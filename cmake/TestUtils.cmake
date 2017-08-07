@@ -1,7 +1,7 @@
 #################################################
 macro (ign_build_tests)
-  # Find the Python interpreter for running the 
-  # check_test_ran.py script 
+  # Find the Python interpreter for running the
+  # check_test_ran.py script
   find_package(PythonInterp QUIET)
 
   # Build all the tests
@@ -14,7 +14,7 @@ macro (ign_build_tests)
     add_executable(${BINARY_NAME} ${GTEST_SOURCE_file})
 
     add_dependencies(${BINARY_NAME}
-      ignition-sensors${PROJECT_MAJOR_VERSION}
+      ${PROJECT_NAME_LOWER}${PROJECT_MAJOR_VERSION}
       gtest gtest_main
       )
 
@@ -23,18 +23,23 @@ macro (ign_build_tests)
          libgtest_main.a
          libgtest.a
          pthread
-	       ignition-sensors${PROJECT_MAJOR_VERSION})
+	       ${PROJECT_NAME_LOWER})
     elseif(WIN32)
       target_link_libraries(${BINARY_NAME}
          gtest.lib
          gtest_main.lib
-         ignition-sensors${PROJECT_MAJOR_VERSION})
+         ${PROJECT_NAME_LOWER}.lib)
     else()
        message(FATAL_ERROR "Unsupported platform")
     endif()
 
     add_test(${BINARY_NAME} ${CMAKE_CURRENT_BINARY_DIR}/${BINARY_NAME}
 	--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${BINARY_NAME}.xml)
+
+    target_include_directories(${BINARY_NAME}
+      PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+             $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR_FULL}>)
+
 
     set_tests_properties(${BINARY_NAME} PROPERTIES TIMEOUT 240)
 

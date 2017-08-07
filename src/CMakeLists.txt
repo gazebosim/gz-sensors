@@ -1,6 +1,7 @@
 include (${project_cmake_dir}/Utils.cmake)
 
 set (sources
+  Sample.cc
 )
 
 set (gtest_sources
@@ -8,7 +9,7 @@ set (gtest_sources
 
 ign_add_library(${PROJECT_LIBRARY_TARGET_NAME} ${sources})
 
-set_target_properties(${PROJECT_LIBRARY_TARGET_NAME}
+set_target_properties(${PROJECT_LIBRARY_TARGET_NAME} PROPERTIES
   CXX_STANDARD 14 
   CXX_STANDARD_REQURED YES)
 
