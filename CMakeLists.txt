@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
-project (ignition-sensors0)
+set(IGN_PROJECT_NAME "sensors")
+set (PROJECT_MAJOR_VERSION 0)
+set (PROJECT_MINOR_VERSION 0)
+set (PROJECT_PATCH_VERSION 1)
 
-string (SUBSTRING ${PROJECT_NAME} 9 7 IGN_PROJECT_NAME)
-
-string (SUBSTRING ${PROJECT_NAME} 16 -1 PROJECT_MAJOR_VERSION)
-set (PROJECT_MINOR_VERSION 2)
-set (PROJECT_PATCH_VERSION 0)
+project (ignition-${IGN_PROJECT_NAME}${PROJECT_MAJOR_VERSION})
 
 set(PROJECT_NAME_NO_VERSION "ignition-${IGN_PROJECT_NAME}")
 string (TOLOWER ${PROJECT_NAME_NO_VERSION} PROJECT_NAME_NO_VERSION_LOWER)
@@ -168,7 +167,7 @@ elseif ("${CMAKE_BUILD_TYPE_UPPERCASE}" STREQUAL "COVERAGE")
   set (BUILD_TYPE_DEBUG TRUE)
   SETUP_TARGET_FOR_COVERAGE(coverage ctest coverage)
 else()
-  build_error("CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} unknown. Valid options are: Debug Release RelWithDebInfo Profile Check")
+  build_error("CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} unknown. Valid options are: Debug Release RelWithDebInfo Profile Check Coverage")
 endif()
 
 #####################################
@@ -236,7 +235,7 @@ if (build_errors)
 else (build_errors)
 
   ########################################
-  # Write the config.h file
+  # Write the config.hh file
   configure_file ("${project_cmake_dir}/config.hh.in"
     "${PROJECT_BINARY_DIR}/include/ignition/${IGN_PROJECT_NAME}/config.hh")
   ign_install_includes(
@@ -252,7 +251,6 @@ else (build_errors)
   endif()
   message (STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
   message (STATUS "Install path: ${CMAKE_INSTALL_PREFIX}")
-
 
   if (BUILD_IGNITION)
     set(TEST_TYPE "UNIT")
@@ -288,7 +286,7 @@ else (build_errors)
   endif()
 
   configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME_NO_VERSION_LOWER}-config.cmake.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ignition-config.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/${cmake_conf_file}"
     PATH_VARS LIB_INSTALL_DIR INCLUDE_INSTALL_DIR_FULL
     INSTALL_DESTINATION ${CMAKE_CONFIG_INSTALL_DIR})
