@@ -87,7 +87,7 @@ void Manager::Remove(const std::string &_name)
 }
 
 //////////////////////////////////////////////////
-void Manager::RunOnce(bool _force)
+void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 {
   // TODO Run all sensors once
 }

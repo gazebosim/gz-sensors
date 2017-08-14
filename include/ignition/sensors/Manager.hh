@@ -18,6 +18,7 @@
 #define IGNITION_SENSORS_MANAGER_HH_
 
 #include <memory>
+#include <ignition/common/Time.hh>
 #include <ignition/sensors/Sensor.hh>
 
 
@@ -71,9 +72,11 @@ namespace ignition
       public: void Remove(const std::string &_name);
 
       /// \brief Run the sensor generation one step.
+      /// \param _time: The current simulated time
       /// \param _force: If true, all sensors are forced to update. Otherwise
       ///        a sensor will update based on it's Hz rate.
-      public: void RunOnce(bool _force = false);
+      public: void RunOnce(const ignition::common::Time &_time,
+                  bool _force = false);
 
       /// \brief Stop the sensor generation loop.
       public: void Stop();
