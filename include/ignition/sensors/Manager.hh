@@ -44,6 +44,12 @@ namespace ignition
     /// \brief Responsible for running sensors
     class Manager
     {
+      /// \brief constructor
+      public: Manager();
+
+      /// \brief destructor
+      public: virtual ~Manager();
+
       /// \brief Initialize the sensor library without rendering or physics.
       /// \return True if successfully initialized, false if not
       public: bool Init();
