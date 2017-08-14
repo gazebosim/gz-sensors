@@ -20,6 +20,7 @@
 #include <memory>
 #include <ignition/common/Time.hh>
 #include <ignition/sensors/Sensor.hh>
+#include <ignition/sensors/ign_sensors_export.h>
 
 
 namespace ignition
@@ -42,7 +43,7 @@ namespace ignition
     class ManagerPrivate;
 
     /// \brief Responsible for running sensors
-    class Manager
+    class IGN_SENSORS_EXPORT Manager
     {
       /// \brief constructor
       public: Manager();
