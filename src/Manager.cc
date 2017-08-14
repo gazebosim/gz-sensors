@@ -34,8 +34,7 @@ class ignsen::ManagerPrivate
 
 
 //////////////////////////////////////////////////
-ManagerPrivate::ManagerPrivate() :
-  running(false)
+ManagerPrivate::ManagerPrivate()
 {
 }
 
