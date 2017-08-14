@@ -120,10 +120,3 @@ SensorId Sensor(const std::string &_name)
 {
   // TODO find sensor id given sensor name
 }
-
-//////////////////////////////////////////////////
-void Enable(const bool _enable)
-{
-  // TODO, enable?
-}
-

@@ -96,10 +96,6 @@ namespace ignition
       /// found.
       public: SensorId Sensor(const std::string &_name);
 
-      /// \brief Disable or enable sensors.
-      /// \param[in] _enable True to enable sensors, false to disable
-      public: void Enable(const bool _enable = true);
-
       /// \brief private data pointer
       private: std::unique_ptr<ManagerPrivate> dataPtr;
     };
