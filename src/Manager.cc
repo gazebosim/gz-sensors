@@ -30,9 +30,6 @@ class ignsen::ManagerPrivate
 
   /// \brief destructor
   public: ~ManagerPrivate();
-
-  /// \brief true if RunThreads() has been called and Stop() has not;
-  public: std::atomic<bool> running;
 };
 
 
@@ -101,12 +98,6 @@ void Manager::Remove(const std::string &_name)
 void Manager::RunOnce(bool _force)
 {
   // TODO Run all sensors once
-}
-
-//////////////////////////////////////////////////
-void Manager::RunThreads()
-{
-  // TODO Run all sensors continuously, sleeping as needed
 }
 
 //////////////////////////////////////////////////

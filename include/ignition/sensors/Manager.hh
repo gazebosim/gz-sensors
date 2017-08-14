@@ -81,9 +81,6 @@ namespace ignition
       ///        a sensor will update based on it's Hz rate.
       public: void RunOnce(bool _force = false);
 
-      /// \brief Run sensors in a threads. This is a non-blocking call.
-      public: void RunThreads();
-
       /// \brief Stop the sensor generation loop.
       public: void Stop();
 
