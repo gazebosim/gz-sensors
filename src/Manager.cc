@@ -53,8 +53,17 @@ bool Manager::Init()
 //////////////////////////////////////////////////
 bool Manager::Init(ignition::rendering::Manager &_rendering)
 {
-  // TODO store the reference to rendering
-  this->dataPtr = std::make_unique<ManagerPrivate>();
+  bool success = this->Init();
+  if (success)
+  {
+    this->SetRendering(_rendering);
+  }
+  return success;
+}
+
+//////////////////////////////////////////////////
+void SetRendering(ignition::rendering::Manager &_rendering)
+{
 }
 
 //////////////////////////////////////////////////

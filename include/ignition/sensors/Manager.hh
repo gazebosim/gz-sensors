@@ -51,6 +51,9 @@ namespace ignition
       /// \return True if successfully initialized, false if not
       public: bool Init(ignition::rendering::Manager &_rendering);
 
+      /// \brief Set or change the ignition-rendering instance used
+      public: void SetRendering(ignition::rendering::Manager &_rendering);
+
       /// \brief Create a sensor using a plugin
       /// \param[in] _filename The sensor plugin filename.
       /// \param[in] _parentName The URI name of the parent link.
