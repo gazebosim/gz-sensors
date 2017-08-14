@@ -59,22 +59,6 @@ bool Manager::Init(ignition::rendering::Manager &_rendering)
 }
 
 //////////////////////////////////////////////////
-bool Manager::Init(ignition::physics::Manager &_physics)
-{
-  // TODO store the reference to physics
-  this->dataPtr = std::make_unique<ManagerPrivate>();
-}
-
-//////////////////////////////////////////////////
-bool Manager::Init(ignition::rendering::Manager &_rendering,
-            ignition::physics::Manager &_physics)
-{
-  // TODO store the reference to physics
-  // TODO store the reference to rendering
-  this->dataPtr = std::make_unique<ManagerPrivate>();
-}
-
-//////////////////////////////////////////////////
 SensorId Manager::LoadSensor(const std::string &_filename,
             const std::string &_sensorName,
             const std::string &_parentName)

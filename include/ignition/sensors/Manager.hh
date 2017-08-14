@@ -51,15 +51,6 @@ namespace ignition
       /// \return True if successfully initialized, false if not
       public: bool Init(ignition::rendering::Manager &_rendering);
 
-      /// \brief Initialize the sensor library with physics.
-      /// \return True if successfully initialized, false if not
-      public: bool Init(ignition::physics::Manager &_physics);
-
-      /// \brief Initialize the sensor library with rendering and physics.
-      /// \return True if successfully initialized, false if not
-      public: bool Init(ignition::rendering::Manager &_rendering,
-                  ignition::physics::Manager &_physics);
-
       /// \brief Create a sensor using a plugin
       /// \param[in] _filename The sensor plugin filename.
       /// \param[in] _parentName The URI name of the parent link.
