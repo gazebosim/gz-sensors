@@ -72,7 +72,7 @@ bool Manager::Init(ignition::rendering::Manager &_rendering)
 }
 
 //////////////////////////////////////////////////
-void SetRendering(ignition::rendering::Manager &_rendering)
+void Manager::SetRendering(ignition::rendering::Manager &_rendering)
 {
 }
 
@@ -103,7 +103,7 @@ void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 }
 
 //////////////////////////////////////////////////
-SensorId Sensor(const std::string &_name)
+SensorId Manager::Sensor(const std::string &_name)
 {
   // TODO find sensor id given sensor name
 }
