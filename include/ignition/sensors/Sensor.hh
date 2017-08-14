@@ -23,6 +23,22 @@ namespace ignition
   {
     /// \brief A string used to identify a sensor
     using SensorId = std::size_t;
+
+    /// \brief a base sensor class
+    class Sensor
+    {
+      /// \brief constructor
+      public: Sensor();
+
+      /// \brief destructor
+      public: virtual ~Sensor();
+
+      // TODO how to tell if it needs ignition physics?
+      // TODO how to tell if it needs ignition rendering?
+      // TODO What kind of data is it outputting?
+      // TODO What is it's ID?
+      // TODO What is it's name?
+    };
   }
 }
 
