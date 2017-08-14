@@ -78,9 +78,6 @@ namespace ignition
       public: void RunOnce(const ignition::common::Time &_time,
                   bool _force = false);
 
-      /// \brief Stop the sensor generation loop.
-      public: void Stop();
-
       /// \brief Get a sensor using by name
       ///
       /// The given name should follow the standard URI naming scheme.

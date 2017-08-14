@@ -93,12 +93,6 @@ void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 }
 
 //////////////////////////////////////////////////
-void Manager::Stop()
-{
-  // Stop running all threads
-}
-
-//////////////////////////////////////////////////
 SensorId Sensor(const std::string &_name)
 {
   // TODO find sensor id given sensor name
