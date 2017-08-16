@@ -15,6 +15,18 @@ include (${project_cmake_dir}/Ronn2Man.cmake)
 add_manpage_target()
 
 ################################################################################
+# Ignition math
+find_package(ignition-math4 QUIET)
+if (NOT ignition-math4_FOUND)
+  BUILD_ERROR ("Missing: Ignition math (libignition-math4-dev)")
+else()
+  message (STATUS "Found Ignition Math")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${IGNITION-MATH_CXX_FLAGS}")
+  include_directories(${IGNITION-MATH_INCLUDE_DIRS})
+  link_directories(${IGNITION-MATH_LIBRARY_DIRS})
+endif()
+
+################################################################################
 # Ignition common
 find_package(ignition-common0 QUIET)
 if (NOT ignition-common0_FOUND)
@@ -24,6 +36,18 @@ else()
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${IGNITION-COMMON_CXX_FLAGS}")
   include_directories(${IGNITION-COMMON_INCLUDE_DIRS})
   link_directories(${IGNITION-COMMON_LIBRARY_DIRS})
+endif()
+
+################################################################################
+# Find SDFormat
+set (SDFormat_MIN_VERSION 6.0.0)
+find_package(SDFormat ${SDFormat_MIN_VERSION})
+
+if (NOT SDFormat_FOUND)
+  message (STATUS "Looking for SDFormat - not found")
+  BUILD_ERROR ("Missing: SDF version >=${SDFormat_MIN_VERSION}. Required for reading and writing SDF files.")
+else()
+  message (STATUS "Looking for SDFormat - found")
 endif()
 
 #################################################

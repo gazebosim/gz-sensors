@@ -2,6 +2,7 @@ include (${project_cmake_dir}/Utils.cmake)
 
 set (sources
   Manager.cc
+  Sensor.cc
 )
 
 set (gtest_sources
@@ -16,7 +17,14 @@ set_target_properties(${PROJECT_LIBRARY_TARGET_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-         $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR_FULL}>)
+         $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR_FULL}>
+         ${IGNITION-MATH_INCLUDE_DIRS}
+         ${SDFormat_INCLUDE_DIRS})
+
+
+target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME} PUBLIC
+  ${IGNITION-MATH_LIBRARIES}
+  ${SDFormat_LIBRARIES})
 
 # Link against header target to get generated header files
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}

@@ -17,6 +17,9 @@
 #ifndef IGNITION_SENSORS_SENSOR_HH_
 #define IGNITION_SENSORS_SENSOR_HH_
 
+#include <ignition/math/Pose3.hh>
+#include <sdf/sdf.hh>
+
 namespace ignition
 {
   namespace sensors
@@ -24,20 +27,44 @@ namespace ignition
     /// \brief A string used to identify a sensor
     using SensorId = std::size_t;
 
+    /// \brief forwar declaration
+    class SensorPrivate;
+
     /// \brief a base sensor class
     class Sensor
     {
       /// \brief constructor
-      public: Sensor();
+      public: Sensor(SensorId _id);
 
       /// \brief destructor
       public: virtual ~Sensor();
 
-      // TODO how to tell if it needs ignition physics?
-      // TODO how to tell if it needs ignition rendering?
-      // TODO What kind of data is it outputting?
-      // TODO What is it's ID?
-      // TODO What is it's name?
+      /// \brief Load the sensor with SDF parameters.
+      /// \param[in] _sdf SDF Sensor parameters.
+      public: virtual void Load(sdf::ElementPtr _sdf);
+
+      /// \brief Update the sensor.
+      /// \param[in] _force True to force update, false otherwise.
+      public: virtual void Update(const bool _force) = 0;
+
+      /// \brief Get the current pose.
+      /// \return Current pose of the sensor.
+      public: const ignition::math::Pose3d &Pose() const;
+
+      /// \brief Update the pose of the sensor
+      public: const void SetPose(const ignition::math::Pose3d &_pose);
+
+      /// \brief Get name.
+      /// \return Name of sensor.
+      public: const std::string &Name() const;
+
+      /// \brief Get the sensor's ID.
+      /// \return The sensor's ID.
+      public: SensorId Id() const;
+
+      /// \internal
+      /// \brief Data pointer for private data
+      private: std::unique_ptr<SensorPrivate> dataPtr;
     };
   }
 }

@@ -81,7 +81,7 @@ SensorId Manager::LoadSensor(const std::string &_filename,
             const std::string &_sensorName,
             const std::string &_parentName)
 {
-  // TODO plugin loader
+  // TODO plugin loader (waiting for ign-common plugin PRs)
 }
 
 //////////////////////////////////////////////////
