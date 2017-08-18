@@ -41,6 +41,8 @@ class ignition::sensors::SensorPrivate
   public: void PopulateFromSDF(sdf::ElementPtr _sdf);
 
   /// \brief a Parent sensor from which to get additional info
+  /// \remarks Having a parent is what allows a sensor to bootstrap itself
+  ///          with the right plugins when loading from SDF
   public: Sensor *parent;
 
   /// \brief id given to sensor when constructed
@@ -58,8 +60,11 @@ class ignition::sensors::SensorPrivate
   /// \brief How many times the sensor will generate data per second
   public: double updateRate;
 
-  /// \brief plugins this sensor uses
-  std::vector<PluginDescription> plugins;
+  /// \brief descriptions of plugins used by this sensor
+  public: std::vector<PluginDescription> pluginDescriptions;
+
+  /// \brief instances of plugins used by this sensor
+  public: std::vector<std::unique_ptr<Sensor>> plugins;
 };
 
 //////////////////////////////////////////////////
@@ -105,7 +110,7 @@ void SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
       desc.pluginName = pluginElem->Get<std::string>("name");
       desc.pluginFileName = pluginElem->Get<std::string>("filename");
       desc.pluginElement = pluginElem;
-      this->plugins.push_back(desc);
+      this->pluginDescriptions.push_back(desc);
       pluginElem = pluginElem->GetNextElement("plugin");
     }
   }
@@ -134,7 +139,7 @@ void SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
       desc.pluginName = "__builtin__";
       desc.pluginFileName = builtin.second;
       desc.pluginElement = pluginElem;
-      this->plugins.push_back(desc);
+      this->pluginDescriptions.push_back(desc);
     }
   }
 }
@@ -186,25 +191,39 @@ const std::string &Sensor::Name() const
 //////////////////////////////////////////////////
 const ignition::math::Pose3d &Sensor::Pose() const
 {
+  // Parent controls the pose
+  if (this->dataPtr->parent)
+    return this->dataPtr->parent->Pose();
   return this->dataPtr->pose;
 }
 
 //////////////////////////////////////////////////
 const void Sensor::SetPose(const ignition::math::Pose3d &_pose)
 {
-  this->dataPtr->pose = _pose;
+  // Parent controls the pose
+  if (this->dataPtr->parent)
+    this->dataPtr->parent->SetPose(_pose);
+  else
+    this->dataPtr->pose = _pose;
 }
 
 //////////////////////////////////////////////////
 double Sensor::UpdateRate() const
 {
+  // Parent controls the update rate
+  if (this->dataPtr->parent)
+    return this->dataPtr->parent->UpdateRate();
   return this->dataPtr->updateRate;
 }
 
 //////////////////////////////////////////////////
 void Sensor::SetUpdateRate(const double _hz)
 {
-  this->dataPtr->updateRate = _hz;
+  // Parent controls the update rate
+  if (this->dataPtr->parent)
+    return this->dataPtr->parent->SetUpdateRate(_hz);
+  else
+    this->dataPtr->updateRate = _hz;
 }
 
 //////////////////////////////////////////////////
@@ -213,7 +232,11 @@ void Sensor::Update(const ignition::common::Time &_now,
 {
   // TODO Check if it's time to update
 
-  // TODO update all plugins
+  // update all plugins
+  for (auto &pluginInst : this->dataPtr->plugins)
+  {
+    pluginInst->Update(_now);
+  }
 
   // update self (useful when running a derived plugin standalone)
   this->Update(_now);
@@ -228,5 +251,6 @@ void Sensor::Update(const ignition::common::Time &_now)
 //////////////////////////////////////////////////
 ignition::common::Time Sensor::NextUpdateTime() const
 {
+  // parent controls the next update time
   // TODO return the next time the sensor will be updated
 }

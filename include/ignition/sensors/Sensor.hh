@@ -17,6 +17,8 @@
 #ifndef IGNITION_SENSORS_SENSOR_HH_
 #define IGNITION_SENSORS_SENSOR_HH_
 
+#include <memory>
+
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
 #include <sdf/sdf.hh>
