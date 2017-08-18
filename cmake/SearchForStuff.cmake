@@ -27,6 +27,18 @@ else()
 endif()
 
 ################################################################################
+# Ignition transport
+find_package(ignition-transport3 QUIET)
+if (NOT ignition-transport3_FOUND)
+  BUILD_ERROR ("Missing: Ignition transport (libignition-transport3-dev)")
+else()
+  message (STATUS "Found Ignition transport")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${IGNITION-TRANSPORT_CXX_FLAGS}")
+  include_directories(${IGNITION-TRANSPORT_INCLUDE_DIRS})
+  link_directories(${IGNITION-TRANSPORT_LIBRARY_DIRS})
+endif()
+
+################################################################################
 # Ignition common
 find_package(ignition-common0 QUIET)
 if (NOT ignition-common0_FOUND)
