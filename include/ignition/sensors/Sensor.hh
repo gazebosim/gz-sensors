@@ -47,6 +47,14 @@ namespace ignition
       /// \param[in] _force True to force update, false otherwise.
       public: virtual void Update(const bool _force) = 0;
 
+      /// \brief Get the update rate of the sensor.
+      /// \return _hz update rate of sensor.  Returns 0 if unthrottled.
+      public: double UpdateRate() const;
+
+      /// \brief Set the update rate of the sensor.
+      /// \param[in] _hz update rate of sensor.
+      public: void SetUpdateRate(const double _hz);
+
       /// \brief Get the current pose.
       /// \return Current pose of the sensor.
       public: const ignition::math::Pose3d &Pose() const;

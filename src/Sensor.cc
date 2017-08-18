@@ -138,6 +138,18 @@ const ignition::math::Pose3d &Sensor::Pose() const
 }
 
 //////////////////////////////////////////////////
+double Sensor::UpdateRate() const
+{
+  return this->dataPtr->updateRate;
+}
+
+//////////////////////////////////////////////////
+void Sensor::SetUpdateRate(const double _hz)
+{
+  this->dataPtr->updateRate = _hz;
+}
+
+//////////////////////////////////////////////////
 const void Sensor::SetPose(const ignition::math::Pose3d &_pose)
 {
   this->dataPtr->pose = _pose;
