@@ -60,6 +60,9 @@ class ignition::sensors::SensorPrivate
   /// \brief How many times the sensor will generate data per second
   public: double updateRate;
 
+  /// \brief What sim time should this sensor update at
+  public: ignition::common::Time nextUpdateTime;
+
   /// \brief descriptions of plugins used by this sensor
   public: std::vector<PluginDescription> pluginDescriptions;
 
@@ -230,7 +233,9 @@ void Sensor::SetUpdateRate(const double _hz)
 void Sensor::Update(const ignition::common::Time &_now,
                   const bool _force)
 {
-  // TODO Check if it's time to update
+  // Check if it's time to update
+  if (_now < this->dataPtr->nextUpdateTime && !_force)
+    return;
 
   // update all plugins
   for (auto &pluginInst : this->dataPtr->plugins)
@@ -240,6 +245,13 @@ void Sensor::Update(const ignition::common::Time &_now,
 
   // update self (useful when running a derived plugin standalone)
   this->Update(_now);
+
+  if (!_force)
+  {
+    // Update the time the plugin should be loaded
+    ignition::common::Time delta(1.0 / this->dataPtr->updateRate);
+    this->dataPtr->nextUpdateTime += delta;
+  }
 }
 
 //////////////////////////////////////////////////
@@ -252,5 +264,7 @@ void Sensor::Update(const ignition::common::Time &_now)
 ignition::common::Time Sensor::NextUpdateTime() const
 {
   // parent controls the next update time
-  // TODO return the next time the sensor will be updated
+  if (this->dataPtr->parent)
+    return this->dataPtr->parent->NextUpdateTime();
+  return this->dataPtr->nextUpdateTime;
 }

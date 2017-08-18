@@ -52,7 +52,9 @@ namespace ignition
 
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
-      public: virtual void Update(const common::Time &_now);
+      /// \remarks this is the update called on a plugin that has been loaded
+      ///          by the parent which bootstrapped itself from sdf
+      protected: virtual void Update(const common::Time &_now);
 
       /// \brief Get the parent sensor (The one which loaded us)
       public: Sensor *Parent() const;
@@ -63,6 +65,7 @@ namespace ignition
       /// \brief Update the sensor.
       /// \param[in] _now The current time
       /// \param[in] _force Force the update to happen even if it's not time
+      /// \remarks if forced the NextUpdateTime() will be unchanged
       public: void Update(const common::Time &_now, const bool _force);
 
       /// \brief Get the update rate of the sensor.
