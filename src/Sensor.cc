@@ -104,7 +104,6 @@ void SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
   }
 }
 
-
 //////////////////////////////////////////////////
 Sensor::Sensor(SensorId _id) :
   dataPtr(new SensorPrivate)
@@ -126,6 +125,12 @@ void Sensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
+SensorId Sensor::Id() const
+{
+  return this->dataPtr->id;
+}
+
+//////////////////////////////////////////////////
 const std::string &Sensor::Name() const
 {
   return this->dataPtr->name;
@@ -138,6 +143,12 @@ const ignition::math::Pose3d &Sensor::Pose() const
 }
 
 //////////////////////////////////////////////////
+const void Sensor::SetPose(const ignition::math::Pose3d &_pose)
+{
+  this->dataPtr->pose = _pose;
+}
+
+//////////////////////////////////////////////////
 double Sensor::UpdateRate() const
 {
   return this->dataPtr->updateRate;
@@ -147,16 +158,4 @@ double Sensor::UpdateRate() const
 void Sensor::SetUpdateRate(const double _hz)
 {
   this->dataPtr->updateRate = _hz;
-}
-
-//////////////////////////////////////////////////
-const void Sensor::SetPose(const ignition::math::Pose3d &_pose)
-{
-  this->dataPtr->pose = _pose;
-}
-
-//////////////////////////////////////////////////
-SensorId Sensor::Id() const
-{
-  return this->dataPtr->id;
 }
