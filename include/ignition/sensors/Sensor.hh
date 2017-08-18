@@ -27,6 +27,7 @@ namespace ignition
   {
     /// \brief A string used to identify a sensor
     using SensorId = std::size_t;
+    const SensorId NO_ID = 0;
 
     /// \brief forwar declaration
     class SensorPrivate;
@@ -35,10 +36,13 @@ namespace ignition
     class Sensor
     {
       /// \brief constructor
-      public: Sensor(SensorId _id);
+      public: Sensor();
 
       /// \brief destructor
       public: virtual ~Sensor();
+
+      /// \brief Initialize values in the sensor
+      public: void Init(Sensor *_parent, SensorId _id);
 
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF Sensor parameters.
@@ -47,6 +51,9 @@ namespace ignition
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       public: virtual void Update(const common::Time &_now);
+
+      /// \brief Get the parent sensor (The one which loaded us)
+      public: Sensor *Parent() const;
 
       /// \brief Return the next time the sensor will generate data
       public: common::Time NextUpdateTime() const;

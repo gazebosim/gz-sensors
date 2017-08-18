@@ -40,6 +40,9 @@ class ignition::sensors::SensorPrivate
   /// \brief Populates fields from a <sensor> element
   public: void PopulateFromSDF(sdf::ElementPtr _sdf);
 
+  /// \brief a Parent sensor from which to get additional info
+  public: Sensor *parent;
+
   /// \brief id given to sensor when constructed
   public: SensorId id;
 
@@ -107,113 +110,46 @@ void SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
     }
   }
 
-  // Add built in plugins to handle sensors defined in SDF 1.6
-  if (_sdf->HasElement("camera"))
+  // Load built-in plugins for sensors which are defined by SDFormat
+  std::vector<std::pair<std::string, std::string>> builtinPlugins = {
+    {"camera", "ignition-sensors-camera"},
+    {"altimeter", "ignition-sensors-altimeter"},
+    {"contact", "ignition-sensors-contact"},
+    {"gps", "ignition-sensors-gps"},
+    {"imu", "ignition-sensors-imu"},
+    {"logical_camera", "ignition-sensors-logical-camera"},
+    {"magnetometer", "ignition-sensors-magnetometer"},
+    {"ray", "ignition-sensors-ray"},
+    {"sonar", "ignition-sensors-sonar"},
+    {"transceiver", "ignition-sensors-transceiver"},
+    {"force_torque", "ignition-sensors-force_torque"},
+  };
+
+  for (auto builtin : builtinPlugins)
   {
-    sdf::ElementPtr pluginElem = _sdf->GetElement("camera");
-    PluginDescription desc;
-    desc.pluginName = pluginElem->Get<std::string>("name");
-    desc.pluginFileName = "ignition-sensors-camera";
-    desc.pluginElement = pluginElem;
-    this->plugins.push_back(desc);
-  }
-  if (_sdf->HasElement("altimeter"))
-  {
-    sdf::ElementPtr pluginElem = _sdf->GetElement("altimeter");
-    PluginDescription desc;
-    desc.pluginName = this->name;
-    desc.pluginFileName = "ignition-sensors-altimeter";
-    desc.pluginElement = pluginElem;
-    this->plugins.push_back(desc);
-  }
-  if (_sdf->HasElement("contact"))
-  {
-    sdf::ElementPtr pluginElem = _sdf->GetElement("contact");
-    PluginDescription desc;
-    desc.pluginName = this->name;
-    desc.pluginFileName = "ignition-sensors-contact";
-    desc.pluginElement = pluginElem;
-    this->plugins.push_back(desc);
-  }
-  if (_sdf->HasElement("gps"))
-  {
-    sdf::ElementPtr pluginElem = _sdf->GetElement("gps");
-    PluginDescription desc;
-    desc.pluginName = this->name;
-    desc.pluginFileName = "ignition-sensors-gps";
-    desc.pluginElement = pluginElem;
-    this->plugins.push_back(desc);
-  }
-  if (_sdf->HasElement("imu"))
-  {
-    sdf::ElementPtr pluginElem = _sdf->GetElement("imu");
-    PluginDescription desc;
-    desc.pluginName = this->name;
-    desc.pluginFileName = "ignition-sensors-gps";
-    desc.pluginElement = pluginElem;
-    this->plugins.push_back(desc);
-  }
-  if (_sdf->HasElement("logical_camera"))
-  {
-    sdf::ElementPtr pluginElem = _sdf->GetElement("logical_camera");
-    PluginDescription desc;
-    desc.pluginName = this->name;
-    desc.pluginFileName = "ignition-sensors-logical-camera";
-    desc.pluginElement = pluginElem;
-    this->plugins.push_back(desc);
-  }
-  if (_sdf->HasElement("magnetometer"))
-  {
-    sdf::ElementPtr pluginElem = _sdf->GetElement("magnetometer");
-    PluginDescription desc;
-    desc.pluginName = this->name;
-    desc.pluginFileName = "ignition-sensors-magnetometer";
-    desc.pluginElement = pluginElem;
-    this->plugins.push_back(desc);
-  }
-  if (_sdf->HasElement("ray"))
-  {
-    sdf::ElementPtr pluginElem = _sdf->GetElement("ray");
-    PluginDescription desc;
-    desc.pluginName = this->name;
-    desc.pluginFileName = "ignition-sensors-ray";
-    desc.pluginElement = pluginElem;
-    this->plugins.push_back(desc);
-  }
-  if (_sdf->HasElement("sonar"))
-  {
-    sdf::ElementPtr pluginElem = _sdf->GetElement("sonar");
-    PluginDescription desc;
-    desc.pluginName = this->name;
-    desc.pluginFileName = "ignition-sensors-sonar";
-    desc.pluginElement = pluginElem;
-    this->plugins.push_back(desc);
-  }
-  if (_sdf->HasElement("transceiver"))
-  {
-    sdf::ElementPtr pluginElem = _sdf->GetElement("tranceiver");
-    PluginDescription desc;
-    desc.pluginName = this->name;
-    desc.pluginFileName = "ignition-sensors-transceiver";
-    desc.pluginElement = pluginElem;
-    this->plugins.push_back(desc);
-  }
-  if (_sdf->HasElement("force_torque"))
-  {
-    sdf::ElementPtr pluginElem = _sdf->GetElement("force_torque");
-    PluginDescription desc;
-    desc.pluginName = this->name;
-    desc.pluginFileName = "ignition-sensors-force-torque";
-    desc.pluginElement = pluginElem;
-    this->plugins.push_back(desc);
+    if (_sdf->HasElement(builtin.first))
+    {
+      sdf::ElementPtr pluginElem = _sdf->GetElement(builtin.first);
+      PluginDescription desc;
+      desc.pluginName = "__builtin__";
+      desc.pluginFileName = builtin.second;
+      desc.pluginElement = pluginElem;
+      this->plugins.push_back(desc);
+    }
   }
 }
 
 //////////////////////////////////////////////////
-Sensor::Sensor(SensorId _id) :
+Sensor::Sensor() :
   dataPtr(new SensorPrivate)
 {
-  this->dataPtr->id =_id;
+}
+
+//////////////////////////////////////////////////
+void Sensor::Init(Sensor *_parent, SensorId _id)
+{
+  this->dataPtr->parent = _parent;
+  this->dataPtr->id = _id;
 }
 
 //////////////////////////////////////////////////
@@ -227,6 +163,12 @@ void Sensor::Load(sdf::ElementPtr _sdf)
   this->dataPtr->PopulateFromSDF(_sdf);
 
   // TODO Load plugins
+}
+
+//////////////////////////////////////////////////
+Sensor *Sensor::Parent() const
+{
+  return this->dataPtr->parent;
 }
 
 //////////////////////////////////////////////////
