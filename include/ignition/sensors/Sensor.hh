@@ -17,6 +17,7 @@
 #ifndef IGNITION_SENSORS_SENSOR_HH_
 #define IGNITION_SENSORS_SENSOR_HH_
 
+#include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
 #include <sdf/sdf.hh>
 
@@ -44,11 +45,16 @@ namespace ignition
       public: virtual void Load(sdf::ElementPtr _sdf);
 
       /// \brief Update the sensor.
+      /// \param[in] _now The current time
       /// \param[in] _force True to force update, false otherwise.
-      public: virtual void Update(const bool _force) = 0;
+      public: virtual void Update(const common::Time &_now,
+                  const bool _force) = 0;
+
+      /// \brief Return the next time that the sensor will need to be updated
+      public: virtual common::Time NextUpdateTime() = 0;
 
       /// \brief Get the update rate of the sensor.
-      /// \return _hz update rate of sensor.  Returns 0 if unthrottled.
+      /// \return _hz update rate of sensor.
       public: double UpdateRate() const;
 
       /// \brief Set the update rate of the sensor.
