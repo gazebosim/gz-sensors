@@ -30,26 +30,31 @@ namespace ignition
   {
     /// \brief A string used to identify a sensor
     using SensorId = std::size_t;
-    const SensorId NO_ID = 0;
+    const SensorId NO_SENSOR = 0;
 
-    /// \brief forwar declaration
+    /// \brief forwar declarations
     class SensorPrivate;
+    class Manager;
 
     /// \brief a base sensor class
     class IGN_SENSORS_EXPORT Sensor
     {
+      friend ignition::sensors::Manager;
+
       /// \brief constructor
-      public: Sensor();
+      protected: Sensor();
 
       /// \brief destructor
       public: virtual ~Sensor();
 
       /// \brief Initialize values in the sensor
-      public: void Init(Sensor *_parent, SensorId _id);
+      public: void Init(ignition::sensors::Manager *_mgr, Sensor *_parent,
+                  SensorId _id);
 
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF Sensor parameters.
-      public: virtual void Load(sdf::ElementPtr _sdf);
+      /// \return true if loading was successful
+      public: virtual bool Load(sdf::ElementPtr _sdf);
 
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
@@ -91,6 +96,9 @@ namespace ignition
       /// \brief Get the sensor's ID.
       /// \return The sensor's ID.
       public: SensorId Id() const;
+
+      /// \brief Get the sensor manager
+      public: ignition::sensors::Manager *Manager() const;
 
       /// \internal
       /// \brief Data pointer for private data

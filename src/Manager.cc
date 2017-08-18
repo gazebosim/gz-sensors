@@ -18,7 +18,6 @@
 #include <ignition/sensors/Manager.hh>
 
 #include <atomic>
-#include <map>
 
 
 using namespace ignition::sensors;
@@ -32,8 +31,12 @@ class ignition::sensors::ManagerPrivate
   /// \brief destructor
   public: ~ManagerPrivate();
 
+  // TODO use a map so sensors can be removed without changing their id
   /// \brief loaded sensors (index + 1 is sensor id)
   public: std::vector<ignition::sensors::Sensor> sensors;
+
+  /// \brief Ignition Rendering manager
+  public: ignition::rendering::Manager *renderingManager;
 };
 
 
@@ -48,7 +51,8 @@ ManagerPrivate::~ManagerPrivate()
 }
 
 //////////////////////////////////////////////////
-Manager::Manager()
+Manager::Manager() :
+  dataPtr(new ManagerPrivate)
 {
 }
 
@@ -78,15 +82,21 @@ bool Manager::Init(ignition::rendering::Manager &_rendering)
 //////////////////////////////////////////////////
 void Manager::SetRendering(ignition::rendering::Manager &_rendering)
 {
-  // TODO set rendering manager
+  this->dataPtr->renderingManager = &_rendering;
+}
+
+//////////////////////////////////////////////////
+ignition::rendering::Manager &Manager::RenderingManager() const
+{
+  return *(this->dataPtr->renderingManager);
 }
 
 //////////////////////////////////////////////////
 SensorId Manager::LoadSensor(sdf::ElementPtr &_sdf)
 {
   ignition::sensors::Sensor sensor;
-  SensorId id = this->dataPtr->sensors.size();
-  sensor.Init(nullptr, id);
+  SensorId id = this->dataPtr->sensors.size() + 1;
+  sensor.Init(this, nullptr, id);
   // TODO check if load succeeded
   sensor.Load(_sdf);
   // TODO does this class need to be thread safe?
@@ -108,7 +118,10 @@ void Manager::Remove(const std::string &_name)
 //////////////////////////////////////////////////
 void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 {
-  // TODO Run all sensors once
+  for (auto &s : this->dataPtr->sensors)
+  {
+    s.Update(_time, _force);
+  }
 }
 
 //////////////////////////////////////////////////

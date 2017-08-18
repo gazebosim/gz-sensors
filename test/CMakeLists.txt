@@ -2,6 +2,7 @@ include_directories (
   ${PROJECT_SOURCE_DIR}/test/gtest/include
   ${PROJECT_SOURCE_DIR}/test/gtest
   ${PROJECT_SOURCE_DIR}/test
+  ${PROJECT_BINARY_DIR}
 )
 
 configure_file (test_config.h.in ${PROJECT_BINARY_DIR}/test_config.h)

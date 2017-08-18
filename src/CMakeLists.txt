@@ -1,4 +1,5 @@
 include (${project_cmake_dir}/Utils.cmake)
+add_subdirectory(camera)
 
 set (sources
   Manager.cc
@@ -26,6 +27,7 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME} PUBLIC
   ${IGNITION-COMMON_LIBRARIES}
   ${IGNITION-MATH_LIBRARIES}
   ${SDFormat_LIBRARIES})
+
 
 # Link against header target to get generated header files
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}

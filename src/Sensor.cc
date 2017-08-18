@@ -40,6 +40,9 @@ class ignition::sensors::SensorPrivate
   /// \brief Populates fields from a <sensor> element
   public: void PopulateFromSDF(sdf::ElementPtr _sdf);
 
+  /// \brief Manager which is managing this sensor
+  public: ignition::sensors::Manager *manager;
+
   /// \brief a Parent sensor from which to get additional info
   /// \remarks Having a parent is what allows a sensor to bootstrap itself
   ///          with the right plugins when loading from SDF
@@ -154,8 +157,10 @@ Sensor::Sensor() :
 }
 
 //////////////////////////////////////////////////
-void Sensor::Init(Sensor *_parent, SensorId _id)
+void Sensor::Init(ignition::sensors::Manager *_mgr, Sensor *_parent,
+    SensorId _id)
 {
+  this->dataPtr->manager = _mgr;
   this->dataPtr->parent = _parent;
   this->dataPtr->id = _id;
 }
@@ -166,11 +171,13 @@ Sensor::~Sensor()
 }
 
 //////////////////////////////////////////////////
-void Sensor::Load(sdf::ElementPtr _sdf)
+bool Sensor::Load(sdf::ElementPtr _sdf)
 {
   this->dataPtr->PopulateFromSDF(_sdf);
 
   // TODO Load plugins
+  // TODO return false if sdf doesn't make sense
+  return true;
 }
 
 //////////////////////////////////////////////////
@@ -183,6 +190,15 @@ Sensor *Sensor::Parent() const
 SensorId Sensor::Id() const
 {
   return this->dataPtr->id;
+}
+
+//////////////////////////////////////////////////
+ignition::sensors::Manager *Sensor::Manager() const
+{
+  // parent has the manager
+  if (this->dataPtr->parent)
+    return this->dataPtr->parent->Manager();
+  return this->dataPtr->manager;
 }
 
 //////////////////////////////////////////////////

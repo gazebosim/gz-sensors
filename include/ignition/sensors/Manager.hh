@@ -63,6 +63,9 @@ namespace ignition
       /// \brief Set or change the ignition-rendering instance used
       public: void SetRendering(ignition::rendering::Manager &_rendering);
 
+      /// \brief Get the rendering manager instance
+      public: ignition::rendering::Manager &RenderingManager() const;
+
       /// \brief Create a sensor from SDF
       /// \param[in] _sdf pointer to the sdf element
       public: SensorId LoadSensor(sdf::ElementPtr &_sdf);
