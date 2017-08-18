@@ -21,6 +21,7 @@
 
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
+#include <ignition/sensors/ign_sensors_export.h>
 #include <sdf/sdf.hh>
 
 namespace ignition
@@ -35,7 +36,7 @@ namespace ignition
     class SensorPrivate;
 
     /// \brief a base sensor class
-    class Sensor
+    class IGN_SENSORS_EXPORT Sensor
     {
       /// \brief constructor
       public: Sensor();
@@ -93,7 +94,7 @@ namespace ignition
 
       /// \internal
       /// \brief Data pointer for private data
-      private: std::unique_ptr<SensorPrivate> dataPtr;
+      private: std::shared_ptr<SensorPrivate> dataPtr;
     };
   }
 }

@@ -21,6 +21,7 @@
 #include <ignition/common/Time.hh>
 #include <ignition/sensors/Sensor.hh>
 #include <ignition/sensors/ign_sensors_export.h>
+#include <sdf/sdf.hh>
 
 
 namespace ignition
@@ -62,13 +63,9 @@ namespace ignition
       /// \brief Set or change the ignition-rendering instance used
       public: void SetRendering(ignition::rendering::Manager &_rendering);
 
-      /// \brief Create a sensor using a plugin
-      /// \param[in] _filename The sensor plugin filename.
-      /// \param[in] _parentName The URI name of the parent link.
-      /// \return The ID of the new sensor.
-      public: SensorId LoadSensor(const std::string &_filename,
-                  const std::string &_sensorName,
-                  const std::string &_parentName = "");
+      /// \brief Create a sensor from SDF
+      /// \param[in] _sdf pointer to the sdf element
+      public: SensorId LoadSensor(sdf::ElementPtr &_sdf);
 
       /// \brief Remove a sensor by ID
       /// \param[in] _sensorId ID of the sensor to remove

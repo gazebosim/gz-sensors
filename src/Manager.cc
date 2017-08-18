@@ -15,21 +15,25 @@
  *
 */
 
-#include <atomic>
-
 #include <ignition/sensors/Manager.hh>
 
-namespace ignsen = ignition::sensors;
-using namespace ignition;
-using namespace ignsen;
+#include <atomic>
+#include <map>
 
-class ignsen::ManagerPrivate
+
+using namespace ignition::sensors;
+
+
+class ignition::sensors::ManagerPrivate
 {
   /// \brief constructor
   public: ManagerPrivate();
 
   /// \brief destructor
   public: ~ManagerPrivate();
+
+  /// \brief loaded sensors (index + 1 is sensor id)
+  public: std::vector<ignition::sensors::Sensor> sensors;
 };
 
 
@@ -74,14 +78,19 @@ bool Manager::Init(ignition::rendering::Manager &_rendering)
 //////////////////////////////////////////////////
 void Manager::SetRendering(ignition::rendering::Manager &_rendering)
 {
+  // TODO set rendering manager
 }
 
 //////////////////////////////////////////////////
-SensorId Manager::LoadSensor(const std::string &_filename,
-            const std::string &_sensorName,
-            const std::string &_parentName)
+SensorId Manager::LoadSensor(sdf::ElementPtr &_sdf)
 {
-  // TODO plugin loader (waiting for ign-common plugin PRs)
+  ignition::sensors::Sensor sensor;
+  SensorId id = this->dataPtr->sensors.size();
+  sensor.Init(nullptr, id);
+  // TODO check if load succeeded
+  sensor.Load(_sdf);
+  // TODO does this class need to be thread safe?
+  this->dataPtr->sensors.push_back(sensor);
 }
 
 //////////////////////////////////////////////////
