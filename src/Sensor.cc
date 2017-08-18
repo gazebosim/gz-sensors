@@ -66,8 +66,11 @@ void SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
   //  then the update_rate will be obeyed. Gazebo seems to use it as if
   //  true means enable the sensor at startup.
 
-  // name, always_on, update_rate, visualize, topic, frame, 
-  // pose, plugin
+  // TODO what to do with <visualize>? ign-sensor data is meant to create
+  // sensor data. Whether or not that data should be visualized seems to
+  // be outside the scope of this library
+
+  // TODO how to use frame?
 
   this->name = _sdf->Get<std::string>("name");
 
