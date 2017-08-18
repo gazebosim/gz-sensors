@@ -29,6 +29,9 @@ struct PluginDescription
 
   /// \brief Library name of a plugin to load
   public: std::string pluginFileName;
+
+  /// \brief element pointer for plugin config data
+  public: sdf::ElementPtr pluginElement;
 };
 
 
@@ -98,9 +101,111 @@ void SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
       PluginDescription desc;
       desc.pluginName = pluginElem->Get<std::string>("name");
       desc.pluginFileName = pluginElem->Get<std::string>("filename");
+      desc.pluginElement = pluginElem;
       this->plugins.push_back(desc);
       pluginElem = pluginElem->GetNextElement("plugin");
     }
+  }
+
+  // Add built in plugins to handle sensors defined in SDF 1.6
+  if (_sdf->HasElement("camera"))
+  {
+    sdf::ElementPtr pluginElem = _sdf->GetElement("camera");
+    PluginDescription desc;
+    desc.pluginName = pluginElem->Get<std::string>("name");
+    desc.pluginFileName = "ignition-sensors-camera";
+    desc.pluginElement = pluginElem;
+    this->plugins.push_back(desc);
+  }
+  if (_sdf->HasElement("altimeter"))
+  {
+    sdf::ElementPtr pluginElem = _sdf->GetElement("altimeter");
+    PluginDescription desc;
+    desc.pluginName = this->name;
+    desc.pluginFileName = "ignition-sensors-altimeter";
+    desc.pluginElement = pluginElem;
+    this->plugins.push_back(desc);
+  }
+  if (_sdf->HasElement("contact"))
+  {
+    sdf::ElementPtr pluginElem = _sdf->GetElement("contact");
+    PluginDescription desc;
+    desc.pluginName = this->name;
+    desc.pluginFileName = "ignition-sensors-contact";
+    desc.pluginElement = pluginElem;
+    this->plugins.push_back(desc);
+  }
+  if (_sdf->HasElement("gps"))
+  {
+    sdf::ElementPtr pluginElem = _sdf->GetElement("gps");
+    PluginDescription desc;
+    desc.pluginName = this->name;
+    desc.pluginFileName = "ignition-sensors-gps";
+    desc.pluginElement = pluginElem;
+    this->plugins.push_back(desc);
+  }
+  if (_sdf->HasElement("imu"))
+  {
+    sdf::ElementPtr pluginElem = _sdf->GetElement("imu");
+    PluginDescription desc;
+    desc.pluginName = this->name;
+    desc.pluginFileName = "ignition-sensors-gps";
+    desc.pluginElement = pluginElem;
+    this->plugins.push_back(desc);
+  }
+  if (_sdf->HasElement("logical_camera"))
+  {
+    sdf::ElementPtr pluginElem = _sdf->GetElement("logical_camera");
+    PluginDescription desc;
+    desc.pluginName = this->name;
+    desc.pluginFileName = "ignition-sensors-logical-camera";
+    desc.pluginElement = pluginElem;
+    this->plugins.push_back(desc);
+  }
+  if (_sdf->HasElement("magnetometer"))
+  {
+    sdf::ElementPtr pluginElem = _sdf->GetElement("magnetometer");
+    PluginDescription desc;
+    desc.pluginName = this->name;
+    desc.pluginFileName = "ignition-sensors-magnetometer";
+    desc.pluginElement = pluginElem;
+    this->plugins.push_back(desc);
+  }
+  if (_sdf->HasElement("ray"))
+  {
+    sdf::ElementPtr pluginElem = _sdf->GetElement("ray");
+    PluginDescription desc;
+    desc.pluginName = this->name;
+    desc.pluginFileName = "ignition-sensors-ray";
+    desc.pluginElement = pluginElem;
+    this->plugins.push_back(desc);
+  }
+  if (_sdf->HasElement("sonar"))
+  {
+    sdf::ElementPtr pluginElem = _sdf->GetElement("sonar");
+    PluginDescription desc;
+    desc.pluginName = this->name;
+    desc.pluginFileName = "ignition-sensors-sonar";
+    desc.pluginElement = pluginElem;
+    this->plugins.push_back(desc);
+  }
+  if (_sdf->HasElement("transceiver"))
+  {
+    sdf::ElementPtr pluginElem = _sdf->GetElement("tranceiver");
+    PluginDescription desc;
+    desc.pluginName = this->name;
+    desc.pluginFileName = "ignition-sensors-transceiver";
+    desc.pluginElement = pluginElem;
+    this->plugins.push_back(desc);
+  }
+  if (_sdf->HasElement("force_torque"))
+  {
+    sdf::ElementPtr pluginElem = _sdf->GetElement("force_torque");
+    PluginDescription desc;
+    desc.pluginName = this->name;
+    desc.pluginFileName = "ignition-sensors-force-torque";
+    desc.pluginElement = pluginElem;
+    this->plugins.push_back(desc);
   }
 }
 
@@ -121,7 +226,7 @@ void Sensor::Load(sdf::ElementPtr _sdf)
 {
   this->dataPtr->PopulateFromSDF(_sdf);
 
-  // Load a plugin if applicable
+  // TODO Load plugins
 }
 
 //////////////////////////////////////////////////
