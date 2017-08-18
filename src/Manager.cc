@@ -101,6 +101,7 @@ SensorId Manager::LoadSensor(sdf::ElementPtr &_sdf)
   sensor.Load(_sdf);
   // TODO does this class need to be thread safe?
   this->dataPtr->sensors.push_back(sensor);
+  return id;
 }
 
 //////////////////////////////////////////////////
