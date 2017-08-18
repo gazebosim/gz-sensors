@@ -44,14 +44,17 @@ namespace ignition
       /// \param[in] _sdf SDF Sensor parameters.
       public: virtual void Load(sdf::ElementPtr _sdf);
 
+      /// \brief Force the sensor to generate data
+      /// \param[in] _now The current time
+      public: virtual void Update(const common::Time &_now);
+
+      /// \brief Return the next time the sensor will generate data
+      public: common::Time NextUpdateTime() const;
+
       /// \brief Update the sensor.
       /// \param[in] _now The current time
-      /// \param[in] _force True to force update, false otherwise.
-      public: virtual void Update(const common::Time &_now,
-                  const bool _force) = 0;
-
-      /// \brief Return the next time that the sensor will need to be updated
-      public: virtual common::Time NextUpdateTime() = 0;
+      /// \param[in] _force Force the update to happen even if it's not time
+      public: void Update(const common::Time &_now, const bool _force);
 
       /// \brief Get the update rate of the sensor.
       /// \return _hz update rate of sensor.

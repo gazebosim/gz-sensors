@@ -159,3 +159,27 @@ void Sensor::SetUpdateRate(const double _hz)
 {
   this->dataPtr->updateRate = _hz;
 }
+
+//////////////////////////////////////////////////
+void Sensor::Update(const ignition::common::Time &_now,
+                  const bool _force)
+{
+  // TODO Check if it's time to update
+
+  // TODO update all plugins
+
+  // update self (useful when running a derived plugin standalone)
+  this->Update(_now);
+}
+
+//////////////////////////////////////////////////
+void Sensor::Update(const ignition::common::Time &_now)
+{
+  // Overridden by derived classes
+}
+
+//////////////////////////////////////////////////
+ignition::common::Time Sensor::NextUpdateTime() const
+{
+  // TODO return the next time the sensor will be updated
+}
