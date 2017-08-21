@@ -85,6 +85,12 @@ namespace ignition
       public: void RunOnce(const ignition::common::Time &_time,
                   bool _force = false);
 
+      /// \brief Adds colon delimited paths sensor plugins may be
+      public: void AddPluginPaths(const std::string &_path);
+
+      /// \brieef Get a path to a sensor plugin library
+      public: std::string FindPlugin(const std::string &_name);
+
       /// \brief Get a sensor using by name
       ///
       /// The given name should follow the standard URI naming scheme.

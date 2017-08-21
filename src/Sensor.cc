@@ -18,6 +18,10 @@
 #include "ignition/sensors/Sensor.hh"
 
 #include <vector>
+#include <ignition/common/PluginLoader.hh>
+#include <ignition/common/SystemPaths.hh>
+#include <ignition/sensors/Manager.hh>
+#include <ignition/sensors/SensorPlugin.hh>
 
 using namespace ignition::sensors;
 
@@ -43,11 +47,6 @@ class ignition::sensors::SensorPrivate
   /// \brief Manager which is managing this sensor
   public: ignition::sensors::Manager *manager;
 
-  /// \brief a Parent sensor from which to get additional info
-  /// \remarks Having a parent is what allows a sensor to bootstrap itself
-  ///          with the right plugins when loading from SDF
-  public: Sensor *parent;
-
   /// \brief id given to sensor when constructed
   public: SensorId id;
 
@@ -70,7 +69,7 @@ class ignition::sensors::SensorPrivate
   public: std::vector<PluginDescription> pluginDescriptions;
 
   /// \brief instances of plugins used by this sensor
-  public: std::vector<std::unique_ptr<Sensor>> plugins;
+  public: std::vector<std::unique_ptr<SensorPlugin>> plugins;
 };
 
 //////////////////////////////////////////////////
@@ -157,11 +156,9 @@ Sensor::Sensor() :
 }
 
 //////////////////////////////////////////////////
-void Sensor::Init(ignition::sensors::Manager *_mgr, Sensor *_parent,
-    SensorId _id)
+void Sensor::Init(ignition::sensors::Manager *_mgr, SensorId _id)
 {
   this->dataPtr->manager = _mgr;
-  this->dataPtr->parent = _parent;
   this->dataPtr->id = _id;
 }
 
@@ -175,15 +172,32 @@ bool Sensor::Load(sdf::ElementPtr _sdf)
 {
   this->dataPtr->PopulateFromSDF(_sdf);
 
-  // TODO Load plugins
+  ignition::common::PluginLoader pl;
+  ignition::common::SystemPaths sp;
+
+  // Load plugins
+  for (auto pluginDesc : this->dataPtr->pluginDescriptions)
+  {
+    auto fullPath = this->Manager()->FindPlugin(pluginDesc.pluginFileName);
+    if (fullPath.size() == 0)
+      return false;
+
+    auto pluginName = pl.LoadLibrary(fullPath);
+    if (pluginName.size() == 0)
+      return false;
+
+    auto instance = pl.Instantiate<SensorPlugin>(pluginName);
+    if (!instance)
+      return false;
+
+    instance->Init(this->dataPtr->manager, this);
+    instance->Load(pluginDesc.pluginElement);
+
+    this->dataPtr->plugins.push_back(std::move(instance));
+  }
+
   // TODO return false if sdf doesn't make sense
   return true;
-}
-
-//////////////////////////////////////////////////
-Sensor *Sensor::Parent() const
-{
-  return this->dataPtr->parent;
 }
 
 //////////////////////////////////////////////////
@@ -195,9 +209,6 @@ SensorId Sensor::Id() const
 //////////////////////////////////////////////////
 ignition::sensors::Manager *Sensor::Manager() const
 {
-  // parent has the manager
-  if (this->dataPtr->parent)
-    return this->dataPtr->parent->Manager();
   return this->dataPtr->manager;
 }
 
@@ -210,39 +221,31 @@ const std::string &Sensor::Name() const
 //////////////////////////////////////////////////
 const ignition::math::Pose3d &Sensor::Pose() const
 {
-  // Parent controls the pose
-  if (this->dataPtr->parent)
-    return this->dataPtr->parent->Pose();
   return this->dataPtr->pose;
+}
+
+//////////////////////////////////////////////////
+const std::string &Sensor::Topic() const
+{
+  return this->dataPtr->topic;
 }
 
 //////////////////////////////////////////////////
 const void Sensor::SetPose(const ignition::math::Pose3d &_pose)
 {
-  // Parent controls the pose
-  if (this->dataPtr->parent)
-    this->dataPtr->parent->SetPose(_pose);
-  else
-    this->dataPtr->pose = _pose;
+  this->dataPtr->pose = _pose;
 }
 
 //////////////////////////////////////////////////
 double Sensor::UpdateRate() const
 {
-  // Parent controls the update rate
-  if (this->dataPtr->parent)
-    return this->dataPtr->parent->UpdateRate();
   return this->dataPtr->updateRate;
 }
 
 //////////////////////////////////////////////////
 void Sensor::SetUpdateRate(const double _hz)
 {
-  // Parent controls the update rate
-  if (this->dataPtr->parent)
-    return this->dataPtr->parent->SetUpdateRate(_hz);
-  else
-    this->dataPtr->updateRate = _hz;
+  this->dataPtr->updateRate = _hz;
 }
 
 //////////////////////////////////////////////////
@@ -259,9 +262,6 @@ void Sensor::Update(const ignition::common::Time &_now,
     pluginInst->Update(_now);
   }
 
-  // update self (useful when running a derived plugin standalone)
-  this->Update(_now);
-
   if (!_force)
   {
     // Update the time the plugin should be loaded
@@ -271,16 +271,7 @@ void Sensor::Update(const ignition::common::Time &_now,
 }
 
 //////////////////////////////////////////////////
-void Sensor::Update(const ignition::common::Time &_now)
-{
-  // Overridden by derived classes
-}
-
-//////////////////////////////////////////////////
 ignition::common::Time Sensor::NextUpdateTime() const
 {
-  // parent controls the next update time
-  if (this->dataPtr->parent)
-    return this->dataPtr->parent->NextUpdateTime();
   return this->dataPtr->nextUpdateTime;
 }

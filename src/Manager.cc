@@ -15,6 +15,7 @@
  *
 */
 
+#include <ignition/common/SystemPaths.hh>
 #include <ignition/sensors/Manager.hh>
 
 #include <atomic>
@@ -37,6 +38,9 @@ class ignition::sensors::ManagerPrivate
 
   /// \brief Ignition Rendering manager
   public: ignition::rendering::Manager *renderingManager;
+
+  /// \brief Instance used to find stuff on the file system
+  public: ignition::common::SystemPaths systemPaths;
 };
 
 
@@ -96,12 +100,28 @@ SensorId Manager::LoadSensor(sdf::ElementPtr &_sdf)
 {
   ignition::sensors::Sensor sensor;
   SensorId id = this->dataPtr->sensors.size() + 1;
-  sensor.Init(this, nullptr, id);
+  sensor.Init(this, id);
   // TODO check if load succeeded
-  sensor.Load(_sdf);
-  // TODO does this class need to be thread safe?
-  this->dataPtr->sensors.push_back(sensor);
+  if (sensor.Load(_sdf))
+  {
+    // TODO does this class need to be thread safe?
+    this->dataPtr->sensors.push_back(sensor);
+  }
+  else
+    id = NO_SENSOR;
   return id;
+}
+
+//////////////////////////////////////////////////
+void Manager::AddPluginPaths(const std::string &_paths)
+{
+  this->dataPtr->systemPaths.AddPluginPaths(_paths);
+}
+
+//////////////////////////////////////////////////
+std::string Manager::FindPlugin(const std::string &_name)
+{
+  return this->dataPtr->systemPaths.FindSharedLibrary(_name);
 }
 
 //////////////////////////////////////////////////

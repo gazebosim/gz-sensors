@@ -1,4 +1,4 @@
-add_library(ignition-sensors-camera CameraSensorPlugin.cc)
+add_library(ignition-sensors-camera MODULE CameraSensorPlugin.cc)
 
 target_link_libraries(ignition-sensors-camera PUBLIC
   ${PROJECT_LIBRARY_TARGET_NAME})

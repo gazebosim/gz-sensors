@@ -17,7 +17,8 @@
 #ifndef IGNITION_SENSORS_CAMERA_CAMERASENSOR_PLUGIN_HH_
 #define IGNITION_SENSORS_CAMERA_CAMERASENSOR_PLUGIN_HH_
 
-#include <ignition/sensors/Sensor.hh>
+#include <ignition/sensors/SensorPlugin.hh>
+#include <ignition/transport.hh>
 
 namespace ignition
 {
@@ -25,13 +26,18 @@ namespace ignition
   {
     /// \brief a plugin for a camera sensor
     /// \internal
-    class CameraSensorPlugin : public Sensor
+    class CameraSensorPlugin : public SensorPlugin
     {
       /// \brief constructor
       public: CameraSensorPlugin();
 
       /// \brief destructor
       public: virtual ~CameraSensorPlugin();
+
+      protected: bool PopulateFromSDF(sdf::ElementPtr _sdf);
+
+      // inherited
+      public: virtual void Init(Manager *_mgr, Sensor *_sensor) override;
 
       // inherited
       public: virtual bool Load(sdf::ElementPtr _sdf) override;
@@ -47,6 +53,21 @@ namespace ignition
 
       /// \brief the horizontal field of view of the camera
       private: double horizontalFieldOfView;
+
+      /// \brief node to create publisher
+      private: transport::Node node;
+
+      /// \brief publisher to publish images
+      private: transport::Node::Publisher pub;
+
+      /// \brief true if Load() has been called and was successful
+      private: bool initialized = false;
+
+      /// \brief pointer to the manager
+      private: Manager *manager;
+
+      /// \brief pointer to the sensor
+      private: Sensor *sensor;
     };
   }
 }

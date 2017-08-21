@@ -37,6 +37,9 @@ namespace ignition
     class Manager;
 
     /// \brief a base sensor class
+    /// \description This class common tasks like timing updates the sensor and
+    ///              parsing the `<sensor>` block in sdformat, and loading
+    ///              plugins to do the actual work
     class IGN_SENSORS_EXPORT Sensor
     {
       friend ignition::sensors::Manager;
@@ -45,25 +48,15 @@ namespace ignition
       protected: Sensor();
 
       /// \brief destructor
-      public: virtual ~Sensor();
+      public: ~Sensor();
 
       /// \brief Initialize values in the sensor
-      public: void Init(ignition::sensors::Manager *_mgr, Sensor *_parent,
-                  SensorId _id);
+      public: void Init(ignition::sensors::Manager *_mgr, SensorId _id);
 
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF Sensor parameters.
       /// \return true if loading was successful
-      public: virtual bool Load(sdf::ElementPtr _sdf);
-
-      /// \brief Force the sensor to generate data
-      /// \param[in] _now The current time
-      /// \remarks this is the update called on a plugin that has been loaded
-      ///          by the parent which bootstrapped itself from sdf
-      protected: virtual void Update(const common::Time &_now);
-
-      /// \brief Get the parent sensor (The one which loaded us)
-      public: Sensor *Parent() const;
+      public: bool Load(sdf::ElementPtr _sdf);
 
       /// \brief Return the next time the sensor will generate data
       public: common::Time NextUpdateTime() const;
@@ -92,6 +85,10 @@ namespace ignition
       /// \brief Get name.
       /// \return Name of sensor.
       public: const std::string &Name() const;
+
+      /// \brief Get topic
+      /// \return Topic sensor publishes data to
+      public: const std::string &Topic() const;
 
       /// \brief Get the sensor's ID.
       /// \return The sensor's ID.

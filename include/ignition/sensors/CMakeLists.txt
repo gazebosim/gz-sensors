@@ -3,6 +3,7 @@ include (${project_cmake_dir}/Utils.cmake)
 set (headers
   Manager.hh
   Sensor.hh
+  SensorPlugin.hh
   System.hh
 )
 

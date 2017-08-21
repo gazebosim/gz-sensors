@@ -1,6 +1,9 @@
 #include "CameraSensorPlugin.hh"
 
+#include <ignition/common/PluginMacros.hh>
 #include <ignition/math/Angle.hh>
+#include <ignition/msgs.hh>
+
 
 using namespace ignition::sensors;
 
@@ -19,11 +22,10 @@ CameraSensorPlugin::~CameraSensorPlugin()
 }
 
 //////////////////////////////////////////////////
-bool CameraSensorPlugin::Load(sdf::ElementPtr _sdf)
+bool CameraSensorPlugin::PopulateFromSDF(sdf::ElementPtr _sdf)
 {
-  if (!_sdf->HasElement("camera"))
+  if (_sdf->GetName() != "camera")
     return false;
-  sdf::ElementPtr cameraElem = _sdf->GetElement("camera");
 
   sdf::ElementPtr imgElem = _sdf->GetElement("image");
   if (!imgElem)
@@ -57,7 +59,30 @@ bool CameraSensorPlugin::Load(sdf::ElementPtr _sdf)
     // This->dataPtr->distortion.reset(new Distortion());
     // This->dataPtr->distortion->Load(this->sdf->GetElement("distortion"));
   }
+  return true;
+}
 
+//////////////////////////////////////////////////
+void CameraSensorPlugin::Init(Manager *_mgr, Sensor *_sensor)
+{
+  this->manager = _mgr;
+  this->sensor = _sensor;
+}
+
+//////////////////////////////////////////////////
+bool CameraSensorPlugin::Load(sdf::ElementPtr _sdf)
+{
+  if (!this->PopulateFromSDF(_sdf))
+    return false;
+
+  this->pub = node.Advertise<ignition::msgs::ImageStamped>(
+      this->sensor->Topic());
+  if (!pub)
+    return false;
+
+  // TODO create rendering scene
+
+  initialized = true;
   return true;
 }
 
@@ -65,4 +90,10 @@ bool CameraSensorPlugin::Load(sdf::ElementPtr _sdf)
 void CameraSensorPlugin::Update(const common::Time &_now)
 {
   // TODO generate sensor data
+  ignition::msgs::ImageStamped msg;
+  this->pub.Publish(msg);
 }
+
+IGN_COMMON_REGISTER_SINGLE_PLUGIN(
+    ignition::sensors::CameraSensorPlugin,
+    ignition::sensors::SensorPlugin);
