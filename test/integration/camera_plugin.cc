@@ -18,7 +18,9 @@
 #include <gtest/gtest.h>
 #include <ignition/common/Filesystem.hh>
 #include <ignition/sensors/Manager.hh>
+#include <ignition/msgs.hh>
 #include "test_config.h"
+#include "TransportTestTools.hh"
 
 
 TEST(CameraPlugin, imagesWithBuiltinSDF)
@@ -45,7 +47,8 @@ TEST(CameraPlugin, imagesWithBuiltinSDF)
   // Wait for an image to get published
   std::string topic = "/test/integration/camera_sensor_builtin_topic";
   // Create an ignition transport subscriber to wait for a message
-  EXPECT_TRUE(false);
+  WaitForMessageTestHelper<ignition::msgs::ImageStamped> helper(topic);
+  EXPECT_TRUE(helper.WaitForMessage()) << helper;
 }
 
 //////////////////////////////////////////////////
