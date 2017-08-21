@@ -19,13 +19,14 @@
 
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/Sensor.hh>
+#include <ignition/sensors/ign_sensors_export.h>
 
 namespace ignition
 {
   namespace sensors
   {
     /// \brief a class for generating/manipulating sensor data
-    class SensorPlugin
+    class IGN_SENSORS_EXPORT SensorPlugin
     {
       /// \brief Virtual destructor
       public: virtual ~SensorPlugin() = default;
