@@ -44,9 +44,7 @@ TEST(CameraPlugin, imagesWithBuiltinSDF)
   ignition::sensors::SensorId id = mgr.LoadSensor(sensorPtr);
   ASSERT_NE(ignition::sensors::NO_SENSOR, id);
 
-  // Wait for an image to get published
   std::string topic = "/test/integration/camera_sensor_builtin_topic";
-  // Create an ignition transport subscriber to wait for a message
   WaitForMessageTestHelper<ignition::msgs::ImageStamped> helper(topic);
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
 }
