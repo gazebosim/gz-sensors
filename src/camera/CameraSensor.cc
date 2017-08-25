@@ -131,7 +131,7 @@ bool CameraSensor::Load(sdf::ElementPtr _sdf)
   if (!this->dataPtr->pub)
     return false;
 
-  // TODO create rendering scene
+  // TODO create a camera in a scene
 
   this->dataPtr->initialized = true;
   return true;

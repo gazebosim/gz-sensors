@@ -18,7 +18,6 @@
 #include "ignition/sensors/Sensor.hh"
 #include <vector>
 #include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/SensorPlugin.hh>
 
 using namespace ignition::sensors;
 
