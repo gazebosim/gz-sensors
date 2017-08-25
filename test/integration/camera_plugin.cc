@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include <ignition/common/Filesystem.hh>
 #include <ignition/sensors/Manager.hh>
+#include <ignition/rendering.hh>
 #include <ignition/msgs.hh>
 #include "test_config.h"
 #include "TransportTestTools.hh"
@@ -39,8 +40,14 @@ TEST(CameraPlugin, imagesWithBuiltinSDF)
   ASSERT_TRUE(linkPtr->HasElement("sensor"));
   auto sensorPtr = linkPtr->GetElement("sensor");
 
+  // Setup ign-rendering with an empty scene
+  auto *engine = ignition::rendering::engine("ogre");
+  ASSERT_NE(nullptr, engine);
+  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+
   // do the test
   ignition::sensors::Manager mgr;
+  mgr.SetRenderingScene(scene);
   mgr.AddPluginPaths(ignition::common::joinPaths(
         PROJECT_BUILD_DIR, "src", "camera"));
   auto ids = mgr.LoadSensor(sensorPtr);

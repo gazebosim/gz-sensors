@@ -39,6 +39,15 @@ else()
 endif()
 
 ################################################################################
+# Ignition rendering
+find_package(ignition-rendering0 QUIET)
+if (NOT ignition-rendering0_FOUND)
+  BUILD_ERROR ("Missing: Ignition Rendering (libignition-rendering0-dev)")
+else()
+  message (STATUS "Found Ignition Rendering")
+endif()
+
+################################################################################
 # Ignition common
 find_package(ignition-common0 QUIET)
 if (NOT ignition-common0_FOUND)

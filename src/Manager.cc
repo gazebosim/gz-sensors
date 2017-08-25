@@ -59,7 +59,7 @@ class ignition::sensors::ManagerPrivate
   public: std::vector<std::shared_ptr<Sensor>> sensors;
 
   /// \brief Ignition Rendering manager
-  public: ignition::rendering::Manager *renderingManager;
+  public: ignition::rendering::ScenePtr renderingScene;
 
   /// \brief Instance used to find stuff on the file system
   public: ignition::common::SystemPaths systemPaths;
@@ -124,7 +124,7 @@ std::vector<PluginDescription> ManagerPrivate::DetermineRequiredPlugins(
   // ONLY IF there is no plugin already defined
   if (pluginDescriptions.empty())
   {
-    std::vector<std::pair<std::string, std::string>> builtinPlugins = {
+    const std::vector<std::pair<std::string, std::string>> builtinPlugins = {
       {"camera", "ignition-sensors-camera"},
       {"altimeter", "ignition-sensors-altimeter"},
       {"contact", "ignition-sensors-contact"},
@@ -144,7 +144,7 @@ std::vector<PluginDescription> ManagerPrivate::DetermineRequiredPlugins(
       {
         sdf::ElementPtr pluginElem = _sdf->GetElement(builtin.first);
         PluginDescription desc;
-        desc.name = "__builtin__";
+        desc.name = _sdf->Get<std::string>("name");
         desc.fileName = builtin.second;
         desc.element = _sdf;
         pluginDescriptions.push_back(desc);
@@ -173,26 +173,26 @@ bool Manager::Init()
 }
 
 //////////////////////////////////////////////////
-bool Manager::Init(ignition::rendering::Manager &_rendering)
+bool Manager::Init(ignition::rendering::ScenePtr _rendering)
 {
   bool success = this->Init();
   if (success)
   {
-    this->SetRendering(_rendering);
+    this->SetRenderingScene(_rendering);
   }
   return success;
 }
 
 //////////////////////////////////////////////////
-void Manager::SetRendering(ignition::rendering::Manager &_rendering)
+void Manager::SetRenderingScene(ignition::rendering::ScenePtr _rendering)
 {
-  this->dataPtr->renderingManager = &_rendering;
+  this->dataPtr->renderingScene = _rendering;
 }
 
 //////////////////////////////////////////////////
-ignition::rendering::Manager &Manager::RenderingManager() const
+ignition::rendering::ScenePtr Manager::RenderingScene() const
 {
-  return *(this->dataPtr->renderingManager);
+  return this->dataPtr->renderingScene;
 }
 
 //////////////////////////////////////////////////

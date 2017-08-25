@@ -20,6 +20,7 @@
 #include <memory>
 #include <type_traits>
 #include <ignition/common/Time.hh>
+#include <ignition/rendering/Scene.hh>
 #include <ignition/sensors/Sensor.hh>
 #include <ignition/sensors/ign_sensors_export.h>
 #include <sdf/sdf.hh>
@@ -27,12 +28,6 @@
 
 namespace ignition
 {
-  namespace rendering
-  {
-    // Forward declarations
-    class Manager;
-  }
-
   namespace physics
   {
     // Forward declarations
@@ -61,13 +56,13 @@ namespace ignition
 
       /// \brief Initialize the sensor library with rendering.
       /// \return True if successfully initialized, false if not
-      public: bool Init(ignition::rendering::Manager &_rendering);
+      public: bool Init(ignition::rendering::ScenePtr _rendering);
 
       /// \brief Set or change the ignition-rendering instance used
-      public: void SetRendering(ignition::rendering::Manager &_rendering);
+      public: void SetRenderingScene(ignition::rendering::ScenePtr _rendering);
 
       /// \brief Get the rendering manager instance
-      public: ignition::rendering::Manager &RenderingManager() const;
+      public: ignition::rendering::ScenePtr RenderingScene() const;
 
       /// \brief Create a sensor from SDF
       /// \description This creates sensors by looking at the given sdf element.

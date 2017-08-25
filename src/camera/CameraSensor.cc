@@ -19,6 +19,8 @@
 
 #include <ignition/common/PluginMacros.hh>
 #include <ignition/math/Angle.hh>
+#include <ignition/rendering/Camera.hh>
+#include <ignition/sensors/Manager.hh>
 #include <ignition/transport.hh>
 
 using namespace ignition::sensors;
@@ -26,7 +28,14 @@ using namespace ignition::sensors;
 
 class ignition::sensors::CameraSensorPrivate
 {
+  /// \brief Set fields in this class from an sdf element
   public: bool PopulateFromSDF(sdf::ElementPtr _sdf);
+
+  /// \brief Create a camera in a scene
+  public: void CreateCamera(ignition::rendering::ScenePtr _scene);
+
+  /// \brief Remove a camera from a scene
+  public: void RemoveCamera(ignition::rendering::ScenePtr _scene);
 
   /// \brief Callback to call when an image is created
   public: std::function<
@@ -49,6 +58,18 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
+
+  /// \brief A scene the camera is capturing
+  public: ignition::rendering::ScenePtr scene;
+
+  /// \brief Rendering camera
+  public: ignition::rendering::CameraPtr camera;
+
+  /// \brief Pointer to an image to be published
+  public: ignition::rendering::ImagePtr image;
+
+  /// \brief Pointer to CameraSensor
+  public: CameraSensor *pThis;
 };
 
 //////////////////////////////////////////////////
@@ -97,8 +118,47 @@ bool CameraSensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
+void CameraSensorPrivate::CreateCamera(ignition::rendering::ScenePtr _scene)
+{
+  if (!_scene)
+    return;
+
+  this->camera = _scene->CreateCamera(this->pThis->Name());
+  auto pose = this->pThis->Pose();
+  auto euler = pose.Rot().Euler();
+  this->camera->SetLocalPosition(
+      pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
+  this->camera->SetLocalRotation(euler.X(), euler.Y(), euler.Z());
+  this->camera->SetImageWidth(this->imageWidth);
+  this->camera->SetImageHeight(this->imageHeight);
+  // TODO these parameters via sdf
+  this->camera->SetAntiAliasing(2);
+  this->camera->SetAspectRatio(1.333);
+  this->camera->SetHFOV(this->horizontalFieldOfView);
+  // TODO other camera parameters via sdf
+
+  this->image = std::make_shared<ignition::rendering::Image>(
+        this->camera->CreateImage());
+
+  ignition::rendering::VisualPtr root = _scene->RootVisual();
+  root->AddChild(camera);
+}
+
+//////////////////////////////////////////////////
+void CameraSensorPrivate::RemoveCamera(ignition::rendering::ScenePtr _scene)
+{
+  if (_scene)
+  {
+    // TODO Remove camera from scene!
+  }
+  this->camera = nullptr;
+}
+
+//////////////////////////////////////////////////
 CameraSensor::CameraSensor()
 {
+  this->dataPtr = std::make_shared<CameraSensorPrivate>();
+  this->dataPtr->pThis = this;
 }
 
 //////////////////////////////////////////////////
@@ -111,19 +171,16 @@ void CameraSensor::Init(
     ignition::sensors::Manager *_mgr, SensorId _id)
 {
   this->Sensor::Init(_mgr, _id);
-  this->dataPtr = std::make_shared<CameraSensorPrivate>();
 }
 
 //////////////////////////////////////////////////
 bool CameraSensor::Load(sdf::ElementPtr _sdf)
 {
-
   if (!this->Sensor::Load(_sdf))
     return false;
 
   if (!this->dataPtr->PopulateFromSDF(_sdf))
     return false;
-
 
   this->dataPtr->pub =
       this->dataPtr->node.Advertise<ignition::msgs::ImageStamped>(
@@ -131,7 +188,11 @@ bool CameraSensor::Load(sdf::ElementPtr _sdf)
   if (!this->dataPtr->pub)
     return false;
 
-  // TODO create a camera in a scene
+  this->dataPtr->scene = this->Manager()->RenderingScene();
+  if (this->dataPtr->scene)
+  {
+    this->dataPtr->CreateCamera(this->dataPtr->scene);
+  }
 
   this->dataPtr->initialized = true;
   return true;
@@ -150,9 +211,40 @@ bool CameraSensor::SetImageCallback(std::function<
 //////////////////////////////////////////////////
 void CameraSensor::Update(const common::Time &_now)
 {
-  // TODO generate sensor data
-  ignition::msgs::ImageStamped msg;
+  if (!this->dataPtr->initialized)
+    return;
 
+  // APIs make it possible for the scene pointer to change
+  auto newScene = this->Manager()->RenderingScene();
+  if (this->dataPtr->scene != newScene)
+  {
+    this->dataPtr->RemoveCamera(this->dataPtr->scene);
+    this->dataPtr->CreateCamera(newScene);
+    this->dataPtr->scene = newScene;
+  }
+
+  if (!this->dataPtr->camera)
+    return;
+
+  // generate sensor data
+  this->dataPtr->camera->Capture(*this->dataPtr->image);
+  unsigned char *data = this->dataPtr->image->Data<unsigned char>();
+
+  // create message
+  ignition::msgs::ImageStamped msg;
+  msg.mutable_image()->set_width(this->dataPtr->camera->ImageWidth());
+  msg.mutable_image()->set_height(this->dataPtr->camera->ImageHeight());
+  msg.mutable_image()->set_step(this->dataPtr->camera->ImageWidth() *
+      this->dataPtr->camera->ImageDepth());
+  msg.mutable_image()->set_pixel_format(3);
+  msg.mutable_image()->set_data(data, this->dataPtr->camera->ImageWidth() *
+      this->dataPtr->camera->ImageHeight() *
+      this->dataPtr->camera->ImageDepth());
+
+  msg.mutable_time()->set_sec(_now.sec);
+  msg.mutable_time()->set_nsec(_now.nsec);
+
+  // publish
   if (this->dataPtr->callback)
     this->dataPtr->callback(msg);
   this->dataPtr->pub.Publish(msg);
