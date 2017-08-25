@@ -18,6 +18,7 @@
 #define IGNITION_SENSORS_MANAGER_HH_
 
 #include <memory>
+#include <type_traits>
 #include <ignition/common/Time.hh>
 #include <ignition/sensors/Sensor.hh>
 #include <ignition/sensors/ign_sensors_export.h>
@@ -44,6 +45,8 @@ namespace ignition
     class ManagerPrivate;
 
     /// \brief Responsible for running sensors
+    /// \remarks This class is not thread safe. Either only call it from one
+    ///          thread only or use a lock when accessing it.
     class IGN_SENSORS_EXPORT Manager
     {
       /// \brief constructor
@@ -67,16 +70,33 @@ namespace ignition
       public: ignition::rendering::Manager &RenderingManager() const;
 
       /// \brief Create a sensor from SDF
+      /// \description This creates sensors by looking at the given sdf element.
+      ///              Sensors created with this API offer an ignition-transport
+      ///              interface to the data.
+      ///              If you know what kind of sensor is going to be loaded,
+      ///              get the sensor pointer and do a cast to the correct type
+      ///              to get a direct C++ interface to the data.
+      ///              A <sensor> tag may have multiple <plugin> tags.
+      ///              A SensorId will be returned for each plugin that is
+      ///              described in SDF.
+      ///              If there are no <plugin> tags then the content of the sdf
+      ///              will be used to load one of the plugins shipped with this
+      ///              library.
+      ///              For example, a <sensor> tag with <camera> but no <plugin>
+      ///              will cause this method to return one SensorId of a sensor
+      ///              loaded from libignition-sensors-camera.so.
+      /// \sa Manager::Sensor()
       /// \param[in] _sdf pointer to the sdf element
-      public: SensorId LoadSensor(sdf::ElementPtr &_sdf);
+      public: std::vector<ignition::sensors::SensorId> LoadSensor(
+          sdf::ElementPtr &_sdf);
+
+      /// \brief Get an instance of a loaded sensor by sensor id
+      public: std::shared_ptr<ignition::sensors::Sensor> Sensor(
+          ignition::sensors::SensorId);
 
       /// \brief Remove a sensor by ID
       /// \param[in] _sensorId ID of the sensor to remove
-      public: void Remove(const SensorId _id);
-
-      /// \brief Remove a sensor by name
-      /// \param[in] _name ID of the sensor to remove
-      public: void Remove(const std::string &_name);
+      public: void Remove(const ignition::sensors::SensorId _id);
 
       /// \brief Run the sensor generation one step.
       /// \param _time: The current simulated time
@@ -88,17 +108,14 @@ namespace ignition
       /// \brief Adds colon delimited paths sensor plugins may be
       public: void AddPluginPaths(const std::string &_path);
 
-      /// \brieef Get a path to a sensor plugin library
-      public: std::string FindPlugin(const std::string &_name);
-
-      /// \brief Get a sensor using by name
+      /// \brief Get a sensor id using by name
       ///
       /// The given name should follow the standard URI naming scheme.
       /// \param[in] _name URI name of the sensor.
       /// If the name is not unique a nullptr pointer is returned.
       /// \return Pointer to the sensor, nullptr if the sensor could not be
       /// found.
-      public: SensorId Sensor(const std::string &_name);
+      public: ignition::sensors::SensorId SensorId(const std::string &_name);
 
       /// \brief private data pointer
       private: std::unique_ptr<ManagerPrivate> dataPtr;

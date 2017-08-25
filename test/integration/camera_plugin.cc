@@ -43,8 +43,9 @@ TEST(CameraPlugin, imagesWithBuiltinSDF)
   ignition::sensors::Manager mgr;
   mgr.AddPluginPaths(ignition::common::joinPaths(
         PROJECT_BUILD_DIR, "src", "camera"));
-  ignition::sensors::SensorId id = mgr.LoadSensor(sensorPtr);
-  ASSERT_NE(ignition::sensors::NO_SENSOR, id);
+  auto ids = mgr.LoadSensor(sensorPtr);
+  ASSERT_EQ(1, ids.size());
+  ASSERT_NE(ignition::sensors::NO_SENSOR, ids[0]);
 
   std::string topic = "/test/integration/CameraPlugin_imagesWithBuiltinSDF";
   WaitForMessageTestHelper<ignition::msgs::ImageStamped> helper(topic);

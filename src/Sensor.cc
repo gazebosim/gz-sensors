@@ -16,33 +16,17 @@
 */
 
 #include "ignition/sensors/Sensor.hh"
-
 #include <vector>
-#include <ignition/common/PluginLoader.hh>
-#include <ignition/common/SystemPaths.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/SensorPlugin.hh>
 
 using namespace ignition::sensors;
 
 
-struct PluginDescription
-{
-  /// \brief Name of a plugin to load
-  public: std::string pluginName;
-
-  /// \brief Library name of a plugin to load
-  public: std::string pluginFileName;
-
-  /// \brief element pointer for plugin config data
-  public: sdf::ElementPtr pluginElement;
-};
-
-
 class ignition::sensors::SensorPrivate
 {
   /// \brief Populates fields from a <sensor> element
-  public: void PopulateFromSDF(sdf::ElementPtr _sdf);
+  public: bool PopulateFromSDF(sdf::ElementPtr _sdf);
 
   /// \brief Manager which is managing this sensor
   public: ignition::sensors::Manager *manager;
@@ -64,16 +48,10 @@ class ignition::sensors::SensorPrivate
 
   /// \brief What sim time should this sensor update at
   public: ignition::common::Time nextUpdateTime;
-
-  /// \brief descriptions of plugins used by this sensor
-  public: std::vector<PluginDescription> pluginDescriptions;
-
-  /// \brief instances of plugins used by this sensor
-  public: std::vector<std::unique_ptr<SensorPlugin>> plugins;
 };
 
 //////////////////////////////////////////////////
-void SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
+bool SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
 {
   // All SDF code gets auto converted to latest version. This code is
   // written assuming sdformat 1.6 is the latest
@@ -87,6 +65,15 @@ void SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
   // be outside the scope of this library
 
   // TODO how to use frame?
+
+  if (!_sdf)
+    return false;
+
+  if (std::string("plugin") == _sdf->GetName())
+    _sdf = _sdf->GetParent();
+
+  if (std::string("sensor") != _sdf->GetName())
+    return false;
 
   this->name = _sdf->Get<std::string>("name");
 
@@ -104,49 +91,7 @@ void SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
   {
     this->updateRate = (_sdf->Get<double>("update_rate"));
   }
-
-  // Get info about plugins
-  if (_sdf->HasElement("plugin"))
-  {
-    sdf::ElementPtr pluginElem = _sdf->GetElement("plugin");
-    while (pluginElem)
-    {
-      PluginDescription desc;
-      desc.pluginName = pluginElem->Get<std::string>("name");
-      desc.pluginFileName = pluginElem->Get<std::string>("filename");
-      desc.pluginElement = pluginElem;
-      this->pluginDescriptions.push_back(desc);
-      pluginElem = pluginElem->GetNextElement("plugin");
-    }
-  }
-
-  // Load built-in plugins for sensors which are defined by SDFormat
-  std::vector<std::pair<std::string, std::string>> builtinPlugins = {
-    {"camera", "ignition-sensors-camera"},
-    {"altimeter", "ignition-sensors-altimeter"},
-    {"contact", "ignition-sensors-contact"},
-    {"gps", "ignition-sensors-gps"},
-    {"imu", "ignition-sensors-imu"},
-    {"logical_camera", "ignition-sensors-logical-camera"},
-    {"magnetometer", "ignition-sensors-magnetometer"},
-    {"ray", "ignition-sensors-ray"},
-    {"sonar", "ignition-sensors-sonar"},
-    {"transceiver", "ignition-sensors-transceiver"},
-    {"force_torque", "ignition-sensors-force_torque"},
-  };
-
-  for (auto builtin : builtinPlugins)
-  {
-    if (_sdf->HasElement(builtin.first))
-    {
-      sdf::ElementPtr pluginElem = _sdf->GetElement(builtin.first);
-      PluginDescription desc;
-      desc.pluginName = "__builtin__";
-      desc.pluginFileName = builtin.second;
-      desc.pluginElement = pluginElem;
-      this->pluginDescriptions.push_back(desc);
-    }
-  }
+  return true;
 }
 
 //////////////////////////////////////////////////
@@ -170,34 +115,7 @@ Sensor::~Sensor()
 //////////////////////////////////////////////////
 bool Sensor::Load(sdf::ElementPtr _sdf)
 {
-  this->dataPtr->PopulateFromSDF(_sdf);
-
-  ignition::common::PluginLoader pl;
-  ignition::common::SystemPaths sp;
-
-  // Load plugins
-  for (auto pluginDesc : this->dataPtr->pluginDescriptions)
-  {
-    auto fullPath = this->Manager()->FindPlugin(pluginDesc.pluginFileName);
-    if (fullPath.size() == 0)
-      return false;
-
-    auto pluginName = pl.LoadLibrary(fullPath);
-    if (pluginName.size() == 0)
-      return false;
-
-    auto instance = pl.Instantiate<SensorPlugin>(pluginName);
-    if (!instance)
-      return false;
-
-    instance->Init(this->dataPtr->manager, this);
-    instance->Load(pluginDesc.pluginElement);
-
-    this->dataPtr->plugins.push_back(std::move(instance));
-  }
-
-  // TODO return false if sdf doesn't make sense
-  return true;
+  return this->dataPtr->PopulateFromSDF(_sdf);
 }
 
 //////////////////////////////////////////////////
@@ -256,11 +174,8 @@ void Sensor::Update(const ignition::common::Time &_now,
   if (_now < this->dataPtr->nextUpdateTime && !_force)
     return;
 
-  // update all plugins
-  for (auto &pluginInst : this->dataPtr->plugins)
-  {
-    pluginInst->Update(_now);
-  }
+  // Make the update happen
+  this->Update(_now);
 
   if (!_force)
   {

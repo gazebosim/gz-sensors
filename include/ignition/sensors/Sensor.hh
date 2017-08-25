@@ -32,14 +32,20 @@ namespace ignition
     using SensorId = std::size_t;
     const SensorId NO_SENSOR = 0;
 
-    /// \brief forwar declarations
+    /// \brief forward declarations
     class SensorPrivate;
+    class SensorPlugin;
     class Manager;
 
     /// \brief a base sensor class
-    /// \description This class common tasks like timing updates the sensor and
-    ///              parsing the `<sensor>` block in sdformat, and loading
-    ///              plugins to do the actual work
+    /// \description This class is capable of loading any sensor plugin at the
+    ///              cost of not offering direct c++ access to the sensor data.
+    ///              It finds and loads the appropriate sensor plugin according
+    ///              to the given sdformat element pointer. An ignition
+    ///              transport subscription must be used to get the sensor data.
+    ///              If direct access is required and you know the type of the
+    ///              sensor then one of the derived sensor classes should be
+    ///              used instead.
     class IGN_SENSORS_EXPORT Sensor
     {
       friend ignition::sensors::Manager;
@@ -48,15 +54,19 @@ namespace ignition
       protected: Sensor();
 
       /// \brief destructor
-      public: ~Sensor();
+      public: virtual ~Sensor();
+
+      /// \brief Force the sensor to generate data
+      /// \param[in] _now The current time
+      public: virtual void Update(const common::Time &_now) = 0;
 
       /// \brief Initialize values in the sensor
-      public: void Init(ignition::sensors::Manager *_mgr, SensorId _id);
+      public: virtual void Init(ignition::sensors::Manager *_mgr, SensorId _id);
 
       /// \brief Load the sensor with SDF parameters.
-      /// \param[in] _sdf SDF Sensor parameters.
+      /// \param[in] _sdf SDF <sensor> or <plugin> inside of <sensor>
       /// \return true if loading was successful
-      public: bool Load(sdf::ElementPtr _sdf);
+      public: virtual bool Load(sdf::ElementPtr _sdf);
 
       /// \brief Return the next time the sensor will generate data
       public: common::Time NextUpdateTime() const;

@@ -1,9 +1,10 @@
 include (${project_cmake_dir}/Utils.cmake)
 
 set (headers
+  CameraSensor.hh
+  CameraUtils.hh
   Manager.hh
   Sensor.hh
-  SensorPlugin.hh
   System.hh
 )
 
@@ -17,9 +18,12 @@ endforeach()
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/sensors.hh.in
                 ${CMAKE_CURRENT_BINARY_DIR}/sensors.hh)
 
+# Generate export headers for each library in this project
 include (GenerateExportHeader)
 generate_export_header(${PROJECT_LIBRARY_TARGET_NAME}
   BASE_NAME ign_sensors)
+generate_export_header(ignition-sensors-camera
+  BASE_NAME ign_sensors_camera)
 
 # Add an Interface library for headers to make propagating properties easier
 add_library(${PROJECT_LIBRARY_TARGET_NAME}_headers INTERFACE)
@@ -32,4 +36,5 @@ target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}_headers INTERFACE
 ign_install_includes("${INCLUDE_INSTALL_DIR_POSTFIX}/ignition" ${CMAKE_CURRENT_BINARY_DIR}/sensors.hh)
 ign_install_includes("${INCLUDE_INSTALL_DIR_POSTFIX}/ignition/${IGN_PROJECT_NAME}"
   ${headers}
-  ${CMAKE_CURRENT_BINARY_DIR}/ign_sensors_export.h)
+  ${CMAKE_CURRENT_BINARY_DIR}/ign_sensors_export.h
+  ${CMAKE_CURRENT_BINARY_DIR}/ign_sensors_camera_export.h)
