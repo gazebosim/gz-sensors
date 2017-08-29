@@ -1,5 +1,8 @@
 add_library(ignition-sensors-camera SHARED CameraSensor.cc)
 
+target_include_directories(ignition-sensors-camera PRIVATE
+  ${PROJECT_SOURCE_DIR})
+
 target_link_libraries(ignition-sensors-camera PUBLIC
   ${PROJECT_LIBRARY_TARGET_NAME})
 

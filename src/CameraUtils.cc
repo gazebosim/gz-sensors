@@ -22,15 +22,6 @@
 using namespace ignition::sensors;
 
 //////////////////////////////////////////////////
-bool SaveImage(const std::string &_path, const ignition::msgs::Image &_img,
-    bool _overwrite = false)
-{
-  // TODO
-  return false;
-}
-
-
-//////////////////////////////////////////////////
 sdf::ElementPtr CameraConfig(const std::string &_name,
     const std::string &_topic, double _hz, std::size_t _width,
     std::size_t _height, double _hfov, double _near, double _far)

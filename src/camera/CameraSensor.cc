@@ -23,6 +23,8 @@
 #include <ignition/sensors/Manager.hh>
 #include <ignition/transport.hh>
 
+#include "src/camera/ImageSaver.hh"
+
 using namespace ignition::sensors;
 
 
@@ -68,6 +70,9 @@ class ignition::sensors::CameraSensorPrivate
   /// \brief Pointer to an image to be published
   public: ignition::rendering::ImagePtr image;
 
+  /// \brief A class to manage saving images to disk
+  public: std::unique_ptr<ImageSaver> saver;
+
   /// \brief Pointer to CameraSensor
   public: CameraSensor *pThis;
 };
@@ -96,7 +101,8 @@ bool CameraSensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
   {
     sdf::ElementPtr elem = _sdf->GetElement("save");
     std::string path = elem->Get<std::string>("path");
-    // TODO make directory, or delegate saving images to another class
+    std::string prefix = this->pThis->Name() + "_";
+    this->saver.reset(new ImageSaver(path, prefix));
   }
 
   if (_sdf->HasElement("horizontal_fov"))
@@ -226,9 +232,19 @@ void CameraSensor::Update(const common::Time &_now)
   if (!this->dataPtr->camera)
     return;
 
+  // TODO move the camera to the current pose
+
   // generate sensor data
   this->dataPtr->camera->Capture(*this->dataPtr->image);
   unsigned char *data = this->dataPtr->image->Data<unsigned char>();
+
+  // Save image
+  if (this->dataPtr->saver)
+  {
+    this->dataPtr->saver->SaveImage(data, this->dataPtr->imageWidth,
+        this->dataPtr->imageHeight,
+        ignition::common::Image::PixelFormatType::RGB_INT8);
+  }
 
   // create message
   ignition::msgs::ImageStamped msg;
@@ -236,7 +252,8 @@ void CameraSensor::Update(const common::Time &_now)
   msg.mutable_image()->set_height(this->dataPtr->camera->ImageHeight());
   msg.mutable_image()->set_step(this->dataPtr->camera->ImageWidth() *
       this->dataPtr->camera->ImageDepth());
-  msg.mutable_image()->set_pixel_format(3);
+  msg.mutable_image()->set_pixel_format(
+      ignition::common::Image::PixelFormatType::RGB_INT8);
   msg.mutable_image()->set_data(data, this->dataPtr->camera->ImageWidth() *
       this->dataPtr->camera->ImageHeight() *
       this->dataPtr->camera->ImageDepth());

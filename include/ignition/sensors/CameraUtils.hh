@@ -29,15 +29,7 @@ namespace ignition
 {
   namespace sensors
   {
-    /// \brief Save a PNG image to disk
-    /// \remarks The image format is PNG regardless of the give file extention
-    /// \param[in] _path A path and filename of where to save the image
-    /// \param[in] _img Image data that should be saved to disk
-    /// \param[in] _overwrite If true then an existing image will be overwritten
-    /// \return true if the image was successfully written to disk
-    bool IGN_SENSORS_EXPORT SaveImage(const std::string &_path,
-        const ignition::msgs::Image &_img, bool _overwrite = false);
-
+    // TODO Should this be a constructor on a camera sensor instead?
     /// \brief Build an SDFormat Element for a Camera Sensor
     /// \param[in] _name Name of the camera sensor
     /// \param[in] _topic ignition-transport topic the camera should publish to
