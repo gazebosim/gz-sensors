@@ -257,7 +257,7 @@ void CameraSensor::Update(const common::Time &_now)
   msg.mutable_image()->set_height(this->dataPtr->camera->ImageHeight());
   msg.mutable_image()->set_step(this->dataPtr->camera->ImageWidth() *
       this->dataPtr->camera->ImageDepth());
-  msg.mutable_image()->set_pixel_format(this->dataPtr->format);
+  msg.mutable_image()->set_pixel_format(this->dataPtr->camera->ImageFormat());
   msg.mutable_image()->set_data(data, this->dataPtr->camera->ImageWidth() *
       this->dataPtr->camera->ImageHeight() *
       this->dataPtr->camera->ImageDepth());
