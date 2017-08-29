@@ -130,11 +130,6 @@ void CameraSensorPrivate::CreateCamera(ignition::rendering::ScenePtr _scene)
     return;
 
   this->camera = _scene->CreateCamera(this->pThis->Name());
-  auto pose = this->pThis->Pose();
-  auto euler = pose.Rot().Euler();
-  this->camera->SetLocalPosition(
-      pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
-  this->camera->SetLocalRotation(euler.X(), euler.Y(), euler.Z());
   this->camera->SetImageWidth(this->imageWidth);
   this->camera->SetImageHeight(this->imageHeight);
   // TODO these parameters via sdf
@@ -232,7 +227,12 @@ void CameraSensor::Update(const common::Time &_now)
   if (!this->dataPtr->camera)
     return;
 
-  // TODO move the camera to the current pose
+  // move the camera to the current pose
+  auto pose = this->Pose();
+  auto euler = pose.Rot().Euler();
+  this->dataPtr->camera->SetLocalPosition(
+      pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
+  this->dataPtr->camera->SetLocalRotation(euler.X(), euler.Y(), euler.Z());
 
   // generate sensor data
   this->dataPtr->camera->Capture(*this->dataPtr->image);
