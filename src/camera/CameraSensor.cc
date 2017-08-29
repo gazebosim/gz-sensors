@@ -52,6 +52,9 @@ class ignition::sensors::CameraSensorPrivate
   /// \brief the horizontal field of view of the camera
   public: double horizontalFieldOfView;
 
+  /// \brief Pixel format used by the camera
+  public: ignition::common::Image::PixelFormatType format;
+
   /// \brief node to create publisher
   public: transport::Node node;
 
@@ -93,7 +96,10 @@ bool CameraSensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
 
   this->imageWidth = imgElem->Get<int>("width");
   this->imageHeight = imgElem->Get<int>("height");
-  // TODO Pixel format
+  std::string format = imgElem->Get<std::string>("format");
+  this->format = ignition::common::Image::ConvertPixelFormat(format);
+  if (ignition::common::Image::UNKNOWN_PIXEL_FORMAT == this->format)
+    return false;
 
   // Create the directory to store frames
   if (_sdf->HasElement("save") &&
@@ -242,8 +248,7 @@ void CameraSensor::Update(const common::Time &_now)
   if (this->dataPtr->saver)
   {
     this->dataPtr->saver->SaveImage(data, this->dataPtr->imageWidth,
-        this->dataPtr->imageHeight,
-        ignition::common::Image::PixelFormatType::RGB_INT8);
+        this->dataPtr->imageHeight, this->dataPtr->format);
   }
 
   // create message
@@ -252,8 +257,7 @@ void CameraSensor::Update(const common::Time &_now)
   msg.mutable_image()->set_height(this->dataPtr->camera->ImageHeight());
   msg.mutable_image()->set_step(this->dataPtr->camera->ImageWidth() *
       this->dataPtr->camera->ImageDepth());
-  msg.mutable_image()->set_pixel_format(
-      ignition::common::Image::PixelFormatType::RGB_INT8);
+  msg.mutable_image()->set_pixel_format(this->dataPtr->format);
   msg.mutable_image()->set_data(data, this->dataPtr->camera->ImageWidth() *
       this->dataPtr->camera->ImageHeight() *
       this->dataPtr->camera->ImageDepth());
