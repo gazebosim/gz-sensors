@@ -1,12 +1,16 @@
-add_library(ignition-sensors-camera SHARED CameraSensor.cc)
+add_library(${PROJECT_LIBRARY_TARGET_NAME}-camera SHARED CameraSensor.cc)
 
-target_include_directories(ignition-sensors-camera PRIVATE
+target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}-camera PRIVATE
   ${PROJECT_SOURCE_DIR})
 
-target_link_libraries(ignition-sensors-camera PUBLIC
+target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC
+  ${IGNITION-MSGS_INCLUDE_DIRS})
+
+target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC
+  ${IGNITION-MSGS_LIBRARIES}
   ${PROJECT_LIBRARY_TARGET_NAME})
 
-target_link_libraries(ignition-sensors-camera PRIVATE
+target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-camera PRIVATE
   ${PROJECT_LIBRARY_TARGET_NAME}_headers)
 
-ign_install_library(ignition-sensors-camera ${PROJECT_EXPORT_NAME}-camera)
+ign_install_library(${PROJECT_LIBRARY_TARGET_NAME}-camera ${PROJECT_EXPORT_NAME})

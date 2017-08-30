@@ -22,7 +22,7 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/sensors.hh.in
 include (GenerateExportHeader)
 generate_export_header(${PROJECT_LIBRARY_TARGET_NAME}
   BASE_NAME ign_sensors)
-generate_export_header(ignition-sensors-camera
+generate_export_header(${PROJECT_LIBRARY_TARGET_NAME}-camera
   BASE_NAME ign_sensors_camera)
 
 # Add an Interface library for headers to make propagating properties easier
