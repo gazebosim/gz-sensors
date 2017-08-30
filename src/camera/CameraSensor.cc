@@ -175,7 +175,7 @@ void CameraSensorPrivate::RemoveCamera(ignition::rendering::ScenePtr _scene)
 //////////////////////////////////////////////////
 CameraSensor::CameraSensor()
 {
-  this->dataPtr = std::make_shared<CameraSensorPrivate>();
+  this->dataPtr.reset(new CameraSensorPrivate());
   this->dataPtr->pThis = this;
 }
 

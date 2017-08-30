@@ -73,7 +73,7 @@ namespace ignition
 
       /// \brief Data pointer for private data
       /// \internal
-      private: std::shared_ptr<CameraSensorPrivate> dataPtr;
+      private: std::unique_ptr<CameraSensorPrivate> dataPtr;
     };
   }
 }
