@@ -20,8 +20,9 @@
 /// \brief This file contains utilities useful for working with camera sensors
 
 #include <memory>
+#include <string>
 
-#include <ignition/sensors/ign_sensors_export.h>
+#include <ignition/sensors/ign_sensors_export.hh>
 #include <ignition/msgs.hh>
 #include <sdf/sdf.hh>
 

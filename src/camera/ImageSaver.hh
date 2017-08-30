@@ -19,6 +19,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <string>
 
 #include <ignition/common/Image.hh>
 #include <ignition/msgs.hh>

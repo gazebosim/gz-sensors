@@ -18,11 +18,13 @@
 #define IGNITION_SENSORS_MANAGER_HH_
 
 #include <memory>
+#include <string>
 #include <type_traits>
+#include <vector>
 #include <ignition/common/Time.hh>
 #include <ignition/rendering/Scene.hh>
 #include <ignition/sensors/Sensor.hh>
-#include <ignition/sensors/ign_sensors_export.h>
+#include <ignition/sensors/ign_sensors_export.hh>
 #include <sdf/sdf.hh>
 
 

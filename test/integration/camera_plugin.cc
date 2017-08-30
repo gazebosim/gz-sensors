@@ -20,7 +20,7 @@
 #include <ignition/sensors/Manager.hh>
 #include <ignition/rendering.hh>
 #include <ignition/msgs.hh>
-#include "test_config.h"
+#include "test/test_config.hh"
 #include "TransportTestTools.hh"
 
 

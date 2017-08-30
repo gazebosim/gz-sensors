@@ -18,10 +18,11 @@
 #define IGNITION_SENSORS_SENSOR_HH_
 
 #include <memory>
+#include <string>
 
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
-#include <ignition/sensors/ign_sensors_export.h>
+#include <ignition/sensors/ign_sensors_export.hh>
 #include <sdf/sdf.hh>
 
 namespace ignition

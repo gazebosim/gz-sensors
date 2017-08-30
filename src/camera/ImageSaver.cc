@@ -17,7 +17,6 @@
 
 #include "src/camera/ImageSaver.hh"
 
-#include <string>
 
 #include <ignition/common/Filesystem.hh>
 
