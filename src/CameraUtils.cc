@@ -19,10 +19,9 @@
 
 #include <sstream>
 
-using namespace ignition::sensors;
 
 //////////////////////////////////////////////////
-sdf::ElementPtr CameraConfig(const std::string &_name,
+sdf::ElementPtr ignition::sensors::CameraConfig(const std::string &_name,
     const std::string &_topic, double _hz, std::size_t _width,
     std::size_t _height, double _hfov, double _near, double _far)
 {

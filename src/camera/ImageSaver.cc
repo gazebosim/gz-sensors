@@ -49,7 +49,7 @@ bool ImageSaver::SaveImage(const unsigned char *_data, unsigned int _width,
   ++counter;
 
   ignition::common::Image image;
-  image->SetFromData(_data, _width, _height, _format);
+  image.SetFromData(_data, _width, _height, _format);
 
   image.SavePNG(ignition::common::joinPaths(this->path, filename));
 }

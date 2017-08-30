@@ -1,4 +1,6 @@
-add_library(${PROJECT_LIBRARY_TARGET_NAME}-camera SHARED CameraSensor.cc)
+add_library(${PROJECT_LIBRARY_TARGET_NAME}-camera SHARED
+  CameraSensor.cc
+  ImageSaver.cc)
 
 target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}-camera PRIVATE
   ${PROJECT_SOURCE_DIR})
@@ -8,6 +10,7 @@ target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC
 
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC
   ${IGNITION-MSGS_LIBRARIES}
+  ${IGNITION-TRANSPORT_LIBRARIES}
   ${PROJECT_LIBRARY_TARGET_NAME})
 
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-camera PRIVATE
