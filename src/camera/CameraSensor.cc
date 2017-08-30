@@ -17,6 +17,7 @@
 
 #include <ignition/sensors/CameraSensor.hh>
 
+#include <ignition/common/Console.hh>
 #include <ignition/common/PluginMacros.hh>
 #include <ignition/math/Angle.hh>
 #include <ignition/rendering/Camera.hh>
@@ -144,6 +145,16 @@ void CameraSensorPrivate::CreateCamera(ignition::rendering::ScenePtr _scene)
   this->camera->SetHFOV(this->horizontalFieldOfView);
   // TODO other camera parameters via sdf
 
+  switch (this->format)
+  {
+    case ignition::common::Image::RGB_INT8:
+      this->camera->SetImageFormat(ignition::rendering::PF_R8G8B8);
+      break;
+    default:
+      ignerr << "Unsupported pixel format [" << this->format << "]\n";
+      break;
+  }
+
   this->image = std::make_shared<ignition::rendering::Image>(
         this->camera->CreateImage());
 
@@ -258,7 +269,7 @@ void CameraSensor::Update(const common::Time &_now)
   msg.mutable_image()->set_step(this->dataPtr->camera->ImageWidth() *
       rendering::PixelUtil::BytesPerPixel(
         this->dataPtr->camera->ImageFormat()));
-  msg.mutable_image()->set_pixel_format(this->dataPtr->camera->ImageFormat());
+  msg.mutable_image()->set_pixel_format(this->dataPtr->format);
   msg.mutable_image()->set_data(data, this->dataPtr->camera->ImageMemorySize());
   msg.mutable_time()->set_sec(_now.sec);
   msg.mutable_time()->set_nsec(_now.nsec);
