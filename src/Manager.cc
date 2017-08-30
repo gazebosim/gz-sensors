@@ -15,12 +15,14 @@
  *
 */
 
+#include "ignition/sensors/Manager.hh"
+
 #include <atomic>
 
 #include <ignition/common/PluginLoader.hh>
 #include <ignition/common/SystemPaths.hh>
-#include <ignition/sensors/Manager.hh>
 
+#include "build_config.hh"
 
 using namespace ignition::sensors;
 
@@ -125,17 +127,17 @@ std::vector<PluginDescription> ManagerPrivate::DetermineRequiredPlugins(
   if (pluginDescriptions.empty())
   {
     const std::vector<std::pair<std::string, std::string>> builtinPlugins = {
-      {"camera", "ignition-sensors-camera"},
-      {"altimeter", "ignition-sensors-altimeter"},
-      {"contact", "ignition-sensors-contact"},
-      {"gps", "ignition-sensors-gps"},
-      {"imu", "ignition-sensors-imu"},
-      {"logical_camera", "ignition-sensors-logical-camera"},
-      {"magnetometer", "ignition-sensors-magnetometer"},
-      {"ray", "ignition-sensors-ray"},
-      {"sonar", "ignition-sensors-sonar"},
-      {"transceiver", "ignition-sensors-transceiver"},
-      {"force_torque", "ignition-sensors-force_torque"},
+      {"camera", IGN_SENSORS_LIBRARY("camera")},
+      {"altimeter", IGN_SENSORS_LIBRARY("altimeter")},
+      {"contact", IGN_SENSORS_LIBRARY("contact")},
+      {"gps", IGN_SENSORS_LIBRARY("gps")},
+      {"imu", IGN_SENSORS_LIBRARY("imu")},
+      {"logical_camera", IGN_SENSORS_LIBRARY("logical-camera")},
+      {"magnetometer", IGN_SENSORS_LIBRARY("magnetometer")},
+      {"ray", IGN_SENSORS_LIBRARY("ray")},
+      {"sonar", IGN_SENSORS_LIBRARY("sonar")},
+      {"transceiver", IGN_SENSORS_LIBRARY("transceiver")},
+      {"force_torque", IGN_SENSORS_LIBRARY("force-torque")},
     };
 
     for (auto builtin : builtinPlugins)
@@ -158,6 +160,8 @@ std::vector<PluginDescription> ManagerPrivate::DetermineRequiredPlugins(
 Manager::Manager() :
   dataPtr(new ManagerPrivate)
 {
+  // Search for plugins in directory where libraries were installed
+  this->dataPtr->systemPaths.AddPluginPaths(IGN_SENSORS_LIB_INSTALL_DIR);
 }
 
 //////////////////////////////////////////////////
@@ -214,7 +218,9 @@ std::vector<ignition::sensors::SensorId> Manager::LoadSensor(
   {
     auto sharedInst = this->dataPtr->LoadPlugin(desc);
     if (!sharedInst)
+    {
       continue;
+    }
 
     ignition::sensors::SensorId id = this->dataPtr->sensors.size() + 1;
     sharedInst->Init(this, id);
