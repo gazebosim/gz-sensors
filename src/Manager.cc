@@ -86,11 +86,11 @@ std::shared_ptr<Sensor> ManagerPrivate::LoadPlugin(
     const PluginDescription &_desc)
 {
   auto fullPath = this->systemPaths.FindSharedLibrary(_desc.fileName);
-  if (fullPath.size() == 0)
+  if (fullPath.empty())
     return false;
 
   auto pluginName = pl.LoadLibrary(fullPath);
-  if (pluginName.size() == 0)
+  if (pluginName.empty())
     return false;
 
   auto instance = pl.Instantiate<Sensor>(pluginName);
