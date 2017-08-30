@@ -78,7 +78,7 @@ class ignition::sensors::CameraSensorPrivate
   public: std::unique_ptr<ImageSaver> saver;
 
   /// \brief Pointer to CameraSensor
-  public: CameraSensor *pThis;
+  public: CameraSensor *pThis = nullptr;
 };
 
 //////////////////////////////////////////////////
