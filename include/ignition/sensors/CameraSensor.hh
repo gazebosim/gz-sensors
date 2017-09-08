@@ -34,21 +34,40 @@ namespace ignition
     /// \brief forward declarations
     class CameraSensorPrivate;
 
-    /// \brief Camera Sensor Class
-    /// \description This class creates images.
-    ///              It offers both an ignition-transport interface and a direct
-    ///              C++ API to access the image data. The API works by setting
-    ///              a callback to be called with image data.
+    /// \brief A camera sensor simulates a monocular camera.
+    ///
+    /// A camera sensor is a simulation model of a physical
+    /// camera. This sensor generates data, in the form of
+    /// images, that mimics data from a physical camera.
+    ///
+    /// This class offers both an ignition-transport interface
+    /// and a direct C++ API to access the image data. The API
+    /// works by setting a callback to be called with image data.
+    ///
+    /// ## Example Usage
+    /// \snippet save_image/main.cc camera sensor save image example
     class IGN_SENSORS_CAMERA_EXPORT CameraSensor : public Sensor
     {
-      /// \brief constructor
+      /// \brief Default constructor. **Do not use this function.**
+      ///
+      /// A sensor should be created and deleted through the Manager class.
+      /// \sa Manager.
       public: CameraSensor();
 
-      /// \brief destructor
+      /// \brief Destructor. **Do not manually delete a sensor.**
+      ///
+      /// A sensor should be created and deleted through the Manager class.
+      /// \sa Manager
       public: virtual ~CameraSensor();
 
-      /// \brief Force the sensor to generate data
-      /// \param[in] _now The current time
+      /// \brief Update the sensor, which will generate new image data.
+      ///
+      /// Typically, the camera sensor is updated automatically from the
+      /// Manager. On rare occasions you may want to directly call this
+      /// function.
+      /// \sa Manager::RunOnce
+      /// \param[in] _now The current time. This time is associated
+      /// with the image data generated during the update.
       public: virtual void Update(const common::Time &_now) override;
 
       /// \brief Initialize values in the sensor

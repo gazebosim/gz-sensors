@@ -4,8 +4,6 @@ Ignition Sensors is a component in the Ignition framework. This library contains
 
   [http://ignitionrobotics.org](http://ignitionrobotics.org)
 
-## Continuous integration
-
 ## Installation
 
 Standard installation can be performed in UNIX systems using the following 

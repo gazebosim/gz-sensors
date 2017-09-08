@@ -38,6 +38,7 @@ void BuildScene(ignition::rendering::ScenePtr _scene);
 
 int main()
 {
+  //! [camera sensor save image example]
   // Setup ign-rendering with a scene
   auto *engine = ignition::rendering::engine("ogre");
   if (!engine)
@@ -95,6 +96,7 @@ int main()
   // Force the camera to generate an image
   mgr.RunOnce(ignition::common::Time::Zero, true);
 
+  //! [camera sensor save image example]
   return 0;
 }
 

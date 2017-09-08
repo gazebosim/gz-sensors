@@ -61,7 +61,16 @@ namespace ignition
       /// \param[in] _now The current time
       public: virtual void Update(const common::Time &_now) = 0;
 
-      /// \brief Initialize values in the sensor
+      /// \brief Initialize values in the sensor.
+      ///
+      /// This function is typically called from the Manager. Only use this
+      /// function if you know what you're doing.
+      ///
+      /// \param[in] _mgr Pointer to the Manager instances that manages
+      /// (created, deletes, and updates) this sensor instance.
+      /// \param[in] _id Identifier of this sensor.
+      ///
+      /// \sa Manager
       public: virtual void Init(ignition::sensors::Manager *_mgr, SensorId _id);
 
       /// \brief Load the sensor with SDF parameters.
