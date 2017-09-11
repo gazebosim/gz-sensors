@@ -21,6 +21,7 @@ if (WIN32)
 endif()
 
 # Compatibility
+# TODO automate adding new libraries to this file
 set(@PKG_NAME@_LIBRARIES
   @PROJECT_LIBRARY_TARGET_NAME@
   @PROJECT_LIBRARY_TARGET_NAME@-camera)
