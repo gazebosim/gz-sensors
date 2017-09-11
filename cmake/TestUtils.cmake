@@ -34,7 +34,7 @@ macro (ign_build_tests)
     set_tests_properties(${BINARY_NAME} PROPERTIES TIMEOUT 240)
 
     # set c++ standard used by target
-    set_property(TARGET ${BINARY_NAME} PROPERTY CXX_STANDARD 11)
+    set_property(TARGET ${BINARY_NAME} PROPERTY CXX_STANDARD 14)
 
     if(PYTHONINTERP_FOUND)
       # Check that the test produced a result and create a failure if it didn't.
