@@ -34,5 +34,5 @@ find_dependency(ignition-math4)
 find_dependency(ignition-transport3)
 find_dependency(ignition-rendering0)
 find_dependency(ignition-common0)
-find_dependency(SDFormat)
+find_dependency(SDFormat 6)
 
