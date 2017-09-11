@@ -27,7 +27,7 @@
 TEST(CameraPlugin, imagesWithBuiltinSDF)
 {
   // get the darn test data
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_DIR, "test",
       "integration", "camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
