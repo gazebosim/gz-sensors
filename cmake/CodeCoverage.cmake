@@ -107,10 +107,9 @@ FUNCTION(SETUP_TARGET_FOR_COVERAGE _targetname _testrunner _outputname)
 	ADD_CUSTOM_TARGET(${_targetname}
 
 		# Capturing lcov counters and generating report
-    COMMAND ${LCOV_PATH} -q --no-checksum --directory ${PROJECT_BINARY_DIR}
-      --capture --output-file ${_outputname}.info 2>/dev/null
+    COMMAND ${LCOV_PATH} -q --no-checksum --base-directory ${PROJECT_SOURCE_DIR} --directory ${PROJECT_BINARY_DIR} --capture --no-external --output-file ${_outputname}.info 2>/dev/null
     COMMAND ${LCOV_PATH} -q --remove ${_outputname}.info
-      'test/*' '/usr/*' '*_TEST*' --output-file ${_outputname}.info.cleaned
+       'test/*' '/usr/*' '*_TEST*' --output-file ${_outputname}.info.cleaned
 		COMMAND ${GENHTML_PATH} -q --legend -o ${_outputname}
       ${_outputname}.info.cleaned
     COMMAND ${LCOV_PATH} --summary ${_outputname}.info.cleaned 2>&1 | grep "lines" | cut -d ' ' -f 4 | cut -d '%' -f 1 > coverage/lines.txt
