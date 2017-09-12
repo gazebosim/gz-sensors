@@ -31,7 +31,7 @@ class WaitForMessageTestHelper
 {
   /// \brief Constructor
   /// \param[in] _topic name of topic to listen to
-  public: WaitForMessageTestHelper(const std::string &_topic)
+  public: explicit WaitForMessageTestHelper(const std::string &_topic)
   {
     if (this->node.Subscribe(_topic, &WaitForMessageTestHelper<M>::OnMessage,
           this))
