@@ -227,10 +227,10 @@ bool CameraSensor::SetImageCallback(std::function<
 }
 
 //////////////////////////////////////////////////
-void CameraSensor::Update(const common::Time &_now)
+bool CameraSensor::Update(const common::Time &_now)
 {
   if (!this->dataPtr->initialized)
-    return;
+    return false;
 
   // APIs make it possible for the scene pointer to change
   auto newScene = this->Manager()->RenderingScene();
@@ -242,7 +242,7 @@ void CameraSensor::Update(const common::Time &_now)
   }
 
   if (!this->dataPtr->camera)
-    return;
+    return false;
 
   // move the camera to the current pose
   auto pose = this->Pose();
@@ -278,6 +278,8 @@ void CameraSensor::Update(const common::Time &_now)
   if (this->dataPtr->callback)
     this->dataPtr->callback(msg);
   this->dataPtr->pub.Publish(msg);
+
+  return true;
 }
 
 IGN_COMMON_REGISTER_SINGLE_PLUGIN(

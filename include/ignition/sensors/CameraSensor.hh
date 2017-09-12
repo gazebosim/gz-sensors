@@ -49,7 +49,8 @@ namespace ignition
 
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
-      public: virtual void Update(const common::Time &_now) override;
+      /// \return true if the update was successfull
+      public: virtual bool Update(const common::Time &_now) override;
 
       /// \brief Initialize values in the sensor
       public: virtual void Init(ignition::sensors::Manager *_mgr, SensorId _id)
