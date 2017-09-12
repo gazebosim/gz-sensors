@@ -15,14 +15,14 @@
  *
 */
 
-#include "ignition/sensors/Manager.hh"
-
 #include <atomic>
 
 #include <ignition/common/PluginLoader.hh>
 #include <ignition/common/SystemPaths.hh>
+#include <ignition/common/Console.hh>
 
 #include "build_config.hh"
+#include "ignition/sensors/Manager.hh"
 
 using namespace ignition::sensors;
 
@@ -108,7 +108,7 @@ std::vector<PluginDescription> ManagerPrivate::DetermineRequiredPlugins(
 {
   std::vector<PluginDescription> pluginDescriptions;
   // Get info about plugins
-  if (_sdf->HasElement("plugin"))
+  if (_sdf && _sdf->HasElement("plugin"))
   {
     sdf::ElementPtr pluginElem = _sdf->GetElement("plugin");
     while (pluginElem)
@@ -142,7 +142,7 @@ std::vector<PluginDescription> ManagerPrivate::DetermineRequiredPlugins(
 
     for (auto builtin : builtinPlugins)
     {
-      if (_sdf->HasElement(builtin.first))
+      if (_sdf && _sdf->HasElement(builtin.first))
       {
         sdf::ElementPtr pluginElem = _sdf->GetElement(builtin.first);
         PluginDescription desc;
@@ -179,6 +179,12 @@ bool Manager::Init()
 //////////////////////////////////////////////////
 bool Manager::Init(ignition::rendering::ScenePtr _rendering)
 {
+  if (!_rendering)
+  {
+    ignerr << "Null ScenePtr cannot initialize a sensor manager.\n";
+    return false;
+  }
+
   bool success = this->Init();
   if (success)
   {
@@ -240,9 +246,10 @@ void Manager::AddPluginPaths(const std::string &_paths)
 }
 
 //////////////////////////////////////////////////
-void Manager::Remove(const ignition::sensors::SensorId _id)
+bool Manager::Remove(const ignition::sensors::SensorId _id)
 {
   // TODO remove sensor
+  return false;
 }
 
 //////////////////////////////////////////////////
@@ -258,4 +265,5 @@ void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 ignition::sensors::SensorId Manager::SensorId(const std::string &_name)
 {
   // TODO find sensor id given sensor name
+  return NO_SENSOR;
 }
