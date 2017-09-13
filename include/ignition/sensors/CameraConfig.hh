@@ -14,10 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_CAMERAUTILS_HH_
-#define IGNITION_SENSORS_CAMERAUTILS_HH_
-
-/// \brief This file contains utilities useful for working with camera sensors
+#ifndef IGNITION_SENSORS_CAMERACONFIG_HH_
+#define IGNITION_SENSORS_CAMERACONFIG_HH_
 
 #include <memory>
 #include <string>
@@ -30,20 +28,173 @@ namespace ignition
 {
   namespace sensors
   {
-    // TODO Should this be a constructor on a camera sensor instead?
-    /// \brief Build an SDFormat Element for a Camera Sensor
-    /// \param[in] _name Name of the camera sensor
-    /// \param[in] _topic ignition-transport topic the camera should publish to
-    /// \param[in] _hz Rate in Hz that the camera should generate images
-    /// \param[in] _width Width of the image in pixels
-    /// \param[in] _height Height of the image in pixels
-    /// \param[in] _hfov Horizontal field of view in radians
-    /// \param[in] _near Near clip plane distance
-    /// \param[in] _far clip plane distance
-    /// \return An SDF Element pointer to the camera config
-    sdf::ElementPtr IGN_SENSORS_EXPORT CameraConfig(const std::string &_name,
+    /// \brief Forward declaration
+    class CameraConfigPrivate;
+
+    /// \brief Hold information for configuring camera sensors
+    class IGN_SENSORS_EXPORT CameraConfig
+    {
+      /// \brief Constructor with initial values
+      /// \param[in] _name Name of the camera sensor
+      /// \param[in] _topic ignition-transport topic the camera will publish to
+      /// \param[in] _hz Rate in Hz that the camera should generate images
+      /// \param[in] _width Width of the image in pixels
+      /// \param[in] _height Height of the image in pixels
+      /// \param[in] _hfov Horizontal field of view in radians
+      /// \param[in] _near Near clip plane distance
+      /// \param[in] _far clip plane distance
+      public: CameraConfig(const std::string &_name,
         const std::string &_topic, double _hz, std::size_t _width,
         std::size_t _height, double _hfov, double _near, double _far);
+
+      /// \brief Constructor
+      public: CameraConfig();
+
+      /// \brief Destructor
+      public: ~CameraConfig();
+
+      /// \brief Set the name of the camera
+      /// \param[in] _name a name for the camera
+      /// \return true if the name is legal
+      /// \sa Name()
+      public: bool SetName(const std::string &_name);
+
+      /// \brief Get the name of the camera
+      ///
+      ///   The name of the camera is used when outputting data. For example,
+      ///   the name may be used to create a topic name if one was not set
+      ///   manually.
+      /// \return name or empty string if it is not set
+      //// \sa SetName()
+      public: const std::string &Name() const;
+
+      /// \brief Set the topic the camera will publish to
+      /// \param[in] an ignition transport topic name
+      /// \return true if the topic name is legal
+      /// \sa Topic()
+      public: bool SetTopic(const std::string &_topic);
+
+      /// \brief Get the topic the camera publishes to
+      ///
+      ///   The topic is an ignition tranpsport topic to which the camera will
+      ///   publish images.
+      /// \return the topic or empty string if it is not set
+      /// \sa SetTopic()
+      public: const std::string &Topic() const;
+
+      /// \brief Set number of frames per second
+      /// \param[in] _hz images per second to generate. It must be a a positive
+      ///   number.
+      /// \return true if the value is legal
+      /// \sa Hz()
+      public: bool SetHz(double _hz);
+
+      /// \brief The number of frames per second
+      ///
+      ///   This is the rate at which the camera sensor will generate images.
+      ///   Note that the maximum rate is limited by the rate of calls to
+      ///   ignition::sensors::Manager::Update(). For example a camera with a
+      ///   Hz of 2 will only generate 1 frame per second if the manager is
+      ///   only asked to update once every simulated second.
+      /// \sa SetHz()
+      public: double Hz() const;
+
+      /// \brief Set the width of the output image
+      /// \param[in] The width of the output image in pixels
+      /// \returns true if the width is legal
+      /// \sa Width()
+      public: bool SetWidth(std::size_t _width);
+
+      /// \brief Get the width of the output image
+      ///
+      ///   The width is given in pixels. This is one component of the
+      ///   resolution of the output image frame.
+      /// \returns the width of the image in pixels, or 0 if it is not set
+      /// \sa SetWidth(), Height(), SetHeight()
+      public: std::size_t Width() const;
+
+      /// \brief Set the height of the output image
+      /// \param[in] The height of the output image in pixels
+      /// \returns true if the height is legal
+      /// \sa Height()
+      public: bool SetHeight(std::size_t _height);
+
+      /// \brief Get the height of the output image
+      ///
+      ///   The height is given in pixels. This is one component of the
+      ///   resolution of the output image frame.
+      /// \returns the height of the image in pixels, or 0 if it is not set
+      /// \sa SetHeight(), Width(), SetWidth()
+      public: std::size_t Height() const;
+
+      /// \brief set the horizontal field of view
+      /// \param[in] _hfov horizontal field of view in radians
+      /// \returns true if the provided value is legal
+      /// \sa HorizontalFOV()
+      public: bool SetHorizontalFOV(double _hfov);
+
+      /// \brief Get the horizontal field of view
+      /// 
+      ///   The horizontal vield is an angle in radians that defines how wide
+      ///   of an area the camera can see.
+      /// \returns angle in radians
+      /// \sa SetHorizontalFOV()
+      public: double HorizontalFOV() const;
+
+      /// \brief Set the near clip plane distance
+      /// \param[in] _dist distance from camera origin in meters to the closest
+      ///   point on the plane.
+      /// \returns true if the provided value is legal
+      /// \sa Near(), SetFar(), Far()
+      public: bool SetNear(double _dist);
+
+      /// \brief Get the near clip plane distance
+      ///
+      ///   The near clip plane distance is the distance from the origin of the
+      ///   camera to the closest point on the near clip plane. Any object
+      ///   between the camera origin and this plane will be culled. Very small
+      ///   values for near clip distance may result in "z-fighting" or
+      ///   "stitching". How severe this will be depends on how close the
+      ///   fighting objects are to each other and the number of bits the
+      ///   z-buffer has on a particular graphics card. This effect gets worse
+      ///   the further away the objects are from the camera, so the far clip
+      ///   plane distance should be set to cull any objects at a range where
+      ///   this becomes a problem.
+      /// \returns distance in meters
+      /// \sa SetNear(), SetFar(), Far()
+      public: double Near() const;
+
+      /// \brief Set the far clip plane distance
+      /// \param[in] _dist distance from camera origin in meters to the closest
+      ///   point on the plane.
+      /// \returns true if the provided value is legal
+      /// \sa Far(), SetNear(), Near()
+      public: bool SetFar(double _dist);
+
+      /// \brief Get the far clip plane distance
+      /// \returns distance in meters
+      /// \sa SetFar(), SetNear(), Near()
+      public: double Far() const;
+
+      /// \brief Get the vertical field of view
+      ///
+      ///   The vertical field of view is an angle in radians that defines how
+      ///   tall of an area the camera can see.
+      /// \remarks The vertical FOV is calculated from width, height, hfov
+      /// \returns angle in radians
+      public: double VerticalFOV() const;
+
+      /// \brief Convert camera configuration to SDFormat
+      ///
+      ///   This populates a `<sensor>` element with a `<camera>` tag. These can
+      ///   then be passed to ignition::sensors::Manager::Load() to create a
+      ///   camera sensor with the given settings.
+      /// \returns An SDF Element pointer with camera data
+      public: sdf::ElementPtr ToSDF();
+
+      /// \internal
+      private: std::unique_ptr<CameraConfigPrivate> dataPtr;
+    };
   }
 }
 
