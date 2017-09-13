@@ -37,9 +37,9 @@ namespace ignition
     ///              task.
     class ImageSaver
     {
-      /// \brief constructor
-      /// \param[in] _path the path to save images
-      /// \param[in] _prefix beginning of the saved image filename
+      /// \brief Constructor.
+      /// \param[in] _path The path to save images.
+      /// \param[in] _prefix Beginning of the saved image filename.
       public: ImageSaver(const std::string &_path, const std::string &_prefix);
 
       /// \brief destructor
@@ -50,7 +50,10 @@ namespace ignition
       /// \param[in] _width width of image in pixels
       /// \param[in] _height height of image in pixels
       /// \param[in] _format The format the data is in
-      /// \return true if the image was saved successfully
+      /// \return True if the image was saved successfully. False can mean
+      /// that the path provided to the constructor does exist and creation
+      /// of the path was not possible.
+      /// \sa ImageSaver
       public: bool SaveImage(const unsigned char *_data, unsigned int _width,
           unsigned int _height, common::Image::PixelFormatType _format);
 
