@@ -78,8 +78,7 @@ namespace ignition
       public: const std::string &Name() const;
 
       /// \brief Set the topic the camera will publish to
-      /// \param[in] _topic an ignition transport topic name. If empty string
-      ///   then the topic will be generated from the name
+      /// \param[in] _topic an ignition transport topic name.
       /// \return true if the topic name is legal
       /// \sa Topic()
       public: bool SetTopic(const std::string &_topic);
