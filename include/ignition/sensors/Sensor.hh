@@ -61,8 +61,8 @@ namespace ignition
       ///
       ///   If a subclass wants to have a variable update rate it should call
       ///   SetUpdateRate().
-      /// 
-      ///   A subclass should return false if there was an error while updating 
+      ///
+      ///   A subclass should return false if there was an error while updating
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       /// \sa SetUpdateRate()

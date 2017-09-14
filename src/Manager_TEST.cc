@@ -38,6 +38,17 @@ TEST(Manager, construct)
 }
 
 //////////////////////////////////////////////////
+TEST(Manager, removeSensor)
+{
+  ignition::sensors::Manager mgr;
+  EXPECT_TRUE(mgr.Init());
+
+  EXPECT_FALSE(mgr.Remove(ignition::sensors::NO_SENSOR));
+
+  // TODO Add a sensor, then remove it
+}
+
+//////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
