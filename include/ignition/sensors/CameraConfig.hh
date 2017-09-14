@@ -151,7 +151,7 @@ namespace ignition
       ///   fighting objects are to each other, how far away the objects are
       ///   from the camera, and the number of bits the z-buffer has on a given
       ///   graphics card.
-      /// 
+      ///
       ///   This effect gets worse the further away the objects are from the
       ///   camera, so the far clip plane distance should be set to cull any
       ///   objects at a range where this becomes a problem.

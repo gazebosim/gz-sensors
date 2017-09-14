@@ -68,7 +68,7 @@ namespace ignition
       ///   This callback will be called every time the camera produces image
       ///   data, but before that data is published to ignition transport.
       ///   Update() function will be blocked while the callback is running.
-      ///   Do not block inside of the callback.
+      /// \remark Do not block inside of the callback.
       /// \return true if the callback could be set
       public: bool SetImageCallback(std::function<
                   void(const ignition::msgs::ImageStamped &)> _callback);
