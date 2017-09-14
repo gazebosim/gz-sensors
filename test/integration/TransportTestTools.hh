@@ -59,7 +59,10 @@ class WaitForMessageTestHelper
       std::unique_lock<std::mutex> lock(this->mtx);
       this->conditionVariable.wait(lock, [this]{return this->gotMessage;});
     }
-    return this->gotMessage;
+    std::unique_lock<std::mutex> lock(this->mtx);
+    bool success = this->gotMessage;
+    this->gotMessage = false;
+    return success;
   }
 
   /// \brief Node to subscribe to topics
