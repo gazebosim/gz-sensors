@@ -57,7 +57,7 @@ namespace ignition
       ///
       ///   Subclasses are told when to update according to the update rate in
       ///   the <sensor> tag. A subclass should only return false if there was
-      ///   an error while trying to generate data. If a subclass wants to 
+      ///   an error while trying to generate data. If a subclass wants to
       ///   change its update rate it should call SetUpdateRate() and rely on
       ///   this base class to call it at the right time.
       /// \param[in] _now The current time

@@ -144,7 +144,7 @@ namespace ignition
       public: bool SetHorizontalFOV(double _hfov);
 
       /// \brief Get the horizontal field of view
-      /// 
+      ///
       ///   The horizontal vield is an angle in radians that defines how wide
       ///   of an area the camera can see.
       /// \returns angle in radians
