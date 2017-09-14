@@ -49,7 +49,7 @@ namespace ignition
       /// \param[in] _height Height of the image in pixels
       /// \param[in] _hfov Horizontal field of view in radians
       /// \param[in] _near Near clip plane distance
-      /// \param[in] _far clip plane distance
+      /// \param[in] _far Far clip plane distance
       /// \param[in] _format How pixel data is formatted
       public: CameraConfig(const std::string &_name,
         const std::string &_topic, double _hz, std::size_t _width,
@@ -70,9 +70,7 @@ namespace ignition
 
       /// \brief Get the name of the camera
       ///
-      ///   The name of the camera is used when outputting data. For example,
-      ///   the name may be used to create a topic name if one was not set
-      ///   manually.
+      ///   The name is used to create a topic if the topic is not set.
       /// \return name or empty string if it is not set
       //// \sa SetName()
       public: const std::string &Name() const;
@@ -87,64 +85,57 @@ namespace ignition
       ///
       ///   The topic is an ignition tranpsport topic to which the camera will
       ///   publish images.
-      /// \return the topic or empty string if it is not set
+      /// \return the topic the camera will publish to
       /// \sa SetTopic()
       public: const std::string &Topic() const;
 
       /// \brief Set number of frames per second
-      /// \param[in] _hz images per second to generate. It must be a a positive
-      ///   number.
-      /// \return true if the value is legal
+      /// \param[in] _hz images per second to generate.
+      /// \return true if the value is > 0
       /// \sa Hz()
       public: bool SetHz(double _hz);
 
       /// \brief The number of frames per second
       ///
       ///   This is the rate at which the camera sensor will generate images.
-      ///   Note that the maximum rate is limited by the rate of calls to
-      ///   ignition::sensors::Manager::Update(). For example a camera with a
-      ///   Hz of 2 will only generate 1 frame per second if the manager is
-      ///   only asked to update once every simulated second.
+      ///   The maximum rate is limited by the rate of calls to
+      ///   ignition::sensors::Manager::Update(). A camera with a Hz of 2 will
+      ///   only generate 1 frame per second if the manager is only updated
+      ///   once every simulated second.
       /// \sa SetHz()
       public: double Hz() const;
 
       /// \brief Set the width of the output image
       /// \param[in] The width of the output image in pixels
-      /// \returns true if the width is legal
+      /// \returns true if the width is > 0
       /// \sa Width()
       public: bool SetWidth(std::size_t _width);
 
       /// \brief Get the width of the output image
-      ///
-      ///   The width is given in pixels. This is one component of the
-      ///   resolution of the output image frame.
-      /// \returns the width of the image in pixels, or 0 if it is not set
+      /// \returns width of the image in pixels
       /// \sa SetWidth(), Height(), SetHeight()
       public: std::size_t Width() const;
 
       /// \brief Set the height of the output image
       /// \param[in] The height of the output image in pixels
-      /// \returns true if the height is legal
+      /// \returns true if the height is > 0
       /// \sa Height()
       public: bool SetHeight(std::size_t _height);
 
       /// \brief Get the height of the output image
-      ///
-      ///   The height is given in pixels. This is one component of the
-      ///   resolution of the output image frame.
-      /// \returns the height of the image in pixels, or 0 if it is not set
+      /// \returns height of the image in pixels
       /// \sa SetHeight(), Width(), SetWidth()
       public: std::size_t Height() const;
 
       /// \brief set the horizontal field of view
       /// \param[in] _hfov horizontal field of view in radians
-      /// \returns true if the provided value is legal
+      /// \returns true if the provided value is between 0 and PI/2
       /// \sa HorizontalFOV()
       public: bool SetHorizontalFOV(double _hfov);
 
       /// \brief Get the horizontal field of view
       ///
-      ///   The horizontal vield is an angle in radians that defines how wide
+      ///   The horizontal field is an angle in radians that defines how wide
       ///   of an area the camera can see.
       /// \returns angle in radians
       /// \sa SetHorizontalFOV()
@@ -157,20 +148,22 @@ namespace ignition
       ///   between the camera origin and this plane will be culled. Very small
       ///   values for near clip distance may result in "z-fighting" or
       ///   "stitching". How severe this will be depends on how close the
-      ///   fighting objects are to each other and the number of bits the
-      ///   z-buffer has on a particular graphics card. This effect gets worse
-      ///   the further away the objects are from the camera, so the far clip
-      ///   plane distance should be set to cull any objects at a range where
-      ///   this becomes a problem.
+      ///   fighting objects are to each other, how far away the objects are
+      ///   from the camera, and the number of bits the z-buffer has on a given
+      ///   graphics card.
+      /// 
+      ///   This effect gets worse the further away the objects are from the
+      ///   camera, so the far clip plane distance should be set to cull any
+      ///   objects at a range where this becomes a problem.
       /// \returns distance in meters
       /// \sa SetClip(), Far()
       public: double Near() const;
 
-      /// \brief Set the far clip plane distance
+      /// \brief Set clip plane distances
       /// \param[in] _near distance from camera origin in meters to the closest
       ///   point on the near clip plane.
       /// \param[in] _far distance from camera origin in meters to the closest
-      ///   point on the far clip.
+      ///   point on the far clip plane
       /// \returns true if the provided values are legal
       /// \sa Far(), Near()
       public: bool SetClip(double _near, double _far);
