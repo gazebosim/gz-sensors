@@ -195,13 +195,6 @@ CameraSensor::~CameraSensor()
 }
 
 //////////////////////////////////////////////////
-void CameraSensor::Init(
-    ignition::sensors::Manager *_mgr, SensorId _id)
-{
-  this->Sensor::Init(_mgr, _id);
-}
-
-//////////////////////////////////////////////////
 bool CameraSensor::Load(sdf::ElementPtr _sdf)
 {
   if (!this->Sensor::Load(_sdf))

@@ -54,10 +54,6 @@ namespace ignition
       /// \return true if the update was successfull
       public: virtual bool Update(const common::Time &_now) override;
 
-      /// \brief Initialize values in the sensor
-      public: virtual void Init(ignition::sensors::Manager *_mgr, SensorId _id)
-              override;
-
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF Sensor parameters.
       /// \return true if loading was successful

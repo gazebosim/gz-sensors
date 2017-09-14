@@ -41,8 +41,8 @@ namespace ignition
     /// \brief a base sensor class
     ///
     ///   This class is a base for all sensor classes. It parses some common
-    ///   SDF elements in the <sensor> tag and is responsible for triggering
-    ///   sensor data generation at the configured update rate.
+    ///   SDF elements in the <sensor> tag and is responsible for making sure
+    ///   sensors update at the right time.
     class IGN_SENSORS_EXPORT Sensor
     {
       friend ignition::sensors::Manager;
@@ -55,18 +55,21 @@ namespace ignition
 
       /// \brief Force the sensor to generate data
       ///
-      ///   Subclasses are told when to update according to the update rate in
-      ///   the <sensor> tag. A subclass should only return false if there was
-      ///   an error while trying to generate data. If a subclass wants to
-      ///   change its update rate it should call SetUpdateRate() and rely on
-      ///   this base class to call it at the right time.
+      ///   This method must be overridden by sensors. Subclasses should not
+      ///   not make a decision about whether or not they need to update. The
+      ///   Sensor class will make sure Update() is called at the correct time.
+      ///
+      ///   If a subclass wants to have a variable update rate it should call
+      ///   SetUpdateRate().
+      /// 
+      ///   A subclass should return false if there was an error while updating 
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       /// \sa SetUpdateRate()
       public: virtual bool Update(const common::Time &_now) = 0;
 
-      /// \brief Initialize values in the sensor
-      public: virtual void Init(ignition::sensors::Manager *_mgr, SensorId _id);
+      /// \brief Initialize the sensor
+      public: void Init(ignition::sensors::Manager *_mgr, SensorId _id);
 
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF <sensor> or <plugin> inside of <sensor>
