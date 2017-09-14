@@ -21,12 +21,11 @@
 #include <string>
 #include <type_traits>
 #include <vector>
+#include <sdf/sdf.hh>
 #include <ignition/common/Time.hh>
 #include <ignition/rendering/Scene.hh>
 #include <ignition/sensors/Sensor.hh>
 #include <ignition/sensors/ign_sensors_export.hh>
-#include <sdf/sdf.hh>
-
 
 namespace ignition
 {
@@ -93,7 +92,8 @@ namespace ignition
 
       /// \brief Remove a sensor by ID
       /// \param[in] _sensorId ID of the sensor to remove
-      public: void Remove(const ignition::sensors::SensorId _id);
+      /// \return True if the sensor exists and removed.
+      public: bool Remove(const ignition::sensors::SensorId _id);
 
       /// \brief Run the sensor generation one step.
       /// \param _time: The current simulated time
