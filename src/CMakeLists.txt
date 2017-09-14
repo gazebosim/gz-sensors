@@ -2,7 +2,7 @@ include (${project_cmake_dir}/Utils.cmake)
 add_subdirectory(camera)
 
 set (sources
-  CameraUtils.cc
+  CameraConfig.cc
   Manager.cc
   Sensor.cc
 )
@@ -20,10 +20,12 @@ set_target_properties(${PROJECT_LIBRARY_TARGET_NAME} PROPERTIES
 # Generate a header with info about the build
 configure_file (build_config.hh.in ${PROJECT_BINARY_DIR}/build_config.hh)
 
-# Allow including generated header
+# Headers that are only used internally (non-installed headers or .cc files)
 target_include_directories(${PROJECT_LIBRARY_TARGET_NAME} PRIVATE
-  ${PROJECT_BINARY_DIR})
+  ${PROJECT_BINARY_DIR}
+  ${IGNITION-TRANSPORT_INCLUDE_DIRS})
 
+# Headers that are used in installed headers
 target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR_FULL}>
@@ -36,9 +38,10 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME} PUBLIC
   ${IGNITION-COMMON_LIBRARIES}
   ${IGNITION-MATH_LIBRARIES}
   ${IGNITION-RENDERING_LIBRARIES}
+  ${IGNITION-TRANSPORT_LIBRARIES}
   ${SDFormat_LIBRARIES})
 
-# Link against header target to get generated header files
+# Link against dummy target to get generated header files
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   PRIVATE ${PROJECT_LIBRARY_TARGET_NAME}_headers)
 
