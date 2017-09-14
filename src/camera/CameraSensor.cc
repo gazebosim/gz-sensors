@@ -89,18 +89,27 @@ bool CameraSensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
     _sdf = _sdf->GetElement("camera");
 
   if (!_sdf)
+  {
+    ignerr << "Null SDF element\n";
     return false;
+  }
 
   sdf::ElementPtr imgElem = _sdf->GetElement("image");
   if (!imgElem)
+  {
+    ignerr << "Failed to find <image> element\n";
     return false;
+  }
 
   this->imageWidth = imgElem->Get<int>("width");
   this->imageHeight = imgElem->Get<int>("height");
   std::string format = imgElem->Get<std::string>("format");
   this->format = ignition::common::Image::ConvertPixelFormat(format);
   if (ignition::common::Image::UNKNOWN_PIXEL_FORMAT == this->format)
+  {
+    ignerr << "Unknown pixel format [" << format << "]\n";
     return false;
+  }
 
   // Create the directory to store frames
   if (_sdf->HasElement("save") &&
@@ -114,7 +123,10 @@ bool CameraSensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
 
   auto angle = _sdf->Get<double>("horizontal_fov", 0);
   if (angle.first < 0.01 || angle.first > M_PI*2)
+  {
+    ignerr << "Invalid horizontal field of view [" << angle.first << "]\n";
     return false;
+  }
   this->horizontalFieldOfView = angle.first;
 
   if (_sdf->HasElement("distortion"))
