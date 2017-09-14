@@ -112,14 +112,10 @@ bool CameraSensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
     this->saver.reset(new ImageSaver(path, prefix));
   }
 
-  if (_sdf->HasElement("horizontal_fov"))
-  {
-    sdf::ElementPtr elem = _sdf->GetElement("horizontal_fov");
-    ignition::math::Angle angle = elem->Get<double>();
-    if (angle < 0.01 || angle > M_PI*2)
-      return false;
-    this->horizontalFieldOfView = angle.Radian();
-  }
+  auto angle = _sdf->Get<double>("horizontal_fov", 0);
+  if (angle.first < 0.01 || angle.first > M_PI*2)
+    return false;
+  this->horizontalFieldOfView = angle.first;
 
   if (_sdf->HasElement("distortion"))
   {
