@@ -147,11 +147,13 @@ void CameraSensorPrivate::CreateCamera(ignition::rendering::ScenePtr _scene)
   this->camera = _scene->CreateCamera(this->pThis->Name());
   this->camera->SetImageWidth(this->imageWidth);
   this->camera->SetImageHeight(this->imageHeight);
+  this->camera->SetHFOV(this->horizontalFieldOfView);
+
   // TODO these parameters via sdf
   this->camera->SetAntiAliasing(2);
-  this->camera->SetAspectRatio(1.333);
-  this->camera->SetHFOV(this->horizontalFieldOfView);
-  // TODO other camera parameters via sdf
+  const double width = this->imageWidth;
+  const double height = this->imageHeight;
+  this->camera->SetAspectRatio(width / height);
 
   switch (this->format)
   {
