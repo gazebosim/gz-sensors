@@ -30,11 +30,10 @@ namespace ignition
   {
     /// \internal
     /// \brief Manage saving images to disk
-    /// \description This class can save camera images to disk.
-    ///              It does so by creating a directory and saving images with
-    ///              a prefix and increasing counter.
-    ///              It is meant to be used by the CameraSensor to handle this
-    ///              task.
+    ///
+    ///   This class saves camera images to disk. It creates a directory to
+    ///   contain the images, and then saves each image with a prefix and
+    ///   increasing counter in the file name.
     class ImageSaver
     {
       /// \brief Constructor.

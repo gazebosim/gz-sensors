@@ -35,10 +35,12 @@ namespace ignition
     class CameraSensorPrivate;
 
     /// \brief Camera Sensor Class
-    /// \description This class creates images.
-    ///              It offers both an ignition-transport interface and a direct
-    ///              C++ API to access the image data. The API works by setting
-    ///              a callback to be called with image data.
+    ///
+    ///   This class creates images from an ignition rendering scene. The scene
+    ///   must be created in advance and given to Manager::Init().
+    ///   It offers both an ignition-transport interface and a direct C++ API
+    ///   to access the image data. The API works by setting a callback to be
+    ///   called with image data.
     class IGN_SENSORS_CAMERA_EXPORT CameraSensor : public Sensor
     {
       /// \brief constructor
@@ -62,12 +64,11 @@ namespace ignition
       public: virtual bool Load(sdf::ElementPtr _sdf) override;
 
       /// \brief Set a callback to be called when frame data is received
-      /// \description This callback will be called every time the camera
-      ///              produces image data, but before that data is published
-      ///              to ignition transport.
-      /// \remarks The Update() function will be blocked while the callback is
-      ///          running. Do not block inside of this callback or the update
-      ///          rate of the camera will be affected.
+      ///
+      ///   This callback will be called every time the camera produces image
+      ///   data, but before that data is published to ignition transport.
+      ///   Update() function will be blocked while the callback is running.
+      ///   Do not block inside of the callback.
       /// \return true if the callback could be set
       public: bool SetImageCallback(std::function<
                   void(const ignition::msgs::ImageStamped &)> _callback);
