@@ -66,7 +66,7 @@ int main()
   sdf::ElementPtr cameraSDF = ignition::sensors::CameraConfig(
       name, topic, hz, width, height, hfov, near, far);
 
-  auto cameraSensor = msg.LoadSensor<ignition::sensors::CameraSensor>(
+  auto cameraSensor = mgr.LoadSensor<ignition::sensors::CameraSensor>(
       cameraSDF);
 
   // Load the sensor in the manager
