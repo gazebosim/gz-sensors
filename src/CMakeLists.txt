@@ -2,6 +2,7 @@ include (${project_cmake_dir}/Utils.cmake)
 add_subdirectory(camera)
 
 set (sources
+  PluginIface.cc  
   CameraUtils.cc
   Manager.cc
   Sensor.cc

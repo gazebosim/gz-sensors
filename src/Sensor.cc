@@ -18,6 +18,7 @@
 #include "ignition/sensors/Sensor.hh"
 #include <vector>
 #include <ignition/sensors/Manager.hh>
+#include <ignition/common/Console.hh>
 
 using namespace ignition::sensors;
 
@@ -27,11 +28,11 @@ class ignition::sensors::SensorPrivate
   /// \brief Populates fields from a <sensor> element
   public: bool PopulateFromSDF(sdf::ElementPtr _sdf);
 
-  /// \brief Manager which is managing this sensor
-  public: ignition::sensors::Manager *manager;
-
   /// \brief id given to sensor when constructed
   public: SensorId id;
+
+  /// \brief Counter used to generate unique sensor identifiers.
+  public: static SensorId idCounter;
 
   /// \brief name given to sensor when loaded
   public: std::string name;
@@ -47,7 +48,12 @@ class ignition::sensors::SensorPrivate
 
   /// \brief What sim time should this sensor update at
   public: ignition::common::Time nextUpdateTime;
+
+  public: sdf::ElementPtr sdf;
+  public: std::shared_ptr<PluginIface> iface;
 };
+
+SensorId SensorPrivate::idCounter = 0;
 
 //////////////////////////////////////////////////
 bool SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
@@ -66,13 +72,20 @@ bool SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
   // TODO how to use frame?
 
   if (!_sdf)
+  {
+    ignerr << "null _sdf\n";
     return false;
+  }
 
   if (std::string("plugin") == _sdf->GetName())
     _sdf = _sdf->GetParent();
 
   if (std::string("sensor") != _sdf->GetName())
+  {
+    ignerr << "SDF is not a sensor.\n";
+    _sdf->PrintValues("  ");
     return false;
+  }
 
   this->name = _sdf->Get<std::string>("name");
 
@@ -97,13 +110,25 @@ bool SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
 Sensor::Sensor() :
   dataPtr(new SensorPrivate)
 {
+  this->dataPtr->id = (++this->dataPtr->idCounter);
 }
 
 //////////////////////////////////////////////////
-void Sensor::Init(ignition::sensors::Manager *_mgr, SensorId _id)
+void Sensor::SetIface(std::shared_ptr<PluginIface> _iface)
 {
-  this->dataPtr->manager = _mgr;
-  this->dataPtr->id = _id;
+  this->dataPtr->iface = _iface;
+}
+
+//////////////////////////////////////////////////
+std::shared_ptr<PluginIface> Sensor::Iface() const
+{
+  return this->dataPtr->iface;
+}
+
+//////////////////////////////////////////////////
+bool Sensor::Init()
+{
+  return true;
 }
 
 //////////////////////////////////////////////////
@@ -114,19 +139,23 @@ Sensor::~Sensor()
 //////////////////////////////////////////////////
 bool Sensor::Load(sdf::ElementPtr _sdf)
 {
+  if (!this->dataPtr->sdf)
+    this->dataPtr->sdf = _sdf->Clone();
+  else
+    this->dataPtr->sdf->Copy(_sdf);
   return this->dataPtr->PopulateFromSDF(_sdf);
+}
+
+//////////////////////////////////////////////////
+sdf::ElementPtr Sensor::SDF() const
+{
+  return this->dataPtr->sdf;
 }
 
 //////////////////////////////////////////////////
 SensorId Sensor::Id() const
 {
   return this->dataPtr->id;
-}
-
-//////////////////////////////////////////////////
-ignition::sensors::Manager *Sensor::Manager() const
-{
-  return this->dataPtr->manager;
 }
 
 //////////////////////////////////////////////////

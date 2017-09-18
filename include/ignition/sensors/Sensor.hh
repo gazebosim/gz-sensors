@@ -23,6 +23,7 @@
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/sensors/ign_sensors_export.hh>
+#include <ignition/sensors/PluginIface.hh>
 #include <sdf/sdf.hh>
 
 namespace ignition
@@ -36,7 +37,6 @@ namespace ignition
     /// \brief forward declarations
     class SensorPrivate;
     class SensorPlugin;
-    class Manager;
 
     /// \brief a base sensor class
     /// \description This class is capable of loading any sensor plugin at the
@@ -49,26 +49,28 @@ namespace ignition
     ///              used instead.
     class IGN_SENSORS_EXPORT Sensor
     {
-      friend ignition::sensors::Manager;
-
       /// \brief constructor
       protected: Sensor();
 
       /// \brief destructor
       public: virtual ~Sensor();
 
-      /// \brief Force the sensor to generate data
-      /// \param[in] _now The current time
-      /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) = 0;
+      public: void SetIface(std::shared_ptr<PluginIface> _iface);
 
-      /// \brief Initialize values in the sensor
-      public: virtual void Init(ignition::sensors::Manager *_mgr, SensorId _id);
+      public: std::shared_ptr<PluginIface> Iface() const;
 
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF <sensor> or <plugin> inside of <sensor>
       /// \return true if loading was successful
       public: virtual bool Load(sdf::ElementPtr _sdf);
+
+      /// \brief Initialize values in the sensor
+      public: virtual bool Init();
+
+      /// \brief Force the sensor to generate data
+      /// \param[in] _now The current time
+      /// \return true if the update was successfull
+      public: virtual bool Update(const common::Time &_now) = 0;
 
       /// \brief Return the next time the sensor will generate data
       public: common::Time NextUpdateTime() const;
@@ -106,8 +108,10 @@ namespace ignition
       /// \return The sensor's ID.
       public: SensorId Id() const;
 
-      /// \brief Get the sensor manager
-      public: ignition::sensors::Manager *Manager() const;
+      /// \brief Get the SDF used to load this sensor.
+      /// \return Pointer to an SDF element that contains initialization
+      /// information for this sensor.
+      public: sdf::ElementPtr SDF() const;
 
       /// \internal
       /// \brief Data pointer for private data

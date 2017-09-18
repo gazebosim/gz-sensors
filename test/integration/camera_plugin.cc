@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include <ignition/common/Filesystem.hh>
 #include <ignition/sensors/Manager.hh>
+#include <ignition/sensors/CameraSensor.hh>
 #include <ignition/rendering.hh>
 #include <ignition/msgs.hh>
 #include "test/test_config.hh"
@@ -50,9 +51,9 @@ TEST(CameraPlugin, imagesWithBuiltinSDF)
   mgr.SetRenderingScene(scene);
   mgr.AddPluginPaths(ignition::common::joinPaths(
         PROJECT_BUILD_DIR, "src", "camera"));
-  auto ids = mgr.LoadSensor(sensorPtr);
-  ASSERT_EQ(1, ids.size());
-  ASSERT_NE(ignition::sensors::NO_SENSOR, ids[0]);
+
+  auto *sensor = mgr.LoadSensor<ignition::sensors::CameraSensor>(sensorPtr);
+  ASSERT_NE(sensor, nullptr);
 
   std::string topic = "/test/integration/CameraPlugin_imagesWithBuiltinSDF";
   WaitForMessageTestHelper<ignition::msgs::ImageStamped> helper(topic);

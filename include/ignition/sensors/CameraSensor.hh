@@ -53,8 +53,8 @@ namespace ignition
       public: virtual bool Update(const common::Time &_now) override;
 
       /// \brief Initialize values in the sensor
-      public: virtual void Init(ignition::sensors::Manager *_mgr, SensorId _id)
-              override;
+      /// \return True on success
+      public: virtual bool Init() override;
 
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF Sensor parameters.
@@ -71,6 +71,12 @@ namespace ignition
       /// \return true if the callback could be set
       public: bool SetImageCallback(std::function<
                   void(const ignition::msgs::ImageStamped &)> _callback);
+
+      /// \brief Create a camera in a scene
+      /// \param[in] _scene Pointer to the scene in which to create the
+      /// render camera.
+      /// \return True on success.
+      private: bool CreateCamera(ignition::rendering::ScenePtr _scene);
 
       /// \brief Data pointer for private data
       /// \internal

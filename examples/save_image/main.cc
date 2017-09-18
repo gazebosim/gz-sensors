@@ -66,8 +66,11 @@ int main()
   sdf::ElementPtr cameraSDF = ignition::sensors::CameraConfig(
       name, topic, hz, width, height, hfov, near, far);
 
+  auto cameraSensor = msg.LoadSensor<ignition::sensors::CameraSensor>(
+      cameraSDF);
+
   // Load the sensor in the manager
-  auto sensorIds = mgr.LoadSensor(cameraSDF);
+  /*auto sensorIds = mgr.LoadSensor(cameraSDF);
 
   if (sensorIds.empty())
   {
@@ -88,6 +91,13 @@ int main()
   // Since camera SDF was passed in, it's known that this is a camera
   std::shared_ptr<ignition::sensors::CameraSensor> cameraSensor =
     std::static_pointer_cast<ignition::sensors::CameraSensor>(sensor);
+    */
+
+  if (!cameraSensor)
+  {
+    ignerr << "Unable to load camera sensor\n";
+    return 1;
+  }
 
   // Set a callback on the camera sensor to get a camera frame
   cameraSensor->SetImageCallback(&OnImageFrame);
