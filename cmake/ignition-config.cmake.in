@@ -21,7 +21,18 @@ if (WIN32)
 endif()
 
 # Compatibility
-set(@PKG_NAME@_LIBRARIES @PROJECT_LIBRARY_TARGET_NAME@)
+# TODO automate adding new libraries to this file
+set(@PKG_NAME@_LIBRARIES
+  @PROJECT_LIBRARY_TARGET_NAME@
+  @PROJECT_LIBRARY_TARGET_NAME@-camera)
 set(@PKG_NAME@_INCLUDE_DIRS "@PACKAGE_INCLUDE_INSTALL_DIR_FULL@")
 set(@PKG_NAME@_LIBRARY_DIRS "@PACKAGE_LIB_INSTALL_DIR@")
 set(@PKG_NAME@_LDFLAGS      "-L@PACKAGE_LIB_INSTALL_DIR@")
+
+include(CMakeFindDependencyMacro)
+find_dependency(ignition-math4)
+find_dependency(ignition-transport3)
+find_dependency(ignition-rendering0)
+find_dependency(ignition-common0)
+find_dependency(SDFormat 6)
+

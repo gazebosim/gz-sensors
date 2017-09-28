@@ -2,9 +2,11 @@ include_directories (
   ${PROJECT_SOURCE_DIR}/test/gtest/include
   ${PROJECT_SOURCE_DIR}/test/gtest
   ${PROJECT_SOURCE_DIR}/test
+  ${PROJECT_BINARY_DIR}
+  ${IGNITION-TRANSPORT_INCLUDE_DIRS}
 )
 
-configure_file (test_config.h.in ${PROJECT_BINARY_DIR}/test_config.h)
+configure_file (test_config.hh.in ${CMAKE_CURRENT_BINARY_DIR}/test_config.hh)
 
 # Build gtest
 add_library(gtest STATIC gtest/src/gtest-all.cc)
