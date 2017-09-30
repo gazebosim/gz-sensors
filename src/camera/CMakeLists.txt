@@ -1,20 +1,19 @@
-add_library(${PROJECT_LIBRARY_TARGET_NAME}-camera SHARED
-  CameraSensor.cc
-  ImageSaver.cc)
 
-target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}-camera PRIVATE
+ign_add_component(
+  camera
+  SOURCES
+    CameraSensor.cc
+    ImageSaver.cc
+  GET_TARGET_NAME camera_target)
+
+target_include_directories(${camera_target} PRIVATE
   ${PROJECT_SOURCE_DIR}
   ${IGNITION-TRANSPORT_INCLUDE_DIRS})
 
-target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC
+target_include_directories(${camera_target} PUBLIC
   ${IGNITION-MSGS_INCLUDE_DIRS})
 
-target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC
+target_link_libraries(${camera_target} PUBLIC
   ${IGNITION-MSGS_LIBRARIES}
   ${IGNITION-TRANSPORT_LIBRARIES}
   ${PROJECT_LIBRARY_TARGET_NAME})
-
-target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-camera PRIVATE
-  ${PROJECT_LIBRARY_TARGET_NAME}_headers)
-
-ign_install_library(${PROJECT_LIBRARY_TARGET_NAME}-camera ${PROJECT_EXPORT_NAME})

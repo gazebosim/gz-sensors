@@ -15,7 +15,7 @@
  *
 */
 
-#include <ignition/sensors/CameraSensor.hh>
+#include <ignition/sensors/camera/CameraSensor.hh>
 
 #include <ignition/common/Console.hh>
 #include <ignition/common/PluginMacros.hh>

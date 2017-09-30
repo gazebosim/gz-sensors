@@ -22,7 +22,7 @@
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/rendering/Camera.hh>
-#include <ignition/sensors/ign_sensors_camera_export.hh>
+#include <ignition/sensors/camera/Export.hh>
 #include <ignition/sensors/Sensor.hh>
 #include <ignition/msgs.hh>
 #include <sdf/sdf.hh>
@@ -41,7 +41,7 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-    class IGN_SENSORS_CAMERA_EXPORT CameraSensor : public Sensor
+    class IGNITION_SENSORS_CAMERA_VISIBLE CameraSensor : public Sensor
     {
       /// \brief constructor
       public: CameraSensor();

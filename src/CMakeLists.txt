@@ -1,5 +1,3 @@
-include (${project_cmake_dir}/Utils.cmake)
-add_subdirectory(camera)
 
 set (sources
   CameraConfig.cc
@@ -11,7 +9,7 @@ set (gtest_sources
   Manager_TEST.cc
 )
 
-ign_add_library(${PROJECT_LIBRARY_TARGET_NAME} ${sources})
+ign_create_main_library(${sources})
 
 set_target_properties(${PROJECT_LIBRARY_TARGET_NAME} PROPERTIES
   CXX_STANDARD 14
@@ -35,15 +33,13 @@ target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}
          ${SDFormat_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME} PUBLIC
-  ${IGNITION-COMMON_LIBRARIES}
+  ignition-common0::ignition-common0
   ${IGNITION-MATH_LIBRARIES}
   ${IGNITION-RENDERING_LIBRARIES}
   ${IGNITION-TRANSPORT_LIBRARIES}
   ${SDFormat_LIBRARIES})
 
-# Link against dummy target to get generated header files
-target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
-  PRIVATE ${PROJECT_LIBRARY_TARGET_NAME}_headers)
 
-ign_build_tests(${gtest_sources})
-ign_install_library(${PROJECT_LIBRARY_TARGET_NAME} ${PROJECT_EXPORT_NAME})
+add_subdirectory(camera)
+
+ign_build_tests(TYPE UNIT SOURCES ${gtest_sources})

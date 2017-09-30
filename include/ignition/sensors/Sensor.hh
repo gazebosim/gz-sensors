@@ -22,7 +22,7 @@
 
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
-#include <ignition/sensors/ign_sensors_export.hh>
+#include <ignition/sensors/Export.hh>
 #include <sdf/sdf.hh>
 
 namespace ignition
@@ -43,7 +43,7 @@ namespace ignition
     ///   This class is a base for all sensor classes. It parses some common
     ///   SDF elements in the <sensor> tag and is responsible for making sure
     ///   sensors update at the right time.
-    class IGN_SENSORS_EXPORT Sensor
+    class IGNITION_SENSORS_VISIBLE Sensor
     {
       friend ignition::sensors::Manager;
 
