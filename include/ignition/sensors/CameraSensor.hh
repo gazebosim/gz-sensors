@@ -66,22 +66,28 @@ namespace ignition
 
       /// \brief Set a callback to be called when frame data is received
       ///
-      ///   This callback will be called every time the camera produces image
-      ///   data, but before that data is published to ignition transport.
-      ///   Update() function will be blocked while the callback is running.
+      /// \param[in] _callback  This callback will be called every time the
+      /// camera produces image
+      /// data, but before that data is published to ignition transport.
+      /// Update() function will be blocked while the callback is running.
       /// \remark Do not block inside of the callback.
-      /// \return true if the callback could be set
-      public: bool SetImageCallback(std::function<
-                  void(const ignition::msgs::Image &)> _callback);
+      /// \return A connection pointer that must remain in scope. When the
+      /// connection pointer falls out of scope, the connection is broken.
+      public: ignition::common::ConnectionPtr ConnectImageCallback(
+                  std::function<void(const ignition::msgs::Image &)> _callback);
 
-      public: ignition::common::ConnectionPtr ConnectDataEvent(std::function<
-                  void(const ignition::msgs::Image &)> _callback);
+      /// \brief Set the rendering scene.
+      /// \param[in] _scene Pointer to the scene
+      public: virtual void SetScene(ignition::rendering::ScenePtr _scene);
 
       /// \brief Create a camera in a scene
-      /// \param[in] _scene Pointer to the scene in which to create the
-      /// render camera.
       /// \return True on success.
-      private: bool CreateCamera(ignition::rendering::ScenePtr _scene);
+      private: bool CreateCamera();
+
+      /// \brief Callback that is triggered when the scene changes on
+      /// the Manager.
+      /// \param[in] _scene Pointer to the new scene.
+      private: void OnSceneChange(ignition::rendering::ScenePtr _scene);
 
       /// \brief Data pointer for private data
       /// \internal

@@ -131,6 +131,17 @@ namespace ignition
       /// found.
       public: ignition::sensors::SensorId SensorId(const std::string &_name);
 
+      /// \brief Set a callback to be called when the scene is changed
+      ///
+      /// \param[in] _callback  This callback will be called every time the
+      /// scene is changed
+      /// \remark Do not block inside of the callback.
+      /// \return A connection pointer that must remain in scope. When the
+      /// connection pointer falls out of scope, the connection is broken.
+      public: ignition::common::ConnectionPtr ConnectSceneChangeCallback(
+                  std::function<void (const ignition::rendering::ScenePtr &)>
+                  _callback);
+
       /// \brief load a plugin and return a shared_ptr
       /// \param[in] _filename Sensor plugin file to load.
       /// \return Pointer to the new sensor, nullptr on error.

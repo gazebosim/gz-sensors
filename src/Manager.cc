@@ -20,7 +20,6 @@
 #include <ignition/common/PluginLoader.hh>
 #include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>
-#include <ignition/sensors/PluginIface.hh>
 
 // Remove this.
 #include "build_config.hh"
@@ -47,9 +46,6 @@ class ignition::sensors::ManagerPrivate
 
   /// \brief Instance used to load plugins
   public: ignition::common::PluginLoader pluginLoader;
-
-  /// \brief An instance of the interface plugins use.
-  public: std::shared_ptr<ignition::sensors::PluginIface> pluginIface;
 };
 
 //////////////////////////////////////////////////
@@ -66,8 +62,6 @@ ManagerPrivate::~ManagerPrivate()
 Manager::Manager() :
   dataPtr(new ManagerPrivate)
 {
-  this->dataPtr->pluginIface = std::make_shared<PluginIface>(this);
-
   // Search for plugins in directory where libraries were installed
   this->dataPtr->systemPaths.AddPluginPaths(IGN_SENSORS_LIB_INSTALL_DIR);
 }
@@ -175,7 +169,8 @@ ignition::sensors::SensorId Manager::LoadSensorPlugin(
     return NO_SENSOR;
   }
 
-  sensor->SetIface(this->dataPtr->pluginIface);
+  // Set the rendering scene
+  sensor->SetScene(this->dataPtr->renderingScene);
 
   if (!sensor->Load(_sdf))
   {

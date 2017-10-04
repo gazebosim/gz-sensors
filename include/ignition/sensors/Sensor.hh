@@ -22,8 +22,8 @@
 
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
+#include <ignition/rendering/Scene.hh>
 #include <ignition/sensors/ign_sensors_export.hh>
-#include <ignition/sensors/PluginIface.hh>
 #include <sdf/sdf.hh>
 
 namespace ignition
@@ -50,10 +50,6 @@ namespace ignition
 
       /// \brief destructor
       public: virtual ~Sensor();
-
-      public: void SetIface(std::shared_ptr<PluginIface> _iface);
-
-      public: std::shared_ptr<PluginIface> Iface() const;
 
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF <sensor> or <plugin> inside of <sensor>
@@ -130,6 +126,13 @@ namespace ignition
       /// \return Pointer to an SDF element that contains initialization
       /// information for this sensor.
       public: sdf::ElementPtr SDF() const;
+
+      /// \brief Set the rendering scene.
+      ///
+      /// A sensor subclass should override this function if the subclass
+      /// needs a pointer to the scene.
+      /// \param[in] _scene Pointer to the scene
+      public: virtual void SetScene(ignition::rendering::ScenePtr _scene);
 
       /// \internal
       /// \brief Data pointer for private data

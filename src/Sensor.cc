@@ -49,8 +49,7 @@ class ignition::sensors::SensorPrivate
   /// \brief What sim time should this sensor update at
   public: ignition::common::Time nextUpdateTime;
 
-  public: sdf::ElementPtr sdf;
-  public: std::shared_ptr<PluginIface> iface;
+  public: sdf::ElementPtr sdf = nullptr;
 };
 
 SensorId SensorPrivate::idCounter = 0;
@@ -114,18 +113,6 @@ Sensor::Sensor() :
 }
 
 //////////////////////////////////////////////////
-void Sensor::SetIface(std::shared_ptr<PluginIface> _iface)
-{
-  this->dataPtr->iface = _iface;
-}
-
-//////////////////////////////////////////////////
-std::shared_ptr<PluginIface> Sensor::Iface() const
-{
-  return this->dataPtr->iface;
-}
-
-//////////////////////////////////////////////////
 bool Sensor::Init()
 {
   return true;
@@ -140,7 +127,9 @@ Sensor::~Sensor()
 bool Sensor::Load(sdf::ElementPtr _sdf)
 {
   if (!this->dataPtr->sdf)
+  {
     this->dataPtr->sdf = _sdf->Clone();
+  }
   else
     this->dataPtr->sdf->Copy(_sdf);
   return this->dataPtr->PopulateFromSDF(_sdf);
@@ -221,4 +210,9 @@ bool Sensor::Update(const ignition::common::Time &_now,
 ignition::common::Time Sensor::NextUpdateTime() const
 {
   return this->dataPtr->nextUpdateTime;
+}
+
+/////////////////////////////////////////////////
+void Sensor::SetScene(ignition::rendering::ScenePtr)
+{
 }

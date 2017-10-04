@@ -60,7 +60,7 @@ int main()
   const double hz = 30;
   const std::size_t width = 480;
   const std::size_t height = 320;
-  const std::size_t hfov = 1.05;
+  const std::size_t hfov = 1.0472;
   const double near = 0.1;
   const double far = 100;
   const auto format = ignition::common::Image::RGB_INT8;
@@ -78,7 +78,8 @@ int main()
   }
 
   // Set a callback on the camera sensor to get a camera frame
-  cameraSensor->SetImageCallback(&OnImageFrame);
+  ignition::common::ConnectionPtr connection =
+    cameraSensor->ConnectImageCallback(&OnImageFrame);
 
   // Force the camera to generate an image
   mgr.RunOnce(ignition::common::Time::Zero, true);
