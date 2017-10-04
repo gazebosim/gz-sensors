@@ -63,8 +63,9 @@ int main()
   const std::size_t hfov = 1.05;
   const double near = 0.1;
   const double far = 100;
+  const auto format = ignition::common::Image::RGB_INT8;
   sdf::ElementPtr cameraSDF = ignition::sensors::CameraConfig(
-      name, topic, hz, width, height, hfov, near, far);
+      name, topic, hz, width, height, hfov, near, far, format).ToSDF();
 
   auto cameraSensor = mgr.LoadSensor<ignition::sensors::CameraSensor>(
       cameraSDF);

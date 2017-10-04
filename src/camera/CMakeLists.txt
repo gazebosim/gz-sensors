@@ -3,7 +3,8 @@ add_library(${PROJECT_LIBRARY_TARGET_NAME}-camera SHARED
   ImageSaver.cc)
 
 target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}-camera PRIVATE
-  ${PROJECT_SOURCE_DIR})
+  ${PROJECT_SOURCE_DIR}
+  ${IGNITION-TRANSPORT_INCLUDE_DIRS})
 
 target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC
   ${IGNITION-MSGS_INCLUDE_DIRS})

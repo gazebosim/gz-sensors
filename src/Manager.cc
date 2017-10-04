@@ -15,17 +15,16 @@
  *
 */
 
-#include "ignition/sensors/Manager.hh"
+#include <unordered_map>
 
-#include <map>
-
-#include <ignition/common/Console.hh>
 #include <ignition/common/PluginLoader.hh>
 #include <ignition/common/SystemPaths.hh>
+#include <ignition/common/Console.hh>
 #include <ignition/sensors/PluginIface.hh>
 
 // Remove this.
 #include "build_config.hh"
+#include "ignition/sensors/Manager.hh"
 
 using namespace ignition::sensors;
 
@@ -88,6 +87,12 @@ bool Manager::Init()
 //////////////////////////////////////////////////
 bool Manager::Init(ignition::rendering::ScenePtr _rendering)
 {
+  if (!_rendering)
+  {
+    ignerr << "Null ScenePtr cannot initialize a sensor manager.\n";
+    return false;
+  }
+
   bool success = this->Init();
   if (success)
   {
@@ -123,9 +128,9 @@ void Manager::AddPluginPaths(const std::string &_paths)
 }
 
 //////////////////////////////////////////////////
-void Manager::Remove(const ignition::sensors::SensorId _id)
+bool Manager::Remove(const ignition::sensors::SensorId _id)
 {
-  // TODO remove sensor
+  return this->dataPtr->sensors.erase(_id) > 0;
 }
 
 //////////////////////////////////////////////////
@@ -141,6 +146,7 @@ void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 ignition::sensors::SensorId Manager::SensorId(const std::string &_name)
 {
   // TODO find sensor id given sensor name
+  return NO_SENSOR;
 }
 
 //////////////////////////////////////////////////

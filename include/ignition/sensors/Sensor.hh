@@ -39,14 +39,10 @@ namespace ignition
     class SensorPlugin;
 
     /// \brief a base sensor class
-    /// \description This class is capable of loading any sensor plugin at the
-    ///              cost of not offering direct c++ access to the sensor data.
-    ///              It finds and loads the appropriate sensor plugin according
-    ///              to the given sdformat element pointer. An ignition
-    ///              transport subscription must be used to get the sensor data.
-    ///              If direct access is required and you know the type of the
-    ///              sensor then one of the derived sensor classes should be
-    ///              used instead.
+    ///
+    ///   This class is a base for all sensor classes. It parses some common
+    ///   SDF elements in the <sensor> tag and is responsible for making sure
+    ///   sensors update at the right time.
     class IGN_SENSORS_EXPORT Sensor
     {
       /// \brief constructor
@@ -68,20 +64,42 @@ namespace ignition
       public: virtual bool Init();
 
       /// \brief Force the sensor to generate data
+      ///
+      ///   This method must be overridden by sensors. Subclasses should not
+      ///   not make a decision about whether or not they need to update. The
+      ///   Sensor class will make sure Update() is called at the correct time.
+      ///
+      ///   If a subclass wants to have a variable update rate it should call
+      ///   SetUpdateRate().
+      ///
+      ///   A subclass should return false if there was an error while updating
       /// \param[in] _now The current time
       /// \return true if the update was successfull
+      /// \sa SetUpdateRate()
       public: virtual bool Update(const common::Time &_now) = 0;
 
       /// \brief Return the next time the sensor will generate data
       public: common::Time NextUpdateTime() const;
 
       /// \brief Update the sensor.
+      ///
+      ///   This is called by the manager, and is responsible for determining
+      ///   if this sensor needs to generate data at this time. If so, the
+      ///   subclasses' Update() method will be called.
       /// \param[in] _now The current time
       /// \param[in] _force Force the update to happen even if it's not time
-      /// \remarks if forced the NextUpdateTime() will be unchanged
-      public: void Update(const common::Time &_now, const bool _force);
+      /// \return True if the update was triggered (_force was true or _now
+      /// >= next_update_time) and the sensor's
+      /// bool Sensor::Update(const common::Time &_now) function returned true.
+      /// False otherwise.
+      /// \remarks If forced the NextUpdateTime() will be unchanged.
+      /// \sa virtual bool Update(const common::Time &_name) = 0
+      public: bool Update(const common::Time &_now, const bool _force);
 
       /// \brief Get the update rate of the sensor.
+      ///
+      ///   The update rate is the number of times per second a sensor should
+      ///   generate and output data.
       /// \return _hz update rate of sensor.
       public: double UpdateRate() const;
 

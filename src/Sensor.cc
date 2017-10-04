@@ -195,15 +195,17 @@ void Sensor::SetUpdateRate(const double _hz)
 }
 
 //////////////////////////////////////////////////
-void Sensor::Update(const ignition::common::Time &_now,
+bool Sensor::Update(const ignition::common::Time &_now,
                   const bool _force)
 {
+  bool result = false;
+
   // Check if it's time to update
   if (_now < this->dataPtr->nextUpdateTime && !_force)
-    return;
+    return result;
 
   // Make the update happen
-  this->Update(_now);
+  result = this->Update(_now);
 
   if (!_force)
   {
@@ -211,6 +213,8 @@ void Sensor::Update(const ignition::common::Time &_now,
     ignition::common::Time delta(1.0 / this->dataPtr->updateRate);
     this->dataPtr->nextUpdateTime += delta;
   }
+
+  return result;
 }
 
 //////////////////////////////////////////////////
