@@ -18,18 +18,18 @@
 #include <iostream>
 
 #include <ignition/common/Image.hh>
+#include <ignition/common/Console.hh>
 #include <ignition/rendering.hh>
 #include <ignition/sensors.hh>
 
-void OnImageFrame(const ignition::msgs::ImageStamped &_image)
+void OnImageFrame(const ignition::msgs::Image &_image)
 {
   const unsigned char *data = reinterpret_cast<const unsigned char*>(
-      _image.image().data().c_str());
+      _image.data().c_str());
   auto format = static_cast<ignition::common::Image::PixelFormatType>(
-      _image.image().pixel_format());
+      _image.pixel_format());
   ignition::common::Image image;
-  image.SetFromData(data, _image.image().width(), _image.image().height(),
-      format);
+  image.SetFromData(data, _image.width(), _image.height(), format);
   std::cout << "Saving image.png\n";
   image.SavePNG("image.png");
 }
@@ -67,32 +67,9 @@ int main()
   sdf::ElementPtr cameraSDF = ignition::sensors::CameraConfig(
       name, topic, hz, width, height, hfov, near, far, format).ToSDF();
 
-  auto cameraSensor = mgr.LoadSensor<ignition::sensors::CameraSensor>(
+  // Create a CameraSensor
+  auto cameraSensor = mgr.CreateSensor<ignition::sensors::CameraSensor>(
       cameraSDF);
-
-  // Load the sensor in the manager
-  /*auto sensorIds = mgr.LoadSensor(cameraSDF);
-
-  if (sensorIds.empty())
-  {
-    std::cerr << "Failed to load camera sensor\n";
-    return 1;
-  }
-
-  // We know the SDF passed in should have created one camera sensor
-  // Cast the sensor to a Camera sensor, and register a callback
-  std::shared_ptr<ignition::sensors::Sensor> sensor = mgr.Sensor(sensorIds[0]);
-
-  if (!sensor)
-  {
-    std::cerr << "Failed to get instance of camera sensor\n";
-    return 1;
-  }
-
-  // Since camera SDF was passed in, it's known that this is a camera
-  std::shared_ptr<ignition::sensors::CameraSensor> cameraSensor =
-    std::static_pointer_cast<ignition::sensors::CameraSensor>(sensor);
-    */
 
   if (!cameraSensor)
   {

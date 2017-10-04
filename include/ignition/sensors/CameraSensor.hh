@@ -20,6 +20,7 @@
 #include <memory>
 
 #include <ignition/common/Time.hh>
+#include <ignition/common/Event.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/rendering/Camera.hh>
 #include <ignition/sensors/ign_sensors_camera_export.hh>
@@ -71,7 +72,10 @@ namespace ignition
       /// \remark Do not block inside of the callback.
       /// \return true if the callback could be set
       public: bool SetImageCallback(std::function<
-                  void(const ignition::msgs::ImageStamped &)> _callback);
+                  void(const ignition::msgs::Image &)> _callback);
+
+      public: ignition::common::ConnectionPtr ConnectDataEvent(std::function<
+                  void(const ignition::msgs::Image &)> _callback);
 
       /// \brief Create a camera in a scene
       /// \param[in] _scene Pointer to the scene in which to create the

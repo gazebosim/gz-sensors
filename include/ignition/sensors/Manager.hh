@@ -86,7 +86,7 @@ namespace ignition
       /// \sa Sensor()
       /// \param[in] _sdf pointer to the sdf element
       public: template<typename T>
-              T *LoadSensor(sdf::ElementPtr _sdf)
+              T *CreateSensor(sdf::ElementPtr _sdf)
               {
                 /// \todo Switch to a Factory pattern.
                 if (_sdf->HasElement("camera"))

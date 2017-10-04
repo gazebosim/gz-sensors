@@ -4,6 +4,7 @@ set (headers
   CameraSensor.hh
   CameraConfig.hh
   Manager.hh
+  PluginIface.hh
   Sensor.hh
   System.hh
 )

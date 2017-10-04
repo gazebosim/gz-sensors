@@ -52,11 +52,11 @@ TEST(CameraPlugin, imagesWithBuiltinSDF)
   mgr.AddPluginPaths(ignition::common::joinPaths(
         PROJECT_BUILD_DIR, "src", "camera"));
 
-  auto *sensor = mgr.LoadSensor<ignition::sensors::CameraSensor>(sensorPtr);
+  auto *sensor = mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
   ASSERT_NE(sensor, nullptr);
 
   std::string topic = "/test/integration/CameraPlugin_imagesWithBuiltinSDF";
-  WaitForMessageTestHelper<ignition::msgs::ImageStamped> helper(topic);
+  WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
 
   // Update once to create image
   mgr.RunOnce(ignition::common::Time::Zero);

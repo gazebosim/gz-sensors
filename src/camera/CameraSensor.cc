@@ -36,7 +36,7 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief Callback to call when an image is created
   public: std::function<
-           void(const ignition::msgs::ImageStamped &)> callback = nullptr;
+           void(const ignition::msgs::Image &)> callback = nullptr;
 
   /// \brief node to create publisher
   public: transport::Node node;
@@ -54,10 +54,13 @@ class ignition::sensors::CameraSensorPrivate
   public: ignition::rendering::CameraPtr camera;
 
   /// \brief Pointer to an image to be published
-  public: ignition::rendering::ImagePtr image;
+  public: ignition::rendering::Image image;
 
   /// \brief A class to manage saving images to disk
   public: std::unique_ptr<ImageSaver> saver;
+
+  public: ignition::common::EventT<void(const ignition::msgs::Image &)>
+          dataEvent;
 };
 
 //////////////////////////////////////////////////
@@ -66,16 +69,22 @@ bool CameraSensor::CreateCamera(ignition::rendering::ScenePtr _scene)
   if (!_scene)
     return false;
 
-  sdf::ElementPtr cameraElem = this->SDF()->GetElement("camera");
 
   this->dataPtr->camera = _scene->CreateCamera(this->Name());
 
+  sdf::ElementPtr cameraElem = this->SDF()->GetElement("camera");
   sdf::ElementPtr imgElem = cameraElem->GetElement("image");
   if (!imgElem)
     return false;
 
-  this->dataPtr->camera->SetImageWidth(imgElem->Get<int>("width"));
-  this->dataPtr->camera->SetImageHeight(imgElem->Get<int>("height"));
+  int width = imgElem->Get<int>("width");
+  int height = imgElem->Get<int>("height");
+  this->dataPtr->camera->SetImageWidth(width);
+  this->dataPtr->camera->SetImageHeight(height);
+  this->dataPtr->camera->SetAspectRatio(width/height);
+
+  // TODO these parameters via sdf
+  this->dataPtr->camera->SetAntiAliasing(2);
 
   auto angle = cameraElem->Get<double>("horizontal_fov", 0);
   if (angle.first < 0.01 || angle.first > M_PI*2)
@@ -92,13 +101,10 @@ bool CameraSensor::CreateCamera(ignition::rendering::ScenePtr _scene)
     // This->dataPtr->distortion->Load(this->sdf->GetElement("distortion"));
   }
 
-  // TODO these parameters via sdf
-  this->dataPtr->camera->SetAntiAliasing(2);
-  this->dataPtr->camera->SetAspectRatio(1.333);
-
   // TODO other camera parameters via sdf
 
   std::string formatStr = imgElem->Get<std::string>("format");
+  std::cerr << "Camera Image Format[" << formatStr << "]\n";
   ignition::common::Image::PixelFormatType format =
     ignition::common::Image::ConvertPixelFormat(formatStr);
   switch (format)
@@ -111,8 +117,7 @@ bool CameraSensor::CreateCamera(ignition::rendering::ScenePtr _scene)
       break;
   }
 
-  this->dataPtr->image = std::make_shared<ignition::rendering::Image>(
-        this->dataPtr->camera->CreateImage());
+  this->dataPtr->image = this->dataPtr->camera->CreateImage();
 
   _scene->RootVisual()->AddChild(this->dataPtr->camera);
 
@@ -174,7 +179,7 @@ bool CameraSensor::Load(sdf::ElementPtr _sdf)
   }
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::ImageStamped>(
+      this->dataPtr->node.Advertise<ignition::msgs::Image>(
           this->Topic());
   if (!this->dataPtr->pub)
     return false;
@@ -190,7 +195,7 @@ bool CameraSensor::Load(sdf::ElementPtr _sdf)
 
 //////////////////////////////////////////////////
 bool CameraSensor::SetImageCallback(std::function<
-    void(const ignition::msgs::ImageStamped &)> _callback)
+    void(const ignition::msgs::Image &)> _callback)
 {
   if (!this->dataPtr->initialized)
     return false;
@@ -203,7 +208,7 @@ bool CameraSensor::Update(const common::Time &_now)
 {
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized\n";
+    ignerr << "Not initialized, update ignored.\n";
     return false;
   }
 
@@ -218,20 +223,16 @@ bool CameraSensor::Update(const common::Time &_now)
 
   if (!this->dataPtr->camera)
   {
-    ignerr << "No camera\n";
+    ignerr << "Camera doesn't exist.\n";
     return false;
   }
 
   // move the camera to the current pose
-  auto pose = this->Pose();
-  auto euler = pose.Rot().Euler();
-  this->dataPtr->camera->SetLocalPosition(
-      pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
-  this->dataPtr->camera->SetLocalRotation(euler.X(), euler.Y(), euler.Z());
+  this->dataPtr->camera->SetLocalPose(this->Pose());
 
   // generate sensor data
-  this->dataPtr->camera->Capture(*this->dataPtr->image);
-  unsigned char *data = this->dataPtr->image->Data<unsigned char>();
+  this->dataPtr->camera->Capture(this->dataPtr->image);
+  unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
   // Save image
   if (this->dataPtr->saver)
@@ -240,24 +241,48 @@ bool CameraSensor::Update(const common::Time &_now)
   }
 
   // create message
-  ignition::msgs::ImageStamped msg;
-  msg.mutable_image()->set_width(this->dataPtr->camera->ImageWidth());
-  msg.mutable_image()->set_height(this->dataPtr->camera->ImageHeight());
-  msg.mutable_image()->set_step(this->dataPtr->camera->ImageWidth() *
+  ignition::msgs::Image msg;
+  msg.set_width(this->dataPtr->camera->ImageWidth());
+  msg.set_height(this->dataPtr->camera->ImageHeight());
+  msg.set_step(this->dataPtr->camera->ImageWidth() *
       rendering::PixelUtil::BytesPerPixel(
         this->dataPtr->camera->ImageFormat()));
-  // msg.mutable_image()->set_pixel_format(this->dataPtr->format);
-  msg.mutable_image()->set_data(data, this->dataPtr->camera->ImageMemorySize());
-  msg.mutable_time()->set_sec(_now.sec);
-  msg.mutable_time()->set_nsec(_now.nsec);
+
+  switch (this->dataPtr->camera->ImageFormat())
+  {
+    case ignition::rendering::PF_R8G8B8:
+      msg.set_pixel_format(ignition::common::Image::RGB_INT8);
+      break;
+    default:
+      ignerr << "Unsupported pixel format ["
+             << this->dataPtr->camera->ImageFormat() << "]\n";
+      break;
+  }
+
+  msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
+  msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
+  msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
 
   // publish
-  if (this->dataPtr->callback)
-    this->dataPtr->callback(msg);
   this->dataPtr->pub.Publish(msg);
+
+  // Call the callback, if one is registered.
+  /*if (this->dataPtr->callback)
+    this->dataPtr->callback(msg);
+    */
+
+  this->dataPtr->dataEvent(msg);
 
   return true;
 }
+
+/////////////////////////////////////////////////
+ignition::common::ConnectionPtr CameraSensor::ConnectDataEvent(std::function<
+    void(const ignition::msgs::Image &)> _callback)
+{
+  return this->dataPtr->dataEvent.Connect(_callback);
+}
+
 
 IGN_COMMON_REGISTER_SINGLE_PLUGIN(
     ignition::sensors::CameraSensor,
