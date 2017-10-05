@@ -3,6 +3,7 @@ add_subdirectory(camera)
 
 set (sources
   CameraConfig.cc
+  Events.cc
   Manager.cc
   Sensor.cc
 )
@@ -16,9 +17,6 @@ ign_add_library(${PROJECT_LIBRARY_TARGET_NAME} ${sources})
 set_target_properties(${PROJECT_LIBRARY_TARGET_NAME} PROPERTIES
   CXX_STANDARD 14
   CXX_STANDARD_REQURED YES)
-
-# Generate a header with info about the build
-configure_file (build_config.hh.in ${PROJECT_BINARY_DIR}/build_config.hh)
 
 # Headers that are only used internally (non-installed headers or .cc files)
 target_include_directories(${PROJECT_LIBRARY_TARGET_NAME} PRIVATE

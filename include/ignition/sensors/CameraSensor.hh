@@ -50,35 +50,36 @@ namespace ignition
       /// \brief destructor
       public: virtual ~CameraSensor();
 
-      /// \brief Force the sensor to generate data
-      /// \param[in] _now The current time
-      /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) override;
-
-      /// \brief Initialize values in the sensor
-      /// \return True on success
-      public: virtual bool Init() override;
-
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF Sensor parameters.
       /// \return true if loading was successful
       public: virtual bool Load(sdf::ElementPtr _sdf) override;
 
-      /// \brief Set a callback to be called when frame data is received
-      ///
-      /// \param[in] _callback  This callback will be called every time the
-      /// camera produces image
-      /// data, but before that data is published to ignition transport.
-      /// Update() function will be blocked while the callback is running.
+      /// \brief Initialize values in the sensor
+      /// \return True on success
+      public: virtual bool Init() override;
+
+      /// \brief Force the sensor to generate data
+      /// \param[in] _now The current time
+      /// \return true if the update was successfull
+      public: virtual bool Update(const common::Time &_now) override;
+
+      /// \brief Set a callback to be called when image frame data is
+      /// generated.
+      /// \param[in] _callback This callback will be called every time the
+      /// camera produces image data. The Update function will be blocked
+      /// while the callbacks are executed.
       /// \remark Do not block inside of the callback.
       /// \return A connection pointer that must remain in scope. When the
       /// connection pointer falls out of scope, the connection is broken.
       public: ignition::common::ConnectionPtr ConnectImageCallback(
-                  std::function<void(const ignition::msgs::Image &)> _callback);
+                  std::function<
+                  void (const ignition::msgs::Image &)> _callback);
 
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
-      public: virtual void SetScene(ignition::rendering::ScenePtr _scene);
+      public: virtual void SetScene(
+                  ignition::rendering::ScenePtr _scene) override;
 
       /// \brief Create a camera in a scene
       /// \return True on success.

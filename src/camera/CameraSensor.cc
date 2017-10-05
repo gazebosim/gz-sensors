@@ -15,20 +15,22 @@
  *
 */
 
+#include <mutex>
 #include <ignition/sensors/CameraSensor.hh>
 
 #include <ignition/common/Console.hh>
 #include <ignition/common/PluginMacros.hh>
 #include <ignition/math/Angle.hh>
 #include <ignition/rendering/Camera.hh>
-#include <ignition/sensors/Manager.hh>
 #include <ignition/transport.hh>
-
+#include <ignition/sensors/Manager.hh>
+#include <ignition/sensors/Events.hh>
 #include "src/camera/ImageSaver.hh"
 
 using namespace ignition::sensors;
 
 
+/// \brief Private data for CameraSensor
 class ignition::sensors::CameraSensorPrivate
 {
   /// \brief Remove a camera from a scene
@@ -57,11 +59,14 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
-  public: ignition::common::EventT<void(const ignition::msgs::Image &)>
-          imageEvent;
+  public: ignition::common::EventT<
+          void (const ignition::msgs::Image &)> imageEvent;
 
   /// \brief Connection to the Manager's scene change event.
   public: ignition::common::ConnectionPtr sceneChangeConnection;
+
+  /// \brief Just a mutex for thread safety
+  public: std::mutex mutex;
 };
 
 //////////////////////////////////////////////////
@@ -167,6 +172,7 @@ bool CameraSensor::Init()
 //////////////////////////////////////////////////
 bool CameraSensor::Load(sdf::ElementPtr _sdf)
 {
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // Check if this is being loaded via "builtin" or via a plugin
   if (_sdf->GetName() == "sensor")
   {
@@ -194,7 +200,8 @@ bool CameraSensor::Load(sdf::ElementPtr _sdf)
     this->CreateCamera();
   }
 
-  // this->dataPtr->sceneChangeConnection = ;
+  this->dataPtr->sceneChangeConnection = Events::ConnectSceneChangeCallback(
+      std::bind(&CameraSensor::SetScene, this, std::placeholders::_1));
 
   this->dataPtr->initialized = true;
   return true;
@@ -210,6 +217,7 @@ ignition::common::ConnectionPtr CameraSensor::ConnectImageCallback(
 /////////////////////////////////////////////////
 void CameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 {
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
   if (this->dataPtr->scene != _scene)
   {
@@ -235,17 +243,19 @@ bool CameraSensor::Update(const common::Time &_now)
     return false;
   }
 
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+
   // move the camera to the current pose
   this->dataPtr->camera->SetLocalPose(this->Pose());
 
   // generate sensor data
   this->dataPtr->camera->Capture(this->dataPtr->image);
-  unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
   unsigned int width = this->dataPtr->camera->ImageWidth();
   unsigned int height = this->dataPtr->camera->ImageHeight();
-  ignition::common::Image::PixelFormatType format;
+  unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
+  ignition::common::Image::PixelFormatType format;
   switch (this->dataPtr->camera->ImageFormat())
   {
     case ignition::rendering::PF_R8G8B8:
@@ -253,8 +263,32 @@ bool CameraSensor::Update(const common::Time &_now)
       break;
     default:
       ignerr << "Unsupported pixel format ["
-             << this->dataPtr->camera->ImageFormat() << "]\n";
+        << this->dataPtr->camera->ImageFormat() << "]\n";
       break;
+  }
+
+  // create message
+  ignition::msgs::Image msg;
+  msg.set_width(width);
+  msg.set_height(height);
+  msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
+               this->dataPtr->camera->ImageFormat()));
+  msg.set_pixel_format(format);
+  msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
+  msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+  msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
+
+  // publish
+  this->dataPtr->pub.Publish(msg);
+
+  // Trigger callbacks.
+  try
+  {
+    this->dataPtr->imageEvent(msg);
+  }
+  catch(...)
+  {
+    ignerr << "Exception thrown in an image callback.\n";
   }
 
   // Save image
@@ -263,27 +297,8 @@ bool CameraSensor::Update(const common::Time &_now)
     this->dataPtr->saver->SaveImage(data, width, height, format);
   }
 
-  // create message
-  ignition::msgs::Image msg;
-  msg.set_width(width);
-  msg.set_height(height);
-  msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
-        this->dataPtr->camera->ImageFormat()));
-
-  msg.set_pixel_format(format);
-  msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
-  msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
-  msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
-
-  // publish
-  this->dataPtr->pub.Publish(msg);
-
-  // Call all registered callbacks.
-  this->dataPtr->imageEvent(msg);
-
   return true;
 }
-
 
 IGN_COMMON_REGISTER_SINGLE_PLUGIN(
     ignition::sensors::CameraSensor,

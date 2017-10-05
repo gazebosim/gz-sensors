@@ -23,7 +23,9 @@
 #include <vector>
 #include <sdf/sdf.hh>
 #include <ignition/common/Time.hh>
+#include <ignition/common/Console.hh>
 #include <ignition/rendering/Scene.hh>
+#include <ignition/sensors/config.hh>
 #include <ignition/sensors/Sensor.hh>
 #include <ignition/sensors/ign_sensors_export.hh>
 
@@ -70,7 +72,7 @@ namespace ignition
       /// \brief Get the rendering manager instance
       public: ignition::rendering::ScenePtr RenderingScene() const;
 
-      /// \brief Create a sensor from SDF
+      /// \brief Create a sensor from SDF with a known sensor type.
       ///
       ///   This creates sensors by looking at the given sdf element.
       ///   Sensors created with this API offer an ignition-transport interface.
@@ -85,22 +87,41 @@ namespace ignition
       ///   ignition-sensors-camera.
       /// \sa Sensor()
       /// \param[in] _sdf pointer to the sdf element
+      /// \return A pointer to the created sensor. nullptr returned on
+      /// error.
       public: template<typename T>
               T *CreateSensor(sdf::ElementPtr _sdf)
               {
-                /// \todo Switch to a Factory pattern.
-                if (_sdf->HasElement("camera"))
-                {
-                  ignition::sensors::SensorId id =
-                    this->LoadSensorPlugin("ignition-sensors0-camera", _sdf);
+                ignition::sensors::SensorId id = this->CreateSensor(_sdf);
 
-                  if (id != NO_SENSOR)
-                  {
-                    return dynamic_cast<T*>(this->Sensor(id));
-                  }
+                if (id != NO_SENSOR)
+                {
+                  return dynamic_cast<T*>(this->Sensor(id));
                 }
+
+                ignerr << "Failed to create sensor of type["
+                       << _sdf->Get<std::string>("type") << "]\n";
                 return nullptr;
               }
+
+      /// \brief Create a sensor from SDF without a known sensor type.
+      ///
+      ///   This creates sensors by looking at the given sdf element.
+      ///   Sensors created with this API offer an ignition-transport interface.
+      ///   If you need a direct C++ interface to the data, you must get the
+      ///   sensor pointer and cast to the correct type.
+      ///
+      ///   A <sensor> tag may have multiple <plugin> tags. A SensorId will be
+      ///   returned for each plugin that is described in SDF.
+      ///   If there are no <plugin> tags then one of the plugins shipped with
+      ///   this library will be loaded. For example, a <sensor> tag with
+      ///   <camera> but no <plugin> will load a CameraSensor from
+      ///   ignition-sensors-camera.
+      /// \sa Sensor()
+      /// \param[in] _sdf pointer to the sdf element
+      /// \return A sensor id that refers to the created sensor. NO_SENSOR
+      /// is returned on erro.
+      public: ignition::sensors::SensorId CreateSensor(sdf::ElementPtr _sdf);
 
       /// \brief Get an instance of a loaded sensor by sensor id
       /// \param[in] _id Idenitifier of the sensor.
@@ -130,17 +151,6 @@ namespace ignition
       /// \return Pointer to the sensor, nullptr if the sensor could not be
       /// found.
       public: ignition::sensors::SensorId SensorId(const std::string &_name);
-
-      /// \brief Set a callback to be called when the scene is changed
-      ///
-      /// \param[in] _callback  This callback will be called every time the
-      /// scene is changed
-      /// \remark Do not block inside of the callback.
-      /// \return A connection pointer that must remain in scope. When the
-      /// connection pointer falls out of scope, the connection is broken.
-      public: ignition::common::ConnectionPtr ConnectSceneChangeCallback(
-                  std::function<void (const ignition::rendering::ScenePtr &)>
-                  _callback);
 
       /// \brief load a plugin and return a shared_ptr
       /// \param[in] _filename Sensor plugin file to load.

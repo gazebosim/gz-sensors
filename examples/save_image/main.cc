@@ -60,7 +60,7 @@ int main()
   const double hz = 30;
   const std::size_t width = 480;
   const std::size_t height = 320;
-  const std::size_t hfov = 1.0472;
+  const std::size_t hfov = IGN_DTOR(60);
   const double near = 0.1;
   const double far = 100;
   const auto format = ignition::common::Image::RGB_INT8;

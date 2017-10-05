@@ -20,9 +20,7 @@
 #include <ignition/common/PluginLoader.hh>
 #include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>
-
-// Remove this.
-#include "build_config.hh"
+#include "ignition/sensors/Events.hh"
 #include "ignition/sensors/Manager.hh"
 
 using namespace ignition::sensors;
@@ -74,7 +72,6 @@ Manager::~Manager()
 //////////////////////////////////////////////////
 bool Manager::Init()
 {
-  this->dataPtr = std::make_unique<ManagerPrivate>();
   return true;
 }
 
@@ -99,6 +96,7 @@ bool Manager::Init(ignition::rendering::ScenePtr _rendering)
 void Manager::SetRenderingScene(ignition::rendering::ScenePtr _rendering)
 {
   this->dataPtr->renderingScene = _rendering;
+  Events::sceneEvent(this->dataPtr->renderingScene);
 }
 
 //////////////////////////////////////////////////
@@ -190,4 +188,16 @@ ignition::sensors::SensorId Manager::LoadSensorPlugin(
 
   // Shared pointer so others can access plugins
   return id;
+}
+
+/////////////////////////////////////////////////
+ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr _sdf)
+{
+  if (_sdf)
+  {
+    std::string type = _sdf->Get<std::string>("type");
+    return this->LoadSensorPlugin(IGN_SENSORS_LIBRARY(type), _sdf);
+  }
+
+  return NO_SENSOR;
 }
