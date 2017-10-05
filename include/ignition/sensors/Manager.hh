@@ -96,7 +96,12 @@ namespace ignition
 
                 if (id != NO_SENSOR)
                 {
-                  return dynamic_cast<T*>(this->Sensor(id));
+                  T *result = dynamic_cast<T*>(this->Sensor(id));
+
+                  if (!result)
+                    ignerr << "SDF sensor type does not match template type\n";
+
+                  return result;
                 }
 
                 ignerr << "Failed to create sensor of type["
