@@ -1,3 +1,2 @@
 
-ign_install_all_headers(
-  ADDITIONAL_DIRS camera)
+ign_install_all_headers()
