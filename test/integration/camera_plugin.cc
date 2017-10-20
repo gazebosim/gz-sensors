@@ -55,7 +55,7 @@ TEST(CameraPlugin, imagesWithBuiltinSDF)
   ASSERT_NE(ignition::sensors::NO_SENSOR, ids[0]);
 
   std::string topic = "/test/integration/CameraPlugin_imagesWithBuiltinSDF";
-  WaitForMessageTestHelper<ignition::msgs::ImageStamped> helper(topic);
+  WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
 
   // Update once to create image
   mgr.RunOnce(ignition::common::Time::Zero);

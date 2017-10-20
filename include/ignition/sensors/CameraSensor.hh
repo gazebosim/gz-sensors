@@ -67,7 +67,7 @@ namespace ignition
       /// \remark Do not block inside of the callback.
       /// \return true if the callback could be set
       public: bool SetImageCallback(std::function<
-                  void(const ignition::msgs::ImageStamped &)> _callback);
+                  void(const ignition::msgs::Image &)> _callback);
 
       /// \brief Data pointer for private data
       /// \internal
