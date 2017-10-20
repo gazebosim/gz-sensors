@@ -42,7 +42,7 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief Callback to call when an image is created
   public: std::function<
-           void(const ignition::msgs::ImageStamped &)> callback = nullptr;
+           void(const ignition::msgs::Image &)> callback = nullptr;
 
   /// \brief width of the image in pixels
   public: int imageWidth;
@@ -204,7 +204,7 @@ bool CameraSensor::Load(sdf::ElementPtr _sdf)
     return false;
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::ImageStamped>(
+      this->dataPtr->node.Advertise<ignition::msgs::Image>(
           this->Topic());
   if (!this->dataPtr->pub)
     return false;
@@ -221,7 +221,7 @@ bool CameraSensor::Load(sdf::ElementPtr _sdf)
 
 //////////////////////////////////////////////////
 bool CameraSensor::SetImageCallback(std::function<
-    void(const ignition::msgs::ImageStamped &)> _callback)
+    void(const ignition::msgs::Image &)> _callback)
 {
   if (!this->dataPtr->initialized)
     return false;
@@ -266,16 +266,16 @@ bool CameraSensor::Update(const common::Time &_now)
   }
 
   // create message
-  ignition::msgs::ImageStamped msg;
-  msg.mutable_image()->set_width(this->dataPtr->camera->ImageWidth());
-  msg.mutable_image()->set_height(this->dataPtr->camera->ImageHeight());
-  msg.mutable_image()->set_step(this->dataPtr->camera->ImageWidth() *
+  ignition::msgs::Image msg;
+  msg.set_width(this->dataPtr->camera->ImageWidth());
+  msg.set_height(this->dataPtr->camera->ImageHeight());
+  msg.set_step(this->dataPtr->camera->ImageWidth() *
       rendering::PixelUtil::BytesPerPixel(
         this->dataPtr->camera->ImageFormat()));
-  msg.mutable_image()->set_pixel_format(this->dataPtr->format);
-  msg.mutable_image()->set_data(data, this->dataPtr->camera->ImageMemorySize());
-  msg.mutable_time()->set_sec(_now.sec);
-  msg.mutable_time()->set_nsec(_now.nsec);
+  msg.set_pixel_format(this->dataPtr->format);
+  msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
+  msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
+  msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
 
   // publish
   if (this->dataPtr->callback)
