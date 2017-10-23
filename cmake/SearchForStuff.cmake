@@ -15,6 +15,15 @@ include (${project_cmake_dir}/Ronn2Man.cmake)
 add_manpage_target()
 
 ################################################################################
+# Ignition msgs
+find_package(ignition-msgs1 QUIET)
+if (NOT ignition-msgs1_FOUND)
+  BUILD_ERROR ("Missing: Ignition msgs (libignition-msgs1-dev)")
+else()
+  message (STATUS "Found Ignition msgs")
+endif()
+
+################################################################################
 # Ignition math
 find_package(ignition-math4 QUIET)
 if (NOT ignition-math4_FOUND)

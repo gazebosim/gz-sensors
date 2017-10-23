@@ -136,6 +136,8 @@ include (${project_cmake_dir}/DissectVersion.cmake)
 
 message (STATUS "\n\n====== Finding 3rd Party Packages ======")
 include (${project_cmake_dir}/SearchForStuff.cmake)
+# HACK: redefine macros defined by ign-cmake
+include (${project_cmake_dir}/Utils.cmake)
 message (STATUS "----------------------------------------\n")
 
 #####################################
