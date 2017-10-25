@@ -145,14 +145,15 @@ ignition::sensors::SensorId Manager::SensorId(const std::string &_name)
 ignition::sensors::SensorId Manager::LoadSensorPlugin(
     const std::string &_filename, sdf::ElementPtr _sdf)
 {
-  auto fullPath = this->dataPtr->systemPaths.FindSharedLibrary(_filename);
+  std::string fullPath =
+    this->dataPtr->systemPaths.FindSharedLibrary(_filename);
   if (fullPath.empty())
   {
     ignerr << "Unable to find sensor plugin path for [" << _filename << "]\n";
     return NO_SENSOR;
   }
 
-  auto pluginName = this->dataPtr->pluginLoader.LoadLibrary(fullPath);
+  std::string pluginName = this->dataPtr->pluginLoader.LoadLibrary(fullPath);
   if (pluginName.empty())
   {
     ignerr << "Unable to load sensor plugin file for [" << fullPath << "]\n";
@@ -182,7 +183,7 @@ ignition::sensors::SensorId Manager::LoadSensorPlugin(
     return NO_SENSOR;
   }
 
-   auto id = sensor->Id();
+  SensorId id = sensor->Id();
   this->dataPtr->sensors.insert(
       std::make_pair(id, std::move(sensor)));
 
@@ -195,8 +196,16 @@ ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr _sdf)
 {
   if (_sdf)
   {
-    std::string type = _sdf->Get<std::string>("type");
-    return this->LoadSensorPlugin(IGN_SENSORS_LIBRARY(type), _sdf);
+    if (_sdf->GetName() == "sensor")
+    {
+      std::string type = _sdf->Get<std::string>("type");
+      return this->LoadSensorPlugin(IGN_SENSORS_LIBRARY(type), _sdf);
+    }
+    else
+    {
+      ignerr << "SDF is not a <sensor> element.\n";
+      return NO_SENSOR;
+    }
   }
 
   return NO_SENSOR;
