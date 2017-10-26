@@ -201,9 +201,10 @@ ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr _sdf)
       std::string type = _sdf->Get<std::string>("type");
       return this->LoadSensorPlugin(IGN_SENSORS_LIBRARY(type), _sdf);
     }
+    /// \todo: Add in plugin support when SDF is updated.
     else
     {
-      ignerr << "SDF is not a <sensor> element.\n";
+      ignerr << "Provided SDF is not a <sensor> element.\n";
       return NO_SENSOR;
     }
   }
