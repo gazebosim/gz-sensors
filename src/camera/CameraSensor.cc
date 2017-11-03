@@ -42,7 +42,7 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief Callback to call when an image is created
   public: std::function<
-           void(const ignition::msgs::ImageStamped &)> callback = nullptr;
+           void(const ignition::msgs::Image &)> callback = nullptr;
 
   /// \brief width of the image in pixels
   public: int imageWidth;
@@ -89,18 +89,27 @@ bool CameraSensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
     _sdf = _sdf->GetElement("camera");
 
   if (!_sdf)
+  {
+    ignerr << "Null SDF element\n";
     return false;
+  }
 
   sdf::ElementPtr imgElem = _sdf->GetElement("image");
   if (!imgElem)
+  {
+    ignerr << "Failed to find <image> element\n";
     return false;
+  }
 
   this->imageWidth = imgElem->Get<int>("width");
   this->imageHeight = imgElem->Get<int>("height");
   std::string format = imgElem->Get<std::string>("format");
   this->format = ignition::common::Image::ConvertPixelFormat(format);
   if (ignition::common::Image::UNKNOWN_PIXEL_FORMAT == this->format)
+  {
+    ignerr << "Unknown pixel format [" << format << "]\n";
     return false;
+  }
 
   // Create the directory to store frames
   if (_sdf->HasElement("save") &&
@@ -112,14 +121,13 @@ bool CameraSensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
     this->saver.reset(new ImageSaver(path, prefix));
   }
 
-  if (_sdf->HasElement("horizontal_fov"))
+  auto angle = _sdf->Get<double>("horizontal_fov", 0);
+  if (angle.first < 0.01 || angle.first > M_PI*2)
   {
-    sdf::ElementPtr elem = _sdf->GetElement("horizontal_fov");
-    ignition::math::Angle angle = elem->Get<double>();
-    if (angle < 0.01 || angle > M_PI*2)
-      return false;
-    this->horizontalFieldOfView = angle.Radian();
+    ignerr << "Invalid horizontal field of view [" << angle.first << "]\n";
+    return false;
   }
+  this->horizontalFieldOfView = angle.first;
 
   if (_sdf->HasElement("distortion"))
   {
@@ -139,11 +147,13 @@ void CameraSensorPrivate::CreateCamera(ignition::rendering::ScenePtr _scene)
   this->camera = _scene->CreateCamera(this->pThis->Name());
   this->camera->SetImageWidth(this->imageWidth);
   this->camera->SetImageHeight(this->imageHeight);
+  this->camera->SetHFOV(this->horizontalFieldOfView);
+
   // TODO these parameters via sdf
   this->camera->SetAntiAliasing(2);
-  this->camera->SetAspectRatio(1.333);
-  this->camera->SetHFOV(this->horizontalFieldOfView);
-  // TODO other camera parameters via sdf
+  const double width = this->imageWidth;
+  const double height = this->imageHeight;
+  this->camera->SetAspectRatio(width / height);
 
   switch (this->format)
   {
@@ -185,13 +195,6 @@ CameraSensor::~CameraSensor()
 }
 
 //////////////////////////////////////////////////
-void CameraSensor::Init(
-    ignition::sensors::Manager *_mgr, SensorId _id)
-{
-  this->Sensor::Init(_mgr, _id);
-}
-
-//////////////////////////////////////////////////
 bool CameraSensor::Load(sdf::ElementPtr _sdf)
 {
   if (!this->Sensor::Load(_sdf))
@@ -201,7 +204,7 @@ bool CameraSensor::Load(sdf::ElementPtr _sdf)
     return false;
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::ImageStamped>(
+      this->dataPtr->node.Advertise<ignition::msgs::Image>(
           this->Topic());
   if (!this->dataPtr->pub)
     return false;
@@ -218,7 +221,7 @@ bool CameraSensor::Load(sdf::ElementPtr _sdf)
 
 //////////////////////////////////////////////////
 bool CameraSensor::SetImageCallback(std::function<
-    void(const ignition::msgs::ImageStamped &)> _callback)
+    void(const ignition::msgs::Image &)> _callback)
 {
   if (!this->dataPtr->initialized)
     return false;
@@ -227,10 +230,10 @@ bool CameraSensor::SetImageCallback(std::function<
 }
 
 //////////////////////////////////////////////////
-void CameraSensor::Update(const common::Time &_now)
+bool CameraSensor::Update(const common::Time &_now)
 {
   if (!this->dataPtr->initialized)
-    return;
+    return false;
 
   // APIs make it possible for the scene pointer to change
   auto newScene = this->Manager()->RenderingScene();
@@ -242,7 +245,7 @@ void CameraSensor::Update(const common::Time &_now)
   }
 
   if (!this->dataPtr->camera)
-    return;
+    return false;
 
   // move the camera to the current pose
   auto pose = this->Pose();
@@ -263,21 +266,23 @@ void CameraSensor::Update(const common::Time &_now)
   }
 
   // create message
-  ignition::msgs::ImageStamped msg;
-  msg.mutable_image()->set_width(this->dataPtr->camera->ImageWidth());
-  msg.mutable_image()->set_height(this->dataPtr->camera->ImageHeight());
-  msg.mutable_image()->set_step(this->dataPtr->camera->ImageWidth() *
+  ignition::msgs::Image msg;
+  msg.set_width(this->dataPtr->camera->ImageWidth());
+  msg.set_height(this->dataPtr->camera->ImageHeight());
+  msg.set_step(this->dataPtr->camera->ImageWidth() *
       rendering::PixelUtil::BytesPerPixel(
         this->dataPtr->camera->ImageFormat()));
-  msg.mutable_image()->set_pixel_format(this->dataPtr->format);
-  msg.mutable_image()->set_data(data, this->dataPtr->camera->ImageMemorySize());
-  msg.mutable_time()->set_sec(_now.sec);
-  msg.mutable_time()->set_nsec(_now.nsec);
+  msg.set_pixel_format(this->dataPtr->format);
+  msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
+  msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
+  msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
 
   // publish
   if (this->dataPtr->callback)
     this->dataPtr->callback(msg);
   this->dataPtr->pub.Publish(msg);
+
+  return true;
 }
 
 IGN_COMMON_REGISTER_SINGLE_PLUGIN(

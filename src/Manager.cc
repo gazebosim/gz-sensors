@@ -15,14 +15,15 @@
  *
 */
 
-#include "ignition/sensors/Manager.hh"
-
 #include <atomic>
+#include <unordered_map>
 
 #include <ignition/common/PluginLoader.hh>
 #include <ignition/common/SystemPaths.hh>
+#include <ignition/common/Console.hh>
 
 #include "build_config.hh"
+#include "ignition/sensors/Manager.hh"
 
 using namespace ignition::sensors;
 
@@ -56,9 +57,11 @@ class ignition::sensors::ManagerPrivate
   /// \brief load a plugin and return a shared_ptr
   public: std::shared_ptr<Sensor> LoadPlugin(const PluginDescription &_desc);
 
-  // TODO use a map so sensors can be removed without changing their id
-  /// \brief loaded sensors (index + 1 is sensor id)
-  public: std::vector<std::shared_ptr<Sensor>> sensors;
+  /// \brief loaded sensors by id
+  public: std::unordered_map<SensorId, std::shared_ptr<Sensor>> sensors;
+
+  /// \brief next sensor id to be used
+  public: SensorId nextId = 1;
 
   /// \brief Ignition Rendering manager
   public: ignition::rendering::ScenePtr renderingScene;
@@ -108,7 +111,7 @@ std::vector<PluginDescription> ManagerPrivate::DetermineRequiredPlugins(
 {
   std::vector<PluginDescription> pluginDescriptions;
   // Get info about plugins
-  if (_sdf->HasElement("plugin"))
+  if (_sdf && _sdf->HasElement("plugin"))
   {
     sdf::ElementPtr pluginElem = _sdf->GetElement("plugin");
     while (pluginElem)
@@ -142,7 +145,7 @@ std::vector<PluginDescription> ManagerPrivate::DetermineRequiredPlugins(
 
     for (auto builtin : builtinPlugins)
     {
-      if (_sdf->HasElement(builtin.first))
+      if (_sdf && _sdf->HasElement(builtin.first))
       {
         sdf::ElementPtr pluginElem = _sdf->GetElement(builtin.first);
         PluginDescription desc;
@@ -179,6 +182,12 @@ bool Manager::Init()
 //////////////////////////////////////////////////
 bool Manager::Init(ignition::rendering::ScenePtr _rendering)
 {
+  if (!_rendering)
+  {
+    ignerr << "Null ScenePtr cannot initialize a sensor manager.\n";
+    return false;
+  }
+
   bool success = this->Init();
   if (success)
   {
@@ -203,9 +212,10 @@ ignition::rendering::ScenePtr Manager::RenderingScene() const
 std::shared_ptr<ignition::sensors::Sensor> Manager::Sensor(
           ignition::sensors::SensorId _id)
 {
-  if (_id <= 0 || _id > this->dataPtr->sensors.size())
+  auto map_pair = this->dataPtr->sensors.find(_id);
+  if (map_pair == this->dataPtr->sensors.end())
     return std::shared_ptr<ignition::sensors::Sensor>();
-  return this->dataPtr->sensors.at(_id - 1);
+  return map_pair->second;
 }
 
 //////////////////////////////////////////////////
@@ -222,11 +232,12 @@ std::vector<ignition::sensors::SensorId> Manager::LoadSensor(
       continue;
     }
 
-    ignition::sensors::SensorId id = this->dataPtr->sensors.size() + 1;
+    ignition::sensors::SensorId id = this->dataPtr->nextId;
     sharedInst->Init(this, id);
     if (sharedInst->Load(desc.element))
     {
-      this->dataPtr->sensors.push_back(sharedInst);
+      ++(this->dataPtr->nextId);
+      this->dataPtr->sensors[id] = sharedInst;
       sensorIds.push_back(id);
     }
   }
@@ -240,9 +251,9 @@ void Manager::AddPluginPaths(const std::string &_paths)
 }
 
 //////////////////////////////////////////////////
-void Manager::Remove(const ignition::sensors::SensorId _id)
+bool Manager::Remove(const ignition::sensors::SensorId _id)
 {
-  // TODO remove sensor
+  return this->dataPtr->sensors.erase(_id) > 0;
 }
 
 //////////////////////////////////////////////////
@@ -250,7 +261,7 @@ void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 {
   for (auto &s : this->dataPtr->sensors)
   {
-    s->Update(_time, _force);
+    s.second->Update(_time, _force);
   }
 }
 
@@ -258,4 +269,5 @@ void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 ignition::sensors::SensorId Manager::SensorId(const std::string &_name)
 {
   // TODO find sensor id given sensor name
+  return NO_SENSOR;
 }

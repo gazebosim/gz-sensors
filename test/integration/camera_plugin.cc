@@ -27,7 +27,7 @@
 TEST(CameraPlugin, imagesWithBuiltinSDF)
 {
   // get the darn test data
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_DIR, "test",
       "integration", "camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -55,7 +55,7 @@ TEST(CameraPlugin, imagesWithBuiltinSDF)
   ASSERT_NE(ignition::sensors::NO_SENSOR, ids[0]);
 
   std::string topic = "/test/integration/CameraPlugin_imagesWithBuiltinSDF";
-  WaitForMessageTestHelper<ignition::msgs::ImageStamped> helper(topic);
+  WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
 
   // Update once to create image
   mgr.RunOnce(ignition::common::Time::Zero);

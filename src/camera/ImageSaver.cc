@@ -15,10 +15,9 @@
  *
 */
 
-#include "src/camera/ImageSaver.hh"
-
-
 #include <ignition/common/Filesystem.hh>
+
+#include "src/camera/ImageSaver.hh"
 
 using namespace ignition::sensors;
 
