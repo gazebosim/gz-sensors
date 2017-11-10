@@ -2079,7 +2079,7 @@ SKIP_FUNCTION_MACROS   = NO
 # the path). If a tag file is not located in the directory in which doxygen is
 # run, you must also specify the path to the tagfile here.
 
-TAGFILES               = "@CMAKE_SOURCE_DIR@/doc/cppreference.tag.xml = http://en.cppreference.com/w/cpp" \
+TAGFILES               = "@CMAKE_SOURCE_DIR@/doc/cppreference.tag.xml = http://en.cppreference.com/w" \
                          "IGNITION-MATH_DOXYGEN_TAGFILE@ = @IGNITION-MATH_API_URL@" \
                          "IGNITION-MSGS_DOXYGEN_TAGFILE@ = @IGNITION-MSGS_API_URL@" \
                          "IGNITION-TRANSPORT_DOXYGEN_TAGFILE@ = @IGNITION-TRANSPORT_API_URL@" \
