@@ -34,11 +34,17 @@ endif()
 
 ################################################################################
 # Ignition transport
-find_package(ignition-transport4 QUIET)
-if (NOT ignition-transport4_FOUND)
-  BUILD_ERROR ("Missing: Ignition transport (libignition-transport4-dev)")
-else()
-  message (STATUS "Found Ignition transport")
+set(IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION 4)
+if (NOT DEFINED IGNITION-TRANSPORT_LIBRARY_DIRS AND NOT DEFINED IGNITION-TRANSPORT_INCLUDE_DIRS AND NOT DEFINED IGNITION-TRANSPORT_LIBRARIES)
+  find_package(ignition-transport${IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION} QUIET)
+  if (NOT ignition-transport${IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION}_FOUND)
+    message(STATUS "Looking for ignition-transport${IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION}-config.cmake - not found, trying ignition-transport3 instead")
+    set(IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION 3)
+    find_package(ignition-transport3 QUIET)
+    if (NOT ignition-transport3_FOUND)
+      BUILD_ERROR ("Missing: Ignition transport4 or Ignition transport3 library.")
+    endif()
+  endif()
 endif()
 
 ################################################################################
