@@ -90,15 +90,15 @@ std::shared_ptr<Sensor> ManagerPrivate::LoadPlugin(
 {
   auto fullPath = this->systemPaths.FindSharedLibrary(_desc.fileName);
   if (fullPath.empty())
-    return false;
+    return nullptr;
 
   auto pluginName = pl.LoadLibrary(fullPath);
   if (pluginName.empty())
-    return false;
+    return nullptr;
 
   auto instance = pl.Instantiate<Sensor>(pluginName);
   if (!instance)
-    return false;
+    return nullptr;
 
   // Shared pointer so others can access plugins
   std::shared_ptr<Sensor> sharedInst = std::move(instance);

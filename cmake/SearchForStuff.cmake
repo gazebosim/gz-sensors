@@ -34,9 +34,9 @@ endif()
 
 ################################################################################
 # Ignition transport
-find_package(ignition-transport3 QUIET)
-if (NOT ignition-transport3_FOUND)
-  BUILD_ERROR ("Missing: Ignition transport (libignition-transport3-dev)")
+find_package(ignition-transport4 QUIET)
+if (NOT ignition-transport4_FOUND)
+  BUILD_ERROR ("Missing: Ignition transport (libignition-transport4-dev)")
 else()
   message (STATUS "Found Ignition transport")
 endif()
