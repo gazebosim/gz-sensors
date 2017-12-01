@@ -42,8 +42,12 @@ if (NOT DEFINED IGNITION-TRANSPORT_LIBRARY_DIRS AND NOT DEFINED IGNITION-TRANSPO
     set(IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION 3)
     find_package(ignition-transport3 QUIET)
     if (NOT ignition-transport3_FOUND)
-      BUILD_ERROR ("Missing: Ignition transport4 or Ignition transport3 library.")
+      BUILD_ERROR ("Missing: Ignition transport4 and Ignition transport3 library.")
+    else()
+      message (STATUS "Found Ignition Transport${IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION}")
     endif()
+  else()
+      message (STATUS "Found Ignition Transport${IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION}")
   endif()
 endif()
 
