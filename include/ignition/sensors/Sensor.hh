@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 
+#include <ignition/common/PluginMacros.hh>
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/rendering/Scene.hh>
@@ -45,6 +46,9 @@ namespace ignition
     ///   sensors update at the right time.
     class IGN_SENSORS_EXPORT Sensor
     {
+      /// \brief Allows using shorter APIS in common::PluginLoader
+      public: IGN_COMMON_SPECIALIZE_INTERFACE(ignition::sensors::Sensor)
+
       /// \brief constructor
       protected: Sensor();
 

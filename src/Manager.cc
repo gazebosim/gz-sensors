@@ -18,6 +18,7 @@
 #include <unordered_map>
 
 #include <ignition/common/PluginLoader.hh>
+#include <ignition/common/Plugin.hh>
 #include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>
 #include "ignition/sensors/Events.hh"
@@ -34,7 +35,7 @@ class ignition::sensors::ManagerPrivate
   public: ~ManagerPrivate();
 
   /// \brief Loaded sensors.
-  public: std::map<SensorId, std::unique_ptr<Sensor>> sensors;
+  public: std::map<SensorId, std::shared_ptr<Sensor>> sensors;
 
   /// \brief Ignition Rendering manager
   public: ignition::rendering::ScenePtr renderingScene;
@@ -153,15 +154,20 @@ ignition::sensors::SensorId Manager::LoadSensorPlugin(
     return NO_SENSOR;
   }
 
-  std::string pluginName = this->dataPtr->pluginLoader.LoadLibrary(fullPath);
-  if (pluginName.empty())
+  auto pluginNames = this->dataPtr->pluginLoader.LoadLibrary(fullPath);
+  if (pluginNames.empty())
   {
     ignerr << "Unable to load sensor plugin file for [" << fullPath << "]\n";
     return NO_SENSOR;
   }
 
-  auto sensor = this->dataPtr->pluginLoader.Instantiate<
-    ignition::sensors::Sensor>(pluginName);
+  // Assume the first plugin is the one we're interested in
+  // TODO(sloretz) fix Manager API to handle libraries with multiple plugins
+  std::string pluginName = *(pluginNames.begin());
+
+  common::PluginPtr pluginPtr =
+    this->dataPtr->pluginLoader.Instantiate(pluginName);
+  auto sensor = pluginPtr->QueryInterfaceSharedPtr<ignition::sensors::Sensor>();
   if (!sensor)
   {
     ignerr << "Unable to instantiate sensor plugin for [" << fullPath << "]\n";
@@ -183,9 +189,9 @@ ignition::sensors::SensorId Manager::LoadSensorPlugin(
     return NO_SENSOR;
   }
 
-  SensorId id = sensor->Id();
+  ignition::sensors::SensorId id = sensor->Id();
   this->dataPtr->sensors.insert(
-      std::make_pair(id, std::move(sensor)));
+      std::make_pair(id, sensor));
 
   // Shared pointer so others can access plugins
   return id;
