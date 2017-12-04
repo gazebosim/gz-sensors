@@ -20,8 +20,10 @@
 #include <memory>
 #include <string>
 
+#include <ignition/common/PluginMacros.hh>
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
+#include <ignition/rendering/Scene.hh>
 #include <ignition/sensors/ign_sensors_export.hh>
 #include <sdf/sdf.hh>
 
@@ -36,7 +38,6 @@ namespace ignition
     /// \brief forward declarations
     class SensorPrivate;
     class SensorPlugin;
-    class Manager;
 
     /// \brief a base sensor class
     ///
@@ -45,13 +46,22 @@ namespace ignition
     ///   sensors update at the right time.
     class IGN_SENSORS_EXPORT Sensor
     {
-      friend ignition::sensors::Manager;
+      /// \brief Allows using shorter APIS in common::PluginLoader
+      public: IGN_COMMON_SPECIALIZE_INTERFACE(ignition::sensors::Sensor)
 
       /// \brief constructor
       protected: Sensor();
 
       /// \brief destructor
       public: virtual ~Sensor();
+
+      /// \brief Load the sensor with SDF parameters.
+      /// \param[in] _sdf SDF <sensor> or <plugin> inside of <sensor>
+      /// \return true if loading was successful
+      public: virtual bool Load(sdf::ElementPtr _sdf);
+
+      /// \brief Initialize values in the sensor
+      public: virtual bool Init();
 
       /// \brief Force the sensor to generate data
       ///
@@ -67,14 +77,6 @@ namespace ignition
       /// \return true if the update was successfull
       /// \sa SetUpdateRate()
       public: virtual bool Update(const common::Time &_now) = 0;
-
-      /// \brief Initialize the sensor
-      public: void Init(ignition::sensors::Manager *_mgr, SensorId _id);
-
-      /// \brief Load the sensor with SDF parameters.
-      /// \param[in] _sdf SDF <sensor> or <plugin> inside of <sensor>
-      /// \return true if loading was successful
-      public: virtual bool Load(sdf::ElementPtr _sdf);
 
       /// \brief Return the next time the sensor will generate data
       public: common::Time NextUpdateTime() const;
@@ -124,8 +126,17 @@ namespace ignition
       /// \return The sensor's ID.
       public: SensorId Id() const;
 
-      /// \brief Get the sensor manager
-      public: ignition::sensors::Manager *Manager() const;
+      /// \brief Get the SDF used to load this sensor.
+      /// \return Pointer to an SDF element that contains initialization
+      /// information for this sensor.
+      public: sdf::ElementPtr SDF() const;
+
+      /// \brief Set the rendering scene.
+      ///
+      /// A sensor subclass should override this function if the subclass
+      /// needs a pointer to the scene.
+      /// \param[in] _scene Pointer to the scene
+      public: virtual void SetScene(ignition::rendering::ScenePtr _scene);
 
       /// \internal
       /// \brief Data pointer for private data

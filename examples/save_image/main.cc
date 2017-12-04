@@ -18,18 +18,18 @@
 #include <iostream>
 
 #include <ignition/common/Image.hh>
+#include <ignition/common/Console.hh>
 #include <ignition/rendering.hh>
 #include <ignition/sensors.hh>
 
-void OnImageFrame(const ignition::msgs::ImageStamped &_image)
+void OnImageFrame(const ignition::msgs::Image &_image)
 {
   const unsigned char *data = reinterpret_cast<const unsigned char*>(
-      _image.image().data().c_str());
+      _image.data().c_str());
   auto format = static_cast<ignition::common::Image::PixelFormatType>(
-      _image.image().pixel_format());
+      _image.pixel_format());
   ignition::common::Image image;
-  image.SetFromData(data, _image.image().width(), _image.image().height(),
-      format);
+  image.SetFromData(data, _image.width(), _image.height(), format);
   std::cout << "Saving image.png\n";
   image.SavePNG("image.png");
 }
@@ -60,38 +60,26 @@ int main()
   const double hz = 30;
   const std::size_t width = 480;
   const std::size_t height = 320;
-  const std::size_t hfov = 1.05;
+  const std::size_t hfov = IGN_DTOR(60);
   const double near = 0.1;
   const double far = 100;
   const auto format = ignition::common::Image::RGB_INT8;
   sdf::ElementPtr cameraSDF = ignition::sensors::CameraConfig(
       name, topic, hz, width, height, hfov, near, far, format).ToSDF();
 
-  // Load the sensor in the manager
-  auto sensorIds = mgr.LoadSensor(cameraSDF);
+  // Create a CameraSensor
+  auto cameraSensor = mgr.CreateSensor<ignition::sensors::CameraSensor>(
+      cameraSDF);
 
-  if (sensorIds.empty())
+  if (!cameraSensor)
   {
-    std::cerr << "Failed to load camera sensor\n";
+    ignerr << "Unable to load camera sensor\n";
     return 1;
   }
-
-  // We know the SDF passed in should have created one camera sensor
-  // Cast the sensor to a Camera sensor, and register a callback
-  std::shared_ptr<ignition::sensors::Sensor> sensor = mgr.Sensor(sensorIds[0]);
-
-  if (!sensor)
-  {
-    std::cerr << "Failed to get instance of camera sensor\n";
-    return 1;
-  }
-
-  // Since camera SDF was passed in, it's known that this is a camera
-  std::shared_ptr<ignition::sensors::CameraSensor> cameraSensor =
-    std::static_pointer_cast<ignition::sensors::CameraSensor>(sensor);
 
   // Set a callback on the camera sensor to get a camera frame
-  cameraSensor->SetImageCallback(&OnImageFrame);
+  ignition::common::ConnectionPtr connection =
+    cameraSensor->ConnectImageCallback(&OnImageFrame);
 
   // Force the camera to generate an image
   mgr.RunOnce(ignition::common::Time::Zero, true);

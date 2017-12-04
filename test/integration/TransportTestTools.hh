@@ -42,10 +42,9 @@ class WaitForMessageTestHelper
 
   protected: void OnMessage(const M &_msg)
   {
-    std::unique_lock<std::mutex> lock(this->mtx);
+    std::lock_guard<std::mutex> lock(this->mtx);
     // Set condition variable
     this->gotMessage = true;
-    lock.unlock();
     this->conditionVariable.notify_all();
   }
 
@@ -54,12 +53,11 @@ class WaitForMessageTestHelper
   /// \remarks Set CTest timeout property for control over time
   public: bool WaitForMessage()
   {
+    std::unique_lock<std::mutex> lock(this->mtx);
     if (this->subscriptionCreated)
     {
-      std::unique_lock<std::mutex> lock(this->mtx);
       this->conditionVariable.wait(lock, [this]{return this->gotMessage;});
     }
-    std::unique_lock<std::mutex> lock(this->mtx);
     bool success = this->gotMessage;
     this->gotMessage = false;
     return success;

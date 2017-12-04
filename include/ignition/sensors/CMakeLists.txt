@@ -3,6 +3,7 @@ include (${project_cmake_dir}/Utils.cmake)
 set (headers
   CameraSensor.hh
   CameraConfig.hh
+  Events.hh
   Manager.hh
   Sensor.hh
   System.hh
