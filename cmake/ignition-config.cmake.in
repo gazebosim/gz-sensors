@@ -31,8 +31,13 @@ set(@PKG_NAME@_LDFLAGS      "-L@PACKAGE_LIB_INSTALL_DIR@")
 
 include(CMakeFindDependencyMacro)
 find_dependency(ignition-math4)
-find_dependency(ignition-transport3)
+find_dependency(ignition-transport@IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION@ REQUIRED)
 find_dependency(ignition-rendering0)
 find_dependency(ignition-common0)
 find_dependency(SDFormat 6)
 
+# Specify the doxygen tag file
+set(@PKG_NAME@_DOXYGEN_TAGFILE "@CMAKE_INSTALL_PREFIX@/share/ignition/@PROJECT_NAME_LOWER@_@PROJECT_MINOR_VERSION@/@PROJECT_NAME_LOWER@.tag.xml")
+
+# Specify the API url. This is where the doxygen tag file will resolve URLS to.
+set(@PKG_NAME@_API_URL "https://ignitionrobotics.org/api/@IGN_PROJECT_NAME@/@PROJECT_MAJOR_VERSION@.@PROJECT_MINOR_VERSION@")
