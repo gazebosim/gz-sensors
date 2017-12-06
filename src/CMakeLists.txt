@@ -1,5 +1,7 @@
 include (${project_cmake_dir}/Utils.cmake)
+
 add_subdirectory(camera)
+add_subdirectory(gpu_lidar)
 
 set (sources
   CameraConfig.cc

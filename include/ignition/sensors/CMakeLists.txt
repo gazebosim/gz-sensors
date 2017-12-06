@@ -27,6 +27,10 @@ generate_export_header(${PROJECT_LIBRARY_TARGET_NAME}
 generate_export_header(${PROJECT_LIBRARY_TARGET_NAME}-camera
   BASE_NAME ign_sensors_camera
   EXPORT_FILE_NAME ign_sensors_camera_export.hh)
+generate_export_header(${PROJECT_LIBRARY_TARGET_NAME}-gpu-lidar
+  BASE_NAME ign_sensors_gpu_lidar
+  EXPORT_FILE_NAME ign_sensors_gpu_lidar_export.hh)
+
 
 # Add an Interface library for headers to make propagating properties easier
 add_library(${PROJECT_LIBRARY_TARGET_NAME}_headers INTERFACE)
@@ -40,4 +44,5 @@ ign_install_includes("${INCLUDE_INSTALL_DIR_POSTFIX}/ignition" ${CMAKE_CURRENT_B
 ign_install_includes("${INCLUDE_INSTALL_DIR_POSTFIX}/ignition/${IGN_PROJECT_NAME}"
   ${headers}
   ${CMAKE_CURRENT_BINARY_DIR}/ign_sensors_export.hh
-  ${CMAKE_CURRENT_BINARY_DIR}/ign_sensors_camera_export.hh)
+  ${CMAKE_CURRENT_BINARY_DIR}/ign_sensors_camera_export.hh
+  ${CMAKE_CURRENT_BINARY_DIR}/ign_sensors_gpu_lidar_export.hh)

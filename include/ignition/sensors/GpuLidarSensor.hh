@@ -19,6 +19,7 @@
 
 #include <memory>
 
+#include <ignition/common/Event.hh>
 #include <ignition/sensors/ign_sensors_gpu_lidar_export.hh>
 #include <ignition/sensors/Sensor.hh>
 #include <ignition/msgs.hh>
@@ -57,15 +58,20 @@ namespace ignition
       /// \return true if loading was successful
       public: virtual bool Load(sdf::ElementPtr _sdf) override;
 
-      /// \brief Set a callback to be called when frame data is received
-      ///
-      ///   This callback will be called every time the camera produces image
-      ///   data, but before that data is published to ignition transport.
-      ///   Update() function will be blocked while the callback is running.
+      /// \brief Initialize values in the sensor
+      /// \return True on success
+      public: virtual bool Init() override;
+
+      /// \brief Set a callback to be called when data is generated.
+      /// \param[in] _callback This callback will be called every time the
+      /// sensor generates data. The Update function will be blocked while the
+      /// callbacks are executed.
       /// \remark Do not block inside of the callback.
-      /// \return true if the callback could be set
-      public: bool SetImageCallback(std::function<
-                  void(const ignition::msgs::Image &)> _callback);
+      /// \return A connection pointer that must remain in scope. When the
+      /// connection pointer falls out of scope, the connection is broken.
+      public: ignition::common::ConnectionPtr ConnectCallback(
+                  std::function<
+                  void (const ignition::msgs::LaserScan &)> _callback);
 
       /// \brief Data pointer for private data
       /// \internal
