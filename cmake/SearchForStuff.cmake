@@ -62,9 +62,9 @@ endif()
 
 ################################################################################
 # Ignition common
-find_package(ignition-common0 QUIET)
-if (NOT ignition-common0_FOUND)
-  BUILD_ERROR ("Missing: Ignition Common (libignition-common0-dev)")
+find_package(ignition-common1 QUIET)
+if (NOT ignition-common1_FOUND)
+  BUILD_ERROR ("Missing: Ignition Common (libignition-common-dev)")
 else()
   message (STATUS "Found Ignition Common")
 endif()
@@ -83,7 +83,7 @@ endif()
 
 #################################################
 # Macro to check for visibility capability in compiler
-# Original idea from: https://gitorious.org/ferric-cmake-stuff/ 
+# Original idea from: https://gitorious.org/ferric-cmake-stuff/
 macro (check_gcc_visibility)
   include (CheckCXXCompilerFlag)
   check_cxx_compiler_flag(-fvisibility=hidden GCC_SUPPORTS_VISIBILITY)
