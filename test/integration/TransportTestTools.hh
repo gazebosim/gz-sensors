@@ -14,7 +14,6 @@
  * limitations under the License.
  *
 */
-
 #ifndef TEST_INTEGRATION_TRANSPORTTESTTOOLS_HH_
 #define TEST_INTEGRATION_TRANSPORTTESTTOOLS_HH_
 
