@@ -24,7 +24,7 @@ Events::sceneEvent;
 
 /////////////////////////////////////////////////
 ignition::common::ConnectionPtr Events::ConnectSceneChangeCallback(
-    std::function<void (const ignition::rendering::ScenePtr &)> _callback)
+    std::function<void(const ignition::rendering::ScenePtr &)> _callback)
 {
   return sceneEvent.Connect(_callback);
 }

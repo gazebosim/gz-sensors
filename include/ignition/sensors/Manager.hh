@@ -26,8 +26,8 @@
 #include <ignition/common/Console.hh>
 #include <ignition/rendering/Scene.hh>
 #include <ignition/sensors/config.hh>
+#include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Sensor.hh>
-#include <ignition/sensors/ign_sensors_export.hh>
 
 namespace ignition
 {
@@ -50,7 +50,7 @@ namespace ignition
     ///   be in the <plugin> tag of the sdf::Element. The manager will
     ///   dynamically load the sensor library and update it.
     /// \remarks This class is not thread safe.
-    class IGN_SENSORS_EXPORT Manager
+    class IGNITION_SENSORS_VISIBLE Manager
     {
       /// \brief constructor
       public: Manager();

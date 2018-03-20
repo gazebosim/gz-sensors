@@ -45,7 +45,7 @@ TEST(Manager, removeSensor)
 
   EXPECT_FALSE(mgr.Remove(ignition::sensors::NO_SENSOR));
 
-  // TODO Add a sensor, then remove it
+  // \todo(nkoenig) Add a sensor, then remove it
 }
 
 //////////////////////////////////////////////////
