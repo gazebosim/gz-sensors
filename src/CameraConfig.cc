@@ -16,6 +16,7 @@
 */
 
 #include <ignition/sensors/CameraConfig.hh>
+#include <ignition/common/Image.hh>
 
 #include <random>
 #include <sstream>
@@ -279,6 +280,8 @@ sdf::ElementPtr CameraConfig::ToSDF()
     << "     <image>"
     << "      <width>" << this->dataPtr->width << "</width>"
     << "      <height>" << this->dataPtr->height << "</height>"
+    << "      <format>"
+    << ignition::common::PixelFormatNames[this->dataPtr->format] << "</format>"
     << "     </image>"
     << "     <clip>"
     << "      <near>" << this->dataPtr->near << "</near>"

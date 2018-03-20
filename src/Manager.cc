@@ -15,31 +15,16 @@
  *
 */
 
-#include <atomic>
 #include <unordered_map>
 
 #include <ignition/common/PluginLoader.hh>
+#include <ignition/common/Plugin.hh>
 #include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>
-
-#include "build_config.hh"
+#include "ignition/sensors/Events.hh"
 #include "ignition/sensors/Manager.hh"
 
 using namespace ignition::sensors;
-
-
-struct PluginDescription
-{
-  /// \brief Name of a plugin to load
-  public: std::string name;
-
-  /// \brief Library name of a plugin to load
-  public: std::string fileName;
-
-  /// \brief element pointer for plugin config data
-  public: sdf::ElementPtr element;
-};
-
 
 class ignition::sensors::ManagerPrivate
 {
@@ -49,19 +34,8 @@ class ignition::sensors::ManagerPrivate
   /// \brief destructor
   public: ~ManagerPrivate();
 
-  /// \brief determine which plugins are needed based on an SDF element
-  /// \return the number of plugins needed
-  public: std::vector<PluginDescription> DetermineRequiredPlugins(
-              sdf::ElementPtr _sdf);
-
-  /// \brief load a plugin and return a shared_ptr
-  public: std::shared_ptr<Sensor> LoadPlugin(const PluginDescription &_desc);
-
-  /// \brief loaded sensors by id
-  public: std::unordered_map<SensorId, std::shared_ptr<Sensor>> sensors;
-
-  /// \brief next sensor id to be used
-  public: SensorId nextId = 1;
+  /// \brief Loaded sensors.
+  public: std::map<SensorId, std::shared_ptr<Sensor>> sensors;
 
   /// \brief Ignition Rendering manager
   public: ignition::rendering::ScenePtr renderingScene;
@@ -70,9 +44,8 @@ class ignition::sensors::ManagerPrivate
   public: ignition::common::SystemPaths systemPaths;
 
   /// \brief Instance used to load plugins
-  public: ignition::common::PluginLoader pl;
+  public: ignition::common::PluginLoader pluginLoader;
 };
-
 
 //////////////////////////////////////////////////
 ManagerPrivate::ManagerPrivate()
@@ -82,81 +55,6 @@ ManagerPrivate::ManagerPrivate()
 //////////////////////////////////////////////////
 ManagerPrivate::~ManagerPrivate()
 {
-}
-
-//////////////////////////////////////////////////
-std::shared_ptr<Sensor> ManagerPrivate::LoadPlugin(
-    const PluginDescription &_desc)
-{
-  auto fullPath = this->systemPaths.FindSharedLibrary(_desc.fileName);
-  if (fullPath.empty())
-    return false;
-
-  auto pluginName = pl.LoadLibrary(fullPath);
-  if (pluginName.empty())
-    return false;
-
-  auto instance = pl.Instantiate<Sensor>(pluginName);
-  if (!instance)
-    return false;
-
-  // Shared pointer so others can access plugins
-  std::shared_ptr<Sensor> sharedInst = std::move(instance);
-  return sharedInst;
-}
-
-//////////////////////////////////////////////////
-std::vector<PluginDescription> ManagerPrivate::DetermineRequiredPlugins(
-    sdf::ElementPtr _sdf)
-{
-  std::vector<PluginDescription> pluginDescriptions;
-  // Get info about plugins
-  if (_sdf && _sdf->HasElement("plugin"))
-  {
-    sdf::ElementPtr pluginElem = _sdf->GetElement("plugin");
-    while (pluginElem)
-    {
-      PluginDescription desc;
-      desc.name = pluginElem->Get<std::string>("name");
-      desc.fileName = pluginElem->Get<std::string>("filename");
-      desc.element = pluginElem;
-      pluginDescriptions.push_back(desc);
-      pluginElem = pluginElem->GetNextElement("plugin");
-    }
-  }
-
-  // Load built-in plugins for sensors which are defined by SDFormat
-  // ONLY IF there is no plugin already defined
-  if (pluginDescriptions.empty())
-  {
-    const std::vector<std::pair<std::string, std::string>> builtinPlugins = {
-      {"camera", IGN_SENSORS_LIBRARY("camera")},
-      {"altimeter", IGN_SENSORS_LIBRARY("altimeter")},
-      {"contact", IGN_SENSORS_LIBRARY("contact")},
-      {"gps", IGN_SENSORS_LIBRARY("gps")},
-      {"imu", IGN_SENSORS_LIBRARY("imu")},
-      {"logical_camera", IGN_SENSORS_LIBRARY("logical-camera")},
-      {"magnetometer", IGN_SENSORS_LIBRARY("magnetometer")},
-      {"ray", IGN_SENSORS_LIBRARY("ray")},
-      {"sonar", IGN_SENSORS_LIBRARY("sonar")},
-      {"transceiver", IGN_SENSORS_LIBRARY("transceiver")},
-      {"force_torque", IGN_SENSORS_LIBRARY("force-torque")},
-    };
-
-    for (auto builtin : builtinPlugins)
-    {
-      if (_sdf && _sdf->HasElement(builtin.first))
-      {
-        sdf::ElementPtr pluginElem = _sdf->GetElement(builtin.first);
-        PluginDescription desc;
-        desc.name = _sdf->Get<std::string>("name");
-        desc.fileName = builtin.second;
-        desc.element = _sdf;
-        pluginDescriptions.push_back(desc);
-      }
-    }
-  }
-  return pluginDescriptions;
 }
 
 //////////////////////////////////////////////////
@@ -175,7 +73,6 @@ Manager::~Manager()
 //////////////////////////////////////////////////
 bool Manager::Init()
 {
-  this->dataPtr = std::make_unique<ManagerPrivate>();
   return true;
 }
 
@@ -200,6 +97,7 @@ bool Manager::Init(ignition::rendering::ScenePtr _rendering)
 void Manager::SetRenderingScene(ignition::rendering::ScenePtr _rendering)
 {
   this->dataPtr->renderingScene = _rendering;
+  Events::sceneEvent(this->dataPtr->renderingScene);
 }
 
 //////////////////////////////////////////////////
@@ -209,39 +107,11 @@ ignition::rendering::ScenePtr Manager::RenderingScene() const
 }
 
 //////////////////////////////////////////////////
-std::shared_ptr<ignition::sensors::Sensor> Manager::Sensor(
-          ignition::sensors::SensorId _id)
+ignition::sensors::Sensor *Manager::Sensor(
+    ignition::sensors::SensorId _id)
 {
-  auto map_pair = this->dataPtr->sensors.find(_id);
-  if (map_pair == this->dataPtr->sensors.end())
-    return std::shared_ptr<ignition::sensors::Sensor>();
-  return map_pair->second;
-}
-
-//////////////////////////////////////////////////
-std::vector<ignition::sensors::SensorId> Manager::LoadSensor(
-    sdf::ElementPtr &_sdf)
-{
-  std::vector<ignition::sensors::SensorId> sensorIds;
-  auto pluginDescriptions = this->dataPtr->DetermineRequiredPlugins(_sdf);
-  for (auto const &desc : pluginDescriptions)
-  {
-    auto sharedInst = this->dataPtr->LoadPlugin(desc);
-    if (!sharedInst)
-    {
-      continue;
-    }
-
-    ignition::sensors::SensorId id = this->dataPtr->nextId;
-    sharedInst->Init(this, id);
-    if (sharedInst->Load(desc.element))
-    {
-      ++(this->dataPtr->nextId);
-      this->dataPtr->sensors[id] = sharedInst;
-      sensorIds.push_back(id);
-    }
-  }
-  return sensorIds;
+  auto iter = this->dataPtr->sensors.find(_id);
+  return iter != this->dataPtr->sensors.end() ? iter->second.get() : nullptr;
 }
 
 //////////////////////////////////////////////////
@@ -269,5 +139,81 @@ void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 ignition::sensors::SensorId Manager::SensorId(const std::string &_name)
 {
   // TODO find sensor id given sensor name
+  return NO_SENSOR;
+}
+
+//////////////////////////////////////////////////
+ignition::sensors::SensorId Manager::LoadSensorPlugin(
+    const std::string &_filename, sdf::ElementPtr _sdf)
+{
+  std::string fullPath =
+    this->dataPtr->systemPaths.FindSharedLibrary(_filename);
+  if (fullPath.empty())
+  {
+    ignerr << "Unable to find sensor plugin path for [" << _filename << "]\n";
+    return NO_SENSOR;
+  }
+
+  auto pluginNames = this->dataPtr->pluginLoader.LoadLibrary(fullPath);
+  if (pluginNames.empty())
+  {
+    ignerr << "Unable to load sensor plugin file for [" << fullPath << "]\n";
+    return NO_SENSOR;
+  }
+
+  // Assume the first plugin is the one we're interested in
+  // TODO(sloretz) fix Manager API to handle libraries with multiple plugins
+  std::string pluginName = *(pluginNames.begin());
+
+  common::PluginPtr pluginPtr =
+    this->dataPtr->pluginLoader.Instantiate(pluginName);
+  auto sensor = pluginPtr->QueryInterfaceSharedPtr<ignition::sensors::Sensor>();
+  if (!sensor)
+  {
+    ignerr << "Unable to instantiate sensor plugin for [" << fullPath << "]\n";
+    return NO_SENSOR;
+  }
+
+  // Set the rendering scene
+  sensor->SetScene(this->dataPtr->renderingScene);
+
+  if (!sensor->Load(_sdf))
+  {
+    ignerr << "Sensor::Load failed for plugin [" << fullPath << "]\n";
+    return NO_SENSOR;
+  }
+
+  if (!sensor->Init())
+  {
+    ignerr << "Sensor::Init failed for plugin [" << fullPath << "]\n";
+    return NO_SENSOR;
+  }
+
+  ignition::sensors::SensorId id = sensor->Id();
+  this->dataPtr->sensors.insert(
+      std::make_pair(id, sensor));
+
+  // Shared pointer so others can access plugins
+  return id;
+}
+
+/////////////////////////////////////////////////
+ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr _sdf)
+{
+  if (_sdf)
+  {
+    if (_sdf->GetName() == "sensor")
+    {
+      std::string type = _sdf->Get<std::string>("type");
+      return this->LoadSensorPlugin(IGN_SENSORS_LIBRARY(type), _sdf);
+    }
+    /// \todo: Add in plugin support when SDF is updated.
+    else
+    {
+      ignerr << "Provided SDF is not a <sensor> element.\n";
+      return NO_SENSOR;
+    }
+  }
+
   return NO_SENSOR;
 }

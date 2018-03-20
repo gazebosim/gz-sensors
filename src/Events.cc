@@ -15,11 +15,17 @@
  *
 */
 
+#include "ignition/sensors/Events.hh"
 
-#ifndef IGNITION_SENSORS_BUILD_CONFIG_HH_
-#define IGNITION_SENSORS_BUILD_CONFIG_HH_
+using namespace ignition::sensors;
 
-#define IGN_SENSORS_LIBRARY(name) "@PROJECT_LIBRARY_TARGET_NAME@-" name
-#define IGN_SENSORS_LIB_INSTALL_DIR "@CMAKE_INSTALL_PREFIX@/@LIB_INSTALL_DIR@"
+ignition::common::EventT<void(const ignition::rendering::ScenePtr &)>
+Events::sceneEvent;
 
-#endif
+/////////////////////////////////////////////////
+ignition::common::ConnectionPtr Events::ConnectSceneChangeCallback(
+    std::function<void (const ignition::rendering::ScenePtr &)> _callback)
+{
+  return sceneEvent.Connect(_callback);
+}
+

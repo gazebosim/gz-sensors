@@ -31,9 +31,9 @@ set(@PKG_NAME@_LDFLAGS      "-L@PACKAGE_LIB_INSTALL_DIR@")
 
 include(CMakeFindDependencyMacro)
 find_dependency(ignition-math4)
-find_dependency(ignition-transport3)
+find_dependency(ignition-transport@IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION@ REQUIRED)
 find_dependency(ignition-rendering0)
-find_dependency(ignition-common0)
+find_dependency(ignition-common1)
 find_dependency(SDFormat 6)
 
 # Specify the doxygen tag file

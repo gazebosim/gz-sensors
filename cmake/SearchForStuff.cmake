@@ -34,11 +34,21 @@ endif()
 
 ################################################################################
 # Ignition transport
-find_package(ignition-transport3 QUIET)
-if (NOT ignition-transport3_FOUND)
-  BUILD_ERROR ("Missing: Ignition transport (libignition-transport3-dev)")
-else()
-  message (STATUS "Found Ignition transport")
+set(IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION 4)
+if (NOT DEFINED IGNITION-TRANSPORT_LIBRARY_DIRS AND NOT DEFINED IGNITION-TRANSPORT_INCLUDE_DIRS AND NOT DEFINED IGNITION-TRANSPORT_LIBRARIES)
+  find_package(ignition-transport${IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION} QUIET)
+  if (NOT ignition-transport${IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION}_FOUND)
+    message(STATUS "Looking for ignition-transport${IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION}-config.cmake - not found, trying ignition-transport3 instead")
+    set(IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION 3)
+    find_package(ignition-transport3 QUIET)
+    if (NOT ignition-transport3_FOUND)
+      BUILD_ERROR ("Missing: Ignition transport4 and Ignition transport3 library.")
+    else()
+      message (STATUS "Found Ignition Transport${IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION}")
+    endif()
+  else()
+      message (STATUS "Found Ignition Transport${IGNITION-TRANSPORT_REQUIRED_MAJOR_VERSION}")
+  endif()
 endif()
 
 ################################################################################
@@ -52,9 +62,9 @@ endif()
 
 ################################################################################
 # Ignition common
-find_package(ignition-common0 QUIET)
-if (NOT ignition-common0_FOUND)
-  BUILD_ERROR ("Missing: Ignition Common (libignition-common0-dev)")
+find_package(ignition-common1 QUIET)
+if (NOT ignition-common1_FOUND)
+  BUILD_ERROR ("Missing: Ignition Common (libignition-common-dev)")
 else()
   message (STATUS "Found Ignition Common")
 endif()
@@ -73,7 +83,7 @@ endif()
 
 #################################################
 # Macro to check for visibility capability in compiler
-# Original idea from: https://gitorious.org/ferric-cmake-stuff/ 
+# Original idea from: https://gitorious.org/ferric-cmake-stuff/
 macro (check_gcc_visibility)
   include (CheckCXXCompilerFlag)
   check_cxx_compiler_flag(-fvisibility=hidden GCC_SUPPORTS_VISIBILITY)
