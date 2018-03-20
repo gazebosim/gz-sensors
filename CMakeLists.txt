@@ -18,7 +18,7 @@ ign_configure_project()
 #============================================================================
 # Set project-specific options
 #============================================================================
-
+set (DRI_TESTS TRUE CACHE BOOL "True to enable DRI tests")
 
 #============================================================================
 # Search for project-specific dependencies

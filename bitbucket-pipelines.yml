@@ -44,7 +44,6 @@ pipelines:
           # Ignition sensors
           - mkdir build
           - cd build
-          - cmake .. -DCMAKE_BUILD_TYPE=coverage
+          - cmake .. -DCMAKE_BUILD_TYPE=coverage -DDRI_TESTS=FALSE
           - make -j4 install
-          #- make test
-          - ./bin/INTEGRATION_camera_plugin
+          - make test
