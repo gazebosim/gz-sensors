@@ -55,7 +55,7 @@ endif()
 
 #################################################
 # Documentation:
-add_subdirectory(doc)
+# add_subdirectory(doc)
 
 # Configure documentation uploader
 configure_file("${project_cmake_dir}/upload_doc.sh.in"
