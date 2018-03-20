@@ -45,5 +45,5 @@ pipelines:
           - mkdir build
           - cd build
           - cmake .. -DCMAKE_BUILD_TYPE=coverage
-          - make -j4
+          - make -j4 install
           - make test
