@@ -46,5 +46,5 @@ pipelines:
           - cd build
           - cmake .. -DCMAKE_BUILD_TYPE=coverage
           - make -j4 install
-          - make test
+          # - make test
           - ./bin/INTEGRATION_camera_plugin
