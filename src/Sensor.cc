@@ -166,7 +166,7 @@ const std::string &Sensor::Topic() const
 }
 
 //////////////////////////////////////////////////
-const void Sensor::SetPose(const ignition::math::Pose3d &_pose)
+void Sensor::SetPose(const ignition::math::Pose3d &_pose)
 {
   this->dataPtr->pose = _pose;
 }

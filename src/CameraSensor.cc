@@ -15,26 +15,39 @@
  *
 */
 
+#include <cstdint>
 #include <mutex>
+#include <string>
 #include <ignition/sensors/CameraSensor.hh>
 
 #include <ignition/common/Console.hh>
+#include <ignition/common/Image.hh>
 #include <ignition/common/PluginMacros.hh>
 #include <ignition/math/Angle.hh>
 #include <ignition/rendering/Camera.hh>
 #include <ignition/transport.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/Events.hh>
-#include "src/camera/ImageSaver.hh"
 
 using namespace ignition::sensors;
-
 
 /// \brief Private data for CameraSensor
 class ignition::sensors::CameraSensorPrivate
 {
   /// \brief Remove a camera from a scene
   public: void RemoveCamera(ignition::rendering::ScenePtr _scene);
+
+  /// \brief Save an image
+  /// \param[in] _data the image data to be saved
+  /// \param[in] _width width of image in pixels
+  /// \param[in] _height height of image in pixels
+  /// \param[in] _format The format the data is in
+  /// \return True if the image was saved successfully. False can mean
+  /// that the path provided to the constructor does exist and creation
+  /// of the path was not possible.
+  /// \sa ImageSaver
+  public: bool SaveImage(const unsigned char *_data, unsigned int _width,
+    unsigned int _height, common::Image::PixelFormatType _format);
 
   /// \brief node to create publisher
   public: transport::Node node;
@@ -54,19 +67,28 @@ class ignition::sensors::CameraSensorPrivate
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
 
-  /// \brief A class to manage saving images to disk
-  public: std::unique_ptr<ImageSaver> saver;
-
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
   public: ignition::common::EventT<
-          void (const ignition::msgs::Image &)> imageEvent;
+          void(const ignition::msgs::Image &)> imageEvent;
 
   /// \brief Connection to the Manager's scene change event.
   public: ignition::common::ConnectionPtr sceneChangeConnection;
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
+
+  /// \brief True to save images
+  public: bool saveImage = false;
+
+  /// \brief path directory to where images are saved
+  public: std::string saveImagePath = "";
+
+  /// \prefix of an image name
+  public: std::string saveImagePrefix = "";
+
+  /// \brief counter used to set the image filename
+  public: std::uint64_t saveImageCounter = 0;
 };
 
 //////////////////////////////////////////////////
@@ -136,10 +158,12 @@ bool CameraSensor::CreateCamera()
       cameraElem->GetElement("save")->Get<bool>("enabled"))
   {
     sdf::ElementPtr elem = cameraElem->GetElement("save");
-    std::string path = elem->Get<std::string>("path");
-    std::string prefix = this->Name() + "_";
-    this->dataPtr->saver.reset(new ImageSaver(path, prefix));
+    this->dataPtr->saveImagePath = elem->Get<std::string>("path");
+    this->dataPtr->saveImagePrefix = this->Name() + "_";
+    this->dataPtr->saveImage = true;
   }
+
+  return true;
 }
 
 //////////////////////////////////////////////////
@@ -292,11 +316,35 @@ bool CameraSensor::Update(const common::Time &_now)
   }
 
   // Save image
-  if (this->dataPtr->saver)
+  if (this->dataPtr->saveImage)
   {
-    this->dataPtr->saver->SaveImage(data, width, height, format);
+    this->dataPtr->SaveImage(data, width, height, format);
   }
 
+  return true;
+}
+
+//////////////////////////////////////////////////
+bool CameraSensorPrivate::SaveImage(const unsigned char *_data,
+    unsigned int _width, unsigned int _height,
+    common::Image::PixelFormatType _format)
+{
+  // Attempt to create the directory if it doesn't exist
+  if (!ignition::common::isDirectory(this->saveImagePath))
+  {
+    if (!ignition::common::createDirectories(this->saveImagePath))
+      return false;
+  }
+
+  std::string filename = this->saveImagePrefix +
+                         std::to_string(this->saveImageCounter) + ".png";
+  ++this->saveImageCounter;
+
+  ignition::common::Image localImage;
+  localImage.SetFromData(_data, _width, _height, _format);
+
+  localImage.SavePNG(
+      ignition::common::joinPaths(this->saveImagePath, filename));
   return true;
 }
 

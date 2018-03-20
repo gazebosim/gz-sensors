@@ -40,7 +40,7 @@ class WaitForMessageTestHelper
       this->diagnostics = "Failed to create subscription to " + _topic;
   }
 
-  protected: void OnMessage(const M &_msg)
+  protected: void OnMessage(const M &/*_msg*/)
   {
     std::lock_guard<std::mutex> lock(this->mtx);
     // Set condition variable

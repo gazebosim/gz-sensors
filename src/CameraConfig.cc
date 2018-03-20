@@ -69,7 +69,7 @@ std::string randomString(std::size_t _num)
   std::default_random_engine generator;
   std::uniform_int_distribution<int> distribution(0, sizeof(lut));
   std::string out(_num, 'X');
-  for (int i = 0; i < _num; ++i)
+  for (std::size_t i = 0; i < _num; ++i)
   {
     out[i] = lut[distribution(generator)];
   }

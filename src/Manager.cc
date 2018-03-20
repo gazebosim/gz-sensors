@@ -23,6 +23,7 @@
 #include <ignition/common/Console.hh>
 #include "ignition/sensors/Events.hh"
 #include "ignition/sensors/Manager.hh"
+#include "ignition/sensors/config.hh"
 
 using namespace ignition::sensors;
 
@@ -62,7 +63,7 @@ Manager::Manager() :
   dataPtr(new ManagerPrivate)
 {
   // Search for plugins in directory where libraries were installed
-  this->dataPtr->systemPaths.AddPluginPaths(IGN_SENSORS_LIB_INSTALL_DIR);
+  this->dataPtr->systemPaths.AddPluginPaths(IGN_SENSORS_PLUGIN_PATH);
 }
 
 //////////////////////////////////////////////////
@@ -136,7 +137,7 @@ void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 }
 
 //////////////////////////////////////////////////
-ignition::sensors::SensorId Manager::SensorId(const std::string &_name)
+ignition::sensors::SensorId Manager::SensorId(const std::string & /*_name*/)
 {
   // TODO find sensor id given sensor name
   return NO_SENSOR;
@@ -205,7 +206,7 @@ ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr _sdf)
     if (_sdf->GetName() == "sensor")
     {
       std::string type = _sdf->Get<std::string>("type");
-      return this->LoadSensorPlugin(IGN_SENSORS_LIBRARY(type), _sdf);
+      return this->LoadSensorPlugin(IGN_SENSORS_PLUGIN_NAME(type), _sdf);
     }
     /// \todo: Add in plugin support when SDF is updated.
     else

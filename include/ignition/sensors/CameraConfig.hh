@@ -22,8 +22,8 @@
 
 #include <ignition/common/Image.hh>
 #include <ignition/msgs.hh>
-#include <ignition/sensors/ign_sensors_export.hh>
 #include <sdf/sdf.hh>
+#include <ignition/sensors/Export.hh>
 
 namespace ignition
 {
@@ -39,7 +39,7 @@ namespace ignition
     ///   To use it, populate the class with the desired configuration. Then
     ///   call ToSDF() to get sdformat representing that configuration. Finally
     ///   pass the sdf element to Manager::Load() to create a camera sensor.
-    class IGN_SENSORS_EXPORT CameraConfig
+    class IGNITION_SENSORS_VISIBLE CameraConfig
     {
       /// \brief Constructor with initial values
       /// \param[in] _name Name of the camera sensor
