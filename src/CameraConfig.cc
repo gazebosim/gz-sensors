@@ -221,7 +221,7 @@ bool CameraConfig::SetClip(double _near, double _far)
     return false;
 
   this->dataPtr->near = _near;
-  this->dataPtr->far =_far;
+  this->dataPtr->far = _far;
   return true;
 }
 
@@ -265,7 +265,7 @@ ignition::common::Image::PixelFormatType CameraConfig::Format() const
 //////////////////////////////////////////////////
 sdf::ElementPtr CameraConfig::ToSDF()
 {
-  // TODO output pixel format to SDF
+  // \todo(nkoenig) output pixel format to SDF
   std::ostringstream stream;
   stream
     << "<?xml version='1.0'?>"

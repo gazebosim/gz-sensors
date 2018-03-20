@@ -116,7 +116,7 @@ bool CameraSensor::CreateCamera()
   this->dataPtr->camera->SetImageWidth(width);
   this->dataPtr->camera->SetImageHeight(height);
 
-  // TODO these parameters via sdf
+  // \todo(nkoeng) these parameters via sdf
   this->dataPtr->camera->SetAntiAliasing(2);
 
   auto angle = cameraElem->Get<double>("horizontal_fov", 0);
@@ -131,7 +131,7 @@ bool CameraSensor::CreateCamera()
 
   if (cameraElem->HasElement("distortion"))
   {
-    // TODO Port Distortion class
+    // \todo(nkoenig) Port Distortion class
     // This->dataPtr->distortion.reset(new Distortion());
     // This->dataPtr->distortion->Load(this->sdf->GetElement("distortion"));
   }
@@ -171,7 +171,7 @@ void CameraSensorPrivate::RemoveCamera(ignition::rendering::ScenePtr _scene)
 {
   if (_scene)
   {
-    // TODO Remove camera from scene!
+    // \todo(nkoenig) Remove camera from scene!
   }
   this->camera = nullptr;
 }

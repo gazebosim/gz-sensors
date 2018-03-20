@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_CAMERA_CAMERASENSOR_HH_
-#define IGNITION_SENSORS_CAMERA_CAMERASENSOR_HH_
+#ifndef IGNITION_SENSORS_CAMERASENSOR_HH_
+#define IGNITION_SENSORS_CAMERASENSOR_HH_
 
 #include <memory>
 

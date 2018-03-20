@@ -60,15 +60,17 @@ bool SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
   // All SDF code gets auto converted to latest version. This code is
   // written assuming sdformat 1.6 is the latest
 
-  // TODO what to do with <always_on>? SDFormat docs seem to say if true
+  // \todo(nkoenig) what to do with <always_on>? SDFormat docs seem
+  // to say if true
   //  then the update_rate will be obeyed. Gazebo seems to use it as if
   //  true means enable the sensor at startup.
 
-  // TODO what to do with <visualize>? ign-sensor data is meant to create
+  // \todo(nkoenig) what to do with <visualize>? ign-sensor data is meant to
+  // create
   // sensor data. Whether or not that data should be visualized seems to
   // be outside the scope of this library
 
-  // TODO how to use frame?
+  // \todo(nkoenig) how to use frame?
 
   if (!_sdf)
   {
