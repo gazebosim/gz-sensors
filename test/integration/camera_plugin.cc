@@ -49,8 +49,7 @@ TEST(CameraPlugin, imagesWithBuiltinSDF)
   // do the test
   ignition::sensors::Manager mgr;
   mgr.SetRenderingScene(scene);
-  mgr.AddPluginPaths(ignition::common::joinPaths(
-        PROJECT_BUILD_DIR, "src", "camera"));
+  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_DIR, "lib"));
 
   auto *sensor = mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
   ASSERT_NE(sensor, nullptr);
