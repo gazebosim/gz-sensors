@@ -25,13 +25,10 @@
 
 #include <ignition/math/Rand.hh>
 
-#include "gazebo/sensors/Noise.hh"
-#include "gazebo/sensors/GaussianNoiseModel.hh"
-#include "test/util.hh"
+#include "ignition/sensors/Noise.hh"
+#include "ignition/sensors/GaussianNoiseModel.hh"
 
-using namespace gazebo;
-
-class NoiseTest : public gazebo::testing::AutoLogFixture { };
+using namespace ignition;
 
 const unsigned int g_applyCount = 100;
 
@@ -63,7 +60,7 @@ sdf::ElementPtr NoiseSdf(const std::string &_type, double _mean,
 
 //////////////////////////////////////////////////
 // Test constructor
-TEST_F(NoiseTest, Constructor)
+TEST(NoiseTest, Constructor)
 {
   // Construct and nothing else
   {
@@ -79,7 +76,7 @@ TEST_F(NoiseTest, Constructor)
 
 //////////////////////////////////////////////////
 // Test noise types
-TEST_F(NoiseTest, Types)
+TEST(NoiseTest, Types)
 {
   // NONE type
   {
@@ -161,7 +158,7 @@ void GaussianNoise(sensors::NoisePtr _noise, unsigned int _count)
 
 //////////////////////////////////////////////////
 // Test noise application
-TEST_F(NoiseTest, ApplyNone)
+TEST(NoiseTest, ApplyNone)
 {
   sensors::NoisePtr noise = sensors::NoiseFactory::NewNoiseModel(
       NoiseSdf("none", 0, 0, 0, 0, 0));
@@ -169,7 +166,7 @@ TEST_F(NoiseTest, ApplyNone)
   NoNoise(noise, g_applyCount);
 }
 
-TEST_F(NoiseTest, ApplyGaussian)
+TEST(NoiseTest, ApplyGaussian)
 {
   double mean, stddev, biasMean, biasStddev;
 
@@ -240,7 +237,7 @@ TEST_F(NoiseTest, ApplyGaussian)
   }
 }
 
-TEST_F(NoiseTest, ApplyGaussianQuantized)
+TEST(NoiseTest, ApplyGaussianQuantized)
 {
   double mean, stddev, biasMean, biasStddev, precision;
 
@@ -355,7 +352,7 @@ double OnApplyCustomNoise(double _in)
   return _in*2;
 }
 
-TEST_F(NoiseTest, OnApplyNoise)
+TEST(NoiseTest, OnApplyNoise)
 {
   // Verify that the custom callback function is called if noise type is
   // set to CUSTOM

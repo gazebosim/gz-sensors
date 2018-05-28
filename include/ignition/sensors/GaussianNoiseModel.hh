@@ -15,24 +15,24 @@
  *
 */
 
-#ifndef _GAZEBO_GAUSSIAN_NOISE_MODEL_HH_
-#define _GAZEBO_GAUSSIAN_NOISE_MODEL_HH_
+#ifndef _IGNITION_GAUSSIAN_NOISE_MODEL_HH_
+#define _IGNITION_GAUSSIAN_NOISE_MODEL_HH_
 
 #include <vector>
 #include <string>
 
 #include <sdf/sdf.hh>
 
-#include "gazebo/rendering/RenderTypes.hh"
-#include "gazebo/sensors/Noise.hh"
-#include "gazebo/util/system.hh"
+#include "ignition/rendering/RenderTypes.hh"
+#include "ignition/sensors/Noise.hh"
+#include <ignition/sensors/Export.hh>
 
 namespace Ogre
 {
   class CompositorInstance;
 }
 
-namespace gazebo
+namespace ignition
 {
   class GaussianNoiseCompositorListener;
 
@@ -40,7 +40,7 @@ namespace gazebo
   {
     /// \class GaussianNoiseModel
     /// \brief Gaussian noise class
-    class GZ_SENSORS_VISIBLE GaussianNoiseModel : public Noise
+    class IGNITION_SENSORS_VISIBLE GaussianNoiseModel : public Noise
     {
         /// \brief Constructor.
         public: GaussianNoiseModel();
@@ -93,7 +93,7 @@ namespace gazebo
 
     /// \class GaussianNoiseModel
     /// \brief Gaussian noise class for image sensors
-    class GZ_SENSORS_VISIBLE ImageGaussianNoiseModel : public GaussianNoiseModel
+    class IGNITION_SENSORS_VISIBLE ImageGaussianNoiseModel : public GaussianNoiseModel
     {
       /// \brief Constructor.
       public: ImageGaussianNoiseModel();
@@ -117,8 +117,8 @@ namespace gazebo
       public: Ogre::CompositorInstance *gaussianNoiseInstance;
 
       /// \brief Gaussian noise compositor listener
-      public: boost::shared_ptr<GaussianNoiseCompositorListener>
-        gaussianNoiseCompositorListener;
+      //public: boost::shared_ptr<GaussianNoiseCompositorListener>
+      //  gaussianNoiseCompositorListener;
     };
     /// \}
   }
