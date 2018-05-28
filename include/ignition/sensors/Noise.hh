@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_NOISE_HH_
-#define _GAZEBO_NOISE_HH_
+#ifndef _IGNITION_NOISE_HH_
+#define _IGNITION_NOISE_HH_
 
 #include <vector>
 #include <string>
@@ -24,20 +24,20 @@
 #include <boost/function.hpp>
 #include <sdf/sdf.hh>
 
-#include "gazebo/rendering/RenderTypes.hh"
-#include "gazebo/sensors/SensorTypes.hh"
-#include "gazebo/util/system.hh"
+#include "ignition/rendering/RenderTypes.hh"
+#include "ignition/sensors/SensorTypes.hh"
+#include <ignition/sensors/Export.hh>
 
-namespace gazebo
+namespace ignition
 {
   namespace sensors
   {
-    /// \addtogroup gazebo_sensors
+    /// \addtogroup ignition_sensors
     /// \{
 
     /// \class NoiseFactory Noise.hh sensors/sensors.hh
     /// \brief Use this noise manager for creating and loading noise models.
-    class GZ_SENSORS_VISIBLE NoiseFactory
+    class IGNITION_SENSORS_VISIBLE NoiseFactory
     {
       /// \brief Load a noise model based on the input sdf parameters and
       /// sensor type.
@@ -52,7 +52,7 @@ namespace gazebo
 
     /// \class Noise Noise.hh
     /// \brief Noise models for sensor output signals.
-    class GZ_SENSORS_VISIBLE Noise
+    class IGNITION_SENSORS_VISIBLE Noise
     {
       /// \brief Which noise types we support
       public: enum NoiseType

@@ -23,16 +23,17 @@
 #include <ignition/math/Helpers.hh>
 #include <ignition/math/Rand.hh>
 
-#include "gazebo/common/Assert.hh"
-#include "gazebo/common/Console.hh"
-#include "gazebo/rendering/ogre_gazebo.h"
-#include "gazebo/rendering/Camera.hh"
-#include "gazebo/sensors/GaussianNoiseModel.hh"
+// #include "ignition/common/Assert.hh"
+#include "ignition/common/Console.hh"
+//#include "ignition/rendering/ogre/OgreIncludes.hh"
+#include "ignition/rendering/Camera.hh"
+#include "ignition/sensors/GaussianNoiseModel.hh"
 
-namespace gazebo
+namespace ignition
 {
   // We'll create an instance of this class for each camera, to be used to
   // inject random values on each render call.
+  /*
   class GaussianNoiseCompositorListener
     : public Ogre::CompositorInstance::Listener
   {
@@ -46,7 +47,7 @@ namespace gazebo
     public: virtual void notifyMaterialRender(unsigned int _passId,
                                               Ogre::MaterialPtr &_mat)
     {
-      GZ_ASSERT(!_mat.isNull(), "Null OGRE material");
+      IGN_ASSERT(!_mat.isNull(), "Null OGRE material");
       // modify material here (wont alter the base material!), called for
       // every drawn geometry instance (i.e. compositor render_quad)
 
@@ -61,12 +62,12 @@ namespace gazebo
       //    fragment_program Gazebo/GaussianCameraNoiseFS
       // 2. media/materials/scripts/camera_noise_gaussian_fs.glsl
       Ogre::Technique *technique = _mat->getTechnique(0);
-      GZ_ASSERT(technique, "Null OGRE material technique");
+      IGN_ASSERT(technique, "Null OGRE material technique");
       Ogre::Pass *pass = technique->getPass(_passId);
-      GZ_ASSERT(pass, "Null OGRE material pass");
+      IGN_ASSERT(pass, "Null OGRE material pass");
       Ogre::GpuProgramParametersSharedPtr params =
           pass->getFragmentProgramParameters();
-      GZ_ASSERT(!params.isNull(), "Null OGRE material GPU parameters");
+      IGN_ASSERT(!params.isNull(), "Null OGRE material GPU parameters");
 
       params->setNamedConstant("offsets", offsets);
       params->setNamedConstant("mean", static_cast<Ogre::Real>(this->mean));
@@ -79,9 +80,10 @@ namespace gazebo
     /// shader.
     private: double stddev;
   };
-}  // namespace gazebo
+  */
+}  // namespace ignition
 
-using namespace gazebo;
+using namespace ignition;
 using namespace sensors;
 
 //////////////////////////////////////////////////
@@ -122,7 +124,7 @@ void GaussianNoiseModel::Load(sdf::ElementPtr _sdf)
     this->bias = -this->bias;
 
   /// \todo Remove this, and use Noise::Print. See ImuSensor for an example
-  gzlog << "applying Gaussian noise model with mean " << this->mean
+  ignlog << "applying Gaussian noise model with mean " << this->mean
     << ", stddev " << this->stdDev
     << ", bias " << this->bias << std::endl;
 
@@ -131,7 +133,7 @@ void GaussianNoiseModel::Load(sdf::ElementPtr _sdf)
     this->precision = _sdf->Get<double>("precision");
     if (this->precision < 0)
     {
-      gzerr << "Noise precision cannot be less than 0" << std::endl;
+      ignerr << "Noise precision cannot be less than 0" << std::endl;
     }
     else if (!ignition::math::equal(this->precision, 0.0, 1e-6))
     {
@@ -211,7 +213,8 @@ void ImageGaussianNoiseModel::Load(sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 void ImageGaussianNoiseModel::SetCamera(rendering::CameraPtr _camera)
 {
-  GZ_ASSERT(_camera, "Unable to apply gaussian noise, camera is null");
+  /*
+  IGN_ASSERT(_camera, "Unable to apply gaussian noise, camera is null");
 
   this->gaussianNoiseCompositorListener.reset(new
         GaussianNoiseCompositorListener(this->mean, this->stdDev));
@@ -222,6 +225,7 @@ void ImageGaussianNoiseModel::SetCamera(rendering::CameraPtr _camera)
   this->gaussianNoiseInstance->setEnabled(true);
   this->gaussianNoiseInstance->addListener(
     this->gaussianNoiseCompositorListener.get());
+  */
 }
 
 //////////////////////////////////////////////////
