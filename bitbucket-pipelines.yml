@@ -20,13 +20,13 @@ pipelines:
           - sh tools/code_check.sh
           # Ignition dependencies
           - apt-get -y install
-            libignition-cmake-dev
-            libignition-common-dev
-            libignition-math5-dev
-            libignition-msgs-dev
-            libignition-transport4-dev
             libignition-cmake1-dev
             libignition-common2-dev
+            libignition-math5-dev
+            libignition-msgs2-dev
+            libignition-tools-dev
+            libignition-transport5-dev
+            libignition-cmake1-dev
             libsdformat6-dev
           # Dependency: Ignition cmake
           - hg clone http://bitbucket.org/ignitionrobotics/ign-cmake -b Components

@@ -44,35 +44,28 @@ ign_find_package(IgnProtobuf
 
 #--------------------------------------
 # Find ignition-math
-set(IGN_MATH_VER 4)
-ign_find_package(ignition-math${IGN_MATH_VER} REQUIRED)
+ign_find_package(ignition-math5 REQUIRED)
+set(IGN_MATH_VER ${ignition-math5_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-common
-set(IGN_COMMON_VER 1)
-ign_find_package(ignition-common${IGN_COMMON_VER} REQUIRED)
+ign_find_package(ignition-common2 REQUIRED)
+set(IGN_COMMON_VER ${ignition-common2_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-transport
-set(IGN_TRANSPORT_VER 4)
-ign_find_package(ignition-transport${IGN_TRANSPORT_VER} REQUIRED)
+ign_find_package(ignition-transport5 REQUIRED)
+set(IGN_TRANSPORT_VER ${ignition-transport5_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-rendering
-find_package(ignition-rendering0 QUIET)
-if (NOT ignition-rendering0_FOUND)
-  ign_build_error("Missing: Ignition Rendering libignition-rendering0-dev.")
-else()
-  message (STATUS "Found Ignition Rendering 0")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${IGNITION-RENDERING_CXX_FLAGS}")
-  include_directories(${IGNITION-RENDERING_INCLUDE_DIRS})
-  link_directories(${IGNITION-RENDERING_LIBRARY_DIRS})
-endif()
+ign_find_package(ignition-rendering0 REQUIRED)
+set(IGN_RENDERING_VER ${ignition-rendering0_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-msgs
-set(IGN_MSGS_VER 1)
-ign_find_package(ignition-msgs${IGN_MSGS_VER} REQUIRED)
+ign_find_package(ignition-msgs2 REQUIRED)
+set(IGN_MSGS_VER ${ignition-msgs2_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-tools
