@@ -15,15 +15,17 @@ pipelines:
           - wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -
           - apt-get update
           - apt-get -y install
-            cmake pkg-config cppcheck libogre-1.9-dev libglew-dev libfreeimage-dev doxygen ruby-ronn freeglut3-dev libxmu-dev libxi-dev curl mercurial lcov   
+            cmake pkg-config cppcheck libogre-1.9-dev libglew-dev libfreeimage-dev doxygen ruby-ronn freeglut3-dev libxmu-dev libxi-dev curl mercurial lcov
           - sh tools/code_check.sh
           # Ignition dependencies
           - apt-get -y install
             libignition-cmake-dev
             libignition-common-dev
-            libignition-math4-dev
+            libignition-math5-dev
             libignition-msgs-dev
             libignition-transport4-dev
+            libignition-cmake1-dev
+            libignition-common2-dev
             libsdformat6-dev
           # Dependency: Ignition cmake
           - hg clone http://bitbucket.org/ignitionrobotics/ign-cmake -b Components
