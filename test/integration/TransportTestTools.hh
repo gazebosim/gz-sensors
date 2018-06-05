@@ -14,9 +14,8 @@
  * limitations under the License.
  *
 */
-
-#ifndef IGNITION_SENSORS_TEST_INTEGRATION_TRANSPORTESTTOOLS_HH_
-#define IGNITION_SENSORS_TEST_INTEGRATION_TRANSPORTESTTOOLS_HH_
+#ifndef TEST_INTEGRATION_TRANSPORTTESTTOOLS_HH_
+#define TEST_INTEGRATION_TRANSPORTTESTTOOLS_HH_
 
 #include <condition_variable>
 #include <functional>
@@ -40,7 +39,7 @@ class WaitForMessageTestHelper
       this->diagnostics = "Failed to create subscription to " + _topic;
   }
 
-  protected: void OnMessage(const M &_msg)
+  protected: void OnMessage(const M &/*_msg*/)
   {
     std::lock_guard<std::mutex> lock(this->mtx);
     // Set condition variable

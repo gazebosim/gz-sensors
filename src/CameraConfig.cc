@@ -69,7 +69,7 @@ std::string randomString(std::size_t _num)
   std::default_random_engine generator;
   std::uniform_int_distribution<int> distribution(0, sizeof(lut));
   std::string out(_num, 'X');
-  for (int i = 0; i < _num; ++i)
+  for (std::size_t i = 0; i < _num; ++i)
   {
     out[i] = lut[distribution(generator)];
   }
@@ -221,7 +221,7 @@ bool CameraConfig::SetClip(double _near, double _far)
     return false;
 
   this->dataPtr->near = _near;
-  this->dataPtr->far =_far;
+  this->dataPtr->far = _far;
   return true;
 }
 
@@ -265,7 +265,7 @@ ignition::common::Image::PixelFormatType CameraConfig::Format() const
 //////////////////////////////////////////////////
 sdf::ElementPtr CameraConfig::ToSDF()
 {
-  // TODO output pixel format to SDF
+  // \todo(nkoenig) output pixel format to SDF
   std::ostringstream stream;
   stream
     << "<?xml version='1.0'?>"

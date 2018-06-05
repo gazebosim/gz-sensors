@@ -3,16 +3,41 @@
 # Only use spaces to indent your .yml configuration.
 # -----
 # You can specify a custom docker image from Docker Hub as your build environment.
-image: gcc:6.1
+image: ubuntu:xenial
 
 pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
+          - apt update
+          - apt -y install wget lsb-release
+          - sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-latest.list'
+          - sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-prerelease `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-prerelease.list'
+          - wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -
           - apt-get update
-          - apt-get -y install cmake
+          - apt-get -y install
+            cmake pkg-config cppcheck libogre-1.9-dev libglew-dev libfreeimage-dev doxygen ruby-ronn freeglut3-dev libxmu-dev libxi-dev curl mercurial lcov
+          - sh tools/code_check.sh
+          # Ignition dependencies
+          - apt-get -y install
+            libignition-common2-dev
+            libignition-math5-dev
+            libignition-msgs2-dev
+            libignition-tools-dev
+            libignition-transport5-dev
+            libignition-cmake1-dev
+            libsdformat6-dev
+          # Dependency: Ignition rendering
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-rendering -b default
+          - cd ign-rendering
           - mkdir build
           - cd build
           - cmake ..
-          - make
+          - make -j4 install
+          - cd ../..
+          # Ignition sensors
+          - mkdir build
+          - cd build
+          - cmake .. -DCMAKE_BUILD_TYPE=coverage -DDRI_TESTS=FALSE
+          - make -j4 install
           - make test

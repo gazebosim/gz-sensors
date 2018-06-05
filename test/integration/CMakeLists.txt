@@ -1,13 +1,14 @@
 set(TEST_TYPE "INTEGRATION")
 
-set(tests
+set(dri_tests
   camera_plugin.cc
 )
 
 link_directories(${PROJECT_BINARY_DIR}/test)
 
-ign_build_tests(${tests})
-
-target_link_libraries(INTEGRATION_camera_plugin ${IGNITION-TRANSPORT_LIBRARIES}
-  ${PROJECT_LIBRARY_TARGET_NAME}-camera)
-set_tests_properties(INTEGRATION_camera_plugin PROPERTIES TIMEOUT 60)
+if (DRI_TESTS)
+  ign_build_tests(TYPE INTEGRATION SOURCES ${dri_tests})
+  target_link_libraries(INTEGRATION_camera_plugin
+    ${IGNITION-TRANSPORT_LIBRARIES}
+    ${PROJECT_LIBRARY_TARGET_NAME}-camera)
+endif()

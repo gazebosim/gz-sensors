@@ -24,7 +24,7 @@
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/rendering/Scene.hh>
-#include <ignition/sensors/ign_sensors_export.hh>
+#include <ignition/sensors/Export.hh>
 #include <sdf/sdf.hh>
 
 namespace ignition
@@ -44,7 +44,7 @@ namespace ignition
     ///   This class is a base for all sensor classes. It parses some common
     ///   SDF elements in the <sensor> tag and is responsible for making sure
     ///   sensors update at the right time.
-    class IGN_SENSORS_EXPORT Sensor
+    class IGNITION_SENSORS_VISIBLE Sensor
     {
       /// \brief Allows using shorter APIS in common::PluginLoader
       public: IGN_COMMON_SPECIALIZE_INTERFACE(ignition::sensors::Sensor)
@@ -112,7 +112,7 @@ namespace ignition
       public: const ignition::math::Pose3d &Pose() const;
 
       /// \brief Update the pose of the sensor
-      public: const void SetPose(const ignition::math::Pose3d &_pose);
+      public: void SetPose(const ignition::math::Pose3d &_pose);
 
       /// \brief Get name.
       /// \return Name of sensor.

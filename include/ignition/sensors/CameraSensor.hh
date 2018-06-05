@@ -14,19 +14,20 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_CAMERA_CAMERASENSOR_HH_
-#define IGNITION_SENSORS_CAMERA_CAMERASENSOR_HH_
+#ifndef IGNITION_SENSORS_CAMERASENSOR_HH_
+#define IGNITION_SENSORS_CAMERASENSOR_HH_
 
 #include <memory>
+
+#include <sdf/sdf.hh>
 
 #include <ignition/common/Time.hh>
 #include <ignition/common/Event.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/rendering/Camera.hh>
-#include <ignition/sensors/ign_sensors_camera_export.hh>
-#include <ignition/sensors/Sensor.hh>
 #include <ignition/msgs.hh>
-#include <sdf/sdf.hh>
+#include <ignition/sensors/Export.hh>
+#include <ignition/sensors/Sensor.hh>
 
 namespace ignition
 {
@@ -42,7 +43,7 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-    class IGN_SENSORS_CAMERA_EXPORT CameraSensor : public Sensor
+    class IGNITION_SENSORS_VISIBLE CameraSensor : public Sensor
     {
       /// \brief constructor
       public: CameraSensor();
@@ -74,7 +75,7 @@ namespace ignition
       /// connection pointer falls out of scope, the connection is broken.
       public: ignition::common::ConnectionPtr ConnectImageCallback(
                   std::function<
-                  void (const ignition::msgs::Image &)> _callback);
+                  void(const ignition::msgs::Image &)> _callback);
 
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
