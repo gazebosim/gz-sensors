@@ -1,34 +1,60 @@
-# This is a sample build configuration for C++.
-# Check our guides at https://confluence.atlassian.com/x/VYk8Lw for more examples.
-# Only use spaces to indent your .yml configuration.
-# -----
-# You can specify a custom docker image from Docker Hub as your build environment.
-image: ubuntu:xenial
+image: ubuntu:bionic
 
 pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
           - apt update
-          - apt -y install wget lsb-release
-          - sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-latest.list'
-          - sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-prerelease `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-prerelease.list'
-          - wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -
-          - apt-get update
           - apt-get -y install
             cmake pkg-config cppcheck libogre-1.9-dev libglew-dev libfreeimage-dev doxygen ruby-ronn freeglut3-dev libxmu-dev libxi-dev curl mercurial lcov
           - sh tools/code_check.sh
           # Ignition dependencies
           - apt-get -y install
-            libignition-common2-dev
-            libignition-math5-dev
             libignition-msgs2-dev
             libignition-tools-dev
-            libignition-transport5-dev
-            libignition-cmake1-dev
             libsdformat6-dev
-          # Dependency: Ignition rendering
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-rendering -b default
+          # Ignition cmake
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-cmake -b c++17
+          - cd ign-cmake
+          - mkdir build
+          - cd build
+          - cmake .. # -DENABLE_TESTS_COMPILATION=false
+          - make -j4 install
+          - cd ../..
+          # Ignition math
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-math -b gcc8_c++17
+          - cd ign-math
+          - mkdir build
+          - cd build
+          - cmake .. # -DENABLE_TESTS_COMPILATION=false
+          - make -j4 install
+          - cd ../..
+          # Ignition common
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-common -b bionic
+          - cd ign-common
+          - mkdir build
+          - cd build
+          - cmake .. # -DENABLE_TESTS_COMPILATION=false
+          - make -j4 install
+          - cd ../..
+          # Ignition msgs
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-msgs -b proto3
+          - cd ign-msgs
+          - mkdir build
+          - cd build
+          - cmake .. # -DENABLE_TESTS_COMPILATION=false
+          - make -j4 install
+          - cd ../..
+          # Ignition transport
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-transport -b proto3_bionic
+          - cd ign-transport
+          - mkdir build
+          - cd build
+          - cmake .. # -DENABLE_TESTS_COMPILATION=false
+          - make -j4 install
+          - cd ../..
+          # Ignition rendering
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-rendering -b bionic
           - cd ign-rendering
           - mkdir build
           - cd build
