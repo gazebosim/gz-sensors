@@ -27,11 +27,6 @@
 #include "ignition/sensors/Noise.hh"
 #include <ignition/sensors/Export.hh>
 
-namespace Ogre
-{
-  class CompositorInstance;
-}
-
 namespace ignition
 {
   class GaussianNoiseCompositorListener;
@@ -113,14 +108,17 @@ namespace ignition
       /// Documentation inherited
       public: virtual void Print(std::ostream &_out) const;
 
+      /*
+      TODO: implement compositor instance in ign-rendering
       /// \brief Gaussian noise compositor.
       public: Ogre::CompositorInstance *gaussianNoiseInstance;
 
+
       /// \brief Gaussian noise compositor listener
-      //public: boost::shared_ptr<GaussianNoiseCompositorListener>
-      //  gaussianNoiseCompositorListener;
+      public: boost::shared_ptr<GaussianNoiseCompositorListener>
+        gaussianNoiseCompositorListener;
+      */
     };
-    /// \}
   }
 }
 

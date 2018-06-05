@@ -22,7 +22,6 @@
 #endif
 
 #include <boost/function.hpp>
-// #include "gazebo/common/Assert.hh"
 #include "ignition/common/Console.hh"
 
 #include "ignition/sensors/GaussianNoiseModel.hh"
@@ -50,7 +49,8 @@ NoisePtr NoiseFactory::NewNoiseModel(sdf::ElementPtr _sdf,
     if (_sensorType == "camera" || _sensorType == "depth" ||
       _sensorType == "multicamera" || _sensorType == "wideanglecamera")
     {
-      noise.reset(new ImageGaussianNoiseModel());
+      // TODO: We need to implement Ogre Compositor Instance in ign-rendering
+      //noise.reset(new ImageGaussianNoiseModel());
     }
     else
       noise.reset(new GaussianNoiseModel());

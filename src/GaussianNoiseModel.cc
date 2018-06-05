@@ -23,17 +23,16 @@
 #include <ignition/math/Helpers.hh>
 #include <ignition/math/Rand.hh>
 
-// #include "ignition/common/Assert.hh"
 #include "ignition/common/Console.hh"
-//#include "ignition/rendering/ogre/OgreIncludes.hh"
 #include "ignition/rendering/Camera.hh"
 #include "ignition/sensors/GaussianNoiseModel.hh"
 
 namespace ignition
 {
+  /* TODO: We need to implement Ogre Compositor Instance in ign-rendering
   // We'll create an instance of this class for each camera, to be used to
   // inject random values on each render call.
-  /*
+
   class GaussianNoiseCompositorListener
     : public Ogre::CompositorInstance::Listener
   {
@@ -106,6 +105,7 @@ GaussianNoiseModel::~GaussianNoiseModel()
 void GaussianNoiseModel::Load(sdf::ElementPtr _sdf)
 {
   Noise::Load(_sdf);
+  std::ostringstream out;
 
   this->mean = _sdf->Get<double>("mean");
   this->stdDev = _sdf->Get<double>("stddev");
@@ -123,10 +123,7 @@ void GaussianNoiseModel::Load(sdf::ElementPtr _sdf)
   if (ignition::math::Rand::DblUniform() < 0.5)
     this->bias = -this->bias;
 
-  /// \todo Remove this, and use Noise::Print. See ImuSensor for an example
-  ignlog << "applying Gaussian noise model with mean " << this->mean
-    << ", stddev " << this->stdDev
-    << ", bias " << this->bias << std::endl;
+  this->Print(out);
 
   if (_sdf->HasElement("precision"))
   {
@@ -193,6 +190,9 @@ void GaussianNoiseModel::Print(std::ostream &_out) const
     << "quantized[" << this->quantized << "]";
 }
 
+
+/* TODO: We need to implement Ogre Compositor Instance in ign-rendering
+
 //////////////////////////////////////////////////
 ImageGaussianNoiseModel::ImageGaussianNoiseModel()
   : GaussianNoiseModel()
@@ -213,7 +213,7 @@ void ImageGaussianNoiseModel::Load(sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 void ImageGaussianNoiseModel::SetCamera(rendering::CameraPtr _camera)
 {
-  /*
+
   IGN_ASSERT(_camera, "Unable to apply gaussian noise, camera is null");
 
   this->gaussianNoiseCompositorListener.reset(new
@@ -225,7 +225,6 @@ void ImageGaussianNoiseModel::SetCamera(rendering::CameraPtr _camera)
   this->gaussianNoiseInstance->setEnabled(true);
   this->gaussianNoiseInstance->addListener(
     this->gaussianNoiseCompositorListener.get());
-  */
 }
 
 //////////////////////////////////////////////////
@@ -243,3 +242,4 @@ void ImageGaussianNoiseModel::Print(std::ostream &_out) const
     << "precision[" << this->precision << "] "
     << "quantized[" << this->quantized << "]";
 }
+*/

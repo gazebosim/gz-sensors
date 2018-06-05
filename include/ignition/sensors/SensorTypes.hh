@@ -34,27 +34,10 @@ namespace ignition
   {
     class AltimeterSensor;
     class Sensor;
-    class RaySensor;
     class CameraSensor;
-    class LogicalCameraSensor;
-    class MagnetometerSensor;
-    class MultiCameraSensor;
-    class DepthCameraSensor;
-    class ContactSensor;
-    class ImuSensor;
-    class GpuRaySensor;
-    class RFIDSensor;
-    class RFIDTag;
-    class SonarSensor;
-    class ForceTorqueSensor;
-    class GpsSensor;
     class Noise;
     class GaussianNoiseModel;
     class ImageGaussianNoiseModel;
-    class WideAngleCameraSensor;
-    class WirelessTransceiver;
-    class WirelessTransmitter;
-    class WirelessReceiver;
 
     /// \def SensorPtr
     /// \brief Shared pointer to Sensor
