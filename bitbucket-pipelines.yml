@@ -10,9 +10,15 @@ pipelines:
           - sh tools/code_check.sh
           # Ignition dependencies
           - apt-get -y install
-            libignition-msgs2-dev
             libignition-tools-dev
-            libsdformat6-dev
+          # SDFormat
+          - hg clone http://bitbucket.org/osrf/sdformat -b math6
+          - cd sdformat
+          - mkdir build
+          - cd build
+          - cmake .. # -DENABLE_TESTS_COMPILATION=false
+          - make -j4 install
+          - cd ../..
           # Ignition cmake
           - hg clone http://bitbucket.org/ignitionrobotics/ign-cmake -b c++17
           - cd ign-cmake
