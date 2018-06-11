@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _IGNITION_GAUSSIAN_NOISE_MODEL_HH_
-#define _IGNITION_GAUSSIAN_NOISE_MODEL_HH_
+#ifndef IGNITION_GAUSSIAN_NOISE_MODEL_HH_
+#define IGNITION_GAUSSIAN_NOISE_MODEL_HH_
 
 #include <vector>
 #include <string>

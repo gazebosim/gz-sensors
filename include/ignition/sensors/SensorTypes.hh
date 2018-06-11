@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef _IGNITION_SENSORS_SENSORTYPES_HH_
-#define _IGNITION_SENSORS_SENSORTYPES_HH_
+#ifndef IGNITION_SENSORS_SENSORTYPES_HH_
+#define IGNITION_SENSORS_SENSORTYPES_HH_
 
 #include <vector>
 #include <memory>

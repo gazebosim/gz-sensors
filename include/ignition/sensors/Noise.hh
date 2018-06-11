@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _IGNITION_NOISE_HH_
-#define _IGNITION_NOISE_HH_
+#ifndef IGNITION_NOISE_HH_
+#define IGNITION_NOISE_HH_
 
 #include <vector>
 #include <string>
