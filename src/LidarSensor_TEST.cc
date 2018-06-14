@@ -26,10 +26,12 @@
 #include <ignition/sensors/LidarSensor.hh>
 
 
-sdf::ElementPtr LidarToSDF(std::string name, double update_rate, std::string topic,
-    double horz_samples, double horz_resolution, double horz_min_angle, double horz_max_angle,
-    double vert_samples, double vert_resolution, double vert_min_angle, double vert_max_angle,
-    double range_resolution, double range_min, double range_max, bool always_on, bool visualize)
+sdf::ElementPtr LidarToSDF(std::string name, double update_rate,
+    std::string topic, double horz_samples, double horz_resolution,
+    double horz_min_angle, double horz_max_angle, double vert_samples,
+    double vert_resolution, double vert_min_angle, double vert_max_angle,
+    double range_resolution, double range_min, double range_max,
+    bool always_on, bool visualize)
 {
   std::ostringstream stream;
   stream

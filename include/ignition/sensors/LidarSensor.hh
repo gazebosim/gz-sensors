@@ -18,6 +18,8 @@
 #define IGNITION_SENSORS_LIDARSENSOR_HH_
 
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <ignition/common/Event.hh>
 #include <ignition/sensors/Sensor.hh>
@@ -219,8 +221,8 @@ namespace ignition
       /// \return A connection pointer that must remain in scope. When the
       /// connection pointer falls out of scope, the connection is broken.
       public: ignition::common::ConnectionPtr ConnectNewLaserFrame(
-          std::function<void(const float *, unsigned int, unsigned int, unsigned int,
-          const std::string &)> _subscriber);
+          std::function<void(const float *, unsigned int, unsigned int,
+            unsigned int, const std::string &)> _subscriber);
 
       /// \brief Data pointer for private data
       /// \internal
