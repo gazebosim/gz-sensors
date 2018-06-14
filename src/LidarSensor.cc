@@ -179,24 +179,24 @@ bool LidarSensor::Load(sdf::ElementPtr _sdf)
 
   if (this->dataPtr->horzRayCount == 0 || this->dataPtr->vertRayCount == 0)
   {
-    ignerr << "LidarSensor: Image has 0 size!\n" ;
+    ignerr << "LidarSensor: Image has 0 size!\n";
   }
 
   this->dataPtr->horzRangeCount = this->RangeCount();
   this->dataPtr->vertRangeCount = this->VerticalRangeCount();
 
   // Handle noise model settings.
-  //if (rayElem->HasElement("noise"))
-  //{
-  //  this->noises[GPU_RAY_NOISE] =
-  //      NoiseFactory::NewNoiseModel(rayElem->GetElement("noise"),
-  //      this->Type());
-  //}
+  // if (rayElem->HasElement("noise"))
+  // {
+  //   this->noises[GPU_RAY_NOISE] =
+  //       NoiseFactory::NewNoiseModel(rayElem->GetElement("noise"),
+  //       this->Type());
+  // }
 
-  //this->dataPtr->parentEntity =
-  //  this->world->EntityByName(this->ParentName());
-  //GZ_ASSERT(this->dataPtr->parentEntity != nullptr,
-  //    "Unable to get the parent entity.");
+  // this->dataPtr->parentEntity =
+  //   this->world->EntityByName(this->ParentName());
+  // GZ_ASSERT(this->dataPtr->parentEntity != nullptr,
+  //     "Unable to get the parent entity.");
 
   this->dataPtr->initialized = true;
   return true;
@@ -204,8 +204,8 @@ bool LidarSensor::Load(sdf::ElementPtr _sdf)
 
 /////////////////////////////////////////////////
 ignition::common::ConnectionPtr LidarSensor::ConnectNewLaserFrame(
-          std::function<void(const float *, unsigned int, unsigned int, unsigned int,
-          const std::string &)> _subscriber)
+          std::function<void(const float *, unsigned int, unsigned int,
+            unsigned int, const std::string &)> _subscriber)
 {
   return this->dataPtr->dataEvent.Connect(_subscriber);
 }
@@ -231,8 +231,8 @@ bool LidarSensor::PublishLaserScan(const common::Time &_now)
       _now.nsec);
 
   // Store the latest laser scans into laserMsg
-  //msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
-  //    this->Pose() + this->dataPtr->parentEntity->WorldPose());
+  // msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
+  //     this->Pose() + this->dataPtr->parentEntity->WorldPose());
   this->dataPtr->laserMsg.set_angle_min(this->AngleMin().Radian());
   this->dataPtr->laserMsg.set_angle_max(this->AngleMax().Radian());
   this->dataPtr->laserMsg.set_angle_step(this->AngleResolution());
@@ -279,14 +279,14 @@ bool LidarSensor::PublishLaserScan(const common::Time &_now)
       {
         range = -IGN_DBL_INF;
       }
-      // TODO (jchoclin): add LIDAR_NOISE
-      //else if (this->noises.find(GPU_RAY_NOISE) !=
-      //         this->noises.end())
-      //{
-      //  range = this->noises[GPU_RAY_NOISE]->Apply(range);
-      //  range = ignition::math::clamp(range,
-      //      this->dataPtr->rangeMin, this->dataPtr->rangeMax);
-      //}
+      // TODO(jchoclin): add LIDAR_NOISE
+      // else if (this->noises.find(GPU_RAY_NOISE) !=
+      //          this->noises.end())
+      // {
+      //   range = this->noises[GPU_RAY_NOISE]->Apply(range);
+      //   range = ignition::math::clamp(range,
+      //       this->dataPtr->rangeMin, this->dataPtr->rangeMax);
+      // }
 
       range = ignition::math::isnan(range) ? this->dataPtr->rangeMax : range;
       this->dataPtr->laserMsg.set_ranges(index, range);
