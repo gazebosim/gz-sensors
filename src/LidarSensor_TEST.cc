@@ -20,11 +20,11 @@
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Helpers.hh>
 #include <ignition/msgs.hh>
-#include <ignition/rendering.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Manager.hh>
 
 #include <ignition/sensors/LidarSensor.hh>
+
 
 sdf::ElementPtr LidarToSDF(std::string name, double update_rate, std::string topic,
     double horz_samples, double horz_resolution, double horz_min_angle, double horz_max_angle,
@@ -88,18 +88,11 @@ void OnNewLaserFrame(int *_scanCounter, float *_scanDest,
 }
 
 /////////////////////////////////////////////////
-/// \brief Test Creation of a Ray sensor
+/// \brief Test Creation of a Lidar sensor
 TEST(LidarSensor_TEST, CreateLaser)
 {
-  // Setup ign-rendering with a scene
-  auto *engine = ignition::rendering::engine("ogre");
-  EXPECT_TRUE(engine != nullptr);
-
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
-
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.SetRenderingScene(scene);
 
   // Create SDF describing a camera sensor
   const std::string name = "TestLidar";
@@ -148,53 +141,6 @@ TEST(LidarSensor_TEST, CreateLaser)
   EXPECT_EQ(sensor->VerticalAngleMax(), 0.0);
 
   EXPECT_TRUE(sensor->IsActive());
-
-  // Set a callback on the lidar sensor to get a scan
-//  ignition::common::ConnectionPtr connection =
-//    sensor->ConnectNewLaserFrame(&OnNewLaserFrame);
-
-  // listen to new laser frames
-  float *scan = new float[sensor->RayCount()
-      * sensor->VerticalRayCount() * 3];
-  int scanCount = 0;
-  ignition::common::ConnectionPtr connection =
-    sensor->ConnectNewLaserFrame(
-        std::bind(&::OnNewLaserFrame, &scanCount, scan,
-          std::placeholders::_1, std::placeholders::_2,
-          std::placeholders::_3, std::placeholders::_4,
-          std::placeholders::_5));
-
-  /*
-  // listen to new laser frames
-  float *scan = new float[sensor->RayCount()
-      * sensor->VerticalRayCount() * 3];
-  int scanCount = 0;
-
-  // wait for a few laser scans
-  int i = 0;
-  while (scanCount < 10 && i < 300)
-  {
-    common::Time::MSleep(10);
-    i++;
-  }
-  EXPECT_LT(i, 300);
-
-  // Get all the range values
-  std::vector<double> ranges;
-  sensor->Ranges(ranges);
-  EXPECT_EQ(ranges.size(), static_cast<size_t>(640));
-
-  // Check that all the range values
-  for (unsigned int i = 0; i < ranges.size(); ++i)
-  {
-    EXPECT_DOUBLE_EQ(ranges[i], ignition::math::INF_D);
-    EXPECT_DOUBLE_EQ(sensor->Range(i), ranges[i]);
-    EXPECT_NEAR(sensor->Retro(i), 0, 1e-6);
-    EXPECT_EQ(sensor->Fiducial(i), -1);
-  }
-
-  delete [] scan;
-  */
 }
 
 //////////////////////////////////////////////////
