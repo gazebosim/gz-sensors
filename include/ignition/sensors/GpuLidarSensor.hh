@@ -62,16 +62,35 @@ namespace ignition
       /// \return True on success
       public: virtual bool Init() override;
 
-      /// \brief Set a callback to be called when data is generated.
-      /// \param[in] _callback This callback will be called every time the
-      /// sensor generates data. The Update function will be blocked while the
-      /// callbacks are executed.
-      /// \remark Do not block inside of the callback.
-      /// \return A connection pointer that must remain in scope. When the
-      /// connection pointer falls out of scope, the connection is broken.
-      public: ignition::common::ConnectionPtr ConnectCallback(
-                  std::function<
-                  void (const ignition::msgs::LaserScan &)> _callback);
+      /// \brief Get Cos Vert field-of-view
+      /// \return 2 * atan(tan(this->vfov/2) / cos(this->hfov/2))
+      public: double CosVertFOV() const;
+
+     /// \brief Get Cos Horz field-of-view
+      /// \return 2 * atan(tan(this->hfov/2) / cos(this->vfov/2))
+      public: double CosHorzFOV() const;
+
+       /// \brief Get (horizontal_max_angle + horizontal_min_angle) * 0.5
+      /// \return (horizontal_max_angle + horizontal_min_angle) * 0.5
+      public: double HorzHalfAngle() const;
+
+     /// \brief Get (vertical_max_angle + vertical_min_angle) * 0.5
+      /// \return (vertical_max_angle + vertical_min_angle) * 0.5
+      public: double VertHalfAngle() const;
+
+      /// \brief Returns a pointer to the internally kept rendering::GpuLaser
+      /// \return Pointer to GpuLaser
+      public: rendering::GpuLaserPtr LaserCamera() const;
+
+       /// \brief Gets the camera count
+      /// \return Number of cameras
+      public: unsigned int CameraCount() const;
+
+     /// \brief Connect to the new laser frame event.
+      /// \param[in] _subscriber Event callback.
+      public: event::ConnectionPtr ConnectNewLaserFrame(
+        std::function<void(const float *, unsigned int, unsigned int,
+        unsigned int, const std::string &)> _subscriber);
 
       /// \brief Data pointer for private data
       /// \internal

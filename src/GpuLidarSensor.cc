@@ -31,33 +31,13 @@
 using namespace ignition::sensors;
 
 
-class ignition::sensors::GpuLidarSensorPrivate
+class ignition::sensors::GpuLidarSensorPrivate : LidarSensorPrivate
 {
   /// \brief constructor
   public: GpuLidarSensorPrivate();
 
   /// \brief destructor
   public: ~GpuLidarSensorPrivate();
-
-  /// \brief Just a mutex for thread safety
-  public: std::mutex mutex;
-
-  /// \brief node to create publisher
-  public: transport::Node node;
-
-  /// \brief publisher to publish images
-  public: transport::Node::Publisher pub;
-
-  /// \brief Laser message to publish data.
-  public: ignition::msgs::LaserScan laserMsg;
-
-  /// \brief true if Load() has been called and was successful
-  public: bool initialized = false;
-
-  /// \brief Event that is used to trigger callbacks when a new image
-  /// is generated
-  public: ignition::common::EventT<
-          void (const ignition::msgs::LaserScan &)> dataEvent;
 
   /// \brief A scene the sensor is generating data from
   public: ignition::rendering::ScenePtr scene;
@@ -79,42 +59,6 @@ class ignition::sensors::GpuLidarSensorPrivate
 
   /// \brief remove campera
   public: void RemoveCamera(ignition::rendering::ScenePtr _scene);
-
-  /// \brief Scan SDF elementz.
-  public: sdf::ElementPtr scanElem;
-
-  /// \brief Horizontal SDF element.
-  public: sdf::ElementPtr horzElem;
-
-  /// \brief Vertical SDF element.
-  public: sdf::ElementPtr vertElem;
-
-  /// \brief Range SDF element.
-  public: sdf::ElementPtr rangeElem;
-
-  /// \brief Camera SDF element.
-  public: sdf::ElementPtr cameraElem;
-
-  /// \brief Horizontal ray count.
-  public: unsigned int horzRayCount;
-
-  /// \brief Vertical ray count.
-  public: unsigned int vertRayCount;
-
-  /// \brief Horizontal range count.
-  public: unsigned int horzRangeCount;
-
-  /// \brief Vertical range count.
-  public: unsigned int vertRangeCount;
-
-  /// \brief Range count ratio.
-  public: double rangeCountRatio;
-
-  /// \brief The minimum range.
-  public: double rangeMin;
-
-  /// \brief The maximum range.
-  public: double rangeMax;
 
   /// \brief True if the sensor was rendered.
   public: bool rendered;
@@ -449,13 +393,6 @@ bool GpuLidarSensor::Load(sdf::ElementPtr _sdf)
   return true;
 }
 
-/////////////////////////////////////////////////
-ignition::common::ConnectionPtr GpuLidarSensor::ConnectCallback(
-    std::function<void(const ignition::msgs::LaserScan &)> _callback)
-{
-  return this->dataPtr->dataEvent.Connect(_callback);
-}
-
 //////////////////////////////////////////////////
 bool GpuLidarSensor::Update(const common::Time &_now)
 {
@@ -612,165 +549,6 @@ double GpuLidarSensor::RayCountRatio() const
 {
 //  return this->dataPtr->laserCam->RayCountRatio();
   return 0;
-}
-
-//////////////////////////////////////////////////
-double GpuLidarSensor::RangeCountRatio() const
-{
-  return this->dataPtr->rangeCountRatio;
-}
-
-//////////////////////////////////////////////////
-ignition::math::Angle GpuLidarSensor::AngleMin() const
-{
-  return this->dataPtr->horzElem->Get<double>("min_angle");
-}
-
-//////////////////////////////////////////////////
-void GpuLidarSensor::SetAngleMin(double _angle)
-{
-  this->dataPtr->horzElem->GetElement("min_angle")->Set(_angle);
-}
-
-//////////////////////////////////////////////////
-ignition::math::Angle GpuLidarSensor::AngleMax() const
-{
-  return this->dataPtr->horzElem->Get<double>("max_angle");
-}
-
-//////////////////////////////////////////////////
-void GpuLidarSensor::SetAngleMax(double _angle)
-{
-  this->dataPtr->horzElem->GetElement("max_angle")->Set(_angle);
-}
-
-//////////////////////////////////////////////////
-double GpuLidarSensor::RangeMin() const
-{
-  return this->dataPtr->rangeElem->Get<double>("min");
-}
-
-//////////////////////////////////////////////////
-double GpuLidarSensor::RangeMax() const
-{
-  return this->dataPtr->rangeElem->Get<double>("max");
-}
-
-/////////////////////////////////////////////////
-double GpuLidarSensor::AngleResolution() const
-{
-  return (this->AngleMax() - this->AngleMin()).Radian() /
-    (this->RangeCount()-1);
-}
-
-//////////////////////////////////////////////////
-double GpuLidarSensor::RangeResolution() const
-{
-  return this->dataPtr->rangeElem->Get<double>("resolution");
-}
-
-//////////////////////////////////////////////////
-int GpuLidarSensor::RayCount() const
-{
-  return this->dataPtr->horzElem->Get<unsigned int>("samples");
-}
-
-//////////////////////////////////////////////////
-int GpuLidarSensor::RangeCount() const
-{
-  return this->RayCount() * this->dataPtr->horzElem->Get<double>("resolution");
-}
-
-//////////////////////////////////////////////////
-int GpuLidarSensor::VerticalRayCount() const
-{
-  if (this->dataPtr->scanElem->HasElement("vertical"))
-    return this->dataPtr->vertElem->Get<unsigned int>("samples");
-  else
-    return 1;
-}
-
-//////////////////////////////////////////////////
-int GpuLidarSensor::VerticalRangeCount() const
-{
-  if (this->dataPtr->scanElem->HasElement("vertical"))
-  {
-    int rows =  (this->VerticalRayCount() *
-          this->dataPtr->vertElem->Get<double>("resolution"));
-    if (rows > 1)
-      return rows;
-    else
-      return 1;
-  }
-  else
-    return 1;
-}
-
-//////////////////////////////////////////////////
-ignition::math::Angle GpuLidarSensor::VerticalAngleMin() const
-{
-  if (this->dataPtr->scanElem->HasElement("vertical"))
-    return this->dataPtr->vertElem->Get<double>("min_angle");
-  else
-    return ignition::math::Angle(0);
-}
-
-//////////////////////////////////////////////////
-void GpuLidarSensor::SetVerticalAngleMin(const double _angle)
-{
-  if (this->dataPtr->scanElem->HasElement("vertical"))
-    this->dataPtr->vertElem->GetElement("min_angle")->Set(_angle);
-}
-
-//////////////////////////////////////////////////
-ignition::math::Angle GpuLidarSensor::VerticalAngleMax() const
-{
-  if (this->dataPtr->scanElem->HasElement("vertical"))
-    return this->dataPtr->vertElem->Get<double>("max_angle");
-  else
-    return ignition::math::Angle(0);
-}
-
-//////////////////////////////////////////////////
-double GpuLidarSensor::VerticalAngleResolution() const
-{
-  return (this->VerticalAngleMax() - this->VerticalAngleMin()).Radian() /
-    (this->VerticalRangeCount()-1);
-}
-
-//////////////////////////////////////////////////
-void GpuLidarSensor::SetVerticalAngleMax(const double _angle)
-{
-  if (this->dataPtr->scanElem->HasElement("vertical"))
-    this->dataPtr->vertElem->GetElement("max_angle")->Set(_angle);
-}
-
-//////////////////////////////////////////////////
-void GpuLidarSensor::Ranges(std::vector<double> &_ranges) const
-{
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-
-  _ranges.resize(this->dataPtr->laserMsg.ranges_size());
-  memcpy(&_ranges[0], this->dataPtr->laserMsg.ranges().data(),
-         sizeof(_ranges[0]) * this->dataPtr->laserMsg.ranges_size());
-}
-
-//////////////////////////////////////////////////
-double GpuLidarSensor::Range(const int _index) const
-{
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  if (this->dataPtr->laserMsg.ranges_size() == 0)
-  {
-    ignwarn << "ranges not constructed yet (zero sized)\n";
-    return 0.0;
-  }
-  if (_index < 0 || _index > this->dataPtr->laserMsg.ranges_size())
-  {
-    ignerr << "Invalid range index[" << _index << "]\n";
-    return 0.0;
-  }
-
-  return this->dataPtr->laserMsg.ranges(_index);
 }
 
 //////////////////////////////////////////////////
