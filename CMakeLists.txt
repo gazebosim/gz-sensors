@@ -74,6 +74,17 @@ if (ignition-tools_FOUND)
   set (HAVE_IGN_TOOLS TRUE)
 endif()
 
+####### TEMP
+# Find OGRE
+ign_find_package(OGRE VERSION 1.9.0
+    REQUIRED_BY ogre
+    PRIVATE_FOR ogre )
+
+include_directories(
+  ${OGRE_INCLUDE_DIRS}
+  ${OGRE_INCLUDE_DIRS}/Paging )
+#######
+
 #--------------------------------------
 # Find SDFormat
 find_package(SDFormat REQUIRED)
@@ -84,7 +95,8 @@ set(IGN_SENSORS_PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 #============================================================================
 # Configure the build
 #============================================================================
-ign_configure_build(QUIT_IF_BUILD_ERRORS)
+ign_configure_build(QUIT_IF_BUILD_ERRORS
+    COMPONENTS ogre )
 
 #============================================================================
 # Create package information

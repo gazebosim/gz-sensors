@@ -21,6 +21,13 @@
 #include <string>
 #include <vector>
 
+#include <ignition/common/Console.hh>
+#include <ignition/common/PluginMacros.hh>
+#include <ignition/math/Angle.hh>
+#include <ignition/sensors/Events.hh>
+#include <ignition/sensors/Manager.hh>
+#include <ignition/transport.hh>
+
 #include <ignition/common/Event.hh>
 #include <ignition/sensors/Sensor.hh>
 #include <ignition/sensors/Export.hh>
@@ -30,8 +37,79 @@ namespace ignition
 {
   namespace sensors
   {
-    /// \brief forward declarations
-    class LidarSensorPrivate;
+    class LidarSensorPrivate
+    {
+      /// \brief constructor
+      public: LidarSensorPrivate();
+
+      /// \brief destructor
+      public: ~LidarSensorPrivate();
+
+      /// \brief Just a mutex for thread safety
+      public: std::mutex mutex;
+
+      /// \brief node to create publisher
+      public: transport::Node node;
+
+      /// \brief publisher to publish images
+      public: transport::Node::Publisher pub;
+
+      /// \brief Laser message to publish data.
+      public: ignition::msgs::LaserScan laserMsg;
+
+      /// \brief true if Load() has been called and was successful
+      public: bool initialized = false;
+
+      /// \brief Event triggered when new laser range data are available.
+      /// \param[in] _frame New frame containing raw laser data.
+      /// \param[in] _width Width of frame.
+      /// \param[in] _height Height of frame.
+      /// \param[in] _depth Depth of frame.
+      /// \param[in] _format Format of frame.
+      public: ignition::common::EventT<void(const float *_frame,
+                   unsigned int _width, unsigned int _height,
+                   unsigned int _depth, const std::string &_format)>
+                   dataEvent;
+
+      /// \brief Raw buffer of laser data.
+      public: float *laserBuffer;
+
+      /// \brief Horizontal ray count.
+      public: unsigned int horzRayCount;
+
+      /// \brief Vertical ray count.
+      public: unsigned int vertRayCount;
+
+      /// \brief Horizontal range count.
+      public: unsigned int horzRangeCount;
+
+      /// \brief Vertical range count.
+      public: unsigned int vertRangeCount;
+
+      /// \brief Range count ratio.
+      public: double rangeCountRatio;
+
+      /// \brief The minimum range.
+      public: double rangeMin;
+
+      /// \brief The maximum range.
+      public: double rangeMax;
+
+      /// \brief Scan SDF element.
+      public: sdf::ElementPtr scanElem;
+
+      /// \brief Horizontal SDF element.
+      public: sdf::ElementPtr horzElem;
+
+      /// \brief Vertical SDF element.
+      public: sdf::ElementPtr vertElem;
+
+      /// \brief Range SDF element.
+      public: sdf::ElementPtr rangeElem;
+
+      /// \brief Camera SDF element.
+      public: sdf::ElementPtr cameraElem;
+    };
 
     /// \brief Lidar Sensor Class
     ///

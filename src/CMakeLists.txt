@@ -4,6 +4,7 @@ set (sources
   Manager.cc
   Sensor.cc
   LidarSensor.cc
+  GpuLidarSensor.cc
 )
 
 set (gtest_sources

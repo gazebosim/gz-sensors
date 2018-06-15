@@ -17,12 +17,55 @@
 #ifndef IGNITION_SENSORS_GPULIDARSENSOR_HH_
 #define IGNITION_SENSORS_GPULIDARSENSOR_HH_
 
+#include <string>
+#include <vector>
 #include <memory>
+#include <sstream>
 
+#include <sdf/sdf.hh>
+
+#include <ignition/common/Time.hh>
+#include <ignition/common/Timer.hh>
 #include <ignition/common/Event.hh>
-#include <ignition/sensors/ign_sensors_gpu_lidar_export.hh>
+#include <ignition/common/Console.hh>
+//#include <ignition/common/Exception.hh>
+#include <ignition/common/Mesh.hh>
+#include <ignition/common/MeshManager.hh>
+#include <ignition/common/PluginMacros.hh>
+
 #include <ignition/sensors/Sensor.hh>
+#include <ignition/sensors/Export.hh>
+#include <ignition/sensors/LidarSensor.hh>
+//#include <ignition/sensors/ign_sensors_gpu_lidar_export.hh>
+
 #include <ignition/msgs.hh>
+
+#include <ignition/math/Color.hh>
+#include <ignition/math/Helpers.hh>
+#include <ignition/math/Pose3.hh>
+#include <ignition/math/Vector3.hh>
+#include <ignition/math/Angle.hh>
+
+#include <ignition/rendering/ogre/OgreIncludes.hh>
+#include <ignition/rendering/ogre/OgreIncludes.hh>
+#include <ignition/rendering/ogre/OgreObject.hh>
+#include <ignition/rendering/ogre/OgreConversions.hh>
+#include <ignition/rendering/ogre/Export.hh>
+#include <ignition/rendering/Camera.hh>
+#include <ignition/rendering/Visual.hh>
+#include <ignition/rendering/Scene.hh>
+#include <ignition/rendering/RenderTypes.hh>
+
+/*
+#ifndef _WIN32
+  #include <dirent.h>
+#else
+  // Ensure that Winsock2.h is included before Windows.h, which can get
+  // pulled in by anybody (e.g., Boost).
+  #include <Winsock2.h>
+  #include "gazebo/common/win_dirent.h"
+#endif
+*/
 
 namespace Ogre
 {
@@ -50,8 +93,14 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-    class IGN_SENSORS_GPU_LIDAR_EXPORT GpuLidarSensor : public LidarSensor
+    class IGNITION_SENSORS_VISIBLE GpuLidarSensor : public LidarSensor
     {
+      /// \brief constructor
+      public: GpuLidarSensor();
+
+      /// \brief destructor
+      public: virtual ~GpuLidarSensor();
+
       /// \brief Horizontal half angle.
       protected: double horzHalfAngle;
 
@@ -89,12 +138,6 @@ namespace ignition
       /// \internal
       private: std::unique_ptr<GpuLidarSensorPrivate> dataPtr;
 
-      /// \brief constructor
-      public: GpuLidarSensor();
-
-      /// \brief destructor
-      public: virtual ~GpuLidarSensor();
-
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
@@ -107,6 +150,9 @@ namespace ignition
       // Documentation inherited
       public: virtual void Fini();
 
+      /// brief Render the camera.
+      private: void Render();
+
       /// \brief Create the texture which is used to render laser data.
       /// \param[in] _textureName Name of the new texture.
       public: void CreateLaserTexture(const std::string &_textureName);
@@ -114,17 +160,13 @@ namespace ignition
       // Documentation inherited
       public: virtual void PostRender();
 
-      /// \brief Gets the camera count
-      /// \return Number of cameras
-      public: unsigned int CameraCount() const;
-
       /// \brief Set the number of laser samples in the width and height
       /// \param[in] _w Number of samples in the horizontal sweep
       /// \param[in] _h Number of samples in the vertical sweep
       public: void SetRangeCount(const unsigned int _w,
           const unsigned int _h = 1);
 
-     /// \brief Get (horizontal_max_angle + horizontal_min_angle) * 0.5
+      /// \brief Get (horizontal_max_angle + horizontal_min_angle) * 0.5
       /// \return (horizontal_max_angle + horizontal_min_angle) * 0.5
       public: double HorzHalfAngle() const;
 
@@ -226,6 +268,12 @@ namespace ignition
                                        Ogre::Camera *_cam,
                                        const bool _updateTex = false);
 
+      /// \internal
+      /// \brief Implementation of Ogre::RenderObjectListener
+      public: virtual void notifyRenderSingleObject(Ogre::Renderable *_rend,
+              const Ogre::Pass *_p, const Ogre::AutoParamDataSource *_s,
+              const Ogre::LightList *_ll, bool _supp);
+
       /// \brief Create an ortho camera.
       private: void CreateOrthoCam();
 
@@ -256,6 +304,8 @@ namespace ignition
       /// \brief Sets second pass target.
       /// \param[in] _target Render target for the second pass.
       private: virtual void Set2ndPassTarget(Ogre::RenderTarget *_target);
+
+
     };
   }
 }
