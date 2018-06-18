@@ -3,6 +3,7 @@ set (sources
   Events.cc
   Manager.cc
   Sensor.cc
+  DepthCameraSensor.cc
 )
 
 set (gtest_sources
@@ -33,4 +34,12 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC
   ${IGNITION-TRANSPORT_LIBRARIES}
   ${PROJECT_LIBRARY_TARGET_NAME})
 install(TARGETS ${PROJECT_LIBRARY_TARGET_NAME}-camera
+  DESTINATION ${IGN_SENSORS_PLUGIN_PATH})
+
+add_library(${PROJECT_LIBRARY_TARGET_NAME}-depth-camera SHARED DepthCameraSensor.cc)
+target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-depth-camera PUBLIC
+  ${IGNITION-MSGS_LIBRARIES}
+  ${IGNITION-TRANSPORT_LIBRARIES}
+  ${PROJECT_LIBRARY_TARGET_NAME})
+install(TARGETS ${PROJECT_LIBRARY_TARGET_NAME}-depth-camera
   DESTINATION ${IGN_SENSORS_PLUGIN_PATH})
