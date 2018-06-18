@@ -49,7 +49,7 @@ pipelines:
           - make -j4 install
           - cd ../..
           # Ignition common
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-common -b bionic
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-common -b gz11
           - cd ign-common
           - mkdir build
           - cd build
@@ -57,7 +57,7 @@ pipelines:
           - make -j4 install
           - cd ../..
           # Ignition msgs
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-msgs -b proto3
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-msgs -b gz11
           - cd ign-msgs
           - mkdir build
           - cd build
@@ -65,7 +65,7 @@ pipelines:
           - make -j4 install
           - cd ../..
           # Ignition transport
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-transport -b proto3_bionic
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-transport -b gz11 
           - cd ign-transport
           - mkdir build
           - cd build
@@ -73,7 +73,7 @@ pipelines:
           - make -j4 install
           - cd ../..
           # Ignition rendering
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-rendering -b bionic
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-rendering -b gz11 
           - cd ign-rendering
           - mkdir build
           - cd build
