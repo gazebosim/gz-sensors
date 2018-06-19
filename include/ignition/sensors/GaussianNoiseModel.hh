@@ -15,16 +15,16 @@
  *
 */
 
-#ifndef IGNITION_GAUSSIAN_NOISE_MODEL_HH_
-#define IGNITION_GAUSSIAN_NOISE_MODEL_HH_
+#ifndef IGNITION_SENSORS_GAUSSIANNOISEMODEL_HH_
+#define IGNITION_SENSORS_GAUSSIANNOISEMODEL_HH_
 
 #include <vector>
 #include <string>
 
 #include <sdf/sdf.hh>
 
-#include "ignition/rendering/RenderTypes.hh"
-#include "ignition/sensors/Noise.hh"
+#include <ignition/rendering/RenderTypes.hh>
+#include <ignition/sensors/Noise.hh>
 #include <ignition/sensors/Export.hh>
 
 namespace ignition
@@ -37,58 +37,59 @@ namespace ignition
     /// \brief Gaussian noise class
     class IGNITION_SENSORS_VISIBLE GaussianNoiseModel : public Noise
     {
-        /// \brief Constructor.
-        public: GaussianNoiseModel();
+      /// \brief Constructor.
+      public: GaussianNoiseModel();
 
-        /// \brief Destructor.
-        public: virtual ~GaussianNoiseModel();
+      /// \brief Destructor.
+      public: virtual ~GaussianNoiseModel();
 
-        // Documentation inherited.
-        public: virtual void Load(sdf::ElementPtr _sdf);
+      // Documentation inherited.
+      public: virtual void Load(sdf::ElementPtr _sdf);
 
-        // Documentation inherited.
-        public: virtual void Fini();
+      // Documentation inherited.
+      public: virtual void Fini();
 
-        // Documentation inherited.
-        public: double ApplyImpl(double _in);
+      // Documentation inherited.
+      public: double ApplyImpl(double _in);
 
-        /// \brief Accessor for mean.
-        /// \return Mean of Gaussian noise.
-        public: double GetMean() const;
+      /// \brief Accessor for mean.
+      /// \return Mean of Gaussian noise.
+      public: double GetMean() const;
 
-        /// \brief Accessor for stddev.
-        /// \return Standard deviation of Gaussian noise.
-        public: double GetStdDev() const;
+      /// \brief Accessor for stddev.
+      /// \return Standard deviation of Gaussian noise.
+      public: double GetStdDev() const;
 
-        /// \brief Accessor for bias.
-        /// \return Bias on output.
-        public: double GetBias() const;
+      /// \brief Accessor for bias.
+      /// \return Bias on output.
+      public: double GetBias() const;
 
-        /// Documentation inherited
-        public: virtual void Print(std::ostream &_out) const;
+      /// Documentation inherited
+      public: virtual void Print(std::ostream &_out) const;
 
-        /// \brief If type starts with GAUSSIAN, the mean of the distribution
-        /// from which we sample when adding noise.
-        protected: double mean;
+      /// \brief If type starts with GAUSSIAN, the mean of the distribution
+      /// from which we sample when adding noise.
+      protected: double mean;
 
-        /// \brief If type starts with GAUSSIAN, the standard deviation of the
-        /// distribution from which we sample when adding noise.
-        protected: double stdDev;
+      /// \brief If type starts with GAUSSIAN, the standard deviation of the
+      /// distribution from which we sample when adding noise.
+      protected: double stdDev;
 
-        /// \brief If type starts with GAUSSIAN, the bias we'll add.
-        protected: double bias;
+      /// \brief If type starts with GAUSSIAN, the bias we'll add.
+      protected: double bias;
 
-        /// \brief If type==GAUSSIAN_QUANTIZED, the precision to which
-        /// the output signal is rounded.
-        protected: double precision;
+      /// \brief If type==GAUSSIAN_QUANTIZED, the precision to which
+      /// the output signal is rounded.
+      protected: double precision;
 
-        /// \brief True if the type is GAUSSIAN_QUANTIZED
-        protected: bool quantized;
+      /// \brief True if the type is GAUSSIAN_QUANTIZED
+      protected: bool quantized;
     };
 
     /// \class GaussianNoiseModel
     /// \brief Gaussian noise class for image sensors
-    class IGNITION_SENSORS_VISIBLE ImageGaussianNoiseModel : public GaussianNoiseModel
+    class IGNITION_SENSORS_VISIBLE ImageGaussianNoiseModel :
+      public GaussianNoiseModel
     {
       /// \brief Constructor.
       public: ImageGaussianNoiseModel();

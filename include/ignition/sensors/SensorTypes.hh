@@ -19,7 +19,8 @@
 
 #include <vector>
 #include <memory>
-#include "ignition/common/EnumIface.hh"
+
+#include <ignition/common/EnumIface.hh>
 #include <ignition/sensors/Export.hh>
 
 

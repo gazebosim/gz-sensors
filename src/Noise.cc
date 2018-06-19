@@ -22,10 +22,10 @@
 #endif
 
 #include <functional>
-#include "ignition/common/Console.hh"
 
-#include "ignition/sensors/GaussianNoiseModel.hh"
-#include "ignition/sensors/Noise.hh"
+#include <ignition/common/Console.hh>
+#include <ignition/sensors/GaussianNoiseModel.hh>
+#include <ignition/sensors/Noise.hh>
 
 using namespace ignition;
 using namespace sensors;
@@ -49,8 +49,9 @@ NoisePtr NoiseFactory::NewNoiseModel(sdf::ElementPtr _sdf,
     if (_sensorType == "camera" || _sensorType == "depth" ||
       _sensorType == "multicamera" || _sensorType == "wideanglecamera")
     {
-      // TODO: We need to implement Ogre Compositor Instance in ign-rendering
-      //noise.reset(new ImageGaussianNoiseModel());
+      // TODO(jchoclin): We need to implement Ogre Compositor Instance in
+      // ign-rendering
+      // noise.reset(new ImageGaussianNoiseModel());
     }
     else
       noise.reset(new GaussianNoiseModel());
@@ -135,7 +136,7 @@ Noise::NoiseType Noise::GetNoiseType() const
 }
 
 //////////////////////////////////////////////////
-void Noise::SetCustomNoiseCallback(std::function<double (double)> _cb)
+void Noise::SetCustomNoiseCallback(std::function<double(double)> _cb)
 {
   this->type = CUSTOM;
   this->customNoiseCallback = _cb;

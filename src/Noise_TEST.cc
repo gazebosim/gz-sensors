@@ -133,7 +133,8 @@ void GaussianNoise(sensors::NoisePtr _noise, unsigned int _count)
   std::vector<double> diff(values.size());
   std::transform(values.begin(), values.end(), diff.begin(),
       [mean_values](double value) { return value - mean_values; });
-  double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+  double sq_sum = std::inner_product(
+      diff.begin(), diff.end(), diff.begin(), 0.0);
   double stdev_values = std::sqrt(sq_sum / values.size());
   double variance_values = stdev_values*stdev_values;
 
@@ -228,7 +229,8 @@ TEST(NoiseTest, ApplyGaussian)
     std::vector<double> diff(values.size());
     std::transform(values.begin(), values.end(), diff.begin(),
         [mean_values](double value) { return value - mean_values; });
-    double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    double sq_sum = std::inner_product(
+        diff.begin(), diff.end(), diff.begin(), 0.0);
     double stdev_values = std::sqrt(sq_sum / values.size());
     double variance_values = stdev_values*stdev_values;
 
@@ -318,7 +320,8 @@ TEST(NoiseTest, ApplyGaussianQuantized)
     std::vector<double> diff(values.size());
     std::transform(values.begin(), values.end(), diff.begin(),
         [mean_values](double value) { return value - mean_values; });
-    double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    double sq_sum = std::inner_product(
+        diff.begin(), diff.end(), diff.begin(), 0.0);
     double stdev_values = std::sqrt(sq_sum / values.size());
     double variance_values = stdev_values*stdev_values;
 
