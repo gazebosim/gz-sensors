@@ -32,10 +32,10 @@ namespace ignition
 {
   namespace sensors
   {
-    /// \addtogroup ignition_sensors
-    /// \{
+    // Forward declarations
+    class NoisePrivate;
 
-    /// \class NoiseFactory Noise.hh sensors/sensors.hh
+    /// \class NoiseFactory Noise.hh ignition/sensors/Noise.hh
     /// \brief Use this noise manager for creating and loading noise models.
     class IGNITION_SENSORS_VISIBLE NoiseFactory
     {
@@ -50,18 +50,18 @@ namespace ignition
           const std::string &_sensorType = "");
     };
 
-    /// \class Noise Noise.hh
+    /// \brief Which noise types we support
+    enum class IGNITION_SENSORS_VISIBLE NoiseType : int
+    {
+      NONE = 0,
+      CUSTOM = 1,
+      GAUSSIAN = 2
+    };
+
+    /// \class Noise Noise.hh ignition/sensors/Noise.hh
     /// \brief Noise models for sensor output signals.
     class IGNITION_SENSORS_VISIBLE Noise
     {
-      /// \brief Which noise types we support
-      public: enum NoiseType
-      {
-        NONE,
-        CUSTOM,
-        GAUSSIAN
-      };
-
       /// \brief Constructor. This should not be called directly unless creating
       /// an empty noise model. Use NoiseFactory::NewNoiseModel to instantiate
       /// a new noise model.
@@ -88,12 +88,9 @@ namespace ignition
       /// \return Data with noise applied.
       public: virtual double ApplyImpl(double _in);
 
-      /// \brief Finalize the noise model
-      public: virtual void Fini();
-
       /// \brief Accessor for NoiseType.
       /// \return Type of noise currently in use.
-      public: NoiseType GetNoiseType() const;
+      public: NoiseType Type() const;
 
       /// \brief Register a custom noise callback.
       /// \param[in] _cb Callback function for applying a custom noise model.
@@ -112,16 +109,9 @@ namespace ignition
       /// \param[in] _out Output stream
       public: virtual void Print(std::ostream &_out) const;
 
-      /// \brief Which type of noise we're applying
-      private: NoiseType type;
-
-      /// \brief Noise sdf element.
-      private: sdf::ElementPtr sdf;
-
-      /// \brief Callback function for applying custom noise to sensor data.
-      private: std::function<double(double)> customNoiseCallback;
+      /// \brief Private data pointer
+      private: NoisePrivate *dataPtr = nullptr;
     };
-    /// \}
   }
 }
 #endif

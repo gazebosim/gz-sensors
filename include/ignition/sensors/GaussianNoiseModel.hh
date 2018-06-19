@@ -18,9 +18,6 @@
 #ifndef IGNITION_SENSORS_GAUSSIANNOISEMODEL_HH_
 #define IGNITION_SENSORS_GAUSSIANNOISEMODEL_HH_
 
-#include <vector>
-#include <string>
-
 #include <sdf/sdf.hh>
 
 #include <ignition/rendering/RenderTypes.hh>
@@ -29,11 +26,14 @@
 
 namespace ignition
 {
-  class GaussianNoiseCompositorListener;
-
+  // class GaussianNoiseCompositorListener;
   namespace sensors
   {
-    /// \class GaussianNoiseModel
+    // Forward declarations
+    class GaussianNoiseModelPrivate;
+
+    /// \class GaussianNoiseModel GaussianNoiseModel.hh
+    /// ignition/sensors/GaussianNoiseModel.hh
     /// \brief Gaussian noise class
     class IGNITION_SENSORS_VISIBLE GaussianNoiseModel : public Noise
     {
@@ -47,43 +47,25 @@ namespace ignition
       public: virtual void Load(sdf::ElementPtr _sdf);
 
       // Documentation inherited.
-      public: virtual void Fini();
-
-      // Documentation inherited.
       public: double ApplyImpl(double _in);
 
       /// \brief Accessor for mean.
       /// \return Mean of Gaussian noise.
-      public: double GetMean() const;
+      public: double Mean() const;
 
       /// \brief Accessor for stddev.
       /// \return Standard deviation of Gaussian noise.
-      public: double GetStdDev() const;
+      public: double StdDev() const;
 
       /// \brief Accessor for bias.
       /// \return Bias on output.
-      public: double GetBias() const;
+      public: double Bias() const;
 
       /// Documentation inherited
       public: virtual void Print(std::ostream &_out) const;
 
-      /// \brief If type starts with GAUSSIAN, the mean of the distribution
-      /// from which we sample when adding noise.
-      protected: double mean;
-
-      /// \brief If type starts with GAUSSIAN, the standard deviation of the
-      /// distribution from which we sample when adding noise.
-      protected: double stdDev;
-
-      /// \brief If type starts with GAUSSIAN, the bias we'll add.
-      protected: double bias;
-
-      /// \brief If type==GAUSSIAN_QUANTIZED, the precision to which
-      /// the output signal is rounded.
-      protected: double precision;
-
-      /// \brief True if the type is GAUSSIAN_QUANTIZED
-      protected: bool quantized;
+      /// \brief Private data pointer.
+      private: GaussianNoiseModelPrivate *dataPtr = nullptr;
     };
 
     /// \class GaussianNoiseModel

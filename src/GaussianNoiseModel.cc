@@ -20,19 +20,18 @@
   #include <Winsock2.h>
 #endif
 
+#include "ignition/sensors/GaussianNoiseModel.hh"
 #include <ignition/math/Helpers.hh>
 #include <ignition/math/Rand.hh>
 
 #include "ignition/common/Console.hh"
 #include "ignition/rendering/Camera.hh"
-#include "ignition/sensors/GaussianNoiseModel.hh"
 
+/* TODO: We need to implement Ogre Compositor Instance in ign-rendering
 namespace ignition
 {
-  /* TODO: We need to implement Ogre Compositor Instance in ign-rendering
   // We'll create an instance of this class for each camera, to be used to
   // inject random values on each render call.
-
   class GaussianNoiseCompositorListener
     : public Ogre::CompositorInstance::Listener
   {
@@ -69,7 +68,7 @@ namespace ignition
       IGN_ASSERT(!params.isNull(), "Null OGRE material GPU parameters");
 
       params->setNamedConstant("offsets", offsets);
-      params->setNamedConstant("mean", static_cast<Ogre::Real>(this->mean));
+      params->setNamedConstant("mean", static_cast<Ogre::Real>(this->dataPtr->mean));
       params->setNamedConstant("stddev", static_cast<Ogre::Real>(this->stddev));
     }
 
@@ -79,26 +78,43 @@ namespace ignition
     /// shader.
     private: double stddev;
   };
-  */
-}  // namespace ignition
+}*/
 
 using namespace ignition;
 using namespace sensors;
 
+class ignition::sensors::GaussianNoiseModelPrivate
+{
+  /// \brief If type starts with GAUSSIAN, the mean of the distribution
+  /// from which we sample when adding noise.
+  public: double mean = 0.0;
+
+  /// \brief If type starts with GAUSSIAN, the standard deviation of the
+  /// distribution from which we sample when adding noise.
+  public: double stdDev = 0.0;
+
+  /// \brief If type starts with GAUSSIAN, the bias we'll add.
+  public: double bias = 0.0;
+
+  /// \brief If type==GAUSSIAN_QUANTIZED, the precision to which
+  /// the output signal is rounded.
+  public: double precision = 0.0;
+
+  /// \brief True if the type is GAUSSIAN_QUANTIZED
+  public: bool quantized = false;
+};
+
 //////////////////////////////////////////////////
 GaussianNoiseModel::GaussianNoiseModel()
-  : Noise(Noise::GAUSSIAN),
-    mean(0.0),
-    stdDev(0.0),
-    bias(0.0),
-    precision(0.0),
-    quantized(false)
+  : Noise(NoiseType::GAUSSIAN), dataPtr(new GaussianNoiseModelPrivate())
 {
 }
 
 //////////////////////////////////////////////////
 GaussianNoiseModel::~GaussianNoiseModel()
 {
+  delete this->dataPtr;
+  this->dataPtr = nullptr;
 }
 
 //////////////////////////////////////////////////
@@ -107,8 +123,9 @@ void GaussianNoiseModel::Load(sdf::ElementPtr _sdf)
   Noise::Load(_sdf);
   std::ostringstream out;
 
-  this->mean = _sdf->Get<double>("mean");
-  this->stdDev = _sdf->Get<double>("stddev");
+  this->dataPtr->mean = _sdf->Get<double>("mean");
+  this->dataPtr->stdDev = _sdf->Get<double>("stddev");
+
   // Sample the bias
   double biasMean = 0;
   double biasStdDev = 0;
@@ -116,78 +133,76 @@ void GaussianNoiseModel::Load(sdf::ElementPtr _sdf)
     biasMean = _sdf->Get<double>("bias_mean");
   if (_sdf->HasElement("bias_stddev"))
     biasStdDev = _sdf->Get<double>("bias_stddev");
-  this->bias = ignition::math::Rand::DblNormal(biasMean, biasStdDev);
+  this->dataPtr->bias = ignition::math::Rand::DblNormal(biasMean, biasStdDev);
+
   // With equal probability, we pick a negative bias (by convention,
   // rateBiasMean should be positive, though it would work fine if
   // negative).
   if (ignition::math::Rand::DblUniform() < 0.5)
-    this->bias = -this->bias;
+    this->dataPtr->bias = -this->dataPtr->bias;
 
   this->Print(out);
 
   if (_sdf->HasElement("precision"))
   {
-    this->precision = _sdf->Get<double>("precision");
-    if (this->precision < 0)
+    this->dataPtr->precision = _sdf->Get<double>("precision");
+    if (this->dataPtr->precision < 0)
     {
       ignerr << "Noise precision cannot be less than 0" << std::endl;
     }
-    else if (!ignition::math::equal(this->precision, 0.0, 1e-6))
+    else if (!ignition::math::equal(this->dataPtr->precision, 0.0, 1e-6))
     {
-      this->quantized = true;
+      this->dataPtr->quantized = true;
     }
   }
-}
-
-//////////////////////////////////////////////////
-void GaussianNoiseModel::Fini()
-{
-  Noise::Fini();
 }
 
 //////////////////////////////////////////////////
 double GaussianNoiseModel::ApplyImpl(double _in)
 {
   // Add independent (uncorrelated) Gaussian noise to each input value.
-  double whiteNoise = ignition::math::Rand::DblNormal(this->mean, this->stdDev);
-  double output = _in + this->bias + whiteNoise;
-  if (this->quantized)
+  double whiteNoise = ignition::math::Rand::DblNormal(
+      this->dataPtr->mean, this->dataPtr->stdDev);
+  double output = _in + this->dataPtr->bias + whiteNoise;
+
+  if (this->dataPtr->quantized)
   {
-    // Apply this->precision
-    if (!ignition::math::equal(this->precision, 0.0, 1e-6))
+    // Apply this->dataPtr->precision
+    if (!ignition::math::equal(this->dataPtr->precision, 0.0, 1e-6))
     {
-      output = std::round(output / this->precision) * this->precision;
+      output = std::round(output / this->dataPtr->precision) *
+        this->dataPtr->precision;
     }
   }
   return output;
 }
 
 //////////////////////////////////////////////////
-double GaussianNoiseModel::GetMean() const
+double GaussianNoiseModel::Mean() const
 {
-  return this->mean;
+  return this->dataPtr->mean;
 }
 
 //////////////////////////////////////////////////
-double GaussianNoiseModel::GetStdDev() const
+double GaussianNoiseModel::StdDev() const
 {
-  return this->stdDev;
+  return this->dataPtr->stdDev;
 }
 
 //////////////////////////////////////////////////
-double GaussianNoiseModel::GetBias() const
+double GaussianNoiseModel::Bias() const
 {
-  return this->bias;
+  return this->dataPtr->bias;
 }
 
 //////////////////////////////////////////////////
 void GaussianNoiseModel::Print(std::ostream &_out) const
 {
-  _out << "Gaussian noise, mean[" << this->mean << "], "
-    << "stdDev[" << this->stdDev << "] "
-    << "bias[" << this->bias << "] "
-    << "precision[" << this->precision << "] "
-    << "quantized[" << this->quantized << "]";
+  _out << "Gaussian noise, mean[" << this->dataPtr->mean << "], "
+    << "stdDev[" << this->dataPtr->stdDev << "] "
+    << "bias[" << this->dataPtr->bias << "] "
+    << "precision[" << this->dataPtr->precision << "] "
+    << "quantized[" << this->dataPtr->quantized << "]";
 }
 
 
@@ -217,7 +232,7 @@ void ImageGaussianNoiseModel::SetCamera(rendering::CameraPtr _camera)
   IGN_ASSERT(_camera, "Unable to apply gaussian noise, camera is null");
 
   this->gaussianNoiseCompositorListener.reset(new
-        GaussianNoiseCompositorListener(this->mean, this->stdDev));
+        GaussianNoiseCompositorListener(this->dataPtr->mean, this->dataPtr->stdDev));
 
   this->gaussianNoiseInstance =
     Ogre::CompositorManager::getSingleton().addCompositor(
@@ -228,18 +243,12 @@ void ImageGaussianNoiseModel::SetCamera(rendering::CameraPtr _camera)
 }
 
 //////////////////////////////////////////////////
-void ImageGaussianNoiseModel::Fini()
-{
-  GaussianNoiseModel::Fini();
-}
-
-//////////////////////////////////////////////////
 void ImageGaussianNoiseModel::Print(std::ostream &_out) const
 {
-  _out << "Image Gaussian noise, mean[" << this->mean << "], "
-    << "stdDev[" << this->stdDev << "] "
-    << "bias[" << this->bias << "] "
-    << "precision[" << this->precision << "] "
-    << "quantized[" << this->quantized << "]";
+  _out << "Image Gaussian noise, mean[" << this->dataPtr->mean << "], "
+    << "stdDev[" << this->dataPtr->stdDev << "] "
+    << "bias[" << this->dataPtr->bias << "] "
+    << "precision[" << this->dataPtr->precision << "] "
+    << "quantized[" << this->dataPtr->quantized << "]";
 }
 */
