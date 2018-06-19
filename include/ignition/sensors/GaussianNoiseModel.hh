@@ -115,7 +115,7 @@ namespace ignition
 
 
       /// \brief Gaussian noise compositor listener
-      public: boost::shared_ptr<GaussianNoiseCompositorListener>
+      public: std::shared_ptr<GaussianNoiseCompositorListener>
         gaussianNoiseCompositorListener;
       */
     };

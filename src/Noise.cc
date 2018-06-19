@@ -21,7 +21,7 @@
   #include <Winsock2.h>
 #endif
 
-#include <boost/function.hpp>
+#include <functional>
 #include "ignition/common/Console.hh"
 
 #include "ignition/sensors/GaussianNoiseModel.hh"
@@ -135,7 +135,7 @@ Noise::NoiseType Noise::GetNoiseType() const
 }
 
 //////////////////////////////////////////////////
-void Noise::SetCustomNoiseCallback(boost::function<double (double)> _cb)
+void Noise::SetCustomNoiseCallback(std::function<double (double)> _cb)
 {
   this->type = CUSTOM;
   this->customNoiseCallback = _cb;

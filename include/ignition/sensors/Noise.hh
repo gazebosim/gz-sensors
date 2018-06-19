@@ -18,15 +18,15 @@
 #ifndef IGNITION_NOISE_HH_
 #define IGNITION_NOISE_HH_
 
-#include <vector>
+#include <functional>
 #include <string>
+#include <vector>
 
-#include <boost/function.hpp>
-#include <sdf/sdf.hh>
-
-#include "ignition/rendering/RenderTypes.hh"
-#include "ignition/sensors/SensorTypes.hh"
+#include <ignition/rendering/RenderTypes.hh>
+#include <ignition/sensors/SensorTypes.hh>
 #include <ignition/sensors/Export.hh>
+
+#include <sdf/sdf.hh>
 
 namespace ignition
 {
@@ -100,7 +100,7 @@ namespace ignition
       /// This is useful if users want to use their own noise model from a
       /// sensor plugin.
       public: virtual void SetCustomNoiseCallback(
-          boost::function<double (double)> _cb);
+          std::function<double (double)> _cb);
 
       /// \brief Set camera needed to create image noise. This is only needed
       /// for image sensors, i.e. camera/multicamera/depth sensors, which use

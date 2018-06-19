@@ -17,12 +17,6 @@
 
 #include <gtest/gtest.h>
 
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
-#include <boost/bind.hpp>
-
 #include <ignition/math/Rand.hh>
 
 #include "ignition/sensors/Noise.hh"
@@ -126,16 +120,22 @@ void GaussianNoise(sensors::NoisePtr _noise, unsigned int _count)
   // Use constant input and repeatedly add noise to it.
   double x = 42.0;
 
-  // boost code from http://stackoverflow.com/questions/3534335
-  boost::accumulators::accumulator_set<double,
-    boost::accumulators::stats<boost::accumulators::tag::mean,
-                               boost::accumulators::tag::variance > > acc;
-
+  std::vector<double> values;
   for (unsigned int i = 0; i < _count; ++i)
   {
     double y = _noise->Apply(x);
-    acc(y);
+    values.push_back(y);
   }
+
+  // std::accumulate code from http://stackoverflow.com/questions/7616511
+  double sum_values = std::accumulate(values.begin(), values.end(), 0.0);
+  double mean_values = sum_values / values.size();
+  std::vector<double> diff(values.size());
+  std::transform(values.begin(), values.end(), diff.begin(),
+      [mean_values](double value) { return value - mean_values; });
+  double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+  double stdev_values = std::sqrt(sq_sum / values.size());
+  double variance_values = stdev_values*stdev_values;
 
   // The sample mean should be near x+mean, with standard deviation of
   // stddev / sqrt(_count)
@@ -144,7 +144,7 @@ void GaussianNoise(sensors::NoisePtr _noise, unsigned int _count)
   double mean = noiseModel->GetMean() + noiseModel->GetBias();
   double stddev = noiseModel->GetStdDev();
   double sampleStdDev = g_sigma*stddev / sqrt(_count);
-  EXPECT_NEAR(boost::accumulators::mean(acc), x+mean, sampleStdDev);
+  EXPECT_NEAR(mean_values, x+mean, sampleStdDev);
 
   // The sample variance has the following variance:
   // 2 stddev^4 / (_count - 1)
@@ -152,8 +152,7 @@ void GaussianNoise(sensors::NoisePtr _noise, unsigned int _count)
   // Again use 5 sigma
   double variance = stddev*stddev;
   double sampleVariance2 = 2 * variance*variance / (_count - 1);
-  EXPECT_NEAR(boost::accumulators::variance(acc),
-              variance, g_sigma*sqrt(sampleVariance2));
+  EXPECT_NEAR(variance_values, variance, g_sigma*sqrt(sampleVariance2));
 }
 
 //////////////////////////////////////////////////
@@ -213,27 +212,33 @@ TEST(NoiseTest, ApplyGaussian)
   biasMean = 0.0;
   biasStddev = 5.0;
   {
-    boost::accumulators::accumulator_set<double,
-      boost::accumulators::stats<boost::accumulators::tag::mean,
-                                 boost::accumulators::tag::variance > > acc;
-
+    std::vector<double> values;
     for (unsigned int i = 0; i < g_applyCount; ++i)
     {
       sensors::NoisePtr noise = sensors::NoiseFactory::NewNoiseModel(
           NoiseSdf("gaussian", mean, stddev, biasMean, biasStddev, 0));
       sensors::GaussianNoiseModelPtr gaussianNoise =
         std::dynamic_pointer_cast<sensors::GaussianNoiseModel>(noise);
-      acc(gaussianNoise->GetBias());
+      values.push_back(gaussianNoise->GetBias());
     }
+
+    // std::accumulate code from http://stackoverflow.com/questions/7616511
+    double sum_values = std::accumulate(values.begin(), values.end(), 0.0);
+    double mean_values = sum_values / values.size();
+    std::vector<double> diff(values.size());
+    std::transform(values.begin(), values.end(), diff.begin(),
+        [mean_values](double value) { return value - mean_values; });
+    double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    double stdev_values = std::sqrt(sq_sum / values.size());
+    double variance_values = stdev_values*stdev_values;
 
     // See comments in GaussianNoise function to explain these calculations.
     double sampleStdDev = g_sigma*biasStddev / sqrt(g_applyCount);
-    EXPECT_NEAR(boost::accumulators::mean(acc), 0.0, sampleStdDev);
+    EXPECT_NEAR(mean_values, 0.0, sampleStdDev);
 
     double variance = biasStddev*biasStddev;
     double sampleVariance2 = 2 * variance*variance / (g_applyCount - 1);
-    EXPECT_NEAR(boost::accumulators::variance(acc),
-                variance, g_sigma*sqrt(sampleVariance2));
+    EXPECT_NEAR(variance_values, variance, g_sigma*sqrt(sampleVariance2));
   }
 }
 
@@ -296,10 +301,7 @@ TEST(NoiseTest, ApplyGaussianQuantized)
   biasStddev = 5.0;
   precision = 0.0;
   {
-    boost::accumulators::accumulator_set<double,
-      boost::accumulators::stats<boost::accumulators::tag::mean,
-                                 boost::accumulators::tag::variance > > acc;
-
+    std::vector<double> values;
     for (unsigned int i = 0; i < g_applyCount; ++i)
     {
       sensors::NoisePtr noise = sensors::NoiseFactory::NewNoiseModel(
@@ -307,17 +309,26 @@ TEST(NoiseTest, ApplyGaussianQuantized)
           biasStddev, precision));
       sensors::GaussianNoiseModelPtr gaussianNoise =
         std::dynamic_pointer_cast<sensors::GaussianNoiseModel>(noise);
-      acc(gaussianNoise->GetBias());
+      values.push_back(gaussianNoise->GetBias());
     }
+
+    // std::accumulate code from http://stackoverflow.com/questions/7616511
+    double sum_values = std::accumulate(values.begin(), values.end(), 0.0);
+    double mean_values = sum_values / values.size();
+    std::vector<double> diff(values.size());
+    std::transform(values.begin(), values.end(), diff.begin(),
+        [mean_values](double value) { return value - mean_values; });
+    double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    double stdev_values = std::sqrt(sq_sum / values.size());
+    double variance_values = stdev_values*stdev_values;
 
     // See comments in GaussianNoise function to explain these calculations.
     double sampleStdDev = g_sigma*biasStddev / sqrt(g_applyCount);
-    EXPECT_NEAR(boost::accumulators::mean(acc), 0.0, sampleStdDev);
+    EXPECT_NEAR(mean_values, 0.0, sampleStdDev);
 
     double variance = biasStddev*biasStddev;
     double sampleVariance2 = 2 * variance*variance / (g_applyCount - 1);
-    EXPECT_NEAR(boost::accumulators::variance(acc),
-                variance, g_sigma*sqrt(sampleVariance2));
+    EXPECT_NEAR(variance_values, variance, g_sigma*sqrt(sampleVariance2));
   }
 
   // Test precision
@@ -361,7 +372,7 @@ TEST(NoiseTest, OnApplyNoise)
   EXPECT_TRUE(noise->GetNoiseType() == sensors::Noise::CUSTOM);
 
   noise->SetCustomNoiseCallback(
-    boost::bind(&OnApplyCustomNoise, _1));
+    std::bind(&OnApplyCustomNoise, std::placeholders::_1));
 
   for (double i = 0; i < 100; i += 1)
   {
