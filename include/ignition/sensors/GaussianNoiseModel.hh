@@ -32,8 +32,9 @@ namespace ignition
     // Forward declarations
     class GaussianNoiseModelPrivate;
 
-    /// \class GaussianNoiseModel GaussianNoiseModel.hh
-    /// ignition/sensors/GaussianNoiseModel.hh
+    /** \class GaussianNoiseModel GaussianNoiseModel.hh \
+    ignition/sensors/GaussianNoiseModel.hh
+    **/
     /// \brief Gaussian noise class
     class IGNITION_SENSORS_VISIBLE GaussianNoiseModel : public Noise
     {
