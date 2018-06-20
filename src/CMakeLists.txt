@@ -3,10 +3,14 @@ set (sources
   Events.cc
   Manager.cc
   Sensor.cc
+  Noise.cc
+  GaussianNoiseModel.cc
+  SensorTypes.cc
 )
 
 set (gtest_sources
   Manager_TEST.cc
+  Noise_TEST.cc
 )
 
 # Create the library target.
