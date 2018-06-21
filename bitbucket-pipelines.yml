@@ -16,14 +16,6 @@ pipelines:
           - cd lcov
           - make install
           - cd ..
-          # SDFormat
-          - hg clone http://bitbucket.org/osrf/sdformat -b gz11
-          - cd sdformat
-          - mkdir build
-          - cd build
-          - cmake .. # -DENABLE_TESTS_COMPILATION=false
-          - make -j4 install
-          - cd ../..
           # Ignition cmake
           - hg clone http://bitbucket.org/ignitionrobotics/ign-cmake -b gz11
           - cd ign-cmake
@@ -35,6 +27,14 @@ pipelines:
           # Ignition tools
           - hg clone http://bitbucket.org/ignitionrobotics/ign-tools
           - cd ign-tools
+          - mkdir build
+          - cd build
+          - cmake .. # -DENABLE_TESTS_COMPILATION=false
+          - make -j4 install
+          - cd ../..
+          # SDFormat
+          - hg clone http://bitbucket.org/osrf/sdformat -b gz11
+          - cd sdformat
           - mkdir build
           - cd build
           - cmake .. # -DENABLE_TESTS_COMPILATION=false
