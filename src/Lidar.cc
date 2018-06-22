@@ -15,7 +15,7 @@
  *
 */
 
-#include <ignition/sensors/LidarSensor.hh>
+#include <ignition/sensors/Lidar.hh>
 
 #include <ignition/common/Console.hh>
 #include <ignition/common/PluginMacros.hh>
@@ -27,13 +27,13 @@
 using namespace ignition::sensors;
 
 
-class ignition::sensors::LidarSensorPrivate
+class ignition::sensors::LidarPrivate
 {
   /// \brief constructor
-  public: LidarSensorPrivate();
+  public: LidarPrivate();
 
   /// \brief destructor
-  public: ~LidarSensorPrivate();
+  public: ~LidarPrivate();
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
@@ -102,40 +102,40 @@ class ignition::sensors::LidarSensorPrivate
 };
 
 //////////////////////////////////////////////////
-LidarSensorPrivate::LidarSensorPrivate()
+LidarPrivate::LidarPrivate()
 {
 }
 
 //////////////////////////////////////////////////
-LidarSensorPrivate::~LidarSensorPrivate()
+LidarPrivate::~LidarPrivate()
 {
 }
 
 //////////////////////////////////////////////////
-LidarSensor::LidarSensor()
-  : dataPtr(new LidarSensorPrivate())
+Lidar::Lidar()
+  : dataPtr(new LidarPrivate())
 {
 }
 
 //////////////////////////////////////////////////
-LidarSensor::~LidarSensor()
+Lidar::~Lidar()
 {
   this->Fini();
 }
 
 //////////////////////////////////////////////////
-bool LidarSensor::Init()
+bool Lidar::Init()
 {
   return this->Sensor::Init();
 }
 
 //////////////////////////////////////////////////
-void LidarSensor::Fini()
+void Lidar::Fini()
 {
 }
 
 //////////////////////////////////////////////////
-bool LidarSensor::Load(sdf::ElementPtr _sdf)
+bool Lidar::Load(sdf::ElementPtr _sdf)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
@@ -145,7 +145,7 @@ bool LidarSensor::Load(sdf::ElementPtr _sdf)
     if (!_sdf->GetElement("ray"))
     {
       ignerr << "<sensor><camera> SDF element not found while attempting to "
-        << "load a ignition::sensors::LidarSensor\n";
+        << "load a ignition::sensors::Lidar\n";
       return false;
     }
   }
@@ -179,7 +179,7 @@ bool LidarSensor::Load(sdf::ElementPtr _sdf)
 
   if (this->dataPtr->horzRayCount == 0 || this->dataPtr->vertRayCount == 0)
   {
-    ignerr << "LidarSensor: Image has 0 size!\n";
+    ignerr << "Lidar: Image has 0 size!\n";
   }
 
   this->dataPtr->horzRangeCount = this->RangeCount();
@@ -203,7 +203,7 @@ bool LidarSensor::Load(sdf::ElementPtr _sdf)
 }
 
 /////////////////////////////////////////////////
-ignition::common::ConnectionPtr LidarSensor::ConnectNewLaserFrame(
+ignition::common::ConnectionPtr Lidar::ConnectNewLaserFrame(
           std::function<void(const float *, unsigned int, unsigned int,
             unsigned int, const std::string &)> _subscriber)
 {
@@ -211,13 +211,13 @@ ignition::common::ConnectionPtr LidarSensor::ConnectNewLaserFrame(
 }
 
 //////////////////////////////////////////////////
-bool LidarSensor::Update(const common::Time &/*_now*/)
+bool Lidar::Update(const common::Time &/*_now*/)
 {
   return true;
 }
 
 //////////////////////////////////////////////////
-bool LidarSensor::PublishLaserScan(const common::Time &_now)
+bool Lidar::PublishLaserScan(const common::Time &_now)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
@@ -302,81 +302,81 @@ bool LidarSensor::PublishLaserScan(const common::Time &_now)
 }
 
 //////////////////////////////////////////////////
-bool LidarSensor::IsHorizontal() const
+bool Lidar::IsHorizontal() const
 {
 //  return this->dataPtr->laserCam->IsHorizontal();
   return 0;
 }
 
 //////////////////////////////////////////////////
-double LidarSensor::RangeCountRatio() const
+double Lidar::RangeCountRatio() const
 {
   return this->dataPtr->rangeCountRatio;
 }
 
 //////////////////////////////////////////////////
-ignition::math::Angle LidarSensor::AngleMin() const
+ignition::math::Angle Lidar::AngleMin() const
 {
   return this->dataPtr->horzElem->Get<double>("min_angle");
 }
 
 //////////////////////////////////////////////////
-void LidarSensor::SetAngleMin(double _angle)
+void Lidar::SetAngleMin(double _angle)
 {
   this->dataPtr->horzElem->GetElement("min_angle")->Set(_angle);
 }
 
 //////////////////////////////////////////////////
-ignition::math::Angle LidarSensor::AngleMax() const
+ignition::math::Angle Lidar::AngleMax() const
 {
   return this->dataPtr->horzElem->Get<double>("max_angle");
 }
 
 //////////////////////////////////////////////////
-void LidarSensor::SetAngleMax(double _angle)
+void Lidar::SetAngleMax(double _angle)
 {
   this->dataPtr->horzElem->GetElement("max_angle")->Set(_angle);
 }
 
 //////////////////////////////////////////////////
-double LidarSensor::RangeMin() const
+double Lidar::RangeMin() const
 {
   return this->dataPtr->rangeElem->Get<double>("min");
 }
 
 //////////////////////////////////////////////////
-double LidarSensor::RangeMax() const
+double Lidar::RangeMax() const
 {
   return this->dataPtr->rangeElem->Get<double>("max");
 }
 
 /////////////////////////////////////////////////
-double LidarSensor::AngleResolution() const
+double Lidar::AngleResolution() const
 {
   return (this->AngleMax() - this->AngleMin()).Radian() /
     (this->RangeCount()-1);
 }
 
 //////////////////////////////////////////////////
-double LidarSensor::RangeResolution() const
+double Lidar::RangeResolution() const
 {
   return this->dataPtr->rangeElem->Get<double>("resolution");
 }
 
 //////////////////////////////////////////////////
-int LidarSensor::RayCount() const
+int Lidar::RayCount() const
 {
   return this->dataPtr->horzElem->Get<unsigned int>("samples");
 }
 
 //////////////////////////////////////////////////
-int LidarSensor::RangeCount() const
+int Lidar::RangeCount() const
 {
   return this->RayCount() * this->dataPtr->horzElem->Get<double>("resolution");
 }
 
 //////////////////////////////////////////////////
-int LidarSensor::VerticalRayCount() const
+int Lidar::VerticalRayCount() const
 {
   if (this->dataPtr->scanElem->HasElement("vertical"))
     return this->dataPtr->vertElem->Get<unsigned int>("samples");
@@ -385,7 +385,7 @@ int LidarSensor::VerticalRayCount() const
 }
 
 //////////////////////////////////////////////////
-int LidarSensor::VerticalRangeCount() const
+int Lidar::VerticalRangeCount() const
 {
   if (this->dataPtr->scanElem->HasElement("vertical"))
   {
@@ -401,7 +401,7 @@ int LidarSensor::VerticalRangeCount() const
 }
 
 //////////////////////////////////////////////////
-ignition::math::Angle LidarSensor::VerticalAngleMin() const
+ignition::math::Angle Lidar::VerticalAngleMin() const
 {
   if (this->dataPtr->scanElem->HasElement("vertical"))
     return this->dataPtr->vertElem->Get<double>("min_angle");
@@ -410,14 +410,14 @@ ignition::math::Angle LidarSensor::VerticalAngleMin() const
 }
 
 //////////////////////////////////////////////////
-void LidarSensor::SetVerticalAngleMin(const double _angle)
+void Lidar::SetVerticalAngleMin(const double _angle)
 {
   if (this->dataPtr->scanElem->HasElement("vertical"))
     this->dataPtr->vertElem->GetElement("min_angle")->Set(_angle);
 }
 
 //////////////////////////////////////////////////
-ignition::math::Angle LidarSensor::VerticalAngleMax() const
+ignition::math::Angle Lidar::VerticalAngleMax() const
 {
   if (this->dataPtr->scanElem->HasElement("vertical"))
     return this->dataPtr->vertElem->Get<double>("max_angle");
@@ -426,21 +426,21 @@ ignition::math::Angle LidarSensor::VerticalAngleMax() const
 }
 
 //////////////////////////////////////////////////
-double LidarSensor::VerticalAngleResolution() const
+double Lidar::VerticalAngleResolution() const
 {
   return (this->VerticalAngleMax() - this->VerticalAngleMin()).Radian() /
     (this->VerticalRangeCount()-1);
 }
 
 //////////////////////////////////////////////////
-void LidarSensor::SetVerticalAngleMax(const double _angle)
+void Lidar::SetVerticalAngleMax(const double _angle)
 {
   if (this->dataPtr->scanElem->HasElement("vertical"))
     this->dataPtr->vertElem->GetElement("max_angle")->Set(_angle);
 }
 
 //////////////////////////////////////////////////
-void LidarSensor::Ranges(std::vector<double> &_ranges) const
+void Lidar::Ranges(std::vector<double> &_ranges) const
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
@@ -450,7 +450,7 @@ void LidarSensor::Ranges(std::vector<double> &_ranges) const
 }
 
 //////////////////////////////////////////////////
-double LidarSensor::Range(const int _index) const
+double Lidar::Range(const int _index) const
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
@@ -469,20 +469,20 @@ double LidarSensor::Range(const int _index) const
 }
 
 //////////////////////////////////////////////////
-double LidarSensor::Retro(const int /*_index*/) const
+double Lidar::Retro(const int /*_index*/) const
 {
   return 0.0;
 }
 
 //////////////////////////////////////////////////
-int LidarSensor::Fiducial(const unsigned int /*_index*/) const
+int Lidar::Fiducial(const unsigned int /*_index*/) const
 {
   return -1;
 }
 
 
 //////////////////////////////////////////////////
-bool LidarSensor::IsActive() const
+bool Lidar::IsActive() const
 {
 //  return Sensor::IsActive() ||
 //    (this->dataPtr->pub && this->dataPtr->pub->HasConnections());
@@ -490,5 +490,5 @@ bool LidarSensor::IsActive() const
 }
 
 IGN_COMMON_REGISTER_SINGLE_PLUGIN(
-    ignition::sensors::LidarSensor,
+    ignition::sensors::Lidar,
     ignition::sensors::Sensor)

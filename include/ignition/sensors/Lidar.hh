@@ -31,7 +31,7 @@ namespace ignition
   namespace sensors
   {
     /// \brief forward declarations
-    class LidarSensorPrivate;
+    class LidarPrivate;
 
     /// \brief Lidar Sensor Class
     ///
@@ -42,13 +42,13 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-    class IGNITION_SENSORS_VISIBLE LidarSensor : public Sensor
+    class IGNITION_SENSORS_VISIBLE Lidar : public Sensor
     {
       /// \brief constructor
-      public: LidarSensor();
+      public: Lidar();
 
       /// \brief destructor
-      public: virtual ~LidarSensor();
+      public: virtual ~Lidar();
 
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
@@ -226,7 +226,7 @@ namespace ignition
 
       /// \brief Data pointer for private data
       /// \internal
-      private: std::unique_ptr<LidarSensorPrivate> dataPtr;
+      private: std::unique_ptr<LidarPrivate> dataPtr;
     };
   }
 }

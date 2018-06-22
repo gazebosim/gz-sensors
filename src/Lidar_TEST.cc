@@ -23,7 +23,7 @@
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Manager.hh>
 
-#include <ignition/sensors/LidarSensor.hh>
+#include <ignition/sensors/Lidar.hh>
 
 
 sdf::ElementPtr LidarToSDF(std::string name, double update_rate,
@@ -91,7 +91,7 @@ void OnNewLaserFrame(int *_scanCounter, float *_scanDest,
 
 /////////////////////////////////////////////////
 /// \brief Test Creation of a Lidar sensor
-TEST(LidarSensor_TEST, CreateLaser)
+TEST(Lidar_TEST, CreateLaser)
 {
   // Create a sensor manager
   ignition::sensors::Manager mgr;
@@ -120,7 +120,7 @@ TEST(LidarSensor_TEST, CreateLaser)
     range_resolution, range_min, range_max, always_on, visualize);
 
   // Create a CameraSensor
-  auto sensor = mgr.CreateSensor<ignition::sensors::LidarSensor>(
+  auto sensor = mgr.CreateSensor<ignition::sensors::Lidar>(
       lidarSDF);
 
   // Make sure the above dynamic cast worked.
