@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_LIDARSENSOR_HH_
-#define IGNITION_SENSORS_LIDARSENSOR_HH_
+#ifndef IGNITION_SENSORS_LIDAR_HH_
+#define IGNITION_SENSORS_LIDAR_HH_
 
 #include <memory>
 #include <string>
