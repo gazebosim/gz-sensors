@@ -4,11 +4,15 @@ set (sources
   Manager.cc
   Sensor.cc
   LidarSensor.cc
+  Noise.cc
+  GaussianNoiseModel.cc
+  SensorTypes.cc
 )
 
 set (gtest_sources
   Manager_TEST.cc
   LidarSensor_TEST.cc
+  Noise_TEST.cc
 )
 
 # Create the library target.
