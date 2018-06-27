@@ -84,7 +84,7 @@ namespace ignition
 
       /// \brief Create a camera in a scene
       /// \return True on success.
-      private: bool CreateCamera();
+      public: virtual bool CreateCamera();
 
       /// \brief Callback that is triggered when the scene changes on
       /// the Manager.

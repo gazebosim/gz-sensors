@@ -15,24 +15,7 @@
  *
 */
 
-#include <cstdint>
-#include <mutex>
-#include <string>
 #include <ignition/sensors/DepthCameraSensor.hh>
-
-#include <ignition/common/Console.hh>
-#include <ignition/common/Image.hh>
-#include <ignition/common/PluginMacros.hh>
-#include <ignition/math/Angle.hh>
-#include <ignition/rendering/Camera.hh>
-#include <ignition/transport.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/Events.hh>
-
-const std::string vertex_shader_path = "media/vertex_shader.glsl";
-const std::string fragment_shader_path = "media/fragment_shader.glsl";
-const std::string depth_vertex_shader_path = "media/depth_vertex_shader.glsl";
-const std::string depth_fragment_shader_path = "media/depth_fragment_shader.glsl";
 
 using namespace ignition::sensors;
 
@@ -95,6 +78,63 @@ class ignition::sensors::DepthCameraSensorPrivate
   /// \brief counter used to set the image filename
   public: std::uint64_t saveImageCounter = 0;
 };
+
+//////////////////////////////////////////////////
+void DepthCameraSensorPrivate::RemoveCamera(ignition::rendering::ScenePtr _scene)
+{
+  if (_scene)
+  {
+    // \todo(nkoenig) Remove camera from scene!
+  }
+  this->camera = nullptr;
+}
+
+//////////////////////////////////////////////////
+bool DepthCameraSensorPrivate::SaveImage(const unsigned char *_data,
+    unsigned int _width, unsigned int _height,
+    common::Image::PixelFormatType _format)
+{
+  // Attempt to create the directory if it doesn't exist
+  if (!ignition::common::isDirectory(this->saveImagePath))
+  {
+    if (!ignition::common::createDirectories(this->saveImagePath))
+      return false;
+  }
+
+  std::string filename = this->saveImagePrefix +
+                         std::to_string(this->saveImageCounter) + ".png";
+  ++this->saveImageCounter;
+
+  ignition::common::Image localImage;
+  localImage.SetFromData(_data, _width, _height, _format);
+
+  localImage.SavePNG(
+      ignition::common::joinPaths(this->saveImagePath, filename));
+  return true;
+}
+
+//////////////////////////////////////////////////
+DepthCameraSensor::DepthCameraSensor()
+  : CameraSensor(), dataPtr(new DepthCameraSensorPrivate())
+{
+}
+
+//////////////////////////////////////////////////
+DepthCameraSensor::~DepthCameraSensor()
+{
+}
+
+//////////////////////////////////////////////////
+bool DepthCameraSensor::Init()
+{
+  return this->CameraSensor::Init();
+}
+
+//////////////////////////////////////////////////
+bool DepthCameraSensor::Load(sdf::ElementPtr _sdf)
+{
+  return this->CameraSensor::Load(_sdf);
+}
 
 //////////////////////////////////////////////////
 bool DepthCameraSensor::CreateCamera()
@@ -178,78 +218,6 @@ bool DepthCameraSensor::CreateCamera()
   return true;
 }
 
-//////////////////////////////////////////////////
-void DepthCameraSensorPrivate::RemoveCamera(ignition::rendering::ScenePtr _scene)
-{
-  if (_scene)
-  {
-    // \todo(nkoenig) Remove camera from scene!
-  }
-  this->camera = nullptr;
-}
-
-//////////////////////////////////////////////////
-DepthCameraSensor::DepthCameraSensor()
-  : dataPtr(new DepthCameraSensorPrivate())
-{
-}
-
-//////////////////////////////////////////////////
-DepthCameraSensor::~DepthCameraSensor()
-{
-}
-
-//////////////////////////////////////////////////
-bool DepthCameraSensor::Init()
-{
-  return this->Sensor::Init();
-}
-
-//////////////////////////////////////////////////
-bool DepthCameraSensor::Load(sdf::ElementPtr _sdf)
-{
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  // Check if this is being loaded via "builtin" or via a plugin
-  if (_sdf->GetName() == "sensor")
-  {
-    if (!_sdf->GetElement("camera"))
-    {
-      ignerr << "<sensor><camera> SDF element not found while attempting to "
-        << "load a ignition::sensors::DepthCameraSensor\n";
-      return false;
-    }
-  }
-
-  if (!Sensor::Load(_sdf))
-  {
-    return false;
-  }
-
-  this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::Image>(
-          this->Topic());
-  if (!this->dataPtr->pub)
-    return false;
-
-  if (this->dataPtr->scene)
-  {
-    this->CreateCamera();
-  }
-
-  this->dataPtr->sceneChangeConnection = Events::ConnectSceneChangeCallback(
-      std::bind(&DepthCameraSensor::SetScene, this, std::placeholders::_1));
-
-  this->dataPtr->initialized = true;
-  return true;
-}
-
-/////////////////////////////////////////////////
-ignition::common::ConnectionPtr DepthCameraSensor::ConnectImageCallback(
-    std::function<void(const ignition::msgs::Image &)> _callback)
-{
-  return this->dataPtr->imageEvent.Connect(_callback);
-}
-
 /////////////////////////////////////////////////
 void DepthCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 {
@@ -301,7 +269,7 @@ bool DepthCameraSensor::Update(const common::Time &_now)
   switch (this->dataPtr->camera->ImageFormat())
   {
     case ignition::rendering::PF_R8G8B8:
-      format = ignition::common::Image::RGB_INT8;
+      format = ignition::common::Image::R_FLOAT32;
       break;
     default:
       ignerr << "Unsupported pixel format ["
@@ -339,30 +307,6 @@ bool DepthCameraSensor::Update(const common::Time &_now)
     this->dataPtr->SaveImage(data, width, height, format);
   }
 
-  return true;
-}
-
-//////////////////////////////////////////////////
-bool DepthCameraSensorPrivate::SaveImage(const unsigned char *_data,
-    unsigned int _width, unsigned int _height,
-    common::Image::PixelFormatType _format)
-{
-  // Attempt to create the directory if it doesn't exist
-  if (!ignition::common::isDirectory(this->saveImagePath))
-  {
-    if (!ignition::common::createDirectories(this->saveImagePath))
-      return false;
-  }
-
-  std::string filename = this->saveImagePrefix +
-                         std::to_string(this->saveImageCounter) + ".png";
-  ++this->saveImageCounter;
-
-  ignition::common::Image localImage;
-  localImage.SetFromData(_data, _width, _height, _format);
-
-  localImage.SavePNG(
-      ignition::common::joinPaths(this->saveImagePath, filename));
   return true;
 }
 
