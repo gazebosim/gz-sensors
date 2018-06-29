@@ -62,28 +62,28 @@ class ignition::sensors::LidarPrivate
                dataEvent;
 
   /// \brief Raw buffer of laser data.
-  public: float *laserBuffer;
+  public: float *laserBuffer = nullptr;
 
   /// \brief Horizontal ray count.
-  public: unsigned int horzRayCount;
+  public: unsigned int horzRayCount = 0;
 
   /// \brief Vertical ray count.
-  public: unsigned int vertRayCount;
+  public: unsigned int vertRayCount = 0;
 
   /// \brief Horizontal range count.
-  public: unsigned int horzRangeCount;
+  public: unsigned int horzRangeCount = 0;
 
   /// \brief Vertical range count.
-  public: unsigned int vertRangeCount;
+  public: unsigned int vertRangeCount = 0;
 
   /// \brief Range count ratio.
-  public: double rangeCountRatio;
+  public: double rangeCountRatio = 0;
 
   /// \brief The minimum range.
-  public: double rangeMin;
+  public: double rangeMin = 0;
 
   /// \brief The maximum range.
-  public: double rangeMax;
+  public: double rangeMax = 0;
 
   /// \brief Scan SDF element.
   public: sdf::ElementPtr scanElem;
