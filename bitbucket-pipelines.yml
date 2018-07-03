@@ -6,7 +6,7 @@ pipelines:
         script: # Modify the commands below to build your repository.
           - apt update
           - apt-get -y install
-            cmake pkg-config cppcheck libogre-1.9-dev libglew-dev libfreeimage-dev doxygen ruby-ronn freeglut3-dev libxmu-dev libxi-dev curl git mercurial  g++-8
+            cmake pkg-config cppcheck libogre-1.9-dev libglew-dev libfreeimage-dev doxygen ruby-ronn uuid-dev freeglut3-dev libxmu-dev libxi-dev curl git mercurial g++-8
               libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libfreeimage-dev libgts-dev libswscale-dev libtinyxml2-dev libtinyxml-dev libprotobuf-dev
               protobuf-compiler libprotoc-dev libzmq3-dev sqlite3
           - update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8 --slave /usr/bin/gcov gcov /usr/bin/gcov-8
