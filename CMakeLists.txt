@@ -81,6 +81,8 @@ include_directories(${SDFormat_INCLUDE_DIRS})
 
 set(IGN_SENSORS_PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 
+add_subdirectory(media)
+
 #============================================================================
 # Configure the build
 #============================================================================

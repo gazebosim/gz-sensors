@@ -17,17 +17,32 @@
 #ifndef IGNITION_SENSORS_CAMERASENSOR_HH_
 #define IGNITION_SENSORS_CAMERASENSOR_HH_
 
+#include <cstdint>
 #include <memory>
+#include <mutex>
+#include <string>
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/Time.hh>
+#include <ignition/common/Console.hh>
 #include <ignition/common/Event.hh>
+#include <ignition/common/Image.hh>
+#include <ignition/common/PluginMacros.hh>
+#include <ignition/common/Time.hh>
+
+#include <ignition/math/Angle.hh>
 #include <ignition/math/Pose3.hh>
-#include <ignition/rendering/Camera.hh>
+
 #include <ignition/msgs.hh>
+
 #include <ignition/sensors/Export.hh>
+#include <ignition/sensors/Events.hh>
+#include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/Sensor.hh>
+
+#include <ignition/rendering/Camera.hh>
+
+#include <ignition/transport.hh>
 
 namespace ignition
 {
@@ -84,7 +99,7 @@ namespace ignition
 
       /// \brief Create a camera in a scene
       /// \return True on success.
-      public: virtual bool CreateCamera();
+      private: bool CreateCamera();
 
       /// \brief Callback that is triggered when the scene changes on
       /// the Manager.

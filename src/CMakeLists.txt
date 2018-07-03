@@ -1,9 +1,7 @@
 set (sources
-  CameraConfig.cc
   Events.cc
   Manager.cc
   Sensor.cc
-  DepthCameraSensor.cc
   Noise.cc
   GaussianNoiseModel.cc
   SensorTypes.cc

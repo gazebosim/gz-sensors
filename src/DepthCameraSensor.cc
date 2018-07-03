@@ -67,13 +67,13 @@ class ignition::sensors::DepthCameraSensorPrivate
   public: std::mutex mutex;
 
   /// \brief True to save images
-  public: bool saveImage = false;
+  public: bool saveImage = true;
 
   /// \brief path directory to where images are saved
-  public: std::string saveImagePath = "";
+  public: std::string saveImagePath = "./";
 
   /// \prefix of an image name
-  public: std::string saveImagePrefix = "";
+  public: std::string saveImagePrefix = "./";
 
   /// \brief counter used to set the image filename
   public: std::uint64_t saveImageCounter = 0;
@@ -133,6 +133,39 @@ bool DepthCameraSensor::Init()
 //////////////////////////////////////////////////
 bool DepthCameraSensor::Load(sdf::ElementPtr _sdf)
 {
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  // Check if this is being loaded via "builtin" or via a plugin
+  if (_sdf->GetName() == "sensor")
+  {
+    if (!_sdf->GetElement("camera"))
+    {
+      ignerr << "<sensor><camera> SDF element not found while attempting to "
+        << "load a ignition::sensors::DepthCameraSensor\n";
+      return false;
+    }
+  }
+
+  if (!Sensor::Load(_sdf))
+  {
+    return false;
+  }
+
+  this->dataPtr->pub =
+      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+          this->Topic());
+  if (!this->dataPtr->pub)
+    return false;
+
+  if (this->dataPtr->scene)
+  {
+    this->CreateCamera();
+  }
+
+  this->dataPtr->sceneChangeConnection = Events::ConnectSceneChangeCallback(
+      std::bind(&DepthCameraSensor::SetScene, this, std::placeholders::_1));
+
+  this->dataPtr->initialized = true;
+
   return this->CameraSensor::Load(_sdf);
 }
 
@@ -215,7 +248,15 @@ bool DepthCameraSensor::CreateCamera()
     this->dataPtr->saveImage = true;
   }
 
+
   return true;
+}
+
+/////////////////////////////////////////////////
+ignition::common::ConnectionPtr DepthCameraSensor::ConnectImageCallback(
+    std::function<void(const ignition::msgs::Image &)> _callback)
+{
+  return this->dataPtr->imageEvent.Connect(_callback);
 }
 
 /////////////////////////////////////////////////
@@ -265,17 +306,7 @@ bool DepthCameraSensor::Update(const common::Time &_now)
   unsigned int height = this->dataPtr->camera->ImageHeight();
   unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
-  ignition::common::Image::PixelFormatType format;
-  switch (this->dataPtr->camera->ImageFormat())
-  {
-    case ignition::rendering::PF_R8G8B8:
-      format = ignition::common::Image::R_FLOAT32;
-      break;
-    default:
-      ignerr << "Unsupported pixel format ["
-        << this->dataPtr->camera->ImageFormat() << "]\n";
-      break;
-  }
+  ignition::common::Image::PixelFormatType format = ignition::common::Image::RGB_INT8;
 
   // create message
   ignition::msgs::Image msg;

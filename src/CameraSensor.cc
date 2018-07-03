@@ -15,19 +15,8 @@
  *
 */
 
-#include <cstdint>
-#include <mutex>
-#include <string>
-#include <ignition/sensors/CameraSensor.hh>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Image.hh>
-#include <ignition/common/PluginMacros.hh>
-#include <ignition/math/Angle.hh>
-#include <ignition/rendering/Camera.hh>
-#include <ignition/transport.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/Events.hh>
+#include <ignition/sensors/CameraSensor.hh>
 
 using namespace ignition::sensors;
 

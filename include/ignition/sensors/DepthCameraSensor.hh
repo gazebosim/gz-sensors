@@ -93,6 +93,18 @@ namespace ignition
       /// \return true if the update was successfull
       public: virtual bool Update(const common::Time &_now) override;
 
+      /// \brief Set a callback to be called when image frame data is
+      /// generated.
+      /// \param[in] _callback This callback will be called every time the
+      /// camera produces image data. The Update function will be blocked
+      /// while the callbacks are executed.
+      /// \remark Do not block inside of the callback.
+      /// \return A connection pointer that must remain in scope. When the
+      /// connection pointer falls out of scope, the connection is broken.
+      public: ignition::common::ConnectionPtr ConnectImageCallback(
+                  std::function<
+                  void(const ignition::msgs::Image &)> _callback);
+
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
       public: virtual void SetScene(
@@ -100,7 +112,7 @@ namespace ignition
 
       /// \brief Create a camera in a scene
       /// \return True on success.
-      public: virtual bool CreateCamera() override;
+      private: bool CreateCamera();
 
       /// \brief Callback that is triggered when the scene changes on
       /// the Manager.
