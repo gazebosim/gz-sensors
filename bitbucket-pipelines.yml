@@ -6,7 +6,9 @@ pipelines:
         script: # Modify the commands below to build your repository.
           - apt update
           - apt-get -y install
-            cmake pkg-config cppcheck libogre-1.9-dev libglew-dev libfreeimage-dev doxygen ruby-ronn freeglut3-dev libxmu-dev libxi-dev curl git mercurial  g++-8
+            cmake pkg-config cppcheck libogre-1.9-dev libglew-dev libfreeimage-dev doxygen ruby-ronn freeglut3-dev libxmu-dev libxi-dev curl git mercurial  g++-8 \
+              libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libfreeimage-dev libgts-dev libswscale-dev libtinyxml2-dev libtinyxml-dev libprotobuf-dev \
+              protobuf-compiler libprotoc-dev libzmq3-dev sqlite3
           - update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8 --slave /usr/bin/gcov gcov /usr/bin/gcov-8
           - gcc -v
           - g++ -v
@@ -32,17 +34,17 @@ pipelines:
           - cmake .. # -DENABLE_TESTS_COMPILATION=false
           - make -j4 install
           - cd ../..
-          # SDFormat
-          - hg clone http://bitbucket.org/osrf/sdformat -b gz11
-          - cd sdformat
+          # Ignition math
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-math -b gz11
+          - cd ign-math
           - mkdir build
           - cd build
           - cmake .. # -DENABLE_TESTS_COMPILATION=false
           - make -j4 install
           - cd ../..
-          # Ignition math
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-math -b gz11 
-          - cd ign-math
+          # SDFormat
+          - hg clone http://bitbucket.org/osrf/sdformat -b gz11
+          - cd sdformat
           - mkdir build
           - cd build
           - cmake .. # -DENABLE_TESTS_COMPILATION=false
