@@ -2,6 +2,7 @@ set (sources
   Events.cc
   Manager.cc
   Sensor.cc
+  Lidar.cc
   Noise.cc
   GaussianNoiseModel.cc
   SensorTypes.cc
@@ -9,6 +10,7 @@ set (sources
 
 set (gtest_sources
   Manager_TEST.cc
+  Lidar_TEST.cc
   Noise_TEST.cc
 )
 
@@ -37,13 +39,25 @@ add_library(${PROJECT_LIBRARY_TARGET_NAME}-depth_camera SHARED DepthCameraSensor
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-depth_camera PUBLIC
   ${IGNITION-MSGS_LIBRARIES}
   ${IGNITION-TRANSPORT_LIBRARIES}
-  ${PROJECT_LIBRARY_TARGET_NAME}
-  ${PROJECT_LIBRARY_TARGET_NAME}-camera)
+  ${PROJECT_LIBRARY_TARGET_NAME})
+
+add_library(${PROJECT_LIBRARY_TARGET_NAME}-lidar SHARED Lidar.cc)
+target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-lidar PUBLIC
+  ${IGNITION-MSGS_LIBRARIES}
+  ${IGNITION-TRANSPORT_LIBRARIES}
+  ${PROJECT_LIBRARY_TARGET_NAME})
+
 
 # Build the unit tests.
 ign_build_tests(TYPE UNIT SOURCES ${gtest_sources})
 
 install(TARGETS
   ${PROJECT_LIBRARY_TARGET_NAME}-camera
+  DESTINATION ${IGN_SENSORS_PLUGIN_PATH})
+install(TARGETS
   ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
   DESTINATION ${IGN_SENSORS_PLUGIN_PATH})
+install(TARGETS
+  ${PROJECT_LIBRARY_TARGET_NAME}-lidar
+  DESTINATION ${IGN_SENSORS_PLUGIN_PATH})
+
