@@ -50,7 +50,10 @@ class ignition::sensors::DepthCameraSensorPrivate
   public: ignition::rendering::ScenePtr scene;
 
   /// \brief Rendering camera
-  public: ignition::rendering::CameraPtr camera;
+  public: ignition::rendering::DepthCameraPtr depthCamera;
+
+  /// \brief Depth data buffer.
+  public: float *depthBuffer = nullptr;
 
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
@@ -86,7 +89,7 @@ void DepthCameraSensorPrivate::RemoveCamera(ignition::rendering::ScenePtr _scene
   {
     // \todo(nkoenig) Remove camera from scene!
   }
-  this->camera = nullptr;
+  //this->depthCamera = nullptr;
 }
 
 //////////////////////////////////////////////////
@@ -190,12 +193,12 @@ bool DepthCameraSensor::CreateCamera()
   int width = imgElem->Get<int>("width");
   int height = imgElem->Get<int>("height");
 
-  this->dataPtr->camera = this->dataPtr->scene->CreateCamera(this->Name());
-  this->dataPtr->camera->SetImageWidth(width);
-  this->dataPtr->camera->SetImageHeight(height);
+  this->dataPtr->depthCamera = this->dataPtr->scene->CreateDepthCamera(this->Name());
+  this->dataPtr->depthCamera->SetImageWidth(width);
+  this->dataPtr->depthCamera->SetImageHeight(height);
 
   // \todo(nkoeng) these parameters via sdf
-  this->dataPtr->camera->SetAntiAliasing(2);
+  this->dataPtr->depthCamera->SetAntiAliasing(2);
 
   auto angle = cameraElem->Get<double>("horizontal_fov", 0);
   if (angle.first < 0.01 || angle.first > M_PI*2)
@@ -204,8 +207,8 @@ bool DepthCameraSensor::CreateCamera()
 
     return false;
   }
-  this->dataPtr->camera->SetAspectRatio(static_cast<double>(width)/height);
-  this->dataPtr->camera->SetHFOV(angle.first);
+  this->dataPtr->depthCamera->SetAspectRatio(static_cast<double>(width)/height);
+  this->dataPtr->depthCamera->SetHFOV(angle.first);
 
   if (cameraElem->HasElement("distortion"))
   {
@@ -220,7 +223,7 @@ bool DepthCameraSensor::CreateCamera()
   switch (format)
   {
     case ignition::common::Image::RGB_INT8:
-      this->dataPtr->camera->SetImageFormat(ignition::rendering::PF_R8G8B8);
+      this->dataPtr->depthCamera->SetImageFormat(ignition::rendering::PF_R8G8B8);
       break;
     default:
       ignerr << "Unsupported pixel format [" << formatStr << "]\n";
@@ -228,15 +231,22 @@ bool DepthCameraSensor::CreateCamera()
   }
 
   // Call set a custom shader on all objects viewed through depthCamera
+
+  this->dataPtr->depthCamera->Init();
+  this->dataPtr->depthCamera->CreateRenderTexture(
+      this->Name() + "_RttTex_Image");
+  //this->dataPtr->depthCamera->CreateDepthTexture(
+  //    this->Name() + "_RttTex_Depth");
+
   this->depthMat = this->dataPtr->scene->CreateMaterial();
   this->depthMat->SetVertexShader(depth_vertex_shader_path);
   this->depthMat->SetFragmentShader(depth_fragment_shader_path);
   //(*(this->depthMat->FragmentShaderParams()))["maxRange"] = 10.0f;
-  this->dataPtr->camera->SetMaterial(depthMat);
+  this->dataPtr->depthCamera->SetMaterial(depthMat);
 
-  this->dataPtr->image = this->dataPtr->camera->CreateImage();
+  this->dataPtr->image = this->dataPtr->depthCamera->CreateImage();
 
-  this->dataPtr->scene->RootVisual()->AddChild(this->dataPtr->camera);
+  this->dataPtr->scene->RootVisual()->AddChild(this->dataPtr->depthCamera);
 
   // Create the directory to store frames
   if (cameraElem->HasElement("save") &&
@@ -288,7 +298,7 @@ bool DepthCameraSensor::Update(const common::Time &_now)
     return false;
   }
 
-  if (!this->dataPtr->camera)
+  if (!this->dataPtr->depthCamera)
   {
     ignerr << "Camera doesn't exist.\n";
     return false;
@@ -297,13 +307,13 @@ bool DepthCameraSensor::Update(const common::Time &_now)
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   // move the camera to the current pose
-  this->dataPtr->camera->SetLocalPose(this->Pose());
+  this->dataPtr->depthCamera->SetLocalPose(this->Pose());
 
   // generate sensor data
-  this->dataPtr->camera->Capture(this->dataPtr->image);
+  this->dataPtr->depthCamera->Capture(this->dataPtr->image);
 
-  unsigned int width = this->dataPtr->camera->ImageWidth();
-  unsigned int height = this->dataPtr->camera->ImageHeight();
+  unsigned int width = this->dataPtr->depthCamera->ImageWidth();
+  unsigned int height = this->dataPtr->depthCamera->ImageHeight();
   unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
   ignition::common::Image::PixelFormatType format = ignition::common::Image::RGB_INT8;
@@ -313,11 +323,11 @@ bool DepthCameraSensor::Update(const common::Time &_now)
   msg.set_width(width);
   msg.set_height(height);
   msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
-               this->dataPtr->camera->ImageFormat()));
+               this->dataPtr->depthCamera->ImageFormat()));
   msg.set_pixel_format(format);
   msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
-  msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
+  msg.set_data(data, this->dataPtr->depthCamera->ImageMemorySize());
 
   // publish
   this->dataPtr->pub.Publish(msg);

@@ -36,7 +36,7 @@
 #include <ignition/math/Pose3.hh>
 #include <ignition/msgs.hh>
 
-#include <ignition/rendering/Camera.hh>
+#include <ignition/rendering/DepthCamera.hh>
 
 #include <ignition/sensors/CameraSensor.hh>
 #include <ignition/sensors/Events.hh>
