@@ -33,6 +33,9 @@ namespace ignition
 {
   namespace sensors
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE
+    {
     // Forward declarations
     class ManagerPrivate;
 
@@ -166,6 +169,7 @@ namespace ignition
       /// \brief private data pointer
       private: std::unique_ptr<ManagerPrivate> dataPtr;
     };
+    }
   }
 }
 

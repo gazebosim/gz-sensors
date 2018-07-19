@@ -26,6 +26,9 @@ namespace ignition
 {
   namespace sensors
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE
+    {
     class IGNITION_SENSORS_VISIBLE Events
     {
       /// \brief Set a callback to be called when the scene is changed.
@@ -44,6 +47,7 @@ namespace ignition
       public: static ignition::common::EventT<
               void(const ignition::rendering::ScenePtr &)> sceneEvent;
     };
+    }
   }
 }
 #endif

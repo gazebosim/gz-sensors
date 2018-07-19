@@ -32,6 +32,9 @@ namespace ignition
 {
   namespace sensors
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE
+    {
     // Forward declarations
     class NoisePrivate;
 
@@ -112,6 +115,7 @@ namespace ignition
       /// \brief Private data pointer
       private: NoisePrivate *dataPtr = nullptr;
     };
+    }
   }
 }
 #endif

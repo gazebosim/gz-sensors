@@ -29,6 +29,9 @@ namespace ignition
   // class GaussianNoiseCompositorListener;
   namespace sensors
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE
+    {
     // Forward declarations
     class GaussianNoiseModelPrivate;
 
@@ -103,6 +106,7 @@ namespace ignition
         gaussianNoiseCompositorListener;
       */
     };
+    }
   }
 }
 
