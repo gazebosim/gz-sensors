@@ -33,6 +33,9 @@ namespace ignition
   /// \brief Sensors namespace
   namespace sensors
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE
+    {
     class AltimeterSensor;
     class Sensor;
     class CameraSensor;
@@ -111,6 +114,7 @@ namespace ignition
       /// \brief Number of Sensor Categories
       CATEGORY_COUNT = 3
     };
+    }
   }
 }
 #endif
