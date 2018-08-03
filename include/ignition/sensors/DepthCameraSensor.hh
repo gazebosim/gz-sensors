@@ -46,16 +46,6 @@
 
 #include <ignition/transport.hh>
 
-// TODO(jchoclin): find a way to get the plugin path from sensor manager
-const static std::string vertex_shader_path =
-    "/usr/local/lib/media/materials/programs/vertex_shader.glsl";
-const static std::string fragment_shader_path =
-    "/usr/local/lib/media/materials/programs/fragment_shader.glsl";
-const static std::string depth_vertex_shader_path =
-    "/usr/local/lib/media/materials/programs/depth_vertex_shader.glsl";
-const static std::string depth_fragment_shader_path =
-    "/usr/local/lib/media/materials/programs/depth_fragment_shader.glsl";
-
 
 namespace ignition
 {
@@ -122,8 +112,6 @@ namespace ignition
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<DepthCameraSensorPrivate> dataPtr;
-
-      private: ignition::rendering::MaterialPtr depthMat;
     };
   }
 }

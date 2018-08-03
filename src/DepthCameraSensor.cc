@@ -151,7 +151,7 @@ bool DepthCameraSensor::Load(sdf::ElementPtr _sdf)
   if (!Sensor::Load(_sdf))
   {
     return false;
-  }
+    }
 
   this->dataPtr->pub =
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
@@ -230,20 +230,6 @@ bool DepthCameraSensor::CreateCamera()
       break;
   }
 
-  // Call set a custom shader on all objects viewed through depthCamera
-
-  this->dataPtr->depthCamera->Init();
-  this->dataPtr->depthCamera->CreateRenderTexture(
-      this->Name() + "_RttTex_Image");
-  //this->dataPtr->depthCamera->CreateDepthTexture(
-  //    this->Name() + "_RttTex_Depth");
-
-  this->depthMat = this->dataPtr->scene->CreateMaterial();
-  this->depthMat->SetVertexShader(depth_vertex_shader_path);
-  this->depthMat->SetFragmentShader(depth_fragment_shader_path);
-  //(*(this->depthMat->FragmentShaderParams()))["maxRange"] = 10.0f;
-  this->dataPtr->depthCamera->SetMaterial(depthMat);
-
   this->dataPtr->image = this->dataPtr->depthCamera->CreateImage();
 
   this->dataPtr->scene->RootVisual()->AddChild(this->dataPtr->depthCamera);
@@ -278,11 +264,6 @@ void DepthCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
   {
     this->dataPtr->RemoveCamera(this->dataPtr->scene);
     this->dataPtr->scene = _scene;
-
-    // create shader material
-    ignition::rendering::MaterialPtr shader = this->dataPtr->scene->CreateMaterial();
-    shader->SetVertexShader(vertex_shader_path);
-    shader->SetFragmentShader(fragment_shader_path);
 
     if (this->dataPtr->initialized)
       this->CreateCamera();
