@@ -24,9 +24,31 @@
 #include "test/test_config.hh"
 #include "TransportTestTools.hh"
 
+#include <ignition/common/Event.hh>
+
 void BuildScene(ignition::rendering::ScenePtr _scene);
 
-TEST(CameraPlugin, imagesWithBuiltinSDF)
+std::mutex g_depthMutex;
+unsigned int g_depthCounter = 0;
+float *g_depthBuffer = nullptr;
+
+
+void OnNewDepthFrame(const float * _image,
+    unsigned int _width, unsigned int _height,
+    unsigned int /*_depth*/, const std::string &/*_format*/)
+{
+
+  if (!_image)
+    return;
+  std::lock_guard<std::mutex> lock(g_depthMutex);
+  if (!g_depthBuffer)
+    g_depthBuffer = new float[_width * _height];
+  memcpy(g_depthBuffer,  _image, _width * _height * sizeof(_image[0]));
+  g_depthCounter++;
+}
+
+
+TEST(DepthCameraPlugin, imagesWithBuiltinSDF)
 {
   // get the darn test data
   std::string path = ignition::common::joinPaths(PROJECT_SOURCE_DIR, "test",
@@ -57,14 +79,63 @@ TEST(CameraPlugin, imagesWithBuiltinSDF)
 
   auto *sensor = mgr.CreateSensor<ignition::sensors::DepthCameraSensor>(sensorPtr);
   ASSERT_NE(sensor, nullptr);
-
+/*
+  EXPECT_EQ(sensor->ImageWidth(), 640u);
+  EXPECT_EQ(sensor->ImageHeight(), 480u);
+  EXPECT_TRUE(sensor->IsActive());
+*/
   std::string topic = "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF";
   WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
+
+  ignition::rendering::DepthCameraPtr depthCamera = sensor->DepthCamera();
+  EXPECT_TRUE(depthCamera != nullptr);
+
+  ignition::common::ConnectionPtr c = depthCamera->ConnectNewDepthFrame(
+      std::bind(&::OnNewDepthFrame, std::placeholders::_1,
+      std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
+      std::placeholders::_5));
 
   // Update once to create image
   mgr.RunOnce(ignition::common::Time::Zero);
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
+
+  // wait for a few depth camera frames
+  int j = 0;
+  while (g_depthCounter < 10 && j < 300)
+  {
+    testing::internal::SleepMilliseconds(10);
+    mgr.RunOnce(ignition::common::Time::Zero, true);
+    j++;
+  }
+  EXPECT_LT(j, 300);
+
+  unsigned int imageSize = 256 * 256;
+//      sensor->ImageWidth() * sensor->ImageHeight();
+
+  std::lock_guard<std::mutex> lock(g_depthMutex);
+  // Check that the depth values are valid
+  for (unsigned int i = 0; i < imageSize; ++i)
+  {
+ //   EXPECT_TRUE(g_depthBuffer[i] <= depthCamera->FarClip());
+ //   EXPECT_TRUE(g_depthBuffer[i] >= depthCamera->NearClip());
+ //   EXPECT_TRUE(!ignition::math::equal(g_depthBuffer[i], 0.0f));
+  }
+
+  // sphere with radius 1m is at 2m in front of depth camera
+  // so verify depth readings are between 1-2m in the mid row
+  unsigned int halfHeight =
+    static_cast<unsigned int>(256*0.5)-1;
+//    static_cast<unsigned int>(sensor->ImageHeight()*0.5)-1;
+//  for (unsigned int i = sensor->ImageWidth()*halfHeight;
+//      i < sensor->ImageWidth()*(halfHeight+1); ++i)
+  for (unsigned int i = 256*halfHeight;
+      i < 256*(halfHeight+1); ++i)
+  {
+    EXPECT_TRUE(g_depthBuffer[i] < 2.0f);
+    EXPECT_TRUE(g_depthBuffer[i] >= 1.0f);
+    std::cout << g_depthBuffer[i] << std::endl;
+  }
 }
 
 // Copy/paste from an ignition-rendering example

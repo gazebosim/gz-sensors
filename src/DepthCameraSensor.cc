@@ -197,6 +197,7 @@ bool DepthCameraSensor::CreateCamera()
   this->dataPtr->depthCamera->SetImageWidth(width);
   this->dataPtr->depthCamera->SetImageHeight(height);
 
+
   // \todo(nkoeng) these parameters via sdf
   this->dataPtr->depthCamera->SetAntiAliasing(2);
 
@@ -209,6 +210,9 @@ bool DepthCameraSensor::CreateCamera()
   }
   this->dataPtr->depthCamera->SetAspectRatio(static_cast<double>(width)/height);
   this->dataPtr->depthCamera->SetHFOV(angle.first);
+
+  // Create depth texture when the camera is reconfigured from default values
+  this->dataPtr->depthCamera->CreateDepthTexture();
 
   if (cameraElem->HasElement("distortion"))
   {
@@ -246,6 +250,12 @@ bool DepthCameraSensor::CreateCamera()
 
 
   return true;
+}
+
+/////////////////////////////////////////////////
+ignition::rendering::DepthCameraPtr DepthCameraSensor::DepthCamera()
+{
+  return this->dataPtr->depthCamera;
 }
 
 /////////////////////////////////////////////////

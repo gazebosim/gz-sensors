@@ -83,6 +83,11 @@ namespace ignition
       /// \return true if the update was successfull
       public: virtual bool Update(const common::Time &_now) override;
 
+      /// \brief Force the sensor to generate data
+      /// \param[in] _now The current time
+      /// \return true if the update was successfull
+      public: virtual ignition::rendering::DepthCameraPtr DepthCamera();
+
       /// \brief Set a callback to be called when image frame data is
       /// generated.
       /// \param[in] _callback This callback will be called every time the
