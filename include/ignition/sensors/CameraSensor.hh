@@ -97,7 +97,15 @@ namespace ignition
       public: virtual void SetScene(
                   ignition::rendering::ScenePtr _scene) override;
 
-      /// \brief Create a camera in a scene
+      /// \brief Get image width.
+      /// \return width of the image
+      public: virtual unsigned int ImageWidth() const;
+
+      /// \brief Get image height.
+      /// \return height of the image
+      public: virtual unsigned int ImageHeight() const;
+
+     /// \brief Create a camera in a scene
       /// \return True on success.
       private: bool CreateCamera();
 

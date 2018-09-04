@@ -264,6 +264,7 @@ bool CameraSensor::Update(const common::Time &_now)
   // generate sensor data
   this->dataPtr->camera->Capture(this->dataPtr->image);
 
+  std::cout << "Mandarina" << std::endl;
   unsigned int width = this->dataPtr->camera->ImageWidth();
   unsigned int height = this->dataPtr->camera->ImageHeight();
   unsigned char *data = this->dataPtr->image.Data<unsigned char>();
@@ -335,6 +336,18 @@ bool CameraSensorPrivate::SaveImage(const unsigned char *_data,
   localImage.SavePNG(
       ignition::common::joinPaths(this->saveImagePath, filename));
   return true;
+}
+
+//////////////////////////////////////////////////
+unsigned int CameraSensor::ImageWidth() const
+{
+  return this->dataPtr->camera->ImageWidth();
+}
+
+//////////////////////////////////////////////////
+unsigned int CameraSensor::ImageHeight() const
+{
+  return this->dataPtr->camera->ImageHeight();
 }
 
 IGN_COMMON_REGISTER_SINGLE_PLUGIN(

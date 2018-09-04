@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Open Source Robotics Foundation
+ * Copyright (C) 2018 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,6 +104,22 @@ namespace ignition
       /// \param[in] _scene Pointer to the scene
       public: virtual void SetScene(
                   ignition::rendering::ScenePtr _scene) override;
+
+      /// \brief Get image width.
+      /// \return width of the image
+      public: virtual unsigned int ImageWidth() const override;
+
+      /// \brief Get image height.
+      /// \return height of the image
+      public: virtual unsigned int ImageHeight() const override;
+
+      /// \brief Get image width.
+      /// \return width of the image
+      public: virtual double FarClip() const;
+
+      /// \brief Get image height.
+      /// \return height of the image
+      public: virtual double NearClip() const;
 
       /// \brief Create a camera in a scene
       /// \return True on success.

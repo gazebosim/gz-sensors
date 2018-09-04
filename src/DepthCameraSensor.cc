@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Open Source Robotics Foundation
+ * Copyright (C) 2018 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,9 @@ class ignition::sensors::DepthCameraSensorPrivate
   /// \brief Depth data buffer.
   public: float *depthBuffer = nullptr;
 
+  /// \brief near distance.
+  public: float near = 0.0;
+
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
 
@@ -70,7 +73,7 @@ class ignition::sensors::DepthCameraSensorPrivate
   public: std::mutex mutex;
 
   /// \brief True to save images
-  public: bool saveImage = true;
+  public: bool saveImage = false;
 
   /// \brief path directory to where images are saved
   public: std::string saveImagePath = "./";
@@ -83,13 +86,14 @@ class ignition::sensors::DepthCameraSensorPrivate
 };
 
 //////////////////////////////////////////////////
-void DepthCameraSensorPrivate::RemoveCamera(ignition::rendering::ScenePtr _scene)
+void DepthCameraSensorPrivate::RemoveCamera(
+    ignition::rendering::ScenePtr _scene)
 {
   if (_scene)
   {
     // \todo(nkoenig) Remove camera from scene!
   }
-  //this->depthCamera = nullptr;
+  // this->depthCamera = nullptr;
 }
 
 //////////////////////////////////////////////////
@@ -125,6 +129,8 @@ DepthCameraSensor::DepthCameraSensor()
 //////////////////////////////////////////////////
 DepthCameraSensor::~DepthCameraSensor()
 {
+  if (this->dataPtr->depthBuffer)
+    delete [] this->dataPtr->depthBuffer;
 }
 
 //////////////////////////////////////////////////
@@ -193,10 +199,25 @@ bool DepthCameraSensor::CreateCamera()
   int width = imgElem->Get<int>("width");
   int height = imgElem->Get<int>("height");
 
-  this->dataPtr->depthCamera = this->dataPtr->scene->CreateDepthCamera(this->Name());
+  sdf::ElementPtr clipElem = cameraElem->GetElement("clip");
+
+  double far = 100.0;
+  double near = 0.3;
+  if (clipElem)
+  {
+    far = clipElem->Get<double>("far");
+    near = clipElem->Get<double>("near");
+  }
+
+  this->dataPtr->depthCamera = this->dataPtr->scene->CreateDepthCamera(
+      this->Name());
   this->dataPtr->depthCamera->SetImageWidth(width);
   this->dataPtr->depthCamera->SetImageHeight(height);
+  this->dataPtr->depthCamera->SetFarClipPlane(far);
 
+  // Resolve near points in the sensor, if not is set in bank from the camera
+  // this->dataPtr->depthCamera->SetNearClipPlane(near);
+  this->dataPtr->near = near;
 
   // \todo(nkoeng) these parameters via sdf
   this->dataPtr->depthCamera->SetAntiAliasing(2);
@@ -226,8 +247,9 @@ bool DepthCameraSensor::CreateCamera()
     ignition::common::Image::ConvertPixelFormat(formatStr);
   switch (format)
   {
-    case ignition::common::Image::RGB_INT8:
-      this->dataPtr->depthCamera->SetImageFormat(ignition::rendering::PF_R8G8B8);
+    case ignition::common::Image::R_FLOAT32:
+      this->dataPtr->depthCamera->SetImageFormat(
+          ignition::rendering::PF_FLOAT32_R);
       break;
     default:
       ignerr << "Unsupported pixel format [" << formatStr << "]\n";
@@ -247,7 +269,6 @@ bool DepthCameraSensor::CreateCamera()
     this->dataPtr->saveImagePrefix = this->Name() + "_";
     this->dataPtr->saveImage = true;
   }
-
 
   return true;
 }
@@ -277,7 +298,7 @@ void DepthCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 
     if (this->dataPtr->initialized)
       this->CreateCamera();
- }
+  }
 }
 
 //////////////////////////////////////////////////
@@ -306,8 +327,11 @@ bool DepthCameraSensor::Update(const common::Time &_now)
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
   unsigned char *data = this->dataPtr->image.Data<unsigned char>();
+  float near = this->NearClip();
+  float far = this->FarClip();
 
-  ignition::common::Image::PixelFormatType format = ignition::common::Image::RGB_INT8;
+  ignition::common::Image::PixelFormatType format =
+    ignition::common::Image::R_FLOAT32;
 
   // create message
   ignition::msgs::Image msg;
@@ -318,7 +342,29 @@ bool DepthCameraSensor::Update(const common::Time &_now)
   msg.set_pixel_format(format);
   msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
-  msg.set_data(data, this->dataPtr->depthCamera->ImageMemorySize());
+
+  unsigned int depthSamples = msg.width() * msg.height();
+  unsigned int depthBufferSize = depthSamples * sizeof(float);
+
+  if (!this->dataPtr->depthBuffer)
+    this->dataPtr->depthBuffer = new float[depthSamples];
+
+  memcpy(this->dataPtr->depthBuffer, data, depthBufferSize);
+
+  for (unsigned int i = 0; i < depthSamples; ++i)
+  {
+    // Mask ranges outside of min/max to +/- inf, as per REP 117
+    if (this->dataPtr->depthBuffer[i] >= far)
+    {
+      this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
+    }
+    else if (this->dataPtr->depthBuffer[i] <= near)
+    {
+      this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
+    }
+  }
+  msg.set_data(this->dataPtr->depthBuffer,
+      this->dataPtr->depthCamera->ImageMemorySize());
 
   // publish
   this->dataPtr->pub.Publish(msg);
@@ -340,6 +386,31 @@ bool DepthCameraSensor::Update(const common::Time &_now)
   }
 
   return true;
+}
+
+//////////////////////////////////////////////////
+unsigned int DepthCameraSensor::ImageWidth() const
+{
+  return this->dataPtr->depthCamera->ImageWidth();
+}
+
+//////////////////////////////////////////////////
+unsigned int DepthCameraSensor::ImageHeight() const
+{
+  return this->dataPtr->depthCamera->ImageHeight();
+}
+
+//////////////////////////////////////////////////
+double DepthCameraSensor::FarClip() const
+{
+  return this->dataPtr->depthCamera->FarClipPlane();
+}
+
+//////////////////////////////////////////////////
+double DepthCameraSensor::NearClip() const
+{
+  // return this->dataPtr->depthCamera->NearClipPlane();
+  return this->dataPtr->near;
 }
 
 IGN_COMMON_REGISTER_SINGLE_PLUGIN(
