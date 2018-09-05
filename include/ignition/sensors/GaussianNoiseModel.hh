@@ -21,6 +21,7 @@
 #include <sdf/sdf.hh>
 
 #include <ignition/rendering/RenderTypes.hh>
+#include <ignition/sensors/config.hh>
 #include <ignition/sensors/Noise.hh>
 #include <ignition/sensors/Export.hh>
 
@@ -30,8 +31,7 @@ namespace ignition
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE
-    {
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     // Forward declarations
     class GaussianNoiseModelPrivate;
 
