@@ -59,13 +59,6 @@ ign_find_package(ignition-msgs3 REQUIRED)
 set(IGN_MSGS_VER ${ignition-msgs3_VERSION_MAJOR})
 
 #--------------------------------------
-# Find ignition-tools
-ign_find_package(ignition-tools QUIET)
-if (ignition-tools_FOUND)
-  set (HAVE_IGN_TOOLS TRUE)
-endif()
-
-#--------------------------------------
 # Find SDFormat
 find_package(SDFormat REQUIRED)
 include_directories(${SDFormat_INCLUDE_DIRS})
