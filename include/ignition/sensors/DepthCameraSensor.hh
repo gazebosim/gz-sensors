@@ -54,13 +54,13 @@ namespace ignition
     /// \brief forward declarations
     class DepthCameraSensorPrivate;
 
-    /// \brief Camera Sensor Class
+    /// \brief Depth camera sensor class.
     ///
-    ///   This class creates images from an ignition rendering scene. The scene
-    ///   must be created in advance and given to Manager::Init().
-    ///   It offers both an ignition-transport interface and a direct C++ API
-    ///   to access the image data. The API works by setting a callback to be
-    ///   called with image data.
+    /// This class creates depth image from an ignition rendering scene.
+    /// The scene  must be created in advance and given to Manager::Init().
+    /// It offers both an ignition-transport interface and a direct C++ API
+    /// to access the image data. The API works by setting a callback to be
+    /// called with image data.
     class IGNITION_SENSORS_VISIBLE DepthCameraSensor : public CameraSensor
     {
       /// \brief constructor

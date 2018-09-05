@@ -108,8 +108,8 @@ TEST(DepthCameraPlugin, imagesWithBuiltinSDF)
       sensorPtr);
   ASSERT_NE(depthSensor, nullptr);
 
-  EXPECT_EQ(depthSensor->ImageWidth(), imgWidth);
-  EXPECT_EQ(depthSensor->ImageHeight(), imgHeight);
+  EXPECT_EQ(depthSensor->ImageWidth(), static_cast<unsigned int>(imgWidth));
+  EXPECT_EQ(depthSensor->ImageHeight(), static_cast<unsigned int>(imgHeight));
   EXPECT_NEAR(depthSensor->FarClip(), far, DOUBLE_TOL);
   EXPECT_NEAR(depthSensor->NearClip(), near, DOUBLE_TOL);
 
