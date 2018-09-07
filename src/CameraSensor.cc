@@ -264,7 +264,6 @@ bool CameraSensor::Update(const common::Time &_now)
   // generate sensor data
   this->dataPtr->camera->Capture(this->dataPtr->image);
 
-  std::cout << "Mandarina" << std::endl;
   unsigned int width = this->dataPtr->camera->ImageWidth();
   unsigned int height = this->dataPtr->camera->ImageHeight();
   unsigned char *data = this->dataPtr->image.Data<unsigned char>();
