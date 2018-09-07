@@ -37,11 +37,11 @@ namespace ignition
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     // Forward declarations.
     class AltimeterSensor;
-    class Sensor;
     class CameraSensor;
-    class Noise;
     class GaussianNoiseModel;
     class ImageGaussianNoiseModel;
+    class Noise;
+    class Sensor;
 
     /// \def SensorPtr
     /// \brief Shared pointer to Sensor
