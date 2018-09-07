@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <ignition/common/Event.hh>
+#include <ignition/sensors/config.hh>
 #include <ignition/sensors/Sensor.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/msgs.hh>
@@ -31,8 +32,8 @@ namespace ignition
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE
-    {
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    //
     /// \brief forward declarations
     class LidarPrivate;
 

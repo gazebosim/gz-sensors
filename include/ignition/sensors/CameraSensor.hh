@@ -35,6 +35,7 @@
 
 #include <ignition/msgs.hh>
 
+#include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Events.hh>
 #include <ignition/sensors/Manager.hh>
@@ -48,6 +49,9 @@ namespace ignition
 {
   namespace sensors
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    //
     /// \brief forward declarations
     class CameraSensorPrivate;
 
@@ -118,6 +122,7 @@ namespace ignition
       /// \internal
       private: std::unique_ptr<CameraSensorPrivate> dataPtr;
     };
+    }
   }
 }
 

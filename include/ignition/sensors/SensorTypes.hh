@@ -21,8 +21,8 @@
 #include <memory>
 
 #include <ignition/common/EnumIface.hh>
+#include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
-
 
 /// \file
 /// \ingroup ignition_sensors
@@ -34,14 +34,14 @@ namespace ignition
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE
-    {
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    // Forward declarations.
     class AltimeterSensor;
-    class Sensor;
     class CameraSensor;
-    class Noise;
     class GaussianNoiseModel;
     class ImageGaussianNoiseModel;
+    class Noise;
+    class Sensor;
 
     /// \def SensorPtr
     /// \brief Shared pointer to Sensor

@@ -51,7 +51,9 @@ namespace ignition
 {
   namespace sensors
   {
-    /// \brief forward declarations
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    // forward declarations
     class DepthCameraSensorPrivate;
 
     /// \brief Depth camera sensor class.
@@ -134,6 +136,7 @@ namespace ignition
       /// \internal
       private: std::unique_ptr<DepthCameraSensorPrivate> dataPtr;
     };
+    }
   }
 }
 
