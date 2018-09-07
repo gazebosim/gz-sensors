@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Open Source Robotics Foundation
+ * Copyright (C) 2018 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,61 +14,60 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_CAMERASENSOR_HH_
-#define IGNITION_SENSORS_CAMERASENSOR_HH_
+#ifndef IGNITION_SENSORS_DEPTHCAMERASENSOR_HH_
+#define IGNITION_SENSORS_DEPTHCAMERASENSOR_HH_
 
-#include <cstdint>
 #include <memory>
+#include <cstdint>
 #include <mutex>
 #include <string>
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/Console.hh>
 #include <ignition/common/Event.hh>
+
+#include <ignition/common/Console.hh>
 #include <ignition/common/Image.hh>
 #include <ignition/common/PluginMacros.hh>
+#include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Time.hh>
 
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Pose3.hh>
-
 #include <ignition/msgs.hh>
 
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/Export.hh>
+#include <ignition/rendering/DepthCamera.hh>
+
+#include <ignition/sensors/CameraSensor.hh>
 #include <ignition/sensors/Events.hh>
+#include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/Sensor.hh>
 
-#include <ignition/rendering/Camera.hh>
-
 #include <ignition/transport.hh>
+
 
 namespace ignition
 {
   namespace sensors
   {
-    // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
-    //
     /// \brief forward declarations
-    class CameraSensorPrivate;
+    class DepthCameraSensorPrivate;
 
-    /// \brief Camera Sensor Class
+    /// \brief Depth camera sensor class.
     ///
-    ///   This class creates images from an ignition rendering scene. The scene
-    ///   must be created in advance and given to Manager::Init().
-    ///   It offers both an ignition-transport interface and a direct C++ API
-    ///   to access the image data. The API works by setting a callback to be
-    ///   called with image data.
-    class IGNITION_SENSORS_VISIBLE CameraSensor : public Sensor
+    /// This class creates depth image from an ignition rendering scene.
+    /// The scene  must be created in advance and given to Manager::Init().
+    /// It offers both an ignition-transport interface and a direct C++ API
+    /// to access the image data. The API works by setting a callback to be
+    /// called with image data.
+    class IGNITION_SENSORS_VISIBLE DepthCameraSensor : public CameraSensor
     {
       /// \brief constructor
-      public: CameraSensor();
+      public: DepthCameraSensor();
 
       /// \brief destructor
-      public: virtual ~CameraSensor();
+      public: virtual ~DepthCameraSensor();
 
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF Sensor parameters.
@@ -83,6 +82,11 @@ namespace ignition
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       public: virtual bool Update(const common::Time &_now) override;
+
+      /// \brief Force the sensor to generate data
+      /// \param[in] _now The current time
+      /// \return true if the update was successfull
+      public: virtual ignition::rendering::DepthCameraPtr DepthCamera();
 
       /// \brief Set a callback to be called when image frame data is
       /// generated.
@@ -103,13 +107,21 @@ namespace ignition
 
       /// \brief Get image width.
       /// \return width of the image
-      public: virtual unsigned int ImageWidth() const;
+      public: virtual unsigned int ImageWidth() const override;
 
       /// \brief Get image height.
       /// \return height of the image
-      public: virtual unsigned int ImageHeight() const;
+      public: virtual unsigned int ImageHeight() const override;
 
-     /// \brief Create a camera in a scene
+      /// \brief Get image width.
+      /// \return width of the image
+      public: virtual double FarClip() const;
+
+      /// \brief Get image height.
+      /// \return height of the image
+      public: virtual double NearClip() const;
+
+      /// \brief Create a camera in a scene
       /// \return True on success.
       private: bool CreateCamera();
 
@@ -120,9 +132,8 @@ namespace ignition
 
       /// \brief Data pointer for private data
       /// \internal
-      private: std::unique_ptr<CameraSensorPrivate> dataPtr;
+      private: std::unique_ptr<DepthCameraSensorPrivate> dataPtr;
     };
-    }
   }
 }
 

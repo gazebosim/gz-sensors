@@ -1,5 +1,4 @@
 set (sources
-  CameraConfig.cc
   Events.cc
   Manager.cc
   Sensor.cc
@@ -30,20 +29,36 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
     ${IGNITION-TRANSPORT_LIBRARIES}
     ${SDFormat_LIBRARIES})
 
-# Build the unit tests.
-ign_build_tests(TYPE UNIT SOURCES ${gtest_sources})
-
 add_library(${PROJECT_LIBRARY_TARGET_NAME}-camera SHARED CameraSensor.cc)
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC
   ${IGNITION-MSGS_LIBRARIES}
   ${IGNITION-TRANSPORT_LIBRARIES}
   ${PROJECT_LIBRARY_TARGET_NAME})
+
+add_library(${PROJECT_LIBRARY_TARGET_NAME}-depth_camera SHARED DepthCameraSensor.cc)
+target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-depth_camera PUBLIC
+  ${IGNITION-MSGS_LIBRARIES}
+  ${IGNITION-TRANSPORT_LIBRARIES}
+  ${PROJECT_LIBRARY_TARGET_NAME}
+  ${PROJECT_LIBRARY_TARGET_NAME}-camera)
+
 add_library(${PROJECT_LIBRARY_TARGET_NAME}-lidar SHARED Lidar.cc)
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-lidar PUBLIC
   ${IGNITION-MSGS_LIBRARIES}
   ${IGNITION-TRANSPORT_LIBRARIES}
   ${PROJECT_LIBRARY_TARGET_NAME})
-install(TARGETS ${PROJECT_LIBRARY_TARGET_NAME}-camera
+
+
+# Build the unit tests.
+ign_build_tests(TYPE UNIT SOURCES ${gtest_sources})
+
+install(TARGETS
+  ${PROJECT_LIBRARY_TARGET_NAME}-camera
   DESTINATION ${IGN_SENSORS_PLUGIN_PATH})
-install(TARGETS ${PROJECT_LIBRARY_TARGET_NAME}-lidar
+install(TARGETS
+  ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
   DESTINATION ${IGN_SENSORS_PLUGIN_PATH})
+install(TARGETS
+  ${PROJECT_LIBRARY_TARGET_NAME}-lidar
+  DESTINATION ${IGN_SENSORS_PLUGIN_PATH})
+
