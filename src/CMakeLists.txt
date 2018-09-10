@@ -3,13 +3,17 @@ set (sources
   Events.cc
   Manager.cc
   Sensor.cc
-  LidarSensor.cc
+  Lidar.cc
   GpuLidarSensor.cc
+  Noise.cc
+  GaussianNoiseModel.cc
+  SensorTypes.cc
 )
 
 set (gtest_sources
   Manager_TEST.cc
-  LidarSensor_TEST.cc
+  Lidar_TEST.cc
+  Noise_TEST.cc
 )
 
 # Create the library target.
@@ -35,7 +39,7 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC
   ${IGNITION-MSGS_LIBRARIES}
   ${IGNITION-TRANSPORT_LIBRARIES}
   ${PROJECT_LIBRARY_TARGET_NAME})
-add_library(${PROJECT_LIBRARY_TARGET_NAME}-lidar SHARED LidarSensor.cc)
+add_library(${PROJECT_LIBRARY_TARGET_NAME}-lidar SHARED Lidar.cc)
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-lidar PUBLIC
   ${IGNITION-MSGS_LIBRARIES}
   ${IGNITION-TRANSPORT_LIBRARIES}

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
 
 #============================================================================
 # Initialize the project
@@ -8,7 +8,7 @@ project(ignition-sensors0 VERSION 0.1.0)
 #============================================================================
 # Find ignition-cmake
 #============================================================================
-find_package(ignition-cmake1 REQUIRED)
+find_package(ignition-cmake2 REQUIRED)
 
 #============================================================================
 # Configure the project
@@ -27,45 +27,36 @@ message(STATUS "\n\n-- ====== Finding Dependencies ======")
 
 #--------------------------------------
 # Find Protobuf
-if(MSVC)
-  # On Windows we require version 3+ in order to have proper support for
-  # shared libraries.
-  set(REQ_PROTOBUF_VER 3)
-  set(PROTOBUF_PURPOSE "Windows requires version 3+ to ensure proper support for DLLs")
-else()
-  set(REQ_PROTOBUF_VER 2.3.0)
-  set(PROTOBUF_PURPOSE)
-endif()
+set(REQ_PROTOBUF_VER 3)
 ign_find_package(IgnProtobuf
                  VERSION ${REQ_PROTOBUF_VER}
                  REQUIRED
-                 PRETTY Protobuf
-                 PURPOSE ${PROTOBUF_PURPOSE})
+                 PRETTY Protobuf)
 
 #--------------------------------------
 # Find ignition-math
-ign_find_package(ignition-math5 REQUIRED)
-set(IGN_MATH_VER ${ignition-math5_VERSION_MAJOR})
+ign_find_package(ignition-math6 REQUIRED)
+set(IGN_MATH_VER ${ignition-math6_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-common
-ign_find_package(ignition-common2 REQUIRED)
-set(IGN_COMMON_VER ${ignition-common2_VERSION_MAJOR})
+ign_find_package(ignition-common3 REQUIRED)
+set(IGN_COMMON_VER ${ignition-common3_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-transport
-ign_find_package(ignition-transport5 REQUIRED)
-set(IGN_TRANSPORT_VER ${ignition-transport5_VERSION_MAJOR})
+ign_find_package(ignition-transport6 REQUIRED)
+set(IGN_TRANSPORT_VER ${ignition-transport6_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-rendering
-ign_find_package(ignition-rendering0 REQUIRED)
-set(IGN_RENDERING_VER ${ignition-rendering0_VERSION_MAJOR})
+ign_find_package(ignition-rendering1 REQUIRED)
+set(IGN_RENDERING_VER ${ignition-rendering1_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-msgs
-ign_find_package(ignition-msgs2 REQUIRED)
-set(IGN_MSGS_VER ${ignition-msgs2_VERSION_MAJOR})
+ign_find_package(ignition-msgs3 REQUIRED)
+set(IGN_MSGS_VER ${ignition-msgs3_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-tools
@@ -103,3 +94,7 @@ ign_configure_build(QUIT_IF_BUILD_ERRORS
 #============================================================================
 ign_create_packages()
 
+#============================================================================
+# Configure documentation
+#============================================================================
+#ign_create_docs()

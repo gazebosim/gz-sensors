@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_LIDARSENSOR_HH_
-#define IGNITION_SENSORS_LIDARSENSOR_HH_
+#ifndef IGNITION_SENSORS_LIDAR_HH_
+#define IGNITION_SENSORS_LIDAR_HH_
 
 #include <memory>
 #include <string>
@@ -37,79 +37,11 @@ namespace ignition
 {
   namespace sensors
   {
-    class LidarSensorPrivate
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE
     {
-      /// \brief constructor
-      public: LidarSensorPrivate();
-
-      /// \brief destructor
-      public: ~LidarSensorPrivate();
-
-      /// \brief Just a mutex for thread safety
-      public: std::mutex mutex;
-
-      /// \brief node to create publisher
-      public: transport::Node node;
-
-      /// \brief publisher to publish images
-      public: transport::Node::Publisher pub;
-
-      /// \brief Laser message to publish data.
-      public: ignition::msgs::LaserScan laserMsg;
-
-      /// \brief true if Load() has been called and was successful
-      public: bool initialized = false;
-
-      /// \brief Event triggered when new laser range data are available.
-      /// \param[in] _frame New frame containing raw laser data.
-      /// \param[in] _width Width of frame.
-      /// \param[in] _height Height of frame.
-      /// \param[in] _depth Depth of frame.
-      /// \param[in] _format Format of frame.
-      public: ignition::common::EventT<void(const float *_frame,
-                   unsigned int _width, unsigned int _height,
-                   unsigned int _depth, const std::string &_format)>
-                   dataEvent;
-
-      /// \brief Raw buffer of laser data.
-      public: float *laserBuffer;
-
-      /// \brief Horizontal ray count.
-      public: unsigned int horzRayCount;
-
-      /// \brief Vertical ray count.
-      public: unsigned int vertRayCount;
-
-      /// \brief Horizontal range count.
-      public: unsigned int horzRangeCount;
-
-      /// \brief Vertical range count.
-      public: unsigned int vertRangeCount;
-
-      /// \brief Range count ratio.
-      public: double rangeCountRatio;
-
-      /// \brief The minimum range.
-      public: double rangeMin;
-
-      /// \brief The maximum range.
-      public: double rangeMax;
-
-      /// \brief Scan SDF element.
-      public: sdf::ElementPtr scanElem;
-
-      /// \brief Horizontal SDF element.
-      public: sdf::ElementPtr horzElem;
-
-      /// \brief Vertical SDF element.
-      public: sdf::ElementPtr vertElem;
-
-      /// \brief Range SDF element.
-      public: sdf::ElementPtr rangeElem;
-
-      /// \brief Camera SDF element.
-      public: sdf::ElementPtr cameraElem;
-    };
+    /// \brief forward declarations
+    class LidarPrivate;
 
     /// \brief Lidar Sensor Class
     ///
@@ -120,13 +52,13 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-    class IGNITION_SENSORS_VISIBLE LidarSensor : public Sensor
+    class IGNITION_SENSORS_VISIBLE Lidar : public Sensor
     {
       /// \brief constructor
-      public: LidarSensor();
+      public: Lidar();
 
       /// \brief destructor
-      public: virtual ~LidarSensor();
+      public: virtual ~Lidar();
 
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
@@ -304,8 +236,9 @@ namespace ignition
 
       /// \brief Data pointer for private data
       /// \internal
-      private: std::unique_ptr<LidarSensorPrivate> dataPtr;
+      private: std::unique_ptr<LidarPrivate> dataPtr;
     };
+    }
   }
 }
 
