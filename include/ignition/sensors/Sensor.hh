@@ -24,6 +24,7 @@
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/rendering/Scene.hh>
+#include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
 #include <sdf/sdf.hh>
 
@@ -32,8 +33,8 @@ namespace ignition
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE
-    {
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    //
     /// \brief A string used to identify a sensor
     using SensorId = std::size_t;
     const SensorId NO_SENSOR = 0;

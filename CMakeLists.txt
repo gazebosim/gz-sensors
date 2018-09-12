@@ -59,24 +59,6 @@ ign_find_package(ignition-msgs3 REQUIRED)
 set(IGN_MSGS_VER ${ignition-msgs3_VERSION_MAJOR})
 
 #--------------------------------------
-# Find ignition-tools
-ign_find_package(ignition-tools QUIET)
-if (ignition-tools_FOUND)
-  set (HAVE_IGN_TOOLS TRUE)
-endif()
-
-####### TEMP
-# Find OGRE
-ign_find_package(OGRE VERSION 1.9.0
-    REQUIRED_BY ogre
-    PRIVATE_FOR ogre )
-
-include_directories(
-  ${OGRE_INCLUDE_DIRS}
-  ${OGRE_INCLUDE_DIRS}/Paging )
-#######
-
-#--------------------------------------
 # Find SDFormat
 find_package(SDFormat REQUIRED)
 include_directories(${SDFormat_INCLUDE_DIRS})
@@ -97,4 +79,9 @@ ign_create_packages()
 #============================================================================
 # Configure documentation
 #============================================================================
-#ign_create_docs()
+configure_file(${CMAKE_SOURCE_DIR}/api.md.in ${CMAKE_BINARY_DIR}/api.md)
+configure_file(${CMAKE_SOURCE_DIR}/tutorials.md.in ${CMAKE_BINARY_DIR}/tutorials.md)
+
+ign_create_docs(
+  API_MAINPAGE_MD "${CMAKE_BINARY_DIR}/api.md"
+  TUTORIALS_MAINPAGE_MD "${CMAKE_BINARY_DIR}/tutorials.md")
