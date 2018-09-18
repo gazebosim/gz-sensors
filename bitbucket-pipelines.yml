@@ -5,10 +5,13 @@ pipelines:
     - step:
         script: # Modify the commands below to build your repository.
           - apt update
+          - apt -y install wget lsb-release gnupg
+          - sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
+          - sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-prerelease `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-prerelease.list'
+          - wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -
+          - apt-get update
           - apt-get -y install
-            cmake pkg-config cppcheck libogre-1.9-dev libglew-dev libfreeimage-dev doxygen ruby-ronn uuid-dev freeglut3-dev libxmu-dev libxi-dev curl git mercurial g++-8
-              libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libfreeimage-dev libgts-dev libswscale-dev libtinyxml2-dev libtinyxml-dev libprotobuf-dev
-              protobuf-compiler libprotoc-dev libzmq3-dev sqlite3
+            cmake pkg-config cppcheck doxygen ruby-ronn curl mercurial git g++-8
           - update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8 --slave /usr/bin/gcov gcov /usr/bin/gcov-8
           - gcc -v
           - g++ -v
@@ -18,70 +21,16 @@ pipelines:
           - cd lcov
           - make install
           - cd ..
-          # Ignition cmake
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-cmake -b gz11
-          - cd ign-cmake
-          - mkdir build
-          - cd build
-          - cmake .. # -DENABLE_TESTS_COMPILATION=false
-          - make -j4 install
-          - cd ../..
-          # Ignition tools
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-tools
-          - cd ign-tools
-          - mkdir build
-          - cd build
-          - cmake .. # -DENABLE_TESTS_COMPILATION=false
-          - make -j4 install
-          - cd ../..
-          # Ignition math
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-math -b gz11
-          - cd ign-math
-          - mkdir build
-          - cd build
-          - cmake .. # -DENABLE_TESTS_COMPILATION=false
-          - make -j4 install
-          - cd ../..
-          # SDFormat
-          - hg clone http://bitbucket.org/osrf/sdformat -b gz11
-          - cd sdformat
-          - mkdir build
-          - cd build
-          - cmake .. # -DENABLE_TESTS_COMPILATION=false
-          - make -j4 install
-          - cd ../..
-          # Ignition common
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-common -b gz11
-          - cd ign-common
-          - mkdir build
-          - cd build
-          - cmake .. # -DENABLE_TESTS_COMPILATION=false
-          - make -j4 install
-          - cd ../..
-          # Ignition msgs
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-msgs -b gz11
-          - cd ign-msgs
-          - mkdir build
-          - cd build
-          - cmake .. # -DENABLE_TESTS_COMPILATION=false
-          - make -j4 install
-          - cd ../..
-          # Ignition transport
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-transport -b gz11 
-          - cd ign-transport
-          - mkdir build
-          - cd build
-          - cmake .. # -DENABLE_TESTS_COMPILATION=false
-          - make -j4 install
-          - cd ../..
-          # Ignition rendering
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-rendering -b gz11 
-          - cd ign-rendering
-          - mkdir build
-          - cd build
-          - cmake ..
-          - make -j4 install
-          - cd ../..
+          # Dependency: Ignition packages and sdformat
+          - apt-get -y install
+            libsdformat8-dev
+            libignition-cmake2-dev
+            libignition-common3-dev
+            libignition-math6-dev
+            libignition-msgs3-dev
+            libignition-rendering-dev
+            libignition-transport6-dev
+            libignition-tools-dev
           # Ignition sensors
           - mkdir build
           - cd build
