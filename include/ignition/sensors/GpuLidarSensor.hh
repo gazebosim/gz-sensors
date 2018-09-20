@@ -35,7 +35,7 @@
 
 #include <ignition/sensors/Sensor.hh>
 #include <ignition/sensors/Export.hh>
-#include <ignition/sensors/LidarSensor.hh>
+#include <ignition/sensors/Lidar.hh>
 //#include <ignition/sensors/ign_sensors_gpu_lidar_export.hh>
 
 #include <ignition/msgs.hh>
@@ -46,11 +46,6 @@
 #include <ignition/math/Vector3.hh>
 #include <ignition/math/Angle.hh>
 
-#include <ignition/rendering/ogre/OgreIncludes.hh>
-#include <ignition/rendering/ogre/OgreIncludes.hh>
-#include <ignition/rendering/ogre/OgreObject.hh>
-#include <ignition/rendering/ogre/OgreConversions.hh>
-#include <ignition/rendering/ogre/Export.hh>
 #include <ignition/rendering/Camera.hh>
 #include <ignition/rendering/Visual.hh>
 #include <ignition/rendering/Scene.hh>
@@ -67,15 +62,6 @@
 #endif
 */
 
-namespace Ogre
-{
-  class Material;
-  class Renderable;
-  class Pass;
-  class AutoParamDataSource;
-  class Matrix4;
-  class MovableObject;
-}
 
 namespace ignition
 {
@@ -93,7 +79,7 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-    class IGNITION_SENSORS_VISIBLE GpuLidarSensor : public LidarSensor
+    class IGNITION_SENSORS_VISIBLE GpuLidarSensor : public Lidar
     {
       /// \brief constructor
       public: GpuLidarSensor();
@@ -258,21 +244,21 @@ namespace ignition
       // Documentation inherited.
       private: virtual void RenderImpl();
 
-      /// \brief Update a render target.
-      /// \param[in, out] _target Render target to update (render).
-      /// \param[in, out] _material Material used during render.
-      /// \param[in] _cam Camerat to render from.
-      /// \param[in] _updateTex True to update the textures in the material
-      private: void UpdateRenderTarget(Ogre::RenderTarget *_target,
-                                       Ogre::Material *_material,
-                                       Ogre::Camera *_cam,
-                                       const bool _updateTex = false);
+      // /// \brief Update a render target.
+      // /// \param[in, out] _target Render target to update (render).
+      // /// \param[in, out] _material Material used during render.
+      // /// \param[in] _cam Camerat to render from.
+      // /// \param[in] _updateTex True to update the textures in the material
+      // private: void UpdateRenderTarget(Ogre::RenderTarget *_target,
+      //                                  Ogre::Material *_material,
+      //                                  Ogre::Camera *_cam,
+      //                                  const bool _updateTex = false);
 
-      /// \internal
-      /// \brief Implementation of Ogre::RenderObjectListener
-      public: virtual void notifyRenderSingleObject(Ogre::Renderable *_rend,
-              const Ogre::Pass *_p, const Ogre::AutoParamDataSource *_s,
-              const Ogre::LightList *_ll, bool _supp);
+      // /// \internal
+      // /// \brief Implementation of Ogre::RenderObjectListener
+      // public: virtual void notifyRenderSingleObject(Ogre::Renderable *_rend,
+      //         const Ogre::Pass *_p, const Ogre::AutoParamDataSource *_s,
+      //         const Ogre::LightList *_ll, bool _supp);
 
       /// \brief Create an ortho camera.
       private: void CreateOrthoCam();
@@ -283,28 +269,28 @@ namespace ignition
       /// \brief Create a canvas.
       private: void CreateCanvas();
 
-      /// \brief Builds scaled Orthogonal Matrix from parameters.
-      /// \param[in] _left Left clip.
-      /// \param[in] _right Right clip.
-      /// \param[in] _bottom Bottom clip.
-      /// \param[in] _top Top clip.
-      /// \param[in] _near Near clip.
-      /// \param[in] _far Far clip.
-      /// \return The Scaled orthogonal Ogre::Matrix4
-      private: Ogre::Matrix4 BuildScaledOrthoMatrix(const float _left,
-          const float _right, const float _bottom, const float _top,
-          const float _near, const float _far);
-
-      /// \brief Sets first pass target.
-      /// \param[in] _target Render target for the first pass.
-      /// \param[in] _index Index of the texture.
-      private: virtual void Set1stPassTarget(Ogre::RenderTarget *_target,
-                                             const unsigned int _index);
-
-      /// \brief Sets second pass target.
-      /// \param[in] _target Render target for the second pass.
-      private: virtual void Set2ndPassTarget(Ogre::RenderTarget *_target);
-
+      // /// \brief Builds scaled Orthogonal Matrix from parameters.
+      // /// \param[in] _left Left clip.
+      // /// \param[in] _right Right clip.
+      // /// \param[in] _bottom Bottom clip.
+      // /// \param[in] _top Top clip.
+      // /// \param[in] _near Near clip.
+      // /// \param[in] _far Far clip.
+      // /// \return The Scaled orthogonal Ogre::Matrix4
+      // private: Ogre::Matrix4 BuildScaledOrthoMatrix(const float _left,
+      //     const float _right, const float _bottom, const float _top,
+      //     const float _near, const float _far);
+      //
+      // /// \brief Sets first pass target.
+      // /// \param[in] _target Render target for the first pass.
+      // /// \param[in] _index Index of the texture.
+      // private: virtual void Set1stPassTarget(Ogre::RenderTarget *_target,
+      //                                        const unsigned int _index);
+      //
+      // /// \brief Sets second pass target.
+      // /// \param[in] _target Render target for the second pass.
+      // private: virtual void Set2ndPassTarget(Ogre::RenderTarget *_target);
+      //
 
     };
   }

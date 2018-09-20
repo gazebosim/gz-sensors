@@ -3,7 +3,6 @@ set (sources
   Manager.cc
   Sensor.cc
   Lidar.cc
-  GpuLidarSensor.cc
   Noise.cc
   GaussianNoiseModel.cc
   SensorTypes.cc
@@ -49,6 +48,13 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-lidar PUBLIC
   ${IGNITION-TRANSPORT_LIBRARIES}
   ${PROJECT_LIBRARY_TARGET_NAME})
 
+add_library(${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar SHARED GpuLidarSensor.cc)
+target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar PUBLIC
+  ${IGNITION-MSGS_LIBRARIES}
+  ${IGNITION-TRANSPORT_LIBRARIES}
+  ${PROJECT_LIBRARY_TARGET_NAME}
+  ${PROJECT_LIBRARY_TARGET_NAME}-lidar)
+
 
 # Build the unit tests.
 ign_build_tests(TYPE UNIT SOURCES ${gtest_sources})
@@ -61,5 +67,8 @@ install(TARGETS
   DESTINATION ${IGN_SENSORS_PLUGIN_PATH})
 install(TARGETS
   ${PROJECT_LIBRARY_TARGET_NAME}-lidar
+  DESTINATION ${IGN_SENSORS_PLUGIN_PATH})
+install(TARGETS
+  ${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar
   DESTINATION ${IGN_SENSORS_PLUGIN_PATH})
 

@@ -32,17 +32,6 @@
 #include "ignition/rendering/RenderTypes.hh"
 
 
-namespace Ogre
-{
-  class Camera;
-  class Material;
-  class MovableObject;
-  class RenderTarget;
-  class SceneNode;
-  class Texture;
-  class Viewport;
-}
-
 namespace ignition
 {
   namespace common
@@ -57,7 +46,7 @@ namespace ignition
   {
     /// \internal
     /// \brief Private data for the GpuLaser class
-    class GpuLidarSensorPrivate : public LidarSensorPrivate
+    class GpuLidarSensorPrivate
     {
       /// \brief constructor
       public: GpuLidarSensorPrivate();
@@ -95,29 +84,29 @@ namespace ignition
       /// \brief Outgoing laser data, used by newLaserFrame event.
       public: float *laserScan;
 
-      /// \brief Pointer to Ogre material for the first rendering pass.
-      public: Ogre::Material *matFirstPass;
-
-      /// \brief Pointer to Ogre material for the sencod rendering pass.
-      public: Ogre::Material *matSecondPass;
-
-      /// \brief An array of first pass textures.
-      public: Ogre::Texture *firstPassTextures[3];
-
-      /// \brief Second pass texture.
-      public: Ogre::Texture *secondPassTexture;
-
-      /// \brief First pass render targets.
-      public: Ogre::RenderTarget *firstPassTargets[3];
-
-      /// \brief Second pass render target.
-      public: Ogre::RenderTarget *secondPassTarget;
-
-      /// \brief First pass viewports.
-      public: Ogre::Viewport *firstPassViewports[3];
-
-      /// \brief Second pass viewport
-      public: Ogre::Viewport *secondPassViewport;
+      // /// \brief Pointer to Ogre material for the first rendering pass.
+      // public: Ogre::Material *matFirstPass;
+      //
+      // /// \brief Pointer to Ogre material for the sencod rendering pass.
+      // public: Ogre::Material *matSecondPass;
+      //
+      // /// \brief An array of first pass textures.
+      // public: Ogre::Texture *firstPassTextures[3];
+      //
+      // /// \brief Second pass texture.
+      // public: Ogre::Texture *secondPassTexture;
+      //
+      // /// \brief First pass render targets.
+      // public: Ogre::RenderTarget *firstPassTargets[3];
+      //
+      // /// \brief Second pass render target.
+      // public: Ogre::RenderTarget *secondPassTarget;
+      //
+      // /// \brief First pass viewports.
+      // public: Ogre::Viewport *firstPassViewports[3];
+      //
+      // /// \brief Second pass viewport
+      // public: Ogre::Viewport *secondPassViewport;
 
       /// \brief Number of first pass textures.
       public: unsigned int textureCount;
@@ -125,25 +114,25 @@ namespace ignition
       /// \brief A list of camera angles for first pass rendering.
       public: double cameraYaws[4];
 
-      /// \brief Temporary pointer to the current render target.
-      public: Ogre::RenderTarget *currentTarget;
-
-      /// \brief Temporary pointer to the current material.
-      public: Ogre::Material *currentMat;
-
-      /// \brief Ogre orthorgraphic camera used in the second pass for
-      /// undistortion.
-      public: Ogre::Camera *orthoCam;
-
-      /// \brief Ogre scenenode where the orthorgraphic camera is attached to.
-      public: Ogre::SceneNode *pitchNodeOrtho;
+      // /// \brief Temporary pointer to the current render target.
+      // public: Ogre::RenderTarget *currentTarget;
+      //
+      // /// \brief Temporary pointer to the current material.
+      // public: Ogre::Material *currentMat;
+      //
+      // /// \brief Ogre orthorgraphic camera used in the second pass for
+      // /// undistortion.
+      // public: Ogre::Camera *orthoCam;
+      //
+      // /// \brief Ogre scenenode where the orthorgraphic camera is attached to.
+      // public: Ogre::SceneNode *pitchNodeOrtho;
 
       /// \brief Ogre mesh used to create a canvas for undistorting range values
       /// in the second rendering pass.
       public: common::Mesh *undistMesh;
 
-      /// \brief Ogre movable object created from the canvas mesh.
-      public: Ogre::MovableObject *object;
+      // /// \brief Ogre movable object created from the canvas mesh.
+      // public: Ogre::MovableObject *object;
 
       /// \brief Pointer to visual that holds the canvas.
       public: rendering::VisualPtr visual;
@@ -172,28 +161,28 @@ using namespace ignition::sensors;
 //////////////////////////////////////////////////
 GpuLidarSensorPrivate::GpuLidarSensorPrivate()
 {
-  this->sceneChangeConnection = Events::ConnectSceneChangeCallback(
-      std::bind(&GpuLidarSensorPrivate::SetScene,this, std::placeholders::_1));
+  // this->sceneChangeConnection = Events::ConnectSceneChangeCallback(
+  //     std::bind(&GpuLidarSensorPrivate::SetScene,this, std::placeholders::_1));
 }
 
 //////////////////////////////////////////////////
 GpuLidarSensorPrivate::~GpuLidarSensorPrivate()
 {
-  Events::sceneEvent.Disconnect(this->sceneChangeConnection->Id());
+  // Events::sceneEvent.Disconnect(this->sceneChangeConnection->Id());
 }
 
 /////////////////////////////////////////////////
 void GpuLidarSensorPrivate::SetScene(ignition::rendering::ScenePtr _scene)
 {
-  std::lock_guard<std::mutex> lock(this->mutex);
-  // APIs make it possible for the scene pointer to change
-  if (this->scene != _scene)
-  {
-    this->RemoveCamera(this->scene);
-    this->scene = _scene;
-    if (this->initialized)
-      this->CreateCamera();
-  }
+  // std::lock_guard<std::mutex> lock(this->mutex);
+  // // APIs make it possible for the scene pointer to change
+  // if (this->scene != _scene)
+  // {
+  //   this->RemoveCamera(this->scene);
+  //   this->scene = _scene;
+  //   if (this->initialized)
+  //     this->CreateCamera();
+  // }
 }
 
 //////////////////////////////////////////////////
@@ -205,11 +194,11 @@ bool GpuLidarSensorPrivate::CreateCamera()
 //////////////////////////////////////////////////
 void GpuLidarSensorPrivate::RemoveCamera(ignition::rendering::ScenePtr _scene)
 {
-  if (_scene)
-  {
-    // TODO Remove camera from scene!
-  }
-  this->camera = nullptr;
+  // if (_scene)
+  // {
+  //   // TODO Remove camera from scene!
+  // }
+  // this->camera = nullptr;
 }
 
 //////////////////////////////////////////////////
@@ -229,203 +218,203 @@ GpuLidarSensor::~GpuLidarSensor()
 bool GpuLidarSensor::Init()
 {
 
-/*
-  if (rendering::RenderEngine::Instance()->GetRenderPathType() ==
-      rendering::RenderEngine::NONE)
-  {
-    ignerr << "Unable to create GpuLidarSensor. Rendering is disabled.\n";
-    return;
-  }
-
-  std::string worldName = this->world->Name();
-
-  if (!worldName.empty())
-  {
-
-    this->dataPtr->scene = rendering::get_scene(worldName);
-
-    if (!this->dataPtr->scene)
-      this->scene = rendering::create_scene(worldName, false, true);
-
-    this->dataPtr->laserCam = this->dataPtr->scene->CreateGpuLaser(
-        this->sdf->Get<std::string>("name"), false);
-
-    if (!this->dataPtr->laserCam)
-    {
-      ignerr << "Unable to create gpu laser sensor\n";
-      return;
-    }
-*/
-    // Camera method
-    //this->SetCaptureData(true);
-
-    // initialize GpuLaser from sdf
-    if (this->dataPtr->vertRayCount == 1)
-    {
-      this->dataPtr->vertRangeCount = 1;
-      this->SetIsHorizontal(true);
-    }
-    else
-      this->SetIsHorizontal(false);
-
-    this->dataPtr->rangeCountRatio =
-      this->dataPtr->horzRangeCount / this->dataPtr->vertRangeCount;
-
-    this->SetNearClip(this->RangeMin());
-    this->SetFarClip(this->RangeMax());
-
-    this->SetHorzFOV((this->AngleMax() - this->AngleMin()).Radian());
-    this->SetVertFOV((this->VerticalAngleMax() -
-          this->VerticalAngleMin()).Radian());
-
-    this->SetHorzHalfAngle(
-      (this->AngleMax() + this->AngleMin()).Radian() / 2.0);
-
-    this->SetVertHalfAngle((this->VerticalAngleMax()
-            + this->VerticalAngleMin()).Radian() / 2.0);
-
-    if (this->HorzFOV() > 2 * M_PI)
-      this->SetHorzFOV(2*M_PI);
-
-    this->SetCameraCount(1);
-
-    if (this->HorzFOV() > 2.8)
-    {
-      if (this->HorzFOV() > 5.6)
-        this->SetCameraCount(3);
-      else
-        this->SetCameraCount(2);
-    }
-
-    this->SetHorzFOV(this->HorzFOV() / this->CameraCount());
-    this->dataPtr->horzRayCount /= this->CameraCount();
-
-    if (this->VertFOV() > M_PI / 2)
-    {
-      ignwarn << "Vertical FOV for block GPU laser is capped at 90 degrees.\n";
-      this->SetVertFOV(M_PI / 2);
-      this->SetVerticalAngleMin(this->VertHalfAngle() -
-                                (this->VertFOV() / 2));
-      this->SetVerticalAngleMax(this->VertHalfAngle() +
-                                (this->VertFOV() / 2));
-    }
-
-    if ((this->dataPtr->horzRayCount * this->dataPtr->vertRayCount) <
-        (this->dataPtr->horzRangeCount * this->dataPtr->vertRangeCount))
-    {
-      this->dataPtr->horzRayCount =
-        std::max(this->dataPtr->horzRayCount, this->dataPtr->horzRangeCount);
-      this->dataPtr->vertRayCount =
-        std::max(this->dataPtr->vertRayCount, this->dataPtr->vertRangeCount);
-    }
-
-    if (this->IsHorizontal())
-    {
-      if (this->dataPtr->vertRayCount > 1)
-      {
-        this->SetCosHorzFOV(
-            2 * atan(tan(this->HorzFOV()/2) / cos(this->VertFOV()/2)));
-        this->SetCosVertFOV(this->VertFOV());
-        this->SetRayCountRatio(
-          tan(this->CosHorzFOV()/2.0) / tan(this->VertFOV()/2.0));
-
-        if ((this->dataPtr->horzRayCount / this->RayCountRatio()) >
-            this->dataPtr->vertRayCount)
-        {
-          this->dataPtr->vertRayCount =
-            this->dataPtr->horzRayCount / this->RayCountRatio();
-        }
-        else
-        {
-          this->dataPtr->horzRayCount =
-            this->dataPtr->vertRayCount * this->RayCountRatio();
-        }
-      }
-      else
-      {
-        this->SetCosHorzFOV(this->HorzFOV());
-        this->SetCosVertFOV(this->VertFOV());
-      }
-    }
-    else
-    {
-      if (this->dataPtr->horzRayCount > 1)
-      {
-        this->SetCosHorzFOV(this->HorzFOV());
-        this->SetCosVertFOV(
-          2 * atan(tan(this->VertFOV()/2) / cos(this->HorzFOV()/2)));
-        this->SetRayCountRatio(
-          tan(this->HorzFOV()/2.0) / tan(this->CosVertFOV()/2.0));
-
-        if ((this->dataPtr->horzRayCount / this->RayCountRatio()) >
-            this->dataPtr->vertRayCount)
-        {
-          this->dataPtr->vertRayCount =
-            this->dataPtr->horzRayCount / this->RayCountRatio();
-        }
-        else
-        {
-          this->dataPtr->horzRayCount = this->dataPtr->vertRayCount *
-            this->RayCountRatio();
-        }
-      }
-      else
-      {
-        this->SetCosHorzFOV(this->HorzFOV());
-        this->SetCosVertFOV(this->VertFOV());
-      }
-    }
-
-    // Initialize camera sdf for GpuLaser
-    this->dataPtr->cameraElem.reset(new sdf::Element);
-    sdf::initFile("camera.sdf", this->dataPtr->cameraElem);
-
-    this->dataPtr->cameraElem->GetElement("horizontal_fov")->Set(
-        this->CosHorzFOV());
-
-    sdf::ElementPtr ptr = this->dataPtr->cameraElem->GetElement("image");
-    ptr->GetElement("width")->Set(this->dataPtr->horzRayCount);
-    ptr->GetElement("height")->Set(this->dataPtr->vertRayCount);
-    ptr->GetElement("format")->Set("R8G8B8");
-
-    ptr = this->dataPtr->cameraElem->GetElement("clip");
-    ptr->GetElement("near")->Set(this->NearClip());
-    ptr->GetElement("far")->Set(this->FarClip());
-
-    // Load camera sdf for GpuLaser
-    //this->dataPtr->laserCam->Load(this->dataPtr->cameraElem);
-
-
-    // initialize GpuLaser
-    this->Init();
-    this->SetRangeCount(
-        this->dataPtr->horzRangeCount, this->dataPtr->vertRangeCount);
-    // Camera method
-    //this->SetClipDist(this->RangeMin(), this->RangeMax());
-    // Sensor method
-    this->CreateLaserTexture(/*this->ScopedName() + */ "_RttTex_Laser");
-    // Camera method
-    //this->CreateRenderTexture(/*this->ScopedName() + */ "_RttTex_Image");
-    // Sensor method
-    //this->SetWorldPose(this->Pose());
-    //this->AttachToVisual(this->ParentId(), true, 0, 0);
-
-    //this->dataPtr->laserMsg.mutable_scan()->set_frame(this->ParentName());
-/*
-  }
-  else
-    ignerr << "No world name\n";
-*/
-
-/*
-  // Disable clouds and moon on server side until fixed and also to improve
-  // performance
-  this->dataPtr->scene->SetSkyXMode(rendering::Scene::GZ_SKYX_ALL &
-      ~rendering::Scene::GZ_SKYX_CLOUDS &
-      ~rendering::Scene::GZ_SKYX_MOON);
-*/
-
-  return this->Sensor::Init();
+// #<{(|
+//   if (rendering::RenderEngine::Instance()->GetRenderPathType() ==
+//       rendering::RenderEngine::NONE)
+//   {
+//     ignerr << "Unable to create GpuLidarSensor. Rendering is disabled.\n";
+//     return;
+//   }
+//
+//   std::string worldName = this->world->Name();
+//
+//   if (!worldName.empty())
+//   {
+//
+//     this->dataPtr->scene = rendering::get_scene(worldName);
+//
+//     if (!this->dataPtr->scene)
+//       this->scene = rendering::create_scene(worldName, false, true);
+//
+//     this->dataPtr->laserCam = this->dataPtr->scene->CreateGpuLaser(
+//         this->sdf->Get<std::string>("name"), false);
+//
+//     if (!this->dataPtr->laserCam)
+//     {
+//       ignerr << "Unable to create gpu laser sensor\n";
+//       return;
+//     }
+// |)}>#
+//     // Camera method
+//     //this->SetCaptureData(true);
+//
+//     // initialize GpuLaser from sdf
+//     if (this->dataPtr->vertRayCount == 1)
+//     {
+//       this->dataPtr->vertRangeCount = 1;
+//       this->SetIsHorizontal(true);
+//     }
+//     else
+//       this->SetIsHorizontal(false);
+//
+//     this->dataPtr->rangeCountRatio =
+//       this->dataPtr->horzRangeCount / this->dataPtr->vertRangeCount;
+//
+//     this->SetNearClip(this->RangeMin());
+//     this->SetFarClip(this->RangeMax());
+//
+//     this->SetHorzFOV((this->AngleMax() - this->AngleMin()).Radian());
+//     this->SetVertFOV((this->VerticalAngleMax() -
+//           this->VerticalAngleMin()).Radian());
+//
+//     this->SetHorzHalfAngle(
+//       (this->AngleMax() + this->AngleMin()).Radian() / 2.0);
+//
+//     this->SetVertHalfAngle((this->VerticalAngleMax()
+//             + this->VerticalAngleMin()).Radian() / 2.0);
+//
+//     if (this->HorzFOV() > 2 * M_PI)
+//       this->SetHorzFOV(2*M_PI);
+//
+//     this->SetCameraCount(1);
+//
+//     if (this->HorzFOV() > 2.8)
+//     {
+//       if (this->HorzFOV() > 5.6)
+//         this->SetCameraCount(3);
+//       else
+//         this->SetCameraCount(2);
+//     }
+//
+//     this->SetHorzFOV(this->HorzFOV() / this->CameraCount());
+//     this->dataPtr->horzRayCount /= this->CameraCount();
+//
+//     if (this->VertFOV() > M_PI / 2)
+//     {
+//       ignwarn << "Vertical FOV for block GPU laser is capped at 90 degrees.\n";
+//       this->SetVertFOV(M_PI / 2);
+//       this->SetVerticalAngleMin(this->VertHalfAngle() -
+//                                 (this->VertFOV() / 2));
+//       this->SetVerticalAngleMax(this->VertHalfAngle() +
+//                                 (this->VertFOV() / 2));
+//     }
+//
+//     if ((this->dataPtr->horzRayCount * this->dataPtr->vertRayCount) <
+//         (this->dataPtr->horzRangeCount * this->dataPtr->vertRangeCount))
+//     {
+//       this->dataPtr->horzRayCount =
+//         std::max(this->dataPtr->horzRayCount, this->dataPtr->horzRangeCount);
+//       this->dataPtr->vertRayCount =
+//         std::max(this->dataPtr->vertRayCount, this->dataPtr->vertRangeCount);
+//     }
+//
+//     if (this->IsHorizontal())
+//     {
+//       if (this->dataPtr->vertRayCount > 1)
+//       {
+//         this->SetCosHorzFOV(
+//             2 * atan(tan(this->HorzFOV()/2) / cos(this->VertFOV()/2)));
+//         this->SetCosVertFOV(this->VertFOV());
+//         this->SetRayCountRatio(
+//           tan(this->CosHorzFOV()/2.0) / tan(this->VertFOV()/2.0));
+//
+//         if ((this->dataPtr->horzRayCount / this->RayCountRatio()) >
+//             this->dataPtr->vertRayCount)
+//         {
+//           this->dataPtr->vertRayCount =
+//             this->dataPtr->horzRayCount / this->RayCountRatio();
+//         }
+//         else
+//         {
+//           this->dataPtr->horzRayCount =
+//             this->dataPtr->vertRayCount * this->RayCountRatio();
+//         }
+//       }
+//       else
+//       {
+//         this->SetCosHorzFOV(this->HorzFOV());
+//         this->SetCosVertFOV(this->VertFOV());
+//       }
+//     }
+//     else
+//     {
+//       if (this->dataPtr->horzRayCount > 1)
+//       {
+//         this->SetCosHorzFOV(this->HorzFOV());
+//         this->SetCosVertFOV(
+//           2 * atan(tan(this->VertFOV()/2) / cos(this->HorzFOV()/2)));
+//         this->SetRayCountRatio(
+//           tan(this->HorzFOV()/2.0) / tan(this->CosVertFOV()/2.0));
+//
+//         if ((this->dataPtr->horzRayCount / this->RayCountRatio()) >
+//             this->dataPtr->vertRayCount)
+//         {
+//           this->dataPtr->vertRayCount =
+//             this->dataPtr->horzRayCount / this->RayCountRatio();
+//         }
+//         else
+//         {
+//           this->dataPtr->horzRayCount = this->dataPtr->vertRayCount *
+//             this->RayCountRatio();
+//         }
+//       }
+//       else
+//       {
+//         this->SetCosHorzFOV(this->HorzFOV());
+//         this->SetCosVertFOV(this->VertFOV());
+//       }
+//     }
+//
+//     // Initialize camera sdf for GpuLaser
+//     this->dataPtr->cameraElem.reset(new sdf::Element);
+//     sdf::initFile("camera.sdf", this->dataPtr->cameraElem);
+//
+//     this->dataPtr->cameraElem->GetElement("horizontal_fov")->Set(
+//         this->CosHorzFOV());
+//
+//     sdf::ElementPtr ptr = this->dataPtr->cameraElem->GetElement("image");
+//     ptr->GetElement("width")->Set(this->dataPtr->horzRayCount);
+//     ptr->GetElement("height")->Set(this->dataPtr->vertRayCount);
+//     ptr->GetElement("format")->Set("R8G8B8");
+//
+//     ptr = this->dataPtr->cameraElem->GetElement("clip");
+//     ptr->GetElement("near")->Set(this->NearClip());
+//     ptr->GetElement("far")->Set(this->FarClip());
+//
+//     // Load camera sdf for GpuLaser
+//     //this->dataPtr->laserCam->Load(this->dataPtr->cameraElem);
+//
+//
+//     // initialize GpuLaser
+//     this->Init();
+//     this->SetRangeCount(
+//         this->dataPtr->horzRangeCount, this->dataPtr->vertRangeCount);
+//     // Camera method
+//     //this->SetClipDist(this->RangeMin(), this->RangeMax());
+//     // Sensor method
+//     this->CreateLaserTexture(#<{(|this->ScopedName() + |)}># "_RttTex_Laser");
+//     // Camera method
+//     //this->CreateRenderTexture(#<{(|this->ScopedName() + |)}># "_RttTex_Image");
+//     // Sensor method
+//     //this->SetWorldPose(this->Pose());
+//     //this->AttachToVisual(this->ParentId(), true, 0, 0);
+//
+//     //this->dataPtr->laserMsg.mutable_scan()->set_frame(this->ParentName());
+// #<{(|
+//   }
+//   else
+//     ignerr << "No world name\n";
+// |)}>#
+//
+// #<{(|
+//   // Disable clouds and moon on server side until fixed and also to improve
+//   // performance
+//   this->dataPtr->scene->SetSkyXMode(rendering::Scene::GZ_SKYX_ALL &
+//       ~rendering::Scene::GZ_SKYX_CLOUDS &
+//       ~rendering::Scene::GZ_SKYX_MOON);
+// |)}>#
+//
+//   return this->Sensor::Init();
 }
 
 //////////////////////////////////////////////////
@@ -445,26 +434,26 @@ void GpuLidarSensor::Fini()
 //////////////////////////////////////////////////
 bool GpuLidarSensor::Update(const common::Time &_now)
 {
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  if (!this->dataPtr->initialized)
-    return false;
-
-  PostRender();
-
-  this->PublishLaserScan(_now);
-
-  // Trigger callbacks.
-  try
-  {
-    //this->dataPtr->dataEvent(msg);
-  }
-  catch(...)
-  {
-    ignerr << "Exception thrown in an image callback.\n";
-  }
-
-  this->dataPtr->rendered = false;
-  return true;
+  // std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  // if (!this->dataPtr->initialized)
+  //   return false;
+  //
+  // PostRender();
+  //
+  // this->PublishLaserScan(_now);
+  //
+  // // Trigger callbacks.
+  // try
+  // {
+  //   //this->dataPtr->dataEvent(msg);
+  // }
+  // catch(...)
+  // {
+  //   ignerr << "Exception thrown in an image callback.\n";
+  // }
+  //
+  // this->dataPtr->rendered = false;
+  // return true;
 }
 
 //////////////////////////////////////////////////
@@ -478,7 +467,7 @@ void GpuLidarSensor::Render()
 //  this->lastMeasurementTime = this->scene->SimTime();
 
 //  this->dataPtr->laserCam->Render();
-  this->dataPtr->rendered = true;
+  // this->dataPtr->rendered = true;
 }
 
 //////////////////////////////////////////////////
@@ -644,129 +633,129 @@ void GpuLidarSensor::PostRender()
 }
 
 /////////////////////////////////////////////////
-void GpuLidarSensor::UpdateRenderTarget(Ogre::RenderTarget *_target,
-                   Ogre::Material *_material, Ogre::Camera *_cam,
-                   const bool _updateTex)
-{
-/*
-  Ogre::RenderSystem *renderSys;
-  Ogre::Viewport *vp = NULL;
-  Ogre::SceneManager *sceneMgr = this->dataPtr->scene->SceneManager();
-  Ogre::Pass *pass;
-
-  renderSys = this->dataPtr->scene->SceneManager()->getDestinationRenderSystem();
-  // Get pointer to the material pass
-  pass = _material->getBestTechnique()->getPass(0);
-
-  // Render the depth texture
-  // SceneManager::_render function automatically sets farClip to 0.
-  // Which normally equates to infinite distance. We don't want this. So
-  // we have to set the distance every time.
-  _cam->setFarClipDistance(this->FarClip());
-
-  Ogre::AutoParamDataSource autoParamDataSource;
-
-  vp = _target->getViewport(0);
-
-  // Need this line to render the ground plane. No idea why it's necessary.
-  renderSys->_setViewport(vp);
-  sceneMgr->_setPass(pass, true, false);
-  autoParamDataSource.setCurrentPass(pass);
-  autoParamDataSource.setCurrentViewport(vp);
-  autoParamDataSource.setCurrentRenderTarget(_target);
-  autoParamDataSource.setCurrentSceneManager(sceneMgr);
-  autoParamDataSource.setCurrentCamera(_cam, true);
-
-  renderSys->setLightingEnabled(false);
-  renderSys->_setFog(Ogre::FOG_NONE);
-
-  pass->_updateAutoParams(&autoParamDataSource, 1);
-
-  if (_updateTex)
-  {
-    pass->getFragmentProgramParameters()->setNamedConstant("tex1",
-      this->dataPtr->textureIndex[0]);
-    if (this->dataPtr->textureIndex.size() > 1)
-    {
-      pass->getFragmentProgramParameters()->setNamedConstant("tex2",
-        this->dataPtr->textureIndex[1]);
-      if (this->dataPtr->textureIndex.size() > 2)
-        pass->getFragmentProgramParameters()->setNamedConstant("tex3",
-          this->dataPtr->textureIndex[2]);
-    }
-  }
-
-  // NOTE: We MUST bind parameters AFTER updating the autos
-  if (pass->hasVertexProgram())
-  {
-    renderSys->bindGpuProgram(
-        pass->getVertexProgram()->_getBindingDelegate());
-
-    renderSys->bindGpuProgramParameters(Ogre::GPT_VERTEX_PROGRAM,
-      pass->getVertexProgramParameters(), 1);
-  }
-
-  if (pass->hasFragmentProgram())
-  {
-    renderSys->bindGpuProgram(
-    pass->getFragmentProgram()->_getBindingDelegate());
-
-      renderSys->bindGpuProgramParameters(Ogre::GPT_FRAGMENT_PROGRAM,
-      pass->getFragmentProgramParameters(), 1);
-  }
-*/
-}
+// void GpuLidarSensor::UpdateRenderTarget(Ogre::RenderTarget *_target,
+//                    Ogre::Material *_material, Ogre::Camera *_cam,
+//                    const bool _updateTex)
+// {
+// #<{(|
+//   Ogre::RenderSystem *renderSys;
+//   Ogre::Viewport *vp = NULL;
+//   Ogre::SceneManager *sceneMgr = this->dataPtr->scene->SceneManager();
+//   Ogre::Pass *pass;
+//
+//   renderSys = this->dataPtr->scene->SceneManager()->getDestinationRenderSystem();
+//   // Get pointer to the material pass
+//   pass = _material->getBestTechnique()->getPass(0);
+//
+//   // Render the depth texture
+//   // SceneManager::_render function automatically sets farClip to 0.
+//   // Which normally equates to infinite distance. We don't want this. So
+//   // we have to set the distance every time.
+//   _cam->setFarClipDistance(this->FarClip());
+//
+//   Ogre::AutoParamDataSource autoParamDataSource;
+//
+//   vp = _target->getViewport(0);
+//
+//   // Need this line to render the ground plane. No idea why it's necessary.
+//   renderSys->_setViewport(vp);
+//   sceneMgr->_setPass(pass, true, false);
+//   autoParamDataSource.setCurrentPass(pass);
+//   autoParamDataSource.setCurrentViewport(vp);
+//   autoParamDataSource.setCurrentRenderTarget(_target);
+//   autoParamDataSource.setCurrentSceneManager(sceneMgr);
+//   autoParamDataSource.setCurrentCamera(_cam, true);
+//
+//   renderSys->setLightingEnabled(false);
+//   renderSys->_setFog(Ogre::FOG_NONE);
+//
+//   pass->_updateAutoParams(&autoParamDataSource, 1);
+//
+//   if (_updateTex)
+//   {
+//     pass->getFragmentProgramParameters()->setNamedConstant("tex1",
+//       this->dataPtr->textureIndex[0]);
+//     if (this->dataPtr->textureIndex.size() > 1)
+//     {
+//       pass->getFragmentProgramParameters()->setNamedConstant("tex2",
+//         this->dataPtr->textureIndex[1]);
+//       if (this->dataPtr->textureIndex.size() > 2)
+//         pass->getFragmentProgramParameters()->setNamedConstant("tex3",
+//           this->dataPtr->textureIndex[2]);
+//     }
+//   }
+//
+//   // NOTE: We MUST bind parameters AFTER updating the autos
+//   if (pass->hasVertexProgram())
+//   {
+//     renderSys->bindGpuProgram(
+//         pass->getVertexProgram()->_getBindingDelegate());
+//
+//     renderSys->bindGpuProgramParameters(Ogre::GPT_VERTEX_PROGRAM,
+//       pass->getVertexProgramParameters(), 1);
+//   }
+//
+//   if (pass->hasFragmentProgram())
+//   {
+//     renderSys->bindGpuProgram(
+//     pass->getFragmentProgram()->_getBindingDelegate());
+//
+//       renderSys->bindGpuProgramParameters(Ogre::GPT_FRAGMENT_PROGRAM,
+//       pass->getFragmentProgramParameters(), 1);
+//   }
+// |)}>#
+// }
 
 /////////////////////////////////////////////////
-void GpuLidarSensor::notifyRenderSingleObject(Ogre::Renderable *_rend,
-      const Ogre::Pass* /*pass*/, const Ogre::AutoParamDataSource* /*source*/,
-      const Ogre::LightList* /*lights*/, bool /*supp*/)
-{
-/*
-  Ogre::Vector4 retro = Ogre::Vector4(0, 0, 0, 0);
-  try
-  {
-    retro = _rend->getCustomParameter(1);
-  }
-  catch(Ogre::ItemIdentityException& e)
-  {
-    _rend->setCustomParameter(1, Ogre::Vector4(0, 0, 0, 0));
-  }
-
-  Ogre::Pass *pass = this->dataPtr->currentMat->getBestTechnique()->getPass(0);
-  Ogre::RenderSystem *renderSys =
-                  this->dataPtr->scene->SceneManager()->getDestinationRenderSystem();
-
-  Ogre::AutoParamDataSource autoParamDataSource;
-
-  Ogre::Viewport *vp = this->dataPtr->currentTarget->getViewport(0);
-
-  renderSys->_setViewport(vp);
-  autoParamDataSource.setCurrentRenderable(_rend);
-  autoParamDataSource.setCurrentPass(pass);
-  autoParamDataSource.setCurrentViewport(vp);
-  autoParamDataSource.setCurrentRenderTarget(this->dataPtr->currentTarget);
-  autoParamDataSource.setCurrentSceneManager(this->dataPtr->scene->SceneManager());
-  autoParamDataSource.setCurrentCamera(this->dataPtr->camera, true);
-
-  pass->_updateAutoParams(&autoParamDataSource,
-      Ogre::GPV_GLOBAL || Ogre::GPV_PER_OBJECT);
-  pass->getFragmentProgramParameters()->setNamedConstant("retro", retro[0]);
-  renderSys->bindGpuProgram(
-      pass->getVertexProgram()->_getBindingDelegate());
-
-  renderSys->bindGpuProgramParameters(Ogre::GPT_VERTEX_PROGRAM,
-      pass->getVertexProgramParameters(),
-      Ogre::GPV_GLOBAL || Ogre::GPV_PER_OBJECT);
-
-  renderSys->bindGpuProgram(
-      pass->getFragmentProgram()->_getBindingDelegate());
-
-  renderSys->bindGpuProgramParameters(Ogre::GPT_FRAGMENT_PROGRAM,
-      pass->getFragmentProgramParameters(),
-      Ogre::GPV_GLOBAL || Ogre::GPV_PER_OBJECT);
-*/
-}
+// void GpuLidarSensor::notifyRenderSingleObject(Ogre::Renderable *_rend,
+//       const Ogre::Pass* #<{(|pass|)}>#, const Ogre::AutoParamDataSource* #<{(|source|)}>#,
+//       const Ogre::LightList* #<{(|lights|)}>#, bool #<{(|supp|)}>#)
+// {
+// #<{(|
+//   Ogre::Vector4 retro = Ogre::Vector4(0, 0, 0, 0);
+//   try
+//   {
+//     retro = _rend->getCustomParameter(1);
+//   }
+//   catch(Ogre::ItemIdentityException& e)
+//   {
+//     _rend->setCustomParameter(1, Ogre::Vector4(0, 0, 0, 0));
+//   }
+//
+//   Ogre::Pass *pass = this->dataPtr->currentMat->getBestTechnique()->getPass(0);
+//   Ogre::RenderSystem *renderSys =
+//                   this->dataPtr->scene->SceneManager()->getDestinationRenderSystem();
+//
+//   Ogre::AutoParamDataSource autoParamDataSource;
+//
+//   Ogre::Viewport *vp = this->dataPtr->currentTarget->getViewport(0);
+//
+//   renderSys->_setViewport(vp);
+//   autoParamDataSource.setCurrentRenderable(_rend);
+//   autoParamDataSource.setCurrentPass(pass);
+//   autoParamDataSource.setCurrentViewport(vp);
+//   autoParamDataSource.setCurrentRenderTarget(this->dataPtr->currentTarget);
+//   autoParamDataSource.setCurrentSceneManager(this->dataPtr->scene->SceneManager());
+//   autoParamDataSource.setCurrentCamera(this->dataPtr->camera, true);
+//
+//   pass->_updateAutoParams(&autoParamDataSource,
+//       Ogre::GPV_GLOBAL || Ogre::GPV_PER_OBJECT);
+//   pass->getFragmentProgramParameters()->setNamedConstant("retro", retro[0]);
+//   renderSys->bindGpuProgram(
+//       pass->getVertexProgram()->_getBindingDelegate());
+//
+//   renderSys->bindGpuProgramParameters(Ogre::GPT_VERTEX_PROGRAM,
+//       pass->getVertexProgramParameters(),
+//       Ogre::GPV_GLOBAL || Ogre::GPV_PER_OBJECT);
+//
+//   renderSys->bindGpuProgram(
+//       pass->getFragmentProgram()->_getBindingDelegate());
+//
+//   renderSys->bindGpuProgramParameters(Ogre::GPT_FRAGMENT_PROGRAM,
+//       pass->getFragmentProgramParameters(),
+//       Ogre::GPV_GLOBAL || Ogre::GPV_PER_OBJECT);
+// |)}>#
+// }
 
 //////////////////////////////////////////////////
 void GpuLidarSensor::RenderImpl()
@@ -852,109 +841,109 @@ GpuLidarSensor::DataIter GpuLidarSensor::LaserDataEnd() const
 /////////////////////////////////////////////////
 void GpuLidarSensor::CreateOrthoCam()
 {
-  this->dataPtr->pitchNodeOrtho =
-    this->GetScene()->WorldVisual()->GetSceneNode()->createChildSceneNode();
-
-  this->dataPtr->orthoCam = this->dataPtr->scene->SceneManager()->createCamera(
-        this->dataPtr->pitchNodeOrtho->getName() + "_ortho_cam");
-
-  // Use X/Y as horizon, Z up
-  this->dataPtr->orthoCam->pitch(Ogre::Degree(90));
-
-  // Don't yaw along variable axis, causes leaning
-  this->dataPtr->orthoCam->setFixedYawAxis(true, Ogre::Vector3::UNIT_Z);
-
-  this->dataPtr->orthoCam->setDirection(1, 0, 0);
-
-  this->dataPtr->pitchNodeOrtho->attachObject(this->dataPtr->orthoCam);
-  this->dataPtr->orthoCam->setAutoAspectRatio(true);
-
-  if (this->dataPtr->orthoCam)
-  {
-    this->dataPtr->orthoCam->setNearClipDistance(0.01);
-    this->dataPtr->orthoCam->setFarClipDistance(0.02);
-    this->dataPtr->orthoCam->setRenderingDistance(0.02);
-
-    this->dataPtr->orthoCam->setProjectionType(Ogre::PT_ORTHOGRAPHIC);
-  }
+  // this->dataPtr->pitchNodeOrtho =
+  //   this->GetScene()->WorldVisual()->GetSceneNode()->createChildSceneNode();
+  //
+  // this->dataPtr->orthoCam = this->dataPtr->scene->SceneManager()->createCamera(
+  //       this->dataPtr->pitchNodeOrtho->getName() + "_ortho_cam");
+  //
+  // // Use X/Y as horizon, Z up
+  // this->dataPtr->orthoCam->pitch(Ogre::Degree(90));
+  //
+  // // Don't yaw along variable axis, causes leaning
+  // this->dataPtr->orthoCam->setFixedYawAxis(true, Ogre::Vector3::UNIT_Z);
+  //
+  // this->dataPtr->orthoCam->setDirection(1, 0, 0);
+  //
+  // this->dataPtr->pitchNodeOrtho->attachObject(this->dataPtr->orthoCam);
+  // this->dataPtr->orthoCam->setAutoAspectRatio(true);
+  //
+  // if (this->dataPtr->orthoCam)
+  // {
+  //   this->dataPtr->orthoCam->setNearClipDistance(0.01);
+  //   this->dataPtr->orthoCam->setFarClipDistance(0.02);
+  //   this->dataPtr->orthoCam->setRenderingDistance(0.02);
+  //
+  //   this->dataPtr->orthoCam->setProjectionType(Ogre::PT_ORTHOGRAPHIC);
+  // }
 }
 
-/////////////////////////////////////////////////
-Ogre::Matrix4 GpuLidarSensor::BuildScaledOrthoMatrix(const float _left,
-    const float _right, const float _bottom, const float _top,
-    const float _near, const float _far)
-{
-  float invw = 1 / (_right - _left);
-  float invh = 1 / (_top - _bottom);
-  float invd = 1 / (_far - _near);
-
-  Ogre::Matrix4 proj = Ogre::Matrix4::ZERO;
-  proj[0][0] = 2 * invw;
-  proj[0][3] = -(_right + _left) * invw;
-  proj[1][1] = 2 * invh;
-  proj[1][3] = -(_top + _bottom) * invh;
-  proj[2][2] = -2 * invd;
-  proj[2][3] = -(_far + _near) * invd;
-  proj[3][3] = 1;
-
-  return proj;
-}
+// /////////////////////////////////////////////////
+// Ogre::Matrix4 GpuLidarSensor::BuildScaledOrthoMatrix(const float _left,
+//     const float _right, const float _bottom, const float _top,
+//     const float _near, const float _far)
+// {
+//   float invw = 1 / (_right - _left);
+//   float invh = 1 / (_top - _bottom);
+//   float invd = 1 / (_far - _near);
+//
+//   Ogre::Matrix4 proj = Ogre::Matrix4::ZERO;
+//   proj[0][0] = 2 * invw;
+//   proj[0][3] = -(_right + _left) * invw;
+//   proj[1][1] = 2 * invh;
+//   proj[1][3] = -(_top + _bottom) * invh;
+//   proj[2][2] = -2 * invd;
+//   proj[2][3] = -(_far + _near) * invd;
+//   proj[3][3] = 1;
+//
+//   return proj;
+// }
 
 //////////////////////////////////////////////////
-void GpuLidarSensor::Set1stPassTarget(Ogre::RenderTarget *_target,
-                                const unsigned int _index)
-{
-  this->dataPtr->firstPassTargets[_index] = _target;
-
-  if (this->dataPtr->firstPassTargets[_index])
-  {
-    // Setup the viewport to use the texture
-    this->dataPtr->firstPassViewports[_index] =
-      this->dataPtr->firstPassTargets[_index]->addViewport(this->dataPtr->camera);
-    this->dataPtr->firstPassViewports[_index]->setClearEveryFrame(true);
-    this->dataPtr->firstPassViewports[_index]->setOverlaysEnabled(false);
-    this->dataPtr->firstPassViewports[_index]->setShadowsEnabled(false);
-    this->dataPtr->firstPassViewports[_index]->setSkiesEnabled(false);
-    this->dataPtr->firstPassViewports[_index]->setBackgroundColour(
-        Ogre::ColourValue(this->farClip, 0.0, 1.0));
-    this->dataPtr->firstPassViewports[_index]->setVisibilityMask(
-        IGN_VISIBILITY_SELECTABLE);
-       // IGN_VISIBILITY_ALL & ~(IGN_VISIBILITY_GUI | IGN_VISIBILITY_SELECTABLE));
-  }
-  if (_index == 0)
-  {
-    this->dataPtr->camera->setAspectRatio(this->rayCountRatio);
-    this->dataPtr->camera->setFOVy(Ogre::Radian(this->vfov));
-  }
-}
-
+// void GpuLidarSensor::Set1stPassTarget(Ogre::RenderTarget *_target,
+//                                 const unsigned int _index)
+// {
+//   this->dataPtr->firstPassTargets[_index] = _target;
+//
+//   if (this->dataPtr->firstPassTargets[_index])
+//   {
+//     // Setup the viewport to use the texture
+//     this->dataPtr->firstPassViewports[_index] =
+//       this->dataPtr->firstPassTargets[_index]->addViewport(this->dataPtr->camera);
+//     this->dataPtr->firstPassViewports[_index]->setClearEveryFrame(true);
+//     this->dataPtr->firstPassViewports[_index]->setOverlaysEnabled(false);
+//     this->dataPtr->firstPassViewports[_index]->setShadowsEnabled(false);
+//     this->dataPtr->firstPassViewports[_index]->setSkiesEnabled(false);
+//     this->dataPtr->firstPassViewports[_index]->setBackgroundColour(
+//         Ogre::ColourValue(this->farClip, 0.0, 1.0));
+//     this->dataPtr->firstPassViewports[_index]->setVisibilityMask(
+//         IGN_VISIBILITY_SELECTABLE);
+//        // IGN_VISIBILITY_ALL & ~(IGN_VISIBILITY_GUI | IGN_VISIBILITY_SELECTABLE));
+//   }
+//   if (_index == 0)
+//   {
+//     this->dataPtr->camera->setAspectRatio(this->rayCountRatio);
+//     this->dataPtr->camera->setFOVy(Ogre::Radian(this->vfov));
+//   }
+// }
+//
 //////////////////////////////////////////////////
-void GpuLidarSensor::Set2ndPassTarget(Ogre::RenderTarget *_target)
-{
-  this->dataPtr->secondPassTarget = _target;
-
-  if (this->dataPtr->secondPassTarget)
-  {
-    // Setup the viewport to use the texture
-    this->dataPtr->secondPassViewport =
-        this->dataPtr->secondPassTarget->addViewport(this->dataPtr->orthoCam);
-    this->dataPtr->secondPassViewport->setClearEveryFrame(true);
-    this->dataPtr->secondPassViewport->setOverlaysEnabled(false);
-    this->dataPtr->secondPassViewport->setShadowsEnabled(false);
-    this->dataPtr->secondPassViewport->setSkiesEnabled(false);
-    this->dataPtr->secondPassViewport->setBackgroundColour(
-        Ogre::ColourValue(0.0, 1.0, 0.0));
-    this->dataPtr->secondPassViewport->setVisibilityMask(
-        IGN_VISIBILITY_SELECTABLE);
-        //IGN_VISIBILITY_ALL & ~(IGN_VISIBILITY_GUI | IGN_VISIBILITY_SELECTABLE));
-  }
-  Ogre::Matrix4 p = this->BuildScaledOrthoMatrix(
-      0, static_cast<float>(this->ImageWidth() / 10.0),
-      0, static_cast<float>(this->ImageHeight() / 10.0),
-      0.01, 0.02);
-
-  this->dataPtr->orthoCam->setCustomProjectionMatrix(true, p);
-}
+// void GpuLidarSensor::Set2ndPassTarget(Ogre::RenderTarget *_target)
+// {
+//   this->dataPtr->secondPassTarget = _target;
+//
+//   if (this->dataPtr->secondPassTarget)
+//   {
+//     // Setup the viewport to use the texture
+//     this->dataPtr->secondPassViewport =
+//         this->dataPtr->secondPassTarget->addViewport(this->dataPtr->orthoCam);
+//     this->dataPtr->secondPassViewport->setClearEveryFrame(true);
+//     this->dataPtr->secondPassViewport->setOverlaysEnabled(false);
+//     this->dataPtr->secondPassViewport->setShadowsEnabled(false);
+//     this->dataPtr->secondPassViewport->setSkiesEnabled(false);
+//     this->dataPtr->secondPassViewport->setBackgroundColour(
+//         Ogre::ColourValue(0.0, 1.0, 0.0));
+//     this->dataPtr->secondPassViewport->setVisibilityMask(
+//         IGN_VISIBILITY_SELECTABLE);
+//         //IGN_VISIBILITY_ALL & ~(IGN_VISIBILITY_GUI | IGN_VISIBILITY_SELECTABLE));
+//   }
+//   Ogre::Matrix4 p = this->BuildScaledOrthoMatrix(
+//       0, static_cast<float>(this->ImageWidth() / 10.0),
+//       0, static_cast<float>(this->ImageHeight() / 10.0),
+//       0.01, 0.02);
+//
+//   this->dataPtr->orthoCam->setCustomProjectionMatrix(true, p);
+// }
 
 /////////////////////////////////////////////////
 void GpuLidarSensor::CreateMesh()

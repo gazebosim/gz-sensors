@@ -19,8 +19,7 @@
 
 using namespace ignition::sensors;
 
-
-class LidarPrivate
+class ignition::sensors::LidarPrivate
 {
   /// \brief constructor
   public: LidarPrivate();
