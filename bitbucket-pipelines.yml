@@ -41,3 +41,11 @@ pipelines:
           # Use a special version of codecov for handling gcc8 output.
           - bash <(curl -s https://raw.githubusercontent.com/codecov/codecov-bash/4678d212cce2078bbaaf5027af0c0dafaad6a095/codecov) -X gcovout
           - make codecheck
+          # Examples
+          - cd ..
+          - cd examples/save_image
+          - mkdir build
+          - cd build
+          - cmake ..
+          - make
+          - ./save_image
