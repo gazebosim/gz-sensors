@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Open Source Robotics Foundation
+ * Copyright (C) 2018 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,68 @@ namespace ignition
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief forward declarations
-    class LidarPrivate;
+    class LidarPrivate
+    {
+      /// \brief constructor
+      public: LidarPrivate();
+
+      /// \brief destructor
+      public: ~LidarPrivate();
+
+      /// \brief Just a mutex for thread safety
+      public: std::mutex mutex;
+
+      /// \brief node to create publisher
+      public: transport::Node node;
+
+      /// \brief publisher to publish images
+      public: transport::Node::Publisher pub;
+
+      /// \brief Laser message to publish data.
+      public: ignition::msgs::LaserScan laserMsg;
+
+      /// \brief true if Load() has been called and was successful
+      public: bool initialized = false;
+
+      /// \brief Raw buffer of laser data.
+      public: float * laserBuffer = nullptr;
+
+      /// \brief Horizontal ray count.
+      public: unsigned int horzRayCount;
+
+      /// \brief Vertical ray count.
+      public: unsigned int vertRayCount;
+
+      /// \brief Horizontal range count.
+      public: unsigned int horzRangeCount;
+
+      /// \brief Vertical range count.
+      public: unsigned int vertRangeCount;
+
+      /// \brief Range count ratio.
+      public: double rangeCountRatio;
+
+      /// \brief The minimum range.
+      public: double rangeMin;
+
+      /// \brief The maximum range.
+      public: double rangeMax;
+
+      /// \brief Scan SDF element.
+      public: sdf::ElementPtr scanElem;
+
+      /// \brief Horizontal SDF element.
+      public: sdf::ElementPtr horzElem;
+
+      /// \brief Vertical SDF element.
+      public: sdf::ElementPtr vertElem;
+
+      /// \brief Range SDF element.
+      public: sdf::ElementPtr rangeElem;
+
+      /// \brief Camera SDF element.
+      public: sdf::ElementPtr cameraElem;
+    };
 
     /// \brief Lidar Sensor Class
     ///
@@ -64,12 +125,12 @@ namespace ignition
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) override;
+      public: virtual bool Update(const common::Time &_now);
 
       /// \brief Publish LaserScan message
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool PublishLaserScan(const common::Time &_now);
+      public: virtual bool PublishLidarScan(const common::Time &_now);
 
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF Sensor parameters.
@@ -79,6 +140,9 @@ namespace ignition
       /// \brief Initialize values in the sensor
       /// \return True on success
       public: virtual bool Init() override;
+
+      /// \brief Create Lidar sensor
+      public: virtual bool CreateLidar();
 
       /// \brief Finalize the ray
       protected: virtual void Fini();
@@ -231,13 +295,14 @@ namespace ignition
       /// \remark Do not block inside of the callback.
       /// \return A connection pointer that must remain in scope. When the
       /// connection pointer falls out of scope, the connection is broken.
-      public: ignition::common::ConnectionPtr ConnectNewLaserFrame(
-          std::function<void(const float *, unsigned int, unsigned int,
-            unsigned int, const std::string &)> _subscriber);
+      public: virtual ignition::common::ConnectionPtr ConnectNewLidarFrame(
+          std::function<void(const float *_scan, unsigned int _width,
+                  unsigned int _heighti, unsigned int _channels,
+                  const std::string &/*_format*/)> _subscriber);
 
       /// \brief Data pointer for private data
       /// \internal
-      private: std::unique_ptr<LidarPrivate> dataPtr;
+      public: std::unique_ptr<LidarPrivate> dataPtr;
     };
     }
   }

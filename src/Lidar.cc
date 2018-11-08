@@ -1,17 +1,17 @@
 /*
- * copyright (c) 2017 open source robotics foundation
+ * Copyright (C) 2018 Open Source Robotics Foundation
  *
- * licensed under the apache license, version 2.0 (the "license");
- * you may not use this file except in compliance with the license.
- * you may obtain a copy of the license at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/license-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * unless required by applicable law or agreed to in writing, software
- * distributed under the license is distributed on an "as is" basis,
- * without warranties or conditions of any kind, either express or implied.
- * see the license for the specific language governing permissions and
- * limitations under the license.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
 */
 
@@ -19,79 +19,6 @@
 
 using namespace ignition::sensors;
 
-class ignition::sensors::LidarPrivate
-{
-  /// \brief constructor
-  public: LidarPrivate();
-
-  /// \brief destructor
-  public: ~LidarPrivate();
-
-  /// \brief Just a mutex for thread safety
-  public: std::mutex mutex;
-
-  /// \brief node to create publisher
-  public: transport::Node node;
-
-  /// \brief publisher to publish images
-  public: transport::Node::Publisher pub;
-
-  /// \brief Laser message to publish data.
-  public: ignition::msgs::LaserScan laserMsg;
-
-  /// \brief true if Load() has been called and was successful
-  public: bool initialized = false;
-
-  /// \brief Event triggered when new laser range data are available.
-  /// \param[in] _frame New frame containing raw laser data.
-  /// \param[in] _width Width of frame.
-  /// \param[in] _height Height of frame.
-  /// \param[in] _depth Depth of frame.
-  /// \param[in] _format Format of frame.
-  public: ignition::common::EventT<void(const float *_frame,
-               unsigned int _width, unsigned int _height,
-               unsigned int _depth, const std::string &_format)>
-               dataEvent;
-
-  /// \brief Raw buffer of laser data.
-  public: float *laserBuffer;
-
-  /// \brief Horizontal ray count.
-  public: unsigned int horzRayCount;
-
-  /// \brief Vertical ray count.
-  public: unsigned int vertRayCount;
-
-  /// \brief Horizontal range count.
-  public: unsigned int horzRangeCount;
-
-  /// \brief Vertical range count.
-  public: unsigned int vertRangeCount;
-
-  /// \brief Range count ratio.
-  public: double rangeCountRatio;
-
-  /// \brief The minimum range.
-  public: double rangeMin;
-
-  /// \brief The maximum range.
-  public: double rangeMax;
-
-  /// \brief Scan SDF element.
-  public: sdf::ElementPtr scanElem;
-
-  /// \brief Horizontal SDF element.
-  public: sdf::ElementPtr horzElem;
-
-  /// \brief Vertical SDF element.
-  public: sdf::ElementPtr vertElem;
-
-  /// \brief Range SDF element.
-  public: sdf::ElementPtr rangeElem;
-
-  /// \brief Camera SDF element.
-  public: sdf::ElementPtr cameraElem;
-};
 
 //////////////////////////////////////////////////
 LidarPrivate::LidarPrivate()
@@ -124,13 +51,22 @@ bool Lidar::Init()
 //////////////////////////////////////////////////
 void Lidar::Fini()
 {
+  if (this->dataPtr->laserBuffer)
+  {
+    delete [] this->dataPtr->laserBuffer;
+    this->dataPtr->laserBuffer = nullptr;
+  }
+}
+
+//////////////////////////////////////////////////
+bool Lidar::CreateLidar()
+{
+  return false;
 }
 
 //////////////////////////////////////////////////
 bool Lidar::Load(sdf::ElementPtr _sdf)
 {
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-
   // Validate that SDF has a sensor ray on it
   if (_sdf->GetName() == "sensor")
   {
@@ -190,45 +126,12 @@ bool Lidar::Load(sdf::ElementPtr _sdf)
   // GZ_ASSERT(this->dataPtr->parentEntity != nullptr,
   //     "Unable to get the parent entity.");
 
-  this->dataPtr->initialized = true;
-  return true;
-}
-
-/////////////////////////////////////////////////
-ignition::common::ConnectionPtr Lidar::ConnectNewLaserFrame(
-          std::function<void(const float *, unsigned int, unsigned int,
-            unsigned int, const std::string &)> _subscriber)
-{
-  return this->dataPtr->dataEvent.Connect(_subscriber);
-}
-
-//////////////////////////////////////////////////
-bool Lidar::Update(const common::Time &/*_now*/)
-{
-  return true;
-}
-
-//////////////////////////////////////////////////
-bool Lidar::PublishLaserScan(const common::Time &_now)
-{
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-
-  if (!this->dataPtr->initialized)
-    return false;
-
   // create message
-  this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_sec(
-      _now.sec);
-  this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_nsec(
-      _now.nsec);
-
-  // Store the latest laser scans into laserMsg
-  // msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
-  //     this->Pose() + this->dataPtr->parentEntity->WorldPose());
   this->dataPtr->laserMsg.set_angle_min(this->AngleMin().Radian());
   this->dataPtr->laserMsg.set_angle_max(this->AngleMax().Radian());
   this->dataPtr->laserMsg.set_angle_step(this->AngleResolution());
   this->dataPtr->laserMsg.set_count(this->RangeCount());
+  //this->dataPtr->laserMsg.set_frame(this->Parent());
 
   this->dataPtr->laserMsg.set_vertical_angle_min(
       this->VerticalAngleMin().Radian());
@@ -241,6 +144,43 @@ bool Lidar::PublishLaserScan(const common::Time &_now)
 
   this->dataPtr->laserMsg.set_range_min(this->dataPtr->rangeMin);
   this->dataPtr->laserMsg.set_range_max(this->dataPtr->rangeMax);
+
+  this->dataPtr->initialized = true;
+  return true;
+}
+
+/////////////////////////////////////////////////
+ignition::common::ConnectionPtr Lidar::ConnectNewLidarFrame(
+          std::function<void(const float *_scan, unsigned int _width,
+                  unsigned int _heighti, unsigned int _channels,
+                  const std::string &/*_format*/)> /*_subscriber*/)
+{
+  return nullptr;
+}
+
+//////////////////////////////////////////////////
+bool Lidar::Update(const common::Time &/*_now*/)
+{
+  ignerr << "No lidar data being updated.\n";
+  return false;
+}
+
+//////////////////////////////////////////////////
+bool Lidar::PublishLidarScan(const common::Time &_now)
+{
+  if (!this->dataPtr->laserBuffer)
+    return false;
+
+  // Store the latest laser scans into laserMsg
+  // msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
+  //     this->Pose() + this->dataPtr->parentEntity->WorldPose());
+
+  this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_sec(
+      _now.sec);
+  this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_nsec(
+      _now.nsec);
+
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   const int numRays = this->RayCount() * this->VerticalRayCount();
   if (this->dataPtr->laserMsg.ranges_size() != numRays)
@@ -262,15 +202,6 @@ bool Lidar::PublishLaserScan(const common::Time &_now)
       int index = j * this->dataPtr->horzRangeCount + i;
       double range = this->dataPtr->laserBuffer[index*3];
 
-      // Mask ranges outside of min/max to +/- inf, as per REP 117
-      if (range >= this->dataPtr->rangeMax)
-      {
-        range = IGN_DBL_INF;
-      }
-      else if (range <= this->dataPtr->rangeMin)
-      {
-        range = -IGN_DBL_INF;
-      }
       // TODO(jchoclin): add LIDAR_NOISE
       // else if (this->noises.find(GPU_RAY_NOISE) !=
       //          this->noises.end())
@@ -289,6 +220,16 @@ bool Lidar::PublishLaserScan(const common::Time &_now)
 
   // publish
   this->dataPtr->pub.Publish(this->dataPtr->laserMsg);
+
+  // Trigger callbacks.
+  try
+  {
+    //this->dataPtr->lidarEvent(this->dataPtr->laserMsg);
+  }
+  catch(...)
+  {
+    ignerr << "Exception thrown in an image callback.\n";
+  }
 
   return true;
 }
