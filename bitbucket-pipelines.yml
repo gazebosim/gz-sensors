@@ -28,9 +28,16 @@ pipelines:
             libignition-common3-dev
             libignition-math6-dev
             libignition-msgs3-dev
-            libignition-rendering-dev
             libignition-transport6-dev
             libignition-tools-dev
+          # Install gz11 branch for ignition rendering
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-rendering -b gz11
+          - cd ign-rendering
+          - mkdir build
+          - cd build
+          - cmake ..
+          - make -j4 install
+          - cd ../..
           # Ignition sensors
           - mkdir build
           - cd build
