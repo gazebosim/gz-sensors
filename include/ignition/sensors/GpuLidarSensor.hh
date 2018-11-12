@@ -27,7 +27,6 @@
 #include <ignition/common/Time.hh>
 #include <ignition/common/Timer.hh>
 #include <ignition/common/Console.hh>
-//#include <ignition/common/Exception.hh>
 #include <ignition/common/Mesh.hh>
 #include <ignition/common/MeshManager.hh>
 #include <ignition/common/PluginMacros.hh>
@@ -35,7 +34,6 @@
 #include <ignition/sensors/Sensor.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Lidar.hh>
-//#include <ignition/sensors/ign_sensors_gpu_lidar_export.hh>
 
 #include <ignition/msgs.hh>
 
@@ -92,24 +90,30 @@ namespace ignition
       /// \return True on success
       public: virtual bool Init() override;
 
+      /// \brief Load sensor sata from SDF
+      /// \param[in] _sdf SDF used
+      /// \return True on success
+      public: virtual bool Load(sdf::ElementPtr _sdf);
+
       /// \brief Create Lidar sensor
       public: virtual bool CreateLidar() override;
-
-      /// \brief Gets the camera count
-      /// \return Number of cameras
-      public: unsigned int CameraCount() const;
 
       /// \brief Gets if sensor is horizontal
       /// \return True if horizontal, false if not
       public: bool IsHorizontal() const;
 
+      /// \brief Makes possible to change sensor scene
+      /// \param[in] _scene used with the sensor
       public: void SetScene(ignition::rendering::ScenePtr _scene);
 
-      public:void RemoveGpuRays(ignition::rendering::ScenePtr _scene);
+      /// \brief Remove sensor from scene
+      /// \param[in] _scene used with the sensor
+      public: void RemoveGpuRays(ignition::rendering::ScenePtr _scene);
 
+      /// \brief Get Gpu Rays object used in the sensor
+      /// \return Pointer to ignition::rendering::GpuRays
       public: ignition::rendering::GpuRaysPtr GpuRays() const;
 
-      public: virtual bool Load(sdf::ElementPtr _sdf);
       /// \brief Return the ratio of horizontal ray count to vertical ray
       /// count.
       ///
@@ -126,6 +130,8 @@ namespace ignition
       /// \return Vertical field of view.
       public: ignition::math::Angle VFOV() const;
 
+      /// \brief Connect function pointer to internal GpuRays callback
+      /// \return ignition::common::Connection pointer
       public: virtual ignition::common::ConnectionPtr ConnectNewLidarFrame(
           std::function<void(const float *_scan, unsigned int _width,
                   unsigned int _heighti, unsigned int _channels,

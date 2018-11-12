@@ -20,13 +20,9 @@
 #include <ignition/common/Console.hh>
 #include <ignition/common/PluginMacros.hh>
 
-#include <ignition/rendering/Camera.hh>
 #include <ignition/sensors/Events.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/transport.hh>
-
-// Generated header that doesn't get installed
-//#include "gpu_lidar/shaders.hh"
 
 
 #include "ignition/rendering/RenderTypes.hh"
@@ -62,8 +58,6 @@ namespace ignition
 
       /// \brief Connection to the Manager's scene change event.
       public: ignition::common::ConnectionPtr sceneChangeConnection;
-
-      public: ignition::common::ConnectionPtr gpuRaysNewFrameCallback;
     };
 }
 }
@@ -90,7 +84,15 @@ GpuLidarSensor::GpuLidarSensor()
 GpuLidarSensor::~GpuLidarSensor()
 {
   this->gpuLidarDataPtr->gpuRays.reset();
+  this->gpuLidarDataPtr->gpuRays = nullptr;
+
   this->gpuLidarDataPtr->sceneChangeConnection.reset();
+
+  if (this->dataPtr->laserBuffer)
+  {
+    delete [] this->dataPtr->laserBuffer;
+    this->dataPtr->laserBuffer = nullptr;
+  }
 }
 
 /////////////////////////////////////////////////
@@ -123,7 +125,7 @@ void GpuLidarSensor::RemoveGpuRays(
 bool GpuLidarSensor::Load(sdf::ElementPtr _sdf)
 {
   // Check if this is being loaded via "builtin" or via a plugin
-  if(!Lidar::Load(_sdf))
+  if (!Lidar::Load(_sdf))
   {
     return false;
   }
@@ -133,7 +135,7 @@ bool GpuLidarSensor::Load(sdf::ElementPtr _sdf)
     if (!_sdf->GetElement("ray"))
     {
       ignerr << "<sensor><camera> SDF element not found while attempting to "
-        << "load a ignition::sensors::DepthCameraSensor\n";
+        << "load a ignition::sensors::GpuLidarSensor\n";
       return false;
     }
   }
@@ -143,8 +145,9 @@ bool GpuLidarSensor::Load(sdf::ElementPtr _sdf)
     this->CreateLidar();
   }
 
-  this->gpuLidarDataPtr->sceneChangeConnection = Events::ConnectSceneChangeCallback(
-      std::bind(&GpuLidarSensor::SetScene, this, std::placeholders::_1));
+  this->gpuLidarDataPtr->sceneChangeConnection =
+    Events::ConnectSceneChangeCallback(std::bind(&GpuLidarSensor::SetScene,
+          this, std::placeholders::_1));
 
   this->dataPtr->initialized = true;
 
@@ -176,7 +179,7 @@ bool GpuLidarSensor::CreateLidar()
   this->gpuLidarDataPtr->gpuRays->SetFarClipPlane(this->RangeMax());
 
   // Mask ranges outside of min/max to +/- inf, as per REP 117
-  // this->gpuLidarDataPtr->gpuRays->SetClamping(false);
+  this->gpuLidarDataPtr->gpuRays->SetClamp(false);
 
   this->gpuLidarDataPtr->gpuRays->SetAngleMin(this->AngleMin().Radian());
   this->gpuLidarDataPtr->gpuRays->SetAngleMax(this->AngleMax().Radian());
@@ -207,7 +210,7 @@ bool GpuLidarSensor::Update(const common::Time &_now)
 
   if (!this->gpuLidarDataPtr->gpuRays)
   {
-    ignerr << "Camera doesn't exist.\n";
+    ignerr << "GpuRays doesn't exist.\n";
     return false;
   }
 
@@ -219,11 +222,10 @@ bool GpuLidarSensor::Update(const common::Time &_now)
     this->dataPtr->laserBuffer = new float[len];
   }
 
-  std::cout << this->Pose().Pos() << " " << this->Pose().Rot() << "\n";
   this->gpuLidarDataPtr->gpuRays->SetWorldPosition(this->Pose().Pos());
   this->gpuLidarDataPtr->gpuRays->SetWorldRotation(this->Pose().Rot());
   this->gpuLidarDataPtr->gpuRays->Update();
-  this->gpuLidarDataPtr->gpuRays->CopyData(this->dataPtr->laserBuffer);
+  this->gpuLidarDataPtr->gpuRays->Copy(this->dataPtr->laserBuffer);
 
   this->PublishLidarScan(_now);
 
