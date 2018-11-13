@@ -83,8 +83,7 @@ GpuLidarSensor::GpuLidarSensor()
 //////////////////////////////////////////////////
 GpuLidarSensor::~GpuLidarSensor()
 {
-  this->gpuLidarDataPtr->gpuRays.reset();
-  this->gpuLidarDataPtr->gpuRays = nullptr;
+  this->RemoveGpuRays(this->gpuLidarDataPtr->scene);
 
   this->gpuLidarDataPtr->sceneChangeConnection.reset();
 
@@ -118,7 +117,8 @@ void GpuLidarSensor::RemoveGpuRays(
   {
     // \todo(nkoenig) Remove camera from scene!
   }
-  // this->gpuLidarDataPtr->gpuRays = nullptr;
+  this->gpuLidarDataPtr->gpuRays.reset();
+  this->gpuLidarDataPtr->gpuRays = nullptr;
 }
 
 //////////////////////////////////////////////////

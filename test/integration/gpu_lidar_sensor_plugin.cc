@@ -15,9 +15,6 @@
  *
 */
 
-
-
-
 #include <gtest/gtest.h>
 #include <ignition/common/Console.hh>
 #include <ignition/common/Filesystem.hh>
@@ -31,8 +28,7 @@
 #include <ignition/rendering.hh>
 #include <sdf/sdf.hh>
 
-
-#include "test/test_config.hh"
+#include "test/test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 #define LASER_TOL 1e-4
@@ -108,22 +104,26 @@ void OnNewLidarFrame(const float * /*_scan*/, unsigned int /*_width*/,
   g_laserCounter++;
 }
 
+class GpuLidarSensorTest: public testing::Test,
+                  public testing::WithParamInterface<const char *>
+{
+  // Test and verify gpu rays properties setters and getters
+  public: void CreateGpuLidar(const std::string &_renderEngine);
+
+  // Test boxes detection
+  public: void DetectBoxes(const std::string &_renderEngine);
+
+  // Test vertical measurements
+  public: void TestThreeBoxes(const std::string &_renderEngine);
+
+  // Test vertical measurements
+  public: void VerticalLidar(const std::string &_renderEngine);
+};
+
 /////////////////////////////////////////////////
 /// \brief Test Creation of a GPU Lidar sensor
-TEST(GpuLidarSensor_TEST, CreateLidar)
+void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
 {
-  // Setup ign-rendering with a scene
-  auto *engine = ignition::rendering::engine("ogre");
-  EXPECT_TRUE(engine != nullptr);
-
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
-  ignition::rendering::VisualPtr root = scene->RootVisual();
-
-  // Create a sensor manager
-  ignition::sensors::Manager mgr;
-  mgr.SetRenderingScene(scene);
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_DIR, "lib"));
-
   // Create SDF describing a camera sensor
   const std::string name = "TestGpuLidar";
   const std::string topic = "/ignition/sensors/test/lidar";
@@ -142,17 +142,34 @@ TEST(GpuLidarSensor_TEST, CreateLidar)
   const bool alwaysOn = 1;
   const bool visualize = 1;
 
-  // Create an scene with a box in it
-  scene->SetAmbientLight(0.3, 0.3, 0.3);
-
+  // Create sensor description in SDF
   ignition::math::Pose3d testPose(ignition::math::Vector3d(0, 0, 0.1),
       ignition::math::Quaterniond::Identity);
-
-  // Create sensor description in SDF
   sdf::ElementPtr lidarSDF = GpuLidarToSDF(name, testPose, updateRate, topic,
     horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
     vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
     rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+
+  // Create and populate scene
+  ignition::rendering::RenderEngine *engine =
+    ignition::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    igndbg << "Engine '" << _renderEngine
+              << "' is not supported" << std::endl;
+    return;
+  }
+
+  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  ignition::rendering::VisualPtr root = scene->RootVisual();
+
+  // Create a sensor manager
+  ignition::sensors::Manager mgr;
+  mgr.SetRenderingScene(scene);
+  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_DIR, "lib"));
+
+  // Create an scene with a box in it
+  scene->SetAmbientLight(0.3, 0.3, 0.3);
 
   // Create a GpuLidarSensor
   auto sensor = mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(
@@ -220,7 +237,7 @@ TEST(GpuLidarSensor_TEST, CreateLidar)
 
 /////////////////////////////////////////////////
 /// \brief Test detect one box
-TEST(GpuLidarSensor_TEST, DetectBoxes)
+void GpuLidarSensorTest::DetectBoxes(const std::string &_renderEngine)
 {
   // Create SDF describing a camera sensor
   const std::string name = "TestGpuLidar";
@@ -248,9 +265,15 @@ TEST(GpuLidarSensor_TEST, DetectBoxes)
     vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
     rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
 
-  // Setup ign-rendering with a scene
-  auto *engine = ignition::rendering::engine("ogre");
-  EXPECT_TRUE(engine != nullptr);
+  // Create and populate scene
+  ignition::rendering::RenderEngine *engine =
+    ignition::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    igndbg << "Engine '" << _renderEngine
+              << "' is not supported" << std::endl;
+    return;
+  }
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
   ignition::rendering::VisualPtr root = scene->RootVisual();
@@ -301,7 +324,7 @@ TEST(GpuLidarSensor_TEST, DetectBoxes)
 
 /////////////////////////////////////////////////
 /// \brief Test detection of different boxes
-TEST(GpuLidarSensor_TEST, TestThreeBoxes)
+void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
 {
   // Test GPU lidar sensor with 3 boxes in the world.
   // First sensor at identity orientation, second at 90 degree roll
@@ -344,9 +367,15 @@ TEST(GpuLidarSensor_TEST, TestThreeBoxes)
       vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
       rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
 
-  // Setup ign-rendering with a scene
-  auto *engine = ignition::rendering::engine("ogre");
-  EXPECT_TRUE(engine != nullptr);
+  // Create and populate scene
+  ignition::rendering::RenderEngine *engine =
+    ignition::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    igndbg << "Engine '" << _renderEngine
+              << "' is not supported" << std::endl;
+    return;
+  }
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
   ignition::rendering::VisualPtr root = scene->RootVisual();
@@ -442,7 +471,7 @@ TEST(GpuLidarSensor_TEST, TestThreeBoxes)
 
 /////////////////////////////////////////////////
 /// \brief Test detect one box
-TEST(GpuLidarSensor_TEST, VerticalLidar)
+void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
 {
   // Create SDF describing a camera sensor
   const std::string name = "TestGpuLidar";
@@ -470,9 +499,15 @@ TEST(GpuLidarSensor_TEST, VerticalLidar)
     vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
     rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
 
-  // Setup ign-rendering with a scene
-  auto *engine = ignition::rendering::engine("ogre");
-  EXPECT_TRUE(engine != nullptr);
+  // Create and populate scene
+  ignition::rendering::RenderEngine *engine =
+    ignition::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    igndbg << "Engine '" << _renderEngine
+              << "' is not supported" << std::endl;
+    return;
+  }
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
   ignition::rendering::VisualPtr root = scene->RootVisual();
@@ -556,7 +591,29 @@ TEST(GpuLidarSensor_TEST, VerticalLidar)
   engine->DestroyScene(scene);
 }
 
-//////////////////////////////////////////////////
+TEST_P(GpuLidarSensorTest, CreateGpuLidar)
+{
+  CreateGpuLidar(GetParam());
+}
+
+TEST_P(GpuLidarSensorTest, DetectBoxes)
+{
+  DetectBoxes(GetParam());
+}
+
+TEST_P(GpuLidarSensorTest, TestThreeBoxes)
+{
+  TestThreeBoxes(GetParam());
+}
+
+TEST_P(GpuLidarSensorTest, VerticalLidar)
+{
+  VerticalLidar(GetParam());
+}
+
+INSTANTIATE_TEST_CASE_P(GpuLidarSensor, GpuLidarSensorTest,
+    ::testing::Values("ogre"));
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
