@@ -31,6 +31,9 @@ pipelines:
             libignition-transport6-dev
             libignition-tools-dev
           # Install gz11 branch for ignition rendering
+          # Install ign-rendering dependencies
+          - apt-get -y install
+            libogre-1.9-dev libglew-dev libfreeimage-dev freeglut3-dev libxmu-dev libxi-dev uuid-dev
           - hg clone http://bitbucket.org/ignitionrobotics/ign-rendering -b gz11
           - cd ign-rendering
           - mkdir build
