@@ -110,8 +110,8 @@ class GpuLidarSensorTest: public testing::Test,
   // Test and verify gpu rays properties setters and getters
   public: void CreateGpuLidar(const std::string &_renderEngine);
 
-  // Test boxes detection
-  public: void DetectBoxes(const std::string &_renderEngine);
+  // Test single box detection
+  public: void DetectBox(const std::string &_renderEngine);
 
   // Test vertical measurements
   public: void TestThreeBoxes(const std::string &_renderEngine);
@@ -237,7 +237,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
 
 /////////////////////////////////////////////////
 /// \brief Test detect one box
-void GpuLidarSensorTest::DetectBoxes(const std::string &_renderEngine)
+void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
 {
   // Create SDF describing a camera sensor
   const std::string name = "TestGpuLidar";
@@ -280,14 +280,14 @@ void GpuLidarSensorTest::DetectBoxes(const std::string &_renderEngine)
 
   scene->SetAmbientLight(0.3, 0.3, 0.3);
 
-  // Create testing boxes
+  // Create testing box
   // box in the center
   ignition::math::Pose3d box01Pose(ignition::math::Vector3d(1, 0, 0.5),
       ignition::math::Quaterniond::Identity);
   ignition::rendering::VisualPtr visualBox1 = scene->CreateVisual("TestBox1");
   visualBox1->AddGeometry(scene->CreateBox());
-  visualBox1->SetWorldPosition(box01Pose.Pos());
-  visualBox1->SetWorldRotation(box01Pose.Rot());
+  visualBox1->SetLocalPosition(box01Pose.Pos());
+  visualBox1->SetLocalRotation(box01Pose.Rot());
   root->AddChild(visualBox1);
 
   // Create a sensor manager
@@ -404,8 +404,8 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
                                    ignition::math::Quaterniond::Identity);
   ignition::rendering::VisualPtr visualBox1 = scene->CreateVisual("UnitBox1");
   visualBox1->AddGeometry(scene->CreateBox());
-  visualBox1->SetWorldPosition(box01Pose.Pos());
-  visualBox1->SetWorldRotation(box01Pose.Rot());
+  visualBox1->SetLocalPosition(box01Pose.Pos());
+  visualBox1->SetLocalRotation(box01Pose.Rot());
   root->AddChild(visualBox1);
 
   // Box on the right of the first sensor
@@ -413,8 +413,8 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
                                    ignition::math::Quaterniond::Identity);
   ignition::rendering::VisualPtr visualBox2 = scene->CreateVisual("UnitBox2");
   visualBox2->AddGeometry(scene->CreateBox());
-  visualBox2->SetWorldPosition(box02Pose.Pos());
-  visualBox2->SetWorldRotation(box02Pose.Rot());
+  visualBox2->SetLocalPosition(box02Pose.Pos());
+  visualBox2->SetLocalRotation(box02Pose.Rot());
   root->AddChild(visualBox2);
 
   // Box on the left of the sensor 1 but out of range
@@ -423,8 +423,8 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
       ignition::math::Quaterniond::Identity);
   ignition::rendering::VisualPtr visualBox3 = scene->CreateVisual("UnitBox3");
   visualBox3->AddGeometry(scene->CreateBox());
-  visualBox3->SetWorldPosition(box03Pose.Pos());
-  visualBox3->SetWorldRotation(box03Pose.Rot());
+  visualBox3->SetLocalPosition(box03Pose.Pos());
+  visualBox3->SetLocalRotation(box03Pose.Rot());
   root->AddChild(visualBox3);
 
   // Update sensors
@@ -447,12 +447,16 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   EXPECT_DOUBLE_EQ(sensor2->Range(last), ignition::math::INF_D);
 
   // Move all boxes out of range
-  visualBox1->SetWorldPosition(
+  root->RemoveChild(visualBox1);
+  root->RemoveChild(visualBox2);
+  visualBox1->SetLocalPosition(
       ignition::math::Vector3d(rangeMax + 1, 0, 0));
-  visualBox1->SetWorldRotation(box01Pose.Rot());
-  visualBox2->SetWorldPosition(
+  visualBox1->SetLocalRotation(box01Pose.Rot());
+  visualBox2->SetLocalPosition(
       ignition::math::Vector3d(0, -(rangeMax + 1), 0));
-  visualBox2->SetWorldRotation(box02Pose.Rot());
+  visualBox2->SetLocalRotation(box02Pose.Rot());
+  root->AddChild(visualBox1);
+  root->AddChild(visualBox2);
 
   // Update sensors
   mgr.RunOnce(ignition::common::Time::Zero);
@@ -521,8 +525,8 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   ignition::rendering::VisualPtr visualBox1 =
     scene->CreateVisual("VerticalTestBox1");
   visualBox1->AddGeometry(scene->CreateBox());
-  visualBox1->SetWorldPosition(box01Pose.Pos());
-  visualBox1->SetWorldRotation(box01Pose.Rot());
+  visualBox1->SetLocalPosition(box01Pose.Pos());
+  visualBox1->SetLocalRotation(box01Pose.Rot());
   root->AddChild(visualBox1);
 
   // Create a sensor manager
@@ -568,10 +572,12 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   // }
 
   // Move box out of range
-  visualBox1->SetWorldPosition(
+  root->RemoveChild(visualBox1);
+  visualBox1->SetLocalPosition(
       ignition::math::Vector3d(rangeMax + 1, 0, 0));
-  visualBox1->SetWorldRotation(
+  visualBox1->SetLocalRotation(
       ignition::math::Quaterniond::Identity);
+  root->AddChild(visualBox1);
 
   // wait for a few more laser scans
   mgr.RunOnce(ignition::common::Time::Zero);
@@ -596,9 +602,9 @@ TEST_P(GpuLidarSensorTest, CreateGpuLidar)
   CreateGpuLidar(GetParam());
 }
 
-TEST_P(GpuLidarSensorTest, DetectBoxes)
+TEST_P(GpuLidarSensorTest, DetectBox)
 {
-  DetectBoxes(GetParam());
+  DetectBox(GetParam());
 }
 
 TEST_P(GpuLidarSensorTest, TestThreeBoxes)

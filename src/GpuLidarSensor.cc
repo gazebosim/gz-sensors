@@ -17,25 +17,6 @@
 
 #include <ignition/sensors/GpuLidarSensor.hh>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/PluginMacros.hh>
-
-#include <ignition/sensors/Events.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/transport.hh>
-
-
-#include "ignition/rendering/RenderTypes.hh"
-
-
-namespace ignition
-{
-  namespace common
-  {
-    class Mesh;
-  }
-}
-
 namespace ignition
 {
   namespace sensors
@@ -115,7 +96,7 @@ void GpuLidarSensor::RemoveGpuRays(
 {
   if (_scene)
   {
-    // \todo(nkoenig) Remove camera from scene!
+    // \todo(anyone) Remove camera from scene!
   }
   this->gpuLidarDataPtr->gpuRays.reset();
   this->gpuLidarDataPtr->gpuRays = nullptr;

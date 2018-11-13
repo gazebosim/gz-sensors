@@ -27,8 +27,6 @@
 #include <ignition/common/Time.hh>
 #include <ignition/common/Timer.hh>
 #include <ignition/common/Console.hh>
-#include <ignition/common/Mesh.hh>
-#include <ignition/common/MeshManager.hh>
 #include <ignition/common/PluginMacros.hh>
 
 #include <ignition/sensors/Sensor.hh>
