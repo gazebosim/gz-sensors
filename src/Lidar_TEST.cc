@@ -123,26 +123,26 @@ TEST(Lidar_TEST, CreateLaser)
   auto sensor = mgr.CreateSensor<ignition::sensors::Lidar>(
       lidarSDF);
 
-  // // Make sure the above dynamic cast worked.
-  // EXPECT_TRUE(sensor != nullptr);
-  //
-  // double angleRes = (sensor->AngleMax() - sensor->AngleMin()).Radian() /
-  //                   sensor->RayCount();
-  // EXPECT_EQ(sensor->AngleMin(), ignition::math::Angle(-1.396263));
-  // EXPECT_EQ(sensor->AngleMax(), ignition::math::Angle(1.396263));
-  // EXPECT_NEAR(sensor->RangeMin(), 0.08, 1e-6);
-  // EXPECT_NEAR(sensor->RangeMax(), 10.0, 1e-6);
-  // EXPECT_NEAR(sensor->AngleResolution(), angleRes, 1e-3);
-  // EXPECT_NEAR(sensor->RangeResolution(), 0.01, 1e-3);
-  // EXPECT_EQ(sensor->RayCount(), 640);
-  // EXPECT_EQ(sensor->RangeCount(), 640);
-  //
-  // EXPECT_EQ(sensor->VerticalRayCount(), 1);
-  // EXPECT_EQ(sensor->VerticalRangeCount(), 1);
-  // EXPECT_EQ(sensor->VerticalAngleMin(), 0.0);
-  // EXPECT_EQ(sensor->VerticalAngleMax(), 0.0);
-  //
-  // EXPECT_TRUE(sensor->IsActive());
+  // Make sure the above dynamic cast worked.
+  EXPECT_TRUE(sensor != nullptr);
+
+  double angleRes = (sensor->AngleMax() - sensor->AngleMin()).Radian() /
+                    sensor->RayCount();
+  EXPECT_EQ(sensor->AngleMin(), ignition::math::Angle(-1.396263));
+  EXPECT_EQ(sensor->AngleMax(), ignition::math::Angle(1.396263));
+  EXPECT_NEAR(sensor->RangeMin(), 0.08, 1e-6);
+  EXPECT_NEAR(sensor->RangeMax(), 10.0, 1e-6);
+  EXPECT_NEAR(sensor->AngleResolution(), angleRes, 1e-3);
+  EXPECT_NEAR(sensor->RangeResolution(), 0.01, 1e-3);
+  EXPECT_EQ(sensor->RayCount(), 640);
+  EXPECT_EQ(sensor->RangeCount(), 640);
+
+  EXPECT_EQ(sensor->VerticalRayCount(), 1);
+  EXPECT_EQ(sensor->VerticalRangeCount(), 1);
+  EXPECT_EQ(sensor->VerticalAngleMin(), 0.0);
+  EXPECT_EQ(sensor->VerticalAngleMax(), 0.0);
+
+  EXPECT_TRUE(sensor->IsActive());
 }
 
 //////////////////////////////////////////////////
