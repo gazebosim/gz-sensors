@@ -59,6 +59,11 @@ ign_find_package(ignition-msgs3 REQUIRED)
 set(IGN_MSGS_VER ${ignition-msgs3_VERSION_MAJOR})
 
 #--------------------------------------
+# Find ignition-plugin
+ign_find_package(ignition-plugin1 REQUIRED COMPONENTS all)
+set(IGN_PLUGIN_VER ${ignition-plugin1_VERSION_MAJOR})
+
+#--------------------------------------
 # Find SDFormat
 ign_find_package(sdformat8 REQUIRED)
 include_directories(${SDFormat_INCLUDE_DIRS})

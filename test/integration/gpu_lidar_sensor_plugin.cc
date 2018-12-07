@@ -233,6 +233,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   // Clean up
   c.reset();
   engine->DestroyScene(scene);
+  ignition::rendering::unloadEngine(engine->Name());
 }
 
 /////////////////////////////////////////////////
@@ -305,21 +306,20 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   // Update sensor
   mgr.RunOnce(ignition::common::Time::Zero);
 
-  // TODO(anyone): verify that the box is detected properly
-  // (For cleaning reasons they don't seem to be updated properly)
-  // int mid = horzSamples / 2;
-  // int last = (horzSamples - 1);
-  // double unitBoxSize = 1.0;
-  // double expectedRangeAtMidPointBox1 =
-  //   abs(box01Pose.Pos().X()) - unitBoxSize/2;
-  //
-  // sensor 1 should see TestBox1
-  // EXPECT_DOUBLE_EQ(sensor->Range(0), ignition::math::INF_D);
-  // EXPECT_NEAR(sensor->Range(mid), expectedRangeAtMidPointBox1, LASER_TOL);
-  // EXPECT_DOUBLE_EQ(sensor->Range(last), ignition::math::INF_D);
+  int mid = horzSamples / 2;
+  int last = (horzSamples - 1);
+  double unitBoxSize = 1.0;
+  double expectedRangeAtMidPointBox1 =
+    abs(box01Pose.Pos().X()) - unitBoxSize/2;
+
+  // Sensor 1 should see TestBox1
+  EXPECT_DOUBLE_EQ(sensor->Range(0), ignition::math::INF_D);
+  EXPECT_NEAR(sensor->Range(mid), expectedRangeAtMidPointBox1, LASER_TOL);
+  EXPECT_DOUBLE_EQ(sensor->Range(last), ignition::math::INF_D);
 
   // Clean up
   engine->DestroyScene(scene);
+  ignition::rendering::unloadEngine(engine->Name());
 }
 
 /////////////////////////////////////////////////
@@ -447,22 +447,18 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   EXPECT_DOUBLE_EQ(sensor2->Range(last), ignition::math::INF_D);
 
   // Move all boxes out of range
-  root->RemoveChild(visualBox1);
-  root->RemoveChild(visualBox2);
   visualBox1->SetLocalPosition(
       ignition::math::Vector3d(rangeMax + 1, 0, 0));
   visualBox1->SetLocalRotation(box01Pose.Rot());
   visualBox2->SetLocalPosition(
       ignition::math::Vector3d(0, -(rangeMax + 1), 0));
   visualBox2->SetLocalRotation(box02Pose.Rot());
-  root->AddChild(visualBox1);
-  root->AddChild(visualBox2);
 
   // Update sensors
   mgr.RunOnce(ignition::common::Time::Zero);
 
   // TODO(anyone): verify that boxes are not detected when moved
-  // (For cleaning reasons they don't seem to be updated properly)
+  // (The boxes don't seem to be updated properly when relocated)
   // for (int i = 0; i < sensor1->RayCount(); ++i)
   //   EXPECT_DOUBLE_EQ(sensor1->Range(i), ignition::math::INF_D);
   //
@@ -471,6 +467,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
 
   // Clean up
   engine->DestroyScene(scene);
+  ignition::rendering::unloadEngine(engine->Name());
 }
 
 /////////////////////////////////////////////////
@@ -544,40 +541,36 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   // Update sensor
   mgr.RunOnce(ignition::common::Time::Zero);
 
-  // TODO(anyone): verify that boxes are not detected when moved
-  // (For cleaning reasons they don't seem to be updated properly)
-  // unsigned int mid = horzSamples / 2;
-  // double unitBoxSize = 1.0;
-  // double expectedRangeAtMidPoint = box01Pose.Pos().X() - unitBoxSize/2
-  //     - testPose.Pos().X();
-  //
-  // double vAngleStep = (vertMaxAngle - vertMinAngle) / (vertSamples - 1);
-  // double angleStep = vertMinAngle;
-  //
-  // // all vertical laser planes should sense box
-  // for (unsigned int i = 0; i < vertSamples; ++i)
-  // {
-  //   double expectedRange = expectedRangeAtMidPoint / cos(angleStep);
-  //
-  //   EXPECT_NEAR(sensor->Range(i * horzSamples + mid),
-  //       expectedRange, VERTICAL_LASER_TOL);
-  //
-  //   angleStep += vAngleStep;
-  //
-  //   // check that the values in the extremes are infinity
-  //   EXPECT_DOUBLE_EQ(sensor->Range(i * horzSamples),
-  //       ignition::math::INF_D);
-  //   EXPECT_DOUBLE_EQ(sensor->Range(i * horzSamples + (horzSamples - 1)),
-  //       ignition::math::INF_D);
-  // }
+  unsigned int mid = horzSamples / 2;
+  double unitBoxSize = 1.0;
+  double expectedRangeAtMidPoint = box01Pose.Pos().X() - unitBoxSize/2
+      - testPose.Pos().X();
+
+  double vAngleStep = (vertMaxAngle - vertMinAngle) / (vertSamples - 1);
+  double angleStep = vertMinAngle;
+
+  // all vertical laser planes should sense box
+  for (unsigned int i = 0; i < vertSamples; ++i)
+  {
+    double expectedRange = expectedRangeAtMidPoint / cos(angleStep);
+
+    EXPECT_NEAR(sensor->Range(i * horzSamples + mid),
+        expectedRange, VERTICAL_LASER_TOL);
+
+    angleStep += vAngleStep;
+
+    // check that the values in the extremes are infinity
+    EXPECT_DOUBLE_EQ(sensor->Range(i * horzSamples),
+        ignition::math::INF_D);
+    EXPECT_DOUBLE_EQ(sensor->Range(i * horzSamples + (horzSamples - 1)),
+        ignition::math::INF_D);
+  }
 
   // Move box out of range
-  root->RemoveChild(visualBox1);
   visualBox1->SetLocalPosition(
       ignition::math::Vector3d(rangeMax + 1, 0, 0));
   visualBox1->SetLocalRotation(
       ignition::math::Quaterniond::Identity);
-  root->AddChild(visualBox1);
 
   // wait for a few more laser scans
   mgr.RunOnce(ignition::common::Time::Zero);
@@ -587,7 +580,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
     for (int i = 0; i < sensor->RayCount(); ++i)
     {
       // TODO(anyone): verify that boxes are not detected when moved
-      // (For cleaning reasons they don't seem to be updated properly)
+      // (The boxes don't seem to be updated properly when relocated)
       // EXPECT_DOUBLE_EQ(sensor->Range(j * sensor->RayCount() + i),
       //     ignition::math::INF_D);
     }
@@ -595,6 +588,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
 
   // Clean up
   engine->DestroyScene(scene);
+  ignition::rendering::unloadEngine(engine->Name());
 }
 
 TEST_P(GpuLidarSensorTest, CreateGpuLidar)

@@ -30,5 +30,6 @@ if (DRI_TESTS)
   target_link_libraries(INTEGRATION_gpu_lidar_sensor_plugin
     ${IGNITION-TRANSPORT_LIBRARIES}
     ${PROJECT_LIBRARY_TARGET_NAME}-lidar
-    ${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar)
+    ${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar
+    ignition-plugin${IGN_PLUGIN_VER})
 endif()
