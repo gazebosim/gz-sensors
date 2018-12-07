@@ -30,6 +30,7 @@ pipelines:
             libignition-msgs3-dev
             libignition-transport6-dev
             libignition-tools-dev
+            libignition-plugin-dev
           # Install gz11 branch for ignition rendering
           # Install ign-rendering dependencies
           - apt-get -y install
