@@ -3,6 +3,7 @@ set (sources
   Manager.cc
   Sensor.cc
   Lidar.cc
+  CameraConfig.cc
   Noise.cc
   GaussianNoiseModel.cc
   SensorTypes.cc

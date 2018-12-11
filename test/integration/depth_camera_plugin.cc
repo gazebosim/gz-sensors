@@ -44,6 +44,11 @@ void OnImage(const ignition::msgs::Image &_msg)
 
 TEST(DepthCameraPlugin, imagesWithBuiltinSDF)
 {
+  // Skip this test if ogre 1.9 is not installed
+#ifndef WITH_OGRE
+    return;
+#endif
+
   // get the darn test data
   std::string path = ignition::common::joinPaths(PROJECT_SOURCE_DIR, "test",
       "integration", "depth_camera_sensor_builtin.sdf");

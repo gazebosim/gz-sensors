@@ -42,7 +42,7 @@ TEST(CameraPlugin, imagesWithBuiltinSDF)
   auto sensorPtr = linkPtr->GetElement("sensor");
 
   // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine("ogre");
+  auto *engine = ignition::rendering::engine("ogre2");
   ASSERT_NE(nullptr, engine);
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
 

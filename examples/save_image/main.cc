@@ -39,7 +39,14 @@ void BuildScene(ignition::rendering::ScenePtr _scene);
 int main()
 {
   // Setup ign-rendering with a scene
+#ifdef WITH_OGRE
   auto *engine = ignition::rendering::engine("ogre");
+#else
+#ifdef WITH_OGRE2
+  auto *engine = ignition::rendering::engine("ogre2");
+#endif
+#endif
+
   if (!engine)
   {
     std::cerr << "Failed to load ogre\n";
