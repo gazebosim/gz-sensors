@@ -70,6 +70,26 @@ include_directories(${SDFormat_INCLUDE_DIRS})
 
 set(IGN_SENSORS_PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 
+#--------------------------------------
+# Find OGRE
+ign_find_package(IgnOGRE VERSION 1.8.0
+  PKGCONFIG_IGNORE)
+
+if (OGRE_FOUND)
+  set(HAVE_OGRE TRUE)
+  add_definitions(-DWITH_OGRE)
+endif()
+
+#--------------------------------------
+# Find OGRE2
+ign_find_package(OGRE2 VERSION 2.1.0
+    PKGCONFIG_IGNORE)
+
+if (OGRE2_FOUND)
+  set(HAVE_OGRE2 TRUE)
+  add_definitions(-DWITH_OGRE2)
+endif()
+
 #============================================================================
 # Configure the build
 #============================================================================
