@@ -16,19 +16,28 @@
 */
 
 #include <gtest/gtest.h>
+
 #include <ignition/common/Filesystem.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/CameraSensor.hh>
 #include <ignition/rendering.hh>
 #include <ignition/msgs.hh>
-#include "test/test_config.hh"
+
+#include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 
-TEST(CameraPlugin, imagesWithBuiltinSDF)
+class CameraSensorTest: public testing::Test,
+  public testing::WithParamInterface<const char *>
+{
+  // Create a Camera sensor from a SDF and gets a image message
+  public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
+};
+
+void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 {
   // get the darn test data
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_DIR, "test",
+  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "integration", "camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -42,14 +51,14 @@ TEST(CameraPlugin, imagesWithBuiltinSDF)
   auto sensorPtr = linkPtr->GetElement("sensor");
 
   // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine("ogre2");
+  auto *engine = ignition::rendering::engine(_renderEngine);
   ASSERT_NE(nullptr, engine);
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
 
   // do the test
   ignition::sensors::Manager mgr;
   mgr.SetRenderingScene(scene);
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_DIR, "lib"));
+  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   auto *sensor = mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
   ASSERT_NE(sensor, nullptr);
@@ -62,6 +71,14 @@ TEST(CameraPlugin, imagesWithBuiltinSDF)
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
 }
+
+TEST_P(CameraSensorTest, ImagesWithBuiltinSDF)
+{
+  ImagesWithBuiltinSDF(GetParam());
+}
+
+INSTANTIATE_TEST_CASE_P(CameraPlugin, CameraSensorTest,
+    RENDER_ENGINE_VALUES);
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
