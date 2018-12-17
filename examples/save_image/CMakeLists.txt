@@ -7,9 +7,6 @@ find_package(ignition-sensors0 REQUIRED)
 #--------------------------------------
 # Find OGRE
 ign_find_package(IgnOGRE VERSION 1.8.0
-  COMPONENTS ${ign_ogre_components}
-  REQUIRED_BY ogre
-  PRIVATE_FOR ogre
   PKGCONFIG_IGNORE)
 
 if (OGRE_FOUND)
@@ -19,9 +16,6 @@ endif()
 #--------------------------------------
 # Find OGRE2
 ign_find_package(OGRE2 VERSION 2.1.0
-    COMPONENTS HlmsPbs HlmsUnlit Overlay
-    REQUIRED_BY ogre2
-    PRIVATE_FOR ogre2
     PKGCONFIG_IGNORE)
 
 if (OGRE2_FOUND)

@@ -52,7 +52,13 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 
   // Setup ign-rendering with an empty scene
   auto *engine = ignition::rendering::engine(_renderEngine);
-  ASSERT_NE(nullptr, engine);
+  if (!engine)
+  {
+    igndbg << "Engine '" << _renderEngine
+              << "' is not supported" << std::endl;
+    return;
+  }
+
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
 
   // do the test
@@ -77,8 +83,8 @@ TEST_P(CameraSensorTest, ImagesWithBuiltinSDF)
   ImagesWithBuiltinSDF(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(CameraPlugin, CameraSensorTest,
-    RENDER_ENGINE_VALUES);
+INSTANTIATE_TEST_CASE_P(CameraSensor, CameraSensorTest,
+    RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)

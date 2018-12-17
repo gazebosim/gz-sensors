@@ -16,6 +16,7 @@
 */
 
 #include <gtest/gtest.h>
+
 #include <ignition/common/Filesystem.hh>
 #include <ignition/common/Event.hh>
 #include <ignition/sensors/Manager.hh>
@@ -23,6 +24,8 @@
 #include <ignition/rendering.hh>
 #include <ignition/msgs.hh>
 #include "test_config.h"
+
+#include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 #define DEPTH_TOL 1e-4
@@ -41,8 +44,15 @@ void OnImage(const ignition::msgs::Image &_msg)
   g_depthCounter++;
 }
 
+class DepthCameraSensorTest: public testing::Test,
+  public testing::WithParamInterface<const char *>
+{
+  // Create a Camera sensor from a SDF and gets a image message
+  public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
+};
 
-TEST(DepthCameraPlugin, imagesWithBuiltinSDF)
+void DepthCameraSensorTest::ImagesWithBuiltinSDF(
+    const std::string &_renderEngine)
 {
   // get the darn test data
   std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
@@ -72,9 +82,23 @@ TEST(DepthCameraPlugin, imagesWithBuiltinSDF)
   double unitBoxSize = 1.0;
   ignition::math::Vector3d boxPosition(3.0, 0.0, 0.0);
 
+  // If ogre is not the engine, don't run the test
+  if (_renderEngine.compare("ogre") != 0)
+  {
+    igndbg << "Engine '" << _renderEngine
+              << "' doesn't support depth cameras" << std::endl;
+    return;
+  }
+
   // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine("ogre");
-  ASSERT_NE(nullptr, engine);
+  auto *engine = ignition::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    igndbg << "Engine '" << _renderEngine
+              << "' is not supported" << std::endl;
+    return;
+  }
+
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
 
   // Create an scene with a box in it
@@ -161,6 +185,14 @@ TEST(DepthCameraPlugin, imagesWithBuiltinSDF)
   mgr.RunOnce(ignition::common::Time::Zero, true);
   EXPECT_DOUBLE_EQ(g_depthBuffer[mid], ignition::math::INF_D);
 }
+
+TEST_P(DepthCameraSensorTest, ImagesWithBuiltinSDF)
+{
+  ImagesWithBuiltinSDF(GetParam());
+}
+
+INSTANTIATE_TEST_CASE_P(DepthCameraSensor, DepthCameraSensorTest,
+    RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
