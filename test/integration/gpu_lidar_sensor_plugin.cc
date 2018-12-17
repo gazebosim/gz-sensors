@@ -16,6 +16,7 @@
 */
 
 #include <gtest/gtest.h>
+
 #include <ignition/common/Console.hh>
 #include <ignition/common/Filesystem.hh>
 #include <ignition/common/Event.hh>
@@ -28,7 +29,7 @@
 #include <ignition/rendering.hh>
 #include <sdf/sdf.hh>
 
-#include "test/test_config.hh"  // NOLINT(build/include)
+#include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 #define LASER_TOL 1e-4
@@ -95,7 +96,7 @@ sdf::ElementPtr GpuLidarToSDF(const std::string &name,
     ->GetElement("sensor");
 }
 
-unsigned int g_laserCounter = 0;
+int g_laserCounter = 0;
 
 void OnNewLidarFrame(const float * /*_scan*/, unsigned int /*_width*/,
     unsigned int /*_height*/, unsigned int /*_channels*/,
@@ -128,12 +129,12 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   const std::string name = "TestGpuLidar";
   const std::string topic = "/ignition/sensors/test/lidar";
   const double updateRate = 30;
-  const double horzSamples = 640;
+  const int horzSamples = 640;
   const double horzResolution = 1;
   const double horzMinAngle = -1.396263;
   const double horzMaxAngle = 1.396263;
   const double vertResolution = 1;
-  const double vertSamples = 1;
+  const int vertSamples = 1;
   const double vertMinAngle = 0;
   const double vertMaxAngle = 0;
   const double rangeResolution = 0.01;
@@ -150,9 +151,16 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
     vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
     rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
 
-  // Create and populate scene
-  ignition::rendering::RenderEngine *engine =
-    ignition::rendering::engine(_renderEngine);
+  // If ogre is not the engine, don't run the test
+  if (_renderEngine.compare("ogre") != 0)
+  {
+    igndbg << "Engine '" << _renderEngine
+              << "' doesn't support depth cameras" << std::endl;
+    return;
+  }
+
+  // Setup ign-rendering with an empty scene
+  auto *engine = ignition::rendering::engine(_renderEngine);
   if (!engine)
   {
     igndbg << "Engine '" << _renderEngine
@@ -166,7 +174,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   // Create a sensor manager
   ignition::sensors::Manager mgr;
   mgr.SetRenderingScene(scene);
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_DIR, "lib"));
+  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create an scene with a box in it
   scene->SetAmbientLight(0.3, 0.3, 0.3);
@@ -244,12 +252,12 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   const std::string name = "TestGpuLidar";
   const std::string topic = "/ignition/sensors/test/lidar";
   const double updateRate = 30;
-  const double horzSamples = 320;
+  const int horzSamples = 320;
   const double horzResolution = 1;
   const double horzMinAngle = -M_PI/2.0;
   const double horzMaxAngle = M_PI/2.0;
   const double vertResolution = 1;
-  const double vertSamples = 1;
+  const int vertSamples = 1;
   const double vertMinAngle = 0;
   const double vertMaxAngle = 0;
   const double rangeResolution = 0.01;
@@ -294,7 +302,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   // Create a sensor manager
   ignition::sensors::Manager mgr;
   mgr.SetRenderingScene(scene);
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_DIR, "lib"));
+  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensor
   auto sensor = mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(
@@ -337,12 +345,12 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   const std::string topic1 = "/ignition/sensors/test/lidar1";
   const std::string topic2 = "/ignition/sensors/test/lidar2";
   const double updateRate = 30;
-  const double horzSamples = 320;
+  const int horzSamples = 320;
   const double horzResolution = 1;
   const double horzMinAngle = -M_PI/2.0;
   const double horzMaxAngle = M_PI/2.0;
   const double vertResolution = 1;
-  const double vertSamples = 1;
+  const int vertSamples = 1;
   const double vertMinAngle = 0;
   const double vertMaxAngle = 0;
   const double rangeResolution = 0.01;
@@ -385,7 +393,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   // Create a sensor manager
   ignition::sensors::Manager mgr;
   mgr.SetRenderingScene(scene);
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_DIR, "lib"));
+  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensors
   auto sensor1 = mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(
@@ -447,12 +455,17 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   EXPECT_DOUBLE_EQ(sensor2->Range(last), ignition::math::INF_D);
 
   // Move all boxes out of range
-  visualBox1->SetLocalPosition(
-      ignition::math::Vector3d(rangeMax + 1, 0, 0));
-  visualBox1->SetLocalRotation(box01Pose.Rot());
-  visualBox2->SetLocalPosition(
-      ignition::math::Vector3d(0, -(rangeMax + 1), 0));
-  visualBox2->SetLocalRotation(box02Pose.Rot());
+  ignition::math::Vector3d box1PositionFar(
+      rangeMax + 1, 0, 0);
+  ignition::math::Vector3d box2PositionFar(
+      0, -(rangeMax + 1), 0);
+
+  root->RemoveChild(visualBox1);
+  visualBox1->SetLocalPosition(box1PositionFar);
+  root->AddChild(visualBox1);
+  root->RemoveChild(visualBox2);
+  visualBox2->SetLocalPosition(box2PositionFar);
+  root->AddChild(visualBox2);
 
   // Update sensors
   mgr.RunOnce(ignition::common::Time::Zero);
@@ -478,12 +491,12 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   const std::string name = "TestGpuLidar";
   const std::string topic = "/ignition/sensors/test/lidar";
   const double updateRate = 30;
-  const double horzSamples = 640;
+  const unsigned int horzSamples = 640;
   const double horzResolution = 1;
   const double horzMinAngle = -M_PI/2.0;
   const double horzMaxAngle = M_PI/2.0;
   const double vertResolution = 1;
-  const double vertSamples = 4;
+  const unsigned int vertSamples = 4;
   const double vertMinAngle = -M_PI/4.0;
   const double vertMaxAngle = M_PI/4.0;
   const double rangeResolution = 0.01;
@@ -529,7 +542,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   // Create a sensor manager
   ignition::sensors::Manager mgr;
   mgr.SetRenderingScene(scene);
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_DIR, "lib"));
+  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensor
   auto sensor = mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(
@@ -567,10 +580,10 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   }
 
   // Move box out of range
+  root->RemoveChild(visualBox1);
   visualBox1->SetLocalPosition(
       ignition::math::Vector3d(rangeMax + 1, 0, 0));
-  visualBox1->SetLocalRotation(
-      ignition::math::Quaterniond::Identity);
+  root->AddChild(visualBox1);
 
   // wait for a few more laser scans
   mgr.RunOnce(ignition::common::Time::Zero);
@@ -612,7 +625,7 @@ TEST_P(GpuLidarSensorTest, VerticalLidar)
 }
 
 INSTANTIATE_TEST_CASE_P(GpuLidarSensor, GpuLidarSensorTest,
-    ::testing::Values("ogre"));
+    RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
 
 int main(int argc, char **argv)
 {

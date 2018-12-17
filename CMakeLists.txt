@@ -93,8 +93,7 @@ endif()
 #============================================================================
 # Configure the build
 #============================================================================
-ign_configure_build(QUIT_IF_BUILD_ERRORS
-    COMPONENTS ogre )
+ign_configure_build(QUIT_IF_BUILD_ERRORS)
 
 #============================================================================
 # Create package information
