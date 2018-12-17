@@ -274,6 +274,14 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
     vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
     rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
 
+  // If ogre is not the engine, don't run the test
+  if (_renderEngine.compare("ogre") != 0)
+  {
+    igndbg << "Engine '" << _renderEngine
+              << "' doesn't support depth cameras" << std::endl;
+    return;
+  }
+
   // Create and populate scene
   ignition::rendering::RenderEngine *engine =
     ignition::rendering::engine(_renderEngine);
@@ -374,6 +382,14 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
       topic2, horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
       vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
       rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+
+  // If ogre is not the engine, don't run the test
+  if (_renderEngine.compare("ogre") != 0)
+  {
+    igndbg << "Engine '" << _renderEngine
+              << "' doesn't support depth cameras" << std::endl;
+    return;
+  }
 
   // Create and populate scene
   ignition::rendering::RenderEngine *engine =
@@ -512,6 +528,14 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
     horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
     vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
     rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+
+  // If ogre is not the engine, don't run the test
+  if (_renderEngine.compare("ogre") != 0)
+  {
+    igndbg << "Engine '" << _renderEngine
+              << "' doesn't support depth cameras" << std::endl;
+    return;
+  }
 
   // Create and populate scene
   ignition::rendering::RenderEngine *engine =
