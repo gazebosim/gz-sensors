@@ -23,7 +23,6 @@
 #include <ignition/sensors/DepthCameraSensor.hh>
 #include <ignition/rendering.hh>
 #include <ignition/msgs.hh>
-#include "test_config.h"
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
