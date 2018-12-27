@@ -76,6 +76,10 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   mgr.RunOnce(ignition::common::Time::Zero);
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
+
+  // Clean up
+  engine->DestroyScene(scene);
+  ignition::rendering::unloadEngine(engine->Name());
 }
 
 TEST_P(CameraSensorTest, ImagesWithBuiltinSDF)

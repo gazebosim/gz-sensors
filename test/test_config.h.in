@@ -21,8 +21,10 @@ static const std::vector<const char *> kRenderEngineTestValues{"ogre"};
 static const std::vector<const char *> kRenderEngineTestValues{"ogre2"};
 #endif
 
+// It cannot run tests with both ogre render engines at the same time
+// use ogre2 by default
 #if WITH_OGRE_AND_OGRE2
-static const std::vector<const char *> kRenderEngineTestValues{"ogre", "ogre2"};
+static const std::vector<const char *> kRenderEngineTestValues{"ogre2"};
 #endif
 
 #include <vector>
