@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(ignition-sensors-camera-demo)
 
 # Find the Ignition Libraries used directly by the example
+find_package(ignition-rendering1 REQUIRED)
 find_package(ignition-sensors0 REQUIRED)
 
 #--------------------------------------
