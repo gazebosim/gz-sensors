@@ -59,6 +59,11 @@ ign_find_package(ignition-msgs3 REQUIRED)
 set(IGN_MSGS_VER ${ignition-msgs3_VERSION_MAJOR})
 
 #--------------------------------------
+# Find ignition-plugin
+ign_find_package(ignition-plugin1 REQUIRED)
+set(IGN_MSGS_VER ${ignition-plugin1_VERSION_MAJOR})
+
+#--------------------------------------
 # Find SDFormat
 ign_find_package(sdformat8 REQUIRED)
 include_directories(${SDFormat_INCLUDE_DIRS})
@@ -77,7 +82,7 @@ endif()
 
 #--------------------------------------
 # Find OGRE2
-ign_find_package(OGRE2 VERSION 2.1.0
+ign_find_package(IgnOGRE2 VERSION 2.1.0
     PKGCONFIG_IGNORE)
 
 if (OGRE2_FOUND)

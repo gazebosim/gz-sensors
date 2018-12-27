@@ -184,6 +184,11 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   root->AddChild(box);
   mgr.RunOnce(ignition::common::Time::Zero, true);
   EXPECT_DOUBLE_EQ(g_depthBuffer[mid], ignition::math::INF_D);
+
+  // Clean up
+  connection.reset();
+  // engine->DestroyScene(scene);
+  // ignition::rendering::unloadEngine(engine->Name());
 }
 
 TEST_P(DepthCameraSensorTest, ImagesWithBuiltinSDF)
