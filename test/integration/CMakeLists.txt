@@ -14,15 +14,13 @@ if (UNIX AND NOT APPLE)
     COMMAND bash ${CMAKE_CURRENT_BINARY_DIR}/all_symbols_have_version.bash $<TARGET_FILE:${PROJECT_LIBRARY_TARGET_NAME}>)
 endif()
 
-if (DRI_TESTS AND BUILD_TESTING)
-  ign_build_tests(TYPE INTEGRATION SOURCES ${dri_tests})
-
-  target_link_libraries(INTEGRATION_camera_plugin
-    ${IGNITION-TRANSPORT_LIBRARIES}
-    ${PROJECT_LIBRARY_TARGET_NAME}-camera)
-
-  target_link_libraries(INTEGRATION_depth_camera_plugin
-    ${IGNITION-TRANSPORT_LIBRARIES}
-    ${PROJECT_LIBRARY_TARGET_NAME}-camera
-    ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera)
+if (DRI_TESTS)
+  ign_build_tests(TYPE INTEGRATION
+    SOURCES
+      ${dri_tests}
+    LIB_DEPS
+      ${IGNITION-TRANSPORT_LIBRARIES}
+      ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
+      ${PROJECT_LIBRARY_TARGET_NAME}-camera
+  )
 endif()
