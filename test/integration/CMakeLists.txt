@@ -15,14 +15,12 @@ if (UNIX AND NOT APPLE)
 endif()
 
 if (DRI_TESTS)
-  ign_build_tests(TYPE INTEGRATION SOURCES ${dri_tests})
-
-  target_link_libraries(INTEGRATION_camera_plugin
-    ${IGNITION-TRANSPORT_LIBRARIES}
-    ${PROJECT_LIBRARY_TARGET_NAME}-camera)
-
-  target_link_libraries(INTEGRATION_depth_camera_plugin
-    ${IGNITION-TRANSPORT_LIBRARIES}
-    ${PROJECT_LIBRARY_TARGET_NAME}-camera
-    ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera)
+  ign_build_tests(TYPE INTEGRATION
+    SOURCES
+      ${dri_tests}
+    LIB_DEPS
+      ${IGNITION-TRANSPORT_LIBRARIES}
+      ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
+      ${PROJECT_LIBRARY_TARGET_NAME}-camera
+  )
 endif()
