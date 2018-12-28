@@ -211,13 +211,13 @@ ignition::common::ConnectionPtr Lidar::ConnectNewLaserFrame(
 }
 
 //////////////////////////////////////////////////
-bool Lidar::Update(const common::Time &/*_now*/)
+bool Lidar::Update(const ignition::common::Time &/*_now*/)
 {
   return true;
 }
 
 //////////////////////////////////////////////////
-bool Lidar::PublishLaserScan(const common::Time &_now)
+bool Lidar::PublishLaserScan(const ignition::common::Time &_now)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
