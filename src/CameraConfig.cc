@@ -17,6 +17,7 @@
 
 #include <ignition/sensors/CameraConfig.hh>
 #include <ignition/common/Image.hh>
+#include <ignition/math/Helpers.hh>
 
 #include <random>
 #include <sstream>
@@ -201,7 +202,7 @@ std::size_t CameraConfig::Height() const
 //////////////////////////////////////////////////
 bool CameraConfig::SetHorizontalFOV(double _hfov)
 {
-  if (_hfov <= 0 || _hfov > M_PI / 2.0)
+  if (_hfov <= 0 || _hfov > IGN_PI / 2.0)
     return false;
 
   this->dataPtr->hfov = _hfov;

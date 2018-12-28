@@ -19,6 +19,7 @@
 
 #include <ignition/common/Image.hh>
 #include <ignition/common/Console.hh>
+#include <ignition/math/Helpers.hh>
 #include <ignition/rendering.hh>
 #include <ignition/sensors.hh>
 
@@ -156,7 +157,7 @@ void BuildScene(ignition::rendering::ScenePtr _scene)
   box->AddGeometry(_scene->CreateBox());
   box->SetOrigin(0.0, 0.5, 0.0);
   box->SetLocalPosition(3, 0, 0);
-  box->SetLocalRotation(M_PI / 4, 0, M_PI / 3);
+  box->SetLocalRotation(IGN_PI / 4, 0, IGN_PI / 3);
   box->SetLocalScale(1, 2.5, 1);
   box->SetMaterial(blue);
   root->AddChild(box);

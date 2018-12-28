@@ -15,6 +15,8 @@
  *
 */
 
+#include <ignition/math/Helpers.hh>
+
 #include <ignition/sensors/DepthCameraSensor.hh>
 
 using namespace ignition::sensors;
@@ -223,7 +225,7 @@ bool DepthCameraSensor::CreateCamera()
   this->dataPtr->depthCamera->SetAntiAliasing(2);
 
   auto angle = cameraElem->Get<double>("horizontal_fov", 0);
-  if (angle.first < 0.01 || angle.first > M_PI*2)
+  if (angle.first < 0.01 || angle.first > IGN_PI*2)
   {
     ignerr << "Invalid horizontal field of view [" << angle.first << "]\n";
 
