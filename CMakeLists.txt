@@ -61,7 +61,7 @@ set(IGN_MSGS_VER ${ignition-msgs3_VERSION_MAJOR})
 #--------------------------------------
 # Find ignition-plugin
 ign_find_package(ignition-plugin1 REQUIRED)
-set(IGN_MSGS_VER ${ignition-plugin1_VERSION_MAJOR})
+set(IGN_PLUGIN_VER ${ignition-plugin1_VERSION_MAJOR})
 
 #--------------------------------------
 # Find SDFormat
