@@ -188,7 +188,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   connection.reset();
   engine->DestroyScene(scene);
 
-  // TODO (anyone): unloading creates a SIGSEGV related to
+  // TODO(anyone): unloading creates a SIGSEGV related to
   // ignition DepthCamera
   // ignition::rendering::unloadEngine(engine->Name());
 }
