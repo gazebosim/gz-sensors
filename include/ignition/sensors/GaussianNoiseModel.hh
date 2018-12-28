@@ -74,26 +74,36 @@ namespace ignition
 
     /// \class GaussianNoiseModel
     /// \brief Gaussian noise class for image sensors
+    /// TODO: remove class empty definitions when implementing them in
+    /// src\GaussingNoiseModel.cc
     class IGNITION_SENSORS_VISIBLE ImageGaussianNoiseModel :
       public GaussianNoiseModel
     {
       /// \brief Constructor.
-      public: ImageGaussianNoiseModel();
+      public: ImageGaussianNoiseModel()
+      { }
 
       /// \brief Destructor.
-      public: virtual ~ImageGaussianNoiseModel();
+      public: virtual ~ImageGaussianNoiseModel()
+      { }
 
       // Documentation inherited.
-      public: virtual void Load(sdf::ElementPtr _sdf);
+      public: virtual void Load(sdf::ElementPtr _sdf)
+      {
+         GaussianNoiseModel::Load(_sdf);
+      }
 
       // Documentation inherited.
-      public: virtual void Fini();
+      public: virtual void Fini()
+      { }
 
       // Documentation inherited.
-      public: virtual void SetCamera(rendering::CameraPtr _camera);
+      public: virtual void SetCamera(rendering::CameraPtr _camera)
+      { }
 
       /// Documentation inherited
-      public: virtual void Print(std::ostream &_out) const;
+      public: virtual void Print(std::ostream &_out) const
+      { }
 
       /*
       TODO: implement compositor instance in ign-rendering
