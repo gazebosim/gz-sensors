@@ -23,7 +23,6 @@
 #include <ignition/sensors/DepthCameraSensor.hh>
 #include <ignition/rendering.hh>
 #include <ignition/msgs.hh>
-#include "test_config.h"
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
@@ -187,8 +186,8 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
 
   // Clean up
   connection.reset();
-  // engine->DestroyScene(scene);
-  // ignition::rendering::unloadEngine(engine->Name());
+  engine->DestroyScene(scene);
+  ignition::rendering::unloadEngine(engine->Name());
 }
 
 TEST_P(DepthCameraSensorTest, ImagesWithBuiltinSDF)

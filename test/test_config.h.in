@@ -9,9 +9,11 @@
 #define RENDER_ENGINE_VALUES ::testing::ValuesIn(\
     ignition::rendering::TestValues())
 
+// Configure tests based on installed render engines
 #define WITH_OGRE_AND_NO_OGRE2 (WITH_OGRE && !WITH_OGRE2)
 #define WITH_NO_OGRE_AND_OGRE2 (!WITH_OGRE && WITH_OGRE2)
 #define WITH_OGRE_AND_OGRE2 (WITH_OGRE && WITH_OGRE2)
+#define NO_OGRE_AND_NO_OGRE2 (!WITH_OGRE && !WITH_OGRE2)
 
 #if WITH_OGRE_AND_NO_OGRE2
 static const std::vector<const char *> kRenderEngineTestValues{"ogre"};
@@ -22,9 +24,15 @@ static const std::vector<const char *> kRenderEngineTestValues{"ogre2"};
 #endif
 
 // It cannot run tests with both ogre render engines at the same time
-// use ogre2 by default
+// so it will use only ogre2 by default.
 #if WITH_OGRE_AND_OGRE2
 static const std::vector<const char *> kRenderEngineTestValues{"ogre2"};
+#endif
+
+// If no render engines are installed it will try to use none, it won't
+// find any and the test will pass.
+#if NO_OGRE_AND_NO_OGRE2
+static const std::vector<const char *> kRenderEngineTestValues{"none"};
 #endif
 
 #include <vector>
