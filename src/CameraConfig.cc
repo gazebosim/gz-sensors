@@ -49,11 +49,11 @@ class ignition::sensors::CameraConfigPrivate
   /// \brief Horizontal field of view in radians
   public: double hfov = 1.05;
 
-  /// \brief near clip plane distance in meters
-  public: double near = 0.1;
+  /// \brief near_ clip plane distance in meters
+  public: double near_ = 0.1;
 
-  /// \brief far clip plane distance in meters
-  public: double far = 100.0;
+  /// \brief far_ clip plane distance in meters
+  public: double far_ = 100.0;
 
   /// \brief format used for pixel data in output images
   public: ignition::common::Image::PixelFormatType format =

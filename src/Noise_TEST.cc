@@ -139,7 +139,7 @@ void GaussianNoise(sensors::NoisePtr _noise, unsigned int _count)
   double stdev_values = std::sqrt(sq_sum / values.size());
   double variance_values = stdev_values*stdev_values;
 
-  // The sample mean should be near x+mean, with standard deviation of
+  // The sample mean should be near_ x+mean, with standard deviation of
   // stddev / sqrt(_count)
   // https://onlinecourses.science.psu.edu/stat414/node/167
   // We will use 5 sigma (4e-5 chance of failure)

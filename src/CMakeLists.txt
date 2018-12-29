@@ -30,14 +30,14 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
     ${SDFormat_LIBRARIES})
 
 add_library(${PROJECT_LIBRARY_TARGET_NAME}-camera SHARED CameraSensor.cc)
-target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME}-camera PRIVATE CameraSensor_EXPORTS)
+target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC CameraSensor_EXPORTS)
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC
   ${IGNITION-MSGS_LIBRARIES}
   ${IGNITION-TRANSPORT_LIBRARIES}
   ${PROJECT_LIBRARY_TARGET_NAME})
 
 add_library(${PROJECT_LIBRARY_TARGET_NAME}-depth_camera SHARED DepthCameraSensor.cc)
-target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME}-camera PRIVATE DepthCameraSensor_EXPORTS)
+target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC DepthCameraSensor_EXPORTS)
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-depth_camera PUBLIC
   ${IGNITION-MSGS_LIBRARIES}
   ${IGNITION-TRANSPORT_LIBRARIES}
@@ -45,7 +45,7 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-depth_camera PUBLIC
   ${PROJECT_LIBRARY_TARGET_NAME}-camera)
 
 add_library(${PROJECT_LIBRARY_TARGET_NAME}-lidar SHARED Lidar.cc)
-target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME}-camera PRIVATE Lidar_EXPORTS)
+target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME}-lidar PUBLIC Lidar_EXPORTS)
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-lidar PUBLIC
   ${IGNITION-MSGS_LIBRARIES}
   ${IGNITION-TRANSPORT_LIBRARIES}

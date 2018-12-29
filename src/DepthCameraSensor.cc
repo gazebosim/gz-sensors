@@ -37,7 +37,7 @@ class ignition::sensors::DepthCameraSensorPrivate
   /// of the path was not possible.
   /// \sa ImageSaver
   public: bool SaveImage(const unsigned char *_data, unsigned int _width,
-    unsigned int _height, common::Image::PixelFormatType _format);
+    unsigned int _height, ignition::common::Image::PixelFormatType _format);
 
   /// \brief node to create publisher
   public: transport::Node node;
@@ -57,8 +57,8 @@ class ignition::sensors::DepthCameraSensorPrivate
   /// \brief Depth data buffer.
   public: float *depthBuffer = nullptr;
 
-  /// \brief near distance.
-  public: float near = 0.0;
+  /// \brief near_ distance.
+  public: float near_ = 0.0;
 
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
@@ -101,7 +101,7 @@ void DepthCameraSensorPrivate::RemoveCamera(
 //////////////////////////////////////////////////
 bool DepthCameraSensorPrivate::SaveImage(const unsigned char *_data,
     unsigned int _width, unsigned int _height,
-    common::Image::PixelFormatType _format)
+    ignition::common::Image::PixelFormatType _format)
 {
   // Attempt to create the directory if it doesn't exist
   if (!ignition::common::isDirectory(this->saveImagePath))
@@ -203,23 +203,23 @@ bool DepthCameraSensor::CreateCamera()
 
   sdf::ElementPtr clipElem = cameraElem->GetElement("clip");
 
-  double far = 100.0;
-  double near = 0.3;
+  double far_ = 100.0;
+  double near_ = 0.3;
   if (clipElem)
   {
-    far = clipElem->Get<double>("far");
-    near = clipElem->Get<double>("near");
+    far_ = clipElem->Get<double>("far");
+    near_ = clipElem->Get<double>("near");
   }
 
   this->dataPtr->depthCamera = this->dataPtr->scene->CreateDepthCamera(
       this->Name());
   this->dataPtr->depthCamera->SetImageWidth(width);
   this->dataPtr->depthCamera->SetImageHeight(height);
-  this->dataPtr->depthCamera->SetFarClipPlane(far);
+  this->dataPtr->depthCamera->SetFarClipPlane(far_);
 
-  // Resolve near points in the sensor, if not is set in bank from the camera
+  // Resolve near_ points in the sensor, if not is set in bank from the camera
   // this->dataPtr->depthCamera->SetNearClipPlane(near);
-  this->dataPtr->near = near;
+  this->dataPtr->near_ = near_;
 
   // \todo(nkoeng) these parameters via sdf
   this->dataPtr->depthCamera->SetAntiAliasing(2);
@@ -304,7 +304,7 @@ void DepthCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 }
 
 //////////////////////////////////////////////////
-bool DepthCameraSensor::Update(const common::Time &_now)
+bool DepthCameraSensor::Update(const ignition::common::Time &_now)
 {
   if (!this->dataPtr->initialized)
   {
@@ -329,8 +329,8 @@ bool DepthCameraSensor::Update(const common::Time &_now)
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
   unsigned char *data = this->dataPtr->image.Data<unsigned char>();
-  float near = this->NearClip();
-  float far = this->FarClip();
+  float near_ = this->NearClip();
+  float far_ = this->FarClip();
 
   ignition::common::Image::PixelFormatType format =
     ignition::common::Image::R_FLOAT32;
@@ -356,11 +356,11 @@ bool DepthCameraSensor::Update(const common::Time &_now)
   for (unsigned int i = 0; i < depthSamples; ++i)
   {
     // Mask ranges outside of min/max to +/- inf, as per REP 117
-    if (this->dataPtr->depthBuffer[i] >= far)
+    if (this->dataPtr->depthBuffer[i] >= far_)
     {
       this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
     }
-    else if (this->dataPtr->depthBuffer[i] <= near)
+    else if (this->dataPtr->depthBuffer[i] <= near_)
     {
       this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
     }
@@ -412,7 +412,7 @@ double DepthCameraSensor::FarClip() const
 double DepthCameraSensor::NearClip() const
 {
   // return this->dataPtr->depthCamera->NearClipPlane();
-  return this->dataPtr->near;
+  return this->dataPtr->near_;
 }
 
 IGN_COMMON_REGISTER_SINGLE_PLUGIN(

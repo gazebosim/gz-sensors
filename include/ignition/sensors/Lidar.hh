@@ -57,7 +57,7 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-    class Lidar_EXPORTS_API Lidar : public Sensor
+    class IGNITION_SENSORS_VISIBLE Lidar : public Sensor
     {
       /// \brief constructor
       public: Lidar();
@@ -207,7 +207,8 @@ namespace ignition
       /// A ray count is the number of simulated rays. Whereas a range count
       /// is the total number of data points returned. When range count
       /// != ray count, then values are interpolated between rays.
-      public: double RayCountRatio() const;
+      public: double RayCountRatio() const
+             { return 0.0; }
 
       /// \brief Return the ratio of horizontal range count to vertical
       /// range count.
@@ -219,11 +220,13 @@ namespace ignition
 
       /// \brief Get the horizontal field of view of the laser sensor.
       /// \return The horizontal field of view of the laser sensor.
-      public: double HorzFOV() const;
+      public: double HorzFOV() const
+             { return 0.0; }
 
       /// \brief Get the vertical field-of-view.
       /// \return Vertical field of view.
-      public: double VertFOV() const;
+      public: double VertFOV() const
+             { return 0.0; }
 
       // Documentation inherited
       public: virtual bool IsActive() const;
