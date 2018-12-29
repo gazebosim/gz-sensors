@@ -31,6 +31,7 @@ pipelines:
             libignition-rendering-dev
             libignition-transport6-dev
             libignition-tools-dev
+            libignition-plugin-dev
           # Ignition sensors
           - mkdir build
           - cd build
