@@ -48,7 +48,7 @@
 #ifndef _WIN32
 #  define CameraSensor_EXPORTS_API
 #else
-#  if(defined(CameraSensor_EXPORTS))
+#  if (defined(CameraSensor_EXPORTS))
 #    define CameraSensor_EXPORTS_API __declspec(dllexport)
 #  else
 #    define CameraSensor_EXPORTS_API __declspec(dllimport)

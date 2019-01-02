@@ -49,7 +49,7 @@
 #ifndef _WIN32
 #  define DepthCameraSensor_EXPORTS_API
 #else
-#  if(defined(DepthCameraSensor_EXPORTS))
+#  if (defined(DepthCameraSensor_EXPORTS))
 #    define DepthCameraSensor_EXPORTS_API __declspec(dllexport)
 #  else
 #    define DepthCameraSensor_EXPORTS_API __declspec(dllimport)

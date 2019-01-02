@@ -14,9 +14,10 @@
  * limitations under the License.
  *
 */
-#include <numeric>
 
 #include <gtest/gtest.h>
+
+#include <numeric>
 
 #include <ignition/math/Rand.hh>
 
