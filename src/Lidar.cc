@@ -14,7 +14,7 @@
  * limitations under the License.
  *
 */
-
+#include <ignition/common/Console.hh>
 #include <ignition/sensors/Lidar.hh>
 
 using namespace ignition::sensors;
@@ -51,10 +51,10 @@ bool Lidar::Init()
 //////////////////////////////////////////////////
 void Lidar::Fini()
 {
-  if (this->dataPtr->laserBuffer)
+  if (this->laserBuffer)
   {
-    delete [] this->dataPtr->laserBuffer;
-    this->dataPtr->laserBuffer = nullptr;
+    delete [] this->laserBuffer;
+    this->laserBuffer = nullptr;
   }
 }
 
@@ -145,7 +145,7 @@ bool Lidar::Load(sdf::ElementPtr _sdf)
   this->dataPtr->laserMsg.set_range_min(this->dataPtr->rangeMin);
   this->dataPtr->laserMsg.set_range_max(this->dataPtr->rangeMax);
 
-  this->dataPtr->initialized = true;
+  this->initialized = true;
   return true;
 }
 
@@ -168,7 +168,7 @@ bool Lidar::Update(const common::Time &/*_now*/)
 //////////////////////////////////////////////////
 bool Lidar::PublishLidarScan(const common::Time &_now)
 {
-  if (!this->dataPtr->laserBuffer)
+  if (!this->laserBuffer)
     return false;
 
   // Store the latest laser scans into laserMsg
@@ -180,7 +180,7 @@ bool Lidar::PublishLidarScan(const common::Time &_now)
   this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_nsec(
       _now.nsec);
 
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  std::lock_guard<std::mutex> lock(this->lidarMutex);
 
   const int numRays = this->RayCount() * this->VerticalRayCount();
   if (this->dataPtr->laserMsg.ranges_size() != numRays)
@@ -200,7 +200,7 @@ bool Lidar::PublishLidarScan(const common::Time &_now)
     for (unsigned int i = 0; i < this->dataPtr->horzRangeCount; ++i)
     {
       int index = j * this->dataPtr->horzRangeCount + i;
-      double range = this->dataPtr->laserBuffer[index*3];
+      double range = this->laserBuffer[index*3];
 
       // TODO(jchoclin): add LIDAR_NOISE
       // else if (this->noises.find(GPU_RAY_NOISE) !=
@@ -214,7 +214,7 @@ bool Lidar::PublishLidarScan(const common::Time &_now)
       range = ignition::math::isnan(range) ? this->dataPtr->rangeMax : range;
       this->dataPtr->laserMsg.set_ranges(index, range);
       this->dataPtr->laserMsg.set_intensities(index,
-          this->dataPtr->laserBuffer[index * 3 + 1]);
+          this->laserBuffer[index * 3 + 1]);
     }
   }
 
@@ -365,7 +365,7 @@ void Lidar::SetVerticalAngleMax(const double _angle)
 //////////////////////////////////////////////////
 void Lidar::Ranges(std::vector<double> &_ranges) const
 {
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  std::lock_guard<std::mutex> lock(this->lidarMutex);
 
   _ranges.resize(this->dataPtr->laserMsg.ranges_size());
   memcpy(&_ranges[0], this->dataPtr->laserMsg.ranges().data(),
@@ -375,7 +375,7 @@ void Lidar::Ranges(std::vector<double> &_ranges) const
 //////////////////////////////////////////////////
 double Lidar::Range(const int _index) const
 {
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  std::lock_guard<std::mutex> lock(this->lidarMutex);
 
   if (this->dataPtr->laserMsg.ranges_size() == 0)
   {

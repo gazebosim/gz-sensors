@@ -246,8 +246,8 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   const double updateRate = 30;
   const int horzSamples = 320;
   const double horzResolution = 1;
-  const double horzMinAngle = -M_PI/2.0;
-  const double horzMaxAngle = M_PI/2.0;
+  const double horzMinAngle = -IGN_PI/2.0;
+  const double horzMaxAngle = IGN_PI/2.0;
   const double vertResolution = 1;
   const int vertSamples = 1;
   const double vertMinAngle = 0;
@@ -339,8 +339,8 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   const double updateRate = 30;
   const int horzSamples = 320;
   const double horzResolution = 1;
-  const double horzMinAngle = -M_PI/2.0;
-  const double horzMaxAngle = M_PI/2.0;
+  const double horzMinAngle = -IGN_PI/2.0;
+  const double horzMaxAngle = IGN_PI/2.0;
   const double vertResolution = 1;
   const int vertSamples = 1;
   const double vertMinAngle = 0;
@@ -361,7 +361,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
 
   // Create a second sensor SDF rotated
   ignition::math::Pose3d testPose2(ignition::math::Vector3d(0, 0, 0.1),
-      ignition::math::Quaterniond(M_PI/2.0, 0, 0));
+      ignition::math::Quaterniond(IGN_PI/2.0, 0, 0));
   sdf::ElementPtr lidarSDF2 = GpuLidarToSDF(name2, testPose2, updateRate,
       topic2, horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
       vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
@@ -485,12 +485,12 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   const double updateRate = 30;
   const unsigned int horzSamples = 640;
   const double horzResolution = 1;
-  const double horzMinAngle = -M_PI/2.0;
-  const double horzMaxAngle = M_PI/2.0;
+  const double horzMinAngle = -IGN_PI/2.0;
+  const double horzMaxAngle = IGN_PI/2.0;
   const double vertResolution = 1;
   const unsigned int vertSamples = 4;
-  const double vertMinAngle = -M_PI/4.0;
-  const double vertMaxAngle = M_PI/4.0;
+  const double vertMinAngle = -IGN_PI/4.0;
+  const double vertMaxAngle = IGN_PI/4.0;
   const double rangeResolution = 0.01;
   const double rangeMin = 0.08;
   const double rangeMax = 10.0;

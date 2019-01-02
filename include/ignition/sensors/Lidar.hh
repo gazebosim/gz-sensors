@@ -21,18 +21,11 @@
 #include <string>
 #include <vector>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/PluginMacros.hh>
-#include <ignition/math/Angle.hh>
-#include <ignition/sensors/Events.hh>
-#include <ignition/sensors/Manager.hh>
+#include <ignition/common/Event.hh>
+
+#include <ignition/sensors/Sensor.hh>
 #include <ignition/transport.hh>
 
-#include <ignition/common/Event.hh>
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/Sensor.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/msgs.hh>
 
 namespace ignition
 {
@@ -50,9 +43,6 @@ namespace ignition
       /// \brief destructor
       public: ~LidarPrivate();
 
-      /// \brief Just a mutex for thread safety
-      public: std::mutex mutex;
-
       /// \brief node to create publisher
       public: transport::Node node;
 
@@ -61,12 +51,6 @@ namespace ignition
 
       /// \brief Laser message to publish data.
       public: ignition::msgs::LaserScan laserMsg;
-
-      /// \brief true if Load() has been called and was successful
-      public: bool initialized = false;
-
-      /// \brief Raw buffer of laser data.
-      public: float * laserBuffer = nullptr;
 
       /// \brief Horizontal ray count.
       public: unsigned int horzRayCount;
@@ -125,7 +109,7 @@ namespace ignition
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now);
+      public: virtual bool Update(const common::Time &_now) override;
 
       /// \brief Publish LaserScan message
       /// \param[in] _now The current time
@@ -288,6 +272,15 @@ namespace ignition
       // Documentation inherited
       public: virtual bool IsActive() const;
 
+      /// \brief Just a mutex for thread safety
+      public: mutable std::mutex lidarMutex;
+
+      /// \brief Raw buffer of laser data.
+      public: float * laserBuffer = nullptr;
+
+      /// \brief true if Load() has been called and was successful
+      public: bool initialized = false;
+
       /// \brief Set a callback to be called when data is generated.
       /// \param[in] _callback This callback will be called every time the
       /// sensor generates data. The Update function will be blocked while the
@@ -302,7 +295,7 @@ namespace ignition
 
       /// \brief Data pointer for private data
       /// \internal
-      public: std::unique_ptr<LidarPrivate> dataPtr;
+      private: std::unique_ptr<LidarPrivate> dataPtr;
     };
     }
   }

@@ -17,42 +17,15 @@
 #ifndef IGNITION_SENSORS_GPULIDARSENSOR_HH_
 #define IGNITION_SENSORS_GPULIDARSENSOR_HH_
 
-#include <string>
-#include <vector>
 #include <memory>
-#include <sstream>
+#include <string>
 
-#include <sdf/sdf.hh>
-
-#include <ignition/common/Time.hh>
-#include <ignition/common/Timer.hh>
-#include <ignition/common/Console.hh>
-#include <ignition/common/PluginMacros.hh>
-
-#include <ignition/sensors/Sensor.hh>
-#include <ignition/sensors/Export.hh>
+#include <ignition/sensors/Events.hh>
 #include <ignition/sensors/Lidar.hh>
-
-#include <ignition/msgs.hh>
-
-#include <ignition/math/Color.hh>
-#include <ignition/math/Helpers.hh>
-#include <ignition/math/Pose3.hh>
-#include <ignition/math/Vector3.hh>
-#include <ignition/math/Angle.hh>
 
 #include <ignition/rendering/GpuRays.hh>
 
-/*
-#ifndef _WIN32
-  #include <dirent.h>
-#else
-  // Ensure that Winsock2.h is included before Windows.h, which can get
-  // pulled in by anybody (e.g., Boost).
-  #include <Winsock2.h>
-  #include "gazebo/common/win_dirent.h"
-#endif
-*/
+#include <sdf/sdf.hh>
 
 
 namespace ignition
@@ -93,7 +66,7 @@ namespace ignition
       /// \brief Load sensor sata from SDF
       /// \param[in] _sdf SDF used
       /// \return True on success
-      public: virtual bool Load(sdf::ElementPtr _sdf);
+      public: virtual bool Load(sdf::ElementPtr _sdf) override;
 
       /// \brief Create Lidar sensor
       public: virtual bool CreateLidar() override;
@@ -139,7 +112,7 @@ namespace ignition
 
       /// \brief Data pointer for private data
       /// \internal
-      public: std::unique_ptr<GpuLidarSensorPrivate> gpuLidarDataPtr;
+      private: std::unique_ptr<GpuLidarSensorPrivate> gpuLidarDataPtr;
     };
     }
   }

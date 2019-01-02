@@ -14,7 +14,7 @@
  * limitations under the License.
  *
 */
-
+#include <ignition/common/Console.hh>
 #include <ignition/sensors/GpuLidarSensor.hh>
 
 namespace ignition
@@ -68,24 +68,24 @@ GpuLidarSensor::~GpuLidarSensor()
 
   this->gpuLidarDataPtr->sceneChangeConnection.reset();
 
-  if (this->dataPtr->laserBuffer)
+  if (this->laserBuffer)
   {
-    delete [] this->dataPtr->laserBuffer;
-    this->dataPtr->laserBuffer = nullptr;
+    delete [] this->laserBuffer;
+    this->laserBuffer = nullptr;
   }
 }
 
 /////////////////////////////////////////////////
 void GpuLidarSensor::SetScene(ignition::rendering::ScenePtr _scene)
 {
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  std::lock_guard<std::mutex> lock(this->lidarMutex);
   // APIs make it possible for the scene pointer to change
   if (this->gpuLidarDataPtr->scene != _scene)
   {
     this->RemoveGpuRays(this->gpuLidarDataPtr->scene);
     this->gpuLidarDataPtr->scene = _scene;
 
-    if (this->dataPtr->initialized)
+    if (this->initialized)
       this->CreateLidar();
   }
 }
@@ -96,7 +96,7 @@ void GpuLidarSensor::RemoveGpuRays(
 {
   if (_scene)
   {
-    // \todo(anyone) Remove camera from scene!
+    _scene->DestroySensor(this->gpuLidarDataPtr->gpuRays);
   }
   this->gpuLidarDataPtr->gpuRays.reset();
   this->gpuLidarDataPtr->gpuRays = nullptr;
@@ -130,7 +130,7 @@ bool GpuLidarSensor::Load(sdf::ElementPtr _sdf)
     Events::ConnectSceneChangeCallback(std::bind(&GpuLidarSensor::SetScene,
           this, std::placeholders::_1));
 
-  this->dataPtr->initialized = true;
+  this->initialized = true;
 
   return true;
 }
@@ -183,7 +183,7 @@ bool GpuLidarSensor::CreateLidar()
 //////////////////////////////////////////////////
 bool GpuLidarSensor::Update(const common::Time &_now)
 {
-  if (!this->dataPtr->initialized)
+  if (!this->initialized)
   {
     ignerr << "Not initialized, update ignored.\n";
     return false;
@@ -198,15 +198,15 @@ bool GpuLidarSensor::Update(const common::Time &_now)
   int len = this->gpuLidarDataPtr->gpuRays->RayCount() *
     this->gpuLidarDataPtr->gpuRays->VerticalRayCount() * 3;
 
-  if (this->dataPtr->laserBuffer == nullptr)
+  if (this->laserBuffer == nullptr)
   {
-    this->dataPtr->laserBuffer = new float[len];
+    this->laserBuffer = new float[len];
   }
 
   this->gpuLidarDataPtr->gpuRays->SetWorldPosition(this->Pose().Pos());
   this->gpuLidarDataPtr->gpuRays->SetWorldRotation(this->Pose().Rot());
   this->gpuLidarDataPtr->gpuRays->Update();
-  this->gpuLidarDataPtr->gpuRays->Copy(this->dataPtr->laserBuffer);
+  this->gpuLidarDataPtr->gpuRays->Copy(this->laserBuffer);
 
   this->PublishLidarScan(_now);
 
