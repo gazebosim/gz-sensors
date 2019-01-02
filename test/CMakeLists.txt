@@ -4,7 +4,7 @@ include_directories (
   ${PROJECT_SOURCE_DIR}/test
 )
 
-configure_file (test_config.hh.in ${PROJECT_BINARY_DIR}/test/test_config.hh)
+configure_file (test_config.h.in ${PROJECT_BINARY_DIR}/test_config.h)
 
 # Build gtest
 add_library(gtest STATIC gtest/src/gtest-all.cc)
