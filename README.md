@@ -16,9 +16,7 @@ Windows       | [![Build Status](https://build.osrfoundation.org/buildStatus/ico
 
 Ignition Sensors, a component of [Ignition
 Robotics](https://ignitionrobotics.org), provides numerous sensor models
-designed to generate realistic data from simulation environments. Typically,
-Ignition Sensors is used in conjunction with [Ignition
-Gazebo](https://ignitionrobotics/libs/gazebo).
+designed to generate realistic data from simulation environments. Ignition Sensors is used in conjunction with [Ignition Libraries](https://ignitionrobotics/libs), and especially relies on the rendering capabilities from [Ignition Rendering](https://ignitionrobotics.org/libs/rendering) and physics simulation from [Ignition Physics](https://ignitionrobotics.org/libs/physics).
 
 # Table of Contents
 
@@ -52,11 +50,10 @@ Gazebo](https://ignitionrobotics/libs/gazebo).
 
 # Features
 
-Ignition Sensors provides an increasing list of sensors models including 2D
-and RGDB cameras, and a  LiDAR. Each sensor model can be configured at
-run time to mimic specific real-world sensors. A noise model is also provided
-that can be used to introduce Gaussian or custom noise models into sensor
-streams.
+Ignition Sensors provides a set of sensors models that can be
+configured at run time to mimic specific real-world sensors. A noise model
+is also provided that can be used to introduce Gaussian or custom noise
+models into sensor streams.
 
 # Install
 
@@ -68,11 +65,29 @@ The [Source Install](#markdown-header-source-install) instructions should be use
 
 On Ubuntu systems, `apt-get` can be used to install `ignition-sensors`:
 
+**Ubuntu Bionic**
+
+1. Configure package repositories.
+
+    ```
+    sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
+    ```
+    
+    ```
+    sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-prerelease `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-prerelease.list'
+    ```
+    
+    ```
+    wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+    ```
+    
+    ```
+    sudo apt-get update
+    ```
+ 
 ```
 sudo apt install libignition-sensors-dev
 ```
-
-** Note: ** [Ubuntu Bionic](http://releases.ubuntu.com/18.04/) is required.
 
 At the time of this writing, there is only one released version of
 ignition-sensors. It's possible that additional versions have been released,
@@ -193,16 +208,17 @@ Follow these steps to run tests and static code analysis in your clone of this r
 Refer to the following table for information about important directories and files in this repository.
 
 ```
-+-- examples                 Example programs.
-+-- include/ignition/sensors Header files that will be installed.
-+-- src                      Source files and unit tests.
-+-- test
-|    +-- integration         Integration tests.
-|    +-- performance         Performance tests.
-|    +-- regression          Regression tests.
-+-- tutorials                Tutorials, written in markdown.
-+-- Changelog.md             Changelog.
-+-- CMakeLists.txt           CMake build script.
+├── examples                  Example programs.
+├── include/ignition/sensors  Header files that will be installed.
+├── src                       Source files and unit tests.
+├── test
+│    ├── integration          Integration tests.
+│    ├── performance          Performance tests.
+│    ├── regression           Regression tests.
+├── tutorials                 Tutorials, written in markdown.
+├── Changelog.md              Changelog.
+├── CMakeLists.txt            CMake build script.
+└── README.md                 This readme.  
 ```
 
 # Contributing
