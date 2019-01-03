@@ -460,15 +460,14 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   root->AddChild(visualBox2);
 
   // Update sensors
-  mgr.RunOnce(ignition::common::Time::Zero);
+  mgr.RunOnce(ignition::common::Time::Zero, true);
 
-  // TODO(anyone): verify that boxes are not detected when moved
-  // (The boxes don't seem to be updated properly when relocated)
-  // for (int i = 0; i < sensor1->RayCount(); ++i)
-  //   EXPECT_DOUBLE_EQ(sensor1->Range(i), ignition::math::INF_D);
-  //
-  // for (int i = 0; i < sensor1->RayCount(); ++i)
-  //   EXPECT_DOUBLE_EQ(sensor2->Range(i), ignition::math::INF_D);
+  // Verify values out of range
+  for (int i = 0; i < sensor1->RayCount(); ++i)
+    EXPECT_DOUBLE_EQ(sensor1->Range(i), ignition::math::INF_D);
+
+  for (int i = 0; i < sensor1->RayCount(); ++i)
+    EXPECT_DOUBLE_EQ(sensor2->Range(i), ignition::math::INF_D);
 
   // Clean up
   engine->DestroyScene(scene);
@@ -577,17 +576,16 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
       ignition::math::Vector3d(rangeMax + 1, 0, 0));
   root->AddChild(visualBox1);
 
-  // wait for a few more laser scans
-  mgr.RunOnce(ignition::common::Time::Zero);
+  // Wait for a few more laser scans
+  mgr.RunOnce(ignition::common::Time::Zero, true);
 
+  // Varify all values are out of range
   for (int j = 0; j < sensor->VerticalRayCount(); ++j)
   {
     for (int i = 0; i < sensor->RayCount(); ++i)
     {
-      // TODO(anyone): verify that boxes are not detected when moved
-      // (The boxes don't seem to be updated properly when relocated)
-      // EXPECT_DOUBLE_EQ(sensor->Range(j * sensor->RayCount() + i),
-      //     ignition::math::INF_D);
+      EXPECT_DOUBLE_EQ(sensor->Range(j * sensor->RayCount() + i),
+          ignition::math::INF_D);
     }
   }
 
