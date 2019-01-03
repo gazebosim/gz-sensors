@@ -31,7 +31,7 @@ pipelines:
             libignition-tools-dev
             libignition-plugin-dev
           # Install ignition cmake from source
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-cmake -b ogre2_pkg_name
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-cmake -b gz11
           - cd ign-cmake
           - mkdir build
           - cd build
