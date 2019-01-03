@@ -14,22 +14,16 @@
  * limitations under the License.
  *
 */
+
+
 #include <ignition/common/Console.hh>
 #include <ignition/sensors/Lidar.hh>
 
-namespace ignition
-{
-  namespace sensors
-  {
-    /// \brief forward declarations
-    class LidarPrivate
+using namespace ignition::sensors;
+
+/// \brief Private data for Lidar class
+class ignition::sensors::LidarPrivate
     {
-      /// \brief constructor
-      public: LidarPrivate();
-
-      /// \brief destructor
-      public: ~LidarPrivate();
-
       /// \brief node to create publisher
       public: transport::Node node;
 
@@ -75,20 +69,6 @@ namespace ignition
       /// \brief Camera SDF element.
       public: sdf::ElementPtr cameraElem;
     };
-  }
-}
-
-using namespace ignition::sensors;
-
-//////////////////////////////////////////////////
-LidarPrivate::LidarPrivate()
-{
-}
-
-//////////////////////////////////////////////////
-LidarPrivate::~LidarPrivate()
-{
-}
 
 //////////////////////////////////////////////////
 Lidar::Lidar()

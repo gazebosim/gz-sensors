@@ -32,11 +32,12 @@ namespace ignition
 {
   namespace sensors
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    //
     /// \brief forward declarations
     class GpuLidarSensorPrivate;
 
-    // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     /// \brief GpuLidar Sensor Class
     ///
     ///   This class creates laser scans using the GPU. It's measures the range
@@ -119,4 +120,3 @@ namespace ignition
 }
 
 #endif
-

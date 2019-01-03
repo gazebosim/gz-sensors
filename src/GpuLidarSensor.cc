@@ -14,46 +14,25 @@
  * limitations under the License.
  *
 */
+
+
 #include <ignition/common/Console.hh>
 #include <ignition/sensors/GpuLidarSensor.hh>
 
-namespace ignition
-{
-  namespace sensors
-  {
-    /// \internal
-    /// \brief Private data for the GpuLidar class
-    class GpuLidarSensorPrivate
-    {
-      /// \brief constructor
-      public: GpuLidarSensorPrivate();
-
-      /// \brief destructor
-      public: ~GpuLidarSensorPrivate();
-
-      /// \brief A scene the camera is capturing
-      public: ignition::rendering::ScenePtr scene;
-
-      /// \brief Rendering camera
-      public: ignition::rendering::GpuRaysPtr gpuRays;
-
-      /// \brief Connection to the Manager's scene change event.
-      public: ignition::common::ConnectionPtr sceneChangeConnection;
-    };
-  }
-}
-
 using namespace ignition::sensors;
 
-//////////////////////////////////////////////////
-GpuLidarSensorPrivate::GpuLidarSensorPrivate()
+/// \brief Private data for the GpuLidar class
+class ignition::sensors::GpuLidarSensorPrivate
 {
-}
+  /// \brief A scene the camera is capturing
+  public: ignition::rendering::ScenePtr scene;
 
-//////////////////////////////////////////////////
-GpuLidarSensorPrivate::~GpuLidarSensorPrivate()
-{
-}
+  /// \brief Rendering camera
+  public: ignition::rendering::GpuRaysPtr gpuRays;
+
+  /// \brief Connection to the Manager's scene change event.
+  public: ignition::common::ConnectionPtr sceneChangeConnection;
+};
 
 //////////////////////////////////////////////////
 GpuLidarSensor::GpuLidarSensor()
