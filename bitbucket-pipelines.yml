@@ -66,4 +66,3 @@ pipelines:
           - cd build
           - cmake ..
           - make
-          - ./save_image
