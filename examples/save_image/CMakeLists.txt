@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(ignition-sensors-camera-demo)
 
 # Find the Ignition Libraries used directly by the example
-find_package(ignition-rendering1 REQUIRED)
+find_package(ignition-rendering1 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
 find_package(ignition-sensors0 REQUIRED COMPONENTS camera)
 
 if (TARGET ignition-rendering1::ogre)
