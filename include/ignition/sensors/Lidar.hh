@@ -31,64 +31,11 @@ namespace ignition
 {
   namespace sensors
   {
+    /// \brief forward declarations
+    class LidarPrivate;
+
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
-    //
-    /// \brief forward declarations
-    class LidarPrivate
-    {
-      /// \brief constructor
-      public: LidarPrivate();
-
-      /// \brief destructor
-      public: ~LidarPrivate();
-
-      /// \brief node to create publisher
-      public: transport::Node node;
-
-      /// \brief publisher to publish images
-      public: transport::Node::Publisher pub;
-
-      /// \brief Laser message to publish data.
-      public: ignition::msgs::LaserScan laserMsg;
-
-      /// \brief Horizontal ray count.
-      public: unsigned int horzRayCount;
-
-      /// \brief Vertical ray count.
-      public: unsigned int vertRayCount;
-
-      /// \brief Horizontal range count.
-      public: unsigned int horzRangeCount;
-
-      /// \brief Vertical range count.
-      public: unsigned int vertRangeCount;
-
-      /// \brief Range count ratio.
-      public: double rangeCountRatio;
-
-      /// \brief The minimum range.
-      public: double rangeMin;
-
-      /// \brief The maximum range.
-      public: double rangeMax;
-
-      /// \brief Scan SDF element.
-      public: sdf::ElementPtr scanElem;
-
-      /// \brief Horizontal SDF element.
-      public: sdf::ElementPtr horzElem;
-
-      /// \brief Vertical SDF element.
-      public: sdf::ElementPtr vertElem;
-
-      /// \brief Range SDF element.
-      public: sdf::ElementPtr rangeElem;
-
-      /// \brief Camera SDF element.
-      public: sdf::ElementPtr cameraElem;
-    };
-
     /// \brief Lidar Sensor Class
     ///
     ///   This class creates laser scans using. It's measures the range

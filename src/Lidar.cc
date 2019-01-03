@@ -17,8 +17,68 @@
 #include <ignition/common/Console.hh>
 #include <ignition/sensors/Lidar.hh>
 
-using namespace ignition::sensors;
+namespace ignition
+{
+  namespace sensors
+  {
+    /// \brief forward declarations
+    class LidarPrivate
+    {
+      /// \brief constructor
+      public: LidarPrivate();
 
+      /// \brief destructor
+      public: ~LidarPrivate();
+
+      /// \brief node to create publisher
+      public: transport::Node node;
+
+      /// \brief publisher to publish images
+      public: transport::Node::Publisher pub;
+
+      /// \brief Laser message to publish data.
+      public: ignition::msgs::LaserScan laserMsg;
+
+      /// \brief Horizontal ray count.
+      public: unsigned int horzRayCount = 0;
+
+      /// \brief Vertical ray count.
+      public: unsigned int vertRayCount = 0;
+
+      /// \brief Horizontal range count.
+      public: unsigned int horzRangeCount = 0;
+
+      /// \brief Vertical range count.
+      public: unsigned int vertRangeCount = 0;
+
+      /// \brief Range count ratio.
+      public: double rangeCountRatio = 0;
+
+      /// \brief The minimum range.
+      public: double rangeMin = 0;
+
+      /// \brief The maximum range.
+      public: double rangeMax = 0;
+
+      /// \brief Scan SDF element.
+      public: sdf::ElementPtr scanElem;
+
+      /// \brief Horizontal SDF element.
+      public: sdf::ElementPtr horzElem;
+
+      /// \brief Vertical SDF element.
+      public: sdf::ElementPtr vertElem;
+
+      /// \brief Range SDF element.
+      public: sdf::ElementPtr rangeElem;
+
+      /// \brief Camera SDF element.
+      public: sdf::ElementPtr cameraElem;
+    };
+  }
+}
+
+using namespace ignition::sensors;
 
 //////////////////////////////////////////////////
 LidarPrivate::LidarPrivate()

@@ -40,7 +40,7 @@ namespace ignition
       /// \brief Connection to the Manager's scene change event.
       public: ignition::common::ConnectionPtr sceneChangeConnection;
     };
-}
+  }
 }
 
 using namespace ignition::sensors;
@@ -57,16 +57,16 @@ GpuLidarSensorPrivate::~GpuLidarSensorPrivate()
 
 //////////////////////////////////////////////////
 GpuLidarSensor::GpuLidarSensor()
-  : gpuLidarDataPtr(new GpuLidarSensorPrivate())
+  : dataPtr(new GpuLidarSensorPrivate())
 {
 }
 
 //////////////////////////////////////////////////
 GpuLidarSensor::~GpuLidarSensor()
 {
-  this->RemoveGpuRays(this->gpuLidarDataPtr->scene);
+  this->RemoveGpuRays(this->dataPtr->scene);
 
-  this->gpuLidarDataPtr->sceneChangeConnection.reset();
+  this->dataPtr->sceneChangeConnection.reset();
 
   if (this->laserBuffer)
   {
@@ -80,10 +80,10 @@ void GpuLidarSensor::SetScene(ignition::rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->lidarMutex);
   // APIs make it possible for the scene pointer to change
-  if (this->gpuLidarDataPtr->scene != _scene)
+  if (this->dataPtr->scene != _scene)
   {
-    this->RemoveGpuRays(this->gpuLidarDataPtr->scene);
-    this->gpuLidarDataPtr->scene = _scene;
+    this->RemoveGpuRays(this->dataPtr->scene);
+    this->dataPtr->scene = _scene;
 
     if (this->initialized)
       this->CreateLidar();
@@ -96,10 +96,10 @@ void GpuLidarSensor::RemoveGpuRays(
 {
   if (_scene)
   {
-    _scene->DestroySensor(this->gpuLidarDataPtr->gpuRays);
+    _scene->DestroySensor(this->dataPtr->gpuRays);
   }
-  this->gpuLidarDataPtr->gpuRays.reset();
-  this->gpuLidarDataPtr->gpuRays = nullptr;
+  this->dataPtr->gpuRays.reset();
+  this->dataPtr->gpuRays = nullptr;
 }
 
 //////////////////////////////////////////////////
@@ -121,12 +121,12 @@ bool GpuLidarSensor::Load(sdf::ElementPtr _sdf)
     }
   }
 
-  if (this->gpuLidarDataPtr->scene)
+  if (this->dataPtr->scene)
   {
     this->CreateLidar();
   }
 
-  this->gpuLidarDataPtr->sceneChangeConnection =
+  this->dataPtr->sceneChangeConnection =
     Events::ConnectSceneChangeCallback(std::bind(&GpuLidarSensor::SetScene,
           this, std::placeholders::_1));
 
@@ -144,38 +144,38 @@ bool GpuLidarSensor::Init()
 //////////////////////////////////////////////////
 bool GpuLidarSensor::CreateLidar()
 {
-  this->gpuLidarDataPtr->gpuRays = this->gpuLidarDataPtr->scene->CreateGpuRays(
+  this->dataPtr->gpuRays = this->dataPtr->scene->CreateGpuRays(
       this->Name() + "_gpu_rays");
 
-  if (!this->gpuLidarDataPtr->gpuRays)
+  if (!this->dataPtr->gpuRays)
   {
     ignerr << "Unable to create gpu laser sensor\n";
     return false;
   }
 
-  this->gpuLidarDataPtr->gpuRays->SetWorldPosition(this->Pose().Pos());
-  this->gpuLidarDataPtr->gpuRays->SetWorldRotation(this->Pose().Rot());
+  this->dataPtr->gpuRays->SetWorldPosition(this->Pose().Pos());
+  this->dataPtr->gpuRays->SetWorldRotation(this->Pose().Rot());
 
-  this->gpuLidarDataPtr->gpuRays->SetNearClipPlane(this->RangeMin());
-  this->gpuLidarDataPtr->gpuRays->SetFarClipPlane(this->RangeMax());
+  this->dataPtr->gpuRays->SetNearClipPlane(this->RangeMin());
+  this->dataPtr->gpuRays->SetFarClipPlane(this->RangeMax());
 
   // Mask ranges outside of min/max to +/- inf, as per REP 117
-  this->gpuLidarDataPtr->gpuRays->SetClamp(false);
+  this->dataPtr->gpuRays->SetClamp(false);
 
-  this->gpuLidarDataPtr->gpuRays->SetAngleMin(this->AngleMin().Radian());
-  this->gpuLidarDataPtr->gpuRays->SetAngleMax(this->AngleMax().Radian());
+  this->dataPtr->gpuRays->SetAngleMin(this->AngleMin().Radian());
+  this->dataPtr->gpuRays->SetAngleMax(this->AngleMax().Radian());
 
-  this->gpuLidarDataPtr->gpuRays->SetVerticalAngleMin(
+  this->dataPtr->gpuRays->SetVerticalAngleMin(
       this->VerticalAngleMin().Radian());
-  this->gpuLidarDataPtr->gpuRays->SetVerticalAngleMax(
+  this->dataPtr->gpuRays->SetVerticalAngleMax(
       this->VerticalAngleMax().Radian());
 
-  this->gpuLidarDataPtr->gpuRays->SetRayCount(this->RayCount());
-  this->gpuLidarDataPtr->gpuRays->SetVerticalRayCount(
+  this->dataPtr->gpuRays->SetRayCount(this->RayCount());
+  this->dataPtr->gpuRays->SetVerticalRayCount(
       this->VerticalRayCount());
 
-  this->gpuLidarDataPtr->scene->RootVisual()->AddChild(
-      this->gpuLidarDataPtr->gpuRays);
+  this->dataPtr->scene->RootVisual()->AddChild(
+      this->dataPtr->gpuRays);
 
   return true;
 }
@@ -189,24 +189,24 @@ bool GpuLidarSensor::Update(const common::Time &_now)
     return false;
   }
 
-  if (!this->gpuLidarDataPtr->gpuRays)
+  if (!this->dataPtr->gpuRays)
   {
     ignerr << "GpuRays doesn't exist.\n";
     return false;
   }
 
-  int len = this->gpuLidarDataPtr->gpuRays->RayCount() *
-    this->gpuLidarDataPtr->gpuRays->VerticalRayCount() * 3;
+  int len = this->dataPtr->gpuRays->RayCount() *
+    this->dataPtr->gpuRays->VerticalRayCount() * 3;
 
   if (this->laserBuffer == nullptr)
   {
     this->laserBuffer = new float[len];
   }
 
-  this->gpuLidarDataPtr->gpuRays->SetWorldPosition(this->Pose().Pos());
-  this->gpuLidarDataPtr->gpuRays->SetWorldRotation(this->Pose().Rot());
-  this->gpuLidarDataPtr->gpuRays->Update();
-  this->gpuLidarDataPtr->gpuRays->Copy(this->laserBuffer);
+  this->dataPtr->gpuRays->SetWorldPosition(this->Pose().Pos());
+  this->dataPtr->gpuRays->SetWorldRotation(this->Pose().Rot());
+  this->dataPtr->gpuRays->Update();
+  this->dataPtr->gpuRays->Copy(this->laserBuffer);
 
   this->PublishLidarScan(_now);
 
@@ -219,31 +219,31 @@ ignition::common::ConnectionPtr GpuLidarSensor::ConnectNewLidarFrame(
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &/*_format*/)> _subscriber)
 {
-  return this->gpuLidarDataPtr->gpuRays->ConnectNewGpuRaysFrame(_subscriber);
+  return this->dataPtr->gpuRays->ConnectNewGpuRaysFrame(_subscriber);
 }
 
 /////////////////////////////////////////////////
 ignition::rendering::GpuRaysPtr GpuLidarSensor::GpuRays() const
 {
-  return this->gpuLidarDataPtr->gpuRays;
+  return this->dataPtr->gpuRays;
 }
 
 //////////////////////////////////////////////////
 bool GpuLidarSensor::IsHorizontal() const
 {
-  return this->gpuLidarDataPtr->gpuRays->IsHorizontal();
+  return this->dataPtr->gpuRays->IsHorizontal();
 }
 
 //////////////////////////////////////////////////
 ignition::math::Angle GpuLidarSensor::HFOV() const
 {
-  return this->gpuLidarDataPtr->gpuRays->HFOV();
+  return this->dataPtr->gpuRays->HFOV();
 }
 
 //////////////////////////////////////////////////
 ignition::math::Angle GpuLidarSensor::VFOV() const
 {
-  return this->gpuLidarDataPtr->gpuRays->VFOV();
+  return this->dataPtr->gpuRays->VFOV();
 }
 
 IGN_COMMON_REGISTER_SINGLE_PLUGIN(

@@ -112,7 +112,7 @@ namespace ignition
 
       /// \brief Data pointer for private data
       /// \internal
-      private: std::unique_ptr<GpuLidarSensorPrivate> gpuLidarDataPtr;
+      private: std::unique_ptr<GpuLidarSensorPrivate> dataPtr;
     };
     }
   }
