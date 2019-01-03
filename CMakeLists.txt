@@ -50,7 +50,7 @@ set(IGN_TRANSPORT_VER ${ignition-transport6_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-rendering
-ign_find_package(ignition-rendering1 REQUIRED COMPONENTS ogre ogre2)
+ign_find_package(ignition-rendering1 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
 set(IGN_RENDERING_VER ${ignition-rendering1_VERSION_MAJOR})
 
 if (TARGET ignition-rendering${IGN_RENDERING_VER}::ogre)
