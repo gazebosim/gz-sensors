@@ -53,5 +53,11 @@ target_link_libraries(${lidar_target}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
     )
 
-
-
+set(gpu_lidar_sources GpuLidarSensor.cc)
+ign_add_component(gpu_lidar SOURCES ${gpu_lidar_sources} GET_TARGET_NAME gpu_lidar_target)
+target_link_libraries(${gpu_lidar_target}
+  PRIVATE
+    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+    ${lidar_target}
+    )
