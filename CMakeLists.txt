@@ -50,8 +50,18 @@ set(IGN_TRANSPORT_VER ${ignition-transport6_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-rendering
-ign_find_package(ignition-rendering1 REQUIRED)
+ign_find_package(ignition-rendering1 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
 set(IGN_RENDERING_VER ${ignition-rendering1_VERSION_MAJOR})
+
+if (TARGET ignition-rendering${IGN_RENDERING_VER}::ogre)
+  set(HAVE_OGRE TRUE)
+  add_definitions(-DWITH_OGRE)
+endif()
+
+if (TARGET ignition-rendering${IGN_RENDERING_VER}::ogre2)
+  set(HAVE_OGRE2 TRUE)
+  add_definitions(-DWITH_OGRE2)
+endif()
 
 #--------------------------------------
 # Find ignition-msgs
@@ -69,26 +79,6 @@ ign_find_package(sdformat8 REQUIRED)
 include_directories(${SDFormat_INCLUDE_DIRS})
 
 set(IGN_SENSORS_PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
-
-#--------------------------------------
-# Find OGRE
-ign_find_package(IgnOGRE VERSION 1.8.0
-  PKGCONFIG_IGNORE)
-
-if (OGRE_FOUND)
-  set(HAVE_OGRE TRUE)
-  add_definitions(-DWITH_OGRE)
-endif()
-
-#--------------------------------------
-# Find OGRE2
-ign_find_package(IgnOGRE2 VERSION 2.1.0
-    PKGCONFIG_IGNORE)
-
-if (OGRE2_FOUND)
-  set(HAVE_OGRE2 TRUE)
-  add_definitions(-DWITH_OGRE2)
-endif()
 
 #============================================================================
 # Configure the build
