@@ -114,7 +114,7 @@ class GpuLidarSensorTest: public testing::Test,
   // Test single box detection
   public: void DetectBox(const std::string &_renderEngine);
 
-  // Test vertical measurements
+  // Test detection of three boxes placed at different locations
   public: void TestThreeBoxes(const std::string &_renderEngine);
 
   // Test vertical measurements
@@ -452,12 +452,8 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   ignition::math::Vector3d box2PositionFar(
       0, -(rangeMax + 1), 0);
 
-  root->RemoveChild(visualBox1);
   visualBox1->SetLocalPosition(box1PositionFar);
-  root->AddChild(visualBox1);
-  root->RemoveChild(visualBox2);
   visualBox2->SetLocalPosition(box2PositionFar);
-  root->AddChild(visualBox2);
 
   // Update sensors
   mgr.RunOnce(ignition::common::Time::Zero, true);
@@ -571,15 +567,13 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   }
 
   // Move box out of range
-  root->RemoveChild(visualBox1);
   visualBox1->SetLocalPosition(
       ignition::math::Vector3d(rangeMax + 1, 0, 0));
-  root->AddChild(visualBox1);
 
   // Wait for a few more laser scans
   mgr.RunOnce(ignition::common::Time::Zero, true);
 
-  // Varify all values are out of range
+  // Verify all values are out of range
   for (int j = 0; j < sensor->VerticalRayCount(); ++j)
   {
     for (int i = 0; i < sensor->RayCount(); ++i)
