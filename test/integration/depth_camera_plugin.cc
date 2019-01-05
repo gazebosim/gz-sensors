@@ -22,7 +22,8 @@
 #include <ignition/sensors/DepthCameraSensor.hh>
 #include <ignition/rendering.hh>
 #include <ignition/msgs.hh>
-#include "test/test_config.hh"
+
+#include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 #define DEPTH_TOL 1e-4
@@ -45,7 +46,7 @@ void OnImage(const ignition::msgs::Image &_msg)
 TEST(DepthCameraPlugin, imagesWithBuiltinSDF)
 {
   // get the darn test data
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_DIR, "test",
+  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "integration", "depth_camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -102,7 +103,7 @@ TEST(DepthCameraPlugin, imagesWithBuiltinSDF)
   // do the test
   ignition::sensors::Manager mgr;
   mgr.SetRenderingScene(scene);
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_DIR, "lib"));
+  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   auto *depthSensor = mgr.CreateSensor<ignition::sensors::DepthCameraSensor>(
       sensorPtr);

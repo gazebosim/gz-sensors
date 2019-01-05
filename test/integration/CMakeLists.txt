@@ -6,7 +6,6 @@ set(dri_tests
 )
 
 link_directories(${PROJECT_BINARY_DIR}/test)
-include_directories(${PROJECT_BINARY_DIR}/test)
 
 # Test symbols having the right name on linux only
 if (UNIX AND NOT APPLE)
