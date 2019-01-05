@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Open Source Robotics Foundation
+ * Copyright (C) 2018 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@
 #include <vector>
 
 #include <ignition/common/Event.hh>
-#include <ignition/sensors/config.hh>
+
 #include <ignition/sensors/Sensor.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/msgs.hh>
+#include <ignition/transport.hh>
+
 
 #ifndef _WIN32
 #  define Lidar_EXPORTS_API
@@ -73,7 +73,7 @@ namespace ignition
       /// \brief Publish LaserScan message
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool PublishLaserScan(const common::Time &_now);
+      public: virtual bool PublishLidarScan(const common::Time &_now);
 
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF Sensor parameters.
@@ -83,6 +83,9 @@ namespace ignition
       /// \brief Initialize values in the sensor
       /// \return True on success
       public: virtual bool Init() override;
+
+      /// \brief Create Lidar sensor
+      public: virtual bool CreateLidar();
 
       /// \brief Finalize the ray
       protected: virtual void Fini();
@@ -231,6 +234,15 @@ namespace ignition
       // Documentation inherited
       public: virtual bool IsActive() const;
 
+      /// \brief Just a mutex for thread safety
+      public: mutable std::mutex lidarMutex;
+
+      /// \brief Raw buffer of laser data.
+      public: float * laserBuffer = nullptr;
+
+      /// \brief true if Load() has been called and was successful
+      public: bool initialized = false;
+
       /// \brief Set a callback to be called when data is generated.
       /// \param[in] _callback This callback will be called every time the
       /// sensor generates data. The Update function will be blocked while the
@@ -238,9 +250,10 @@ namespace ignition
       /// \remark Do not block inside of the callback.
       /// \return A connection pointer that must remain in scope. When the
       /// connection pointer falls out of scope, the connection is broken.
-      public: ignition::common::ConnectionPtr ConnectNewLaserFrame(
-          std::function<void(const float *, unsigned int, unsigned int,
-            unsigned int, const std::string &)> _subscriber);
+      public: virtual ignition::common::ConnectionPtr ConnectNewLidarFrame(
+          std::function<void(const float *_scan, unsigned int _width,
+                  unsigned int _heighti, unsigned int _channels,
+                  const std::string &/*_format*/)> _subscriber);
 
       /// \brief Data pointer for private data
       /// \internal
@@ -251,4 +264,3 @@ namespace ignition
 }
 
 #endif
-

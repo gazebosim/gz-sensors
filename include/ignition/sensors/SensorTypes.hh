@@ -38,6 +38,7 @@ namespace ignition
     // Forward declarations.
     class AltimeterSensor;
     class CameraSensor;
+    class GpuLidarSensor;
     class GaussianNoiseModel;
     class ImageGaussianNoiseModel;
     class Noise;
@@ -50,6 +51,10 @@ namespace ignition
     /// \def CameraSensorPtr
     /// \brief Shared pointer to CameraSensor
     typedef std::shared_ptr<CameraSensor> CameraSensorPtr;
+
+    /// \def GpuLidarSensorPtr
+    /// \brief Shared pointer to GpuLidarSensor
+    typedef std::shared_ptr<GpuLidarSensor> GpuLidarSensorPtr;
 
     /// \def NoisePtr
     /// \brief Shared pointer to Noise
@@ -70,6 +75,10 @@ namespace ignition
     /// \def CameraSensor_V
     /// \brief Vector of CameraSensor shared pointers
     typedef std::vector<CameraSensorPtr> CameraSensor_V;
+
+    /// \def GpuLidarSensor_V
+    /// \brief Vector of GpuLidarSensor shared pointers
+    typedef std::vector<GpuLidarSensorPtr> GpuLidarSensor_V;
 
     /// \def SensorNoiseType
     /// \brief Eumeration of all sensor noise types

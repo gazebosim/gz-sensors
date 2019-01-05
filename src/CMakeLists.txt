@@ -3,6 +3,7 @@ set (sources
   Manager.cc
   Sensor.cc
   Lidar.cc
+  CameraConfig.cc
   Noise.cc
   GaussianNoiseModel.cc
   SensorTypes.cc
@@ -17,51 +18,46 @@ set (gtest_sources
 # Create the library target.
 ign_create_core_library(SOURCES ${sources} CXX_STANDARD 14)
 
-# Include the interface directories that we always need.
-#ign_target_interface_include_directories(${PROJECT_LIBRARY_TARGET_NAME}
-#  ignition-math${IGN_MATH_VER})
-
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC
-    ${ignition-math${IGN_MATH_VER}_LIBRARIES}
-    ${ignition-common${IGN_COMMON_VER}_LIBRARIES}
-    ${IGNITION-RENDERING_LIBRARIES}
-    ${IGNITION-TRANSPORT_LIBRARIES}
+    ignition-math${IGN_MATH_VER}::ignition-math${IGN_MATH_VER}
+    ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
+    ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
+    ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
     ${SDFormat_LIBRARIES})
-
-add_library(${PROJECT_LIBRARY_TARGET_NAME}-camera SHARED CameraSensor.cc)
-target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC CameraSensor_EXPORTS)
-target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC
-  ${IGNITION-MSGS_LIBRARIES}
-  ${IGNITION-TRANSPORT_LIBRARIES}
-  ${PROJECT_LIBRARY_TARGET_NAME})
-
-add_library(${PROJECT_LIBRARY_TARGET_NAME}-depth_camera SHARED DepthCameraSensor.cc)
-target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME}-camera PUBLIC DepthCameraSensor_EXPORTS)
-target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-depth_camera PUBLIC
-  ${IGNITION-MSGS_LIBRARIES}
-  ${IGNITION-TRANSPORT_LIBRARIES}
-  ${PROJECT_LIBRARY_TARGET_NAME}
-  ${PROJECT_LIBRARY_TARGET_NAME}-camera)
-
-add_library(${PROJECT_LIBRARY_TARGET_NAME}-lidar SHARED Lidar.cc)
-target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME}-lidar PUBLIC Lidar_EXPORTS)
-target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}-lidar PUBLIC
-  ${IGNITION-MSGS_LIBRARIES}
-  ${IGNITION-TRANSPORT_LIBRARIES}
-  ${PROJECT_LIBRARY_TARGET_NAME})
-
 
 # Build the unit tests.
 ign_build_tests(TYPE UNIT SOURCES ${gtest_sources})
 
-install(TARGETS
-  ${PROJECT_LIBRARY_TARGET_NAME}-camera
-  DESTINATION ${IGN_SENSORS_PLUGIN_PATH})
-install(TARGETS
-  ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
-  DESTINATION ${IGN_SENSORS_PLUGIN_PATH})
-install(TARGETS
-  ${PROJECT_LIBRARY_TARGET_NAME}-lidar
-  DESTINATION ${IGN_SENSORS_PLUGIN_PATH})
+set(camera_sources CameraSensor.cc)
+ign_add_component(camera SOURCES ${camera_sources} GET_TARGET_NAME camera_target)
+target_link_libraries(${camera_target}
+  PRIVATE
+    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+    )
 
+set(depth_camera_sources DepthCameraSensor.cc)
+ign_add_component(depth_camera SOURCES ${depth_camera_sources} GET_TARGET_NAME depth_camera_target)
+target_link_libraries(${depth_camera_target}
+  PRIVATE
+    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+    )
+
+set(lidar_sources Lidar.cc)
+ign_add_component(lidar SOURCES ${lidar_sources} GET_TARGET_NAME lidar_target)
+target_link_libraries(${lidar_target}
+  PRIVATE
+    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+    )
+
+set(gpu_lidar_sources GpuLidarSensor.cc)
+ign_add_component(gpu_lidar SOURCES ${gpu_lidar_sources} GET_TARGET_NAME gpu_lidar_target)
+target_link_libraries(${gpu_lidar_target}
+  PRIVATE
+    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+    ${lidar_target}
+    )
