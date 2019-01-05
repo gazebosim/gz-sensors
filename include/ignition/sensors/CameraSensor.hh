@@ -119,7 +119,7 @@ namespace ignition
       /// \return height of the image
       public: virtual unsigned int ImageHeight() const;
 
-     /// \brief Create a camera in a scene
+      /// \brief Create a camera in a scene
       /// \return True on success.
       private: bool CreateCamera();
 

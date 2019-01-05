@@ -31,6 +31,9 @@ ign_build_tests(TYPE UNIT SOURCES ${gtest_sources})
 
 set(camera_sources CameraSensor.cc)
 ign_add_component(camera SOURCES ${camera_sources} GET_TARGET_NAME camera_target)
+# custom compile definitions since the one provided automatically is versioned and will
+# make the code need to change with every major version
+target_compile_definitions(${camera_target} PUBLIC CameraSensor_EXPORTS)
 target_link_libraries(${camera_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
@@ -39,14 +42,17 @@ target_link_libraries(${camera_target}
 
 set(depth_camera_sources DepthCameraSensor.cc)
 ign_add_component(depth_camera SOURCES ${depth_camera_sources} GET_TARGET_NAME depth_camera_target)
+target_compile_definitions(${depth_camera_target} PUBLIC DepthCameraSensor_EXPORTS)
 target_link_libraries(${depth_camera_target}
   PRIVATE
+    ${camera_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
     )
 
 set(lidar_sources Lidar.cc)
 ign_add_component(lidar SOURCES ${lidar_sources} GET_TARGET_NAME lidar_target)
+target_compile_definitions(${lidar_target} PUBLIC Lidar_EXPORTS)
 target_link_libraries(${lidar_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
@@ -55,6 +61,7 @@ target_link_libraries(${lidar_target}
 
 set(gpu_lidar_sources GpuLidarSensor.cc)
 ign_add_component(gpu_lidar SOURCES ${gpu_lidar_sources} GET_TARGET_NAME gpu_lidar_target)
+target_compile_definitions(${gpu_lidar_target} PUBLIC GpuLidarSensor_EXPORTS)
 target_link_libraries(${gpu_lidar_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}

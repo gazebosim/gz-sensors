@@ -221,21 +221,21 @@ bool CameraConfig::SetClip(double _near, double _far)
   if (_near <= 0 || _far <= 0 || _far <= _near)
     return false;
 
-  this->dataPtr->near = _near;
-  this->dataPtr->far = _far;
+  this->dataPtr->near_ = _near;
+  this->dataPtr->far_ = _far;
   return true;
 }
 
 //////////////////////////////////////////////////
 double CameraConfig::Near() const
 {
-  return this->dataPtr->near;
+  return this->dataPtr->near_;
 }
 
 //////////////////////////////////////////////////
 double CameraConfig::Far() const
 {
-  return this->dataPtr->far;
+  return this->dataPtr->far_;
 }
 
 //////////////////////////////////////////////////
@@ -285,8 +285,8 @@ sdf::ElementPtr CameraConfig::ToSDF()
     << ignition::common::PixelFormatNames[this->dataPtr->format] << "</format>"
     << "     </image>"
     << "     <clip>"
-    << "      <near>" << this->dataPtr->near << "</near>"
-    << "      <far>" << this->dataPtr->far << "</far>"
+    << "      <near>" << this->dataPtr->near_ << "</near>"
+    << "      <far>" << this->dataPtr->far_ << "</far>"
     << "     </clip>"
     << "    </camera>"
     << "   </sensor>"

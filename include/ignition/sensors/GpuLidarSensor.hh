@@ -27,6 +27,15 @@
 
 #include <sdf/sdf.hh>
 
+#ifndef _WIN32
+#  define GpuLidarSensor_EXPORTS_API
+#else
+#  if (defined(GpuLidarSensor_EXPORTS))
+#    define GpuLidarSensor_EXPORTS_API __declspec(dllexport)
+#  else
+#    define GpuLidarSensor_EXPORTS_API __declspec(dllimport)
+#  endif
+#endif
 
 namespace ignition
 {
@@ -47,7 +56,7 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-    class IGNITION_SENSORS_VISIBLE GpuLidarSensor : public Lidar
+    class GpuLidarSensor_EXPORTS_API GpuLidarSensor : public Lidar
     {
       /// \brief constructor
       public: GpuLidarSensor();
@@ -94,7 +103,8 @@ namespace ignition
       /// A ray count is the number of simulated rays. Whereas a range count
       /// is the total number of data points returned. When range count
       /// != ray count, then values are interpolated between rays.
-      public: double RayCountRatio() const;
+      public: double RayCountRatio() const
+             { return 0.0; }
 
       /// \brief Get the horizontal field of view of the laser sensor.
       /// \return The horizontal field of view of the laser sensor.
