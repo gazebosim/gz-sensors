@@ -45,8 +45,8 @@ void OnImage(const ignition::msgs::Image &_msg)
 class DepthCameraSensorTest: public testing::Test,
   public testing::WithParamInterface<const char *>
 {
-   // Create a Camera sensor from a SDF and gets a image message
-   public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
+  // Create a Camera sensor from a SDF and gets a image message
+  public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
 };
 
 void DepthCameraSensorTest::ImagesWithBuiltinSDF(
