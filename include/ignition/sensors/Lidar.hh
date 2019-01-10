@@ -210,8 +210,7 @@ namespace ignition
       /// A ray count is the number of simulated rays. Whereas a range count
       /// is the total number of data points returned. When range count
       /// != ray count, then values are interpolated between rays.
-      public: double RayCountRatio() const
-             { return 0.0; }
+      public: double RayCountRatio() const;
 
       /// \brief Return the ratio of horizontal range count to vertical
       /// range count.
@@ -223,13 +222,11 @@ namespace ignition
 
       /// \brief Get the horizontal field of view of the laser sensor.
       /// \return The horizontal field of view of the laser sensor.
-      public: double HorzFOV() const
-             { return 0.0; }
+      public: double HorzFOV() const;
 
       /// \brief Get the vertical field-of-view.
       /// \return Vertical field of view.
-      public: double VertFOV() const
-             { return 0.0; }
+      public: double VertFOV() const;
 
       // Documentation inherited
       public: virtual bool IsActive() const;

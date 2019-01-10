@@ -103,8 +103,7 @@ namespace ignition
       /// A ray count is the number of simulated rays. Whereas a range count
       /// is the total number of data points returned. When range count
       /// != ray count, then values are interpolated between rays.
-      public: double RayCountRatio() const
-             { return 0.0; }
+      public: double RayCountRatio() const;
 
       /// \brief Get the horizontal field of view of the laser sensor.
       /// \return The horizontal field of view of the laser sensor.
