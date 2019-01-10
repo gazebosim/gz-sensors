@@ -139,7 +139,7 @@ namespace ignition
       /// \brief Callback that is triggered when the scene changes on
       /// the Manager.
       /// \param[in] _scene Pointer to the new scene.
-      private: void OnSceneChange(ignition::rendering::ScenePtr _scene)
+      private: void OnSceneChange(ignition::rendering::ScenePtr /*_scene*/)
               { }
 
       /// \brief Data pointer for private data
