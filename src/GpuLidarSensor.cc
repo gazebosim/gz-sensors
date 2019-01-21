@@ -124,7 +124,7 @@ bool GpuLidarSensor::Init()
 bool GpuLidarSensor::CreateLidar()
 {
   this->dataPtr->gpuRays = this->dataPtr->scene->CreateGpuRays(
-      this->Name() + "_gpu_rays");
+      this->Name());
 
   if (!this->dataPtr->gpuRays)
   {

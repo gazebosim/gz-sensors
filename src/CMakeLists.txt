@@ -54,7 +54,8 @@ target_link_libraries(${lidar_target}
     )
 
 set(gpu_lidar_sources GpuLidarSensor.cc)
-ign_add_component(gpu_lidar SOURCES ${gpu_lidar_sources} GET_TARGET_NAME gpu_lidar_target)
+ign_add_component(gpu_ray SOURCES ${gpu_lidar_sources} GET_TARGET_NAME gpu_lidar_target)
+target_compile_definitions(${gpu_lidar_target} PUBLIC GpuLidarSensor_EXPORTS)
 target_link_libraries(${gpu_lidar_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
