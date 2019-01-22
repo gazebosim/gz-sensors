@@ -1,0 +1,12 @@
+diff -r b14c9ded78bb test/gtest/src/gtest.cc
+--- a/test/gtest/src/gtest.cc	Tue Nov 20 18:15:29 2018 +0000
++++ b/test/gtest/src/gtest.cc	Thu Dec 06 17:39:43 2018 -0800
+@@ -30,6 +30,8 @@
+ //
+ // The Google C++ Testing and Mocking Framework (Google Test)
+ 
++#pragma GCC system_header
++
+ #include "gtest/gtest.h"
+ #include "gtest/internal/custom/gtest.h"
+ #include "gtest/gtest-spi.h"

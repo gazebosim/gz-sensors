@@ -15,6 +15,7 @@
  *
 */
 
+#include <ignition/math/Helpers.hh>
 
 #include <ignition/sensors/CameraSensor.hh>
 
@@ -36,7 +37,7 @@ class ignition::sensors::CameraSensorPrivate
   /// of the path was not possible.
   /// \sa ImageSaver
   public: bool SaveImage(const unsigned char *_data, unsigned int _width,
-    unsigned int _height, common::Image::PixelFormatType _format);
+    unsigned int _height, ignition::common::Image::PixelFormatType _format);
 
   /// \brief node to create publisher
   public: transport::Node node;
@@ -109,7 +110,7 @@ bool CameraSensor::CreateCamera()
   this->dataPtr->camera->SetAntiAliasing(2);
 
   auto angle = cameraElem->Get<double>("horizontal_fov", 0);
-  if (angle.first < 0.01 || angle.first > M_PI*2)
+  if (angle.first < 0.01 || angle.first > IGN_PI*2)
   {
     ignerr << "Invalid horizontal field of view [" << angle.first << "]\n";
 
@@ -242,7 +243,7 @@ void CameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 }
 
 //////////////////////////////////////////////////
-bool CameraSensor::Update(const common::Time &_now)
+bool CameraSensor::Update(const ignition::common::Time &_now)
 {
   if (!this->dataPtr->initialized)
   {
@@ -316,7 +317,7 @@ bool CameraSensor::Update(const common::Time &_now)
 //////////////////////////////////////////////////
 bool CameraSensorPrivate::SaveImage(const unsigned char *_data,
     unsigned int _width, unsigned int _height,
-    common::Image::PixelFormatType _format)
+    ignition::common::Image::PixelFormatType _format)
 {
   // Attempt to create the directory if it doesn't exist
   if (!ignition::common::isDirectory(this->saveImagePath))
