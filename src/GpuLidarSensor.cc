@@ -160,7 +160,7 @@ bool GpuLidarSensor::CreateLidar()
 }
 
 //////////////////////////////////////////////////
-bool GpuLidarSensor::Update(const common::Time &_now)
+bool GpuLidarSensor::Update(const ignition::common::Time &_now)
 {
   if (!this->initialized)
   {

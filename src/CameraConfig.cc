@@ -17,6 +17,7 @@
 
 #include <ignition/sensors/CameraConfig.hh>
 #include <ignition/common/Image.hh>
+#include <ignition/math/Helpers.hh>
 
 #include <random>
 #include <sstream>
@@ -48,11 +49,11 @@ class ignition::sensors::CameraConfigPrivate
   /// \brief Horizontal field of view in radians
   public: double hfov = 1.05;
 
-  /// \brief near clip plane distance in meters
-  public: double near = 0.1;
+  /// \brief near_ clip plane distance in meters
+  public: double near_ = 0.1;
 
-  /// \brief far clip plane distance in meters
-  public: double far = 100.0;
+  /// \brief far_ clip plane distance in meters
+  public: double far_ = 100.0;
 
   /// \brief format used for pixel data in output images
   public: ignition::common::Image::PixelFormatType format =
@@ -201,7 +202,7 @@ std::size_t CameraConfig::Height() const
 //////////////////////////////////////////////////
 bool CameraConfig::SetHorizontalFOV(double _hfov)
 {
-  if (_hfov <= 0 || _hfov > M_PI / 2.0)
+  if (_hfov <= 0 || _hfov > IGN_PI / 2.0)
     return false;
 
   this->dataPtr->hfov = _hfov;
@@ -220,21 +221,21 @@ bool CameraConfig::SetClip(double _near, double _far)
   if (_near <= 0 || _far <= 0 || _far <= _near)
     return false;
 
-  this->dataPtr->near = _near;
-  this->dataPtr->far = _far;
+  this->dataPtr->near_ = _near;
+  this->dataPtr->far_ = _far;
   return true;
 }
 
 //////////////////////////////////////////////////
 double CameraConfig::Near() const
 {
-  return this->dataPtr->near;
+  return this->dataPtr->near_;
 }
 
 //////////////////////////////////////////////////
 double CameraConfig::Far() const
 {
-  return this->dataPtr->far;
+  return this->dataPtr->far_;
 }
 
 //////////////////////////////////////////////////
@@ -284,8 +285,8 @@ sdf::ElementPtr CameraConfig::ToSDF()
     << ignition::common::PixelFormatNames[this->dataPtr->format] << "</format>"
     << "     </image>"
     << "     <clip>"
-    << "      <near>" << this->dataPtr->near << "</near>"
-    << "      <far>" << this->dataPtr->far << "</far>"
+    << "      <near>" << this->dataPtr->near_ << "</near>"
+    << "      <far>" << this->dataPtr->far_ << "</far>"
     << "     </clip>"
     << "    </camera>"
     << "   </sensor>"

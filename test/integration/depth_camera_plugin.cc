@@ -16,7 +16,6 @@
 */
 
 #include <gtest/gtest.h>
-
 #include <ignition/common/Filesystem.hh>
 #include <ignition/common/Event.hh>
 #include <ignition/sensors/Manager.hh>
@@ -75,8 +74,8 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
 
   int imgWidth = imagePtr->Get<int>("width");
   int imgHeight = imagePtr->Get<int>("height");
-  double far = clipPtr->Get<double>("far");
-  double near = clipPtr->Get<double>("near");
+  double far_ = clipPtr->Get<double>("far");
+  double near_ = clipPtr->Get<double>("near");
 
   double unitBoxSize = 1.0;
   ignition::math::Vector3d boxPosition(3.0, 0.0, 0.0);
@@ -133,8 +132,8 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
 
   EXPECT_EQ(depthSensor->ImageWidth(), static_cast<unsigned int>(imgWidth));
   EXPECT_EQ(depthSensor->ImageHeight(), static_cast<unsigned int>(imgHeight));
-  EXPECT_NEAR(depthSensor->FarClip(), far, DOUBLE_TOL);
-  EXPECT_NEAR(depthSensor->NearClip(), near, DOUBLE_TOL);
+  EXPECT_NEAR(depthSensor->FarClip(), far_, DOUBLE_TOL);
+  EXPECT_NEAR(depthSensor->NearClip(), near_, DOUBLE_TOL);
 
   std::string topic =
     "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF";
@@ -169,7 +168,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   // Check that for a box really close it returns -inf
   root->RemoveChild(box);
   ignition::math::Vector3d boxPositionNear(
-      unitBoxSize * 0.5 + near * 0.5, 0.0, 0.0);
+      unitBoxSize * 0.5 + near_ * 0.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionNear);
   root->AddChild(box);
   mgr.RunOnce(ignition::common::Time::Zero, true);
@@ -178,7 +177,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   // Check that for a box really far it returns inf
   root->RemoveChild(box);
   ignition::math::Vector3d boxPositionFar(
-      unitBoxSize * 0.5 + far * 1.5, 0.0, 0.0);
+      unitBoxSize * 0.5 + far_ * 1.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionFar);
   root->AddChild(box);
   mgr.RunOnce(ignition::common::Time::Zero, true);

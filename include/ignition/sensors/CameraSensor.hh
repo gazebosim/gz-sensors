@@ -45,6 +45,16 @@
 
 #include <ignition/transport.hh>
 
+#ifndef _WIN32
+#  define CameraSensor_EXPORTS_API
+#else
+#  if (defined(CameraSensor_EXPORTS))
+#    define CameraSensor_EXPORTS_API __declspec(dllexport)
+#  else
+#    define CameraSensor_EXPORTS_API __declspec(dllimport)
+#  endif
+#endif
+
 namespace ignition
 {
   namespace sensors
@@ -62,7 +72,7 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-    class IGNITION_SENSORS_VISIBLE CameraSensor : public Sensor
+    class CameraSensor_EXPORTS_API CameraSensor : public Sensor
     {
       /// \brief constructor
       public: CameraSensor();
@@ -109,14 +119,14 @@ namespace ignition
       /// \return height of the image
       public: virtual unsigned int ImageHeight() const;
 
-     /// \brief Create a camera in a scene
+      /// \brief Create a camera in a scene
       /// \return True on success.
       private: bool CreateCamera();
 
       /// \brief Callback that is triggered when the scene changes on
       /// the Manager.
       /// \param[in] _scene Pointer to the new scene.
-      private: void OnSceneChange(ignition::rendering::ScenePtr _scene);
+      private: void OnSceneChange(ignition::rendering::ScenePtr /*_scene*/);
 
       /// \brief Data pointer for private data
       /// \internal

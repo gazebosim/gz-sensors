@@ -199,14 +199,14 @@ ignition::common::ConnectionPtr Lidar::ConnectNewLidarFrame(
 }
 
 //////////////////////////////////////////////////
-bool Lidar::Update(const common::Time &/*_now*/)
+bool Lidar::Update(const ignition::common::Time &/*_now*/)
 {
   ignerr << "No lidar data being updated.\n";
   return false;
 }
 
 //////////////////////////////////////////////////
-bool Lidar::PublishLidarScan(const common::Time &_now)
+bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
 {
   if (!this->laserBuffer)
     return false;
