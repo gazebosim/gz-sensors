@@ -24,6 +24,6 @@ if (DRI_TESTS)
       ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-camera
       ${PROJECT_LIBRARY_TARGET_NAME}-lidar
-      ${PROJECT_LIBRARY_TARGET_NAME}-gpu_ray
+      ${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar
   )
 endif()
