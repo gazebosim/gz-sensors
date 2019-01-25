@@ -214,7 +214,7 @@ Refer to the following table for information about important directories and fil
 ├── test
 │    ├── integration          Integration tests.
 │    ├── performance          Performance tests.
-│    ├── regression           Regression tests.
+│    └── regression           Regression tests.
 ├── tutorials                 Tutorials, written in markdown.
 ├── Changelog.md              Changelog.
 ├── CMakeLists.txt            CMake build script.
