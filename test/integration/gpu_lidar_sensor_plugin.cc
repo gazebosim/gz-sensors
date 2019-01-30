@@ -20,12 +20,14 @@
 #include <ignition/common/Console.hh>
 #include <ignition/common/Filesystem.hh>
 #include <ignition/common/Event.hh>
+#include <ignition/common/Time.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/GpuLidarSensor.hh>
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Helpers.hh>
 #include <ignition/msgs.hh>
+#include <ignition/transport/Node.hh>
 #include <ignition/rendering.hh>
 #include <sdf/sdf.hh>
 
@@ -97,12 +99,19 @@ sdf::ElementPtr GpuLidarToSDF(const std::string &name,
 }
 
 int g_laserCounter = 0;
+std::vector<ignition::msgs::LaserScan> laserMsgs;
 
 void OnNewLidarFrame(const float * /*_scan*/, unsigned int /*_width*/,
     unsigned int /*_height*/, unsigned int /*_channels*/,
     const std::string &/*_format*/)
 {
   g_laserCounter++;
+}
+
+/////////////////////////////////////////////////
+void laserCb(const ignition::msgs::LaserScan &_msg)
+{
+  laserMsgs.push_back(_msg);
 }
 
 class GpuLidarSensorTest: public testing::Test,
@@ -303,8 +312,14 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
 
+  // subscribe to altimeter topic
+  ignition::transport::Node node;
+  node.Subscribe(topic, &::laserCb);
+
+  WaitForMessageTestHelper<ignition::msgs::LaserScan> helper(topic);
   // Update sensor
-  mgr.RunOnce(ignition::common::Time::Zero);
+  mgr.RunOnce(ignition::common::Time::Zero, true);
+  EXPECT_TRUE(helper.WaitForMessage()) << helper;
 
   int mid = horzSamples / 2;
   int last = (horzSamples - 1);
@@ -316,6 +331,21 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   EXPECT_DOUBLE_EQ(sensor->Range(0), ignition::math::INF_D);
   EXPECT_NEAR(sensor->Range(mid), expectedRangeAtMidPointBox1, LASER_TOL);
   EXPECT_DOUBLE_EQ(sensor->Range(last), ignition::math::INF_D);
+
+  // Make sure to wait to receive the message
+  ignition::common::Time waitTime = ignition::common::Time(0.01);
+  int i = 0;
+  while (laserMsgs.size() < 1 && i < 300)
+  {
+    ignition::common::Time::Sleep(waitTime);
+    i++;
+  }
+  EXPECT_LT(i, 300);
+
+  // Check we have the same values than using the sensors method
+  EXPECT_DOUBLE_EQ(laserMsgs.back().ranges(0), ignition::math::INF_D);
+  EXPECT_NEAR(laserMsgs.back().ranges(mid), expectedRangeAtMidPointBox1, LASER_TOL);
+  EXPECT_DOUBLE_EQ(laserMsgs.back().ranges(last), ignition::math::INF_D);
 
   // Clean up
   engine->DestroyScene(scene);
