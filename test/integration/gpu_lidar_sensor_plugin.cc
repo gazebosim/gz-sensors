@@ -344,7 +344,8 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
 
   // Check we have the same values than using the sensors method
   EXPECT_DOUBLE_EQ(laserMsgs.back().ranges(0), ignition::math::INF_D);
-  EXPECT_NEAR(laserMsgs.back().ranges(mid), expectedRangeAtMidPointBox1, LASER_TOL);
+  EXPECT_NEAR(laserMsgs.back().ranges(mid), expectedRangeAtMidPointBox1,
+      LASER_TOL);
   EXPECT_DOUBLE_EQ(laserMsgs.back().ranges(last), ignition::math::INF_D);
 
   // Clean up
