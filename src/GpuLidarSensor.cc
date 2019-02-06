@@ -182,8 +182,6 @@ bool GpuLidarSensor::Update(const ignition::common::Time &_now)
     this->laserBuffer = new float[len];
   }
 
-  this->dataPtr->gpuRays->SetWorldPosition(this->Pose().Pos());
-  this->dataPtr->gpuRays->SetWorldRotation(this->Pose().Rot());
   this->dataPtr->gpuRays->Update();
   this->dataPtr->gpuRays->Copy(this->laserBuffer);
 
