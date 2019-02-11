@@ -118,6 +118,9 @@ namespace ignition
       /// \brief Update the pose of the sensor
       public: void SetPose(const ignition::math::Pose3d &_pose);
 
+      /// \brief Set the parent of the sensor
+      public: void SetParent(const std::string &_parent);
+
       /// \brief Get name.
       /// \return Name of sensor.
       public: const std::string &Name() const;
@@ -125,6 +128,10 @@ namespace ignition
       /// \brief Get topic
       /// \return Topic sensor publishes data to
       public: const std::string &Topic() const;
+
+      /// \brief Get parent link of the sensor.
+      /// \return Parent link of sensor.
+      public: const std::string &Parent() const;
 
       /// \brief Get the sensor's ID.
       /// \return The sensor's ID.

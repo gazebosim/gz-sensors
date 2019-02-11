@@ -136,6 +136,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
 {
   // Create SDF describing a camera sensor
   const std::string name = "TestGpuLidar";
+  const std::string parent = "parent_link";
   const std::string topic = "/ignition/sensors/test/lidar";
   const double updateRate = 30;
   const int horzSamples = 640;
@@ -183,7 +184,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   // Create a GpuLidarSensor
   auto sensor = mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(
       lidarSDF);
-
+  sensor->SetParent(parent);
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
 
@@ -207,6 +208,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   EXPECT_EQ(sensor->RayCount(), horzSamples);
   EXPECT_EQ(sensor->RangeCount(), horzSamples);
 
+  EXPECT_EQ(sensor->Parent(), parent);
   EXPECT_EQ(sensor->VerticalRayCount(), vertSamples);
   EXPECT_EQ(sensor->VerticalRangeCount(), vertSamples);
   EXPECT_EQ(sensor->VerticalAngleMin(), vertMinAngle);
@@ -251,6 +253,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
 {
   // Create SDF describing a camera sensor
   const std::string name = "TestGpuLidar";
+  const std::string parent = "parent_link";
   const std::string topic = "/ignition/sensors/test/lidar";
   const double updateRate = 30;
   const int horzSamples = 320;
@@ -308,6 +311,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   // Create a GpuLidarSensor
   auto sensor = mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(
       lidarSDF);
+  sensor->SetParent(parent);
 
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
@@ -347,6 +351,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   EXPECT_NEAR(laserMsgs.back().ranges(mid), expectedRangeAtMidPointBox1,
       LASER_TOL);
   EXPECT_DOUBLE_EQ(laserMsgs.back().ranges(last), ignition::math::INF_D);
+  EXPECT_EQ(laserMsgs.back().frame(), parent);
 
   // Clean up
   engine->DestroyScene(scene);

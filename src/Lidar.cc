@@ -171,7 +171,6 @@ bool Lidar::Load(sdf::ElementPtr _sdf)
   this->dataPtr->laserMsg.set_angle_max(this->AngleMax().Radian());
   this->dataPtr->laserMsg.set_angle_step(this->AngleResolution());
   this->dataPtr->laserMsg.set_count(this->RangeCount());
-  // this->dataPtr->laserMsg.set_frame(this->Parent());
 
   this->dataPtr->laserMsg.set_vertical_angle_min(
       this->VerticalAngleMin().Radian());
@@ -219,6 +218,7 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
       _now.sec);
   this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_nsec(
       _now.nsec);
+  this->dataPtr->laserMsg.set_frame(this->Parent());
 
   std::lock_guard<std::mutex> lock(this->lidarMutex);
 
