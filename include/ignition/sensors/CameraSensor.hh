@@ -119,6 +119,10 @@ namespace ignition
       /// \return height of the image
       public: virtual unsigned int ImageHeight() const;
 
+      /// \brief Get pointer to rendering camera object.
+      /// \return Camera in Ignition Rendering.
+      public: rendering::CameraPtr RenderingCamera() const;
+
       /// \brief Create a camera in a scene
       /// \return True on success.
       private: bool CreateCamera();

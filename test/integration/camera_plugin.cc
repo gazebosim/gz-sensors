@@ -68,6 +68,8 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 
   auto *sensor = mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
   ASSERT_NE(sensor, nullptr);
+  ASSERT_NE(sensor->RenderingCamera(), nullptr);
+  EXPECT_NE(sensor->Id(), sensor->RenderingCamera()->Id());
 
   std::string topic = "/test/integration/CameraPlugin_imagesWithBuiltinSDF";
   WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
