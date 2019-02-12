@@ -171,7 +171,7 @@ const std::string &Sensor::Topic() const
 }
 
 //////////////////////////////////////////////////
-const std::string &Sensor::Parent() const
+std::string Sensor::Parent() const
 {
   return this->dataPtr->parent;
 }
