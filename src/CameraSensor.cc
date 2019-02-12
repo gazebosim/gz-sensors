@@ -19,7 +19,8 @@
 
 #include <ignition/sensors/CameraSensor.hh>
 
-using namespace ignition::sensors;
+using namespace ignition;
+using namespace sensors;
 
 /// \brief Private data for CameraSensor
 class ignition::sensors::CameraSensorPrivate
@@ -103,6 +104,7 @@ bool CameraSensor::CreateCamera()
   int height = imgElem->Get<int>("height");
 
   this->dataPtr->camera = this->dataPtr->scene->CreateCamera(this->Name());
+std::cout << this->dataPtr->camera->Id() << std::endl;
   this->dataPtr->camera->SetImageWidth(width);
   this->dataPtr->camera->SetImageHeight(height);
 
@@ -348,6 +350,12 @@ unsigned int CameraSensor::ImageWidth() const
 unsigned int CameraSensor::ImageHeight() const
 {
   return this->dataPtr->camera->ImageHeight();
+}
+
+//////////////////////////////////////////////////
+rendering::CameraPtr CameraSensor::RenderingCamera() const
+{
+  return this->dataPtr->camera;
 }
 
 IGN_COMMON_REGISTER_SINGLE_PLUGIN(
