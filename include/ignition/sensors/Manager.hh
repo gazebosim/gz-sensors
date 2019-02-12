@@ -151,14 +151,6 @@ namespace ignition
       /// \brief Adds colon delimited paths sensor plugins may be
       public: void AddPluginPaths(const std::string &_path);
 
-      /// \brief Get a sensor id by name
-      ///
-      /// The given name should follow the standard URI naming scheme.
-      /// \param[in] _name URI name of the sensor.
-      /// \return Pointer to the sensor, nullptr if the sensor could not be
-      /// found.
-      public: ignition::sensors::SensorId SensorId(const std::string &_name);
-
       /// \brief load a plugin and return a shared_ptr
       /// \param[in] _filename Sensor plugin file to load.
       /// \return Pointer to the new sensor, nullptr on error.

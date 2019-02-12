@@ -33,7 +33,6 @@ TEST(Manager, construct)
   ignition::sensors::Sensor *sensor = mgr.Sensor(0);
   EXPECT_EQ(sensor, nullptr);
 
-  EXPECT_EQ(mgr.SensorId("nonexistant_sensor"), ignition::sensors::NO_SENSOR);
   EXPECT_FALSE(mgr.Remove(ignition::sensors::NO_SENSOR));
 }
 

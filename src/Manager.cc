@@ -137,13 +137,6 @@ void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 }
 
 //////////////////////////////////////////////////
-ignition::sensors::SensorId Manager::SensorId(const std::string & /*_name*/)
-{
-  // \todo(nkoenig) find sensor id given sensor name
-  return NO_SENSOR;
-}
-
-//////////////////////////////////////////////////
 ignition::sensors::SensorId Manager::LoadSensorPlugin(
     const std::string &_filename, sdf::ElementPtr _sdf)
 {
