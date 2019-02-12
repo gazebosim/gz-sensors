@@ -104,7 +104,6 @@ bool CameraSensor::CreateCamera()
   int height = imgElem->Get<int>("height");
 
   this->dataPtr->camera = this->dataPtr->scene->CreateCamera(this->Name());
-std::cout << this->dataPtr->camera->Id() << std::endl;
   this->dataPtr->camera->SetImageWidth(width);
   this->dataPtr->camera->SetImageHeight(height);
 
