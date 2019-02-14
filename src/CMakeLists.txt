@@ -6,6 +6,7 @@ set (sources
   CameraConfig.cc
   Noise.cc
   GaussianNoiseModel.cc
+  SensorFactory.cc
   SensorTypes.cc
 )
 
@@ -68,3 +69,14 @@ target_link_libraries(${gpu_lidar_target}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
     ${lidar_target}
     )
+
+set(logical_camera_sources LogicalCameraSensor.cc)
+ign_add_component(logical_camera SOURCES ${logical_camera_sources} GET_TARGET_NAME logical_camera_target)
+target_compile_definitions(${logical_camera_target} PUBLIC LogicalCameraSensor_EXPORTS)
+target_link_libraries(${logical_camera_target}
+  PRIVATE
+    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+    )
+
+

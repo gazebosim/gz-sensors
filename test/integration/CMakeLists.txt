@@ -4,6 +4,7 @@ set(dri_tests
   camera_plugin.cc
   depth_camera_plugin.cc
   gpu_lidar_sensor_plugin.cc
+  logical_camera_plugin.cc
 )
 
 link_directories(${PROJECT_BINARY_DIR}/test)
@@ -24,6 +25,7 @@ if (DRI_TESTS)
       ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-camera
       ${PROJECT_LIBRARY_TARGET_NAME}-lidar
+      ${PROJECT_LIBRARY_TARGET_NAME}-logical_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar
   )
 endif()
