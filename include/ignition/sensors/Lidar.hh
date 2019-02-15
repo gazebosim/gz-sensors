@@ -84,6 +84,10 @@ namespace ignition
       /// \return True on success
       public: virtual bool Init() override;
 
+      /// \brief Initialize values in the sensor
+      /// \return True on success
+      public: void SetParent(const std::string &_parent);
+
       /// \brief Create Lidar sensor
       public: virtual bool CreateLidar();
 

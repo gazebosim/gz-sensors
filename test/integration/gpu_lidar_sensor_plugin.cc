@@ -346,14 +346,28 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   }
   EXPECT_LT(i, 300);
 
-  // Check we have the same values than using the sensors method
+  double angleRes = (sensor->AngleMax() - sensor->AngleMin()).Radian() /
+                    sensor->RayCount();
+
+  // Check we have the same values than using the sensors methods
   EXPECT_DOUBLE_EQ(laserMsgs.back().ranges(0), ignition::math::INF_D);
   EXPECT_NEAR(laserMsgs.back().ranges(mid), expectedRangeAtMidPointBox1,
       LASER_TOL);
   EXPECT_DOUBLE_EQ(laserMsgs.back().ranges(last), ignition::math::INF_D);
+
   EXPECT_EQ(laserMsgs.back().frame(), parent);
+  EXPECT_NEAR(laserMsgs.back().angle_min(), horzMinAngle, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().angle_max(), horzMaxAngle, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().count(), horzSamples, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().angle_step(), angleRes, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().vertical_angle_min(), vertMinAngle, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().vertical_angle_max(), vertMaxAngle, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().vertical_count(), vertSamples, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().range_min(), rangeMin, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().range_max(), rangeMax, 1e-4);
 
   // Clean up
+  //
   engine->DestroyScene(scene);
   ignition::rendering::unloadEngine(engine->Name());
 }
