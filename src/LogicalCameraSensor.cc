@@ -33,7 +33,7 @@ class ignition::sensors::LogicalCameraSensorPrivate
   /// \brief node to create publisher
   public: transport::Node node;
 
-  /// \brief publisher to publish images
+  /// \brief publisher to publish logical camera messages.
   public: transport::Node::Publisher pub;
 
   /// \brief true if Load() has been called and was successful

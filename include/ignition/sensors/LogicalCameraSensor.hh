@@ -94,7 +94,7 @@ namespace ignition
       /// \return Far distance.
       public: double Far() const;
 
-      /// \brief Set the models in currently in the world
+      /// \brief Set the models currently in the world
       /// \param[in] _models A map of model names to their world pose.
       public: void SetModelPoses(std::map<std::string, math::Pose3d> &_models);
 
