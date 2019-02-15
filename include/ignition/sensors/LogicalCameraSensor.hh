@@ -57,13 +57,11 @@ namespace ignition
     /// \brief forward declarations
     class LogicalCameraSensorPrivate;
 
-    /// \brief Camera Sensor Class
+    /// \brief Logical Camera Sensor Class
     ///
-    ///   This class creates images from an ignition rendering scene. The scene
-    ///   must be created in advance and given to Manager::Init().
-    ///   It offers both an ignition-transport interface and a direct C++ API
-    ///   to access the image data. The API works by setting a callback to be
-    ///   called with image data.
+    /// A logical camera reports locations of objects. This camera finds models
+    /// within the sensor's frustum and publishes information about the models
+    /// on the sensor's topic.
     class LogicalCameraSensor_EXPORTS_API LogicalCameraSensor : public Sensor
     {
       /// \brief constructor
