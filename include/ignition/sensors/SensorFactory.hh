@@ -22,6 +22,8 @@
 #include <type_traits>
 #include <sdf/sdf.hh>
 
+#include <ignition/common/Console.hh>
+
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
 
