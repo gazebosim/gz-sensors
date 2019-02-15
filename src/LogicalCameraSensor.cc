@@ -102,7 +102,7 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
 
   this->dataPtr->pub =
       this->dataPtr->node.Advertise<ignition::msgs::LogicalCameraImage>(
-          this->Topic());
+      this->Topic());
 
   if (!this->dataPtr->pub)
     return false;
