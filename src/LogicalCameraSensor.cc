@@ -113,7 +113,7 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
 
 //////////////////////////////////////////////////
 void LogicalCameraSensor::SetModelPoses(
-    std::map<std::string, math::Pose3d> &_models)
+    std::map<std::string, math::Pose3d> &&_models)
 {
   this->dataPtr->models = std::move(_models);
 }

@@ -96,7 +96,7 @@ namespace ignition
 
       /// \brief Set the models in currently in the world
       /// \param[in] _models A map of model names to their world pose.
-      public: void SetModelPoses(std::map<std::string, math::Pose3d> &_models);
+      public: void SetModelPoses(std::map<std::string, math::Pose3d> &&_models);
 
       /// \brief Get the horizontal field of view. The field of view is the
       /// angle between the frustum's vertex and the edges of the near or far

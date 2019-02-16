@@ -158,7 +158,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
 
   std::map<std::string, ignition::math::Pose3d> modelPoses;
   modelPoses[boxName] = boxPose;
-  sensor->SetModelPoses(modelPoses);
+  sensor->SetModelPoses(std::move(modelPoses));
 
   // update
   sensor->Update(ignition::common::Time::Zero);
@@ -175,7 +175,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   ignition::math::Pose3d boxPose2(ignition::math::Vector3d(8, 0, 0.5),
       ignition::math::Quaterniond::Identity);
   modelPoses[boxName] = boxPose2;
-  sensor->SetModelPoses(modelPoses);
+  sensor->SetModelPoses(std::move(modelPoses));
 
   // update
   sensor->Update(ignition::common::Time::Zero);
@@ -194,7 +194,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   ignition::math::Pose3d boxPose3(ignition::math::Vector3d(2, 0, 0.5),
       ignition::math::Quaterniond(0, 0, 1.57));
   modelPoses[boxName] = boxPose3;
-  sensor->SetModelPoses(modelPoses);
+  sensor->SetModelPoses(std::move(modelPoses));
 
   // update
   sensor->Update(ignition::common::Time::Zero);
