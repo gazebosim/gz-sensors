@@ -37,6 +37,9 @@ class ignition::sensors::SensorPrivate
   /// \brief name given to sensor when loaded
   public: std::string name;
 
+  /// \brief name given to the sensor parent link
+  public: std::string parent;
+
   /// \brief topic to send sensor data
   public: std::string topic;
 
@@ -165,6 +168,18 @@ const ignition::math::Pose3d &Sensor::Pose() const
 const std::string &Sensor::Topic() const
 {
   return this->dataPtr->topic;
+}
+
+//////////////////////////////////////////////////
+std::string Sensor::Parent() const
+{
+  return this->dataPtr->parent;
+}
+
+//////////////////////////////////////////////////
+void Sensor::SetParent(const std::string &_parent)
+{
+  this->dataPtr->parent = _parent;
 }
 
 //////////////////////////////////////////////////

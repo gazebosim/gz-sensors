@@ -153,6 +153,22 @@ bool Lidar::Load(sdf::ElementPtr _sdf)
   this->dataPtr->horzRangeCount = this->RangeCount();
   this->dataPtr->vertRangeCount = this->VerticalRangeCount();
 
+  // create message
+  this->dataPtr->laserMsg.set_count(this->RangeCount());
+  this->dataPtr->laserMsg.set_range_min(this->RangeMin());
+  this->dataPtr->laserMsg.set_range_max(this->RangeMax());
+  this->dataPtr->laserMsg.set_angle_min(this->AngleMin().Radian());
+  this->dataPtr->laserMsg.set_angle_max(this->AngleMax().Radian());
+  this->dataPtr->laserMsg.set_angle_step(this->AngleResolution());
+  this->dataPtr->laserMsg.set_vertical_angle_min(
+      this->VerticalAngleMin().Radian());
+  this->dataPtr->laserMsg.set_vertical_angle_max(
+      this->VerticalAngleMax().Radian());
+  this->dataPtr->laserMsg.set_vertical_angle_step(
+      this->VerticalAngleResolution());
+  this->dataPtr->laserMsg.set_vertical_count(
+      this->dataPtr->vertRangeCount);
+
   // Handle noise model settings.
   // if (rayElem->HasElement("noise"))
   // {
@@ -165,25 +181,6 @@ bool Lidar::Load(sdf::ElementPtr _sdf)
   //   this->world->EntityByName(this->ParentName());
   // GZ_ASSERT(this->dataPtr->parentEntity != nullptr,
   //     "Unable to get the parent entity.");
-
-  // create message
-  this->dataPtr->laserMsg.set_angle_min(this->AngleMin().Radian());
-  this->dataPtr->laserMsg.set_angle_max(this->AngleMax().Radian());
-  this->dataPtr->laserMsg.set_angle_step(this->AngleResolution());
-  this->dataPtr->laserMsg.set_count(this->RangeCount());
-  // this->dataPtr->laserMsg.set_frame(this->Parent());
-
-  this->dataPtr->laserMsg.set_vertical_angle_min(
-      this->VerticalAngleMin().Radian());
-  this->dataPtr->laserMsg.set_vertical_angle_max(
-      this->VerticalAngleMax().Radian());
-  this->dataPtr->laserMsg.set_vertical_angle_step(
-      this->VerticalAngleResolution());
-  this->dataPtr->laserMsg.set_vertical_count(
-      this->dataPtr->vertRangeCount);
-
-  this->dataPtr->laserMsg.set_range_min(this->dataPtr->rangeMin);
-  this->dataPtr->laserMsg.set_range_max(this->dataPtr->rangeMax);
 
   this->initialized = true;
   return true;
@@ -211,14 +208,14 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
   if (!this->laserBuffer)
     return false;
 
-  // Store the latest laser scans into laserMsg
-  // msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
-  //     this->Pose() + this->dataPtr->parentEntity->WorldPose());
-
   this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_sec(
       _now.sec);
   this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_nsec(
       _now.nsec);
+
+  // Store the latest laser scans into laserMsg
+  msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
+      this->Pose());
 
   std::lock_guard<std::mutex> lock(this->lidarMutex);
 
@@ -361,6 +358,13 @@ int Lidar::VerticalRangeCount() const
   }
   else
     return 1;
+}
+
+//////////////////////////////////////////////////
+void Lidar::SetParent(const std::string &_parent)
+{
+  Sensor::SetParent(_parent);
+  this->dataPtr->laserMsg.set_frame(this->Parent());
 }
 
 //////////////////////////////////////////////////

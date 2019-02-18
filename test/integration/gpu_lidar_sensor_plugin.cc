@@ -136,6 +136,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
 {
   // Create SDF describing a camera sensor
   const std::string name = "TestGpuLidar";
+  const std::string parent = "parent_link";
   const std::string topic = "/ignition/sensors/test/lidar";
   const double updateRate = 30;
   const int horzSamples = 640;
@@ -183,7 +184,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   // Create a GpuLidarSensor
   auto sensor = mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(
       lidarSDF);
-
+  sensor->SetParent(parent);
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
 
@@ -207,6 +208,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   EXPECT_EQ(sensor->RayCount(), horzSamples);
   EXPECT_EQ(sensor->RangeCount(), horzSamples);
 
+  EXPECT_EQ(sensor->Parent(), parent);
   EXPECT_EQ(sensor->VerticalRayCount(), vertSamples);
   EXPECT_EQ(sensor->VerticalRangeCount(), vertSamples);
   EXPECT_EQ(sensor->VerticalAngleMin(), vertMinAngle);
@@ -251,6 +253,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
 {
   // Create SDF describing a camera sensor
   const std::string name = "TestGpuLidar";
+  const std::string parent = "parent_link";
   const std::string topic = "/ignition/sensors/test/lidar";
   const double updateRate = 30;
   const int horzSamples = 320;
@@ -308,6 +311,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   // Create a GpuLidarSensor
   auto sensor = mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(
       lidarSDF);
+  sensor->SetParent(parent);
 
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
@@ -342,13 +346,28 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   }
   EXPECT_LT(i, 300);
 
-  // Check we have the same values than using the sensors method
+  double angleRes = (sensor->AngleMax() - sensor->AngleMin()).Radian() /
+                    sensor->RayCount();
+
+  // Check we have the same values than using the sensors methods
   EXPECT_DOUBLE_EQ(laserMsgs.back().ranges(0), ignition::math::INF_D);
   EXPECT_NEAR(laserMsgs.back().ranges(mid), expectedRangeAtMidPointBox1,
       LASER_TOL);
   EXPECT_DOUBLE_EQ(laserMsgs.back().ranges(last), ignition::math::INF_D);
 
+  EXPECT_EQ(laserMsgs.back().frame(), parent);
+  EXPECT_NEAR(laserMsgs.back().angle_min(), horzMinAngle, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().angle_max(), horzMaxAngle, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().count(), horzSamples, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().angle_step(), angleRes, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().vertical_angle_min(), vertMinAngle, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().vertical_angle_max(), vertMaxAngle, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().vertical_count(), vertSamples, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().range_min(), rangeMin, 1e-4);
+  EXPECT_NEAR(laserMsgs.back().range_max(), rangeMax, 1e-4);
+
   // Clean up
+  //
   engine->DestroyScene(scene);
   ignition::rendering::unloadEngine(engine->Name());
 }
