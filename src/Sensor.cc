@@ -183,18 +183,6 @@ void Sensor::SetParent(const std::string &_parent)
 }
 
 //////////////////////////////////////////////////
-std::string Sensor::Parent() const
-{
-  return this->dataPtr->parent;
-}
-
-//////////////////////////////////////////////////
-void Sensor::SetParent(const std::string &_parent)
-{
-  this->dataPtr->parent = _parent;
-}
-
-//////////////////////////////////////////////////
 void Sensor::SetPose(const ignition::math::Pose3d &_pose)
 {
   this->dataPtr->pose = _pose;

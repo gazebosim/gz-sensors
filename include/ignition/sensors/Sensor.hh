@@ -133,10 +133,6 @@ namespace ignition
       /// \return Parent link of sensor.
       public: std::string Parent() const;
 
-      /// \brief Get parent link of the sensor.
-      /// \return Parent link of sensor.
-      public: std::string Parent() const;
-
       /// \brief Get the sensor's ID.
       /// \return The sensor's ID.
       public: SensorId Id() const;
