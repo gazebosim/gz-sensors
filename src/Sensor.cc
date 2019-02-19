@@ -153,21 +153,33 @@ SensorId Sensor::Id() const
 }
 
 //////////////////////////////////////////////////
-const std::string &Sensor::Name() const
+std::string Sensor::Name() const
 {
   return this->dataPtr->name;
 }
 
 //////////////////////////////////////////////////
-const ignition::math::Pose3d &Sensor::Pose() const
+std::string Sensor::Topic() const
+{
+  return this->dataPtr->topic;
+}
+
+//////////////////////////////////////////////////
+ignition::math::Pose3d Sensor::Pose() const
 {
   return this->dataPtr->pose;
 }
 
 //////////////////////////////////////////////////
-const std::string &Sensor::Topic() const
+std::string Sensor::Parent() const
 {
-  return this->dataPtr->topic;
+  return this->dataPtr->parent;
+}
+
+//////////////////////////////////////////////////
+void Sensor::SetParent(const std::string &_parent)
+{
+  this->dataPtr->parent = _parent;
 }
 
 //////////////////////////////////////////////////
