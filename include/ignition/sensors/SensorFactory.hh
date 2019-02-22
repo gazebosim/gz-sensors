@@ -58,7 +58,7 @@ namespace ignition
     class IGNITION_SENSORS_VISIBLE SensorTypePlugin : public SensorPlugin
     {
       // Documentation inherited
-      public: T *New()
+      public: T *New() override
               {
                 return new T();
               };
