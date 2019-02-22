@@ -51,13 +51,14 @@ namespace ignition
     };
 
     /// \brief Templated class for instantiating sensors of the specified type
-    template<class T>
+    /// \tparam Type of sensor being instantiated.
+    template<class SensorType>
     class IGNITION_SENSORS_VISIBLE SensorTypePlugin : public SensorPlugin
     {
       // Documentation inherited
-      public: T *New() override
+      public: SensorType *New() override
               {
-                return new T();
+                return new SensorType();
               };
     };
 
