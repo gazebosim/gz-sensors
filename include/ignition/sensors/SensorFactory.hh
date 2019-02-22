@@ -23,6 +23,7 @@
 #include <sdf/sdf.hh>
 
 #include <ignition/common/Console.hh>
+#include <ignition/common/PluginMacros.hh>
 
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>

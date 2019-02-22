@@ -20,7 +20,6 @@
 #include <memory>
 #include <string>
 
-#include <ignition/common/PluginMacros.hh>
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/rendering/Scene.hh>
