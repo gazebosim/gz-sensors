@@ -182,9 +182,8 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   scene->SetAmbientLight(0.3, 0.3, 0.3);
 
   // Create a GpuLidarSensor
-  ignition::sensors::GpuLidarSensor *s =
+  ignition::sensors::GpuLidarSensor *sensor =
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSDF);
-  std::unique_ptr<ignition::sensors::GpuLidarSensor> sensor(s);
   sensor->SetParent(parent);
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
@@ -310,9 +309,8 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensor
-  ignition::sensors::GpuLidarSensor *s =
+  ignition::sensors::GpuLidarSensor *sensor =
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSDF);
-  std::unique_ptr<ignition::sensors::GpuLidarSensor> sensor(s);
   sensor->SetParent(parent);
 
   // Make sure the above dynamic cast worked.
@@ -440,14 +438,12 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensors
-  ignition::sensors::GpuLidarSensor *s1 =
+  ignition::sensors::GpuLidarSensor *sensor1 =
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSDF1);
-  std::unique_ptr<ignition::sensors::GpuLidarSensor> sensor1(s1);
 
   // Create second GpuLidarSensor
-  ignition::sensors::GpuLidarSensor *s2 =
+  ignition::sensors::GpuLidarSensor *sensor2 =
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSDF2);
-  std::unique_ptr<ignition::sensors::GpuLidarSensor> sensor2(s2);
 
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor1 != nullptr);
@@ -587,9 +583,8 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensor
-  ignition::sensors::GpuLidarSensor *s =
+  ignition::sensors::GpuLidarSensor *sensor =
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSDF);
-  std::unique_ptr<ignition::sensors::GpuLidarSensor> sensor(s);
 
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);

@@ -100,10 +100,9 @@ TEST_F(LogicalCameraSensorTest, CreateLogicalCamera)
   // create the sensor using sensor factory
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
-  ignition::sensors::LogicalCameraSensor *s =
+  std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor =
       sf.CreateSensor<ignition::sensors::LogicalCameraSensor>(logicalCameraSDF);
-  EXPECT_TRUE(s != nullptr);
-  std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor(s);
+  EXPECT_TRUE(sensor != nullptr);
 
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(topic, sensor->Topic());
@@ -140,13 +139,13 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
-  ignition::sensors::Sensor *s = sf.CreateSensor(logicalCameraSDF);
-  ignition::sensors::LogicalCameraSensor *logicalSensor =
-      dynamic_cast<ignition::sensors::LogicalCameraSensor *>(s);
+  std::unique_ptr<ignition::sensors::Sensor> s =
+      sf.CreateSensor(logicalCameraSDF);
+  std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor(
+      dynamic_cast<ignition::sensors::LogicalCameraSensor *>(s.release()));
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(logicalSensor != nullptr);
-  std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor(logicalSensor);
+  EXPECT_TRUE(sensor != nullptr);
 
   // verify initial image
   auto img = sensor->Image();

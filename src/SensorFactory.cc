@@ -94,8 +94,9 @@ std::shared_ptr<SensorPlugin> SensorFactory::LoadSensorPlugin(
 }
 
 /////////////////////////////////////////////////
-Sensor *SensorFactory::CreateSensor(sdf::ElementPtr _sdf)
+std::unique_ptr<Sensor> SensorFactory::CreateSensor(sdf::ElementPtr _sdf)
 {
+  std::unique_ptr<Sensor> result;
   if (_sdf)
   {
     if (_sdf->GetName() == "sensor")
@@ -137,7 +138,8 @@ Sensor *SensorFactory::CreateSensor(sdf::ElementPtr _sdf)
         ignerr << "Sensor::Init failed for plugin [" << fullPath << "]\n";
         return nullptr;
       }
-      return sensor;
+      result.reset(sensor);
+      return result;
     }
     else
     {

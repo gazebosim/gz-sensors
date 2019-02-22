@@ -37,7 +37,7 @@ class ignition::sensors::ManagerPrivate
   public: ~ManagerPrivate();
 
   /// \brief Loaded sensors.
-  public: std::map<SensorId, Sensor *> sensors;
+  public: std::map<SensorId, std::unique_ptr<Sensor>> sensors;
 
   /// \brief Ignition Rendering manager
   public: ignition::rendering::ScenePtr renderingScene;
@@ -108,7 +108,7 @@ ignition::sensors::Sensor *Manager::Sensor(
     ignition::sensors::SensorId _id)
 {
   auto iter = this->dataPtr->sensors.find(_id);
-  return iter != this->dataPtr->sensors.end() ? iter->second : nullptr;
+  return iter != this->dataPtr->sensors.end() ? iter->second.get() : nullptr;
 }
 
 //////////////////////////////////////////////////
@@ -143,6 +143,6 @@ ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr _sdf)
   sensor->SetScene(this->dataPtr->renderingScene);
 
   SensorId id = sensor->Id();
-  this->dataPtr->sensors[id] = sensor;
+  this->dataPtr->sensors[id] = std::move(sensor);
   return id;
 }

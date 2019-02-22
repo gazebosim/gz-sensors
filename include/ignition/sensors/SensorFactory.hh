@@ -47,10 +47,7 @@ namespace ignition
 
       /// \brief Instantiate new sensor
       /// \return New sensor
-      public: virtual Sensor *New()
-              {
-                return nullptr;
-              }
+      public: virtual Sensor *New() = 0;
     };
 
     /// \brief Templated class for instantiating sensors of the specified type
@@ -81,21 +78,21 @@ namespace ignition
       ///   This creates sensors by looking at the given sdf element.
       ///   Sensors created with this API offer an ignition-transport interface.
       ///   If you need a direct C++ interface to the data, you must get the
-      ///   sensor pointer and cast to the correct type. The caller is
-      ///   responsible for the deletion of the sensor
+      ///   sensor pointer and cast to the correct type.
       ///
       /// \sa Sensor()
       /// \param[in] _sdf pointer to the sdf element
       /// \return A pointer to the created sensor. nullptr returned on
       /// error.
       public: template<typename T>
-              T *CreateSensor(sdf::ElementPtr _sdf)
+              std::unique_ptr<T> CreateSensor(sdf::ElementPtr _sdf)
               {
                 auto sensor = SensorFactory::CreateSensor(_sdf);
 
                 if (sensor)
                 {
-                  T *result = dynamic_cast<T *>(sensor);
+                  std::unique_ptr<T> result(
+                      dynamic_cast<T *>(sensor.release()));
 
                   if (!result)
                     ignerr << "SDF sensor type does not match template type\n";
@@ -113,14 +110,13 @@ namespace ignition
       ///   This creates sensors by looking at the given sdf element.
       ///   Sensors created with this API offer an ignition-transport interface.
       ///   If you need a direct C++ interface to the data, you must get the
-      ///   sensor pointer and cast to the correct type. The caller is
-      ///   responsible for the deletion of the sensor.
+      ///   sensor pointer and cast to the correct type.
       ///
       /// \sa Sensor()
       /// \param[in] _sdf pointer to the sdf element
       /// \return A sensor id that refers to the created sensor. Null is
       /// is returned on error.
-      public: Sensor *CreateSensor(sdf::ElementPtr _sdf);
+      public: std::unique_ptr<Sensor> CreateSensor(sdf::ElementPtr _sdf);
 
 
       /// \brief Add additional path to search for sensor plugins
