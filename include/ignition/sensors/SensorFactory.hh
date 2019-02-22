@@ -38,6 +38,31 @@ namespace ignition
     // forward declaration
     class SensorFactoryPrivate;
 
+    /// \brief Base sensor plugin interface
+    class IGNITION_SENSORS_VISIBLE SensorPlugin
+    {
+      /// \brief Allows using shorter APIS in common::PluginLoader
+      public: IGN_COMMON_SPECIALIZE_INTERFACE(ignition::sensors::SensorPlugin)
+
+      /// \brief Instantiate new sensor
+      /// \return New sensor
+      public: virtual Sensor *New()
+              {
+                return nullptr;
+              }
+    };
+
+    /// \brief Templated class for instantiating sensors of the specified type
+    template<class T>
+    class IGNITION_SENSORS_VISIBLE SensorTypePlugin : public SensorPlugin
+    {
+      // Documentation inherited
+      public: T *New()
+              {
+                return new T();
+              };
+    };
+
     /// \brief A factory class for creating sensors
     /// This class wll load a sensor plugin based on the given sensor type and
     ///  instantiates a sensor object
@@ -55,7 +80,8 @@ namespace ignition
       ///   This creates sensors by looking at the given sdf element.
       ///   Sensors created with this API offer an ignition-transport interface.
       ///   If you need a direct C++ interface to the data, you must get the
-      ///   sensor pointer and cast to the correct type.
+      ///   sensor pointer and cast to the correct type. The caller is
+      ///   responsible for the deletion of the sensor
       ///
       /// \sa Sensor()
       /// \param[in] _sdf pointer to the sdf element
@@ -86,7 +112,8 @@ namespace ignition
       ///   This creates sensors by looking at the given sdf element.
       ///   Sensors created with this API offer an ignition-transport interface.
       ///   If you need a direct C++ interface to the data, you must get the
-      ///   sensor pointer and cast to the correct type.
+      ///   sensor pointer and cast to the correct type. The caller is
+      ///   responsible for the deletion of the sensor.
       ///
       /// \sa Sensor()
       /// \param[in] _sdf pointer to the sdf element
@@ -102,12 +129,18 @@ namespace ignition
       /// \brief load a plugin and return a pointer
       /// \param[in] _filename Sensor plugin file to load.
       /// \return Pointer to the new sensor, nullptr on error.
-      private: Sensor *LoadSensorPlugin(
-          const std::string &_filename, sdf::ElementPtr _sdf);
+      private: std::shared_ptr<SensorPlugin> LoadSensorPlugin(
+          const std::string &_filename);
 
       /// \brief private data pointer
       private: std::unique_ptr<SensorFactoryPrivate> dataPtr;
     };
+
+    /// \brief Sensor registration macro
+    #define IGN_SENSORS_REGISTER_SENSOR(classname) \
+    IGN_COMMON_REGISTER_SINGLE_PLUGIN(\
+       ignition::sensors::SensorTypePlugin<classname>, \
+       ignition::sensors::SensorPlugin)
     }
   }
 }

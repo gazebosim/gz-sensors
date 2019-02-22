@@ -120,11 +120,12 @@ TEST(Lidar_TEST, CreateLaser)
     range_resolution, range_min, range_max, always_on, visualize);
 
   // Create a CameraSensor
-  auto sensor = mgr.CreateSensor<ignition::sensors::Lidar>(
+  ignition::sensors::Lidar *s = mgr.CreateSensor<ignition::sensors::Lidar>(
       lidarSDF);
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
+  EXPECT_TRUE(s != nullptr);
+  std::unique_ptr<ignition::sensors::Lidar> sensor(s);
 
   double angleRes = (sensor->AngleMax() - sensor->AngleMin()).Radian() /
                     sensor->RayCount();

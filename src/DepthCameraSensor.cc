@@ -17,7 +17,8 @@
 
 #include <ignition/math/Helpers.hh>
 
-#include <ignition/sensors/DepthCameraSensor.hh>
+#include "ignition/sensors/DepthCameraSensor.hh"
+#include "ignition/sensors/SensorFactory.hh"
 
 using namespace ignition::sensors;
 
@@ -415,6 +416,4 @@ double DepthCameraSensor::NearClip() const
   return this->dataPtr->near_;
 }
 
-IGN_COMMON_REGISTER_SINGLE_PLUGIN(
-    ignition::sensors::DepthCameraSensor,
-    ignition::sensors::Sensor)
+IGN_SENSORS_REGISTER_SENSOR(DepthCameraSensor)

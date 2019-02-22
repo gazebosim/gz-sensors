@@ -28,8 +28,8 @@ class ignition::sensors::SensorFactoryPrivate
   /// \brief Constructor
   public: SensorFactoryPrivate();
 
-  /// \brief A map of loaded sensors and their id's.
-  public: std::map<SensorId, std::shared_ptr<Sensor>> sensors;
+  /// \brief A map of loaded sensor plugins and their type.
+  public: std::map<std::string, std::shared_ptr<SensorPlugin>> sensorPlugins;
 
   /// \brief Stores paths to search for on file system
   public: ignition::common::SystemPaths systemPaths;
@@ -64,22 +64,22 @@ SensorFactory::~SensorFactory()
 }
 
 //////////////////////////////////////////////////
-Sensor *SensorFactory::LoadSensorPlugin(
-    const std::string &_filename, sdf::ElementPtr _sdf)
+std::shared_ptr<SensorPlugin> SensorFactory::LoadSensorPlugin(
+    const std::string &_filename)
 {
   std::string fullPath =
       this->dataPtr->systemPaths.FindSharedLibrary(_filename);
   if (fullPath.empty())
   {
     ignerr << "Unable to find sensor plugin path for [" << _filename << "]\n";
-    return nullptr;
+    return std::shared_ptr<SensorPlugin>();
   }
 
   auto pluginNames = this->dataPtr->pluginLoader.LoadLibrary(fullPath);
   if (pluginNames.empty())
   {
     ignerr << "Unable to load sensor plugin file for [" << fullPath << "]\n";
-    return nullptr;
+    return std::shared_ptr<SensorPlugin>();
   }
 
   // Assume the first plugin is the one we're interested in
@@ -88,28 +88,9 @@ Sensor *SensorFactory::LoadSensorPlugin(
   common::PluginPtr pluginPtr =
       this->dataPtr->pluginLoader.Instantiate(pluginName);
 
-  auto sensor = pluginPtr->QueryInterfaceSharedPtr<ignition::sensors::Sensor>();
-  if (!sensor)
-  {
-    ignerr << "Unable to instantiate sensor plugin for [" << fullPath << "]\n";
-    return nullptr;
-  }
-
-  if (!sensor->Load(_sdf))
-  {
-    ignerr << "Sensor::Load failed for plugin [" << fullPath << "]\n";
-    return nullptr;
-  }
-
-  if (!sensor->Init())
-  {
-    ignerr << "Sensor::Init failed for plugin [" << fullPath << "]\n";
-    return nullptr;
-  }
-
-  this->dataPtr->sensors[sensor->Id()] = sensor;
-
-  return sensor.get();
+  auto sensorPlugin = pluginPtr->QueryInterfaceSharedPtr<
+      ignition::sensors::SensorPlugin>();
+  return sensorPlugin;
 }
 
 /////////////////////////////////////////////////
@@ -119,9 +100,44 @@ Sensor *SensorFactory::CreateSensor(sdf::ElementPtr _sdf)
   {
     if (_sdf->GetName() == "sensor")
     {
+      std::shared_ptr<SensorPlugin> sensorPlugin;
       std::string type = _sdf->Get<std::string>("type");
-      return this->LoadSensorPlugin(
-          IGN_SENSORS_PLUGIN_NAME(type), _sdf);
+      std::string fullPath = IGN_SENSORS_PLUGIN_NAME(type);
+      auto it = this->dataPtr->sensorPlugins.find(type);
+      if (it != this->dataPtr->sensorPlugins.end())
+        sensorPlugin = it->second;
+      else
+      {
+        sensorPlugin = this->LoadSensorPlugin(fullPath);
+        if (!sensorPlugin)
+        {
+          ignerr << "Unable to instantiate sensor plugin for [" << fullPath
+                 << "]\n";
+          return nullptr;
+        }
+
+        this->dataPtr->sensorPlugins[type] = sensorPlugin;
+      }
+
+      auto sensor = sensorPlugin->New();
+      if (!sensor)
+      {
+        ignerr << "Unable to instantiate sensor for [" << fullPath << "]\n";
+        return nullptr;
+      }
+
+      if (!sensor->Load(_sdf))
+      {
+        ignerr << "Sensor::Load failed for plugin [" << fullPath << "]\n";
+        return nullptr;
+      }
+
+      if (!sensor->Init())
+      {
+        ignerr << "Sensor::Init failed for plugin [" << fullPath << "]\n";
+        return nullptr;
+      }
+      return sensor;
     }
     else
     {

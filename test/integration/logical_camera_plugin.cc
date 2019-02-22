@@ -100,9 +100,10 @@ TEST_F(LogicalCameraSensorTest, CreateLogicalCamera)
   // create the sensor using sensor factory
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
-  ignition::sensors::LogicalCameraSensor *sensor =
+  ignition::sensors::LogicalCameraSensor *s =
       sf.CreateSensor<ignition::sensors::LogicalCameraSensor>(logicalCameraSDF);
-  EXPECT_TRUE(sensor != nullptr);
+  EXPECT_TRUE(s != nullptr);
+  std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor(s);
 
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(topic, sensor->Topic());
@@ -140,11 +141,12 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   ignition::sensors::Sensor *s = sf.CreateSensor(logicalCameraSDF);
-  ignition::sensors::LogicalCameraSensor *sensor =
+  ignition::sensors::LogicalCameraSensor *logicalSensor =
       dynamic_cast<ignition::sensors::LogicalCameraSensor *>(s);
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
+  EXPECT_TRUE(logicalSensor != nullptr);
+  std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor(logicalSensor);
 
   // verify initial image
   auto img = sensor->Image();
@@ -172,10 +174,11 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   EXPECT_EQ(boxPoseCameraFrame, ignition::msgs::Convert(img.model(0).pose()));
 
   // 2. test box outside of frustum
+  std::map<std::string, ignition::math::Pose3d> modelPoses2;
   ignition::math::Pose3d boxPose2(ignition::math::Vector3d(8, 0, 0.5),
       ignition::math::Quaterniond::Identity);
-  modelPoses[boxName] = boxPose2;
-  sensor->SetModelPoses(std::move(modelPoses));
+  modelPoses2[boxName] = boxPose2;
+  sensor->SetModelPoses(std::move(modelPoses2));
 
   // update
   sensor->Update(ignition::common::Time::Zero);
@@ -187,14 +190,15 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
 
   // 3. test with different sensor pose
   // camera now on y, orientated to face box
+  std::map<std::string, ignition::math::Pose3d> modelPoses3;
   ignition::math::Pose3d sensorPose3(ignition::math::Vector3d(2, 2, 0.5),
       ignition::math::Quaterniond(0, 0, -1.57));
   sensor->SetPose(sensorPose3);
 
   ignition::math::Pose3d boxPose3(ignition::math::Vector3d(2, 0, 0.5),
       ignition::math::Quaterniond(0, 0, 1.57));
-  modelPoses[boxName] = boxPose3;
-  sensor->SetModelPoses(std::move(modelPoses));
+  modelPoses3[boxName] = boxPose3;
+  sensor->SetModelPoses(std::move(modelPoses3));
 
   // update
   sensor->Update(ignition::common::Time::Zero);
