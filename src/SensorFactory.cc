@@ -15,7 +15,8 @@
  *
 */
 
-#include <ignition/common/PluginLoader.hh>
+#include <ignition/plugin/Loader.hh>
+
 #include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>
 #include "ignition/sensors/config.hh"
@@ -35,7 +36,7 @@ class ignition::sensors::SensorFactoryPrivate
   public: ignition::common::SystemPaths systemPaths;
 
   /// \brief For loading plugins
-  public: ignition::common::PluginLoader pluginLoader;
+  public: ignition::plugin::Loader pluginLoader;
 };
 
 using namespace ignition;
@@ -75,7 +76,7 @@ std::shared_ptr<SensorPlugin> SensorFactory::LoadSensorPlugin(
     return std::shared_ptr<SensorPlugin>();
   }
 
-  auto pluginNames = this->dataPtr->pluginLoader.LoadLibrary(fullPath);
+  auto pluginNames = this->dataPtr->pluginLoader.LoadLib(fullPath);
   if (pluginNames.empty())
   {
     ignerr << "Unable to load sensor plugin file for [" << fullPath << "]\n";
@@ -85,7 +86,7 @@ std::shared_ptr<SensorPlugin> SensorFactory::LoadSensorPlugin(
   // Assume the first plugin is the one we're interested in
   std::string pluginName = *(pluginNames.begin());
 
-  common::PluginPtr pluginPtr =
+  auto pluginPtr =
       this->dataPtr->pluginLoader.Instantiate(pluginName);
 
   auto sensorPlugin = pluginPtr->QueryInterfaceSharedPtr<

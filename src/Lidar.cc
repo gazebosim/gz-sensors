@@ -16,9 +16,11 @@
 */
 
 
+#include <ignition/plugin/Register.hh>
 #include <ignition/common/Console.hh>
 #include "ignition/sensors/Lidar.hh"
-#include "ignition/sensors/SensorFactory.hh"
+#include "ignition/sensors/Register.hh"
+// #include "ignition/sensors/SensorFactory.hh"
 
 using namespace ignition::sensors;
 
@@ -458,3 +460,7 @@ bool Lidar::IsActive() const
 }
 
 IGN_SENSORS_REGISTER_SENSOR(Lidar)
+//IGNITION_ADD_PLUGIN(
+//   ignition::sensors::SensorTypePlugin<Lidar>,
+//   ignition::sensors::SensorPlugin)
+

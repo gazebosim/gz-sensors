@@ -27,7 +27,6 @@
 #include <ignition/common/Console.hh>
 #include <ignition/common/Event.hh>
 #include <ignition/common/Image.hh>
-#include <ignition/common/PluginMacros.hh>
 #include <ignition/common/Time.hh>
 
 #include <ignition/math/Angle.hh>

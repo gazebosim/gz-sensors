@@ -18,7 +18,7 @@
 #include <ignition/math/Helpers.hh>
 
 #include "ignition/sensors/CameraSensor.hh"
-#include "ignition/sensors/SensorFactory.hh"
+#include "ignition/sensors/Register.hh"
 
 using namespace ignition;
 using namespace sensors;

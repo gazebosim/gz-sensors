@@ -15,15 +15,13 @@
  *
 */
 
-#include "ignition/sensors/Manager.hh"
 #include <unordered_map>
-#include <ignition/common/PluginLoader.hh>
-#include <ignition/common/Plugin.hh>
 #include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>
 
 #include "ignition/sensors/config.hh"
 #include "ignition/sensors/Events.hh"
+#include "ignition/sensors/Manager.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
 using namespace ignition::sensors;

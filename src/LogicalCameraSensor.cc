@@ -22,8 +22,8 @@
 #include <ignition/math/Frustum.hh>
 #include <ignition/math/Helpers.hh>
 
-#include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/LogicalCameraSensor.hh"
+#include "ignition/sensors/Register.hh"
 
 using namespace ignition;
 using namespace sensors;

@@ -18,7 +18,7 @@
 
 #include <ignition/common/Console.hh>
 #include "ignition/sensors/GpuLidarSensor.hh"
-#include "ignition/sensors/SensorFactory.hh"
+#include "ignition/sensors/Register.hh"
 
 using namespace ignition::sensors;
 

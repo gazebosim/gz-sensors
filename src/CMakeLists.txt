@@ -25,7 +25,10 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
     ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
     ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    ${SDFormat_LIBRARIES})
+    ${SDFormat_LIBRARIES}
+  PRIVATE
+    ignition-plugin${IGN_PLUGIN_VER}::loader
+  )
 
 # Build the unit tests.
 ign_build_tests(TYPE UNIT SOURCES ${gtest_sources})
@@ -39,6 +42,7 @@ target_link_libraries(${camera_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+    ignition-plugin${IGN_PLUGIN_VER}::register
     )
 
 set(depth_camera_sources DepthCameraSensor.cc)
@@ -49,6 +53,7 @@ target_link_libraries(${depth_camera_target}
     ${camera_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+    ignition-plugin${IGN_PLUGIN_VER}::register
     )
 
 set(lidar_sources Lidar.cc)
@@ -58,6 +63,7 @@ target_link_libraries(${lidar_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+    ignition-plugin${IGN_PLUGIN_VER}::register
     )
 
 set(gpu_lidar_sources GpuLidarSensor.cc)
@@ -68,6 +74,7 @@ target_link_libraries(${gpu_lidar_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
     ${lidar_target}
+    ignition-plugin${IGN_PLUGIN_VER}::register
     )
 
 set(logical_camera_sources LogicalCameraSensor.cc)
@@ -77,6 +84,7 @@ target_link_libraries(${logical_camera_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+    ignition-plugin${IGN_PLUGIN_VER}::register
     )
 
 
