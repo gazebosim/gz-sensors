@@ -19,13 +19,14 @@
 
 #include <memory>
 #include <string>
+#include <sdf/sdf.hh>
 
 #include <ignition/sensors/Events.hh>
 #include <ignition/sensors/Lidar.hh>
 
 #include <ignition/rendering/GpuRays.hh>
 
-#include <sdf/sdf.hh>
+#include "ignition/sensors/gpu_lidar/Export.hh"
 
 #ifndef _WIN32
 #  define GpuLidarSensor_EXPORTS_API
@@ -56,7 +57,8 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-    class GpuLidarSensor_EXPORTS_API GpuLidarSensor : public Lidar
+//    class GpuLidarSensor_EXPORTS_API GpuLidarSensor : public Lidar
+    class IGNITION_SENSORS_GPU_LIDAR_VISIBLE GpuLidarSensor : public Lidar
     {
       /// \brief constructor
       public: GpuLidarSensor();
