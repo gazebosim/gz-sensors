@@ -36,7 +36,7 @@ class ignition::sensors::DepthCameraSensorPrivate
   /// that the path provided to the constructor does exist and creation
   /// of the path was not possible.
   /// \sa ImageSaver
-  public: bool SaveImage(const unsigned char *_data, unsigned int _width,
+  public: bool SaveImage(const float *_data, unsigned int _width,
     unsigned int _height, ignition::common::Image::PixelFormatType _format);
 
   /// \brief node to create publisher
@@ -68,6 +68,9 @@ class ignition::sensors::DepthCameraSensorPrivate
   public: ignition::common::EventT<
           void(const ignition::msgs::Image &)> imageEvent;
 
+  /// \brief Connection from depth camera with a new image
+  public: ignition::common::ConnectionPtr connection;
+
   /// \brief Connection to the Manager's scene change event.
   public: ignition::common::ConnectionPtr sceneChangeConnection;
 
@@ -75,7 +78,7 @@ class ignition::sensors::DepthCameraSensorPrivate
   public: std::mutex mutex;
 
   /// \brief True to save images
-  public: bool saveImage = false;
+  public: bool saveImage = true;
 
   /// \brief path directory to where images are saved
   public: std::string saveImagePath = "./";
@@ -99,9 +102,9 @@ void DepthCameraSensorPrivate::RemoveCamera(
 }
 
 //////////////////////////////////////////////////
-bool DepthCameraSensorPrivate::SaveImage(const unsigned char *_data,
+bool DepthCameraSensorPrivate::SaveImage(const float *_data,
     unsigned int _width, unsigned int _height,
-    ignition::common::Image::PixelFormatType _format)
+    ignition::common::Image::PixelFormatType /*_format*/)
 {
   // Attempt to create the directory if it doesn't exist
   if (!ignition::common::isDirectory(this->saveImagePath))
@@ -110,15 +113,43 @@ bool DepthCameraSensorPrivate::SaveImage(const unsigned char *_data,
       return false;
   }
 
+  if (_width == 0 || _height == 0)
+    return false;
+
+  ignition::common::Image localImage;
+
+  unsigned int depthSamples = _width * _height;
+  float f;
+  unsigned int depthBufferSize = depthSamples * sizeof(f) * 3;
+
+  unsigned char * imgDepthBuffer = new unsigned char[depthBufferSize];
+
+  float maxDepth = 0;
+  for (unsigned int i = 0; i < _height * _width; ++i)
+  {
+    if (_data[i] > maxDepth && !std::isinf(_data[i]))
+    {
+      maxDepth = _data[i];
+    }
+  }
+  double factor = 255 / maxDepth;
+  for (unsigned int j = 0; j < _height * _width; ++j)
+  {
+    unsigned char d = 255 - (_data[j] * factor);
+    imgDepthBuffer[j * 3] = d;
+    imgDepthBuffer[j * 3 + 1] = d;
+    imgDepthBuffer[j * 3 + 2] = d;
+  }
+
   std::string filename = this->saveImagePrefix +
                          std::to_string(this->saveImageCounter) + ".png";
   ++this->saveImageCounter;
 
-  ignition::common::Image localImage;
-  localImage.SetFromData(_data, _width, _height, _format);
-
+  localImage.SetFromData(imgDepthBuffer, _width, _height, common::Image::RGB_INT8);
   localImage.SavePNG(
       ignition::common::joinPaths(this->saveImagePath, filename));
+
+  delete[] imgDepthBuffer;
   return true;
 }
 
@@ -131,6 +162,7 @@ DepthCameraSensor::DepthCameraSensor()
 //////////////////////////////////////////////////
 DepthCameraSensor::~DepthCameraSensor()
 {
+  this->dataPtr->connection.reset();
   if (this->dataPtr->depthBuffer)
     delete [] this->dataPtr->depthBuffer;
 }
@@ -272,7 +304,54 @@ bool DepthCameraSensor::CreateCamera()
     this->dataPtr->saveImage = true;
   }
 
+  this->dataPtr->connection = this->dataPtr->depthCamera->ConnectNewDepthFrame(
+      std::bind(&DepthCameraSensor::OnNewDepthFrame, this,
+        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5));
+
   return true;
+}
+
+/////////////////////////////////////////////////
+void DepthCameraSensor::OnNewDepthFrame(const float *_scan,
+                    unsigned int _width, unsigned int _height,
+                    unsigned int /*_channels*/,
+                    const std::string &_format)
+{
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+
+  float near_ = this->NearClip();
+  float far_ = this->FarClip();
+  unsigned int depthSamples = _width * _height;
+  unsigned int depthBufferSize = depthSamples * sizeof(float);
+
+  ignition::common::Image::PixelFormatType format =
+    ignition::common::Image::ConvertPixelFormat(_format);
+
+  if (!this->dataPtr->depthBuffer)
+    this->dataPtr->depthBuffer = new float[depthSamples];
+
+  memcpy(this->dataPtr->depthBuffer, _scan, depthBufferSize);
+
+  for (unsigned int i = 0; i < depthSamples; ++i)
+  {
+    // Mask ranges outside of min/max to +/- inf, as per REP 117
+    if (this->dataPtr->depthBuffer[i] >= far_)
+    {
+      this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
+    }
+    else if (this->dataPtr->depthBuffer[i] <= near_)
+    {
+      this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
+    }
+  }
+
+  // Save image
+  if (this->dataPtr->saveImage)
+  {
+    this->dataPtr->SaveImage(_scan, _width, _height,
+        format);
+  }
 }
 
 /////////////////////////////////////////////////
@@ -318,19 +397,11 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
     return false;
   }
 
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-
-  // move the camera to the current pose
-  this->dataPtr->depthCamera->SetLocalPose(this->Pose());
-
   // generate sensor data
-  this->dataPtr->depthCamera->Capture(this->dataPtr->image);
+  this->dataPtr->depthCamera->Update();
 
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
-  unsigned char *data = this->dataPtr->image.Data<unsigned char>();
-  float near_ = this->NearClip();
-  float far_ = this->FarClip();
 
   ignition::common::Image::PixelFormatType format =
     ignition::common::Image::R_FLOAT32;
@@ -345,26 +416,7 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
   msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
 
-  unsigned int depthSamples = msg.width() * msg.height();
-  unsigned int depthBufferSize = depthSamples * sizeof(float);
-
-  if (!this->dataPtr->depthBuffer)
-    this->dataPtr->depthBuffer = new float[depthSamples];
-
-  memcpy(this->dataPtr->depthBuffer, data, depthBufferSize);
-
-  for (unsigned int i = 0; i < depthSamples; ++i)
-  {
-    // Mask ranges outside of min/max to +/- inf, as per REP 117
-    if (this->dataPtr->depthBuffer[i] >= far_)
-    {
-      this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
-    }
-    else if (this->dataPtr->depthBuffer[i] <= near_)
-    {
-      this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
-    }
-  }
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   msg.set_data(this->dataPtr->depthBuffer,
       this->dataPtr->depthCamera->ImageMemorySize());
 
@@ -379,12 +431,6 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
   catch(...)
   {
     ignerr << "Exception thrown in an image callback.\n";
-  }
-
-  // Save image
-  if (this->dataPtr->saveImage)
-  {
-    this->dataPtr->SaveImage(data, width, height, format);
   }
 
   return true;
