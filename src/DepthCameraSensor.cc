@@ -78,7 +78,7 @@ class ignition::sensors::DepthCameraSensorPrivate
   public: std::mutex mutex;
 
   /// \brief True to save images
-  public: bool saveImage = true;
+  public: bool saveImage = false;
 
   /// \brief path directory to where images are saved
   public: std::string saveImagePath = "./";
