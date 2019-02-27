@@ -36,6 +36,7 @@
 
 #include "ignition/sensors/logical_camera/Export.hh"
 #include "ignition/sensors/Sensor.hh"
+#include "ignition/sensors/SensorPlugin.hh"
 
 #ifndef _WIN32
 #  define LogicalCameraSensor_EXPORTS_API

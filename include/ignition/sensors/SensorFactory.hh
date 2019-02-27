@@ -28,6 +28,7 @@
 #include <ignition/sensors/Export.hh>
 
 #include "ignition/sensors/Sensor.hh"
+#include "ignition/sensors/SensorPlugin.hh"
 
 namespace ignition
 {
@@ -37,26 +38,6 @@ namespace ignition
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     // forward declaration
     class SensorFactoryPrivate;
-
-    /// \brief Base sensor plugin interface
-    class IGNITION_SENSORS_VISIBLE SensorPlugin
-    {
-      /// \brief Instantiate new sensor
-      /// \return New sensor
-      public: virtual Sensor *New() = 0;
-    };
-
-    /// \brief Templated class for instantiating sensors of the specified type
-    /// \tparam Type of sensor being instantiated.
-    template<class SensorType>
-    class IGNITION_SENSORS_VISIBLE SensorTypePlugin : public SensorPlugin
-    {
-      // Documentation inherited
-      public: SensorType *New() override
-              {
-                return new SensorType();
-              };
-    };
 
     /// \brief A factory class for creating sensors
     /// This class wll load a sensor plugin based on the given sensor type and
