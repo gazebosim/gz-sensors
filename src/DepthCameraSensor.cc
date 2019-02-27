@@ -57,8 +57,8 @@ class ignition::sensors::DepthCameraSensorPrivate
   /// \brief Depth data buffer.
   public: float *depthBuffer = nullptr;
 
-  /// \brief near_ distance.
-  public: float near_ = 0.0;
+  /// \brief Near clip distance.
+  public: float near = 0.0;
 
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
@@ -119,8 +119,7 @@ bool DepthCameraSensorPrivate::SaveImage(const float *_data,
   ignition::common::Image localImage;
 
   unsigned int depthSamples = _width * _height;
-  float f;
-  unsigned int depthBufferSize = depthSamples * sizeof(f) * 3;
+  unsigned int depthBufferSize = depthSamples * 3;
 
   unsigned char * imgDepthBuffer = new unsigned char[depthBufferSize];
 
@@ -145,7 +144,8 @@ bool DepthCameraSensorPrivate::SaveImage(const float *_data,
                          std::to_string(this->saveImageCounter) + ".png";
   ++this->saveImageCounter;
 
-  localImage.SetFromData(imgDepthBuffer, _width, _height, common::Image::RGB_INT8);
+  localImage.SetFromData(imgDepthBuffer, _width, _height,
+      common::Image::RGB_INT8);
   localImage.SavePNG(
       ignition::common::joinPaths(this->saveImagePath, filename));
 
@@ -233,25 +233,25 @@ bool DepthCameraSensor::CreateCamera()
   int width = imgElem->Get<int>("width");
   int height = imgElem->Get<int>("height");
 
-  sdf::ElementPtr clipElem = cameraElem->GetElement("clip");
 
-  double far_ = 100.0;
-  double near_ = 0.3;
-  if (clipElem)
+  double far = 100.0;
+  double near = 0.3;
+  if (cameraElem->HasElement("clip"))
   {
-    far_ = clipElem->Get<double>("far");
-    near_ = clipElem->Get<double>("near");
+    sdf::ElementPtr clipElem = cameraElem->GetElement("clip");
+    far = clipElem->Get<double>("far");
+    near = clipElem->Get<double>("near");
   }
 
   this->dataPtr->depthCamera = this->dataPtr->scene->CreateDepthCamera(
       this->Name());
   this->dataPtr->depthCamera->SetImageWidth(width);
   this->dataPtr->depthCamera->SetImageHeight(height);
-  this->dataPtr->depthCamera->SetFarClipPlane(far_);
+  this->dataPtr->depthCamera->SetFarClipPlane(far);
 
-  // Resolve near_ points in the sensor, if not is set in bank from the camera
-  // this->dataPtr->depthCamera->SetNearClipPlane(near);
-  this->dataPtr->near_ = near_;
+  // Near clip plane not set because we need to be able to detect occlusion
+  // from objects before near clip plane
+  this->dataPtr->near = near;
 
   // \todo(nkoeng) these parameters via sdf
   this->dataPtr->depthCamera->SetAntiAliasing(2);
@@ -320,8 +320,8 @@ void DepthCameraSensor::OnNewDepthFrame(const float *_scan,
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-  float near_ = this->NearClip();
-  float far_ = this->FarClip();
+  float near = this->NearClip();
+  float far = this->FarClip();
   unsigned int depthSamples = _width * _height;
   unsigned int depthBufferSize = depthSamples * sizeof(float);
 
@@ -336,11 +336,11 @@ void DepthCameraSensor::OnNewDepthFrame(const float *_scan,
   for (unsigned int i = 0; i < depthSamples; ++i)
   {
     // Mask ranges outside of min/max to +/- inf, as per REP 117
-    if (this->dataPtr->depthBuffer[i] >= far_)
+    if (this->dataPtr->depthBuffer[i] >= far)
     {
       this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
     }
-    else if (this->dataPtr->depthBuffer[i] <= near_)
+    else if (this->dataPtr->depthBuffer[i] <= near)
     {
       this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
     }
@@ -457,8 +457,7 @@ double DepthCameraSensor::FarClip() const
 //////////////////////////////////////////////////
 double DepthCameraSensor::NearClip() const
 {
-  // return this->dataPtr->depthCamera->NearClipPlane();
-  return this->dataPtr->near_;
+  return this->dataPtr->near;
 }
 
 IGN_COMMON_REGISTER_SINGLE_PLUGIN(

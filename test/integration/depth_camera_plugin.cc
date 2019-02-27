@@ -161,13 +161,20 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   double expectedRangeAtMidPoint = boxPosition.X() - unitBoxSize * 0.5;
 
   ignition::common::Time waitTime = ignition::common::Time(0.001);
-  int i = 0;
-  while (i < 300)
+  int counter = 0;
+  for (int sleep = 0; sleep < 300 && counter == 0; ++sleep)
   {
+    g_mutex.lock();
+    counter = g_depthCounter;
+    g_mutex.unlock();
     ignition::common::Time::Sleep(waitTime);
-    i++;
   }
   g_mutex.lock();
+  g_depthCounter = 0;
+  EXPECT_GT(counter, 0);
+  counter = 0;
+
+  EXPECT_NEAR(g_depthBuffer[mid], expectedRangeAtMidPoint, DEPTH_TOL);
   // Depth sensor should see box in the middle of the image
   EXPECT_NEAR(g_depthBuffer[mid], expectedRangeAtMidPoint, DEPTH_TOL);
 
@@ -186,13 +193,19 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   root->AddChild(box);
 
   mgr.RunOnce(ignition::common::Time::Zero, true);
-  i = 0;
-  while (i < 300)
+  for (int sleep = 0; sleep < 300 && counter == 0; ++sleep)
   {
+    g_mutex.lock();
+    counter = g_depthCounter;
+    g_mutex.unlock();
     ignition::common::Time::Sleep(waitTime);
-    i++;
   }
+
   g_mutex.lock();
+  g_depthCounter = 0;
+  EXPECT_GT(counter, 0);
+  counter = 0;
+
   EXPECT_DOUBLE_EQ(g_depthBuffer[mid], -ignition::math::INF_D);
   g_mutex.unlock();
 
@@ -204,13 +217,18 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   root->AddChild(box);
 
   mgr.RunOnce(ignition::common::Time::Zero, true);
-  i = 0;
-  while (i < 300)
+  for (int sleep = 0; sleep < 300 && counter == 0; ++sleep)
   {
+    g_mutex.lock();
+    counter = g_depthCounter;
+    g_mutex.unlock();
     ignition::common::Time::Sleep(waitTime);
-    i++;
   }
   g_mutex.lock();
+  g_depthCounter = 0;
+  EXPECT_GT(counter, 0);
+  counter = 0;
+
   EXPECT_DOUBLE_EQ(g_depthBuffer[mid], ignition::math::INF_D);
   g_mutex.unlock();
 
