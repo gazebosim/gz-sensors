@@ -17,7 +17,8 @@
 
 #include <ignition/math/Helpers.hh>
 
-#include <ignition/sensors/CameraSensor.hh>
+#include "ignition/sensors/CameraSensor.hh"
+#include "ignition/sensors/SensorFactory.hh"
 
 using namespace ignition;
 using namespace sensors;
@@ -357,6 +358,4 @@ rendering::CameraPtr CameraSensor::RenderingCamera() const
   return this->dataPtr->camera;
 }
 
-IGN_COMMON_REGISTER_SINGLE_PLUGIN(
-    ignition::sensors::CameraSensor,
-    ignition::sensors::Sensor)
+IGN_SENSORS_REGISTER_SENSOR(CameraSensor)

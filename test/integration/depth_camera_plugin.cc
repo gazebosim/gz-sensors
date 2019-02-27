@@ -130,8 +130,8 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   mgr.SetRenderingScene(scene);
   mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
-  auto *depthSensor = mgr.CreateSensor<ignition::sensors::DepthCameraSensor>(
-      sensorPtr);
+  ignition::sensors::DepthCameraSensor *depthSensor =
+      mgr.CreateSensor<ignition::sensors::DepthCameraSensor>(sensorPtr);
   ASSERT_NE(depthSensor, nullptr);
 
   EXPECT_EQ(depthSensor->ImageWidth(), static_cast<unsigned int>(imgWidth));

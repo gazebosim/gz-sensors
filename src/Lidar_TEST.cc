@@ -120,7 +120,7 @@ TEST(Lidar_TEST, CreateLaser)
     range_resolution, range_min, range_max, always_on, visualize);
 
   // Create a CameraSensor
-  auto sensor = mgr.CreateSensor<ignition::sensors::Lidar>(
+  ignition::sensors::Lidar *sensor = mgr.CreateSensor<ignition::sensors::Lidar>(
       lidarSDF);
 
   // Make sure the above dynamic cast worked.

@@ -20,7 +20,6 @@
 #include <memory>
 #include <string>
 
-#include <ignition/common/PluginMacros.hh>
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/rendering/Scene.hh>
@@ -41,7 +40,6 @@ namespace ignition
 
     /// \brief forward declarations
     class SensorPrivate;
-    class SensorPlugin;
 
     /// \brief a base sensor class
     ///
@@ -50,9 +48,6 @@ namespace ignition
     ///   sensors update at the right time.
     class IGNITION_SENSORS_VISIBLE Sensor
     {
-      /// \brief Allows using shorter APIS in common::PluginLoader
-      public: IGN_COMMON_SPECIALIZE_INTERFACE(ignition::sensors::Sensor)
-
       /// \brief constructor
       protected: Sensor();
 

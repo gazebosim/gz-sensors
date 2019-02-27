@@ -17,7 +17,8 @@
 
 
 #include <ignition/common/Console.hh>
-#include <ignition/sensors/Lidar.hh>
+#include "ignition/sensors/Lidar.hh"
+#include "ignition/sensors/SensorFactory.hh"
 
 using namespace ignition::sensors;
 
@@ -456,6 +457,4 @@ bool Lidar::IsActive() const
   return true;
 }
 
-IGN_COMMON_REGISTER_SINGLE_PLUGIN(
-    ignition::sensors::Lidar,
-    ignition::sensors::Sensor)
+IGN_SENSORS_REGISTER_SENSOR(Lidar)

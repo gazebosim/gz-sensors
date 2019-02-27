@@ -23,6 +23,7 @@
 #include <sdf/sdf.hh>
 
 #include <ignition/common/Console.hh>
+#include <ignition/common/PluginMacros.hh>
 
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
@@ -37,6 +38,29 @@ namespace ignition
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     // forward declaration
     class SensorFactoryPrivate;
+
+    /// \brief Base sensor plugin interface
+    class IGNITION_SENSORS_VISIBLE SensorPlugin
+    {
+      /// \brief Allows using shorter APIS in common::PluginLoader
+      public: IGN_COMMON_SPECIALIZE_INTERFACE(ignition::sensors::SensorPlugin)
+
+      /// \brief Instantiate new sensor
+      /// \return New sensor
+      public: virtual Sensor *New() = 0;
+    };
+
+    /// \brief Templated class for instantiating sensors of the specified type
+    /// \tparam Type of sensor being instantiated.
+    template<class SensorType>
+    class IGNITION_SENSORS_VISIBLE SensorTypePlugin : public SensorPlugin
+    {
+      // Documentation inherited
+      public: SensorType *New() override
+              {
+                return new SensorType();
+              };
+    };
 
     /// \brief A factory class for creating sensors
     /// This class wll load a sensor plugin based on the given sensor type and
@@ -62,13 +86,14 @@ namespace ignition
       /// \return A pointer to the created sensor. nullptr returned on
       /// error.
       public: template<typename T>
-              T *CreateSensor(sdf::ElementPtr _sdf)
+              std::unique_ptr<T> CreateSensor(sdf::ElementPtr _sdf)
               {
                 auto sensor = SensorFactory::CreateSensor(_sdf);
 
                 if (sensor)
                 {
-                  T *result = dynamic_cast<T *>(sensor);
+                  std::unique_ptr<T> result(
+                      dynamic_cast<T *>(sensor.release()));
 
                   if (!result)
                     ignerr << "SDF sensor type does not match template type\n";
@@ -92,7 +117,7 @@ namespace ignition
       /// \param[in] _sdf pointer to the sdf element
       /// \return A sensor id that refers to the created sensor. Null is
       /// is returned on error.
-      public: Sensor *CreateSensor(sdf::ElementPtr _sdf);
+      public: std::unique_ptr<Sensor> CreateSensor(sdf::ElementPtr _sdf);
 
 
       /// \brief Add additional path to search for sensor plugins
@@ -102,12 +127,18 @@ namespace ignition
       /// \brief load a plugin and return a pointer
       /// \param[in] _filename Sensor plugin file to load.
       /// \return Pointer to the new sensor, nullptr on error.
-      private: Sensor *LoadSensorPlugin(
-          const std::string &_filename, sdf::ElementPtr _sdf);
+      private: std::shared_ptr<SensorPlugin> LoadSensorPlugin(
+          const std::string &_filename);
 
       /// \brief private data pointer
       private: std::unique_ptr<SensorFactoryPrivate> dataPtr;
     };
+
+    /// \brief Sensor registration macro
+    #define IGN_SENSORS_REGISTER_SENSOR(classname) \
+    IGN_COMMON_REGISTER_SINGLE_PLUGIN(\
+       ignition::sensors::SensorTypePlugin<classname>, \
+       ignition::sensors::SensorPlugin)
     }
   }
 }

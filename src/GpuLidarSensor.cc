@@ -17,7 +17,8 @@
 
 
 #include <ignition/common/Console.hh>
-#include <ignition/sensors/GpuLidarSensor.hh>
+#include "ignition/sensors/GpuLidarSensor.hh"
+#include "ignition/sensors/SensorFactory.hh"
 
 using namespace ignition::sensors;
 
@@ -223,6 +224,4 @@ ignition::math::Angle GpuLidarSensor::VFOV() const
   return this->dataPtr->gpuRays->VFOV();
 }
 
-IGN_COMMON_REGISTER_SINGLE_PLUGIN(
-    ignition::sensors::GpuLidarSensor,
-    ignition::sensors::Sensor)
+IGN_SENSORS_REGISTER_SENSOR(GpuLidarSensor)

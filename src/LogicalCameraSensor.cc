@@ -22,6 +22,7 @@
 #include <ignition/math/Frustum.hh>
 #include <ignition/math/Helpers.hh>
 
+#include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/LogicalCameraSensor.hh"
 
 using namespace ignition;
@@ -186,6 +187,4 @@ msgs::LogicalCameraImage LogicalCameraSensor::Image() const
   return this->dataPtr->msg;
 }
 
-IGN_COMMON_REGISTER_SINGLE_PLUGIN(
-    ignition::sensors::LogicalCameraSensor,
-    ignition::sensors::Sensor)
+IGN_SENSORS_REGISTER_SENSOR(LogicalCameraSensor)
