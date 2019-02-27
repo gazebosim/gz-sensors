@@ -99,6 +99,17 @@ namespace ignition
       /// \return true if the update was successfull
       public: virtual ignition::rendering::DepthCameraPtr DepthCamera();
 
+      /// \brief Depth data callback used to get the data from the sensor
+      /// \param[in] _scan pointer to the data from the sensor
+      /// \param[in] _width width of the depth image
+      /// \param[in] _height height of the depth image
+      /// \param[in] _channel bytes used for the depth data
+      /// \param[in] _format string with the format
+      public: void OnNewDepthFrame(const float *_scan,
+                    unsigned int _width, unsigned int _height,
+                    unsigned int /*_channels*/,
+                    const std::string &/*_format*/);
+
       /// \brief Set a callback to be called when image frame data is
       /// generated.
       /// \param[in] _callback This callback will be called every time the
