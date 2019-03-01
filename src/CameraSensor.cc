@@ -271,7 +271,8 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
   unsigned int height = this->dataPtr->camera->ImageHeight();
   unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
-  ignition::common::Image::PixelFormatType format;
+  ignition::common::Image::PixelFormatType
+      format{common::Image::UNKNOWN_PIXEL_FORMAT};
   switch (this->dataPtr->camera->ImageFormat())
   {
     case ignition::rendering::PF_R8G8B8:
