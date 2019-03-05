@@ -103,7 +103,7 @@ ign_build_tests(TYPE UNIT SOURCES Lidar_TEST.cc LIB_DEPS ${lidar_target})
 #    ign_build_executables(
 #      PREFIX "my_"
 #      SOURCES abc.test.cc
-#      LIB_DEPS gtest gtest_main ${camera_target}
+#      LIB_DEPS ${camera_target} gtest gtest_main
 ##      INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/test/gtest/include ${ign_build_tests_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/build
 #      EXEC_LIST test_list)
 

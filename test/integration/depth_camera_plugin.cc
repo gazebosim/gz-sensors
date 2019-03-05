@@ -29,17 +29,20 @@
 #define DEPTH_TOL 1e-4
 #define DOUBLE_TOL 1e-6
 
+std::mutex g_mutex;
 unsigned int g_depthCounter = 0;
 float *g_depthBuffer = nullptr;
 
 void OnImage(const ignition::msgs::Image &_msg)
 {
+  g_mutex.lock();
   unsigned int depthSamples = _msg.width() * _msg.height();
   unsigned int depthBufferSize = depthSamples * sizeof(float);
   if (!g_depthBuffer)
     g_depthBuffer = new float[depthSamples];
   memcpy(g_depthBuffer, _msg.data().c_str(), depthBufferSize);
   g_depthCounter++;
+  g_mutex.unlock();
 }
 
 class DepthCameraSensorTest: public testing::Test,
@@ -81,7 +84,8 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   ignition::math::Vector3d boxPosition(3.0, 0.0, 0.0);
 
   // If ogre is not the engine, don't run the test
-  if (_renderEngine.compare("ogre") != 0)
+  if ((_renderEngine.compare("ogre") != 0) &&
+      (_renderEngine.compare("ogre2") != 0))
   {
     igndbg << "Engine '" << _renderEngine
               << "' doesn't support depth cameras" << std::endl;
@@ -145,9 +149,9 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
 
-  // Set a callback on the  camera sensor to get a depth camera frame
-  ignition::common::ConnectionPtr connection =
-    depthSensor->ConnectImageCallback(&OnImage);
+  // subscribe to the depth camera topic
+  ignition::transport::Node node;
+  node.Subscribe(topic, &OnImage);
 
   // wait for a few depth camera frames
   mgr.RunOnce(ignition::common::Time::Zero, true);
@@ -157,6 +161,21 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   int mid = midHeight * depthSensor->ImageWidth() + midWidth -1;
   double expectedRangeAtMidPoint = boxPosition.X() - unitBoxSize * 0.5;
 
+  ignition::common::Time waitTime = ignition::common::Time(0.001);
+  int counter = 0;
+  for (int sleep = 0; sleep < 300 && counter == 0; ++sleep)
+  {
+    g_mutex.lock();
+    counter = g_depthCounter;
+    g_mutex.unlock();
+    ignition::common::Time::Sleep(waitTime);
+  }
+  g_mutex.lock();
+  g_depthCounter = 0;
+  EXPECT_GT(counter, 0);
+  counter = 0;
+
+  EXPECT_NEAR(g_depthBuffer[mid], expectedRangeAtMidPoint, DEPTH_TOL);
   // Depth sensor should see box in the middle of the image
   EXPECT_NEAR(g_depthBuffer[mid], expectedRangeAtMidPoint, DEPTH_TOL);
 
@@ -165,6 +184,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_DOUBLE_EQ(g_depthBuffer[left], ignition::math::INF_D);
   int right = (midHeight+1) * depthSensor->ImageWidth() - 1;
   EXPECT_DOUBLE_EQ(g_depthBuffer[right], ignition::math::INF_D);
+  g_mutex.unlock();
 
   // Check that for a box really close it returns -inf
   root->RemoveChild(box);
@@ -172,8 +192,23 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
       unitBoxSize * 0.5 + near_ * 0.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionNear);
   root->AddChild(box);
+
   mgr.RunOnce(ignition::common::Time::Zero, true);
+  for (int sleep = 0; sleep < 300 && counter == 0; ++sleep)
+  {
+    g_mutex.lock();
+    counter = g_depthCounter;
+    g_mutex.unlock();
+    ignition::common::Time::Sleep(waitTime);
+  }
+
+  g_mutex.lock();
+  g_depthCounter = 0;
+  EXPECT_GT(counter, 0);
+  counter = 0;
+
   EXPECT_DOUBLE_EQ(g_depthBuffer[mid], -ignition::math::INF_D);
+  g_mutex.unlock();
 
   // Check that for a box really far it returns inf
   root->RemoveChild(box);
@@ -181,11 +216,24 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
       unitBoxSize * 0.5 + far_ * 1.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionFar);
   root->AddChild(box);
+
   mgr.RunOnce(ignition::common::Time::Zero, true);
+  for (int sleep = 0; sleep < 300 && counter == 0; ++sleep)
+  {
+    g_mutex.lock();
+    counter = g_depthCounter;
+    g_mutex.unlock();
+    ignition::common::Time::Sleep(waitTime);
+  }
+  g_mutex.lock();
+  g_depthCounter = 0;
+  EXPECT_GT(counter, 0);
+  counter = 0;
+
   EXPECT_DOUBLE_EQ(g_depthBuffer[mid], ignition::math::INF_D);
+  g_mutex.unlock();
 
   // Clean up
-  connection.reset();
   engine->DestroyScene(scene);
   ignition::rendering::unloadEngine(engine->Name());
 }
