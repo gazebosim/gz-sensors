@@ -22,7 +22,6 @@
 #include <string>
 #include <vector>
 
-#include <ignition/rendering/RenderTypes.hh>
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/SensorTypes.hh>
 #include <ignition/sensors/Export.hh>
@@ -101,12 +100,6 @@ namespace ignition
       /// sensor plugin.
       public: virtual void SetCustomNoiseCallback(
           std::function<double(double)> _cb);
-
-      /// \brief Set camera needed to create image noise. This is only needed
-      /// for image sensors, i.e. camera/multicamera/depth sensors, which use
-      /// shaders for more efficient noise generation.
-      /// \param[in] _camera Camera associated to an image sensor
-      public: virtual void SetCamera(rendering::CameraPtr _camera);
 
       /// \brief Output information about the noise model.
       /// \param[in] _out Output stream

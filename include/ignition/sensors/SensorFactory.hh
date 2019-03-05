@@ -39,6 +39,10 @@ namespace ignition
     // forward declaration
     class SensorFactoryPrivate;
 
+    /// \def Sensor
+    /// \brief Prototype for sensor factory functions
+    typedef Sensor *(*SensorFactoryFn) ();
+
     /// \brief A factory class for creating sensors
     /// This class wll load a sensor plugin based on the given sensor type and
     ///  instantiates a sensor object
@@ -96,16 +100,26 @@ namespace ignition
       /// is returned on error.
       public: std::unique_ptr<Sensor> CreateSensor(sdf::ElementPtr _sdf);
 
-
       /// \brief Add additional path to search for sensor plugins
       /// \param[in] _path Search path
       public: void AddPluginPaths(const std::string &_path);
 
+      /// \brief Register a sensor class (called by sensor registration function).
+      /// \param[in] _sensorType Name of sensor type to register.
+      /// \param[in] _factoryfn Function handle for registration.
+      public: static void RegisterSensor(const std::string &_sensorType,
+                                         //SensorFactoryFn _factoryfn);
+                                         SensorInterface *_interface);
+
       /// \brief load a plugin and return a pointer
       /// \param[in] _filename Sensor plugin file to load.
       /// \return Pointer to the new sensor, nullptr on error.
-      private: std::shared_ptr<SensorPlugin> LoadSensorPlugin(
+      private: std::shared_ptr<SensorInterface> LoadSensorPlugin(
           const std::string &_filename);
+
+      /// \brief A list of registered sensor types
+      // private: static std::map<std::string, SensorFactoryFn> sensorMap;
+      private: static std::map<std::string, SensorInterface *> sensorMap;
 
       /// \brief private data pointer
       private: std::unique_ptr<SensorFactoryPrivate> dataPtr;

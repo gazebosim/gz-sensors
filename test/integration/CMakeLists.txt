@@ -21,7 +21,6 @@ if (DRI_TESTS)
     SOURCES
       ${dri_tests}
     LIB_DEPS
-      ${IGNITION-TRANSPORT_LIBRARIES}
       ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-camera
       ${PROJECT_LIBRARY_TARGET_NAME}-lidar
@@ -29,3 +28,30 @@ if (DRI_TESTS)
       ${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar
   )
 endif()
+
+# ign_build_tests(TYPE INTEGRATION
+#   SOURCES
+#     camera_plugin.cc
+#   LIB_DEPS
+#      ${IGNITION-TRANSPORT_LIBRARIES}
+# #     ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
+# #     ${camera_target}
+#      ${PROJECT_LIBRARY_TARGET_NAME}-camera
+# )
+#
+# ign_build_tests(TYPE INTEGRATION
+#   SOURCES
+#     depth_camera_plugin.cc
+#   LIB_DEPS
+#      ${IGNITION-TRANSPORT_LIBRARIES}
+#      ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
+# )
+#
+# ign_build_tests(TYPE INTEGRATION
+#   SOURCES
+#     gpu_lidar_sensor_plugin.cc
+#   LIB_DEPS
+#      ${IGNITION-TRANSPORT_LIBRARIES}
+#      ${PROJECT_LIBRARY_TARGET_NAME}-lidar
+#      ${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar
+# )

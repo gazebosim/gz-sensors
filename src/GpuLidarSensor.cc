@@ -107,8 +107,8 @@ bool GpuLidarSensor::Load(sdf::ElementPtr _sdf)
   }
 
   this->dataPtr->sceneChangeConnection =
-    Events::ConnectSceneChangeCallback(std::bind(&GpuLidarSensor::SetScene,
-          this, std::placeholders::_1));
+      RenderingEvents::ConnectSceneChangeCallback(
+      std::bind(&GpuLidarSensor::SetScene, this, std::placeholders::_1));
 
   this->initialized = true;
 
@@ -224,4 +224,4 @@ ignition::math::Angle GpuLidarSensor::VFOV() const
   return this->dataPtr->gpuRays->VFOV();
 }
 
-IGN_SENSORS_REGISTER_SENSOR(GpuLidarSensor)
+IGN_SENSORS_REGISTER_STATIC_SENSOR("gpu_lidar", GpuLidarSensor)

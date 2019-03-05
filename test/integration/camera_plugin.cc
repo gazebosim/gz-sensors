@@ -63,12 +63,13 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 
   // do the test
   ignition::sensors::Manager mgr;
-  mgr.SetRenderingScene(scene);
   mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   ignition::sensors::CameraSensor *sensor =
       mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
   ASSERT_NE(sensor, nullptr);
+
+  sensor->SetScene(scene);
 
   ASSERT_NE(sensor->RenderingCamera(), nullptr);
   EXPECT_NE(sensor->Id(), sensor->RenderingCamera()->Id());

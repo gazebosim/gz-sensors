@@ -216,7 +216,8 @@ bool CameraSensor::Load(sdf::ElementPtr _sdf)
     this->CreateCamera();
   }
 
-  this->dataPtr->sceneChangeConnection = Events::ConnectSceneChangeCallback(
+  this->dataPtr->sceneChangeConnection =
+      RenderingEvents::ConnectSceneChangeCallback(
       std::bind(&CameraSensor::SetScene, this, std::placeholders::_1));
 
   this->dataPtr->initialized = true;
@@ -358,4 +359,4 @@ rendering::CameraPtr CameraSensor::RenderingCamera() const
   return this->dataPtr->camera;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(CameraSensor)
+IGN_SENSORS_REGISTER_STATIC_SENSOR("camera", CameraSensor)

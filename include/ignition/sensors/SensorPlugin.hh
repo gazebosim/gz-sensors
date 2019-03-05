@@ -28,26 +28,27 @@ namespace ignition
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
 
     /// \brief Base sensor plugin interface
-    class IGNITION_SENSORS_VISIBLE SensorPlugin
+    class IGNITION_SENSORS_VISIBLE SensorInterface
     {
       /// \brief Instantiate new sensor
       /// \return New sensor
-      public: virtual Sensor *New() = 0;
+      public: virtual Sensor *New() const = 0;
     };
 
     /// \brief Templated class for instantiating sensors of the specified type
     /// \tparam Type of sensor being instantiated.
-    template<class SensorType>
-    class IGNITION_SENSORS_VISIBLE SensorTypePlugin : public SensorPlugin
+    template<typename SensorType>
+    class IGNITION_SENSORS_VISIBLE SensorPlugin:
+      public SensorInterface
     {
       // Documentation inherited
-      public: Sensor *New() override
+      public: Sensor *New() const override
               {
                 return new SensorType();
               };
     };
+
     }
   }
 }
-
 #endif

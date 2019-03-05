@@ -20,7 +20,7 @@
 #include <ignition/common/Console.hh>
 
 #include "ignition/sensors/config.hh"
-#include "ignition/sensors/Events.hh"
+// #include "ignition/sensors/Events.hh"
 #include "ignition/sensors/Manager.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
@@ -36,9 +36,6 @@ class ignition::sensors::ManagerPrivate
 
   /// \brief Loaded sensors.
   public: std::map<SensorId, std::unique_ptr<Sensor>> sensors;
-
-  /// \brief Ignition Rendering manager
-  public: ignition::rendering::ScenePtr renderingScene;
 
   /// \brief Sensor factory for creating sensors from plugins;
   public: SensorFactory sensorFactory;
@@ -72,34 +69,34 @@ bool Manager::Init()
 }
 
 //////////////////////////////////////////////////
-bool Manager::Init(ignition::rendering::ScenePtr _rendering)
-{
-  if (!_rendering)
-  {
-    ignerr << "Null ScenePtr cannot initialize a sensor manager.\n";
-    return false;
-  }
-
-  bool success = this->Init();
-  if (success)
-  {
-    this->SetRenderingScene(_rendering);
-  }
-  return success;
-}
-
-//////////////////////////////////////////////////
-void Manager::SetRenderingScene(ignition::rendering::ScenePtr _rendering)
-{
-  this->dataPtr->renderingScene = _rendering;
-  Events::sceneEvent(this->dataPtr->renderingScene);
-}
+//bool Manager::Init(ignition::rendering::ScenePtr _rendering)
+//{
+//  if (!_rendering)
+//  {
+//    ignerr << "Null ScenePtr cannot initialize a sensor manager.\n";
+//    return false;
+//  }
+//
+//  bool success = this->Init();
+//  if (success)
+//  {
+//    this->SetRenderingScene(_rendering);
+//  }
+//  return success;
+//}
 
 //////////////////////////////////////////////////
-ignition::rendering::ScenePtr Manager::RenderingScene() const
-{
-  return this->dataPtr->renderingScene;
-}
+//void Manager::SetRenderingScene(ignition::rendering::ScenePtr _rendering)
+//{
+//  this->dataPtr->renderingScene = _rendering;
+//  Events::sceneEvent(this->dataPtr->renderingScene);
+//}
+
+//////////////////////////////////////////////////
+//ignition::rendering::ScenePtr Manager::RenderingScene() const
+//{
+//  return this->dataPtr->renderingScene;
+//}
 
 //////////////////////////////////////////////////
 ignition::sensors::Sensor *Manager::Sensor(
@@ -138,7 +135,7 @@ ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr _sdf)
     return NO_SENSOR;
 
   // Set the rendering scene
-  sensor->SetScene(this->dataPtr->renderingScene);
+  // sensor->SetScene(this->dataPtr->renderingScene);
 
   SensorId id = sensor->Id();
   this->dataPtr->sensors[id] = std::move(sensor);

@@ -41,9 +41,9 @@
 #include "ignition/sensors/camera/Export.hh"
 #include "ignition/sensors/config.hh"
 #include "ignition/sensors/Export.hh"
-#include "ignition/sensors/Events.hh"
 #include "ignition/sensors/Manager.hh"
-#include "ignition/sensors/Sensor.hh"
+#include "ignition/sensors/RenderingEvents.hh"
+#include "ignition/sensors/RenderingSensor.hh"
 
 
 
@@ -75,7 +75,7 @@ namespace ignition
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
 //    class CameraSensor_EXPORTS_API CameraSensor : public Sensor
-    class IGNITION_SENSORS_CAMERA_VISIBLE CameraSensor : public Sensor
+    class IGNITION_SENSORS_CAMERA_VISIBLE CameraSensor : public RenderingSensor
     {
       /// \brief constructor
       public: CameraSensor();

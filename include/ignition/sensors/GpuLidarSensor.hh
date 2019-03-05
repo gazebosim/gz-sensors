@@ -21,8 +21,8 @@
 #include <string>
 #include <sdf/sdf.hh>
 
-#include <ignition/sensors/Events.hh>
 #include <ignition/sensors/Lidar.hh>
+#include <ignition/sensors/RenderingEvents.hh>
 
 #include <ignition/rendering/GpuRays.hh>
 

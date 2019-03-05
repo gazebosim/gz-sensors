@@ -187,4 +187,4 @@ msgs::LogicalCameraImage LogicalCameraSensor::Image() const
   return this->dataPtr->msg;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(LogicalCameraSensor)
+IGN_SENSORS_REGISTER_STATIC_SENSOR("logical_camera", LogicalCameraSensor)

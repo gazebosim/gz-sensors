@@ -20,25 +20,33 @@
 
 #include <ignition/plugin/Register.hh>
 
-
-#include <ignition/sensors/config.hh>
-#include "ignition/sensors/SensorPlugin.hh"
 #include "ignition/sensors/SensorFactory.hh"
+#include "ignition/sensors/SensorPlugin.hh"
 
-/*namespace ignition
-{
-  namespace sensors
-  {
-    // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
-    }
-  }
-}
-*/
-/// \brief Sensor registration macro
-#define IGN_SENSORS_REGISTER_SENSOR(classname) \
+/// \brief Sensor plugin registration macro
+///
+/// Use this macro to register sensor as plugins that are to be dynamically
+// loaded
+#define IGN_SENSORS_REGISTER_SENSOR_PLUGIN(classname) \
 IGNITION_ADD_PLUGIN(\
-   ignition::sensors::IGNITION_SENSORS_VERSION_NAMESPACE::SensorTypePlugin<classname>, \
-   ignition::sensors::IGNITION_SENSORS_VERSION_NAMESPACE::SensorPlugin)
-
+   ignition::sensors::SensorPlugin<classname>, \
+   ignition::sensors::SensorInterface)
 #endif
+
+/// \brief Static sensor registration macro
+///
+/// Use this macro to register sensors with the sensor factory.
+#define IGN_SENSORS_REGISTER_STATIC_SENSOR(name, classname) \
+class classname##Factory : public ignition::sensors::SensorInterface { \
+public: \
+    classname##Factory() \
+    { \
+        ignition::sensors::SensorFactory::RegisterSensor(name, this); \
+    } \
+    Sensor *New() const override { \
+        return new classname(); \
+    } \
+}; \
+static classname##Factory global_##classname##Factory;
+
+

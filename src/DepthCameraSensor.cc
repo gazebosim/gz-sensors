@@ -173,7 +173,8 @@ bool DepthCameraSensor::Load(sdf::ElementPtr _sdf)
     this->CreateCamera();
   }
 
-  this->dataPtr->sceneChangeConnection = Events::ConnectSceneChangeCallback(
+  this->dataPtr->sceneChangeConnection =
+      RenderingEvents::ConnectSceneChangeCallback(
       std::bind(&DepthCameraSensor::SetScene, this, std::placeholders::_1));
 
   this->dataPtr->initialized = true;
@@ -416,4 +417,4 @@ double DepthCameraSensor::NearClip() const
   return this->dataPtr->near_;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(DepthCameraSensor)
+IGN_SENSORS_REGISTER_STATIC_SENSOR("depth_camera", DepthCameraSensor)

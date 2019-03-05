@@ -22,7 +22,6 @@
 
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
-#include <ignition/rendering/Scene.hh>
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
 #include <sdf/sdf.hh>
@@ -137,16 +136,9 @@ namespace ignition
       /// information for this sensor.
       public: sdf::ElementPtr SDF() const;
 
-      /// \brief Set the rendering scene.
-      ///
-      /// A sensor subclass should override this function if the subclass
-      /// needs a pointer to the scene.
-      /// \param[in] _scene Pointer to the scene
-      public: virtual void SetScene(ignition::rendering::ScenePtr _scene);
-
       /// \internal
       /// \brief Data pointer for private data
-      private: std::shared_ptr<SensorPrivate> dataPtr;
+      private: std::unique_ptr<SensorPrivate> dataPtr;
     };
     }
   }

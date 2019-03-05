@@ -459,8 +459,4 @@ bool Lidar::IsActive() const
   return true;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(Lidar)
-//IGNITION_ADD_PLUGIN(
-//   ignition::sensors::SensorTypePlugin<Lidar>,
-//   ignition::sensors::SensorPlugin)
-
+IGN_SENSORS_REGISTER_STATIC_SENSOR("lidar", Lidar)

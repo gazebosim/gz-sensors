@@ -20,7 +20,6 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/rendering/RenderTypes.hh>
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Noise.hh>
 #include <ignition/sensors/Export.hh>
@@ -70,51 +69,6 @@ namespace ignition
 
       /// \brief Private data pointer.
       private: GaussianNoiseModelPrivate *dataPtr = nullptr;
-    };
-
-    /// \class GaussianNoiseModel
-    /// \brief Gaussian noise class for image sensors
-    /// TODO: remove class empty definitions when implementing them in
-    /// src\GaussingNoiseModel.cc
-    class IGNITION_SENSORS_VISIBLE ImageGaussianNoiseModel :
-      public GaussianNoiseModel
-    {
-      /// \brief Constructor.
-      public: ImageGaussianNoiseModel()
-      { }
-
-      /// \brief Destructor.
-      public: virtual ~ImageGaussianNoiseModel()
-      { }
-
-      // Documentation inherited.
-      public: virtual void Load(sdf::ElementPtr _sdf)
-      {
-         GaussianNoiseModel::Load(_sdf);
-      }
-
-      // Documentation inherited.
-      public: virtual void Fini()
-      { }
-
-      // Documentation inherited.
-      public: virtual void SetCamera(rendering::CameraPtr /*_camera*/)
-      { }
-
-      /// Documentation inherited
-      public: virtual void Print(std::ostream &/*_out*/) const
-      { }
-
-      /*
-      TODO: implement compositor instance in ign-rendering
-      /// \brief Gaussian noise compositor.
-      public: Ogre::CompositorInstance *gaussianNoiseInstance;
-
-
-      /// \brief Gaussian noise compositor listener
-      public: std::shared_ptr<GaussianNoiseCompositorListener>
-        gaussianNoiseCompositorListener;
-      */
     };
     }
   }

@@ -24,7 +24,7 @@
 #include <sdf/sdf.hh>
 #include <ignition/common/Time.hh>
 #include <ignition/common/Console.hh>
-#include <ignition/rendering/Scene.hh>
+// #include <ignition/rendering/Scene.hh>
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Sensor.hh>
@@ -66,13 +66,13 @@ namespace ignition
 
       /// \brief Initialize the sensor library with rendering.
       /// \return True if successfully initialized, false if not
-      public: bool Init(ignition::rendering::ScenePtr _rendering);
+      // public: bool Init(ignition::rendering::ScenePtr _rendering);
 
       /// \brief Set or change the ignition-rendering instance used
-      public: void SetRenderingScene(ignition::rendering::ScenePtr _rendering);
+      // public: void SetRenderingScene(ignition::rendering::ScenePtr _rendering);
 
       /// \brief Get the rendering manager instance
-      public: ignition::rendering::ScenePtr RenderingScene() const;
+      // public: ignition::rendering::ScenePtr RenderingScene() const;
 
       /// \brief Create a sensor from SDF with a known sensor type.
       ///
