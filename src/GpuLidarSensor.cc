@@ -105,7 +105,7 @@ bool GpuLidarSensor::Load(sdf::ElementPtr _sdf)
 
   this->dataPtr->sceneChangeConnection =
       RenderingEvents::ConnectSceneChangeCallback(
-      std::bind(&GpuLidarSensor::SetScene,this, std::placeholders::_1));
+      std::bind(&GpuLidarSensor::SetScene, this, std::placeholders::_1));
 
   this->initialized = true;
 
