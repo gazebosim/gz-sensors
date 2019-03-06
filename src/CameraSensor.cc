@@ -50,9 +50,6 @@ class ignition::sensors::CameraSensorPrivate
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
 
-  /// \brief A scene the camera is capturing
-  public: ignition::rendering::ScenePtr scene;
-
   /// \brief Rendering camera
   public: ignition::rendering::CameraPtr camera;
 
@@ -104,7 +101,7 @@ bool CameraSensor::CreateCamera()
   int width = imgElem->Get<int>("width");
   int height = imgElem->Get<int>("height");
 
-  this->dataPtr->camera = this->dataPtr->scene->CreateCamera(this->Name());
+  this->dataPtr->camera = this->Scene()->CreateCamera(this->Name());
   this->dataPtr->camera->SetImageWidth(width);
   this->dataPtr->camera->SetImageHeight(height);
 
@@ -143,7 +140,7 @@ bool CameraSensor::CreateCamera()
 
   this->dataPtr->image = this->dataPtr->camera->CreateImage();
 
-  this->dataPtr->scene->RootVisual()->AddChild(this->dataPtr->camera);
+  this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);
 
   // Create the directory to store frames
   if (cameraElem->HasElement("save") &&
@@ -159,7 +156,7 @@ bool CameraSensor::CreateCamera()
 }
 
 //////////////////////////////////////////////////
-void CameraSensorPrivate::RemoveCamera(ignition::rendering::ScenePtr _scene)
+void CameraSensorPrivate::RemoveCamera(rendering::ScenePtr _scene)
 {
   if (_scene)
   {
@@ -211,12 +208,13 @@ bool CameraSensor::Load(sdf::ElementPtr _sdf)
   if (!this->dataPtr->pub)
     return false;
 
-  if (this->dataPtr->scene)
+  if (this->Scene())
   {
     this->CreateCamera();
   }
 
-  this->dataPtr->sceneChangeConnection = Events::ConnectSceneChangeCallback(
+  this->dataPtr->sceneChangeConnection =
+      RenderingEvents::ConnectSceneChangeCallback(
       std::bind(&CameraSensor::SetScene, this, std::placeholders::_1));
 
   this->dataPtr->initialized = true;
@@ -235,10 +233,10 @@ void CameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
-  if (this->dataPtr->scene != _scene)
+  if (this->Scene() != _scene)
   {
-    this->dataPtr->RemoveCamera(this->dataPtr->scene);
-    this->dataPtr->scene = _scene;
+    this->dataPtr->RemoveCamera(this->Scene());
+    RenderingSensor::SetScene(_scene);
     if (this->dataPtr->initialized)
       this->CreateCamera();
   }

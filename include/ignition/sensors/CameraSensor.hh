@@ -32,18 +32,15 @@
 
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Pose3.hh>
-
 #include <ignition/msgs.hh>
-
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/Events.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/Sensor.hh>
-
 #include <ignition/rendering/Camera.hh>
-
 #include <ignition/transport.hh>
+
+#include "ignition/sensors/config.hh"
+#include "ignition/sensors/Export.hh"
+#include "ignition/sensors/RenderingEvents.hh"
+#include "ignition/sensors/Manager.hh"
+#include "ignition/sensors/RenderingSensor.hh"
 
 #ifndef _WIN32
 #  define CameraSensor_EXPORTS_API
@@ -72,7 +69,7 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-    class CameraSensor_EXPORTS_API CameraSensor : public Sensor
+    class CameraSensor_EXPORTS_API CameraSensor : public RenderingSensor
     {
       /// \brief constructor
       public: CameraSensor();

@@ -2,7 +2,6 @@ set (sources
   Events.cc
   Manager.cc
   Sensor.cc
-  Lidar.cc
   CameraConfig.cc
   Noise.cc
   GaussianNoiseModel.cc
@@ -10,15 +9,12 @@ set (sources
   SensorTypes.cc
 )
 
-set (gtest_sources
-  Manager_TEST.cc
-  Lidar_TEST.cc
-  Noise_TEST.cc
-)
-
 # Create the library target.
 ign_create_core_library(SOURCES ${sources} CXX_STANDARD 14)
 
+# todo(anyone) dependency on rendering has been moved to its own component
+# and relevant functions are deprecated in ign-sensors 2. We can remove linking
+# against ign-rendering from the core lib in ign-sensors 3
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC
     ignition-math${IGN_MATH_VER}::ignition-math${IGN_MATH_VER}
@@ -27,8 +23,18 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
     ${SDFormat_LIBRARIES})
 
-# Build the unit tests.
-ign_build_tests(TYPE UNIT SOURCES ${gtest_sources})
+set(rendering_sources
+  Lidar.cc
+  RenderingSensor.cc
+  RenderingEvents.cc
+)
+
+ign_add_component(rendering SOURCES ${rendering_sources} GET_TARGET_NAME rendering_target)
+target_link_libraries(${rendering_target}
+  PUBLIC
+    ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
+    )
+
 
 set(camera_sources CameraSensor.cc)
 ign_add_component(camera SOURCES ${camera_sources} GET_TARGET_NAME camera_target)
@@ -36,6 +42,8 @@ ign_add_component(camera SOURCES ${camera_sources} GET_TARGET_NAME camera_target
 # make the code need to change with every major version
 target_compile_definitions(${camera_target} PUBLIC CameraSensor_EXPORTS)
 target_link_libraries(${camera_target}
+  PUBLIC
+    ${rendering_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
@@ -55,6 +63,8 @@ set(lidar_sources Lidar.cc)
 ign_add_component(lidar SOURCES ${lidar_sources} GET_TARGET_NAME lidar_target)
 target_compile_definitions(${lidar_target} PUBLIC Lidar_EXPORTS)
 target_link_libraries(${lidar_target}
+  PUBLIC
+    ${rendering_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
@@ -79,4 +89,13 @@ target_link_libraries(${logical_camera_target}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
     )
 
+set (gtest_sources
+  Manager_TEST.cc
+  Noise_TEST.cc
+)
 
+# Build the unit tests.
+ign_build_tests(TYPE UNIT SOURCES ${gtest_sources} LIB_DEPS ${rendering_target})
+
+# Build the unit tests that depend on components.
+ign_build_tests(TYPE UNIT SOURCES Lidar_TEST.cc LIB_DEPS ${lidar_target})

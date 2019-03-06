@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Open Source Robotics Foundation
+ * Copyright (C) 2019 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_EVENTS_HH_
-#define IGNITION_SENSORS_EVENTS_HH_
+#ifndef IGNITION_SENSORS_RENDERINGEVENTS_HH_
+#define IGNITION_SENSORS_RENDERINGEVENTS_HH_
 
 #include <ignition/common/Event.hh>
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/Export.hh>
 #include <ignition/rendering/Scene.hh>
+#include <ignition/sensors/config.hh>
+#include <ignition/sensors/rendering/Export.hh>
 
 namespace ignition
 {
@@ -30,7 +30,7 @@ namespace ignition
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     //
-    class IGNITION_SENSORS_VISIBLE Events
+    class IGNITION_SENSORS_RENDERING_VISIBLE RenderingEvents
     {
       /// \brief Set a callback to be called when the scene is changed.
       ///
@@ -39,9 +39,7 @@ namespace ignition
       /// \remark Do not block inside of the callback.
       /// \return A connection pointer that must remain in scope. When the
       /// connection pointer falls out of scope, the connection is broken.
-      /// \deprecated See RenderingEvents::ConnectSceneChangeCallback
-      public: static ignition::common::ConnectionPtr IGN_DEPRECATED(1)
-                  ConnectSceneChangeCallback(
+      public: static ignition::common::ConnectionPtr ConnectSceneChangeCallback(
                   std::function<void(const ignition::rendering::ScenePtr &)>
                   _callback);
 

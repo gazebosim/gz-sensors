@@ -20,12 +20,13 @@
 #include <memory>
 #include <string>
 
-#include <ignition/sensors/Events.hh>
-#include <ignition/sensors/Lidar.hh>
+#include <sdf/sdf.hh>
 
 #include <ignition/rendering/GpuRays.hh>
 
-#include <sdf/sdf.hh>
+#include "ignition/sensors/RenderingEvents.hh"
+#include "ignition/sensors/Lidar.hh"
+
 
 #ifndef _WIN32
 #  define GpuLidarSensor_EXPORTS_API

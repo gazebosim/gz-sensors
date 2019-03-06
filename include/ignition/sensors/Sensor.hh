@@ -142,11 +142,13 @@ namespace ignition
       /// A sensor subclass should override this function if the subclass
       /// needs a pointer to the scene.
       /// \param[in] _scene Pointer to the scene
-      public: virtual void SetScene(ignition::rendering::ScenePtr _scene);
+      /// \deprecated See RenderingSensor::SetScene
+      public: virtual void IGN_DEPRECATED(1) SetScene(
+          ignition::rendering::ScenePtr _scene);
 
       /// \internal
       /// \brief Data pointer for private data
-      private: std::shared_ptr<SensorPrivate> dataPtr;
+      private: std::unique_ptr<SensorPrivate> dataPtr;
     };
     }
   }

@@ -25,9 +25,6 @@ using namespace ignition::sensors;
 /// \brief Private data for the GpuLidar class
 class ignition::sensors::GpuLidarSensorPrivate
 {
-  /// \brief A scene the camera is capturing
-  public: ignition::rendering::ScenePtr scene;
-
   /// \brief Rendering camera
   public: ignition::rendering::GpuRaysPtr gpuRays;
 
@@ -44,7 +41,7 @@ GpuLidarSensor::GpuLidarSensor()
 //////////////////////////////////////////////////
 GpuLidarSensor::~GpuLidarSensor()
 {
-  this->RemoveGpuRays(this->dataPtr->scene);
+  this->RemoveGpuRays(this->Scene());
 
   this->dataPtr->sceneChangeConnection.reset();
 
@@ -60,10 +57,10 @@ void GpuLidarSensor::SetScene(ignition::rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->lidarMutex);
   // APIs make it possible for the scene pointer to change
-  if (this->dataPtr->scene != _scene)
+  if (this->Scene() != _scene)
   {
-    this->RemoveGpuRays(this->dataPtr->scene);
-    this->dataPtr->scene = _scene;
+    this->RemoveGpuRays(this->Scene());
+    RenderingSensor::SetScene(_scene);
 
     if (this->initialized)
       this->CreateLidar();
@@ -101,14 +98,14 @@ bool GpuLidarSensor::Load(sdf::ElementPtr _sdf)
     }
   }
 
-  if (this->dataPtr->scene)
+  if (this->Scene())
   {
     this->CreateLidar();
   }
 
   this->dataPtr->sceneChangeConnection =
-    Events::ConnectSceneChangeCallback(std::bind(&GpuLidarSensor::SetScene,
-          this, std::placeholders::_1));
+      RenderingEvents::ConnectSceneChangeCallback(
+      std::bind(&GpuLidarSensor::SetScene,this, std::placeholders::_1));
 
   this->initialized = true;
 
@@ -124,7 +121,7 @@ bool GpuLidarSensor::Init()
 //////////////////////////////////////////////////
 bool GpuLidarSensor::CreateLidar()
 {
-  this->dataPtr->gpuRays = this->dataPtr->scene->CreateGpuRays(
+  this->dataPtr->gpuRays = this->Scene()->CreateGpuRays(
       this->Name());
 
   if (!this->dataPtr->gpuRays)
@@ -154,7 +151,7 @@ bool GpuLidarSensor::CreateLidar()
   this->dataPtr->gpuRays->SetVerticalRayCount(
       this->VerticalRayCount());
 
-  this->dataPtr->scene->RootVisual()->AddChild(
+  this->Scene()->RootVisual()->AddChild(
       this->dataPtr->gpuRays);
 
   return true;
