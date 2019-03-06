@@ -60,7 +60,6 @@ int main()
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.SetRenderingScene(scene);
 
   // Create SDF describing a camera sensor
   const std::string name = "ExampleCamera";
@@ -84,6 +83,7 @@ int main()
     ignerr << "Unable to load camera sensor\n";
     return 1;
   }
+  cameraSensor->SetScene(scene);
 
   // Set a callback on the camera sensor to get a camera frame
   ignition::common::ConnectionPtr connection =
