@@ -19,15 +19,8 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Time.hh>
-
 #include <ignition/sensors/AltimeterSensor.hh>
 #include <ignition/sensors/SensorFactory.hh>
-
-#include <ignition/math/Helpers.hh>
-#include <ignition/msgs.hh>
-#include <ignition/transport/Node.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
 
