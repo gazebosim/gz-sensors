@@ -81,7 +81,7 @@ TEST_F(LogicalCameraSensorTest, CreateLogicalCamera)
 {
   // Create SDF describing a logical camera sensor
   const std::string name = "TestLogicalCamera";
-  const std::string topic = "/ignition/sensors/test/lidar";
+  const std::string topic = "/ignition/sensors/test/logical_camera";
   const double updateRate = 30;
   const double near = 0.55;
   const double far = 5;
@@ -119,7 +119,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
 {
   // Create SDF describing a logical camera sensor
   const std::string name = "TestLogicalCamera";
-  const std::string topic = "/ignition/sensors/test/lidar";
+  const std::string topic = "/ignition/sensors/test/logical_camera";
   const double updateRate = 30;
   const double near = 0.55;
   const double far = 5;

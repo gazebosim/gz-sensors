@@ -101,9 +101,12 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
   if (!Sensor::Load(_sdf))
     return false;
 
+  std::string topic = this->Topic();
+  if (topic.empty())
+    topic = "/logical_camera";
+
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::LogicalCameraImage>(
-      this->Topic());
+      this->dataPtr->node.Advertise<ignition::msgs::LogicalCameraImage>(topic);
 
   if (!this->dataPtr->pub)
     return false;
