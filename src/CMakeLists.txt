@@ -24,7 +24,6 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
     ${SDFormat_LIBRARIES})
 
 set(rendering_sources
-  Lidar.cc
   RenderingSensor.cc
   RenderingEvents.cc
 )
