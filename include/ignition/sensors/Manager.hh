@@ -41,10 +41,11 @@ namespace ignition
     /// \brief Loads and runs sensors
     ///
     ///   This class is responsible for loading and running sensors, and
-    ///   providing sensors with common environments to generat data from. For
-    ///   example, sensors that need information about the visible world would
-    ///   access the common igntion::rendering::ScenePtr. A user of this class
-    ///   is expected to popluate that scene and give it to the manager.
+    ///   providing sensors with common environments to generat data from.
+    ///
+    ///   For rendering sensors that need information about the visible world,
+    ///   the user of this class is expected to popluate that scene and give it
+    ///   to the sensors.
     ///
     ///   The primary interface through which to load a sensor is LoadSensor().
     ///   This takes an sdf element pointer that should be configured with
@@ -66,13 +67,19 @@ namespace ignition
 
       /// \brief Initialize the sensor library with rendering.
       /// \return True if successfully initialized, false if not
-      public: bool Init(ignition::rendering::ScenePtr _rendering);
+      /// \deprecated Call RenderingSensor::SetScene directly
+      public: bool IGN_DEPRECATED(1) Init(
+          ignition::rendering::ScenePtr _rendering);
 
       /// \brief Set or change the ignition-rendering instance used
-      public: void SetRenderingScene(ignition::rendering::ScenePtr _rendering);
+      /// \deprecated Call RenderingSensor::SetScene directly
+      public: void IGN_DEPRECATED(1) SetRenderingScene(
+          ignition::rendering::ScenePtr _rendering);
 
       /// \brief Get the rendering manager instance
-      public: ignition::rendering::ScenePtr RenderingScene() const;
+      /// \deprecated See RenderingSensor::Scene
+      public: ignition::rendering::ScenePtr IGN_DEPRECATED(1)
+          RenderingScene() const;
 
       /// \brief Create a sensor from SDF with a known sensor type.
       ///

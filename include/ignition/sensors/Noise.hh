@@ -106,7 +106,10 @@ namespace ignition
       /// for image sensors, i.e. camera/multicamera/depth sensors, which use
       /// shaders for more efficient noise generation.
       /// \param[in] _camera Camera associated to an image sensor
-      public: virtual void SetCamera(rendering::CameraPtr _camera);
+      /// \deprecated This will be provided in derived classes that support
+      /// adding noise to rendering sensors
+      public: virtual IGN_DEPRECATED(1) void SetCamera(
+          rendering::CameraPtr _camera);
 
       /// \brief Output information about the noise model.
       /// \param[in] _out Output stream

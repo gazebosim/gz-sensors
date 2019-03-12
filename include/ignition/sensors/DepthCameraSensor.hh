@@ -97,7 +97,7 @@ namespace ignition
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual ignition::rendering::DepthCameraPtr DepthCamera();
+      public: virtual rendering::DepthCameraPtr DepthCamera();
 
       /// \brief Depth data callback used to get the data from the sensor
       /// \param[in] _scan pointer to the data from the sensor

@@ -49,10 +49,7 @@ class ignition::sensors::DepthCameraSensorPrivate
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
 
-  /// \brief A scene the camera is capturing
-  public: ignition::rendering::ScenePtr scene;
-
-  /// \brief Rendering camera
+    /// \brief Rendering camera
   public: ignition::rendering::DepthCameraPtr depthCamera;
 
   /// \brief Depth data buffer.
@@ -93,7 +90,7 @@ class ignition::sensors::DepthCameraSensorPrivate
 
 //////////////////////////////////////////////////
 void DepthCameraSensorPrivate::RemoveCamera(
-    ignition::rendering::ScenePtr _scene)
+    rendering::ScenePtr _scene)
 {
   if (_scene)
   {
@@ -200,12 +197,13 @@ bool DepthCameraSensor::Load(sdf::ElementPtr _sdf)
   if (!this->dataPtr->pub)
     return false;
 
-  if (this->dataPtr->scene)
+  if (this->Scene())
   {
     this->CreateCamera();
   }
 
-  this->dataPtr->sceneChangeConnection = Events::ConnectSceneChangeCallback(
+  this->dataPtr->sceneChangeConnection =
+      RenderingEvents::ConnectSceneChangeCallback(
       std::bind(&DepthCameraSensor::SetScene, this, std::placeholders::_1));
 
   this->dataPtr->initialized = true;
@@ -244,7 +242,7 @@ bool DepthCameraSensor::CreateCamera()
     near = clipElem->Get<double>("near");
   }
 
-  this->dataPtr->depthCamera = this->dataPtr->scene->CreateDepthCamera(
+  this->dataPtr->depthCamera = this->Scene()->CreateDepthCamera(
       this->Name());
   this->dataPtr->depthCamera->SetImageWidth(width);
   this->dataPtr->depthCamera->SetImageHeight(height);
@@ -293,7 +291,7 @@ bool DepthCameraSensor::CreateCamera()
 
   this->dataPtr->image = this->dataPtr->depthCamera->CreateImage();
 
-  this->dataPtr->scene->RootVisual()->AddChild(this->dataPtr->depthCamera);
+  this->Scene()->RootVisual()->AddChild(this->dataPtr->depthCamera);
 
   // Create the directory to store frames
   if (cameraElem->HasElement("save") &&
@@ -373,10 +371,10 @@ void DepthCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
-  if (this->dataPtr->scene != _scene)
+  if (this->Scene() != _scene)
   {
-    this->dataPtr->RemoveCamera(this->dataPtr->scene);
-    this->dataPtr->scene = _scene;
+    this->dataPtr->RemoveCamera(this->Scene());
+    RenderingSensor::SetScene(_scene);
 
     if (this->dataPtr->initialized)
       this->CreateCamera();
