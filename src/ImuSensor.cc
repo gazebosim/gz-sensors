@@ -30,7 +30,7 @@ class ignition::sensors::ImuSensorPrivate
   /// \brief node to create publisher
   public: transport::Node node;
 
-  /// \brief publisher to publish logical camera messages.
+  /// \brief publisher to publish imu messages.
   public: transport::Node::Publisher pub;
 
   /// \brief true if Load() has been called and was successful
