@@ -38,7 +38,7 @@ pipelines:
           # Install ign-rendering dependencies
           - apt-get -y install
             libogre-1.9-dev libogre-2.1-dev libglew-dev libfreeimage-dev freeglut3-dev libxmu-dev libxi-dev uuid-dev
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-rendering -b gz11
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-rendering -b merge_bump_2
           - cd ign-rendering
           - mkdir build
           - cd build
