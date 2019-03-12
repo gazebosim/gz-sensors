@@ -1,0 +1,196 @@
+/*
+ * Copyright (C) 2019 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+*/
+
+#include <ignition/msgs/imu.pb.h>
+#include <ignition/transport/Node.hh>
+
+#include "ignition/sensors/SensorFactory.hh"
+#include "ignition/sensors/ImuSensor.hh"
+
+using namespace ignition;
+using namespace sensors;
+
+/// \brief Private data for ImuSensor
+class ignition::sensors::ImuSensorPrivate
+{
+  /// \brief node to create publisher
+  public: transport::Node node;
+
+  /// \brief publisher to publish logical camera messages.
+  public: transport::Node::Publisher pub;
+
+  /// \brief true if Load() has been called and was successful
+  public: bool initialized = false;
+
+  /// \brief Noise free linear acceleration
+  public: ignition::math::Vector3d linearAcc;
+
+  /// \brief Noise free angular velocity.
+  public: ignition::math::Vector3d angularVel;
+
+  /// \brief transform to Imu orientation reference frame.
+  public: ignition::math::Quaterniond orientationReference;
+
+  /// \brief transform from Imu frame to Imu reference frame.
+  public: ignition::math::Quaterniond orientation;
+
+  /// \brief store gravity vector to be added to the IMU output.
+  public: ignition::math::Vector3d gravity;
+
+  /// \brief World pose of the imu sensor
+  public: ignition::math::Pose3d worldPose;
+};
+
+//////////////////////////////////////////////////
+ImuSensor::ImuSensor()
+  : dataPtr(new ImuSensorPrivate())
+{
+}
+
+//////////////////////////////////////////////////
+ImuSensor::~ImuSensor()
+{
+}
+
+//////////////////////////////////////////////////
+bool ImuSensor::Init()
+{
+  return this->Sensor::Init();
+}
+
+//////////////////////////////////////////////////
+bool ImuSensor::Load(sdf::ElementPtr _sdf)
+{
+  if (!Sensor::Load(_sdf))
+    return false;
+
+  std::string topic = this->Topic();
+  if (topic.empty())
+    topic = "/imu";
+
+  this->dataPtr->pub =
+      this->dataPtr->node.Advertise<ignition::msgs::IMU>(topic);
+
+  if (!this->dataPtr->pub)
+    return false;
+
+  this->dataPtr->initialized = true;
+  return true;
+}
+
+//////////////////////////////////////////////////
+bool ImuSensor::Update(const ignition::common::Time &_now)
+{
+  if (!this->dataPtr->initialized)
+  {
+    ignerr << "Not initialized, update ignored.\n";
+    return false;
+  }
+
+  // Add contribution from gravity
+  // Skip if gravity is not enabled?
+  this->dataPtr->linearAcc -=
+      this->dataPtr->worldPose.Rot().Inverse().RotateVector(
+      this->dataPtr->gravity);
+
+  // Set the IMU orientation
+  // imu orientation with respect to reference frame
+  this->dataPtr->orientation =
+      this->dataPtr->orientationReference.Inverse() *
+      this->dataPtr->worldPose.Rot();
+
+  msgs::IMU msg;
+  msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
+  msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+  msg.set_entity_name(this->Name());
+  msgs::Set(msg.mutable_orientation(), this->dataPtr->orientation);
+  msgs::Set(msg.mutable_angular_velocity(), this->dataPtr->angularVel);
+  msgs::Set(msg.mutable_linear_acceleration(), this->dataPtr->linearAcc);
+
+  // publish
+  this->dataPtr->pub.Publish(msg);
+
+  return true;
+}
+
+//////////////////////////////////////////////////
+void ImuSensor::SetAngularVelocity(const math::Vector3d &_angularVel)
+{
+  this->dataPtr->angularVel = _angularVel;
+}
+
+//////////////////////////////////////////////////
+math::Vector3d ImuSensor::AngularVelocity() const
+{
+  return this->dataPtr->angularVel;
+}
+
+//////////////////////////////////////////////////
+void ImuSensor::SetLinearAcceleration(const math::Vector3d &_linearAcc)
+{
+  this->dataPtr->linearAcc = _linearAcc;
+}
+
+//////////////////////////////////////////////////
+math::Vector3d ImuSensor::LinearAcceleration() const
+{
+  return this->dataPtr->linearAcc;
+}
+
+//////////////////////////////////////////////////
+void ImuSensor::SetWorldPose(const math::Pose3d _pose)
+{
+  this->dataPtr->worldPose = _pose;
+}
+
+//////////////////////////////////////////////////
+math::Pose3d ImuSensor::WorldPose() const
+{
+  return this->dataPtr->worldPose;
+}
+
+//////////////////////////////////////////////////
+void ImuSensor::SetOrientationReference(const math::Quaterniond &_orient)
+{
+  this->dataPtr->orientationReference = _orient;
+}
+
+//////////////////////////////////////////////////
+math::Quaterniond ImuSensor::OrientationReference() const
+{
+  return this->dataPtr->orientationReference;
+}
+
+//////////////////////////////////////////////////
+void ImuSensor::SetGravity(const math::Vector3d &_gravity)
+{
+  this->dataPtr->gravity = _gravity;
+}
+
+//////////////////////////////////////////////////
+math::Vector3d ImuSensor::Gravity() const
+{
+  return this->dataPtr->gravity;
+}
+
+//////////////////////////////////////////////////
+math::Quaterniond ImuSensor::Orientation() const
+{
+  return this->dataPtr->orientation;
+}
+
+IGN_SENSORS_REGISTER_SENSOR(ImuSensor)
