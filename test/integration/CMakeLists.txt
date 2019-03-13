@@ -4,7 +4,12 @@ set(dri_tests
   camera_plugin.cc
   depth_camera_plugin.cc
   gpu_lidar_sensor_plugin.cc
+)
+
+
+set(tests
   logical_camera_plugin.cc
+  magnetometer_plugin.cc
 )
 
 link_directories(${PROJECT_BINARY_DIR}/test)
@@ -29,3 +34,12 @@ if (DRI_TESTS)
       ${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar
   )
 endif()
+
+ign_build_tests(TYPE INTEGRATION
+  SOURCES
+    ${tests}
+  LIB_DEPS
+    ${PROJECT_LIBRARY_TARGET_NAME}-logical_camera
+    ${PROJECT_LIBRARY_TARGET_NAME}-magnetometer
+)
+
