@@ -45,7 +45,7 @@ class ignition::sensors::ImuSensorPrivate
   /// \brief transform to Imu orientation reference frame.
   public: ignition::math::Quaterniond orientationReference;
 
-  /// \brief transform from Imu frame to Imu reference frame.
+  /// \brief transform to Imu frame from Imu reference frame.
   public: ignition::math::Quaterniond orientation;
 
   /// \brief store gravity vector to be added to the IMU output.
