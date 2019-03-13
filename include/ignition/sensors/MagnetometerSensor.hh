@@ -65,12 +65,11 @@ namespace ignition
       /// \return true if the update was successfull
       public: virtual bool Update(const common::Time &_now) override;
 
-      /// \brief Set the angular velocity of the imu
-      /// \brief Set the world pose of the imu
+      /// \brief Set the world pose of the sensor
       /// \param[in] _pose Pose in world frame
       public: void SetWorldPose(const math::Pose3d _pose);
 
-      /// \brief Get the world pose of the imu
+      /// \brief Get the world pose of the sensor
       /// \return Pose in world frame.
       public: math::Pose3d WorldPose() const;
 
