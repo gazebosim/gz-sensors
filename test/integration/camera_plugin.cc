@@ -18,7 +18,8 @@
 #include <gtest/gtest.h>
 
 #include <ignition/common/Filesystem.hh>
-#include <ignition/sensors/Manager.hh>
+//#include <ignition/sensors/Manager.hh>
+#include <ignition/sensors/SensorFactory.hh>
 #include <ignition/sensors/CameraSensor.hh>
 #include <ignition/rendering.hh>
 #include <ignition/msgs.hh>
@@ -62,10 +63,18 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
 
   // do the test
-  ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
+//  ignition::sensors::Manager mgr;
+//  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
-  ignition::sensors::CameraSensor *sensor =
+  ignition::sensors::SensorFactory sf;
+ // sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
+  std::unique_ptr<ignition::sensors::Sensor> s =
+      sf.CreateSensor(sensorPtr);
+  std::unique_ptr<ignition::sensors::CameraSensor> sensor(
+      dynamic_cast<ignition::sensors::CameraSensor *>(s.release()));
+
+
+/*  ignition::sensors::CameraSensor *sensor =
       mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
   ASSERT_NE(sensor, nullptr);
 
@@ -81,6 +90,7 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   mgr.RunOnce(ignition::common::Time::Zero);
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
+*/
 
   // Clean up
   engine->DestroyScene(scene);

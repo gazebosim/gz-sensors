@@ -1,7 +1,7 @@
 set(TEST_TYPE "INTEGRATION")
 
 set(dri_tests
-  camera_plugin.cc
+#  camera_plugin.cc
   depth_camera_plugin.cc
   gpu_lidar_sensor_plugin.cc
   logical_camera_plugin.cc
@@ -21,6 +21,7 @@ if (DRI_TESTS)
     SOURCES
       ${dri_tests}
     LIB_DEPS
+      ${PROJECT_LIBRARY_TARGET_NAME}-rendering_sensor
       ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-camera
       ${PROJECT_LIBRARY_TARGET_NAME}-lidar
@@ -29,13 +30,19 @@ if (DRI_TESTS)
   )
 endif()
 
+  ign_build_tests(TYPE INTEGRATION
+    SOURCES
+      camera_plugin.cc
+    LIB_DEPS
+      ${PROJECT_LIBRARY_TARGET_NAME}-rendering_sensor
+      ${PROJECT_LIBRARY_TARGET_NAME}-camera
+  )
+
 # ign_build_tests(TYPE INTEGRATION
 #   SOURCES
 #     camera_plugin.cc
 #   LIB_DEPS
-#      ${IGNITION-TRANSPORT_LIBRARIES}
-# #     ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
-# #     ${camera_target}
+#      ${PROJECT_LIBRARY_TARGET_NAME}-rendering_sensor
 #      ${PROJECT_LIBRARY_TARGET_NAME}-camera
 # )
 #
@@ -43,7 +50,8 @@ endif()
 #   SOURCES
 #     depth_camera_plugin.cc
 #   LIB_DEPS
-#      ${IGNITION-TRANSPORT_LIBRARIES}
+#      ${PROJECT_LIBRARY_TARGET_NAME}-rendering_sensor
+#      ${PROJECT_LIBRARY_TARGET_NAME}-camera
 #      ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
 # )
 #
@@ -51,7 +59,5 @@ endif()
 #   SOURCES
 #     gpu_lidar_sensor_plugin.cc
 #   LIB_DEPS
-#      ${IGNITION-TRANSPORT_LIBRARIES}
-#      ${PROJECT_LIBRARY_TARGET_NAME}-lidar
 #      ${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar
 # )

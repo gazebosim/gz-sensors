@@ -100,6 +100,7 @@ std::shared_ptr<SensorInterface> SensorFactory::LoadSensorPlugin(
 /////////////////////////////////////////////////
 std::unique_ptr<Sensor> SensorFactory::CreateSensor(sdf::ElementPtr _sdf)
 {
+  std::cerr << "Sensor factory create sensor! " << std::endl;
   std::unique_ptr<Sensor> result;
   if (_sdf)
   {
@@ -113,10 +114,12 @@ std::unique_ptr<Sensor> SensorFactory::CreateSensor(sdf::ElementPtr _sdf)
       auto sensorMapIt = sensorMap.find(type);
       if (sensorMapIt != sensorMap.end())
       {
+        std::cerr << "found lib!!! " << std::endl;
         sensor = sensorMapIt->second->New();
       }
       else
       {
+        std::cerr << "loading dynamic lib " << std::endl;
         // if not found, then try loading dynamic lib
         std::string fullPath = IGN_SENSORS_PLUGIN_NAME(type);
         auto it = this->dataPtr->sensorPlugins.find(type);
@@ -169,5 +172,6 @@ void SensorFactory::RegisterSensor(const std::string &_sensorType,
                                    // SensorFactoryFn _factoryfn)
                                    SensorInterface *_interface)
 {
+  std::cerr << " ============REGISTER " << _sensorType << std::endl;
   sensorMap[_sensorType] = _interface;
 }

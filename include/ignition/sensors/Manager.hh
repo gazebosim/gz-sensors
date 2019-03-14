@@ -94,11 +94,13 @@ namespace ignition
       public: template<typename T>
               T *CreateSensor(sdf::ElementPtr _sdf)
               {
+                std::cerr << "manager create sensor T! " << std::endl;
+
                 ignition::sensors::SensorId id = this->CreateSensor(_sdf);
 
                 if (id != NO_SENSOR)
                 {
-                  T *result = dynamic_cast<T*>(this->Sensor(id));
+                  T *result = dynamic_cast<T *>(this->Sensor(id));
 
                   if (!result)
                     ignerr << "SDF sensor type does not match template type\n";

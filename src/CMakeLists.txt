@@ -37,16 +37,15 @@ target_link_libraries(${camera_target}
   PUBLIC
     ${rendering_sensor_target}
   PRIVATE
-    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-plugin${IGN_PLUGIN_VER}::register
     )
 
 set(depth_camera_sources DepthCameraSensor.cc)
 ign_add_component(depth_camera SOURCES ${depth_camera_sources} GET_TARGET_NAME depth_camera_target)
 target_link_libraries(${depth_camera_target}
-  PRIVATE
+  PUBLIC
     ${camera_target}
-    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+  PRIVATE
     ignition-plugin${IGN_PLUGIN_VER}::register
     )
 
@@ -56,16 +55,15 @@ target_link_libraries(${lidar_target}
   PUBLIC
     ${rendering_sensor_target}
   PRIVATE
-    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-plugin${IGN_PLUGIN_VER}::register
     )
 
 set(gpu_lidar_sources GpuLidarSensor.cc)
 ign_add_component(gpu_lidar SOURCES ${gpu_lidar_sources} GET_TARGET_NAME gpu_lidar_target)
 target_link_libraries(${gpu_lidar_target}
-  PRIVATE
-    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+  PUBLIC
     ${lidar_target}
+  PRIVATE
     ignition-plugin${IGN_PLUGIN_VER}::register
     )
 
@@ -73,7 +71,6 @@ set(logical_camera_sources LogicalCameraSensor.cc)
 ign_add_component(logical_camera SOURCES ${logical_camera_sources} GET_TARGET_NAME logical_camera_target)
 target_link_libraries(${logical_camera_target}
   PRIVATE
-    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-plugin${IGN_PLUGIN_VER}::register
     )
 
@@ -86,24 +83,25 @@ set (gtest_sources
 ign_build_tests(TYPE UNIT SOURCES ${gtest_sources})
 
 # Build the unit tests that depend on components.
-ign_build_tests(TYPE UNIT SOURCES Lidar_TEST.cc LIB_DEPS ${lidar_target})
+ign_build_tests(TYPE UNIT SOURCES Lidar_TEST.cc LIB_DEPS ${lidar_target} ${rendering_sensor_target})
 
-#ign_build_tests(TYPE UNIT SOURCES Camera_TEST.cc LIB_DEPS ${camera_target})
-#
-#add_executable(abc abc.test.cc)
-#target_link_libraries(abc ${camera_target} ${PROJECT_LIBRARY_TARGET_NAME} gtest gtest_main)
-#
-#    target_include_directories(abc
-#      PRIVATE
-#        ${PROJECT_SOURCE_DIR}
-#        ${PROJECT_BINARY_DIR}
-#    )
-#
-#
+ign_build_tests(TYPE UNIT SOURCES Camera_TEST.cc LIB_DEPS ${camera_target} ${rendering_sensor_target})
+
+add_executable(abc abc.bk.cc)
+target_link_libraries(abc ${rendering_sensor_target} ${camera_target} ${PROJECT_LIBRARY_TARGET_NAME} gtest gtest_main)
+
+    target_include_directories(abc
+      PRIVATE
+        ${PROJECT_SOURCE_DIR}
+        ${PROJECT_BINARY_DIR}
+    )
+
+
 #    ign_build_executables(
 #      PREFIX "my_"
 #      SOURCES abc.test.cc
 #      LIB_DEPS ${camera_target} gtest gtest_main
-##      INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/test/gtest/include ${ign_build_tests_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/build
+#      INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/test/gtest/include ${ign_build_tests_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/build
 #      EXEC_LIST test_list)
-
+#
+#ign_build_tests(TYPE UNIT SOURCES abc.test.cc LIB_DEPS ${camera_target})
