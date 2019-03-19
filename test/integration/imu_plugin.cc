@@ -23,6 +23,7 @@
 #include <ignition/sensors/SensorFactory.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
+#include "TransportTestTools.hh"
 
 /// \brief Helper function to create an imu sdf element
 sdf::ElementPtr ImuToSDF(const std::string &_name,
@@ -116,6 +117,9 @@ TEST_F(ImuSensorTest, SensorReadings)
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
 
+  // subscribe to the topic
+  WaitForMessageTestHelper<ignition::msgs::IMU> msgHelper(topic);
+
   // verify initial readings
   EXPECT_EQ(ignition::math::Pose3d::Zero, sensor->WorldPose());
   EXPECT_EQ(ignition::math::Vector3d::Zero, sensor->LinearAcceleration());
@@ -161,6 +165,17 @@ TEST_F(ImuSensorTest, SensorReadings)
   EXPECT_EQ(ignition::math::Quaterniond(ignition::math::Vector3d(0, 0, -1.57)),
       sensor->Orientation());
 
+  // verify msg received on the topic
+  EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
+  auto msg = msgHelper.Message();
+  EXPECT_EQ(1, msg.header().stamp().sec());
+  EXPECT_EQ(0, msg.header().stamp().nsec());
+  EXPECT_EQ(ignition::math::Vector3d::Zero,
+      ignition::msgs::Convert(msg.angular_velocity()));
+  EXPECT_EQ(-gravity, ignition::msgs::Convert(msg.linear_acceleration()));
+  EXPECT_EQ(ignition::math::Quaterniond(ignition::math::Vector3d(0, 0, -1.57)),
+      ignition::msgs::Convert(msg.orientation()));
+
   // 2. Turn imu upside down, give it some linear acc and angular velocity and
   // verify readings
 
@@ -181,7 +196,7 @@ TEST_F(ImuSensorTest, SensorReadings)
   EXPECT_EQ(newPose, sensor->WorldPose());
 
   // update sensor and verify new readings
-  EXPECT_TRUE(sensor->Update(ignition::common::Time(1, 0)));
+  EXPECT_TRUE(sensor->Update(ignition::common::Time(2, 0)));
   EXPECT_EQ(orientRef, sensor->OrientationReference());
   EXPECT_EQ(gravity, sensor->Gravity());
   EXPECT_EQ(angularVel, sensor->AngularVelocity());
@@ -193,6 +208,22 @@ TEST_F(ImuSensorTest, SensorReadings)
   EXPECT_EQ(
       ignition::math::Quaterniond(ignition::math::Vector3d(0, 3.14, -1.57)),
       sensor->Orientation());
+
+  // verify updated msg
+  EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
+  msg = msgHelper.Message();
+  EXPECT_EQ(2, msg.header().stamp().sec());
+  EXPECT_EQ(0, msg.header().stamp().nsec());
+  EXPECT_EQ(angularVel,
+      ignition::msgs::Convert(msg.angular_velocity()));
+  ignition::math::Vector3d actualLinAcc =
+      ignition::msgs::Convert(msg.linear_acceleration());
+  EXPECT_NEAR(expectedLinAcc.X(), actualLinAcc.X(), 1e-2);
+  EXPECT_NEAR(expectedLinAcc.Y(), actualLinAcc.Y(), 1e-6);
+  EXPECT_NEAR(expectedLinAcc.Z(), actualLinAcc.Z(), 1e-5);
+  EXPECT_EQ(
+      ignition::math::Quaterniond(ignition::math::Vector3d(0, 3.14, -1.57)),
+      ignition::msgs::Convert(msg.orientation()));
 }
 
 int main(int argc, char **argv)
