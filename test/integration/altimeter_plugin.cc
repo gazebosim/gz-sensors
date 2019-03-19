@@ -23,6 +23,7 @@
 #include <ignition/sensors/SensorFactory.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
+#include "TransportTestTools.hh"
 
 /// \brief Helper function to create an altimeter sdf element
 sdf::ElementPtr AltimeterToSDF(const std::string &_name,
@@ -137,6 +138,17 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   pos = -6.0;
   sensor->SetPosition(pos);
   EXPECT_DOUBLE_EQ(pos - vertRef, sensor->VerticalPosition());
+
+  // verify msg received on the topic
+  WaitForMessageTestHelper<ignition::msgs::Altimeter> msgHelper(topic);
+  sensor->Update(ignition::common::Time(1, 0));
+  EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
+  auto msg = msgHelper.Message();
+  EXPECT_EQ(1, msg.header().stamp().sec());
+  EXPECT_EQ(0, msg.header().stamp().nsec());
+  EXPECT_DOUBLE_EQ(vertRef, msg.vertical_reference());
+  EXPECT_DOUBLE_EQ(pos - vertRef, msg.vertical_position());
+  EXPECT_DOUBLE_EQ(vertVel, msg.vertical_velocity());
 }
 
 int main(int argc, char **argv)
