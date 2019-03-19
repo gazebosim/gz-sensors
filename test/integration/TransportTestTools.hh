@@ -63,6 +63,8 @@ class WaitForMessageTestHelper
     return success;
   }
 
+  /// \brief Get the last msg received.
+  /// \return last msg received.
   public: M Message()
   {
     return this->msg;
