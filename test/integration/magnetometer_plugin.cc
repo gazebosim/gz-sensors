@@ -23,6 +23,7 @@
 #include <ignition/sensors/SensorFactory.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
+#include "TransportTestTools.hh"
 
 /// \brief Helper function to create an magnetometer sdf element
 sdf::ElementPtr MagnetometerToSDF(const std::string &_name,
@@ -116,6 +117,9 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
 
+  // subscribe to the topic
+  WaitForMessageTestHelper<ignition::msgs::Magnetometer> msgHelper(topic);
+
   // verify initial readings
   EXPECT_EQ(ignition::math::Pose3d::Zero, sensor->WorldPose());
   EXPECT_EQ(ignition::math::Vector3d::Zero, sensor->WorldMagneticField());
@@ -142,6 +146,13 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   EXPECT_EQ(worldField, sensor->WorldMagneticField());
   EXPECT_EQ(worldField, sensor->MagneticField());
 
+  // verify msg received on the topic
+  EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
+  auto msg = msgHelper.Message();
+  EXPECT_EQ(1, msg.header().stamp().sec());
+  EXPECT_EQ(0, msg.header().stamp().nsec());
+  EXPECT_EQ(worldField, ignition::msgs::Convert(msg.field_tesla()));
+
   // Rotate the magnetometer
   ignition::math::Quaterniond newOrientation(0, 3.14, 1.57);
   ignition::math::Pose3d newPose(position, newOrientation);
@@ -149,11 +160,18 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   EXPECT_EQ(newPose, sensor->WorldPose());
 
   // update sensor and verify new readings
-  EXPECT_TRUE(sensor->Update(ignition::common::Time(1, 0)));
+  EXPECT_TRUE(sensor->Update(ignition::common::Time(2, 0)));
   EXPECT_EQ(worldField, sensor->WorldMagneticField());
   ignition::math::Vector3d localField =
       newOrientation.RotateVectorReverse(worldField);
   EXPECT_EQ(localField, sensor->MagneticField());
+
+  // verify updated msg
+  EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
+  msg = msgHelper.Message();
+  EXPECT_EQ(2, msg.header().stamp().sec());
+  EXPECT_EQ(0, msg.header().stamp().nsec());
+  EXPECT_EQ(localField, ignition::msgs::Convert(msg.field_tesla()));
 }
 
 int main(int argc, char **argv)
