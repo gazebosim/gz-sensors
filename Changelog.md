@@ -5,5 +5,8 @@
 1. Add magnetometer
     * [Pull request 47](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/47)
 
+1. Add IMU
+    * [Pull request 44](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/44)
+
 
 ### Ignition Sensors 1.0.0 (2019-03-01)

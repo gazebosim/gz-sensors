@@ -6,10 +6,10 @@ set(dri_tests
   gpu_lidar_sensor_plugin.cc
 )
 
-
 set(tests
   logical_camera_plugin.cc
   magnetometer_plugin.cc
+  imu_plugin.cc
 )
 
 link_directories(${PROJECT_BINARY_DIR}/test)
@@ -41,5 +41,6 @@ ign_build_tests(TYPE INTEGRATION
   LIB_DEPS
     ${PROJECT_LIBRARY_TARGET_NAME}-logical_camera
     ${PROJECT_LIBRARY_TARGET_NAME}-magnetometer
+    ${PROJECT_LIBRARY_TARGET_NAME}-imu
 )
 
