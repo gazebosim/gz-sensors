@@ -24,7 +24,6 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
     ${SDFormat_LIBRARIES})
 
 set(rendering_sources
-  Lidar.cc
   RenderingSensor.cc
   RenderingEvents.cc
 )
@@ -88,6 +87,12 @@ target_link_libraries(${logical_camera_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
     )
+
+set(magnetometer_sources MagnetometerSensor.cc)
+ign_add_component(magnetometer SOURCES ${magnetometer_sources} GET_TARGET_NAME magnetometer_target)
+
+set(imu_sources ImuSensor.cc)
+ign_add_component(imu SOURCES ${imu_sources} GET_TARGET_NAME imu_target)
 
 set(altimeter_sources AltimeterSensor.cc)
 ign_add_component(altimeter SOURCES ${altimeter_sources} GET_TARGET_NAME altimeter_target)

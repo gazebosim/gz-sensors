@@ -7,15 +7,11 @@ pipelines:
           - apt update
           - apt -y install wget lsb-release gnupg
           - sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
-          - sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-prerelease `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-prerelease.list'
           - wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -
           - apt-get update
           - apt-get -y install
             cmake pkg-config cppcheck doxygen ruby-ronn curl mercurial git g++-8
           - update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8 --slave /usr/bin/gcov gcov /usr/bin/gcov-8
-          - gcc -v
-          - g++ -v
-          - gcov -v
           # lcov
           - git clone https://github.com/linux-test-project/lcov.git
           - cd lcov
