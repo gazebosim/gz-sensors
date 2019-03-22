@@ -2,6 +2,9 @@
 
 ### Ignition Sensors 2.X.X (201X-XX-XX)
 
+1. Add magnetometer
+    * [Pull request 47](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/47)
+
 1. Add IMU
     * [Pull request 44](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/44)
 

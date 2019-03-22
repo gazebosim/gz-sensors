@@ -8,9 +8,9 @@ set(dri_tests
 
 set(tests
   logical_camera_plugin.cc
+  magnetometer_plugin.cc
   imu_plugin.cc
 )
-
 
 link_directories(${PROJECT_BINARY_DIR}/test)
 
@@ -40,6 +40,7 @@ ign_build_tests(TYPE INTEGRATION
     ${tests}
   LIB_DEPS
     ${PROJECT_LIBRARY_TARGET_NAME}-logical_camera
+    ${PROJECT_LIBRARY_TARGET_NAME}-magnetometer
     ${PROJECT_LIBRARY_TARGET_NAME}-imu
 )
 
