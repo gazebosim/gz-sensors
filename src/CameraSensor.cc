@@ -356,7 +356,4 @@ rendering::CameraPtr CameraSensor::RenderingCamera() const
   return this->dataPtr->camera;
 }
 
-IGN_COMMON_REGISTER_SINGLE_PLUGIN(
-   ignition::sensors::SensorTypePlugin<CameraSensor>,
-   ignition::sensors::SensorPlugin)
-
+IGN_SENSORS_REGISTER_SENSOR(CameraSensor)
