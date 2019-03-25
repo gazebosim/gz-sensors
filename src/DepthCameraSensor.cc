@@ -20,7 +20,11 @@
 #include "ignition/sensors/DepthCameraSensor.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
-using namespace ignition::sensors;
+// undefine near and far macros from windows.h
+#ifdef _WIN32
+  #undef near
+  #undef far
+#endif
 
 /// \brief Private data for DepthCameraSensor
 class ignition::sensors::DepthCameraSensorPrivate
@@ -87,6 +91,9 @@ class ignition::sensors::DepthCameraSensorPrivate
   /// \brief counter used to set the image filename
   public: std::uint64_t saveImageCounter = 0;
 };
+
+using namespace ignition;
+using namespace sensors;
 
 //////////////////////////////////////////////////
 void DepthCameraSensorPrivate::RemoveCamera(
