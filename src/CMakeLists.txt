@@ -88,6 +88,15 @@ target_link_libraries(${logical_camera_target}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
     )
 
+set(magnetometer_sources MagnetometerSensor.cc)
+ign_add_component(magnetometer SOURCES ${magnetometer_sources} GET_TARGET_NAME magnetometer_target)
+
+set(imu_sources ImuSensor.cc)
+ign_add_component(imu SOURCES ${imu_sources} GET_TARGET_NAME imu_target)
+
+set(altimeter_sources AltimeterSensor.cc)
+ign_add_component(altimeter SOURCES ${altimeter_sources} GET_TARGET_NAME altimeter_target)
+
 set (gtest_sources
   Manager_TEST.cc
   Noise_TEST.cc

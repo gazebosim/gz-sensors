@@ -1,10 +1,16 @@
 set(TEST_TYPE "INTEGRATION")
 
 set(dri_tests
+  altimeter_plugin.cc
   camera_plugin.cc
   depth_camera_plugin.cc
   gpu_lidar_sensor_plugin.cc
+)
+
+set(tests
   logical_camera_plugin.cc
+  magnetometer_plugin.cc
+  imu_plugin.cc
 )
 
 link_directories(${PROJECT_BINARY_DIR}/test)
@@ -22,6 +28,7 @@ if (DRI_TESTS)
       ${dri_tests}
     LIB_DEPS
       ${IGNITION-TRANSPORT_LIBRARIES}
+      ${PROJECT_LIBRARY_TARGET_NAME}-altimeter
       ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-camera
       ${PROJECT_LIBRARY_TARGET_NAME}-lidar
@@ -29,3 +36,13 @@ if (DRI_TESTS)
       ${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar
   )
 endif()
+
+ign_build_tests(TYPE INTEGRATION
+  SOURCES
+    ${tests}
+  LIB_DEPS
+    ${PROJECT_LIBRARY_TARGET_NAME}-logical_camera
+    ${PROJECT_LIBRARY_TARGET_NAME}-magnetometer
+    ${PROJECT_LIBRARY_TARGET_NAME}-imu
+)
+

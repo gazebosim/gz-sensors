@@ -39,11 +39,12 @@ class WaitForMessageTestHelper
       this->diagnostics = "Failed to create subscription to " + _topic;
   }
 
-  protected: void OnMessage(const M &/*_msg*/)
+  protected: void OnMessage(const M &_msg)
   {
     std::lock_guard<std::mutex> lock(this->mtx);
     // Set condition variable
     this->gotMessage = true;
+    this->msg.CopyFrom(_msg);
     this->conditionVariable.notify_all();
   }
 
@@ -62,6 +63,13 @@ class WaitForMessageTestHelper
     return success;
   }
 
+  /// \brief Get the last msg received.
+  /// \return last msg received.
+  public: M Message()
+  {
+    return this->msg;
+  }
+
   /// \brief Node to subscribe to topics
   public: ignition::transport::Node node;
 
@@ -73,6 +81,9 @@ class WaitForMessageTestHelper
 
   /// \brief a mutex used for the condition variable
   public: std::mutex mtx;
+
+  /// \brief the msg received on the specified topic.
+  public: M msg;
 
   /// \brief variable used to notivy waiting thread
   public: std::condition_variable conditionVariable;
