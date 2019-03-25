@@ -32,6 +32,12 @@
 
 #include "test_config.h"  // NOLINT(build/include)
 
+// undefine near and far macros from windows.h
+#ifdef _WIN32
+  #undef near
+  #undef far
+#endif
+
 /// \brief Helper function to create a logical camera sdf element
 sdf::ElementPtr LogicalCameraToSDF(const std::string &_name,
     const ignition::math::Pose3d &_pose, const double _updateRate,
