@@ -271,10 +271,14 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
 
   ignition::common::Image::PixelFormatType
       format{common::Image::UNKNOWN_PIXEL_FORMAT};
+  msgs::PixelFormatType msgsPixelFormat =
+    msgs::PixelFormatType::UNKNOWN_PIXEL_FORMAT;
+
   switch (this->dataPtr->camera->ImageFormat())
   {
     case ignition::rendering::PF_R8G8B8:
       format = ignition::common::Image::RGB_INT8;
+      msgsPixelFormat = msgs::PixelFormatType::RGB_INT8;
       break;
     default:
       ignerr << "Unsupported pixel format ["
@@ -288,7 +292,7 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
   msg.set_height(height);
   msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
                this->dataPtr->camera->ImageFormat()));
-  msg.set_pixel_format(format);
+  msg.set_pixel_format_type(msgsPixelFormat);
   msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
   msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
