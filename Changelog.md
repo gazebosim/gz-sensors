@@ -11,6 +11,8 @@
 1. Add altimeter
     * [Pull request 43](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/43)
 
+1. Upgrade to ignition-msgs4 and ignition-transport7
+   * [Pull request 51](https://bitbucket.org/ignitionrobotics/ign-transport/pull-requests/51)
 
 ### Ignition Sensors 1.X.X (2019-XX-XX)
 
