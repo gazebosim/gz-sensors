@@ -7,6 +7,7 @@ pipelines:
           - apt update
           - apt -y install wget lsb-release gnupg
           - sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
+          - sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-nightly `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-nightly.list'
           - wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -
           - apt-get update
           - apt-get -y install
@@ -23,21 +24,22 @@ pipelines:
             libignition-cmake2-dev
             libignition-common3-dev
             libignition-math6-dev
-            libignition-msgs3-dev
-            libignition-transport6-dev
+            libignition-msgs4-dev
+            libignition-rendering2-dev
+            libignition-transport7-dev
             libignition-tools-dev
             libignition-plugin-dev
           # Install default branch for ignition rendering
           # Install ign-rendering dependencies
-          - apt-get -y install
-            libogre-1.9-dev libogre-2.1-dev libglew-dev libfreeimage-dev freeglut3-dev libxmu-dev libxi-dev uuid-dev
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-rendering -b default
-          - cd ign-rendering
-          - mkdir build
-          - cd build
-          - cmake ..
-          - make -j4 install
-          - cd ../..
+          # - apt-get -y install
+          #   libogre-1.9-dev libogre-2.1-dev libglew-dev libfreeimage-dev freeglut3-dev libxmu-dev libxi-dev uuid-dev
+          # - hg clone http://bitbucket.org/ignitionrobotics/ign-rendering -b default
+          # - cd ign-rendering
+          # - mkdir build
+          # - cd build
+          # - cmake ..
+          # - make -j4 install
+          # - cd ../..
           # Ignition sensors
           - mkdir build
           - cd build
@@ -49,6 +51,7 @@ pipelines:
           - bash <(curl -s https://raw.githubusercontent.com/codecov/codecov-bash/4678d212cce2078bbaaf5027af0c0dafaad6a095/codecov) -X gcovout
           - make codecheck
           # Examples
+          - apt-get -y install libfreeimage-dev
           - cd ..
           - cd examples/save_image
           - mkdir build
