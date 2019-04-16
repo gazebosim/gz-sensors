@@ -29,6 +29,14 @@ pipelines:
             libignition-transport7-dev
             libignition-tools-dev
             libignition-plugin-dev
+          # Install test branch for ignition cmake
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-cmake -b component_private_for_cmake
+          - cd ign-cmake
+          - mkdir build
+          - cd build
+          - cmake .. -DBUILD_TESTING=OFF
+          - make -j4 install
+          - cd ../..
           # Install default branch for ignition rendering
           # Install ign-rendering dependencies
           # - apt-get -y install
