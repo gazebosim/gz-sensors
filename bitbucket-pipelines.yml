@@ -37,6 +37,14 @@ pipelines:
           - cmake .. -DBUILD_TESTING=OFF
           - make -j4 install
           - cd ../..
+          # Install test branch for ignition common
+          - hg clone http://bitbucket.org/ignitionrobotics/ign-common -b ign-common3
+          - cd ign-common
+          - mkdir build
+          - cd build
+          - cmake .. -DBUILD_TESTING=OFF
+          - make -j4 install
+          - cd ../..
           # Install default branch for ignition rendering
           # Install ign-rendering dependencies
           # - apt-get -y install
