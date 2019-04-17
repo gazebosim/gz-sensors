@@ -57,6 +57,11 @@ namespace ignition
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF <sensor> or <plugin> inside of <sensor>
       /// \return true if loading was successful
+      public: virtual bool Load(const sdf::Sensor &_sdf);
+
+      /// \brief Load the sensor with SDF parameters.
+      /// \param[in] _sdf SDF <sensor> or <plugin> inside of <sensor>
+      /// \return true if loading was successful
       public: virtual bool Load(sdf::ElementPtr _sdf);
 
       /// \brief Initialize values in the sensor
