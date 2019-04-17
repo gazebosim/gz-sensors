@@ -54,7 +54,7 @@ namespace ignition
       /// \brief destructor
       public: virtual ~Sensor();
 
-      /// \brief Load the sensor with SDF parameters.
+      /// \brief Load the sensor based on data from an sdf::Sensor object.
       /// \param[in] _sdf SDF <sensor> or <plugin> inside of <sensor>
       /// \return true if loading was successful
       public: virtual bool Load(const sdf::Sensor &_sdf);

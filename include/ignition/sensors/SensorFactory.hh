@@ -74,15 +74,15 @@ namespace ignition
       /// \brief Destructor
       public: ~SensorFactory();
 
-      /// \brief Create a sensor from SDF with a known sensor type.
+      /// \brief Create a sensor from a SDF DOM object with a known sensor type.
       ///
-      ///   This creates sensors by looking at the given sdf element.
+      ///   This creates sensors by looking at the given SDF DOM object.
       ///   Sensors created with this API offer an ignition-transport interface.
       ///   If you need a direct C++ interface to the data, you must get the
       ///   sensor pointer and cast to the correct type.
       ///
       /// \sa Sensor()
-      /// \param[in] _sdf pointer to the sdf element
+      /// \param[in] _sdf SDF Sensor DOM object.
       /// \return A pointer to the created sensor. nullptr returned on
       /// error.
       public: template<typename T>
@@ -151,15 +151,17 @@ namespace ignition
       /// is returned on error.
       public: std::unique_ptr<Sensor> CreateSensor(sdf::ElementPtr _sdf);
 
-      /// \brief Create a sensor from SDF without a known sensor type.
+      /// \brief Create a sensor from an SDF Sensor DOM object without a known
+      /// sensor type.
       ///
-      ///   This creates sensors by looking at the given sdf element.
+      ///   This creates sensors by looking at the given SDF Sensor DOM
+      ///   object.
       ///   Sensors created with this API offer an ignition-transport interface.
       ///   If you need a direct C++ interface to the data, you must get the
       ///   sensor pointer and cast to the correct type.
       ///
       /// \sa Sensor()
-      /// \param[in] _sdf pointer to the sdf element
+      /// \param[in] _sdf SDF Sensor DOM object.
       /// \return A sensor id that refers to the created sensor. Null is
       /// is returned on error.
       public: std::unique_ptr<Sensor> CreateSensor(const sdf::Sensor &_sdf);

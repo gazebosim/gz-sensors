@@ -72,7 +72,6 @@ bool MagnetometerSensor::Load(const sdf::Sensor &_sdf)
     return false;
 
   std::string topic = this->Topic();
-  std::cout << "TOPIC[" << topic << "]\n";
   if (topic.empty())
     topic = "/magnetometer";
 

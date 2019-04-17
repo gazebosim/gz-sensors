@@ -82,7 +82,6 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
   this->name = _sdf.Name();
   this->topic = _sdf.Topic();
   this->pose = _sdf.Pose();
-  std::cout << "Mag Update Rate[" << _sdf.UpdateRate() << "]\n";
   this->updateRate = _sdf.UpdateRate();
   return true;
 }
