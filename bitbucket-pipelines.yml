@@ -32,7 +32,7 @@ pipelines:
           # SDFormat (uncomment if a specific branch is needed)
           - apt install -y
             libxml2-utils
-            libtinyxml2-dev
+            libtinyxml-dev
           - hg clone http://bitbucket.org/osrf/sdformat -b magnetometer
           - cd sdformat
           - mkdir build
