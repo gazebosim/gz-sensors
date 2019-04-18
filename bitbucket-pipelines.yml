@@ -20,7 +20,6 @@ pipelines:
           - cd ..
           # Dependency: Ignition packages and sdformat
           - apt-get -y install
-            libsdformat8-dev
             libignition-cmake2-dev
             libignition-common3-dev
             libignition-math6-dev
@@ -29,6 +28,17 @@ pipelines:
             libignition-transport7-dev
             libignition-tools-dev
             libignition-plugin-dev
+          # libsdformat8-dev
+          # SDFormat (uncomment if a specific branch is needed)
+          - apt install -y
+            libxml2-utils
+          - hg clone http://bitbucket.org/osrf/sdformat -b magnetometer
+          - cd sdformat
+          - mkdir build
+          - cd build
+          - cmake .. -DBUILD_TESTING=false
+          - make -j4 install
+          - cd ../..
           # Install default branch for ignition rendering
           # Install ign-rendering dependencies
           # - apt-get -y install
