@@ -66,6 +66,26 @@ bool MagnetometerSensor::Init()
 }
 
 //////////////////////////////////////////////////
+bool MagnetometerSensor::Load(const sdf::Sensor &_sdf)
+{
+  if (!Sensor::Load(_sdf))
+    return false;
+
+  std::string topic = this->Topic();
+  if (topic.empty())
+    topic = "/magnetometer";
+
+  this->dataPtr->pub =
+      this->dataPtr->node.Advertise<ignition::msgs::Magnetometer>(topic);
+
+  if (!this->dataPtr->pub)
+    return false;
+
+  this->dataPtr->initialized = true;
+  return true;
+}
+
+//////////////////////////////////////////////////
 bool MagnetometerSensor::Load(sdf::ElementPtr _sdf)
 {
   if (!Sensor::Load(_sdf))
