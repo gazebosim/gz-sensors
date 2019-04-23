@@ -118,21 +118,19 @@ GaussianNoiseModel::~GaussianNoiseModel()
 }
 
 //////////////////////////////////////////////////
-void GaussianNoiseModel::Load(sdf::ElementPtr _sdf)
+void GaussianNoiseModel::Load(const sdf::Noise &_sdf)
 {
   Noise::Load(_sdf);
   std::ostringstream out;
 
-  this->dataPtr->mean = _sdf->Get<double>("mean");
-  this->dataPtr->stdDev = _sdf->Get<double>("stddev");
+  this->dataPtr->mean = _sdf.Mean();
+  this->dataPtr->stdDev = _sdf.StdDev();
 
   // Sample the bias
   double biasMean = 0;
   double biasStdDev = 0;
-  if (_sdf->HasElement("bias_mean"))
-    biasMean = _sdf->Get<double>("bias_mean");
-  if (_sdf->HasElement("bias_stddev"))
-    biasStdDev = _sdf->Get<double>("bias_stddev");
+  biasMean = _sdf.BiasMean();
+  biasStdDev = _sdf.BiasStdDev();
   this->dataPtr->bias = ignition::math::Rand::DblNormal(biasMean, biasStdDev);
 
   // With equal probability, we pick a negative bias (by convention,
@@ -143,18 +141,11 @@ void GaussianNoiseModel::Load(sdf::ElementPtr _sdf)
 
   this->Print(out);
 
-  if (_sdf->HasElement("precision"))
-  {
-    this->dataPtr->precision = _sdf->Get<double>("precision");
-    if (this->dataPtr->precision < 0)
-    {
-      ignerr << "Noise precision cannot be less than 0" << std::endl;
-    }
-    else if (!ignition::math::equal(this->dataPtr->precision, 0.0, 1e-6))
-    {
-      this->dataPtr->quantized = true;
-    }
-  }
+  this->dataPtr->precision = _sdf.Precision();
+  if (this->dataPtr->precision < 0)
+    ignerr << "Noise precision cannot be less than 0" << std::endl;
+  else if (!ignition::math::equal(this->dataPtr->precision, 0.0, 1e-6))
+    this->dataPtr->quantized = true;
 }
 
 //////////////////////////////////////////////////

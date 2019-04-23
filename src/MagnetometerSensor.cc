@@ -17,8 +17,11 @@
 
 #include <ignition/msgs/magnetometer.pb.h>
 #include <ignition/transport/Node.hh>
+#include <sdf/Magnetometer.hh>
 
+#include "ignition/sensors/Noise.hh"
 #include "ignition/sensors/SensorFactory.hh"
+#include "ignition/sensors/SensorTypes.hh"
 #include "ignition/sensors/MagnetometerSensor.hh"
 
 using namespace ignition;
@@ -46,6 +49,9 @@ class ignition::sensors::MagnetometerSensorPrivate
 
   /// \brief World pose of the magnetometer
   public: ignition::math::Pose3d worldPose;
+
+  /// \brief Noise added to sensor data
+  public: std::map<SensorNoiseType, NoisePtr> noises;
 };
 
 //////////////////////////////////////////////////
@@ -71,6 +77,20 @@ bool MagnetometerSensor::Load(const sdf::Sensor &_sdf)
   if (!Sensor::Load(_sdf))
     return false;
 
+  if (_sdf.Type() != sdf::SensorType::MAGNETOMETER)
+  {
+    ignerr << "Attempting to a load a Magnetometer sensor, but received "
+      << "a " << _sdf.TypeStr() << std::endl;
+    return false;
+  }
+
+  if (_sdf.MagnetometerSensor() == nullptr)
+  {
+    ignerr << "Attempting to a load a Magnetometer sensor, but received "
+      << "a null sensor." << std::endl;
+    return false;
+  }
+
   std::string topic = this->Topic();
   if (topic.empty())
     topic = "/magnetometer";
@@ -80,6 +100,25 @@ bool MagnetometerSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->pub)
     return false;
+
+  // Load the noise parameters
+  if (_sdf.MagnetometerSensor()->XNoise().Type() != sdf::NoiseType::NONE)
+  {
+    this->dataPtr->noises[MAGNETOMETER_X_NOISE_TESLA] =
+      NoiseFactory::NewNoiseModel(_sdf.MagnetometerSensor()->XNoise());
+  }
+
+  if (_sdf.MagnetometerSensor()->YNoise().Type() != sdf::NoiseType::NONE)
+  {
+    this->dataPtr->noises[MAGNETOMETER_Y_NOISE_TESLA] =
+      NoiseFactory::NewNoiseModel(_sdf.MagnetometerSensor()->YNoise());
+  }
+
+  if (_sdf.MagnetometerSensor()->ZNoise().Type() != sdf::NoiseType::NONE)
+  {
+    this->dataPtr->noises[MAGNETOMETER_Z_NOISE_TESLA] =
+      NoiseFactory::NewNoiseModel(_sdf.MagnetometerSensor()->ZNoise());
+  }
 
   this->dataPtr->initialized = true;
   return true;
@@ -88,21 +127,9 @@ bool MagnetometerSensor::Load(const sdf::Sensor &_sdf)
 //////////////////////////////////////////////////
 bool MagnetometerSensor::Load(sdf::ElementPtr _sdf)
 {
-  if (!Sensor::Load(_sdf))
-    return false;
-
-  std::string topic = this->Topic();
-  if (topic.empty())
-    topic = "/magnetometer";
-
-  this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::Magnetometer>(topic);
-
-  if (!this->dataPtr->pub)
-    return false;
-
-  this->dataPtr->initialized = true;
-  return true;
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(_sdf);
+  return this->Load(sdfSensor);
 }
 
 //////////////////////////////////////////////////
@@ -122,6 +149,32 @@ bool MagnetometerSensor::Update(const ignition::common::Time &_now)
   msgs::Magnetometer msg;
   msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+
+  // Apply magnetometer noise after converting to body frame
+  if (this->dataPtr->noises.find(MAGNETOMETER_X_NOISE_TESLA) !=
+      this->dataPtr->noises.end())
+  {
+    this->dataPtr->localField.X(
+        this->dataPtr->noises[MAGNETOMETER_X_NOISE_TESLA]->Apply(
+          this->dataPtr->localField.X()));
+  }
+
+  if (this->dataPtr->noises.find(MAGNETOMETER_Y_NOISE_TESLA) !=
+      this->dataPtr->noises.end())
+  {
+    this->dataPtr->localField.Y(
+        this->dataPtr->noises[MAGNETOMETER_Y_NOISE_TESLA]->Apply(
+          this->dataPtr->localField.Y()));
+  }
+
+  if (this->dataPtr->noises.find(MAGNETOMETER_Z_NOISE_TESLA) !=
+      this->dataPtr->noises.end())
+  {
+    this->dataPtr->localField.Z(
+        this->dataPtr->noises[MAGNETOMETER_Z_NOISE_TESLA]->Apply(
+          this->dataPtr->localField.Z()));
+  }
+
   msgs::Set(msg.mutable_field_tesla(), this->dataPtr->localField);
 
   // publish

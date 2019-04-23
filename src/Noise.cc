@@ -36,30 +36,27 @@ class ignition::sensors::NoisePrivate
   public: NoiseType type = NoiseType::NONE;
 
   /// \brief Noise sdf element.
-  public: sdf::ElementPtr sdf;
+  public: sdf::Noise noiseDom;
 
   /// \brief Callback function for applying custom noise to sensor data.
   public: std::function<double(double)> customNoiseCallback;
 };
 
 //////////////////////////////////////////////////
-NoisePtr NoiseFactory::NewNoiseModel(sdf::ElementPtr _sdf,
+NoisePtr NoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
     const std::string &_sensorType)
 {
-  IGN_ASSERT(_sdf != nullptr, "noise sdf is null");
-  IGN_ASSERT(_sdf->GetName() == "noise", "Not a noise SDF element");
-
-  std::string typeString = _sdf->Get<std::string>("type");
+  sdf::NoiseType noiseType = _sdf.Type();
 
   NoisePtr noise;
 
   // Check for 'gaussian' noise. The 'gaussian_quantized' type is kept for
   // backward compatibility.
-  if (typeString == "gaussian" ||
-      typeString == "gaussian_quantized")
+  if (noiseType == sdf::NoiseType::GAUSSIAN ||
+      noiseType == sdf::NoiseType::GAUSSIAN_QUANTIZED)
   {
     if (_sensorType == "camera" || _sensorType == "depth" ||
-      _sensorType == "multicamera" || _sensorType == "wideanglecamera")
+        _sensorType == "multicamera" || _sensorType == "wideanglecamera")
     {
       // TODO(jchoclin): We need to implement Ogre Compositor Instance in
       // ign-rendering
@@ -71,7 +68,7 @@ NoisePtr NoiseFactory::NewNoiseModel(sdf::ElementPtr _sdf,
     IGN_ASSERT(noise->Type() == NoiseType::GAUSSIAN,
         "Noise type should be 'gaussian'");
   }
-  else if (typeString == "none" || typeString == "custom")
+  else if (noiseType == sdf::NoiseType::NONE)
   {
     // Return empty noise if 'none' or 'custom' is specified.
     // if 'custom', the type will be set once the user calls the
@@ -91,6 +88,18 @@ NoisePtr NoiseFactory::NewNoiseModel(sdf::ElementPtr _sdf,
 }
 
 //////////////////////////////////////////////////
+NoisePtr NoiseFactory::NewNoiseModel(sdf::ElementPtr _sdf,
+    const std::string &_sensorType)
+{
+  IGN_ASSERT(_sdf != nullptr, "noise sdf is null");
+  IGN_ASSERT(_sdf->GetName() == "noise", "Not a noise SDF element");
+  sdf::Noise noiseDom;
+  noiseDom.Load(_sdf);
+
+  return NewNoiseModel(noiseDom, _sensorType);
+}
+
+//////////////////////////////////////////////////
 Noise::Noise(NoiseType _type)
   : dataPtr(new NoisePrivate())
 {
@@ -105,10 +114,17 @@ Noise::~Noise()
 }
 
 //////////////////////////////////////////////////
+void Noise::Load(const sdf::Noise &_sdf)
+{
+  this->dataPtr->noiseDom = _sdf;
+}
+
+//////////////////////////////////////////////////
 void Noise::Load(sdf::ElementPtr _sdf)
 {
-  this->dataPtr->sdf = _sdf;
-  IGN_ASSERT(this->dataPtr->sdf != nullptr, "this->sdf is null");
+  sdf::Noise noiseDom;
+  noiseDom.Load(_sdf);
+  this->Load(noiseDom);
 }
 
 //////////////////////////////////////////////////
