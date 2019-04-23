@@ -92,7 +92,7 @@ namespace ignition
       /// \brief Load noise parameters from sdf.
       /// \param[in] _sdf SDF parameters.
       /// \deprecated Use the version that accepts an sdf::Noise object.
-      public: virtual void Load(sdf::ElementPtr _sdf) IGN_DEPRECATED(2.0);
+      public: virtual IGN_DEPRECATED(2) void Load(sdf::ElementPtr _sdf);
 
       /// \brief Apply noise to input data value.
       /// \param[in] _in Input data value.
