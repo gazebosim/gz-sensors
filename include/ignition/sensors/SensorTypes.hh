@@ -97,13 +97,26 @@ namespace ignition
       /// \sa CameraSensor
       CAMERA_NOISE = 1,
 
+      /// \brief Magnetometer body-frame X axis noise in Tesla
+      /// \sa MagnetometerSensor
+      MAGNETOMETER_X_NOISE_TESLA = 2,
+
+      /// \brief Magnetometer body-frame Y axis noise in Tesla
+      /// \sa MagnetometerSensor
+      MAGNETOMETER_Y_NOISE_TESLA = 3,
+
+      /// \brief Magnetometer body-frame Z axis noise in Tesla
+      /// \sa MagnetometerSensor
+      MAGNETOMETER_Z_NOISE_TESLA = 4,
+
       /// \brief Vertical noise stream for the altimeter sensor
       /// \sa AltimeterSensor
-      ALTIMETER_VERTICAL_POSITION_NOISE_METERS = 2,
+      ALTIMETER_VERTICAL_POSITION_NOISE_METERS = 5,
+
 
       /// \brief Velocity noise streams for the altimeter sensor
       /// \sa AltimeterSensor
-      ALTIMETER_VERTICAL_VELOCITY_NOISE_METERS_PER_S = 3,
+      ALTIMETER_VERTICAL_VELOCITY_NOISE_METERS_PER_S = 6,
 
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not

@@ -51,6 +51,16 @@ namespace ignition
       /// \return Pointer to the noise model created.
       public: static NoisePtr NewNoiseModel(sdf::ElementPtr _sdf,
           const std::string &_sensorType = "");
+
+      /// \brief Load a noise model based on the input sdf parameters and
+      /// sensor type.
+      /// \param[in] _sdf Noise sdf parameters.
+      /// \param[in] _sensorType Type of sensor. This is currently used to
+      /// distinguish between image and non image sensors in order to create
+      /// the appropriate noise model.
+      /// \return Pointer to the noise model created.
+      public: static NoisePtr NewNoiseModel(const sdf::Noise &_sdf,
+                  const std::string &_sensorType = "");
     };
 
     /// \brief Which noise types we support
@@ -76,9 +86,13 @@ namespace ignition
       public: virtual ~Noise();
 
       /// \brief Load noise parameters from sdf.
+      /// \param[in] _sdf SDF Noise DOM object.
+      public: virtual void Load(const sdf::Noise &_sdf);
+
+      /// \brief Load noise parameters from sdf.
       /// \param[in] _sdf SDF parameters.
-      /// \param[in] _sensor Type of sensor.
-      public: virtual void Load(sdf::ElementPtr _sdf);
+      /// \deprecated Use the version that accepts an sdf::Noise object.
+      public: virtual IGN_DEPRECATED(2) void Load(sdf::ElementPtr _sdf);
 
       /// \brief Apply noise to input data value.
       /// \param[in] _in Input data value.
