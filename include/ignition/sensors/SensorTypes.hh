@@ -113,7 +113,6 @@ namespace ignition
       /// \sa AltimeterSensor
       ALTIMETER_VERTICAL_POSITION_NOISE_METERS = 5,
 
-
       /// \brief Velocity noise streams for the altimeter sensor
       /// \sa AltimeterSensor
       ALTIMETER_VERTICAL_VELOCITY_NOISE_METERS_PER_S = 6,

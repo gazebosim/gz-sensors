@@ -17,6 +17,8 @@
 
 #include <ignition/transport/Node.hh>
 
+#include "ignition/sensors/Noise.hh"
+#include "ignition/sensors/SensorTypes.hh"
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/AltimeterSensor.hh"
 
@@ -95,11 +97,11 @@ bool AltimeterSensor::Load(const sdf::Sensor &_sdf)
   if (!this->dataPtr->pub)
     return false;
 
-   // Load the noise parameters
+  // Load the noise parameters
   if (_sdf.AltimeterSensor()->VerticalPositionNoise().Type()
       != sdf::NoiseType::NONE)
   {
-    this->dataPtr->noises[ALTIMETER_VERTICAL_POSITION_NOISE] =
+    this->dataPtr->noises[ALTIMETER_VERTICAL_POSITION_NOISE_METERS] =
       NoiseFactory::NewNoiseModel(
           _sdf.AltimeterSensor()->VerticalPositionNoise());
   }
@@ -107,7 +109,7 @@ bool AltimeterSensor::Load(const sdf::Sensor &_sdf)
   if (_sdf.AltimeterSensor()->VerticalVelocityNoise().Type()
       != sdf::NoiseType::NONE)
   {
-    this->dataPtr->noises[ALTIMETER_VERTICAL_VELOCITY_NOISE] =
+    this->dataPtr->noises[ALTIMETER_VERTICAL_VELOCITY_NOISE_METERS_PER_S] =
       NoiseFactory::NewNoiseModel(
           _sdf.AltimeterSensor()->VerticalVelocityNoise());
   }
@@ -138,21 +140,23 @@ bool AltimeterSensor::Update(const ignition::common::Time &_now)
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
 
   // Apply altimeter vertical position noise
-  if (this->dataPtr->noises.find(ALTIMETER_VERTICAL_POSITION_NOISE) !=
+  if (this->dataPtr->noises.find(ALTIMETER_VERTICAL_POSITION_NOISE_METERS) !=
       this->dataPtr->noises.end())
   {
     this->dataPtr->verticalPosition =
-      this->dataPtr->noises[ALTIMETER_VERTICAL_POSITION_NOISE]->Apply(
-          this->dataPtr->verticalPosition)
+      this->dataPtr->noises[ALTIMETER_VERTICAL_POSITION_NOISE_METERS]->Apply(
+          this->dataPtr->verticalPosition);
   }
 
   // Apply altimeter vertical velocity noise
-  if (this->dataPtr->noises.find(ALTIMETER_VERTICAL_VELOCITY_NOISE) !=
+  if (this->dataPtr->noises.find(
+        ALTIMETER_VERTICAL_VELOCITY_NOISE_METERS_PER_S) !=
       this->dataPtr->noises.end())
   {
     this->dataPtr->verticalVelocity =
-      this->dataPtr->noises[ALTIMETER_VERTICAL_VELOCITY_NOISE]->Apply(
-          this->dataPtr->verticalVelocity)
+      this->dataPtr->noises[
+      ALTIMETER_VERTICAL_VELOCITY_NOISE_METERS_PER_S]->Apply(
+          this->dataPtr->verticalVelocity);
   }
 
   msg.set_vertical_position(this->dataPtr->verticalPosition);

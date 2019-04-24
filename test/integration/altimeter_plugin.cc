@@ -19,6 +19,7 @@
 
 #include <sdf/sdf.hh>
 
+#include <ignition/math/Helpers.hh>
 #include <ignition/sensors/AltimeterSensor.hh>
 #include <ignition/sensors/SensorFactory.hh>
 
@@ -167,7 +168,7 @@ TEST_F(AltimeterSensorTest, SensorReadings)
         updateRate, topic, alwaysOn, visualize);
 
   sdf::ElementPtr altimeterSdfNoise = AltimeterToSdfWithNoise(name, sensorPose,
-        updateRate, topic, alwaysOn, visualize, 1.0, 0.2, 10.0);
+        updateRate, topicNoise, alwaysOn, visualize, 1.0, 0.2, 10.0);
 
   // create the sensor using sensor factory
   // try creating without specifying the sensor type and then cast it
@@ -202,19 +203,27 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   // set state and verify readings
   double vertRef = 1.0;
   sensor->SetVerticalReference(vertRef);
+  sensorNoise->SetVerticalReference(vertRef);
   EXPECT_DOUBLE_EQ(vertRef, sensor->VerticalReference());
+  EXPECT_DOUBLE_EQ(vertRef, sensorNoise->VerticalReference());
 
   double pos = 2.0;
   sensor->SetPosition(pos);
+  sensorNoise->SetPosition(pos);
   EXPECT_DOUBLE_EQ(pos - vertRef, sensor->VerticalPosition());
+  EXPECT_DOUBLE_EQ(pos - vertRef, sensorNoise->VerticalPosition());
 
   double vertVel = 3.0;
   sensor->SetVerticalVelocity(vertVel);
+  sensorNoise->SetVerticalVelocity(vertVel);
   EXPECT_DOUBLE_EQ(vertVel, sensor->VerticalVelocity());
+  EXPECT_DOUBLE_EQ(vertVel, sensorNoise->VerticalVelocity());
 
   pos = -6.0;
   sensor->SetPosition(pos);
+  sensorNoise->SetPosition(pos);
   EXPECT_DOUBLE_EQ(pos - vertRef, sensor->VerticalPosition());
+  EXPECT_DOUBLE_EQ(pos - vertRef, sensorNoise->VerticalPosition());
 
   // verify msg received on the topic
   WaitForMessageTestHelper<ignition::msgs::Altimeter> msgHelper(topic);
@@ -232,12 +241,13 @@ TEST_F(AltimeterSensorTest, SensorReadings)
     msgHelperNoise(topicNoise);
   sensorNoise->Update(ignition::common::Time(1, 0));
   EXPECT_TRUE(msgHelperNoise.WaitForMessage()) << msgHelperNoise;
-  auto msg = msgHelperNoise.Message();
+  auto msgNoise = msgHelperNoise.Message();
   EXPECT_EQ(1, msg.header().stamp().sec());
   EXPECT_EQ(0, msg.header().stamp().nsec());
-  EXPECT_DOUBLE_EQ(vertRef, msg.vertical_reference());
-  EXPECT_DOUBLE_EQ(pos - vertRef, msg.vertical_position());
-  EXPECT_DOUBLE_EQ(vertVel, msg.vertical_velocity());
+  EXPECT_DOUBLE_EQ(vertRef, msgNoise.vertical_reference());
+  EXPECT_FALSE(ignition::math::equal(pos - vertRef,
+        msgNoise.vertical_position()));
+  EXPECT_FALSE(ignition::math::equal(vertVel, msgNoise.vertical_velocity()));
 }
 
 int main(int argc, char **argv)
