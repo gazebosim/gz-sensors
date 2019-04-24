@@ -97,6 +97,14 @@ namespace ignition
       /// \sa CameraSensor
       CAMERA_NOISE = 1,
 
+      /// \brief Vertical noise stream for the altimeter sensor
+      /// \sa AltimeterSensor
+      ALTIMETER_VERTICAL_POSITION_NOISE_METERS = 2,
+
+      /// \brief Velocity noise streams for the altimeter sensor
+      /// \sa AltimeterSensor
+      ALTIMETER_VERTICAL_VELOCITY_NOISE_METERS_PER_S = 3,
+
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not
       /// use this.

@@ -57,6 +57,54 @@ sdf::ElementPtr AltimeterToSDF(const std::string &_name,
     ->GetElement("sensor");
 }
 
+/// \brief Helper function to create an altimeter sdf element with noise
+sdf::ElementPtr AltimeterToSdfWithNoise(const std::string &_name,
+    const ignition::math::Pose3d &_pose, const double _updateRate,
+    const std::string &_topic, const bool _alwaysOn,
+    const bool _visualize, double _mean, double _stddev, double _bias)
+{
+  std::ostringstream stream;
+  stream
+    << "<?xml version='1.0'?>"
+    << "<sdf version='1.6'>"
+    << " <model name='m1'>"
+    << "  <link name='link1'>"
+    << "    <sensor name='" << _name << "' type='altimeter'>"
+    << "      <pose>" << _pose << "</pose>"
+    << "      <topic>" << _topic << "</topic>"
+    << "      <update_rate>"<< _updateRate <<"</update_rate>"
+    << "      <alwaysOn>" << _alwaysOn <<"</alwaysOn>"
+    << "      <visualize>" << _visualize << "</visualize>"
+    << "      <altimeter>"
+    << "        <vertical_position>"
+    << "          <noise type='gaussian'>"
+    << "            <mean>" << _mean << "</mean>"
+    << "            <stddev>" << _stddev << "</stddev>"
+    << "            <bias_mean>" << _bias << "</bias_mean>"
+    << "          </noise>"
+    << "        </vertical_position>"
+    << "        <vertical_velocity>"
+    << "          <noise type='gaussian'>"
+    << "            <mean>" << _mean << "</mean>"
+    << "            <stddev>" << _stddev << "</stddev>"
+    << "            <bias_mean>" << _bias << "</bias_mean>"
+    << "          </noise>"
+    << "        </vertical_velocity>"
+    << "      </altimeter>"
+    << "    </sensor>"
+    << "  </link>"
+    << " </model>"
+    << "</sdf>";
+
+  sdf::SDFPtr sdfParsed(new sdf::SDF());
+  sdf::init(sdfParsed);
+  if (!sdf::readString(stream.str(), sdfParsed))
+    return sdf::ElementPtr();
+
+  return sdfParsed->Root()->GetElement("model")->GetElement("link")
+    ->GetElement("sensor");
+}
+
 class AltimeterSensorTest: public testing::Test
 {
 };
@@ -67,6 +115,7 @@ TEST_F(AltimeterSensorTest, CreateAltimeter)
   // Create SDF describing an altimeter sensor
   const std::string name = "TestAltimeter";
   const std::string topic = "/ignition/sensors/test/altimeter";
+  const std::string topicNoise = "/ignition/sensors/test/altimeter_noise";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
@@ -76,6 +125,9 @@ TEST_F(AltimeterSensorTest, CreateAltimeter)
       ignition::math::Quaterniond::Identity);
   sdf::ElementPtr altimeterSDF = AltimeterToSDF(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
+
+  sdf::ElementPtr altimeterSdfNoise = AltimeterToSdfWithNoise(name, sensorPose,
+        updateRate, topicNoise, alwaysOn, visualize, 1.0, 0.2, 10.0);
 
   // create the sensor using sensor factory
   ignition::sensors::SensorFactory sf;
@@ -87,6 +139,14 @@ TEST_F(AltimeterSensorTest, CreateAltimeter)
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(topic, sensor->Topic());
   EXPECT_DOUBLE_EQ(updateRate, sensor->UpdateRate());
+
+  std::unique_ptr<ignition::sensors::AltimeterSensor> sensorNoise =
+      sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdfNoise);
+  EXPECT_TRUE(sensorNoise != nullptr);
+
+  EXPECT_EQ(name, sensorNoise->Name());
+  EXPECT_EQ(topicNoise, sensorNoise->Topic());
+  EXPECT_DOUBLE_EQ(updateRate, sensorNoise->UpdateRate());
 }
 
 /////////////////////////////////////////////////
@@ -95,6 +155,7 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   // Create SDF describing an altimeter sensor
   const std::string name = "TestAltimeter";
   const std::string topic = "/ignition/sensors/test/altimeter";
+  const std::string topicNoise = "/ignition/sensors/test/altimeter_noise";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
@@ -104,6 +165,9 @@ TEST_F(AltimeterSensorTest, SensorReadings)
       ignition::math::Quaterniond::Identity);
   sdf::ElementPtr altimeterSDF = AltimeterToSDF(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
+
+  sdf::ElementPtr altimeterSdfNoise = AltimeterToSdfWithNoise(name, sensorPose,
+        updateRate, topic, alwaysOn, visualize, 1.0, 0.2, 10.0);
 
   // create the sensor using sensor factory
   // try creating without specifying the sensor type and then cast it
@@ -117,10 +181,23 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
 
+  std::unique_ptr<ignition::sensors::Sensor> sNoise =
+      sf.CreateSensor(altimeterSdfNoise);
+  std::unique_ptr<ignition::sensors::AltimeterSensor> sensorNoise(
+      dynamic_cast<ignition::sensors::AltimeterSensor *>(sNoise.release()));
+
+  // Make sure the above dynamic cast worked.
+  EXPECT_TRUE(sensorNoise != nullptr);
+
   // verify initial readings
   EXPECT_DOUBLE_EQ(0.0, sensor->VerticalReference());
   EXPECT_DOUBLE_EQ(0.0, sensor->VerticalVelocity());
   EXPECT_DOUBLE_EQ(0.0, sensor->VerticalPosition());
+
+  // verify initial readings
+  EXPECT_DOUBLE_EQ(0.0, sensorNoise->VerticalReference());
+  EXPECT_DOUBLE_EQ(0.0, sensorNoise->VerticalVelocity());
+  EXPECT_DOUBLE_EQ(0.0, sensorNoise->VerticalPosition());
 
   // set state and verify readings
   double vertRef = 1.0;
@@ -144,6 +221,18 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   sensor->Update(ignition::common::Time(1, 0));
   EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
   auto msg = msgHelper.Message();
+  EXPECT_EQ(1, msg.header().stamp().sec());
+  EXPECT_EQ(0, msg.header().stamp().nsec());
+  EXPECT_DOUBLE_EQ(vertRef, msg.vertical_reference());
+  EXPECT_DOUBLE_EQ(pos - vertRef, msg.vertical_position());
+  EXPECT_DOUBLE_EQ(vertVel, msg.vertical_velocity());
+
+  // verify msg with noise received on the topic
+  WaitForMessageTestHelper<ignition::msgs::Altimeter>
+    msgHelperNoise(topicNoise);
+  sensorNoise->Update(ignition::common::Time(1, 0));
+  EXPECT_TRUE(msgHelperNoise.WaitForMessage()) << msgHelperNoise;
+  auto msg = msgHelperNoise.Message();
   EXPECT_EQ(1, msg.header().stamp().sec());
   EXPECT_EQ(0, msg.header().stamp().nsec());
   EXPECT_DOUBLE_EQ(vertRef, msg.vertical_reference());
