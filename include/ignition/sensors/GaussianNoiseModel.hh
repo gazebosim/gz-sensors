@@ -46,7 +46,7 @@ namespace ignition
       public: virtual ~GaussianNoiseModel();
 
       // Documentation inherited.
-      public: virtual void Load(sdf::ElementPtr _sdf);
+      public: virtual void Load(const sdf::Noise &_sdf) override final;
 
       // Documentation inherited.
       public: double ApplyImpl(double _in);
