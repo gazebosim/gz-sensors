@@ -2,12 +2,14 @@
 
 ### Ignition Sensors 2.X.X (201X-XX-XX)
 
+1. Add support for loading an altimeter sensor from an SDF Sensor DOM object.
+    * [Pull request 55](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/55)
+
 1. Noise factory uses `sdf::Noise` objects, Magnetometer sensor utilizes
    noise parameters.
     * [Pull request 54](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/54)
 
-1. Add support for loading a magnetometer sensor from and SDF Sensor DOM
-   object.
+1. Add support for loading a magnetometer sensor from an SDF Sensor DOM object.
     * [Pull request 53](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/53)
 
 1. Add magnetometer
