@@ -137,7 +137,7 @@ std::unique_ptr<Sensor> SensorFactory::CreateSensor(const sdf::Sensor &_sdf)
   }
 
   result.reset(sensor);
-  return result;
+  return std::move(result);
 }
 
 /////////////////////////////////////////////////

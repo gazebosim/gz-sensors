@@ -20,6 +20,7 @@
 // #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 #include "ignition/sensors/Manager.hh"
+#include <memory>
 #include <unordered_map>
 #include <ignition/common/PluginLoader.hh>
 #include <ignition/common/Plugin.hh>
@@ -138,6 +139,25 @@ void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
   {
     s.second->Update(_time, _force);
   }
+}
+
+/////////////////////////////////////////////////
+ignition::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &_sdf)
+{
+  auto sensor = this->dataPtr->sensorFactory.CreateSensor(_sdf);
+  if (!sensor)
+    return NO_SENSOR;
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  // This behavior is deprecated.
+  // The users are expected to call RenderingSsensor::SetScene in ign-sensors3
+  sensor->SetScene(this->dataPtr->renderingScene);
+#pragma GCC diagnostic pop
+
+  SensorId id = sensor->Id();
+  this->dataPtr->sensors[id] = std::move(sensor);
+  return id;
 }
 
 /////////////////////////////////////////////////

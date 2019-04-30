@@ -99,6 +99,43 @@ namespace ignition
       /// \return A pointer to the created sensor. nullptr returned on
       /// error.
       public: template<typename T>
+              T *CreateSensor(sdf::Sensor _sdf)
+              {
+                ignition::sensors::SensorId id = this->CreateSensor(_sdf);
+
+                if (id != NO_SENSOR)
+                {
+                  T *result = dynamic_cast<T*>(this->Sensor(id));
+
+                  if (!result)
+                    ignerr << "SDF sensor type does not match template type\n";
+
+                  return result;
+                }
+
+                ignerr << "Failed to create sensor of type["
+                       << _sdf.TypeStr() << "]\n";
+                return nullptr;
+              }
+
+      /// \brief Create a sensor from SDF with a known sensor type.
+      ///
+      ///   This creates sensors by looking at the given sdf element.
+      ///   Sensors created with this API offer an ignition-transport interface.
+      ///   If you need a direct C++ interface to the data, you must get the
+      ///   sensor pointer and cast to the correct type.
+      ///
+      ///   A <sensor> tag may have multiple <plugin> tags. A SensorId will be
+      ///   returned for each plugin that is described in SDF.
+      ///   If there are no <plugin> tags then one of the plugins shipped with
+      ///   this library will be loaded. For example, a <sensor> tag with
+      ///   <camera> but no <plugin> will load a CameraSensor from
+      ///   ignition-sensors-camera.
+      /// \sa Sensor()
+      /// \param[in] _sdf pointer to the sdf element
+      /// \return A pointer to the created sensor. nullptr returned on
+      /// error.
+      public: template<typename T>
               T *CreateSensor(sdf::ElementPtr _sdf)
               {
                 ignition::sensors::SensorId id = this->CreateSensor(_sdf);
@@ -136,6 +173,26 @@ namespace ignition
       /// \return A sensor id that refers to the created sensor. NO_SENSOR
       /// is returned on erro.
       public: ignition::sensors::SensorId CreateSensor(sdf::ElementPtr _sdf);
+
+      /// \brief Create a sensor from SDF without a known sensor type.
+      ///
+      ///   This creates sensors by looking at the given sdf element.
+      ///   Sensors created with this API offer an ignition-transport interface.
+      ///   If you need a direct C++ interface to the data, you must get the
+      ///   sensor pointer and cast to the correct type.
+      ///
+      ///   A <sensor> tag may have multiple <plugin> tags. A SensorId will be
+      ///   returned for each plugin that is described in SDF.
+      ///   If there are no <plugin> tags then one of the plugins shipped with
+      ///   this library will be loaded. For example, a <sensor> tag with
+      ///   <camera> but no <plugin> will load a CameraSensor from
+      ///   ignition-sensors-camera.
+      /// \sa Sensor()
+      /// \param[in] _sdf SDF sensor DOM object
+      /// \return A sensor id that refers to the created sensor. NO_SENSOR
+      /// is returned on erro.
+      public: ignition::sensors::SensorId CreateSensor(const sdf::Sensor &_sdf);
+
 
       /// \brief Get an instance of a loaded sensor by sensor id
       /// \param[in] _id Idenitifier of the sensor.
