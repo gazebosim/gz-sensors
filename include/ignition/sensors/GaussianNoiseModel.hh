@@ -49,7 +49,7 @@ namespace ignition
       public: virtual void Load(const sdf::Noise &_sdf) override final;
 
       // Documentation inherited.
-      public: double ApplyImpl(double _in);
+      public: double ApplyImpl(double _in) override;
 
       /// \brief Accessor for mean.
       /// \return Mean of Gaussian noise.
@@ -64,7 +64,7 @@ namespace ignition
       public: double Bias() const;
 
       /// Documentation inherited
-      public: virtual void Print(std::ostream &_out) const;
+      public: virtual void Print(std::ostream &_out) const override;
 
       /// \brief Private data pointer.
       private: GaussianNoiseModelPrivate *dataPtr = nullptr;
