@@ -109,6 +109,14 @@ namespace ignition
       /// \sa MagnetometerSensor
       MAGNETOMETER_Z_NOISE_TESLA = 4,
 
+      /// \brief Vertical noise stream for the altimeter sensor
+      /// \sa AltimeterSensor
+      ALTIMETER_VERTICAL_POSITION_NOISE_METERS = 5,
+
+      /// \brief Velocity noise streams for the altimeter sensor
+      /// \sa AltimeterSensor
+      ALTIMETER_VERTICAL_VELOCITY_NOISE_METERS_PER_S = 6,
+
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not
       /// use this.

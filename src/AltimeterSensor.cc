@@ -17,6 +17,8 @@
 
 #include <ignition/transport/Node.hh>
 
+#include "ignition/sensors/Noise.hh"
+#include "ignition/sensors/SensorTypes.hh"
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/AltimeterSensor.hh"
 
@@ -43,6 +45,9 @@ class ignition::sensors::AltimeterSensorPrivate
 
   /// \brief Vertical reference, i.e. initial sensor position
   public: double verticalReference = 0.0;
+
+  /// \brief Noise added to sensor data
+  public: std::map<SensorNoiseType, NoisePtr> noises;
 };
 
 //////////////////////////////////////////////////
@@ -63,10 +68,24 @@ bool AltimeterSensor::Init()
 }
 
 //////////////////////////////////////////////////
-bool AltimeterSensor::Load(sdf::ElementPtr _sdf)
+bool AltimeterSensor::Load(const sdf::Sensor &_sdf)
 {
   if (!Sensor::Load(_sdf))
     return false;
+
+  if (_sdf.Type() != sdf::SensorType::ALTIMETER)
+  {
+    ignerr << "Attempting to a load an Altimeter sensor, but received "
+      << "a " << _sdf.TypeStr() << std::endl;
+    return false;
+  }
+
+  if (_sdf.AltimeterSensor() == nullptr)
+  {
+    ignerr << "Attempting to a load an Altimeter sensor, but received "
+      << "a null sensor." << std::endl;
+    return false;
+  }
 
   std::string topic = this->Topic();
   if (topic.empty())
@@ -78,8 +97,33 @@ bool AltimeterSensor::Load(sdf::ElementPtr _sdf)
   if (!this->dataPtr->pub)
     return false;
 
+  // Load the noise parameters
+  if (_sdf.AltimeterSensor()->VerticalPositionNoise().Type()
+      != sdf::NoiseType::NONE)
+  {
+    this->dataPtr->noises[ALTIMETER_VERTICAL_POSITION_NOISE_METERS] =
+      NoiseFactory::NewNoiseModel(
+          _sdf.AltimeterSensor()->VerticalPositionNoise());
+  }
+
+  if (_sdf.AltimeterSensor()->VerticalVelocityNoise().Type()
+      != sdf::NoiseType::NONE)
+  {
+    this->dataPtr->noises[ALTIMETER_VERTICAL_VELOCITY_NOISE_METERS_PER_S] =
+      NoiseFactory::NewNoiseModel(
+          _sdf.AltimeterSensor()->VerticalVelocityNoise());
+  }
+
   this->dataPtr->initialized = true;
   return true;
+}
+
+//////////////////////////////////////////////////
+bool AltimeterSensor::Load(sdf::ElementPtr _sdf)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(_sdf);
+  return this->Load(sdfSensor);
 }
 
 //////////////////////////////////////////////////
@@ -94,6 +138,27 @@ bool AltimeterSensor::Update(const ignition::common::Time &_now)
   msgs::Altimeter msg;
   msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+
+  // Apply altimeter vertical position noise
+  if (this->dataPtr->noises.find(ALTIMETER_VERTICAL_POSITION_NOISE_METERS) !=
+      this->dataPtr->noises.end())
+  {
+    this->dataPtr->verticalPosition =
+      this->dataPtr->noises[ALTIMETER_VERTICAL_POSITION_NOISE_METERS]->Apply(
+          this->dataPtr->verticalPosition);
+  }
+
+  // Apply altimeter vertical velocity noise
+  if (this->dataPtr->noises.find(
+        ALTIMETER_VERTICAL_VELOCITY_NOISE_METERS_PER_S) !=
+      this->dataPtr->noises.end())
+  {
+    this->dataPtr->verticalVelocity =
+      this->dataPtr->noises[
+      ALTIMETER_VERTICAL_VELOCITY_NOISE_METERS_PER_S]->Apply(
+          this->dataPtr->verticalVelocity);
+  }
+
   msg.set_vertical_position(this->dataPtr->verticalPosition);
   msg.set_vertical_velocity(this->dataPtr->verticalVelocity);
   msg.set_vertical_reference(this->dataPtr->verticalReference);
