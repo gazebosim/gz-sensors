@@ -40,8 +40,7 @@ namespace ignition
 
     /// \brief AirPressure Sensor Class
     ///
-    /// An altimeter sensor that reports vertical position and velocity
-    /// readings over ign transport
+    /// A sensor that reports air pressure readings.
     class IGNITION_SENSORS_AIR_PRESSURE_VISIBLE AirPressureSensor :
       public Sensor
     {
