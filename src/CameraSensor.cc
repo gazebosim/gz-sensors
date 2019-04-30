@@ -78,63 +78,56 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief counter used to set the image filename
   public: std::uint64_t saveImageCounter = 0;
+
+  /// \brief SDF Sensor DOM object.
+  public: sdf::Sensor sdfSensor;
 };
 
 //////////////////////////////////////////////////
 bool CameraSensor::CreateCamera()
 {
-  sdf::ElementPtr cameraElem = this->SDF()->GetElement("camera");
-  if (!cameraElem)
+  const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
+  if (!cameraSdf)
   {
-    ignerr << "Unable to find <camera> SDF element\n";
+    ignerr << "Unable to access camera SDF element.\n";
     return false;
   }
 
-  sdf::ElementPtr imgElem = cameraElem->GetElement("image");
-
-  if (!imgElem)
-  {
-    ignerr << "Unable to find <camera><image> SDF element\n";
-    return false;
-  }
-
-  int width = imgElem->Get<int>("width");
-  int height = imgElem->Get<int>("height");
+  int width = cameraSdf->ImageWidth();
+  int height = cameraSdf->ImageHeight();
 
   this->dataPtr->camera = this->Scene()->CreateCamera(this->Name());
   this->dataPtr->camera->SetImageWidth(width);
   this->dataPtr->camera->SetImageHeight(height);
+  this->dataPtr->camera->SetNearClipPlane(cameraSdf->NearClip());
+  this->dataPtr->camera->SetFarClipPlane(cameraSdf->FarClip());
 
   // \todo(nkoeng) these parameters via sdf
   this->dataPtr->camera->SetAntiAliasing(2);
 
-  auto angle = cameraElem->Get<double>("horizontal_fov", 0);
-  if (angle.first < 0.01 || angle.first > IGN_PI*2)
+  double angle = cameraSdf->HorizontalFov();
+  if (angle < 0.01 || angle > IGN_PI*2)
   {
-    ignerr << "Invalid horizontal field of view [" << angle.first << "]\n";
+    ignerr << "Invalid horizontal field of view [" << angle << "]\n";
 
     return false;
   }
   this->dataPtr->camera->SetAspectRatio(static_cast<double>(width)/height);
-  this->dataPtr->camera->SetHFOV(angle.first);
+  this->dataPtr->camera->SetHFOV(angle);
 
-  if (cameraElem->HasElement("distortion"))
-  {
-    // \todo(nkoenig) Port Distortion class
-    // This->dataPtr->distortion.reset(new Distortion());
-    // This->dataPtr->distortion->Load(this->sdf->GetElement("distortion"));
-  }
+  // \todo(nkoenig) Port Distortion class
+  // This->dataPtr->distortion.reset(new Distortion());
+  // This->dataPtr->distortion->Load(this->sdf->GetElement("distortion"));
 
-  std::string formatStr = imgElem->Get<std::string>("format");
-  ignition::common::Image::PixelFormatType format =
-    ignition::common::Image::ConvertPixelFormat(formatStr);
-  switch (format)
+  sdf::PixelFormatType pixelFormat = cameraSdf->PixelFormat();
+  switch (pixelFormat)
   {
-    case ignition::common::Image::RGB_INT8:
+    case sdf::PixelFormatType::RGB_INT8:
       this->dataPtr->camera->SetImageFormat(ignition::rendering::PF_R8G8B8);
       break;
     default:
-      ignerr << "Unsupported pixel format [" << formatStr << "]\n";
+      ignerr << "Unsupported pixel format ["
+        << static_cast<int>(pixelFormat) << "]\n";
       break;
   }
 
@@ -143,11 +136,9 @@ bool CameraSensor::CreateCamera()
   this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);
 
   // Create the directory to store frames
-  if (cameraElem->HasElement("save") &&
-      cameraElem->GetElement("save")->Get<bool>("enabled"))
+  if (cameraSdf->SaveFrames())
   {
-    sdf::ElementPtr elem = cameraElem->GetElement("save");
-    this->dataPtr->saveImagePath = elem->Get<std::string>("path");
+    this->dataPtr->saveImagePath = cameraSdf->SaveFramesPath();
     this->dataPtr->saveImagePrefix = this->Name() + "_";
     this->dataPtr->saveImage = true;
   }
@@ -183,24 +174,30 @@ bool CameraSensor::Init()
 }
 
 //////////////////////////////////////////////////
-bool CameraSensor::Load(sdf::ElementPtr _sdf)
+bool CameraSensor::Load(const sdf::Sensor &_sdf)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  // Check if this is being loaded via "builtin" or via a plugin
-  if (_sdf->GetName() == "sensor")
-  {
-    if (!_sdf->GetElement("camera"))
-    {
-      ignerr << "<sensor><camera> SDF element not found while attempting to "
-        << "load a ignition::sensors::CameraSensor\n";
-      return false;
-    }
-  }
 
   if (!Sensor::Load(_sdf))
   {
     return false;
   }
+
+  // Check if this is the right type
+  if (_sdf.Type() != sdf::SensorType::CAMERA)
+  {
+    ignerr << "Attempting to a load a Camera sensor, but received "
+      << "a " << _sdf.TypeStr() << std::endl;
+  }
+
+  if (_sdf.CameraSensor() == nullptr)
+  {
+    ignerr << "Attempting to a load a Camera sensor, but received "
+      << "a null sensor." << std::endl;
+    return false;
+  }
+
+  this->dataPtr->sdfSensor = _sdf;
 
   this->dataPtr->pub =
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
@@ -219,6 +216,14 @@ bool CameraSensor::Load(sdf::ElementPtr _sdf)
 
   this->dataPtr->initialized = true;
   return true;
+}
+
+//////////////////////////////////////////////////
+bool CameraSensor::Load(sdf::ElementPtr _sdf)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(_sdf);
+  return this->Load(sdfSensor);
 }
 
 /////////////////////////////////////////////////
