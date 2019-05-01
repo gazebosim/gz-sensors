@@ -73,10 +73,24 @@ bool ImuSensor::Init()
 }
 
 //////////////////////////////////////////////////
-bool ImuSensor::Load(sdf::ElementPtr _sdf)
+bool ImuSensor::Load(const sdf::Sensor &_sdf)
 {
   if (!Sensor::Load(_sdf))
     return false;
+
+  // Check if this is the right type
+  if (_sdf.Type() != sdf::SensorType::IMU)
+  {
+    ignerr << "Attempting to a load an IMU sensor, but received "
+      << "a " << _sdf.TypeStr() << std::endl;
+  }
+
+  if (_sdf.ImuSensor() == nullptr)
+  {
+    ignerr << "Attempting to a load an IMU sensor, but received "
+      << "a null sensor." << std::endl;
+    return false;
+  }
 
   std::string topic = this->Topic();
   if (topic.empty())
@@ -90,6 +104,14 @@ bool ImuSensor::Load(sdf::ElementPtr _sdf)
 
   this->dataPtr->initialized = true;
   return true;
+}
+
+//////////////////////////////////////////////////
+bool ImuSensor::Load(sdf::ElementPtr _sdf)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(_sdf);
+  return this->Load(sdfSensor);
 }
 
 //////////////////////////////////////////////////
