@@ -11,6 +11,7 @@ set(tests
   altimeter_plugin.cc
   logical_camera_plugin.cc
   magnetometer_plugin.cc
+  noise_generation.cc
   imu_plugin.cc
 )
 

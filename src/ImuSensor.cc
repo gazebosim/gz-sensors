@@ -18,7 +18,9 @@
 #include <ignition/msgs/imu.pb.h>
 #include <ignition/transport/Node.hh>
 
+#include "ignition/sensors/Noise.hh"
 #include "ignition/sensors/SensorFactory.hh"
+#include "ignition/sensors/SensorTypes.hh"
 #include "ignition/sensors/ImuSensor.hh"
 
 using namespace ignition;
@@ -53,6 +55,9 @@ class ignition::sensors::ImuSensorPrivate
 
   /// \brief World pose of the imu sensor
   public: ignition::math::Pose3d worldPose;
+
+  /// \brief Noise added to sensor data
+  public: std::map<SensorNoiseType, NoisePtr> noises;
 };
 
 //////////////////////////////////////////////////
@@ -101,6 +106,23 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->pub)
     return false;
+
+  const std::map<SensorNoiseType, sdf::Noise> noises = {
+    {ACCELEROMETER_X_NOISE_M_S_S, _sdf.ImuSensor()->LinearAccelerationXNoise()},
+    {ACCELEROMETER_Y_NOISE_M_S_S, _sdf.ImuSensor()->LinearAccelerationYNoise()},
+    {ACCELEROMETER_Z_NOISE_M_S_S, _sdf.ImuSensor()->LinearAccelerationZNoise()},
+    {GYROSCOPE_X_NOISE_RAD_S, _sdf.ImuSensor()->AngularVelocityXNoise()},
+    {GYROSCOPE_Y_NOISE_RAD_S, _sdf.ImuSensor()->AngularVelocityYNoise()},
+    {GYROSCOPE_Z_NOISE_RAD_S, _sdf.ImuSensor()->AngularVelocityZNoise()},
+  };
+
+  for (const auto it : noises )
+  {
+    if (it.second.Type() != sdf::NoiseType::NONE)
+    {
+      this->dataPtr->noises[it.first] = NoiseFactory::NewNoiseModel(it.second);
+    }
+  }
 
   this->dataPtr->initialized = true;
   return true;

@@ -265,7 +265,7 @@ bool DepthCameraSensor::CreateCamera()
   // \todo(nkoeng) these parameters via sdf
   this->dataPtr->depthCamera->SetAntiAliasing(2);
 
-  double angle = cameraSdf->HorizontalFov();
+  auto angle = cameraSdf->HorizontalFov();
   if (angle < 0.01 || angle > IGN_PI*2)
   {
     ignerr << "Invalid horizontal field of view [" << angle << "]\n";

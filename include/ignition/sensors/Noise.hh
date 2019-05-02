@@ -97,13 +97,13 @@ namespace ignition
       /// \brief Apply noise to input data value.
       /// \param[in] _in Input data value.
       /// \return Data with noise applied.
-      public: double Apply(double _in);
+      public: double Apply(double _in, double _dt=0.0);
 
       /// \brief Apply noise to input data value. This gets overriden by
       /// derived classes, and called by Apply.
       /// \param[in] _in Input data value.
       /// \return Data with noise applied.
-      public: virtual double ApplyImpl(double _in);
+      public: virtual double ApplyImpl(double _in, double _dt);
 
       /// \brief Accessor for NoiseType.
       /// \return Type of noise currently in use.
@@ -114,7 +114,7 @@ namespace ignition
       /// This is useful if users want to use their own noise model from a
       /// sensor plugin.
       public: virtual void SetCustomNoiseCallback(
-          std::function<double(double)> _cb);
+          std::function<double(double, double)> _cb);
 
       /// \brief Set camera needed to create image noise. This is only needed
       /// for image sensors, i.e. camera/multicamera/depth sensors, which use
