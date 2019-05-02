@@ -7,7 +7,7 @@ set(dri_tests
 )
 
 set(tests
-  #air_pressure_plugin.cc
+  air_pressure_plugin.cc
   altimeter_plugin.cc
   logical_camera_plugin.cc
   magnetometer_plugin.cc
@@ -40,7 +40,7 @@ ign_build_tests(TYPE INTEGRATION
   SOURCES
     ${tests}
   LIB_DEPS
-    #${PROJECT_LIBRARY_TARGET_NAME}-air_pressure
+    ${PROJECT_LIBRARY_TARGET_NAME}-air_pressure
     ${PROJECT_LIBRARY_TARGET_NAME}-altimeter
     ${PROJECT_LIBRARY_TARGET_NAME}-logical_camera
     ${PROJECT_LIBRARY_TARGET_NAME}-magnetometer
