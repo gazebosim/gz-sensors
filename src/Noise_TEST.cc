@@ -17,6 +17,8 @@
 
 #include <gtest/gtest.h>
 
+#include <numeric>
+
 #include <ignition/math/Rand.hh>
 
 #include "ignition/sensors/Noise.hh"
@@ -35,7 +37,7 @@ sdf::ElementPtr NoiseSdf(const std::string &_type, double _mean,
   double _stddev, double _biasMean, double _biasStddev, double _precision)
 {
   std::ostringstream noiseStream;
-  noiseStream << "<sdf version='1.4'>"
+  noiseStream << "<sdf version='1.6'>"
               << "  <noise type='" << _type << "'>"
               << "    <mean>" << _mean << "</mean>"
               << "    <stddev>" << _stddev << "</stddev>"
@@ -64,7 +66,15 @@ TEST(NoiseTest, Constructor)
   // Construct and initialize
   {
     sensors::Noise noise(sensors::NoiseType::NONE);
+
+#ifndef _WIN32
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
     noise.Load(NoiseSdf("none", 0, 0, 0, 0, 0));
+#ifndef _WIN32
+#pragma GCC diagnostic pop
+#endif
   }
 }
 
@@ -72,10 +82,15 @@ TEST(NoiseTest, Constructor)
 // Test noise types
 TEST(NoiseTest, Types)
 {
+  sdf::Noise noiseDom;
+
   // NONE type
   {
     sensors::NoisePtr noise =
         sensors::NoiseFactory::NewNoiseModel(NoiseSdf("none", 0, 0, 0, 0, 0));
+    EXPECT_EQ(noise->Type(), sensors::NoiseType::NONE);
+
+    noise = sensors::NoiseFactory::NewNoiseModel(noiseDom);
     EXPECT_EQ(noise->Type(), sensors::NoiseType::NONE);
   }
 
@@ -85,6 +100,10 @@ TEST(NoiseTest, Types)
         sensors::NoiseFactory::NewNoiseModel(
         NoiseSdf("gaussian", 0, 0, 0, 0, 0));
     EXPECT_EQ(noise->Type(), sensors::NoiseType::GAUSSIAN);
+
+    noiseDom.SetType(sdf::NoiseType::GAUSSIAN);
+    noise = sensors::NoiseFactory::NewNoiseModel(noiseDom);
+    EXPECT_EQ(noise->Type(), sensors::NoiseType::GAUSSIAN);
   }
 
   // GAUSSIAN_QUANTIZED type
@@ -92,6 +111,10 @@ TEST(NoiseTest, Types)
     sensors::NoisePtr noise =
         sensors::NoiseFactory::NewNoiseModel(
         NoiseSdf("gaussian_quantized", 0, 0, 0, 0, 0));
+    EXPECT_EQ(noise->Type(), sensors::NoiseType::GAUSSIAN);
+
+    noiseDom.SetType(sdf::NoiseType::GAUSSIAN_QUANTIZED);
+    noise = sensors::NoiseFactory::NewNoiseModel(noiseDom);
     EXPECT_EQ(noise->Type(), sensors::NoiseType::GAUSSIAN);
   }
 }
@@ -138,7 +161,7 @@ void GaussianNoise(sensors::NoisePtr _noise, unsigned int _count)
   double stdev_values = std::sqrt(sq_sum / values.size());
   double variance_values = stdev_values*stdev_values;
 
-  // The sample mean should be near x+mean, with standard deviation of
+  // The sample mean should be near_ x+mean, with standard deviation of
   // stddev / sqrt(_count)
   // https://onlinecourses.science.psu.edu/stat414/node/167
   // We will use 5 sigma (4e-5 chance of failure)

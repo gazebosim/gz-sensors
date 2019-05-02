@@ -33,16 +33,19 @@ namespace ignition
 {
   namespace sensors
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     // Forward declarations
     class ManagerPrivate;
 
     /// \brief Loads and runs sensors
     ///
     ///   This class is responsible for loading and running sensors, and
-    ///   providing sensors with common environments to generat data from. For
-    ///   example, sensors that need information about the visible world would
-    ///   access the common igntion::rendering::ScenePtr. A user of this class
-    ///   is expected to popluate that scene and give it to the manager.
+    ///   providing sensors with common environments to generat data from.
+    ///
+    ///   For rendering sensors that need information about the visible world,
+    ///   the user of this class is expected to popluate that scene and give it
+    ///   to the sensors.
     ///
     ///   The primary interface through which to load a sensor is LoadSensor().
     ///   This takes an sdf element pointer that should be configured with
@@ -64,13 +67,56 @@ namespace ignition
 
       /// \brief Initialize the sensor library with rendering.
       /// \return True if successfully initialized, false if not
-      public: bool Init(ignition::rendering::ScenePtr _rendering);
+      /// \deprecated Call RenderingSensor::SetScene directly
+      public: bool IGN_DEPRECATED(1) Init(
+          ignition::rendering::ScenePtr _rendering);
 
       /// \brief Set or change the ignition-rendering instance used
-      public: void SetRenderingScene(ignition::rendering::ScenePtr _rendering);
+      /// \deprecated Call RenderingSensor::SetScene directly
+      public: void IGN_DEPRECATED(1) SetRenderingScene(
+          ignition::rendering::ScenePtr _rendering);
 
       /// \brief Get the rendering manager instance
-      public: ignition::rendering::ScenePtr RenderingScene() const;
+      /// \deprecated See RenderingSensor::Scene
+      public: ignition::rendering::ScenePtr IGN_DEPRECATED(1)
+          RenderingScene() const;
+
+      /// \brief Create a sensor from SDF with a known sensor type.
+      ///
+      ///   This creates sensors by looking at the given sdf element.
+      ///   Sensors created with this API offer an ignition-transport interface.
+      ///   If you need a direct C++ interface to the data, you must get the
+      ///   sensor pointer and cast to the correct type.
+      ///
+      ///   A <sensor> tag may have multiple <plugin> tags. A SensorId will be
+      ///   returned for each plugin that is described in SDF.
+      ///   If there are no <plugin> tags then one of the plugins shipped with
+      ///   this library will be loaded. For example, a <sensor> tag with
+      ///   <camera> but no <plugin> will load a CameraSensor from
+      ///   ignition-sensors-camera.
+      /// \sa Sensor()
+      /// \param[in] _sdf pointer to the sdf element
+      /// \return A pointer to the created sensor. nullptr returned on
+      /// error.
+      public: template<typename T>
+              T *CreateSensor(sdf::Sensor _sdf)
+              {
+                ignition::sensors::SensorId id = this->CreateSensor(_sdf);
+
+                if (id != NO_SENSOR)
+                {
+                  T *result = dynamic_cast<T*>(this->Sensor(id));
+
+                  if (!result)
+                    ignerr << "SDF sensor type does not match template type\n";
+
+                  return result;
+                }
+
+                ignerr << "Failed to create sensor of type["
+                       << _sdf.TypeStr() << "]\n";
+                return nullptr;
+              }
 
       /// \brief Create a sensor from SDF with a known sensor type.
       ///
@@ -128,6 +174,26 @@ namespace ignition
       /// is returned on erro.
       public: ignition::sensors::SensorId CreateSensor(sdf::ElementPtr _sdf);
 
+      /// \brief Create a sensor from SDF without a known sensor type.
+      ///
+      ///   This creates sensors by looking at the given sdf element.
+      ///   Sensors created with this API offer an ignition-transport interface.
+      ///   If you need a direct C++ interface to the data, you must get the
+      ///   sensor pointer and cast to the correct type.
+      ///
+      ///   A <sensor> tag may have multiple <plugin> tags. A SensorId will be
+      ///   returned for each plugin that is described in SDF.
+      ///   If there are no <plugin> tags then one of the plugins shipped with
+      ///   this library will be loaded. For example, a <sensor> tag with
+      ///   <camera> but no <plugin> will load a CameraSensor from
+      ///   ignition-sensors-camera.
+      /// \sa Sensor()
+      /// \param[in] _sdf SDF sensor DOM object
+      /// \return A sensor id that refers to the created sensor. NO_SENSOR
+      /// is returned on erro.
+      public: ignition::sensors::SensorId CreateSensor(const sdf::Sensor &_sdf);
+
+
       /// \brief Get an instance of a loaded sensor by sensor id
       /// \param[in] _id Idenitifier of the sensor.
       /// \return Pointer to the sensor, nullptr on error.
@@ -149,14 +215,6 @@ namespace ignition
       /// \brief Adds colon delimited paths sensor plugins may be
       public: void AddPluginPaths(const std::string &_path);
 
-      /// \brief Get a sensor id by name
-      ///
-      /// The given name should follow the standard URI naming scheme.
-      /// \param[in] _name URI name of the sensor.
-      /// \return Pointer to the sensor, nullptr if the sensor could not be
-      /// found.
-      public: ignition::sensors::SensorId SensorId(const std::string &_name);
-
       /// \brief load a plugin and return a shared_ptr
       /// \param[in] _filename Sensor plugin file to load.
       /// \return Pointer to the new sensor, nullptr on error.
@@ -166,6 +224,7 @@ namespace ignition
       /// \brief private data pointer
       private: std::unique_ptr<ManagerPrivate> dataPtr;
     };
+    }
   }
 }
 

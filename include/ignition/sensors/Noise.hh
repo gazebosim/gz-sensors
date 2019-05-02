@@ -23,6 +23,7 @@
 #include <vector>
 
 #include <ignition/rendering/RenderTypes.hh>
+#include <ignition/sensors/config.hh>
 #include <ignition/sensors/SensorTypes.hh>
 #include <ignition/sensors/Export.hh>
 
@@ -32,6 +33,8 @@ namespace ignition
 {
   namespace sensors
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     // Forward declarations
     class NoisePrivate;
 
@@ -48,6 +51,16 @@ namespace ignition
       /// \return Pointer to the noise model created.
       public: static NoisePtr NewNoiseModel(sdf::ElementPtr _sdf,
           const std::string &_sensorType = "");
+
+      /// \brief Load a noise model based on the input sdf parameters and
+      /// sensor type.
+      /// \param[in] _sdf Noise sdf parameters.
+      /// \param[in] _sensorType Type of sensor. This is currently used to
+      /// distinguish between image and non image sensors in order to create
+      /// the appropriate noise model.
+      /// \return Pointer to the noise model created.
+      public: static NoisePtr NewNoiseModel(const sdf::Noise &_sdf,
+                  const std::string &_sensorType = "");
     };
 
     /// \brief Which noise types we support
@@ -73,9 +86,13 @@ namespace ignition
       public: virtual ~Noise();
 
       /// \brief Load noise parameters from sdf.
+      /// \param[in] _sdf SDF Noise DOM object.
+      public: virtual void Load(const sdf::Noise &_sdf);
+
+      /// \brief Load noise parameters from sdf.
       /// \param[in] _sdf SDF parameters.
-      /// \param[in] _sensor Type of sensor.
-      public: virtual void Load(sdf::ElementPtr _sdf);
+      /// \deprecated Use the version that accepts an sdf::Noise object.
+      public: virtual IGN_DEPRECATED(2) void Load(sdf::ElementPtr _sdf);
 
       /// \brief Apply noise to input data value.
       /// \param[in] _in Input data value.
@@ -103,7 +120,10 @@ namespace ignition
       /// for image sensors, i.e. camera/multicamera/depth sensors, which use
       /// shaders for more efficient noise generation.
       /// \param[in] _camera Camera associated to an image sensor
-      public: virtual void SetCamera(rendering::CameraPtr _camera);
+      /// \deprecated This will be provided in derived classes that support
+      /// adding noise to rendering sensors
+      public: virtual IGN_DEPRECATED(1) void SetCamera(
+          rendering::CameraPtr _camera);
 
       /// \brief Output information about the noise model.
       /// \param[in] _out Output stream
@@ -112,6 +132,7 @@ namespace ignition
       /// \brief Private data pointer
       private: NoisePrivate *dataPtr = nullptr;
     };
+    }
   }
 }
 #endif

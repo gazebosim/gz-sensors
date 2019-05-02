@@ -21,8 +21,8 @@
 #include <memory>
 
 #include <ignition/common/EnumIface.hh>
+#include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
-
 
 /// \file
 /// \ingroup ignition_sensors
@@ -33,12 +33,16 @@ namespace ignition
   /// \brief Sensors namespace
   namespace sensors
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    // Forward declarations.
     class AltimeterSensor;
-    class Sensor;
     class CameraSensor;
-    class Noise;
+    class GpuLidarSensor;
     class GaussianNoiseModel;
     class ImageGaussianNoiseModel;
+    class Noise;
+    class Sensor;
 
     /// \def SensorPtr
     /// \brief Shared pointer to Sensor
@@ -47,6 +51,10 @@ namespace ignition
     /// \def CameraSensorPtr
     /// \brief Shared pointer to CameraSensor
     typedef std::shared_ptr<CameraSensor> CameraSensorPtr;
+
+    /// \def GpuLidarSensorPtr
+    /// \brief Shared pointer to GpuLidarSensor
+    typedef std::shared_ptr<GpuLidarSensor> GpuLidarSensorPtr;
 
     /// \def NoisePtr
     /// \brief Shared pointer to Noise
@@ -68,6 +76,10 @@ namespace ignition
     /// \brief Vector of CameraSensor shared pointers
     typedef std::vector<CameraSensorPtr> CameraSensor_V;
 
+    /// \def GpuLidarSensor_V
+    /// \brief Vector of GpuLidarSensor shared pointers
+    typedef std::vector<GpuLidarSensorPtr> GpuLidarSensor_V;
+
     /// \def SensorNoiseType
     /// \brief Eumeration of all sensor noise types
     enum SensorNoiseType
@@ -84,6 +96,30 @@ namespace ignition
       /// \brief Noise streams for the Camera sensor
       /// \sa CameraSensor
       CAMERA_NOISE = 1,
+
+      /// \brief Magnetometer body-frame X axis noise in Tesla
+      /// \sa MagnetometerSensor
+      MAGNETOMETER_X_NOISE_TESLA = 2,
+
+      /// \brief Magnetometer body-frame Y axis noise in Tesla
+      /// \sa MagnetometerSensor
+      MAGNETOMETER_Y_NOISE_TESLA = 3,
+
+      /// \brief Magnetometer body-frame Z axis noise in Tesla
+      /// \sa MagnetometerSensor
+      MAGNETOMETER_Z_NOISE_TESLA = 4,
+
+      /// \brief Vertical noise stream for the altimeter sensor
+      /// \sa AltimeterSensor
+      ALTIMETER_VERTICAL_POSITION_NOISE_METERS = 5,
+
+      /// \brief Velocity noise streams for the altimeter sensor
+      /// \sa AltimeterSensor
+      ALTIMETER_VERTICAL_VELOCITY_NOISE_METERS_PER_S = 6,
+
+      /// \brief Air Pressure noise streams for the air pressure sensor
+      /// \sa AirPressureSensor
+      AIR_PRESSURE_NOISE_PASCALS = 7,
 
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not
@@ -111,6 +147,7 @@ namespace ignition
       /// \brief Number of Sensor Categories
       CATEGORY_COUNT = 3
     };
+    }
   }
 }
 #endif

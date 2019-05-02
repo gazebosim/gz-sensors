@@ -1,43 +1,30 @@
 /*
- * copyright (c) 2017 open source robotics foundation
+ * Copyright (C) 2018 Open Source Robotics Foundation
  *
- * licensed under the apache license, version 2.0 (the "license");
- * you may not use this file except in compliance with the license.
- * you may obtain a copy of the license at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/license-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * unless required by applicable law or agreed to in writing, software
- * distributed under the license is distributed on an "as is" basis,
- * without warranties or conditions of any kind, either express or implied.
- * see the license for the specific language governing permissions and
- * limitations under the license.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
 */
 
-#include <ignition/sensors/Lidar.hh>
 
 #include <ignition/common/Console.hh>
-#include <ignition/common/PluginMacros.hh>
-#include <ignition/math/Angle.hh>
-#include <ignition/sensors/Events.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/transport.hh>
+#include "ignition/sensors/Lidar.hh"
+#include "ignition/sensors/SensorFactory.hh"
 
 using namespace ignition::sensors;
 
-
+/// \brief Private data for Lidar class
 class ignition::sensors::LidarPrivate
 {
-  /// \brief constructor
-  public: LidarPrivate();
-
-  /// \brief destructor
-  public: ~LidarPrivate();
-
-  /// \brief Just a mutex for thread safety
-  public: std::mutex mutex;
-
   /// \brief node to create publisher
   public: transport::Node node;
 
@@ -47,43 +34,26 @@ class ignition::sensors::LidarPrivate
   /// \brief Laser message to publish data.
   public: ignition::msgs::LaserScan laserMsg;
 
-  /// \brief true if Load() has been called and was successful
-  public: bool initialized = false;
-
-  /// \brief Event triggered when new laser range data are available.
-  /// \param[in] _frame New frame containing raw laser data.
-  /// \param[in] _width Width of frame.
-  /// \param[in] _height Height of frame.
-  /// \param[in] _depth Depth of frame.
-  /// \param[in] _format Format of frame.
-  public: ignition::common::EventT<void(const float *_frame,
-               unsigned int _width, unsigned int _height,
-               unsigned int _depth, const std::string &_format)>
-               dataEvent;
-
-  /// \brief Raw buffer of laser data.
-  public: float *laserBuffer;
-
   /// \brief Horizontal ray count.
-  public: unsigned int horzRayCount;
+  public: unsigned int horzRayCount = 0;
 
   /// \brief Vertical ray count.
-  public: unsigned int vertRayCount;
+  public: unsigned int vertRayCount = 0;
 
   /// \brief Horizontal range count.
-  public: unsigned int horzRangeCount;
+  public: unsigned int horzRangeCount = 0;
 
   /// \brief Vertical range count.
-  public: unsigned int vertRangeCount;
+  public: unsigned int vertRangeCount = 0;
 
   /// \brief Range count ratio.
-  public: double rangeCountRatio;
+  public: double rangeCountRatio = 0;
 
   /// \brief The minimum range.
-  public: double rangeMin;
+  public: double rangeMin = 0;
 
   /// \brief The maximum range.
-  public: double rangeMax;
+  public: double rangeMax = 0;
 
   /// \brief Scan SDF element.
   public: sdf::ElementPtr scanElem;
@@ -100,16 +70,6 @@ class ignition::sensors::LidarPrivate
   /// \brief Camera SDF element.
   public: sdf::ElementPtr cameraElem;
 };
-
-//////////////////////////////////////////////////
-LidarPrivate::LidarPrivate()
-{
-}
-
-//////////////////////////////////////////////////
-LidarPrivate::~LidarPrivate()
-{
-}
 
 //////////////////////////////////////////////////
 Lidar::Lidar()
@@ -132,13 +92,22 @@ bool Lidar::Init()
 //////////////////////////////////////////////////
 void Lidar::Fini()
 {
+  if (this->laserBuffer)
+  {
+    delete [] this->laserBuffer;
+    this->laserBuffer = nullptr;
+  }
+}
+
+//////////////////////////////////////////////////
+bool Lidar::CreateLidar()
+{
+  return false;
 }
 
 //////////////////////////////////////////////////
 bool Lidar::Load(sdf::ElementPtr _sdf)
 {
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-
   // Validate that SDF has a sensor ray on it
   if (_sdf->GetName() == "sensor")
   {
@@ -185,6 +154,22 @@ bool Lidar::Load(sdf::ElementPtr _sdf)
   this->dataPtr->horzRangeCount = this->RangeCount();
   this->dataPtr->vertRangeCount = this->VerticalRangeCount();
 
+  // create message
+  this->dataPtr->laserMsg.set_count(this->RangeCount());
+  this->dataPtr->laserMsg.set_range_min(this->RangeMin());
+  this->dataPtr->laserMsg.set_range_max(this->RangeMax());
+  this->dataPtr->laserMsg.set_angle_min(this->AngleMin().Radian());
+  this->dataPtr->laserMsg.set_angle_max(this->AngleMax().Radian());
+  this->dataPtr->laserMsg.set_angle_step(this->AngleResolution());
+  this->dataPtr->laserMsg.set_vertical_angle_min(
+      this->VerticalAngleMin().Radian());
+  this->dataPtr->laserMsg.set_vertical_angle_max(
+      this->VerticalAngleMax().Radian());
+  this->dataPtr->laserMsg.set_vertical_angle_step(
+      this->VerticalAngleResolution());
+  this->dataPtr->laserMsg.set_vertical_count(
+      this->dataPtr->vertRangeCount);
+
   // Handle noise model settings.
   // if (rayElem->HasElement("noise"))
   // {
@@ -198,57 +183,42 @@ bool Lidar::Load(sdf::ElementPtr _sdf)
   // GZ_ASSERT(this->dataPtr->parentEntity != nullptr,
   //     "Unable to get the parent entity.");
 
-  this->dataPtr->initialized = true;
+  this->initialized = true;
   return true;
 }
 
 /////////////////////////////////////////////////
-ignition::common::ConnectionPtr Lidar::ConnectNewLaserFrame(
-          std::function<void(const float *, unsigned int, unsigned int,
-            unsigned int, const std::string &)> _subscriber)
+ignition::common::ConnectionPtr Lidar::ConnectNewLidarFrame(
+          std::function<void(const float *_scan, unsigned int _width,
+                  unsigned int _heighti, unsigned int _channels,
+                  const std::string &/*_format*/)> /*_subscriber*/)
 {
-  return this->dataPtr->dataEvent.Connect(_subscriber);
+  return nullptr;
 }
 
 //////////////////////////////////////////////////
-bool Lidar::Update(const common::Time &/*_now*/)
+bool Lidar::Update(const ignition::common::Time &/*_now*/)
 {
-  return true;
+  ignerr << "No lidar data being updated.\n";
+  return false;
 }
 
 //////////////////////////////////////////////////
-bool Lidar::PublishLaserScan(const common::Time &_now)
+bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
 {
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-
-  if (!this->dataPtr->initialized)
+  if (!this->laserBuffer)
     return false;
 
-  // create message
   this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_sec(
       _now.sec);
   this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_nsec(
       _now.nsec);
 
   // Store the latest laser scans into laserMsg
-  // msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
-  //     this->Pose() + this->dataPtr->parentEntity->WorldPose());
-  this->dataPtr->laserMsg.set_angle_min(this->AngleMin().Radian());
-  this->dataPtr->laserMsg.set_angle_max(this->AngleMax().Radian());
-  this->dataPtr->laserMsg.set_angle_step(this->AngleResolution());
-  this->dataPtr->laserMsg.set_count(this->RangeCount());
+  msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
+      this->Pose());
 
-  this->dataPtr->laserMsg.set_vertical_angle_min(
-      this->VerticalAngleMin().Radian());
-  this->dataPtr->laserMsg.set_vertical_angle_max(
-      this->VerticalAngleMax().Radian());
-  this->dataPtr->laserMsg.set_vertical_angle_step(
-      this->VerticalAngleResolution());
-  this->dataPtr->laserMsg.set_vertical_count(
-      this->dataPtr->vertRangeCount);
-
-  this->dataPtr->laserMsg.set_range_min(this->dataPtr->rangeMin);
-  this->dataPtr->laserMsg.set_range_max(this->dataPtr->rangeMax);
+  std::lock_guard<std::mutex> lock(this->lidarMutex);
 
   const int numRays = this->RayCount() * this->VerticalRayCount();
   if (this->dataPtr->laserMsg.ranges_size() != numRays)
@@ -268,17 +238,8 @@ bool Lidar::PublishLaserScan(const common::Time &_now)
     for (unsigned int i = 0; i < this->dataPtr->horzRangeCount; ++i)
     {
       int index = j * this->dataPtr->horzRangeCount + i;
-      double range = this->dataPtr->laserBuffer[index*3];
+      double range = this->laserBuffer[index*3];
 
-      // Mask ranges outside of min/max to +/- inf, as per REP 117
-      if (range >= this->dataPtr->rangeMax)
-      {
-        range = IGN_DBL_INF;
-      }
-      else if (range <= this->dataPtr->rangeMin)
-      {
-        range = -IGN_DBL_INF;
-      }
       // TODO(jchoclin): add LIDAR_NOISE
       // else if (this->noises.find(GPU_RAY_NOISE) !=
       //          this->noises.end())
@@ -291,7 +252,7 @@ bool Lidar::PublishLaserScan(const common::Time &_now)
       range = ignition::math::isnan(range) ? this->dataPtr->rangeMax : range;
       this->dataPtr->laserMsg.set_ranges(index, range);
       this->dataPtr->laserMsg.set_intensities(index,
-          this->dataPtr->laserBuffer[index * 3 + 1]);
+          this->laserBuffer[index * 3 + 1]);
     }
   }
 
@@ -401,6 +362,13 @@ int Lidar::VerticalRangeCount() const
 }
 
 //////////////////////////////////////////////////
+void Lidar::SetParent(const std::string &_parent)
+{
+  Sensor::SetParent(_parent);
+  this->dataPtr->laserMsg.set_frame(this->Parent());
+}
+
+//////////////////////////////////////////////////
 ignition::math::Angle Lidar::VerticalAngleMin() const
 {
   if (this->dataPtr->scanElem->HasElement("vertical"))
@@ -442,7 +410,7 @@ void Lidar::SetVerticalAngleMax(const double _angle)
 //////////////////////////////////////////////////
 void Lidar::Ranges(std::vector<double> &_ranges) const
 {
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  std::lock_guard<std::mutex> lock(this->lidarMutex);
 
   _ranges.resize(this->dataPtr->laserMsg.ranges_size());
   memcpy(&_ranges[0], this->dataPtr->laserMsg.ranges().data(),
@@ -452,7 +420,7 @@ void Lidar::Ranges(std::vector<double> &_ranges) const
 //////////////////////////////////////////////////
 double Lidar::Range(const int _index) const
 {
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  std::lock_guard<std::mutex> lock(this->lidarMutex);
 
   if (this->dataPtr->laserMsg.ranges_size() == 0)
   {
@@ -489,6 +457,4 @@ bool Lidar::IsActive() const
   return true;
 }
 
-IGN_COMMON_REGISTER_SINGLE_PLUGIN(
-    ignition::sensors::Lidar,
-    ignition::sensors::Sensor)
+IGN_SENSORS_REGISTER_SENSOR(Lidar)

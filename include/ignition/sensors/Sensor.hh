@@ -20,10 +20,10 @@
 #include <memory>
 #include <string>
 
-#include <ignition/common/PluginMacros.hh>
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/rendering/Scene.hh>
+#include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
 #include <sdf/sdf.hh>
 
@@ -31,13 +31,15 @@ namespace ignition
 {
   namespace sensors
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    //
     /// \brief A string used to identify a sensor
     using SensorId = std::size_t;
     const SensorId NO_SENSOR = 0;
 
     /// \brief forward declarations
     class SensorPrivate;
-    class SensorPlugin;
 
     /// \brief a base sensor class
     ///
@@ -46,14 +48,16 @@ namespace ignition
     ///   sensors update at the right time.
     class IGNITION_SENSORS_VISIBLE Sensor
     {
-      /// \brief Allows using shorter APIS in common::PluginLoader
-      public: IGN_COMMON_SPECIALIZE_INTERFACE(ignition::sensors::Sensor)
-
       /// \brief constructor
       protected: Sensor();
 
       /// \brief destructor
       public: virtual ~Sensor();
+
+      /// \brief Load the sensor based on data from an sdf::Sensor object.
+      /// \param[in] _sdf SDF <sensor> or <plugin> inside of <sensor>
+      /// \return true if loading was successful
+      public: virtual bool Load(const sdf::Sensor &_sdf);
 
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF <sensor> or <plugin> inside of <sensor>
@@ -109,18 +113,25 @@ namespace ignition
 
       /// \brief Get the current pose.
       /// \return Current pose of the sensor.
-      public: const ignition::math::Pose3d &Pose() const;
+      public: ignition::math::Pose3d Pose() const;
 
       /// \brief Update the pose of the sensor
       public: void SetPose(const ignition::math::Pose3d &_pose);
 
+      /// \brief Set the parent of the sensor
+      public: void SetParent(const std::string &_parent);
+
       /// \brief Get name.
       /// \return Name of sensor.
-      public: const std::string &Name() const;
+      public: std::string Name() const;
 
       /// \brief Get topic
       /// \return Topic sensor publishes data to
-      public: const std::string &Topic() const;
+      public: std::string Topic() const;
+
+      /// \brief Get parent link of the sensor.
+      /// \return Parent link of sensor.
+      public: std::string Parent() const;
 
       /// \brief Get the sensor's ID.
       /// \return The sensor's ID.
@@ -136,12 +147,15 @@ namespace ignition
       /// A sensor subclass should override this function if the subclass
       /// needs a pointer to the scene.
       /// \param[in] _scene Pointer to the scene
-      public: virtual void SetScene(ignition::rendering::ScenePtr _scene);
+      /// \deprecated See RenderingSensor::SetScene
+      public: virtual void IGN_DEPRECATED(1) SetScene(
+          ignition::rendering::ScenePtr _scene);
 
       /// \internal
       /// \brief Data pointer for private data
-      private: std::shared_ptr<SensorPrivate> dataPtr;
+      private: std::unique_ptr<SensorPrivate> dataPtr;
     };
+    }
   }
 }
 

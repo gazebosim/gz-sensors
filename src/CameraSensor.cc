@@ -15,21 +15,13 @@
  *
 */
 
-#include <cstdint>
-#include <mutex>
-#include <string>
-#include <ignition/sensors/CameraSensor.hh>
+#include <ignition/math/Helpers.hh>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Image.hh>
-#include <ignition/common/PluginMacros.hh>
-#include <ignition/math/Angle.hh>
-#include <ignition/rendering/Camera.hh>
-#include <ignition/transport.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/Events.hh>
+#include "ignition/sensors/CameraSensor.hh"
+#include "ignition/sensors/SensorFactory.hh"
 
-using namespace ignition::sensors;
+using namespace ignition;
+using namespace sensors;
 
 /// \brief Private data for CameraSensor
 class ignition::sensors::CameraSensorPrivate
@@ -47,7 +39,7 @@ class ignition::sensors::CameraSensorPrivate
   /// of the path was not possible.
   /// \sa ImageSaver
   public: bool SaveImage(const unsigned char *_data, unsigned int _width,
-    unsigned int _height, common::Image::PixelFormatType _format);
+    unsigned int _height, ignition::common::Image::PixelFormatType _format);
 
   /// \brief node to create publisher
   public: transport::Node node;
@@ -57,9 +49,6 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
-
-  /// \brief A scene the camera is capturing
-  public: ignition::rendering::ScenePtr scene;
 
   /// \brief Rendering camera
   public: ignition::rendering::CameraPtr camera;
@@ -89,76 +78,67 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief counter used to set the image filename
   public: std::uint64_t saveImageCounter = 0;
+
+  /// \brief SDF Sensor DOM object.
+  public: sdf::Sensor sdfSensor;
 };
 
 //////////////////////////////////////////////////
 bool CameraSensor::CreateCamera()
 {
-  sdf::ElementPtr cameraElem = this->SDF()->GetElement("camera");
-  if (!cameraElem)
+  const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
+  if (!cameraSdf)
   {
-    ignerr << "Unable to find <camera> SDF element\n";
+    ignerr << "Unable to access camera SDF element.\n";
     return false;
   }
 
-  sdf::ElementPtr imgElem = cameraElem->GetElement("image");
+  int width = cameraSdf->ImageWidth();
+  int height = cameraSdf->ImageHeight();
 
-  if (!imgElem)
-  {
-    ignerr << "Unable to find <camera><image> SDF element\n";
-    return false;
-  }
-
-  int width = imgElem->Get<int>("width");
-  int height = imgElem->Get<int>("height");
-
-  this->dataPtr->camera = this->dataPtr->scene->CreateCamera(this->Name());
+  this->dataPtr->camera = this->Scene()->CreateCamera(this->Name());
   this->dataPtr->camera->SetImageWidth(width);
   this->dataPtr->camera->SetImageHeight(height);
+  this->dataPtr->camera->SetNearClipPlane(cameraSdf->NearClip());
+  this->dataPtr->camera->SetFarClipPlane(cameraSdf->FarClip());
 
   // \todo(nkoeng) these parameters via sdf
   this->dataPtr->camera->SetAntiAliasing(2);
 
-  auto angle = cameraElem->Get<double>("horizontal_fov", 0);
-  if (angle.first < 0.01 || angle.first > M_PI*2)
+  double angle = cameraSdf->HorizontalFov();
+  if (angle < 0.01 || angle > IGN_PI*2)
   {
-    ignerr << "Invalid horizontal field of view [" << angle.first << "]\n";
+    ignerr << "Invalid horizontal field of view [" << angle << "]\n";
 
     return false;
   }
   this->dataPtr->camera->SetAspectRatio(static_cast<double>(width)/height);
-  this->dataPtr->camera->SetHFOV(angle.first);
+  this->dataPtr->camera->SetHFOV(angle);
 
-  if (cameraElem->HasElement("distortion"))
-  {
-    // \todo(nkoenig) Port Distortion class
-    // This->dataPtr->distortion.reset(new Distortion());
-    // This->dataPtr->distortion->Load(this->sdf->GetElement("distortion"));
-  }
+  // \todo(nkoenig) Port Distortion class
+  // This->dataPtr->distortion.reset(new Distortion());
+  // This->dataPtr->distortion->Load(this->sdf->GetElement("distortion"));
 
-  std::string formatStr = imgElem->Get<std::string>("format");
-  ignition::common::Image::PixelFormatType format =
-    ignition::common::Image::ConvertPixelFormat(formatStr);
-  switch (format)
+  sdf::PixelFormatType pixelFormat = cameraSdf->PixelFormat();
+  switch (pixelFormat)
   {
-    case ignition::common::Image::RGB_INT8:
+    case sdf::PixelFormatType::RGB_INT8:
       this->dataPtr->camera->SetImageFormat(ignition::rendering::PF_R8G8B8);
       break;
     default:
-      ignerr << "Unsupported pixel format [" << formatStr << "]\n";
+      ignerr << "Unsupported pixel format ["
+        << static_cast<int>(pixelFormat) << "]\n";
       break;
   }
 
   this->dataPtr->image = this->dataPtr->camera->CreateImage();
 
-  this->dataPtr->scene->RootVisual()->AddChild(this->dataPtr->camera);
+  this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);
 
   // Create the directory to store frames
-  if (cameraElem->HasElement("save") &&
-      cameraElem->GetElement("save")->Get<bool>("enabled"))
+  if (cameraSdf->SaveFrames())
   {
-    sdf::ElementPtr elem = cameraElem->GetElement("save");
-    this->dataPtr->saveImagePath = elem->Get<std::string>("path");
+    this->dataPtr->saveImagePath = cameraSdf->SaveFramesPath();
     this->dataPtr->saveImagePrefix = this->Name() + "_";
     this->dataPtr->saveImage = true;
   }
@@ -167,7 +147,7 @@ bool CameraSensor::CreateCamera()
 }
 
 //////////////////////////////////////////////////
-void CameraSensorPrivate::RemoveCamera(ignition::rendering::ScenePtr _scene)
+void CameraSensorPrivate::RemoveCamera(rendering::ScenePtr _scene)
 {
   if (_scene)
   {
@@ -194,24 +174,30 @@ bool CameraSensor::Init()
 }
 
 //////////////////////////////////////////////////
-bool CameraSensor::Load(sdf::ElementPtr _sdf)
+bool CameraSensor::Load(const sdf::Sensor &_sdf)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  // Check if this is being loaded via "builtin" or via a plugin
-  if (_sdf->GetName() == "sensor")
-  {
-    if (!_sdf->GetElement("camera"))
-    {
-      ignerr << "<sensor><camera> SDF element not found while attempting to "
-        << "load a ignition::sensors::CameraSensor\n";
-      return false;
-    }
-  }
 
   if (!Sensor::Load(_sdf))
   {
     return false;
   }
+
+  // Check if this is the right type
+  if (_sdf.Type() != sdf::SensorType::CAMERA)
+  {
+    ignerr << "Attempting to a load a Camera sensor, but received "
+      << "a " << _sdf.TypeStr() << std::endl;
+  }
+
+  if (_sdf.CameraSensor() == nullptr)
+  {
+    ignerr << "Attempting to a load a Camera sensor, but received "
+      << "a null sensor." << std::endl;
+    return false;
+  }
+
+  this->dataPtr->sdfSensor = _sdf;
 
   this->dataPtr->pub =
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
@@ -219,16 +205,25 @@ bool CameraSensor::Load(sdf::ElementPtr _sdf)
   if (!this->dataPtr->pub)
     return false;
 
-  if (this->dataPtr->scene)
+  if (this->Scene())
   {
     this->CreateCamera();
   }
 
-  this->dataPtr->sceneChangeConnection = Events::ConnectSceneChangeCallback(
+  this->dataPtr->sceneChangeConnection =
+      RenderingEvents::ConnectSceneChangeCallback(
       std::bind(&CameraSensor::SetScene, this, std::placeholders::_1));
 
   this->dataPtr->initialized = true;
   return true;
+}
+
+//////////////////////////////////////////////////
+bool CameraSensor::Load(sdf::ElementPtr _sdf)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(_sdf);
+  return this->Load(sdfSensor);
 }
 
 /////////////////////////////////////////////////
@@ -243,17 +238,17 @@ void CameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
-  if (this->dataPtr->scene != _scene)
+  if (this->Scene() != _scene)
   {
-    this->dataPtr->RemoveCamera(this->dataPtr->scene);
-    this->dataPtr->scene = _scene;
+    this->dataPtr->RemoveCamera(this->Scene());
+    RenderingSensor::SetScene(_scene);
     if (this->dataPtr->initialized)
       this->CreateCamera();
   }
 }
 
 //////////////////////////////////////////////////
-bool CameraSensor::Update(const common::Time &_now)
+bool CameraSensor::Update(const ignition::common::Time &_now)
 {
   if (!this->dataPtr->initialized)
   {
@@ -279,11 +274,16 @@ bool CameraSensor::Update(const common::Time &_now)
   unsigned int height = this->dataPtr->camera->ImageHeight();
   unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
-  ignition::common::Image::PixelFormatType format;
+  ignition::common::Image::PixelFormatType
+      format{common::Image::UNKNOWN_PIXEL_FORMAT};
+  msgs::PixelFormatType msgsPixelFormat =
+    msgs::PixelFormatType::UNKNOWN_PIXEL_FORMAT;
+
   switch (this->dataPtr->camera->ImageFormat())
   {
     case ignition::rendering::PF_R8G8B8:
       format = ignition::common::Image::RGB_INT8;
+      msgsPixelFormat = msgs::PixelFormatType::RGB_INT8;
       break;
     default:
       ignerr << "Unsupported pixel format ["
@@ -297,7 +297,7 @@ bool CameraSensor::Update(const common::Time &_now)
   msg.set_height(height);
   msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
                this->dataPtr->camera->ImageFormat()));
-  msg.set_pixel_format(format);
+  msg.set_pixel_format_type(msgsPixelFormat);
   msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
   msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
@@ -327,7 +327,7 @@ bool CameraSensor::Update(const common::Time &_now)
 //////////////////////////////////////////////////
 bool CameraSensorPrivate::SaveImage(const unsigned char *_data,
     unsigned int _width, unsigned int _height,
-    common::Image::PixelFormatType _format)
+    ignition::common::Image::PixelFormatType _format)
 {
   // Attempt to create the directory if it doesn't exist
   if (!ignition::common::isDirectory(this->saveImagePath))
@@ -348,6 +348,22 @@ bool CameraSensorPrivate::SaveImage(const unsigned char *_data,
   return true;
 }
 
-IGN_COMMON_REGISTER_SINGLE_PLUGIN(
-    ignition::sensors::CameraSensor,
-    ignition::sensors::Sensor)
+//////////////////////////////////////////////////
+unsigned int CameraSensor::ImageWidth() const
+{
+  return this->dataPtr->camera->ImageWidth();
+}
+
+//////////////////////////////////////////////////
+unsigned int CameraSensor::ImageHeight() const
+{
+  return this->dataPtr->camera->ImageHeight();
+}
+
+//////////////////////////////////////////////////
+rendering::CameraPtr CameraSensor::RenderingCamera() const
+{
+  return this->dataPtr->camera;
+}
+
+IGN_SENSORS_REGISTER_SENSOR(CameraSensor)

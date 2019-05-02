@@ -20,15 +20,16 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/rendering/RenderTypes.hh>
-#include <ignition/sensors/Noise.hh>
-#include <ignition/sensors/Export.hh>
+#include "ignition/sensors/config.hh"
+#include "ignition/sensors/Export.hh"
+#include "ignition/sensors/Noise.hh"
 
 namespace ignition
 {
-  // class GaussianNoiseCompositorListener;
   namespace sensors
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     // Forward declarations
     class GaussianNoiseModelPrivate;
 
@@ -45,10 +46,10 @@ namespace ignition
       public: virtual ~GaussianNoiseModel();
 
       // Documentation inherited.
-      public: virtual void Load(sdf::ElementPtr _sdf);
+      public: virtual void Load(const sdf::Noise &_sdf) override final;
 
       // Documentation inherited.
-      public: double ApplyImpl(double _in);
+      public: double ApplyImpl(double _in) override;
 
       /// \brief Accessor for mean.
       /// \return Mean of Gaussian noise.
@@ -63,46 +64,12 @@ namespace ignition
       public: double Bias() const;
 
       /// Documentation inherited
-      public: virtual void Print(std::ostream &_out) const;
+      public: virtual void Print(std::ostream &_out) const override;
 
       /// \brief Private data pointer.
       private: GaussianNoiseModelPrivate *dataPtr = nullptr;
     };
-
-    /// \class GaussianNoiseModel
-    /// \brief Gaussian noise class for image sensors
-    class IGNITION_SENSORS_VISIBLE ImageGaussianNoiseModel :
-      public GaussianNoiseModel
-    {
-      /// \brief Constructor.
-      public: ImageGaussianNoiseModel();
-
-      /// \brief Destructor.
-      public: virtual ~ImageGaussianNoiseModel();
-
-      // Documentation inherited.
-      public: virtual void Load(sdf::ElementPtr _sdf);
-
-      // Documentation inherited.
-      public: virtual void Fini();
-
-      // Documentation inherited.
-      public: virtual void SetCamera(rendering::CameraPtr _camera);
-
-      /// Documentation inherited
-      public: virtual void Print(std::ostream &_out) const;
-
-      /*
-      TODO: implement compositor instance in ign-rendering
-      /// \brief Gaussian noise compositor.
-      public: Ogre::CompositorInstance *gaussianNoiseInstance;
-
-
-      /// \brief Gaussian noise compositor listener
-      public: std::shared_ptr<GaussianNoiseCompositorListener>
-        gaussianNoiseCompositorListener;
-      */
-    };
+    }
   }
 }
 

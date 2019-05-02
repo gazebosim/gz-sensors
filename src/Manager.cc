@@ -15,15 +15,21 @@
  *
 */
 
+// todo(anyone) remove pragma once the deprecated functions are removed in
+// ign-sensors 3
+// #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 #include "ignition/sensors/Manager.hh"
+#include <memory>
 #include <unordered_map>
 #include <ignition/common/PluginLoader.hh>
 #include <ignition/common/Plugin.hh>
 #include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>
-#include "ignition/sensors/Events.hh"
-#include "ignition/sensors/config.hh"
 
+#include "ignition/sensors/config.hh"
+#include "ignition/sensors/Events.hh"
+#include "ignition/sensors/SensorFactory.hh"
 
 using namespace ignition::sensors;
 
@@ -36,16 +42,13 @@ class ignition::sensors::ManagerPrivate
   public: ~ManagerPrivate();
 
   /// \brief Loaded sensors.
-  public: std::map<SensorId, std::shared_ptr<Sensor>> sensors;
+  public: std::map<SensorId, std::unique_ptr<Sensor>> sensors;
 
   /// \brief Ignition Rendering manager
   public: ignition::rendering::ScenePtr renderingScene;
 
-  /// \brief Instance used to find stuff on the file system
-  public: ignition::common::SystemPaths systemPaths;
-
-  /// \brief Instance used to load plugins
-  public: ignition::common::PluginLoader pluginLoader;
+  /// \brief Sensor factory for creating sensors from plugins;
+  public: SensorFactory sensorFactory;
 };
 
 //////////////////////////////////////////////////
@@ -62,8 +65,6 @@ ManagerPrivate::~ManagerPrivate()
 Manager::Manager() :
   dataPtr(new ManagerPrivate)
 {
-  // Search for plugins in directory where libraries were installed
-  this->dataPtr->systemPaths.AddPluginPaths(IGN_SENSORS_PLUGIN_PATH);
 }
 
 //////////////////////////////////////////////////
@@ -78,9 +79,9 @@ bool Manager::Init()
 }
 
 //////////////////////////////////////////////////
-bool Manager::Init(ignition::rendering::ScenePtr _rendering)
+bool Manager::Init(ignition::rendering::ScenePtr _scene)
 {
-  if (!_rendering)
+  if (!_scene)
   {
     ignerr << "Null ScenePtr cannot initialize a sensor manager.\n";
     return false;
@@ -89,7 +90,11 @@ bool Manager::Init(ignition::rendering::ScenePtr _rendering)
   bool success = this->Init();
   if (success)
   {
-    this->SetRenderingScene(_rendering);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    // The Init and SetRenderingScene functions will be removed in ign-sensors3
+    this->SetRenderingScene(_scene);
+#pragma GCC diagnostic pop
   }
   return success;
 }
@@ -118,7 +123,7 @@ ignition::sensors::Sensor *Manager::Sensor(
 //////////////////////////////////////////////////
 void Manager::AddPluginPaths(const std::string &_paths)
 {
-  this->dataPtr->systemPaths.AddPluginPaths(_paths);
+  this->dataPtr->sensorFactory.AddPluginPaths(_paths);
 }
 
 //////////////////////////////////////////////////
@@ -136,85 +141,40 @@ void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
   }
 }
 
-//////////////////////////////////////////////////
-ignition::sensors::SensorId Manager::SensorId(const std::string & /*_name*/)
+/////////////////////////////////////////////////
+ignition::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &_sdf)
 {
-  // \todo(nkoenig) find sensor id given sensor name
-  return NO_SENSOR;
-}
-
-//////////////////////////////////////////////////
-ignition::sensors::SensorId Manager::LoadSensorPlugin(
-    const std::string &_filename, sdf::ElementPtr _sdf)
-{
-  std::string fullPath =
-    this->dataPtr->systemPaths.FindSharedLibrary(_filename);
-  if (fullPath.empty())
-  {
-    ignerr << "Unable to find sensor plugin path for [" << _filename << "]\n";
-    return NO_SENSOR;
-  }
-
-  auto pluginNames = this->dataPtr->pluginLoader.LoadLibrary(fullPath);
-  if (pluginNames.empty())
-  {
-    ignerr << "Unable to load sensor plugin file for [" << fullPath << "]\n";
-    return NO_SENSOR;
-  }
-
-  // Assume the first plugin is the one we're interested in
-  // \todo(sloretz) fix Manager API to handle libraries with multiple plugins
-  std::string pluginName = *(pluginNames.begin());
-
-  common::PluginPtr pluginPtr =
-    this->dataPtr->pluginLoader.Instantiate(pluginName);
-  auto sensor = pluginPtr->QueryInterfaceSharedPtr<ignition::sensors::Sensor>();
+  auto sensor = this->dataPtr->sensorFactory.CreateSensor(_sdf);
   if (!sensor)
-  {
-    ignerr << "Unable to instantiate sensor plugin for [" << fullPath << "]\n";
     return NO_SENSOR;
-  }
 
-  // Set the rendering scene
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  // This behavior is deprecated.
+  // The users are expected to call RenderingSsensor::SetScene in ign-sensors3
   sensor->SetScene(this->dataPtr->renderingScene);
+#pragma GCC diagnostic pop
 
-  if (!sensor->Load(_sdf))
-  {
-    ignerr << "Sensor::Load failed for plugin [" << fullPath << "]\n";
-    return NO_SENSOR;
-  }
-
-  if (!sensor->Init())
-  {
-    ignerr << "Sensor::Init failed for plugin [" << fullPath << "]\n";
-    return NO_SENSOR;
-  }
-
-  ignition::sensors::SensorId id = sensor->Id();
-  this->dataPtr->sensors.insert(
-      std::make_pair(id, sensor));
-
-  // Shared pointer so others can access plugins
+  SensorId id = sensor->Id();
+  this->dataPtr->sensors[id] = std::move(sensor);
   return id;
 }
 
 /////////////////////////////////////////////////
 ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr _sdf)
 {
-  if (_sdf)
-  {
-    if (_sdf->GetName() == "sensor")
-    {
-      std::string type = _sdf->Get<std::string>("type");
-      return this->LoadSensorPlugin(IGN_SENSORS_PLUGIN_NAME(type), _sdf);
-    }
-    /// \todo: Add in plugin support when SDF is updated.
-    else
-    {
-      ignerr << "Provided SDF is not a <sensor> element.\n";
-      return NO_SENSOR;
-    }
-  }
+  auto sensor = this->dataPtr->sensorFactory.CreateSensor(_sdf);
+  if (!sensor)
+    return NO_SENSOR;
 
-  return NO_SENSOR;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  // This behavior is deprecated.
+  // The users are expected to call RenderingSsensor::SetScene in ign-sensors3
+  sensor->SetScene(this->dataPtr->renderingScene);
+#pragma GCC diagnostic pop
+
+  SensorId id = sensor->Id();
+  this->dataPtr->sensors[id] = std::move(sensor);
+  return id;
 }

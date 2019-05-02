@@ -19,6 +19,7 @@
 #define IGNITION_SENSORS_EVENTS_HH_
 
 #include <ignition/common/Event.hh>
+#include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/rendering/Scene.hh>
 
@@ -26,6 +27,9 @@ namespace ignition
 {
   namespace sensors
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    //
     class IGNITION_SENSORS_VISIBLE Events
     {
       /// \brief Set a callback to be called when the scene is changed.
@@ -35,7 +39,9 @@ namespace ignition
       /// \remark Do not block inside of the callback.
       /// \return A connection pointer that must remain in scope. When the
       /// connection pointer falls out of scope, the connection is broken.
-      public: static ignition::common::ConnectionPtr ConnectSceneChangeCallback(
+      /// \deprecated See RenderingEvents::ConnectSceneChangeCallback
+      public: static ignition::common::ConnectionPtr IGN_DEPRECATED(1)
+                  ConnectSceneChangeCallback(
                   std::function<void(const ignition::rendering::ScenePtr &)>
                   _callback);
 
@@ -44,6 +50,7 @@ namespace ignition
       public: static ignition::common::EventT<
               void(const ignition::rendering::ScenePtr &)> sceneEvent;
     };
+    }
   }
 }
 #endif

@@ -3,3 +3,4 @@ syntax: glob
 build
 .DS_Store
 .*.sw?
+*.orig

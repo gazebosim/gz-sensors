@@ -17,22 +17,48 @@
 #ifndef IGNITION_SENSORS_CAMERASENSOR_HH_
 #define IGNITION_SENSORS_CAMERASENSOR_HH_
 
+#include <cstdint>
 #include <memory>
+#include <mutex>
+#include <string>
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/Time.hh>
+#include <ignition/common/Console.hh>
 #include <ignition/common/Event.hh>
+#include <ignition/common/Image.hh>
+#include <ignition/common/PluginMacros.hh>
+#include <ignition/common/Time.hh>
+
+#include <ignition/math/Angle.hh>
 #include <ignition/math/Pose3.hh>
-#include <ignition/rendering/Camera.hh>
 #include <ignition/msgs.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/Sensor.hh>
+#include <ignition/rendering/Camera.hh>
+#include <ignition/transport.hh>
+
+#include "ignition/sensors/config.hh"
+#include "ignition/sensors/Export.hh"
+#include "ignition/sensors/RenderingEvents.hh"
+#include "ignition/sensors/Manager.hh"
+#include "ignition/sensors/RenderingSensor.hh"
+
+#ifndef _WIN32
+#  define CameraSensor_EXPORTS_API
+#else
+#  if (defined(CameraSensor_EXPORTS))
+#    define CameraSensor_EXPORTS_API __declspec(dllexport)
+#  else
+#    define CameraSensor_EXPORTS_API __declspec(dllimport)
+#  endif
+#endif
 
 namespace ignition
 {
   namespace sensors
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    //
     /// \brief forward declarations
     class CameraSensorPrivate;
 
@@ -43,13 +69,18 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-    class IGNITION_SENSORS_VISIBLE CameraSensor : public Sensor
+    class CameraSensor_EXPORTS_API CameraSensor : public RenderingSensor
     {
       /// \brief constructor
       public: CameraSensor();
 
       /// \brief destructor
       public: virtual ~CameraSensor();
+
+      /// \brief Load the sensor based on data from an sdf::Sensor object.
+      /// \param[in] _sdf SDF Sensor parameters.
+      /// \return true if loading was successful
+      public: virtual bool Load(const sdf::Sensor &_sdf) override;
 
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF Sensor parameters.
@@ -82,6 +113,18 @@ namespace ignition
       public: virtual void SetScene(
                   ignition::rendering::ScenePtr _scene) override;
 
+      /// \brief Get image width.
+      /// \return width of the image
+      public: virtual unsigned int ImageWidth() const;
+
+      /// \brief Get image height.
+      /// \return height of the image
+      public: virtual unsigned int ImageHeight() const;
+
+      /// \brief Get pointer to rendering camera object.
+      /// \return Camera in Ignition Rendering.
+      public: rendering::CameraPtr RenderingCamera() const;
+
       /// \brief Create a camera in a scene
       /// \return True on success.
       private: bool CreateCamera();
@@ -89,12 +132,13 @@ namespace ignition
       /// \brief Callback that is triggered when the scene changes on
       /// the Manager.
       /// \param[in] _scene Pointer to the new scene.
-      private: void OnSceneChange(ignition::rendering::ScenePtr _scene);
+      private: void OnSceneChange(ignition::rendering::ScenePtr /*_scene*/);
 
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<CameraSensorPrivate> dataPtr;
     };
+    }
   }
 }
 

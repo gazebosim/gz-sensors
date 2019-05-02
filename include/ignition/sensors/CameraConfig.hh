@@ -23,12 +23,16 @@
 #include <ignition/common/Image.hh>
 #include <ignition/msgs.hh>
 #include <sdf/sdf.hh>
+#include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
 
 namespace ignition
 {
   namespace sensors
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    //
     /// \brief Forward declaration
     class CameraConfigPrivate;
 
@@ -201,6 +205,7 @@ namespace ignition
       /// \internal
       private: std::unique_ptr<CameraConfigPrivate> dataPtr;
     };
+    }
   }
 }
 

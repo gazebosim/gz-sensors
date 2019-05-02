@@ -19,6 +19,7 @@
 
 #include <ignition/common/Image.hh>
 #include <ignition/common/Console.hh>
+#include <ignition/math/Helpers.hh>
 #include <ignition/rendering.hh>
 #include <ignition/sensors.hh>
 
@@ -39,7 +40,14 @@ void BuildScene(ignition::rendering::ScenePtr _scene);
 int main()
 {
   // Setup ign-rendering with a scene
-  auto *engine = ignition::rendering::engine("ogre");
+#ifdef WITH_OGRE
+  auto engine = ignition::rendering::engine("ogre");
+#else
+#ifdef WITH_OGRE2
+  auto engine = ignition::rendering::engine("ogre2");
+#endif
+#endif
+
   if (!engine)
   {
     std::cerr << "Failed to load ogre\n";
@@ -52,7 +60,6 @@ int main()
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.SetRenderingScene(scene);
 
   // Create SDF describing a camera sensor
   const std::string name = "ExampleCamera";
@@ -76,6 +83,7 @@ int main()
     ignerr << "Unable to load camera sensor\n";
     return 1;
   }
+  cameraSensor->SetScene(scene);
 
   // Set a callback on the camera sensor to get a camera frame
   ignition::common::ConnectionPtr connection =
@@ -156,7 +164,7 @@ void BuildScene(ignition::rendering::ScenePtr _scene)
   box->AddGeometry(_scene->CreateBox());
   box->SetOrigin(0.0, 0.5, 0.0);
   box->SetLocalPosition(3, 0, 0);
-  box->SetLocalRotation(M_PI / 4, 0, M_PI / 3);
+  box->SetLocalRotation(IGN_PI / 4, 0, IGN_PI / 3);
   box->SetLocalScale(1, 2.5, 1);
   box->SetMaterial(blue);
   root->AddChild(box);
