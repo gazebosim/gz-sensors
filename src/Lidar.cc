@@ -86,6 +86,7 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
   {
     ignerr << "Attempting to a load a Lidar sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
+    return false;
   }
 
   if (_sdf.LidarSensor() == nullptr)
@@ -262,7 +263,7 @@ ignition::math::Angle Lidar::AngleMax() const
 //////////////////////////////////////////////////
 void Lidar::SetAngleMax(double _angle)
 {
-  return this->dataPtr->sdfLidar.SetHorizontalScanMaxAngle(_angle);
+  this->dataPtr->sdfLidar.SetHorizontalScanMaxAngle(_angle);
 }
 
 //////////////////////////////////////////////////
@@ -354,7 +355,7 @@ double Lidar::VerticalAngleResolution() const
 //////////////////////////////////////////////////
 void Lidar::SetVerticalAngleMax(const double _angle)
 {
-  return this->dataPtr->sdfLidar.SetVerticalScanMaxAngle(_angle);
+  this->dataPtr->sdfLidar.SetVerticalScanMaxAngle(_angle);
 }
 
 //////////////////////////////////////////////////
