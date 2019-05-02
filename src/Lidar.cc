@@ -268,13 +268,13 @@ void Lidar::SetAngleMax(double _angle)
 //////////////////////////////////////////////////
 double Lidar::RangeMin() const
 {
-  return this->dataPtr->sdfLidar.MinRange();
+  return this->dataPtr->sdfLidar.RangeMin();
 }
 
 //////////////////////////////////////////////////
 double Lidar::RangeMax() const
 {
-  return this->dataPtr->sdfLidar.MaxRange();
+  return this->dataPtr->sdfLidar.RangeMax();
 }
 
 /////////////////////////////////////////////////
