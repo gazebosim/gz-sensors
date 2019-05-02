@@ -139,12 +139,12 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   const std::string parent = "parent_link";
   const std::string topic = "/ignition/sensors/test/lidar";
   const double updateRate = 30;
-  const int horzSamples = 640;
+  const unsigned int horzSamples = 640;
   const double horzResolution = 1;
   const double horzMinAngle = -1.396263;
   const double horzMaxAngle = 1.396263;
   const double vertResolution = 1;
-  const int vertSamples = 1;
+  const unsigned int vertSamples = 1;
   const double vertMinAngle = 0;
   const double vertMaxAngle = 0;
   const double rangeResolution = 0.01;
@@ -510,10 +510,10 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   mgr.RunOnce(ignition::common::Time::Zero, true);
 
   // Verify values out of range
-  for (int i = 0; i < sensor1->RayCount(); ++i)
+  for (unsigned int i = 0; i < sensor1->RayCount(); ++i)
     EXPECT_DOUBLE_EQ(sensor1->Range(i), ignition::math::INF_D);
 
-  for (int i = 0; i < sensor1->RayCount(); ++i)
+  for (unsigned int i = 0; i < sensor1->RayCount(); ++i)
     EXPECT_DOUBLE_EQ(sensor2->Range(i), ignition::math::INF_D);
 
   // Clean up
@@ -625,9 +625,9 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   mgr.RunOnce(ignition::common::Time::Zero, true);
 
   // Verify all values are out of range
-  for (int j = 0; j < sensor->VerticalRayCount(); ++j)
+  for (unsigned int j = 0; j < sensor->VerticalRayCount(); ++j)
   {
-    for (int i = 0; i < sensor->RayCount(); ++i)
+    for (unsigned int i = 0; i < sensor->RayCount(); ++i)
     {
       EXPECT_DOUBLE_EQ(sensor->Range(j * sensor->RayCount() + i),
           ignition::math::INF_D);

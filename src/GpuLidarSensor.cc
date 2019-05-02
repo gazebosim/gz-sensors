@@ -14,8 +14,6 @@
  * limitations under the License.
  *
 */
-
-
 #include <ignition/common/Console.hh>
 #include "ignition/sensors/GpuLidarSensor.hh"
 #include "ignition/sensors/SensorFactory.hh"
@@ -80,7 +78,7 @@ void GpuLidarSensor::RemoveGpuRays(
 }
 
 //////////////////////////////////////////////////
-bool GpuLidarSensor::Load(sdf::ElementPtr _sdf)
+bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
 {
   // Check if this is being loaded via "builtin" or via a plugin
   if (!Lidar::Load(_sdf))
@@ -88,28 +86,24 @@ bool GpuLidarSensor::Load(sdf::ElementPtr _sdf)
     return false;
   }
 
-  if (_sdf->GetName() == "sensor")
-  {
-    if (!_sdf->GetElement("ray"))
-    {
-      ignerr << "<sensor><camera> SDF element not found while attempting to "
-        << "load a ignition::sensors::GpuLidarSensor\n";
-      return false;
-    }
-  }
-
   if (this->Scene())
-  {
     this->CreateLidar();
-  }
 
   this->dataPtr->sceneChangeConnection =
-      RenderingEvents::ConnectSceneChangeCallback(
-      std::bind(&GpuLidarSensor::SetScene, this, std::placeholders::_1));
+    RenderingEvents::ConnectSceneChangeCallback(
+        std::bind(&GpuLidarSensor::SetScene, this, std::placeholders::_1));
 
   this->initialized = true;
 
   return true;
+}
+
+//////////////////////////////////////////////////
+bool GpuLidarSensor::Load(sdf::ElementPtr _sdf)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(_sdf);
+  return this->Load(sdfSensor);
 }
 
 //////////////////////////////////////////////////
