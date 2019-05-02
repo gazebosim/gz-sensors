@@ -86,7 +86,6 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
   {
     ignerr << "Attempting to a load a Lidar sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
-    return false;
   }
 
   if (_sdf.LidarSensor() == nullptr)
