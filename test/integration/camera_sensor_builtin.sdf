@@ -9,7 +9,7 @@
           <horizontal_fov>1.05</horizontal_fov>
           <image>
             <width>256</width>
-            <height>256</height>
+            <height>257</height>
           </image>
           <clip>
             <near>0.1</near>
