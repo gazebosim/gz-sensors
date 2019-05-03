@@ -58,9 +58,6 @@ class ignition::sensors::AirPressureSensorPrivate
   /// \brief Altitude reference, i.e. initial sensor position
   public: double referenceAltitude = 0.0;
 
-  /// \brief Current vertical position of the sensor.
-  public: double verticalPosition = 0.0;
-
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
 };
@@ -148,8 +145,7 @@ bool AirPressureSensor::Update(const ignition::common::Time &_now)
   // https://github.com/ethz-asl/rotors_simulator/blob/master/rotors_gazebo_plugins/src/gazebo_pressure_plugin.cpp
   {
     // Get the current height.
-    double height = this->dataPtr->referenceAltitude +
-      this->dataPtr->verticalPosition;
+    double height = this->dataPtr->referenceAltitude + this->Pose().Pos().Z();
 
     // Compute the geopotential height.
     double geoHeight = kEarthRadiusMeters * height /
