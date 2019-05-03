@@ -93,8 +93,8 @@ bool CameraSensor::CreateCamera()
     return false;
   }
 
-  int width = cameraSdf->ImageWidth();
-  int height = cameraSdf->ImageHeight();
+  unsigned int width = cameraSdf->ImageWidth();
+  unsigned int height = cameraSdf->ImageHeight();
 
   this->dataPtr->camera = this->Scene()->CreateCamera(this->Name());
   this->dataPtr->camera->SetImageWidth(width);

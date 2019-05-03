@@ -46,7 +46,7 @@ class ignition::sensors::AirPressureSensorPrivate
   /// \brief node to create publisher
   public: transport::Node node;
 
-  /// \brief publisher to publish logical camera messages.
+  /// \brief publisher to publish air pressure messages.
   public: transport::Node::Publisher pub;
 
   /// \brief true if Load() has been called and was successful

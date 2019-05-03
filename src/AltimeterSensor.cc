@@ -31,7 +31,7 @@ class ignition::sensors::AltimeterSensorPrivate
   /// \brief node to create publisher
   public: transport::Node node;
 
-  /// \brief publisher to publish logical camera messages.
+  /// \brief publisher to publish altimeter messages.
   public: transport::Node::Publisher pub;
 
   /// \brief true if Load() has been called and was successful
