@@ -81,8 +81,8 @@ namespace ignition
       /// \param[in] _pos Z position in meters
       public: void SetVerticalPosition(double _pos);
 
-      /// \brief Get the vertical position of the sensor relative to the
-      /// reference altitude.
+      /// \brief Get the current z position of the sensor, as set via
+      /// SetVerticalPosition(double).
       /// \return Vertical position relative to referene position
       public: double VerticalPosition() const;
 
