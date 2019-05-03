@@ -77,15 +77,6 @@ namespace ignition
       /// \return Verical reference position in meters
       public: double ReferenceAltitude() const;
 
-      /// \brief Set the current z position of the sensor
-      /// \param[in] _pos Z position in meters
-      public: void SetVerticalPosition(double _pos);
-
-      /// \brief Get the current z position of the sensor, as set via
-      /// SetVerticalPosition(double).
-      /// \return Vertical position relative to referene position
-      public: double VerticalPosition() const;
-
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<AirPressureSensorPrivate> dataPtr;

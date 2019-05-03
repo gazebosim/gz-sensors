@@ -203,16 +203,4 @@ double AirPressureSensor::ReferenceAltitude() const
   return this->dataPtr->referenceAltitude;
 }
 
-//////////////////////////////////////////////////
-void AirPressureSensor::SetVerticalPosition(double _pos)
-{
-  this->dataPtr->verticalPosition = _pos;
-}
-
-//////////////////////////////////////////////////
-double AirPressureSensor::VerticalPosition() const
-{
-  return this->dataPtr->verticalPosition;
-}
-
 IGN_SENSORS_REGISTER_SENSOR(AirPressureSensor)
