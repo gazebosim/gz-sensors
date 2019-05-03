@@ -117,6 +117,10 @@ namespace ignition
       /// \sa AltimeterSensor
       ALTIMETER_VERTICAL_VELOCITY_NOISE_METERS_PER_S = 6,
 
+      /// \brief Air Pressure noise streams for the air pressure sensor
+      /// \sa AirPressureSensor
+      AIR_PRESSURE_NOISE_PASCALS = 7,
+
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not
       /// use this.

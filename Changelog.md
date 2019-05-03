@@ -2,6 +2,9 @@
 
 ### Ignition Sensors 2.X.X (201X-XX-XX)
 
+1. Add support for loading an air pressure sensor from an SDF Sensor DOM object.
+    * [Pull request 56](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/56)
+
 1. Add support for loading an altimeter sensor from an SDF Sensor DOM object.
     * [Pull request 55](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/55)
 
