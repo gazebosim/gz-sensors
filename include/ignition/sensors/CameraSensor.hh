@@ -77,6 +77,11 @@ namespace ignition
       /// \brief destructor
       public: virtual ~CameraSensor();
 
+      /// \brief Load the sensor based on data from an sdf::Sensor object.
+      /// \param[in] _sdf SDF Sensor parameters.
+      /// \return true if loading was successful
+      public: virtual bool Load(const sdf::Sensor &_sdf) override;
+
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF Sensor parameters.
       /// \return true if loading was successful
