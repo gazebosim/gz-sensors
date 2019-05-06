@@ -93,8 +93,8 @@ bool CameraSensor::CreateCamera()
     return false;
   }
 
-  int width = cameraSdf->ImageWidth();
-  int height = cameraSdf->ImageHeight();
+  unsigned int width = cameraSdf->ImageWidth();
+  unsigned int height = cameraSdf->ImageHeight();
 
   this->dataPtr->camera = this->Scene()->CreateCamera(this->Name());
   this->dataPtr->camera->SetImageWidth(width);
@@ -206,9 +206,7 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
     return false;
 
   if (this->Scene())
-  {
     this->CreateCamera();
-  }
 
   this->dataPtr->sceneChangeConnection =
       RenderingEvents::ConnectSceneChangeCallback(
@@ -351,13 +349,17 @@ bool CameraSensorPrivate::SaveImage(const unsigned char *_data,
 //////////////////////////////////////////////////
 unsigned int CameraSensor::ImageWidth() const
 {
-  return this->dataPtr->camera->ImageWidth();
+  if (this->dataPtr->camera)
+    return this->dataPtr->camera->ImageWidth();
+  return 0;
 }
 
 //////////////////////////////////////////////////
 unsigned int CameraSensor::ImageHeight() const
 {
-  return this->dataPtr->camera->ImageHeight();
+  if (this->dataPtr->camera)
+    return this->dataPtr->camera->ImageHeight();
+  return 0;
 }
 
 //////////////////////////////////////////////////

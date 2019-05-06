@@ -8,6 +8,12 @@
 1. Add support for loading an IMU sensor from an SDF Sensor DOM object.
     * [Pull request 58](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/58)
 
+1. Add support for loading a camera and depth camera sensor from an SDF Sensor DOM object.
+    * [Pull request 57](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/57)
+
+1. Add support for loading an air pressure sensor from an SDF Sensor DOM object.
+    * [Pull request 56](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/56)
+
 1. Add support for loading an altimeter sensor from an SDF Sensor DOM object.
     * [Pull request 55](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/55)
 
