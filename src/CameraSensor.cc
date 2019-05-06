@@ -105,7 +105,7 @@ bool CameraSensor::CreateCamera()
   // \todo(nkoeng) these parameters via sdf
   this->dataPtr->camera->SetAntiAliasing(2);
 
-  auto angle = cameraSdf->HorizontalFov();
+  math::Angle angle = cameraSdf->HorizontalFov();
   if (angle < 0.01 || angle > IGN_PI*2)
   {
     ignerr << "Invalid horizontal field of view [" << angle << "]\n";
