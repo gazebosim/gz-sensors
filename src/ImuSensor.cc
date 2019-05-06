@@ -116,7 +116,7 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     {GYROSCOPE_Z_NOISE_RAD_S, _sdf.ImuSensor()->AngularVelocityZNoise()},
   };
 
-  for (const auto it : noises )
+  for (const auto it : noises)
   {
     if (it.second.Type() != sdf::NoiseType::NONE)
     {
@@ -145,11 +145,61 @@ bool ImuSensor::Update(const ignition::common::Time &_now)
     return false;
   }
 
+  const double dt = this->UpdateRate();
+
   // Add contribution from gravity
   // Skip if gravity is not enabled?
   this->dataPtr->linearAcc -=
       this->dataPtr->worldPose.Rot().Inverse().RotateVector(
       this->dataPtr->gravity);
+
+  if (this->dataPtr->noises.find(ACCELEROMETER_X_NOISE_M_S_S) !=
+     this->dataPtr->noises.end())
+  {
+    this->dataPtr->linearAcc.X(
+        this->dataPtr->noises[ACCELEROMETER_X_NOISE_M_S_S]->Apply(
+          this->dataPtr->linearAcc.X(), dt));
+  }
+
+  if (this->dataPtr->noises.find(ACCELEROMETER_Y_NOISE_M_S_S) !=
+     this->dataPtr->noises.end())
+  {
+    this->dataPtr->linearAcc.Y(
+        this->dataPtr->noises[ACCELEROMETER_Y_NOISE_M_S_S]->Apply(
+          this->dataPtr->linearAcc.Y(), dt));
+  }
+
+  if (this->dataPtr->noises.find(ACCELEROMETER_Z_NOISE_M_S_S) !=
+     this->dataPtr->noises.end())
+  {
+    this->dataPtr->linearAcc.Z(
+        this->dataPtr->noises[ACCELEROMETER_Z_NOISE_M_S_S]->Apply(
+          this->dataPtr->linearAcc.Z(), dt));
+  }
+
+  if (this->dataPtr->noises.find(GYROSCOPE_X_NOISE_RAD_S) !=
+      this->dataPtr->noises.end())
+  {
+    this->dataPtr->angularVel.X(
+        this->dataPtr->noises[GYROSCOPE_X_NOISE_RAD_S]->Apply(
+          this->dataPtr->angularVel.X(), dt));
+  }
+
+  if (this->dataPtr->noises.find(GYROSCOPE_Y_NOISE_RAD_S) !=
+      this->dataPtr->noises.end())
+  {
+    this->dataPtr->angularVel.Y(
+        this->dataPtr->noises[GYROSCOPE_Y_NOISE_RAD_S]->Apply(
+          this->dataPtr->angularVel.Z(), dt));
+  }
+
+  if (this->dataPtr->noises.find(GYROSCOPE_Z_NOISE_RAD_S) !=
+      this->dataPtr->noises.end())
+  {
+    this->dataPtr->angularVel.Z(
+        this->dataPtr->noises[GYROSCOPE_Z_NOISE_RAD_S]->Apply(
+          this->dataPtr->angularVel.Z(), dt));
+  }
 
   // Set the IMU orientation
   // imu orientation with respect to reference frame
@@ -161,6 +211,7 @@ bool ImuSensor::Update(const ignition::common::Time &_now)
   msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
   msg.set_entity_name(this->Name());
+
   msgs::Set(msg.mutable_orientation(), this->dataPtr->orientation);
   msgs::Set(msg.mutable_angular_velocity(), this->dataPtr->angularVel);
   msgs::Set(msg.mutable_linear_acceleration(), this->dataPtr->linearAcc);

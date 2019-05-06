@@ -398,7 +398,8 @@ TEST(NoiseTest, OnApplyNoise)
   EXPECT_TRUE(noise->Type() == sensors::NoiseType::CUSTOM);
 
   noise->SetCustomNoiseCallback(
-    std::bind(&OnApplyCustomNoise, std::placeholders::_1, std::placeholders::_2));
+    std::bind(&OnApplyCustomNoise,
+      std::placeholders::_1, std::placeholders::_2));
 
   for (double i = 0; i < 100; i += 1)
   {

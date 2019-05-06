@@ -166,13 +166,21 @@ double GaussianNoiseModel::ApplyImpl(double _in, double _dt)
       this->dataPtr->mean, this->dataPtr->stdDev);
 
   // Generate varying (correlated) bias to each input value.
-  if(this->dataPtr->dynamicBiasStdDev > 0 &&
+  // This implementation is based on the one available in Rotors:
+  // https://github.com/ethz-asl/rotors_simulator/blob/master/rotors_gazebo_plugins/src/gazebo_imu_plugin.cpp
+  //
+  // More information about the parameters and their derivation:
+  //
+  // https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model
+
+  if (this->dataPtr->dynamicBiasStdDev > 0 &&
      this->dataPtr->dynamicBiasCorrTime > 0)
   {
     double sigma_b = this->dataPtr->dynamicBiasStdDev;
     double tau = this->dataPtr->dynamicBiasCorrTime;
 
-    double sigma_b_d = sqrt(-sigma_b * sigma_b * tau / 2 * expm1(-2 * _dt / tau));
+    double sigma_b_d = sqrt(-sigma_b * sigma_b *
+        tau / 2 * expm1(-2 * _dt / tau));
     double phi_d = exp(-_dt / tau);
     this->dataPtr->bias = phi_d * this->dataPtr->bias +
       ignition::math::Rand::DblNormal(0, sigma_b_d);
