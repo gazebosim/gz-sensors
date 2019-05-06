@@ -145,6 +145,29 @@ namespace ignition
       /// \sa SetHorizontalFOV()
       public: double HorizontalFOV() const;
 
+      /// \brief Set the noise standard desviation of the sensor noise
+      /// \param[in] _sttdev the noise standard desviation of the sensor noise
+      /// \returns true if the stddev is > 0
+      /// \sa NoiseStdDev()
+      public: bool SetNoiseStdDev(double _stddev);
+
+      /// \brief Get the noise standard desviation of the sensor noise
+      /// \returns standard desviation of the sensor noise
+      /// \sa SetNoiseStdded
+      public: double NoiseStdDev() const;
+
+      /// \brief Set the noise mean.
+      /// \param[in] _mean noise mean
+      /// \sa NoiseMean()
+      public: void SetNoiseMean(double _mean);
+
+      /// \brief Get the noise mean of the sensor.
+      ///
+      ///   Sensor noise mean.
+      /// \returns noise mean
+      /// \sa SetNoiseMean()
+      public: double NoiseMean() const;
+
       /// \brief Get the near clip plane distance
       ///
       ///   The near clip plane distance is the distance from the origin of the

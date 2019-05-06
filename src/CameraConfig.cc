@@ -49,6 +49,12 @@ class ignition::sensors::CameraConfigPrivate
   /// \brief Horizontal field of view in radians
   public: double hfov = 1.05;
 
+  /// \brief Noise mean
+  public: double noiseMean = 0;
+
+  /// \brief Noise standard desviation
+  public: double noiseStdDev = 0;
+
   /// \brief near_ clip plane distance in meters
   public: double near_ = 0.1;
 
@@ -165,6 +171,34 @@ bool CameraConfig::SetHz(double _hz)
 double CameraConfig::Hz() const
 {
   return this->dataPtr->hz;
+}
+
+//////////////////////////////////////////////////
+void CameraConfig::SetNoiseMean(double _mean)
+{
+  this->dataPtr->noiseMean = _mean;
+}
+
+//////////////////////////////////////////////////
+double CameraConfig::NoiseMean() const
+{
+  return this->dataPtr->noiseStdDev;
+}
+
+//////////////////////////////////////////////////
+bool CameraConfig::SetNoiseStdDev(double _stddev)
+{
+  if (_stddev <= 0)
+    return false;
+
+  this->dataPtr->noiseStdDev = _stddev;
+  return true;
+}
+
+//////////////////////////////////////////////////
+double CameraConfig::NoiseStdDev() const
+{
+  return this->dataPtr->noiseStdDev;
 }
 
 //////////////////////////////////////////////////

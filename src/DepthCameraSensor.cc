@@ -20,6 +20,11 @@
 #include "ignition/sensors/DepthCameraSensor.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
+#include "ignition/rendering/RenderPass.hh"
+#include "ignition/rendering/RenderEngine.hh"
+#include "ignition/rendering/RenderPassSystem.hh"
+#include "ignition/rendering/GaussianNoisePass.hh"
+
 // undefine near and far macros from windows.h
 #ifdef _WIN32
   #undef near
@@ -64,6 +69,9 @@ class ignition::sensors::DepthCameraSensorPrivate
 
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
+
+  /// \brief Pointer to noise pass
+  public: ignition::rendering::RenderPassPtr noisePass;
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
@@ -257,6 +265,28 @@ bool DepthCameraSensor::CreateCamera()
   this->dataPtr->depthCamera->SetImageWidth(width);
   this->dataPtr->depthCamera->SetImageHeight(height);
   this->dataPtr->depthCamera->SetFarClipPlane(far);
+
+  // Add gaussian noise to camera sensor
+  const sdf::Noise noiseSdf = cameraSdf->ImageNoise();
+  if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
+  {
+    rendering::RenderEngine *engine = this->Scene()->Engine();
+    rendering::RenderPassSystemPtr rpSystem = engine->RenderPassSystem();
+    if (rpSystem)
+    {
+      // add gaussian noise pass
+      std::cout << "Applying noise to sensor, mean: " << noiseSdf.Mean();
+      std::cout << " stddev: " << noiseSdf.StdDev() << "\n";
+      this->dataPtr->noisePass = rpSystem->Create<rendering::GaussianNoisePass>();
+      rendering::GaussianNoisePassPtr gaussianNoisePass =
+          std::dynamic_pointer_cast<rendering::GaussianNoisePass>(
+              this->dataPtr->noisePass);
+      gaussianNoisePass->SetMean(noiseSdf.Mean());
+      gaussianNoisePass->SetStdDev(noiseSdf.StdDev());
+      gaussianNoisePass->SetEnabled(true);
+      this->dataPtr->depthCamera->AddRenderPass(gaussianNoisePass);
+    }
+  }
 
   // Near clip plane not set because we need to be able to detect occlusion
   // from objects before near clip plane
