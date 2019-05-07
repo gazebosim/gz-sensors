@@ -266,12 +266,8 @@ TEST(ImuSensor_TEST, ComputeNoise)
   // \TODO(mjcarroll): It's _very_ unlikely any of these numbers
   // will be exactly zero, but there are probably better ways
   // of verifying the noise is correctly added statistically.
-  EXPECT_TRUE(abs(sensor->AngularVelocity().X()) > 0.0);
-  EXPECT_TRUE(abs(sensor->AngularVelocity().Y()) > 0.0);
-  EXPECT_TRUE(abs(sensor->AngularVelocity().Z()) > 0.0);
-  EXPECT_TRUE(abs(sensor->LinearAcceleration().X()) > 0.0);
-  EXPECT_TRUE(abs(sensor->LinearAcceleration().Y()) > 0.0);
-  EXPECT_TRUE(abs(sensor->LinearAcceleration().Z()) > 0.0);
+  EXPECT_GT(sensor->AngularVelocity().SquaredLength(), 0.0);
+  EXPECT_GT(sensor->LinearAcceleration().SquaredLength(), 0.0);
 }
 
 
