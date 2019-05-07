@@ -16,8 +16,10 @@
 */
 
 #include <iostream>
-#include <sdf/Sensor.hh>
+
 #include <sdf/Camera.hh>
+#include <sdf/Noise.hh>
+#include <sdf/Sensor.hh>
 
 #include <ignition/common/Image.hh>
 #include <ignition/common/Console.hh>
@@ -80,6 +82,13 @@ int main()
   cameraSdf.SetNearClip(near);
   cameraSdf.SetFarClip(far);
   cameraSdf.SetPixelFormat(format);
+
+  // Add noise
+  sdf::Noise noise;
+  noise.SetMean(0.1);
+  noise.SetStdDev(0.05);
+  noise.SetType(sdf::NoiseType::GAUSSIAN);
+  cameraSdf.SetImageNoise(noise);
 
   sdf::Sensor sensorSdf;
   sensorSdf.SetType(sdf::SensorType::CAMERA);
