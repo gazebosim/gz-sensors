@@ -116,11 +116,11 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     {GYROSCOPE_Z_NOISE_RAD_S, _sdf.ImuSensor()->AngularVelocityZNoise()},
   };
 
-  for (const auto it : noises)
+  for (const auto & [noiseType, noiseSdf] : noises)
   {
-    if (it.second.Type() != sdf::NoiseType::NONE)
+    if (noiseSdf.Type() != sdf::NoiseType::NONE)
     {
-      this->dataPtr->noises[it.first] = NoiseFactory::NewNoiseModel(it.second);
+      this->dataPtr->noises[noiseType] = NoiseFactory::NewNoiseModel(noiseSdf);
     }
   }
 
@@ -153,53 +153,20 @@ bool ImuSensor::Update(const ignition::common::Time &_now)
       this->dataPtr->worldPose.Rot().Inverse().RotateVector(
       this->dataPtr->gravity);
 
-  if (this->dataPtr->noises.find(ACCELEROMETER_X_NOISE_M_S_S) !=
-     this->dataPtr->noises.end())
+  // Convenience method to apply noise to a channel, if present.
+  auto applyNoise = [&](SensorNoiseType noiseType, double & value)
   {
-    this->dataPtr->linearAcc.X(
-        this->dataPtr->noises[ACCELEROMETER_X_NOISE_M_S_S]->Apply(
-          this->dataPtr->linearAcc.X(), dt));
-  }
+    if (this->dataPtr->noises.find(noiseType) != this->dataPtr->noises.end()) {
+      value = this->dataPtr->noises[noiseType]->Apply(value, dt);
+    }
+  };
 
-  if (this->dataPtr->noises.find(ACCELEROMETER_Y_NOISE_M_S_S) !=
-     this->dataPtr->noises.end())
-  {
-    this->dataPtr->linearAcc.Y(
-        this->dataPtr->noises[ACCELEROMETER_Y_NOISE_M_S_S]->Apply(
-          this->dataPtr->linearAcc.Y(), dt));
-  }
-
-  if (this->dataPtr->noises.find(ACCELEROMETER_Z_NOISE_M_S_S) !=
-     this->dataPtr->noises.end())
-  {
-    this->dataPtr->linearAcc.Z(
-        this->dataPtr->noises[ACCELEROMETER_Z_NOISE_M_S_S]->Apply(
-          this->dataPtr->linearAcc.Z(), dt));
-  }
-
-  if (this->dataPtr->noises.find(GYROSCOPE_X_NOISE_RAD_S) !=
-      this->dataPtr->noises.end())
-  {
-    this->dataPtr->angularVel.X(
-        this->dataPtr->noises[GYROSCOPE_X_NOISE_RAD_S]->Apply(
-          this->dataPtr->angularVel.X(), dt));
-  }
-
-  if (this->dataPtr->noises.find(GYROSCOPE_Y_NOISE_RAD_S) !=
-      this->dataPtr->noises.end())
-  {
-    this->dataPtr->angularVel.Y(
-        this->dataPtr->noises[GYROSCOPE_Y_NOISE_RAD_S]->Apply(
-          this->dataPtr->angularVel.Z(), dt));
-  }
-
-  if (this->dataPtr->noises.find(GYROSCOPE_Z_NOISE_RAD_S) !=
-      this->dataPtr->noises.end())
-  {
-    this->dataPtr->angularVel.Z(
-        this->dataPtr->noises[GYROSCOPE_Z_NOISE_RAD_S]->Apply(
-          this->dataPtr->angularVel.Z(), dt));
-  }
+  applyNoise(ACCELEROMETER_X_NOISE_M_S_S, this->dataPtr->linearAcc.X());
+  applyNoise(ACCELEROMETER_Y_NOISE_M_S_S, this->dataPtr->linearAcc.Y());
+  applyNoise(ACCELEROMETER_Z_NOISE_M_S_S, this->dataPtr->linearAcc.Z());
+  applyNoise(GYROSCOPE_X_NOISE_RAD_S, this->dataPtr->angularVel.X());
+  applyNoise(GYROSCOPE_Y_NOISE_RAD_S, this->dataPtr->angularVel.X());
+  applyNoise(GYROSCOPE_Z_NOISE_RAD_S, this->dataPtr->angularVel.X());
 
   // Set the IMU orientation
   // imu orientation with respect to reference frame

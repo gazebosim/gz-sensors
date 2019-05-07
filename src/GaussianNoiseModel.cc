@@ -96,11 +96,11 @@ class ignition::sensors::GaussianNoiseModelPrivate
   /// \brief If type starts with GAUSSIAN, the bias we'll add.
   public: double bias = 0.0;
 
-  /// \brief If type startus with GAUSSIAN, the standard deviation of the
+  /// \brief If type starts with GAUSSIAN, the standard deviation of the
   /// distribution from which the dynamic bias will be driven.
   public: double dynamicBiasStdDev = 0.0;
 
-  /// \brief If type startus with GAUSSIAN, the correlation time of the
+  /// \brief If type starts with GAUSSIAN, the correlation time of the
   /// process from which the dynamic bias will be driven.
   public: double dynamicBiasCorrTime = 0.0;
 

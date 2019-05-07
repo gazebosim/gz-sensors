@@ -96,12 +96,14 @@ namespace ignition
 
       /// \brief Apply noise to input data value.
       /// \param[in] _in Input data value.
+      /// \param[in] _dt Input data time step.
       /// \return Data with noise applied.
       public: double Apply(double _in, double _dt = 0.0);
 
       /// \brief Apply noise to input data value. This gets overriden by
       /// derived classes, and called by Apply.
       /// \param[in] _in Input data value.
+      /// \param[in] _dt Input data time step.
       /// \return Data with noise applied.
       public: virtual double ApplyImpl(double _in, double _dt);
 
