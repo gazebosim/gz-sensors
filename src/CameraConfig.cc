@@ -188,7 +188,7 @@ double CameraConfig::NoiseMean() const
 //////////////////////////////////////////////////
 bool CameraConfig::SetNoiseStdDev(double _stddev)
 {
-  if (_stddev <= 0)
+  if (_stddev < 0)
     return false;
 
   this->dataPtr->noiseStdDev = _stddev;

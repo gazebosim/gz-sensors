@@ -124,6 +124,12 @@ bool CameraSensor::CreateCamera()
            this->dataPtr->noises[noiseType])->SetCamera(
              this->dataPtr->camera);
     }
+    else
+    {
+      ignwarn << "The camera sensor only supports Gaussian noise. "
+       << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
+       << "] is not supported." << std::endl;
+    }
   }
 
   // \todo(nkoeng) these parameters via sdf

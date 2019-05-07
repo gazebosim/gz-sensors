@@ -278,6 +278,13 @@ bool DepthCameraSensor::CreateCamera()
            this->dataPtr->noises[noiseType])->SetCamera(
              this->dataPtr->depthCamera);
     }
+    else
+    {
+      ignwarn << "The depth camera sensor only supports Gaussian noise. "
+       << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
+       << "] is not supported." << std::endl;
+    }
+
   }
 
   // Near clip plane not set because we need to be able to detect occlusion
