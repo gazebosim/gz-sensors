@@ -165,8 +165,8 @@ bool ImuSensor::Update(const ignition::common::Time &_now)
   applyNoise(ACCELEROMETER_Y_NOISE_M_S_S, this->dataPtr->linearAcc.Y());
   applyNoise(ACCELEROMETER_Z_NOISE_M_S_S, this->dataPtr->linearAcc.Z());
   applyNoise(GYROSCOPE_X_NOISE_RAD_S, this->dataPtr->angularVel.X());
-  applyNoise(GYROSCOPE_Y_NOISE_RAD_S, this->dataPtr->angularVel.X());
-  applyNoise(GYROSCOPE_Z_NOISE_RAD_S, this->dataPtr->angularVel.X());
+  applyNoise(GYROSCOPE_Y_NOISE_RAD_S, this->dataPtr->angularVel.Y());
+  applyNoise(GYROSCOPE_Z_NOISE_RAD_S, this->dataPtr->angularVel.Z());
 
   // Set the IMU orientation
   // imu orientation with respect to reference frame
