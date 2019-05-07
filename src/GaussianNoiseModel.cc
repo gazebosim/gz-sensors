@@ -195,13 +195,15 @@ void GaussianNoiseModel::Print(std::ostream &_out) const
 
 //////////////////////////////////////////////////
 ImageGaussianNoiseModel::ImageGaussianNoiseModel()
-  : GaussianNoiseModel()
+  : GaussianNoiseModel(), dataPtr(new ImageGaussianNoiseModelPrivate())
 {
 }
 
 //////////////////////////////////////////////////
 ImageGaussianNoiseModel::~ImageGaussianNoiseModel()
 {
+  delete this->dataPtr;
+  this->dataPtr = nullptr;
 }
 
 //////////////////////////////////////////////////
