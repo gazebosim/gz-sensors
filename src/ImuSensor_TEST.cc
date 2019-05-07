@@ -207,8 +207,11 @@ TEST(ImuSensor_TEST, ComputeNoise)
     const std::string name = "TestImu_Truth";
     const std::string topic = "/ignition/sensors/test/imu_truth";
     const double update_rate = 100;
-    const auto accelNoise = noNoiseParameters(update_rate, 0.0);
-    const auto gyroNoise = noNoiseParameters(update_rate, 0.0);
+    auto accelNoise = noNoiseParameters(update_rate, 0.0);
+    auto gyroNoise = noNoiseParameters(update_rate, 0.0);
+    // Small bias to make sure that the results won't equal zero.
+    accelNoise.biasMean = 0.01;
+    gyroNoise.biasMean = 0.01;
     const bool always_on = 1;
     const bool visualize = 1;
 
