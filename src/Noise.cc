@@ -39,7 +39,7 @@ class ignition::sensors::NoisePrivate
   public: sdf::Noise noiseDom;
 
   /// \brief Callback function for applying custom noise to sensor data.
-  public: std::function<double(double)> customNoiseCallback;
+  public: std::function<double(double, double)> customNoiseCallback;
 };
 
 //////////////////////////////////////////////////
@@ -134,14 +134,14 @@ void Noise::SetCamera(rendering::CameraPtr /*_camera*/)
 }
 
 //////////////////////////////////////////////////
-double Noise::Apply(double _in)
+double Noise::Apply(double _in, double _dt)
 {
   if (this->dataPtr->type == NoiseType::NONE)
     return _in;
   else if (this->dataPtr->type == NoiseType::CUSTOM)
   {
     if (this->dataPtr->customNoiseCallback)
-      return this->dataPtr->customNoiseCallback(_in);
+      return this->dataPtr->customNoiseCallback(_in, _dt);
     else
     {
       ignerr << "Custom noise callback function not set!"
@@ -151,11 +151,11 @@ double Noise::Apply(double _in)
     }
   }
 
-  return this->ApplyImpl(_in);
+  return this->ApplyImpl(_in, _dt);
 }
 
 //////////////////////////////////////////////////
-double Noise::ApplyImpl(double _in)
+double Noise::ApplyImpl(double _in, double /*_dt*/)
 {
   return _in;
 }
@@ -167,7 +167,7 @@ NoiseType Noise::Type() const
 }
 
 //////////////////////////////////////////////////
-void Noise::SetCustomNoiseCallback(std::function<double(double)> _cb)
+void Noise::SetCustomNoiseCallback(std::function<double(double, double)> _cb)
 {
   this->dataPtr->type = NoiseType::CUSTOM;
   this->dataPtr->customNoiseCallback = _cb;

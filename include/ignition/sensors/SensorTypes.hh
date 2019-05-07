@@ -121,6 +121,30 @@ namespace ignition
       /// \sa AirPressureSensor
       AIR_PRESSURE_NOISE_PASCALS = 7,
 
+      /// \brief Accelerometer body-frame X axis noise in m/s^2
+      /// \sa ImuSensor
+      ACCELEROMETER_X_NOISE_M_S_S = 8,
+
+      /// \brief Accelerometer body-frame Y axis noise in m/s^2
+      /// \sa ImuSensor
+      ACCELEROMETER_Y_NOISE_M_S_S = 9,
+
+      /// \brief Accelerometer body-frame Z axis noise in m/s^2
+      /// \sa ImuSensor
+      ACCELEROMETER_Z_NOISE_M_S_S = 10,
+
+      /// \brief Gyroscope body-frame X axis noise in m/s^2
+      /// \sa ImuSensor
+      GYROSCOPE_X_NOISE_RAD_S = 11,
+
+      /// \brief Gyroscope body-frame X axis noise in m/s^2
+      /// \sa ImuSensor
+      GYROSCOPE_Y_NOISE_RAD_S = 12,
+
+      /// \brief Gyroscope body-frame X axis noise in m/s^2
+      /// \sa ImuSensor
+      GYROSCOPE_Z_NOISE_RAD_S = 13,
+
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not
       /// use this.
