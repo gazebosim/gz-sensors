@@ -384,7 +384,7 @@ TEST(NoiseTest, ApplyGaussianQuantized)
 
 //////////////////////////////////////////////////
 // Callback function for applying custom noise
-double OnApplyCustomNoise(double _in)
+double OnApplyCustomNoise(double _in, double /*_dt*/)
 {
   return _in*2;
 }
@@ -398,7 +398,8 @@ TEST(NoiseTest, OnApplyNoise)
   EXPECT_TRUE(noise->Type() == sensors::NoiseType::CUSTOM);
 
   noise->SetCustomNoiseCallback(
-    std::bind(&OnApplyCustomNoise, std::placeholders::_1));
+    std::bind(&OnApplyCustomNoise,
+      std::placeholders::_1, std::placeholders::_2));
 
   for (double i = 0; i < 100; i += 1)
   {
