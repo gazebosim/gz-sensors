@@ -76,7 +76,8 @@ namespace ignition
     ignition/sensors/GaussianNoiseModel.hh
     **/
     /// \brief Gaussian noise class for image sensors
-    class IGNITION_SENSORS_VISIBLE ImageGaussianNoiseModel : public GaussianNoiseModel
+    class IGNITION_SENSORS_VISIBLE ImageGaussianNoiseModel :
+      public GaussianNoiseModel
     {
       /// \brief Constructor.
       public: ImageGaussianNoiseModel();
