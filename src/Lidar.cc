@@ -18,7 +18,10 @@
 #include <sdf/Lidar.hh>
 
 #include "ignition/sensors/Lidar.hh"
+#include "ignition/sensors/Noise.hh"
 #include "ignition/sensors/SensorFactory.hh"
+#include "ignition/sensors/SensorTypes.hh"
+#include "ignition/sensors/GaussianNoiseModel.hh"
 
 using namespace ignition::sensors;
 
@@ -33,6 +36,9 @@ class ignition::sensors::LidarPrivate
 
   /// \brief Laser message to publish data.
   public: ignition::msgs::LaserScan laserMsg;
+
+  /// \brief Noise added to sensor data
+  public: std::map<SensorNoiseType, NoisePtr> noises;
 
   /// \brief Sdf sensor.
   public: sdf::Lidar sdfLidar;
@@ -129,17 +135,18 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
       this->VerticalRangeCount());
 
   // Handle noise model settings.
-  // if (rayElem->HasElement("noise"))
-  // {
-  //   this->noises[GPU_RAY_NOISE] =
-  //       NoiseFactory::NewNoiseModel(rayElem->GetElement("noise"),
-  //       this->Type());
-  // }
+  const std::map<SensorNoiseType, sdf::Noise> noises = {
+    {LIDAR_NOISE, this->dataPtr->sdfLidar.LidarNoise()},
+  };
 
-  // this->dataPtr->parentEntity =
-  //   this->world->EntityByName(this->ParentName());
-  // GZ_ASSERT(this->dataPtr->parentEntity != nullptr,
-  //     "Unable to get the parent entity.");
+  for (const auto & [noiseType, noiseSdf] : noises)
+  {
+    if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
+    {
+      this->dataPtr->noises[noiseType] =
+        NoiseFactory::NewNoiseModel(noiseSdf);
+    }
+  }
 
   this->initialized = true;
   return true;
@@ -206,14 +213,13 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
       int index = j * this->RangeCount() + i;
       double range = this->laserBuffer[index*3];
 
-      // TODO(jchoclin): add LIDAR_NOISE
-      // else if (this->noises.find(GPU_RAY_NOISE) !=
-      //          this->noises.end())
-      // {
-      //   range = this->noises[GPU_RAY_NOISE]->Apply(range);
-      //   range = ignition::math::clamp(range,
-      //       this->RangeMin(), this->RangeMax());
-      // }
+      if (this->dataPtr->noises.find(LIDAR_NOISE) !=
+          this->dataPtr->noises.end())
+      {
+        range = this->dataPtr->noises[LIDAR_NOISE]->Apply(range);
+        range = ignition::math::clamp(range,
+            this->RangeMin(), this->RangeMax());
+      }
 
       range = ignition::math::isnan(range) ? this->RangeMax() : range;
       this->dataPtr->laserMsg.set_ranges(index, range);

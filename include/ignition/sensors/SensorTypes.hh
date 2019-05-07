@@ -145,6 +145,10 @@ namespace ignition
       /// \sa ImuSensor
       GYROSCOPE_Z_NOISE_RAD_S = 13,
 
+      /// \brief Noise streams for the Lidar sensor
+      /// \sa Lidar
+      LIDAR_NOISE = 14,
+
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not
       /// use this.
