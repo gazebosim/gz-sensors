@@ -278,7 +278,7 @@ bool DepthCameraSensor::CreateCamera()
            this->dataPtr->noises[noiseType])->SetCamera(
              this->dataPtr->depthCamera);
     }
-    else
+    else if (noiseSdf.Type() != sdf::NoiseType::NONE)
     {
       ignwarn << "The depth camera sensor only supports Gaussian noise. "
        << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
