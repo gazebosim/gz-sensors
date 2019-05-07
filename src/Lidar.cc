@@ -146,6 +146,12 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
       this->dataPtr->noises[noiseType] =
         NoiseFactory::NewNoiseModel(noiseSdf);
     }
+    else if (noiseSdf.Type() != sdf::NoiseType::NONE)
+    {
+      ignwarn << "The lidar sensor only supports Gaussian noise. "
+       << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
+       << "] is not supported." << std::endl;
+    }
   }
 
   this->initialized = true;
