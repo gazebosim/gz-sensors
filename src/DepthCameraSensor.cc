@@ -284,7 +284,6 @@ bool DepthCameraSensor::CreateCamera()
        << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
        << "] is not supported." << std::endl;
     }
-
   }
 
   // Near clip plane not set because we need to be able to detect occlusion
