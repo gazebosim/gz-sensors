@@ -18,7 +18,9 @@
 #include <ignition/msgs/imu.pb.h>
 #include <ignition/transport/Node.hh>
 
+#include "ignition/sensors/Noise.hh"
 #include "ignition/sensors/SensorFactory.hh"
+#include "ignition/sensors/SensorTypes.hh"
 #include "ignition/sensors/ImuSensor.hh"
 
 using namespace ignition;
@@ -53,6 +55,9 @@ class ignition::sensors::ImuSensorPrivate
 
   /// \brief World pose of the imu sensor
   public: ignition::math::Pose3d worldPose;
+
+  /// \brief Noise added to sensor data
+  public: std::map<SensorNoiseType, NoisePtr> noises;
 };
 
 //////////////////////////////////////////////////
@@ -73,10 +78,24 @@ bool ImuSensor::Init()
 }
 
 //////////////////////////////////////////////////
-bool ImuSensor::Load(sdf::ElementPtr _sdf)
+bool ImuSensor::Load(const sdf::Sensor &_sdf)
 {
   if (!Sensor::Load(_sdf))
     return false;
+
+  // Check if this is the right type
+  if (_sdf.Type() != sdf::SensorType::IMU)
+  {
+    ignerr << "Attempting to a load an IMU sensor, but received "
+      << "a " << _sdf.TypeStr() << std::endl;
+  }
+
+  if (_sdf.ImuSensor() == nullptr)
+  {
+    ignerr << "Attempting to a load an IMU sensor, but received "
+      << "a null sensor." << std::endl;
+    return false;
+  }
 
   std::string topic = this->Topic();
   if (topic.empty())
@@ -88,8 +107,33 @@ bool ImuSensor::Load(sdf::ElementPtr _sdf)
   if (!this->dataPtr->pub)
     return false;
 
+  const std::map<SensorNoiseType, sdf::Noise> noises = {
+    {ACCELEROMETER_X_NOISE_M_S_S, _sdf.ImuSensor()->LinearAccelerationXNoise()},
+    {ACCELEROMETER_Y_NOISE_M_S_S, _sdf.ImuSensor()->LinearAccelerationYNoise()},
+    {ACCELEROMETER_Z_NOISE_M_S_S, _sdf.ImuSensor()->LinearAccelerationZNoise()},
+    {GYROSCOPE_X_NOISE_RAD_S, _sdf.ImuSensor()->AngularVelocityXNoise()},
+    {GYROSCOPE_Y_NOISE_RAD_S, _sdf.ImuSensor()->AngularVelocityYNoise()},
+    {GYROSCOPE_Z_NOISE_RAD_S, _sdf.ImuSensor()->AngularVelocityZNoise()},
+  };
+
+  for (const auto & [noiseType, noiseSdf] : noises)
+  {
+    if (noiseSdf.Type() != sdf::NoiseType::NONE)
+    {
+      this->dataPtr->noises[noiseType] = NoiseFactory::NewNoiseModel(noiseSdf);
+    }
+  }
+
   this->dataPtr->initialized = true;
   return true;
+}
+
+//////////////////////////////////////////////////
+bool ImuSensor::Load(sdf::ElementPtr _sdf)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(_sdf);
+  return this->Load(sdfSensor);
 }
 
 //////////////////////////////////////////////////
@@ -101,11 +145,28 @@ bool ImuSensor::Update(const ignition::common::Time &_now)
     return false;
   }
 
+  const double dt = this->UpdateRate();
+
   // Add contribution from gravity
   // Skip if gravity is not enabled?
   this->dataPtr->linearAcc -=
       this->dataPtr->worldPose.Rot().Inverse().RotateVector(
       this->dataPtr->gravity);
+
+  // Convenience method to apply noise to a channel, if present.
+  auto applyNoise = [&](SensorNoiseType noiseType, double & value)
+  {
+    if (this->dataPtr->noises.find(noiseType) != this->dataPtr->noises.end()) {
+      value = this->dataPtr->noises[noiseType]->Apply(value, dt);
+    }
+  };
+
+  applyNoise(ACCELEROMETER_X_NOISE_M_S_S, this->dataPtr->linearAcc.X());
+  applyNoise(ACCELEROMETER_Y_NOISE_M_S_S, this->dataPtr->linearAcc.Y());
+  applyNoise(ACCELEROMETER_Z_NOISE_M_S_S, this->dataPtr->linearAcc.Z());
+  applyNoise(GYROSCOPE_X_NOISE_RAD_S, this->dataPtr->angularVel.X());
+  applyNoise(GYROSCOPE_Y_NOISE_RAD_S, this->dataPtr->angularVel.Y());
+  applyNoise(GYROSCOPE_Z_NOISE_RAD_S, this->dataPtr->angularVel.Z());
 
   // Set the IMU orientation
   // imu orientation with respect to reference frame
@@ -117,6 +178,7 @@ bool ImuSensor::Update(const ignition::common::Time &_now)
   msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
   msg.set_entity_name(this->Name());
+
   msgs::Set(msg.mutable_orientation(), this->dataPtr->orientation);
   msgs::Set(msg.mutable_angular_velocity(), this->dataPtr->angularVel);
   msgs::Set(msg.mutable_linear_acceleration(), this->dataPtr->linearAcc);

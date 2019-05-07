@@ -74,6 +74,11 @@ namespace ignition
       /// \return True on success
       public: virtual bool Init() override;
 
+      /// \brief Load the sensor based on data from an sdf::Sensor object.
+      /// \param[in] _sdf SDF Sensor parameters.
+      /// \return true if loading was successful
+      public: virtual bool Load(const sdf::Sensor &_sdf) override;
+
       /// \brief Load sensor sata from SDF
       /// \param[in] _sdf SDF used
       /// \return True on success

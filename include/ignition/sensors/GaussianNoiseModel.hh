@@ -51,7 +51,7 @@ namespace ignition
       public: virtual void Load(const sdf::Noise &_sdf) override;
 
       // Documentation inherited.
-      public: double ApplyImpl(double _in) override;
+      public: double ApplyImpl(double _in, double _dt) override;
 
       /// \brief Accessor for mean.
       /// \return Mean of Gaussian noise.
