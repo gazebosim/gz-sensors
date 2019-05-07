@@ -16,6 +16,8 @@
 */
 
 #include <iostream>
+#include <sdf/Sensor.hh>
+#include <sdf/Camera.hh>
 
 #include <ignition/common/Image.hh>
 #include <ignition/common/Console.hh>
@@ -28,7 +30,7 @@ void OnImageFrame(const ignition::msgs::Image &_image)
   const unsigned char *data = reinterpret_cast<const unsigned char*>(
       _image.data().c_str());
   auto format = static_cast<ignition::common::Image::PixelFormatType>(
-      _image.pixel_format());
+      _image.pixel_format_type());
   ignition::common::Image image;
   image.SetFromData(data, _image.width(), _image.height(), format);
   std::cout << "Saving image.png\n";
@@ -70,13 +72,28 @@ int main()
   const std::size_t hfov = IGN_DTOR(60);
   const double near = 0.1;
   const double far = 100;
-  const auto format = ignition::common::Image::RGB_INT8;
-  sdf::ElementPtr cameraSDF = ignition::sensors::CameraConfig(
-      name, topic, hz, width, height, hfov, near, far, format).ToSDF();
+  const auto format = sdf::PixelFormatType::RGB_INT8;
+  sdf::Camera cameraSdf;
+  cameraSdf.SetImageWidth(width);
+  cameraSdf.SetImageHeight(height);
+  cameraSdf.SetHorizontalFov(hfov);
+  cameraSdf.SetNearClip(near);
+  cameraSdf.SetFarClip(far);
+  cameraSdf.SetPixelFormat(format);
+
+  sdf::Sensor sensorSdf;
+  sensorSdf.SetType(sdf::SensorType::CAMERA);
+  sensorSdf.SetName(name);
+  sensorSdf.SetTopic(topic);
+  sensorSdf.SetUpdateRate(hz);
+  sensorSdf.SetCameraSensor(cameraSdf);
+
+  //sdf::ElementPtr cameraSDF = ignition::sensors::CameraConfig(
+  //    name, topic, hz, width, height, hfov, near, far, format).ToSDF();
 
   // Create a CameraSensor
   auto cameraSensor = mgr.CreateSensor<ignition::sensors::CameraSensor>(
-      cameraSDF);
+      sensorSdf);
 
   if (!cameraSensor)
   {
