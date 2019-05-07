@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #include <iostream>
 #include <vector>
@@ -25,10 +25,14 @@
 #include <ignition/sensors/SensorFactory.hh>
 
 static constexpr double kSampleFrequency = 100.0;
+// 16-bit ADC
 static constexpr double kSamplePrecision = 1.0/pow(2.0, 16.0);
+// Generate 6 hours of data.
 static constexpr double kNumSamples = 6 * 3600 * kSampleFrequency;
 
 // Default values for use with ADIS16448 IMU
+// These values come from the Rotors default values:
+// https://github.com/ethz-asl/rotors_simulator/blob/513bb92da0c1a0c968bdc679dffc8fe7d77de918/rotors_gazebo_plugins/include/rotors_gazebo_plugins/gazebo_imu_plugin.h#L40
 static constexpr double kDefaultAdisGyroscopeNoiseDensity =
     2.0 * 35.0 / 3600.0 / 180.0 * M_PI;
 static constexpr double kDefaultAdisGyroscopeRandomWalk =
