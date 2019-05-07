@@ -18,11 +18,10 @@
 #include <ignition/math/Helpers.hh>
 
 #include "ignition/sensors/CameraSensor.hh"
+#include "ignition/sensors/Noise.hh"
 #include "ignition/sensors/SensorFactory.hh"
-#include "ignition/rendering/RenderPass.hh"
-#include "ignition/rendering/RenderEngine.hh"
-#include "ignition/rendering/RenderPassSystem.hh"
-#include "ignition/rendering/GaussianNoisePass.hh"
+#include "ignition/sensors/SensorTypes.hh"
+#include "ignition/sensors/GaussianNoiseModel.hh"
 
 using namespace ignition;
 using namespace sensors;
@@ -60,8 +59,8 @@ class ignition::sensors::CameraSensorPrivate
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
 
-  /// \brief Pointer to noise pass
-  public: rendering::RenderPassPtr noisePass;
+  /// \brief Noise added to sensor data
+  public: std::map<SensorNoiseType, NoisePtr> noises;
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
@@ -108,26 +107,22 @@ bool CameraSensor::CreateCamera()
   this->dataPtr->camera->SetImageHeight(height);
   this->dataPtr->camera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->camera->SetFarClipPlane(cameraSdf->FarClip());
-  
-  // Add gaussian noise to camera sensor
-  const sdf::Noise noiseSdf = cameraSdf->ImageNoise();
-  if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
+
+  const std::map<SensorNoiseType, sdf::Noise> noises = {
+    {CAMERA_NOISE, cameraSdf->ImageNoise()},
+  };
+
+  for (const auto & [noiseType, noiseSdf] : noises)
   {
-    rendering::RenderEngine *engine = this->Scene()->Engine();
-    rendering::RenderPassSystemPtr rpSystem = engine->RenderPassSystem();
-    if (rpSystem)
+    // Add gaussian noise to camera sensor
+    if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
     {
-      // add gaussian noise pass
-      std::cout << "Applying noise to sensor, mean: " << noiseSdf.Mean();
-      std::cout << " stddev: " << noiseSdf.StdDev() << "\n";
-      this->dataPtr->noisePass = rpSystem->Create<rendering::GaussianNoisePass>();
-      rendering::GaussianNoisePassPtr gaussianNoisePass =
-          std::dynamic_pointer_cast<rendering::GaussianNoisePass>(
-              this->dataPtr->noisePass);
-      gaussianNoisePass->SetMean(noiseSdf.Mean());
-      gaussianNoisePass->SetStdDev(noiseSdf.StdDev());
-      gaussianNoisePass->SetEnabled(true);
-      this->dataPtr->camera->AddRenderPass(gaussianNoisePass);
+      this->dataPtr->noises[noiseType] =
+        NoiseFactory::NewNoiseModel(noiseSdf, "camera");
+
+      std::dynamic_pointer_cast<ImageGaussianNoiseModel>(
+           this->dataPtr->noises[noiseType])->SetCamera(
+             this->dataPtr->camera);
     }
   }
 

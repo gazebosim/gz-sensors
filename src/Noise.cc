@@ -58,9 +58,7 @@ NoisePtr NoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
     if (_sensorType == "camera" || _sensorType == "depth" ||
         _sensorType == "multicamera" || _sensorType == "wideanglecamera")
     {
-      // TODO(jchoclin): We need to implement Ogre Compositor Instance in
-      // ign-rendering
-      // noise.reset(new ImageGaussianNoiseModel());
+      noise.reset(new ImageGaussianNoiseModel());
     }
     else
       noise.reset(new GaussianNoiseModel());
