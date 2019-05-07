@@ -88,9 +88,6 @@ int main()
   sensorSdf.SetUpdateRate(hz);
   sensorSdf.SetCameraSensor(cameraSdf);
 
-  //sdf::ElementPtr cameraSDF = ignition::sensors::CameraConfig(
-  //    name, topic, hz, width, height, hfov, near, far, format).ToSDF();
-
   // Create a CameraSensor
   auto cameraSensor = mgr.CreateSensor<ignition::sensors::CameraSensor>(
       sensorSdf);
