@@ -25,60 +25,11 @@
 #include <ignition/math/Rand.hh>
 
 #include "ignition/common/Console.hh"
-#include "ignition/rendering/Camera.hh"
+#include "ignition/rendering/GaussianNoisePass.hh"
+#include "ignition/rendering/RenderPass.hh"
+#include "ignition/rendering/RenderEngine.hh"
+#include "ignition/rendering/RenderPassSystem.hh"
 
-/* TODO: We need to implement Ogre Compositor Instance in ign-rendering
-namespace ignition
-{
-  // We'll create an instance of this class for each camera, to be used to
-  // inject random values on each render call.
-  class GaussianNoiseCompositorListener
-    : public Ogre::CompositorInstance::Listener
-  {
-    /// \brief Constructor, setting mean and standard deviation.
-    public: GaussianNoiseCompositorListener(double _mean, double _stddev):
-        mean(_mean), stddev(_stddev) {}
-
-    /// \brief Callback that OGRE will invoke for us on each render call
-    /// \param[in] _passID OGRE material pass ID.
-    /// \param[in] _mat Pointer to OGRE material.
-    public: virtual void notifyMaterialRender(unsigned int _passId,
-                                              Ogre::MaterialPtr &_mat)
-    {
-      IGN_ASSERT(!_mat.isNull(), "Null OGRE material");
-      // modify material here (wont alter the base material!), called for
-      // every drawn geometry instance (i.e. compositor render_quad)
-
-      // Sample three values within the range [0,1.0] and set them for use in
-      // the fragment shader, which will interpret them as offsets from (0,0)
-      // to use when computing pseudo-random values.
-      Ogre::Vector3 offsets(ignition::math::Rand::DblUniform(0.0, 1.0),
-                            ignition::math::Rand::DblUniform(0.0, 1.0),
-                            ignition::math::Rand::DblUniform(0.0, 1.0));
-      // These calls are setting parameters that are declared in two places:
-      // 1. media/materials/scripts/gazebo.material, in
-      //    fragment_program Gazebo/GaussianCameraNoiseFS
-      // 2. media/materials/scripts/camera_noise_gaussian_fs.glsl
-      Ogre::Technique *technique = _mat->getTechnique(0);
-      IGN_ASSERT(technique, "Null OGRE material technique");
-      Ogre::Pass *pass = technique->getPass(_passId);
-      IGN_ASSERT(pass, "Null OGRE material pass");
-      Ogre::GpuProgramParametersSharedPtr params =
-          pass->getFragmentProgramParameters();
-      IGN_ASSERT(!params.isNull(), "Null OGRE material GPU parameters");
-
-      params->setNamedConstant("offsets", offsets);
-      params->setNamedConstant("mean", static_cast<Ogre::Real>(this->dataPtr->mean));
-      params->setNamedConstant("stddev", static_cast<Ogre::Real>(this->stddev));
-    }
-
-    /// \brief Mean that we'll pass down to the GLSL fragment shader.
-    private: double mean;
-    /// \brief Standard deviation that we'll pass down to the GLSL fragment
-    /// shader.
-    private: double stddev;
-  };
-}*/
 
 using namespace ignition;
 using namespace sensors;
@@ -110,6 +61,20 @@ class ignition::sensors::GaussianNoiseModelPrivate
 
   /// \brief True if the type is GAUSSIAN_QUANTIZED
   public: bool quantized = false;
+};
+
+class ignition::sensors::ImageGaussianNoiseModelPrivate
+{
+  /// \brief If type starts with GAUSSIAN, the mean of the distribution
+  /// from which we sample when adding noise.
+  public: double mean = 0.0;
+
+  /// \brief If type starts with GAUSSIAN, the standard deviation of the
+  /// distribution from which we sample when adding noise.
+  public: double stdDev = 0.0;
+
+  /// \brief Gaussian noise pass.
+  public: rendering::GaussianNoisePassPtr gaussianNoisePass;
 };
 
 //////////////////////////////////////////////////
@@ -228,50 +193,56 @@ void GaussianNoiseModel::Print(std::ostream &_out) const
     << "quantized[" << this->dataPtr->quantized << "]";
 }
 
-
-/* TODO: We need to implement Ogre Compositor Instance in ign-rendering
-
 //////////////////////////////////////////////////
 ImageGaussianNoiseModel::ImageGaussianNoiseModel()
-  : GaussianNoiseModel()
+  : GaussianNoiseModel(), dataPtr(new ImageGaussianNoiseModelPrivate())
 {
 }
 
 //////////////////////////////////////////////////
 ImageGaussianNoiseModel::~ImageGaussianNoiseModel()
 {
+  delete this->dataPtr;
+  this->dataPtr = nullptr;
 }
 
 //////////////////////////////////////////////////
-void ImageGaussianNoiseModel::Load(sdf::ElementPtr _sdf)
+void ImageGaussianNoiseModel::Load(const sdf::Noise &_sdf)
 {
-  GaussianNoiseModel::Load(_sdf);
+  Noise::Load(_sdf);
+
+  this->dataPtr->mean = _sdf.Mean();
+  this->dataPtr->stdDev = _sdf.StdDev();
 }
 
 //////////////////////////////////////////////////
 void ImageGaussianNoiseModel::SetCamera(rendering::CameraPtr _camera)
 {
+  if (!_camera)
+  {
+    ignerr << "Unable to apply gaussian noise, camera is null\n";
+    return;
+  }
 
-  IGN_ASSERT(_camera, "Unable to apply gaussian noise, camera is null");
-
-  this->gaussianNoiseCompositorListener.reset(new
-        GaussianNoiseCompositorListener(this->dataPtr->mean, this->dataPtr->stdDev));
-
-  this->gaussianNoiseInstance =
-    Ogre::CompositorManager::getSingleton().addCompositor(
-      _camera->OgreViewport(), "CameraNoise/Gaussian");
-  this->gaussianNoiseInstance->setEnabled(true);
-  this->gaussianNoiseInstance->addListener(
-    this->gaussianNoiseCompositorListener.get());
+  rendering::RenderEngine *engine = _camera->Scene()->Engine();
+  rendering::RenderPassSystemPtr rpSystem = engine->RenderPassSystem();
+  if (rpSystem)
+  {
+    // add gaussian noise pass
+    rendering::RenderPassPtr noisePass =
+      rpSystem->Create<rendering::GaussianNoisePass>();
+    this->dataPtr->gaussianNoisePass =
+        std::dynamic_pointer_cast<rendering::GaussianNoisePass>(noisePass);
+    this->dataPtr->gaussianNoisePass->SetMean(this->dataPtr->mean);
+    this->dataPtr->gaussianNoisePass->SetStdDev(this->dataPtr->stdDev);
+    this->dataPtr->gaussianNoisePass->SetEnabled(true);
+    _camera->AddRenderPass(this->dataPtr->gaussianNoisePass);
+  }
 }
 
 //////////////////////////////////////////////////
 void ImageGaussianNoiseModel::Print(std::ostream &_out) const
 {
   _out << "Image Gaussian noise, mean[" << this->dataPtr->mean << "], "
-    << "stdDev[" << this->dataPtr->stdDev << "] "
-    << "bias[" << this->dataPtr->bias << "] "
-    << "precision[" << this->dataPtr->precision << "] "
-    << "quantized[" << this->dataPtr->quantized << "]";
+    << "stdDev[" << this->dataPtr->stdDev << "] ";
 }
-*/

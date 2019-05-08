@@ -19,6 +19,7 @@
 
 #include "ignition/sensors/DepthCameraSensor.hh"
 #include "ignition/sensors/SensorFactory.hh"
+#include "ignition/sensors/GaussianNoiseModel.hh"
 
 // undefine near and far macros from windows.h
 #ifdef _WIN32
@@ -64,6 +65,9 @@ class ignition::sensors::DepthCameraSensorPrivate
 
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
+
+  /// \brief Noise added to sensor data
+  public: std::map<SensorNoiseType, NoisePtr> noises;
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
@@ -257,6 +261,30 @@ bool DepthCameraSensor::CreateCamera()
   this->dataPtr->depthCamera->SetImageWidth(width);
   this->dataPtr->depthCamera->SetImageHeight(height);
   this->dataPtr->depthCamera->SetFarClipPlane(far);
+
+  const std::map<SensorNoiseType, sdf::Noise> noises = {
+    {CAMERA_NOISE, cameraSdf->ImageNoise()},
+  };
+
+  for (const auto & [noiseType, noiseSdf] : noises)
+  {
+    // Add gaussian noise to camera sensor
+    if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
+    {
+      this->dataPtr->noises[noiseType] =
+        NoiseFactory::NewNoiseModel(noiseSdf, "depth");
+
+      std::dynamic_pointer_cast<ImageGaussianNoiseModel>(
+           this->dataPtr->noises[noiseType])->SetCamera(
+             this->dataPtr->depthCamera);
+    }
+    else if (noiseSdf.Type() != sdf::NoiseType::NONE)
+    {
+      ignwarn << "The depth camera sensor only supports Gaussian noise. "
+       << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
+       << "] is not supported." << std::endl;
+    }
+  }
 
   // Near clip plane not set because we need to be able to detect occlusion
   // from objects before near clip plane

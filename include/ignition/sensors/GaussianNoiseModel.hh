@@ -23,6 +23,7 @@
 #include "ignition/sensors/config.hh"
 #include "ignition/sensors/Export.hh"
 #include "ignition/sensors/Noise.hh"
+#include "ignition/rendering/Camera.hh"
 
 namespace ignition
 {
@@ -32,6 +33,7 @@ namespace ignition
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     // Forward declarations
     class GaussianNoiseModelPrivate;
+    class ImageGaussianNoiseModelPrivate;
 
     /** \class GaussianNoiseModel GaussianNoiseModel.hh \
     ignition/sensors/GaussianNoiseModel.hh
@@ -46,7 +48,7 @@ namespace ignition
       public: virtual ~GaussianNoiseModel();
 
       // Documentation inherited.
-      public: virtual void Load(const sdf::Noise &_sdf) override final;
+      public: virtual void Load(const sdf::Noise &_sdf) override;
 
       // Documentation inherited.
       public: double ApplyImpl(double _in, double _dt) override;
@@ -69,7 +71,34 @@ namespace ignition
       /// \brief Private data pointer.
       private: GaussianNoiseModelPrivate *dataPtr = nullptr;
     };
-    }
+
+    /** \class ImageGaussianNoiseModel GaussianNoiseModel.hh \
+    ignition/sensors/GaussianNoiseModel.hh
+    **/
+    /// \brief Gaussian noise class for image sensors
+    class IGNITION_SENSORS_VISIBLE ImageGaussianNoiseModel :
+      public GaussianNoiseModel
+    {
+      /// \brief Constructor.
+      public: ImageGaussianNoiseModel();
+
+      /// \brief Destructor.
+      public: virtual ~ImageGaussianNoiseModel();
+
+      // Documentation inherited.
+      public: virtual void Load(const sdf::Noise &_sdf) override;
+
+      // Documentation inherited.
+      public: virtual void SetCamera(rendering::CameraPtr _camera) override;
+
+      /// Documentation inherited
+      public: virtual void Print(std::ostream &_out) const override;
+
+      /// \brief Private data pointer.
+      private: ImageGaussianNoiseModelPrivate *dataPtr = nullptr;
+    };
+    /// \}
+  }
   }
 }
 

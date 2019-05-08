@@ -2,7 +2,6 @@ set (sources
   Events.cc
   Manager.cc
   Sensor.cc
-  CameraConfig.cc
   Noise.cc
   GaussianNoiseModel.cc
   SensorFactory.cc

@@ -18,7 +18,10 @@
 #include <ignition/math/Helpers.hh>
 
 #include "ignition/sensors/CameraSensor.hh"
+#include "ignition/sensors/Noise.hh"
 #include "ignition/sensors/SensorFactory.hh"
+#include "ignition/sensors/SensorTypes.hh"
+#include "ignition/sensors/GaussianNoiseModel.hh"
 
 using namespace ignition;
 using namespace sensors;
@@ -55,6 +58,9 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
+
+  /// \brief Noise added to sensor data
+  public: std::map<SensorNoiseType, NoisePtr> noises;
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
@@ -101,6 +107,30 @@ bool CameraSensor::CreateCamera()
   this->dataPtr->camera->SetImageHeight(height);
   this->dataPtr->camera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->camera->SetFarClipPlane(cameraSdf->FarClip());
+
+  const std::map<SensorNoiseType, sdf::Noise> noises = {
+    {CAMERA_NOISE, cameraSdf->ImageNoise()},
+  };
+
+  for (const auto & [noiseType, noiseSdf] : noises)
+  {
+    // Add gaussian noise to camera sensor
+    if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
+    {
+      this->dataPtr->noises[noiseType] =
+        NoiseFactory::NewNoiseModel(noiseSdf, "camera");
+
+      std::dynamic_pointer_cast<ImageGaussianNoiseModel>(
+           this->dataPtr->noises[noiseType])->SetCamera(
+             this->dataPtr->camera);
+    }
+    else if (noiseSdf.Type() != sdf::NoiseType::NONE)
+    {
+      ignwarn << "The camera sensor only supports Gaussian noise. "
+       << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
+       << "] is not supported." << std::endl;
+    }
+  }
 
   // \todo(nkoeng) these parameters via sdf
   this->dataPtr->camera->SetAntiAliasing(2);
