@@ -325,6 +325,9 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
   msg.set_height(height);
   msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
                this->dataPtr->camera->ImageFormat()));
+  // TODO(anyone) Deprecated in ign-msgs4, will be removed on ign-msgs5
+  // in favor of set_pixel_format_type.
+  msg.set_pixel_format(format);
   msg.set_pixel_format_type(msgsPixelFormat);
   msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
