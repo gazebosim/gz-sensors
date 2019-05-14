@@ -2,6 +2,11 @@
 
 ### Ignition Sensors 2.X.X (201X-XX-XX)
 
+### Ignition Sensors 2.0.0 (2019-05-XX)
+
+1. Restore `pixel_format` in message and add deprecation comment.
+    * [Pull request 62](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/62)
+
 1. Added noise to  camera and lidar sensors.
     * [Pull request 60](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/60)
     * [Pull request 61](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/60)
@@ -36,6 +41,12 @@
 
 1. Add altimeter
     * [Pull request 43](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/43)
+
+1. Create component for rendering sensor classes
+   * [Pull request 42](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/42)
+
+1. Upgrade to ignition-rendering2
+   * [Pull request 45](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/45)
 
 1. Upgrade to ignition-msgs4 and ignition-transport7
    * [Pull request 51](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/51)
