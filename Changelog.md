@@ -2,6 +2,9 @@
 
 ### Ignition Sensors 2.X.X (201X-XX-XX)
 
+1. Add frame_id to sensor messages
+    * [Pull request 63](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/63)
+
 1. Added noise to  camera and lidar sensors.
     * [Pull request 60](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/60)
     * [Pull request 61](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/60)
