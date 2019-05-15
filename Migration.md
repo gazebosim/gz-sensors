@@ -8,6 +8,16 @@ release will remove the deprecated code.
 
 ## Ignition Sensors 2.X to 3.X
 
+### Additions
+
+1. Rendering sensors moved to `rendering` component.
+
+1. New sensors: altimeter, IMU, magnetometer.
+
+### Modifications
+
+1. Depend on ignition-msgs4, ignition-rendering2, ignition-transport7.
+
 ### Deprecations
 
 1. **include/sensors/Noise.hh**
