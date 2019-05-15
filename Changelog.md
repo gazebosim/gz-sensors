@@ -4,6 +4,9 @@
 
 ### Ignition Sensors 2.0.0 (2019-05-XX)
 
+1. Add frame_id to sensor messages
+    * [Pull request 63](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/63)
+
 1. Restore `pixel_format` in message and add deprecation comment.
     * [Pull request 62](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/62)
 
