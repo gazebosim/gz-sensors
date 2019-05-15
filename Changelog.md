@@ -12,7 +12,7 @@
 
 1. Added noise to  camera and lidar sensors.
     * [Pull request 60](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/60)
-    * [Pull request 61](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/60)
+    * [Pull request 61](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/61)
 
 1. Add support for loading a Lidar sensor from an SDF Sensor DOM object.
     * [Pull request 59](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/59)
