@@ -434,8 +434,8 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
 
-  ignition::common::Image::PixelFormatType format =
-    ignition::common::Image::R_FLOAT32;
+  auto commonFormat = common::Image::R_FLOAT32;
+  auto msgsFormat = msgs::PixelFormatType::R_FLOAT32;
 
   // create message
   ignition::msgs::Image msg;
@@ -443,7 +443,10 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
   msg.set_height(height);
   msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
                this->dataPtr->depthCamera->ImageFormat()));
-  msg.set_pixel_format(format);
+  // TODO(anyone) Deprecated in ign-msgs4, will be removed on ign-msgs5
+  // in favor of set_pixel_format_type.
+  msg.set_pixel_format(commonFormat);
+  msg.set_pixel_format_type(msgsFormat);
   msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
   auto frame = msg.mutable_header()->add_data();
