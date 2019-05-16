@@ -47,7 +47,7 @@ class ignition::sensors::SensorPrivate
   public: ignition::math::Pose3d pose;
 
   /// \brief How many times the sensor will generate data per second
-  public: double updateRate = 1;
+  public: double updateRate = 0.0;
 
   /// \brief What sim time should this sensor update at
   public: ignition::common::Time nextUpdateTime;

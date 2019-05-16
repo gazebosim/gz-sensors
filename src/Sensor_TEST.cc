@@ -42,7 +42,7 @@ TEST(Sensor_TEST, Sensor)
   sensor.SetPose(math::Pose3d(1, 2, 3, 0, 0, 0));
   EXPECT_EQ(math::Pose3d(1, 2, 3, 0, 0, 0), sensor.Pose());
 
-  EXPECT_DOUBLE_EQ(1.0, sensor.UpdateRate());
+  EXPECT_DOUBLE_EQ(0.0, sensor.UpdateRate());
   sensor.SetUpdateRate(0.5);
   EXPECT_DOUBLE_EQ(0.5, sensor.UpdateRate());
   sensor.SetUpdateRate(0);

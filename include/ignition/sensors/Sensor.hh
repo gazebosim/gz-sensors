@@ -108,7 +108,8 @@ namespace ignition
       public: double UpdateRate() const;
 
       /// \brief Set the update rate of the sensor. An update rate of zero means
-      /// that the sensor is updated every cycle. Negative rates become zero.
+      /// that the sensor is updated every cycle. It's zero by default.
+      /// \detail Negative rates become zero.
       /// \param[in] _hz Update rate of sensor in Hertz.
       public: void SetUpdateRate(const double _hz);
 
@@ -120,7 +121,7 @@ namespace ignition
       public: void SetPose(const ignition::math::Pose3d &_pose);
 
       /// \brief Set the parent of the sensor
-      public: void SetParent(const std::string &_parent);
+      public: virtual void SetParent(const std::string &_parent);
 
       /// \brief Get name.
       /// \return Name of sensor.
