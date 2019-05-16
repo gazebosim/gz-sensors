@@ -88,7 +88,8 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
   }
 
   // Check if this is the right type
-  if (_sdf.Type() != sdf::SensorType::LIDAR)
+  if (_sdf.Type() != sdf::SensorType::LIDAR &&
+      _sdf.Type() != sdf::SensorType::GPU_LIDAR)
   {
     ignerr << "Attempting to a load a Lidar sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
@@ -107,8 +108,11 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
         this->Topic());
   if (!this->dataPtr->pub)
   {
+    ignerr << "Failed to advertise on topic [" << this->Topic()
+      << "]." << std::endl;
     return false;
   }
+  ignmsg << "Publishing laser scans on [" << this->Topic() << "]" << std::endl;
 
   // Load ray atributes
   this->dataPtr->sdfLidar = *_sdf.LidarSensor();

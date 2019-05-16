@@ -52,6 +52,7 @@ class ignition::sensors::SensorPrivate
   /// \brief What sim time should this sensor update at
   public: ignition::common::Time nextUpdateTime;
 
+  /// \brief SDF element with sensor information.
   public: sdf::ElementPtr sdf = nullptr;
 
   /// \brief SDF Sensor DOM object.
@@ -182,7 +183,14 @@ double Sensor::UpdateRate() const
 //////////////////////////////////////////////////
 void Sensor::SetUpdateRate(const double _hz)
 {
-  this->dataPtr->updateRate = _hz;
+  if (_hz < 0)
+  {
+    this->dataPtr->updateRate = 0;
+  }
+  else
+  {
+    this->dataPtr->updateRate = _hz;
+  }
 }
 
 //////////////////////////////////////////////////
@@ -192,13 +200,16 @@ bool Sensor::Update(const ignition::common::Time &_now,
   bool result = false;
 
   // Check if it's time to update
-  if (_now < this->dataPtr->nextUpdateTime && !_force)
+  if (_now < this->dataPtr->nextUpdateTime && !_force &&
+      this->dataPtr->updateRate > 0)
+  {
     return result;
+  }
 
   // Make the update happen
   result = this->Update(_now);
 
-  if (!_force)
+  if (!_force && this->dataPtr->updateRate > 0.0)
   {
     // Update the time the plugin should be loaded
     ignition::common::Time delta(1.0 / this->dataPtr->updateRate);

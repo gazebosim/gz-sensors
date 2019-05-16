@@ -107,8 +107,9 @@ namespace ignition
       /// \return _hz update rate of sensor.
       public: double UpdateRate() const;
 
-      /// \brief Set the update rate of the sensor.
-      /// \param[in] _hz update rate of sensor.
+      /// \brief Set the update rate of the sensor. An update rate of zero means
+      /// that the sensor is updated every cycle. Negative rates become zero.
+      /// \param[in] _hz Update rate of sensor in Hertz.
       public: void SetUpdateRate(const double _hz);
 
       /// \brief Get the current pose.

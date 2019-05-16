@@ -103,6 +103,7 @@ ign_add_component(air_pressure SOURCES ${air_pressure_sources} GET_TARGET_NAME a
 set (gtest_sources
   Manager_TEST.cc
   Noise_TEST.cc
+  Sensor_TEST.cc
 )
 
 # Build the unit tests.
