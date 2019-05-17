@@ -4,6 +4,9 @@
 
 ### Ignition Sensors 2.0.0 (2019-05-XX)
 
+1. Zero update rate, virtual SetParent and fix gpu_lidar
+    * [Pull request 66](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/66)
+
 1. Add frame_id to sensor messages
     * [Pull request 63](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/63)
 
