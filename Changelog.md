@@ -9,6 +9,7 @@
 
 1. Restore `pixel_format` in message and add deprecation comment.
     * [Pull request 62](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/62)
+    * [Pull request 65](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/65)
 
 1. Added noise to  camera and lidar sensors.
     * [Pull request 60](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-request/60)
