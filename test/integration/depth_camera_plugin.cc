@@ -16,9 +16,10 @@
 */
 
 #include <gtest/gtest.h>
+#include <ignition/msgs/camera_info.pb.h>
+
 #include <ignition/common/Filesystem.hh>
 #include <ignition/common/Event.hh>
-#include <ignition/msgs/camera_info.pb.h>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/DepthCameraSensor.hh>
 #include <ignition/rendering.hh>

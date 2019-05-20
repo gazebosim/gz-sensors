@@ -14,9 +14,9 @@
  * limitations under the License.
  *
 */
+#include <ignition/msgs/camera_info.pb.h>
 
 #include <ignition/math/Helpers.hh>
-#include <ignition/msgs/camera_info.pb.h>
 
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/Noise.hh"
