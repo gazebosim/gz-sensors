@@ -2,11 +2,13 @@
 
 ### Ignition Sensors 2.X.X (201X-XX-XX)
 
-### Ignition Sensors 2.0.0 (2019-05-XX)
+### Ignition Sensors 2.1.0 (201X-XX-XX)
 
 1. Create and publish on `camera_info` topics for the Camera and DepthCamera
    sensors.
     * [Pull request 67](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/67)
+
+### Ignition Sensors 2.0.0 (2019-05-21)
 
 1. Zero update rate, virtual SetParent and fix gpu_lidar
     * [Pull request 66](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/66)
