@@ -16,6 +16,8 @@
 */
 
 #include <ignition/msgs/pointcloud2.pb.h>
+
+#include <ignition/common/Image.hh>
 #include <ignition/msgs/image.pb.h>
 #include <ignition/math/Helpers.hh>
 
@@ -39,6 +41,19 @@ class ignition::sensors::RGBDCameraSensorPrivate
 
   /// \brief Remove a camera from a scene
   public: void RemoveCamera(ignition::rendering::ScenePtr _scene);
+
+  public: void CreateAndPublishPointCloud();
+
+  /// \brief Depth data callback used to get the data from the sensor
+  /// \param[in] _scan pointer to the data from the sensor
+  /// \param[in] _width width of the depth image
+  /// \param[in] _height height of the depth image
+  /// \param[in] _channel bytes used for the depth data
+  /// \param[in] _format string with the format
+  public: void OnNewDepthFrame(const float *_scan,
+                    unsigned int _width, unsigned int _height,
+                    unsigned int /*_channels*/,
+                    const std::string &_format);
 
   /// \brief node to create publisher
   public: transport::Node node;
@@ -107,6 +122,12 @@ class ignition::sensors::RGBDCameraSensorPrivate
 
   /// \brief Camera information message.
   public: msgs::CameraInfo infoMsg;
+
+  /// \brief Depth camera near clip.
+  public: double depthNear = 0.1;
+
+  /// \brief Depth camera far clip.
+  public: double depthFar = 6.0;
 };
 
 using namespace ignition;
@@ -270,7 +291,8 @@ bool RGBDCameraSensorPrivate::CreateCameras(const std::string &_name,
   this->depthCamera = _scene->CreateDepthCamera(_name + "_depth");
   this->depthCamera->SetImageWidth(width);
   this->depthCamera->SetImageHeight(height);
-  this->depthCamera->SetFarClipPlane(cameraSdf->FarClip());
+  // \todo(nkoenig) Fix this to be a parameter.
+  this->depthCamera->SetFarClipPlane(this->depthFar);
 
   this->camera = _scene->CreateCamera(_name);
   this->camera->SetImageWidth(width);
@@ -336,6 +358,11 @@ bool RGBDCameraSensorPrivate::CreateCameras(const std::string &_name,
   _scene->RootVisual()->AddChild(this->depthCamera);
   _scene->RootVisual()->AddChild(this->camera);
 
+  this->connection = this->depthCamera->ConnectNewDepthFrame(
+      std::bind(&RGBDCameraSensorPrivate::OnNewDepthFrame, this,
+        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5));
+
   return true;
 }
 
@@ -354,6 +381,36 @@ void RGBDCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
   }
 }
 
+/////////////////////////////////////////////////
+void RGBDCameraSensorPrivate::OnNewDepthFrame(const float *_scan,
+                    unsigned int _width, unsigned int _height,
+                    unsigned int /*_channels*/,
+                    const std::string &/*_format*/)
+{
+  std::lock_guard<std::mutex> lock(this->mutex);
+
+  unsigned int depthSamples = _width * _height;
+  unsigned int depthBufferSize = depthSamples * sizeof(float);
+
+  if (!this->depthBuffer)
+    this->depthBuffer = new float[depthSamples];
+
+  memcpy(this->depthBuffer, _scan, depthBufferSize);
+
+  for (unsigned int i = 0; i < depthSamples; ++i)
+  {
+    // Mask ranges outside of min/max to +/- inf, as per REP 117
+    if (this->depthBuffer[i] >= this->depthFar)
+    {
+      this->depthBuffer[i] = ignition::math::INF_D;
+    }
+    else if (this->depthBuffer[i] <= this->depthNear)
+    {
+      this->depthBuffer[i] = -ignition::math::INF_D;
+    }
+  }
+}
+
 //////////////////////////////////////////////////
 bool RGBDCameraSensor::Update(const ignition::common::Time &_now)
 {
@@ -369,9 +426,19 @@ bool RGBDCameraSensor::Update(const ignition::common::Time &_now)
     return false;
   }
 
-  // move the camera to the current pose
-  this->dataPtr->camera->SetLocalPose(this->Pose());
-  this->dataPtr->depthCamera->SetLocalPose(this->Pose());
+  // move the depth camera to the current pose
+  // \todo(nkoenig) Ignition Gazebo attaches the rendering camera with
+  // this->Name() to the appropriate model link. When physics updates the
+  // link's pose, the visual is also moved. This in turn moves the rendering
+  // rendering camera. The problem is that the RGBD sensor has two cameras,
+  // one with a name that equals 'this->Name()' and one with a name that
+  // equal 'this->Name() + "_depth"'. In order to make the depth camera
+  // move, we have to manually set the world pose of the depth camera to
+  // match this->dataPtr->camera.
+  //
+  // It would be nice if the whole sensor + rendering + gazebo pipeline
+  // could handle this use-case more elegantly.
+  this->dataPtr->depthCamera->SetWorldPose(this->dataPtr->camera->WorldPose());
 
   unsigned int width = this->dataPtr->camera->ImageWidth();
   unsigned int height = this->dataPtr->camera->ImageHeight();
@@ -423,6 +490,9 @@ bool RGBDCameraSensor::Update(const ignition::common::Time &_now)
     this->dataPtr->depthPub.Publish(msg);
   }
 
+  // Create and publish point cloud information
+  this->dataPtr->CreateAndPublishPointCloud();
+
   // publish the camera info message
   this->dataPtr->infoMsg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   this->dataPtr->infoMsg.mutable_header()->mutable_stamp()->set_nsec(
@@ -453,7 +523,73 @@ double RGBDCameraSensor::FarClip() const
 //////////////////////////////////////////////////
 double RGBDCameraSensor::NearClip() const
 {
-  this->dataPtr->sdfSensor.CameraSensor()->NearClip();
+  return this->dataPtr->sdfSensor.CameraSensor()->NearClip();
+}
+
+//////////////////////////////////////////////////
+void RGBDCameraSensorPrivate::CreateAndPublishPointCloud()
+{
+  msgs::PointCloud2 msg;
+
+  double hfov = this->depthCamera->HFOV().Radian();
+  unsigned int width = this->depthCamera->ImageWidth();
+  unsigned int height = this->depthCamera->ImageHeight();
+
+  double fl = width / (2.0 * tan(hfov/2.0));
+
+  int index = 0;
+
+  unsigned char *imageData = this->image.Data<unsigned char>();
+
+  // convert depth to point cloud
+  for (unsigned int y = 0; y < height; ++y)
+  {
+    double pAngle = 0.0;
+    if (height > 1)
+    {
+      pAngle = atan2(static_cast<double>(y) -
+                     0.5 * static_cast<double>(height - 1), fl);
+    }
+
+    for (unsigned int x = 0; x < width; ++x)
+    {
+      double yAngle = 0.0;
+      if (width > 1)
+      {
+        yAngle = atan2(static_cast<double>(x) -
+                       0.5*static_cast<double>(width-1), fl);
+      }
+
+      double depth = this->depthBuffer[index++];
+      if (depth > -ignition::math::INF_D && depth < ignition::math::INF_D)
+        std::cout << "I[" << index << "] D[" << depth << "]\n";
+      msgs::Vector3d *pt = msg.add_points();
+      pt->set_x(depth * tan(yAngle));
+      pt->set_y(depth * tan(pAngle));
+      pt->set_z(depth);
+
+      // put image color data for each point.
+
+      // \todo(nkoenig) we are assuming RGB_INT8 format, which is also
+      // hardcoded in this sensor.
+      msgs::Color *clr = msg.add_color();
+      if (imageData)
+      {
+        clr->set_r(imageData[x*3 + y*height*3 + 0]);
+        clr->set_g(imageData[x*3 + y*height*3 + 1]);
+        clr->set_b(imageData[x*3 + y*height*3 + 2]);
+      }
+      else
+      {
+        // No color data
+        clr->set_r(0);
+        clr->set_g(0);
+        clr->set_b(0);
+      }
+    }
+  }
+
+  this->pointPub.Publish(msg);
 }
 
 IGN_SENSORS_REGISTER_SENSOR(RGBDCameraSensor)
