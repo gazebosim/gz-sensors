@@ -26,12 +26,12 @@
 
 #include <sdf/Sensor.hh>
 
-#include "ignition/sensors/RGBDCameraSensor.hh"
+#include "ignition/sensors/RgbdCameraSensor.hh"
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/GaussianNoiseModel.hh"
 
-/// \brief Private data for RGBDCameraSensor
-class ignition::sensors::RGBDCameraSensorPrivate
+/// \brief Private data for RgbdCameraSensor
+class ignition::sensors::RgbdCameraSensorPrivate
 {
   /// \brief Create the cameras in a scene.
   /// \return True on success.
@@ -134,7 +134,7 @@ using namespace ignition;
 using namespace sensors;
 
 //////////////////////////////////////////////////
-void RGBDCameraSensorPrivate::RemoveCamera(
+void RgbdCameraSensorPrivate::RemoveCamera(
     rendering::ScenePtr _scene)
 {
   if (_scene)
@@ -146,13 +146,13 @@ void RGBDCameraSensorPrivate::RemoveCamera(
 
 
 //////////////////////////////////////////////////
-RGBDCameraSensor::RGBDCameraSensor()
-  : dataPtr(new RGBDCameraSensorPrivate())
+RgbdCameraSensor::RgbdCameraSensor()
+  : dataPtr(new RgbdCameraSensorPrivate())
 {
 }
 
 //////////////////////////////////////////////////
-RGBDCameraSensor::~RGBDCameraSensor()
+RgbdCameraSensor::~RgbdCameraSensor()
 {
   this->dataPtr->connection.reset();
   if (this->dataPtr->depthBuffer)
@@ -160,13 +160,13 @@ RGBDCameraSensor::~RGBDCameraSensor()
 }
 
 //////////////////////////////////////////////////
-bool RGBDCameraSensor::Init()
+bool RgbdCameraSensor::Init()
 {
   return this->Sensor::Init();
 }
 
 //////////////////////////////////////////////////
-bool RGBDCameraSensor::Load(const sdf::Sensor &_sdf)
+bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
@@ -227,7 +227,7 @@ bool RGBDCameraSensor::Load(const sdf::Sensor &_sdf)
 }
 
 //////////////////////////////////////////////////
-bool RGBDCameraSensorPrivate::CreateCameras(const std::string &_name,
+bool RgbdCameraSensorPrivate::CreateCameras(const std::string &_name,
               ignition::rendering::ScenePtr _scene)
 {
   const sdf::Camera *cameraSdf = this->sdfSensor.CameraSensor();
@@ -359,7 +359,7 @@ bool RGBDCameraSensorPrivate::CreateCameras(const std::string &_name,
   _scene->RootVisual()->AddChild(this->camera);
 
   this->connection = this->depthCamera->ConnectNewDepthFrame(
-      std::bind(&RGBDCameraSensorPrivate::OnNewDepthFrame, this,
+      std::bind(&RgbdCameraSensorPrivate::OnNewDepthFrame, this,
         std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
         std::placeholders::_4, std::placeholders::_5));
 
@@ -367,7 +367,7 @@ bool RGBDCameraSensorPrivate::CreateCameras(const std::string &_name,
 }
 
 /////////////////////////////////////////////////
-void RGBDCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
+void RgbdCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
@@ -382,7 +382,7 @@ void RGBDCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 }
 
 /////////////////////////////////////////////////
-void RGBDCameraSensorPrivate::OnNewDepthFrame(const float *_scan,
+void RgbdCameraSensorPrivate::OnNewDepthFrame(const float *_scan,
                     unsigned int _width, unsigned int _height,
                     unsigned int /*_channels*/,
                     const std::string &/*_format*/)
@@ -412,7 +412,7 @@ void RGBDCameraSensorPrivate::OnNewDepthFrame(const float *_scan,
 }
 
 //////////////////////////////////////////////////
-bool RGBDCameraSensor::Update(const ignition::common::Time &_now)
+bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 {
   if (!this->dataPtr->initialized)
   {
@@ -503,32 +503,34 @@ bool RGBDCameraSensor::Update(const ignition::common::Time &_now)
 }
 
 //////////////////////////////////////////////////
-unsigned int RGBDCameraSensor::ImageWidth() const
+unsigned int RgbdCameraSensor::ImageWidth() const
 {
   return this->dataPtr->depthCamera->ImageWidth();
 }
 
 //////////////////////////////////////////////////
-unsigned int RGBDCameraSensor::ImageHeight() const
+unsigned int RgbdCameraSensor::ImageHeight() const
 {
   return this->dataPtr->depthCamera->ImageHeight();
 }
 
 //////////////////////////////////////////////////
-double RGBDCameraSensor::FarClip() const
+double RgbdCameraSensor::FarClip() const
 {
   return this->dataPtr->depthCamera->FarClipPlane();
 }
 
 //////////////////////////////////////////////////
-double RGBDCameraSensor::NearClip() const
+double RgbdCameraSensor::NearClip() const
 {
   return this->dataPtr->sdfSensor.CameraSensor()->NearClip();
 }
 
 //////////////////////////////////////////////////
-void RGBDCameraSensorPrivate::CreateAndPublishPointCloud()
+void RgbdCameraSensorPrivate::CreateAndPublishPointCloud()
 {
+  // This code was inspired by
+  // https://github.com/ros-simulation/gazebo_ros_pkgs/blob/kinetic-devel/gazebo_plugins/src/gazebo_ros_openni_kinect.cpp
   msgs::PointCloud2 msg;
 
   double hfov = this->depthCamera->HFOV().Radian();
@@ -561,8 +563,6 @@ void RGBDCameraSensorPrivate::CreateAndPublishPointCloud()
       }
 
       double depth = this->depthBuffer[index++];
-      if (depth > -ignition::math::INF_D && depth < ignition::math::INF_D)
-        std::cout << "I[" << index << "] D[" << depth << "]\n";
       msgs::Vector3d *pt = msg.add_points();
       pt->set_x(depth * tan(yAngle));
       pt->set_y(depth * tan(pAngle));
@@ -592,4 +592,4 @@ void RGBDCameraSensorPrivate::CreateAndPublishPointCloud()
   this->pointPub.Publish(msg);
 }
 
-IGN_SENSORS_REGISTER_SENSOR(RGBDCameraSensor)
+IGN_SENSORS_REGISTER_SENSOR(RgbdCameraSensor)

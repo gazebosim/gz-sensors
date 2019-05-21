@@ -33,12 +33,12 @@
 
 
 #ifndef _WIN32
-#  define RGBDCameraSensor_EXPORTS_API
+#  define RgbdCameraSensor_EXPORTS_API
 #else
-#  if (defined(RGBDCameraSensor_EXPORTS))
-#    define RGBDCameraSensor_EXPORTS_API __declspec(dllexport)
+#  if (defined(RgbdCameraSensor_EXPORTS))
+#    define RgbdCameraSensor_EXPORTS_API __declspec(dllexport)
 #  else
-#    define RGBDCameraSensor_EXPORTS_API __declspec(dllimport)
+#    define RgbdCameraSensor_EXPORTS_API __declspec(dllimport)
 #  endif
 #endif
 
@@ -49,7 +49,7 @@ namespace ignition
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     // forward declarations
-    class RGBDCameraSensorPrivate;
+    class RgbdCameraSensorPrivate;
 
     /// \brief Depth camera sensor class.
     ///
@@ -58,13 +58,13 @@ namespace ignition
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-    class RGBDCameraSensor_EXPORTS_API RGBDCameraSensor : public RenderingSensor
+    class RgbdCameraSensor_EXPORTS_API RgbdCameraSensor : public RenderingSensor
     {
       /// \brief constructor
-      public: RGBDCameraSensor();
+      public: RgbdCameraSensor();
 
       /// \brief destructor
-      public: virtual ~RGBDCameraSensor();
+      public: virtual ~RgbdCameraSensor();
 
       /// \brief Load the sensor based on data from an sdf::Sensor object.
       /// \param[in] _sdf SDF Sensor parameters.
@@ -111,7 +111,7 @@ namespace ignition
 
       /// \brief Data pointer for private data
       /// \internal
-      private: std::unique_ptr<RGBDCameraSensorPrivate> dataPtr;
+      private: std::unique_ptr<RgbdCameraSensorPrivate> dataPtr;
     };
     }
   }
