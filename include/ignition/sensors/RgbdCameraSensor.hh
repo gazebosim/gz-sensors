@@ -17,14 +17,14 @@
 #ifndef IGNITION_SENSORS_RGBDCAMERASENSOR_HH_
 #define IGNITION_SENSORS_RGBDCAMERASENSOR_HH_
 
+#include <ignition/msgs/image.pb.h>
+
 #include <memory>
 #include <cstdint>
 #include <mutex>
 #include <string>
 
 #include <sdf/Sensor.hh>
-
-#include <ignition/msgs/image.pb.h>
 
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Sensor.hh>

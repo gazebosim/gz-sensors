@@ -15,10 +15,10 @@
  *
 */
 
+#include <ignition/msgs/image.pb.h>
 #include <ignition/msgs/pointcloud2.pb.h>
 
 #include <ignition/common/Image.hh>
-#include <ignition/msgs/image.pb.h>
 #include <ignition/math/Helpers.hh>
 
 #include <ignition/rendering/Camera.hh>
