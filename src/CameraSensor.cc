@@ -155,7 +155,7 @@ bool CameraSensor::CreateCamera()
     proj->add_p(1.0);
     proj->add_p(0.0);
 
-    // Set the rectifcation matrix to identity
+    // Set the rectification matrix to identity
     this->dataPtr->infoMsg.add_rectification_matrix(1.0);
     this->dataPtr->infoMsg.add_rectification_matrix(0.0);
     this->dataPtr->infoMsg.add_rectification_matrix(0.0);
