@@ -37,11 +37,13 @@ float *g_depthBuffer = nullptr;
 
 std::mutex g_infoMutex;
 unsigned int g_infoCounter = 0;
+ignition::msgs::CameraInfo g_infoMsg;
 
-void OnCameraInfo(const ignition::msgs::CameraInfo & /*_msg*/)
+void OnCameraInfo(const ignition::msgs::CameraInfo & _msg)
 {
   g_infoMutex.lock();
   g_infoCounter++;
+  g_infoMsg.CopyFrom(_msg);
   g_infoMutex.unlock();
 }
 
@@ -182,6 +184,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   ignition::common::Time waitTime = ignition::common::Time(0.001);
   int counter = 0;
   int infoCounter = 0;
+  ignition::msgs::CameraInfo infoMsg;
   for (int sleep = 0;
        sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
   {
@@ -191,6 +194,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
 
     g_infoMutex.lock();
     infoCounter = g_infoCounter;
+    infoMsg = g_infoMsg;
     g_infoMutex.unlock();
     ignition::common::Time::Sleep(waitTime);
   }
@@ -214,6 +218,22 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_DOUBLE_EQ(g_depthBuffer[right], ignition::math::INF_D);
   g_infoMutex.unlock();
   g_mutex.unlock();
+
+  // Check camera info
+  EXPECT_TRUE(infoMsg.has_header());
+  ASSERT_EQ(1, infoMsg.header().data().size());
+  EXPECT_EQ("frame_id", infoMsg.header().data(0).key());
+  ASSERT_EQ(1, infoMsg.header().data(0).value().size());
+  EXPECT_EQ("camera1", infoMsg.header().data(0).value(0));
+  EXPECT_TRUE(infoMsg.has_distortion());
+  EXPECT_EQ(ignition::msgs::CameraInfo::Distortion::PLUMB_BOB,
+      infoMsg.distortion().model());
+  EXPECT_EQ(5, infoMsg.distortion().k().size());
+  EXPECT_TRUE(infoMsg.has_intrinsics());
+  EXPECT_EQ(9, infoMsg.intrinsics().k().size());
+  EXPECT_TRUE(infoMsg.has_projection());
+  EXPECT_EQ(12, infoMsg.projection().p().size());
+  EXPECT_EQ(9, infoMsg.rectification_matrix().size());
 
   // Check that for a box really close it returns -inf
   root->RemoveChild(box);

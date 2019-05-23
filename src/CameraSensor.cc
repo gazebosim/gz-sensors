@@ -114,26 +114,46 @@ bool CameraSensor::CreateCamera()
     msgs::CameraInfo::Distortion *distortion =
       this->dataPtr->infoMsg.mutable_distortion();
 
-    distortion->set_distortion_model(msgs::CameraInfo::Distortion::PLUMB_BOB);
-    distortion->set_k1(cameraSdf->DistortionK1());
-    distortion->set_k2(cameraSdf->DistortionK2());
-    distortion->set_k3(cameraSdf->DistortionK3());
-    distortion->set_t1(cameraSdf->DistortionP1());
-    distortion->set_t2(cameraSdf->DistortionP2());
+    distortion->set_model(msgs::CameraInfo::Distortion::PLUMB_BOB);
+    distortion->add_k(cameraSdf->DistortionK1());
+    distortion->add_k(cameraSdf->DistortionK2());
+    distortion->add_k(cameraSdf->DistortionP1());
+    distortion->add_k(cameraSdf->DistortionP2());
+    distortion->add_k(cameraSdf->DistortionK3());
 
     msgs::CameraInfo::Intrinsics *intrinsics =
       this->dataPtr->infoMsg.mutable_intrinsics();
-    intrinsics->set_fx(cameraSdf->LensIntrinsicsFx());
-    intrinsics->set_fy(cameraSdf->LensIntrinsicsFy());
-    intrinsics->set_cx(cameraSdf->LensIntrinsicsCx());
-    intrinsics->set_cy(cameraSdf->LensIntrinsicsCy());
 
+    intrinsics->add_k(cameraSdf->LensIntrinsicsFx());
+    intrinsics->add_k(0.0);
+    intrinsics->add_k(cameraSdf->LensIntrinsicsCx());
+
+    intrinsics->add_k(0.0);
+    intrinsics->add_k(cameraSdf->LensIntrinsicsFy());
+    intrinsics->add_k(cameraSdf->LensIntrinsicsCy());
+
+    intrinsics->add_k(0.0);
+    intrinsics->add_k(0.0);
+    intrinsics->add_k(1.0);
+
+    // TODO(anyone) Get tx and ty from SDF
     msgs::CameraInfo::Projection *proj =
       this->dataPtr->infoMsg.mutable_projection();
-    proj->set_fx(cameraSdf->LensIntrinsicsFx());
-    proj->set_fy(cameraSdf->LensIntrinsicsFy());
-    proj->set_cx(cameraSdf->LensIntrinsicsCx());
-    proj->set_cy(cameraSdf->LensIntrinsicsCy());
+
+    proj->add_p(cameraSdf->LensIntrinsicsFx());
+    proj->add_p(0.0);
+    proj->add_p(cameraSdf->LensIntrinsicsCx());
+    proj->add_p(0.0);
+
+    proj->add_p(0.0);
+    proj->add_p(cameraSdf->LensIntrinsicsFy());
+    proj->add_p(cameraSdf->LensIntrinsicsCy());
+    proj->add_p(0.0);
+
+    proj->add_p(0.0);
+    proj->add_p(0.0);
+    proj->add_p(1.0);
+    proj->add_p(0.0);
 
     // Set the rectifcation matrix to identity
     this->dataPtr->infoMsg.add_rectification_matrix(1.0);
