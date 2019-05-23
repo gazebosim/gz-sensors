@@ -140,20 +140,20 @@ bool CameraSensor::CreateCamera()
     msgs::CameraInfo::Projection *proj =
       this->dataPtr->infoMsg.mutable_projection();
 
-    proj->add_k(cameraSdf->LensIntrinsicsFx());
-    proj->add_k(0.0);
-    proj->add_k(cameraSdf->LensIntrinsicsCx());
-    proj->add_k(0.0);
+    proj->add_p(cameraSdf->LensIntrinsicsFx());
+    proj->add_p(0.0);
+    proj->add_p(cameraSdf->LensIntrinsicsCx());
+    proj->add_p(0.0);
 
-    proj->add_k(0.0);
-    proj->add_k(cameraSdf->LensIntrinsicsFy());
-    proj->add_k(cameraSdf->LensIntrinsicsCy());
-    proj->add_k(0.0);
+    proj->add_p(0.0);
+    proj->add_p(cameraSdf->LensIntrinsicsFy());
+    proj->add_p(cameraSdf->LensIntrinsicsCy());
+    proj->add_p(0.0);
 
-    proj->add_k(0.0);
-    proj->add_k(0.0);
-    proj->add_k(1.0);
-    proj->add_k(0.0);
+    proj->add_p(0.0);
+    proj->add_p(0.0);
+    proj->add_p(1.0);
+    proj->add_p(0.0);
 
     // Set the rectifcation matrix to identity
     this->dataPtr->infoMsg.add_rectification_matrix(1.0);

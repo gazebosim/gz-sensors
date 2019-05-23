@@ -232,7 +232,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_TRUE(infoMsg.has_intrinsics());
   EXPECT_EQ(9, infoMsg.intrinsics().k().size());
   EXPECT_TRUE(infoMsg.has_projection());
-  EXPECT_EQ(12, infoMsg.projection().k().size());
+  EXPECT_EQ(12, infoMsg.projection().p().size());
   EXPECT_EQ(9, infoMsg.rectification_matrix().size());
 
   // Check that for a box really close it returns -inf
