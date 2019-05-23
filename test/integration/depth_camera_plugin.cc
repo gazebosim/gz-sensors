@@ -226,8 +226,13 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   ASSERT_EQ(1, infoMsg.header().data(0).value().size());
   EXPECT_EQ("camera1", infoMsg.header().data(0).value(0));
   EXPECT_TRUE(infoMsg.has_distortion());
+  EXPECT_EQ(ignition::msgs::CameraInfo::Distortion::PLUMB_BOB,
+      infoMsg.distortion().model());
+  EXPECT_EQ(5, infoMsg.distortion().k().size());
   EXPECT_TRUE(infoMsg.has_intrinsics());
+  EXPECT_EQ(9, infoMsg.intrinsics().k().size());
   EXPECT_TRUE(infoMsg.has_projection());
+  EXPECT_EQ(12, infoMsg.projection().k().size());
   EXPECT_EQ(9, infoMsg.rectification_matrix().size());
 
   // Check that for a box really close it returns -inf
