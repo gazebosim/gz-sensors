@@ -14,6 +14,7 @@
  * limitations under the License.
  *
 */
+#include <ignition/common/StringUtils.hh>
 #include <ignition/msgs/camera_info.pb.h>
 
 #include <ignition/math/Helpers.hh>
@@ -309,9 +310,18 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
   if (!this->dataPtr->pub)
     return false;
 
+  // TODO(anyone) Make info topic configurable from SDF
+  // Info topic must be at same level as image topic
+  auto parts = common::Split(this->Topic(), '/');
+  parts.pop_back();
+
+  std::string infoTopic;
+  for (const auto &part : parts)
+    infoTopic += "/" + part;
+  infoTopic += "/camera_info";
+
   this->dataPtr->infoPub =
-      this->dataPtr->node.Advertise<ignition::msgs::CameraInfo>(
-          this->Topic() + "/camera_info");
+      this->dataPtr->node.Advertise<ignition::msgs::CameraInfo>(infoTopic);
   if (!this->dataPtr->infoPub)
     return false;
 
