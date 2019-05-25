@@ -125,6 +125,23 @@ namespace ignition
       /// \return Camera in Ignition Rendering.
       public: rendering::CameraPtr RenderingCamera() const;
 
+      /// \brief Topic where camera info is published.
+      /// \return Camera info topic.
+      public: std::string InfoTopic() const;
+
+      /// \brief Advertise camera info topic.
+      /// \return True if successful.
+      protected: bool AdvertiseInfo();
+
+      /// \brief Populate camera info message.
+      /// \param[in] _cameraSdf Pointer to SDF object containing camera
+      /// information.
+      protected: void PopulateInfo(const sdf::Camera *_cameraSdf);
+
+      /// \brief Publish camera info message.
+      /// \param[in] _now The current time
+      protected: void PublishInfo(const ignition::common::Time &_now);
+
       /// \brief Create a camera in a scene
       /// \return True on success.
       private: bool CreateCamera();

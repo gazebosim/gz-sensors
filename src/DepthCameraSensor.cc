@@ -51,9 +51,6 @@ class ignition::sensors::DepthCameraSensorPrivate
   /// \brief publisher to publish images
   public: transport::Node::Publisher pub;
 
-  /// \brief Camera info publisher to publish images
-  public: transport::Node::Publisher infoPub;
-
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
 
@@ -100,9 +97,6 @@ class ignition::sensors::DepthCameraSensorPrivate
 
   /// \brief SDF Sensor DOM object.
   public: sdf::Sensor sdfSensor;
-
-  /// \brief Camera information message.
-  public: msgs::CameraInfo infoMsg;
 };
 
 using namespace ignition;
@@ -231,10 +225,7 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
   if (!this->dataPtr->pub)
     return false;
 
-  this->dataPtr->infoPub =
-      this->dataPtr->node.Advertise<ignition::msgs::CameraInfo>(
-          this->Topic() + "/camera_info");
-  if (!this->dataPtr->infoPub)
+  if (!this->AdvertiseInfo())
     return false;
 
   if (this->Scene())
@@ -268,71 +259,7 @@ bool DepthCameraSensor::CreateCamera()
   double far = cameraSdf->FarClip();
   double near = cameraSdf->NearClip();
 
-  // Set some values of the camera info message.
-  {
-    msgs::CameraInfo::Distortion *distortion =
-      this->dataPtr->infoMsg.mutable_distortion();
-
-    distortion->set_model(msgs::CameraInfo::Distortion::PLUMB_BOB);
-    distortion->add_k(cameraSdf->DistortionK1());
-    distortion->add_k(cameraSdf->DistortionK2());
-    distortion->add_k(cameraSdf->DistortionP1());
-    distortion->add_k(cameraSdf->DistortionP2());
-    distortion->add_k(cameraSdf->DistortionK3());
-
-    msgs::CameraInfo::Intrinsics *intrinsics =
-      this->dataPtr->infoMsg.mutable_intrinsics();
-
-    intrinsics->add_k(cameraSdf->LensIntrinsicsFx());
-    intrinsics->add_k(0.0);
-    intrinsics->add_k(cameraSdf->LensIntrinsicsCx());
-
-    intrinsics->add_k(0.0);
-    intrinsics->add_k(cameraSdf->LensIntrinsicsFy());
-    intrinsics->add_k(cameraSdf->LensIntrinsicsCy());
-
-    intrinsics->add_k(0.0);
-    intrinsics->add_k(0.0);
-    intrinsics->add_k(1.0);
-
-    msgs::CameraInfo::Projection *proj =
-      this->dataPtr->infoMsg.mutable_projection();
-
-    proj->add_p(cameraSdf->LensIntrinsicsFx());
-    proj->add_p(0.0);
-    proj->add_p(cameraSdf->LensIntrinsicsCx());
-    proj->add_p(0.0);
-
-    proj->add_p(0.0);
-    proj->add_p(cameraSdf->LensIntrinsicsFy());
-    proj->add_p(cameraSdf->LensIntrinsicsCy());
-    proj->add_p(0.0);
-
-    proj->add_p(0.0);
-    proj->add_p(0.0);
-    proj->add_p(1.0);
-    proj->add_p(0.0);
-
-    // Set the rectification matrix to identity
-    this->dataPtr->infoMsg.add_rectification_matrix(1.0);
-    this->dataPtr->infoMsg.add_rectification_matrix(0.0);
-    this->dataPtr->infoMsg.add_rectification_matrix(0.0);
-
-    this->dataPtr->infoMsg.add_rectification_matrix(0.0);
-    this->dataPtr->infoMsg.add_rectification_matrix(1.0);
-    this->dataPtr->infoMsg.add_rectification_matrix(0.0);
-
-    this->dataPtr->infoMsg.add_rectification_matrix(0.0);
-    this->dataPtr->infoMsg.add_rectification_matrix(0.0);
-    this->dataPtr->infoMsg.add_rectification_matrix(1.0);
-
-    auto infoFrame = this->dataPtr->infoMsg.mutable_header()->add_data();
-    infoFrame->set_key("frame_id");
-    infoFrame->add_value(this->Name());
-
-    this->dataPtr->infoMsg.set_width(width);
-    this->dataPtr->infoMsg.set_height(height);
-  }
+  this->PopulateInfo(cameraSdf);
 
   this->dataPtr->depthCamera = this->Scene()->CreateDepthCamera(
       this->Name());
@@ -539,10 +466,7 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
   this->dataPtr->pub.Publish(msg);
 
   // publish the camera info message
-  this->dataPtr->infoMsg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
-  this->dataPtr->infoMsg.mutable_header()->mutable_stamp()->set_nsec(
-      _now.nsec);
-  this->dataPtr->infoPub.Publish(this->dataPtr->infoMsg);
+  this->PublishInfo(_now);
 
   // Trigger callbacks.
   try
