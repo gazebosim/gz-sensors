@@ -15,6 +15,7 @@
  *
 */
 #include <ignition/msgs/camera_info.pb.h>
+#include <ignition/common/StringUtils.hh>
 
 #include <ignition/math/Helpers.hh>
 
@@ -94,6 +95,9 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief Camera information message.
   public: msgs::CameraInfo infoMsg;
+
+  /// \brief Topic for info message.
+  public: std::string infoTopic{""};
 };
 
 //////////////////////////////////////////////////
@@ -106,75 +110,10 @@ bool CameraSensor::CreateCamera()
     return false;
   }
 
+  this->PopulateInfo(cameraSdf);
+
   unsigned int width = cameraSdf->ImageWidth();
   unsigned int height = cameraSdf->ImageHeight();
-
-  // Set some values of the camera info message.
-  {
-    msgs::CameraInfo::Distortion *distortion =
-      this->dataPtr->infoMsg.mutable_distortion();
-
-    distortion->set_model(msgs::CameraInfo::Distortion::PLUMB_BOB);
-    distortion->add_k(cameraSdf->DistortionK1());
-    distortion->add_k(cameraSdf->DistortionK2());
-    distortion->add_k(cameraSdf->DistortionP1());
-    distortion->add_k(cameraSdf->DistortionP2());
-    distortion->add_k(cameraSdf->DistortionK3());
-
-    msgs::CameraInfo::Intrinsics *intrinsics =
-      this->dataPtr->infoMsg.mutable_intrinsics();
-
-    intrinsics->add_k(cameraSdf->LensIntrinsicsFx());
-    intrinsics->add_k(0.0);
-    intrinsics->add_k(cameraSdf->LensIntrinsicsCx());
-
-    intrinsics->add_k(0.0);
-    intrinsics->add_k(cameraSdf->LensIntrinsicsFy());
-    intrinsics->add_k(cameraSdf->LensIntrinsicsCy());
-
-    intrinsics->add_k(0.0);
-    intrinsics->add_k(0.0);
-    intrinsics->add_k(1.0);
-
-    // TODO(anyone) Get tx and ty from SDF
-    msgs::CameraInfo::Projection *proj =
-      this->dataPtr->infoMsg.mutable_projection();
-
-    proj->add_p(cameraSdf->LensIntrinsicsFx());
-    proj->add_p(0.0);
-    proj->add_p(cameraSdf->LensIntrinsicsCx());
-    proj->add_p(0.0);
-
-    proj->add_p(0.0);
-    proj->add_p(cameraSdf->LensIntrinsicsFy());
-    proj->add_p(cameraSdf->LensIntrinsicsCy());
-    proj->add_p(0.0);
-
-    proj->add_p(0.0);
-    proj->add_p(0.0);
-    proj->add_p(1.0);
-    proj->add_p(0.0);
-
-    // Set the rectification matrix to identity
-    this->dataPtr->infoMsg.add_rectification_matrix(1.0);
-    this->dataPtr->infoMsg.add_rectification_matrix(0.0);
-    this->dataPtr->infoMsg.add_rectification_matrix(0.0);
-
-    this->dataPtr->infoMsg.add_rectification_matrix(0.0);
-    this->dataPtr->infoMsg.add_rectification_matrix(1.0);
-    this->dataPtr->infoMsg.add_rectification_matrix(0.0);
-
-    this->dataPtr->infoMsg.add_rectification_matrix(0.0);
-    this->dataPtr->infoMsg.add_rectification_matrix(0.0);
-    this->dataPtr->infoMsg.add_rectification_matrix(1.0);
-
-    auto infoFrame = this->dataPtr->infoMsg.mutable_header()->add_data();
-    infoFrame->set_key("frame_id");
-    infoFrame->add_value(this->Name());
-
-    this->dataPtr->infoMsg.set_width(width);
-    this->dataPtr->infoMsg.set_height(height);
-  }
 
   this->dataPtr->camera = this->Scene()->CreateCamera(this->Name());
   this->dataPtr->camera->SetImageWidth(width);
@@ -309,10 +248,7 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
   if (!this->dataPtr->pub)
     return false;
 
-  this->dataPtr->infoPub =
-      this->dataPtr->node.Advertise<ignition::msgs::CameraInfo>(
-          this->Topic() + "/camera_info");
-  if (!this->dataPtr->infoPub)
+  if (!this->AdvertiseInfo())
     return false;
 
   if (this->Scene())
@@ -420,10 +356,7 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
   this->dataPtr->pub.Publish(msg);
 
   // publish the camera info message
-  this->dataPtr->infoMsg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
-  this->dataPtr->infoMsg.mutable_header()->mutable_stamp()->set_nsec(
-      _now.nsec);
-  this->dataPtr->infoPub.Publish(this->dataPtr->infoMsg);
+  this->PublishInfo(_now);
 
   // Trigger callbacks.
   try
@@ -488,6 +421,118 @@ unsigned int CameraSensor::ImageHeight() const
 rendering::CameraPtr CameraSensor::RenderingCamera() const
 {
   return this->dataPtr->camera;
+}
+
+//////////////////////////////////////////////////
+std::string CameraSensor::InfoTopic() const
+{
+  return this->dataPtr->infoTopic;
+}
+
+//////////////////////////////////////////////////
+bool CameraSensor::AdvertiseInfo()
+{
+  // TODO(anyone) Make info topic configurable from SDF
+  // Info topic must be at same level as image topic
+  auto parts = common::Split(this->Topic(), '/');
+  parts.pop_back();
+
+  for (const auto &part : parts)
+  {
+    if (!part.empty())
+      this->dataPtr->infoTopic += "/" + part;
+  }
+  this->dataPtr->infoTopic += "/camera_info";
+
+  this->dataPtr->infoPub =
+      this->dataPtr->node.Advertise<ignition::msgs::CameraInfo>(
+      this->dataPtr->infoTopic);
+
+  return this->dataPtr->infoPub;
+}
+
+//////////////////////////////////////////////////
+void CameraSensor::PublishInfo(const ignition::common::Time &_now)
+{
+  this->dataPtr->infoMsg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
+  this->dataPtr->infoMsg.mutable_header()->mutable_stamp()->set_nsec(
+      _now.nsec);
+  this->dataPtr->infoPub.Publish(this->dataPtr->infoMsg);
+}
+
+//////////////////////////////////////////////////
+void CameraSensor::PopulateInfo(const sdf::Camera *_cameraSdf)
+{
+  unsigned int width = _cameraSdf->ImageWidth();
+  unsigned int height = _cameraSdf->ImageHeight();
+
+  msgs::CameraInfo::Distortion *distortion =
+    this->dataPtr->infoMsg.mutable_distortion();
+
+  distortion->set_model(msgs::CameraInfo::Distortion::PLUMB_BOB);
+  distortion->add_k(_cameraSdf->DistortionK1());
+  distortion->add_k(_cameraSdf->DistortionK2());
+  distortion->add_k(_cameraSdf->DistortionP1());
+  distortion->add_k(_cameraSdf->DistortionP2());
+  distortion->add_k(_cameraSdf->DistortionK3());
+
+  msgs::CameraInfo::Intrinsics *intrinsics =
+    this->dataPtr->infoMsg.mutable_intrinsics();
+
+  intrinsics->add_k(_cameraSdf->LensIntrinsicsFx());
+  intrinsics->add_k(0.0);
+  intrinsics->add_k(_cameraSdf->LensIntrinsicsCx());
+
+  intrinsics->add_k(0.0);
+  intrinsics->add_k(_cameraSdf->LensIntrinsicsFy());
+  intrinsics->add_k(_cameraSdf->LensIntrinsicsCy());
+
+  intrinsics->add_k(0.0);
+  intrinsics->add_k(0.0);
+  intrinsics->add_k(1.0);
+
+  // TODO(anyone) Get tx and ty from SDF
+  msgs::CameraInfo::Projection *proj =
+    this->dataPtr->infoMsg.mutable_projection();
+
+  proj->add_p(_cameraSdf->LensIntrinsicsFx());
+  proj->add_p(0.0);
+  proj->add_p(_cameraSdf->LensIntrinsicsCx());
+  proj->add_p(0.0);
+
+  proj->add_p(0.0);
+  proj->add_p(_cameraSdf->LensIntrinsicsFy());
+  proj->add_p(_cameraSdf->LensIntrinsicsCy());
+  proj->add_p(0.0);
+
+  proj->add_p(0.0);
+  proj->add_p(0.0);
+  proj->add_p(1.0);
+  proj->add_p(0.0);
+
+  // Set the rectification matrix to identity
+  this->dataPtr->infoMsg.add_rectification_matrix(1.0);
+  this->dataPtr->infoMsg.add_rectification_matrix(0.0);
+  this->dataPtr->infoMsg.add_rectification_matrix(0.0);
+
+  this->dataPtr->infoMsg.add_rectification_matrix(0.0);
+  this->dataPtr->infoMsg.add_rectification_matrix(1.0);
+  this->dataPtr->infoMsg.add_rectification_matrix(0.0);
+
+  this->dataPtr->infoMsg.add_rectification_matrix(0.0);
+  this->dataPtr->infoMsg.add_rectification_matrix(0.0);
+  this->dataPtr->infoMsg.add_rectification_matrix(1.0);
+
+  // Note: while Gazebo interprets the camera frame to be looking towards +X,
+  // other tools, such as ROS, may interpret this frame as looking towards +Z.
+  // TODO(anyone) Expose the `frame_id` as an SDF parameter so downstream users
+  // can populate it with arbitrary frames.
+  auto infoFrame = this->dataPtr->infoMsg.mutable_header()->add_data();
+  infoFrame->set_key("frame_id");
+  infoFrame->add_value(this->Name());
+
+  this->dataPtr->infoMsg.set_width(width);
+  this->dataPtr->infoMsg.set_height(height);
 }
 
 IGN_SENSORS_REGISTER_SENSOR(CameraSensor)

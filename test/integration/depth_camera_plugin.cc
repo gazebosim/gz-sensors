@@ -154,7 +154,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_NEAR(depthSensor->NearClip(), near_, DOUBLE_TOL);
 
   std::string topic =
-    "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF";
+    "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/image";
   WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
 
   std::string infoTopic =
