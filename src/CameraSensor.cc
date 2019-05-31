@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#include <ignition/common/StringUtils.hh>
 #include <ignition/msgs/camera_info.pb.h>
+#include <ignition/common/StringUtils.hh>
 
 #include <ignition/math/Helpers.hh>
 
@@ -523,7 +523,7 @@ void CameraSensor::PopulateInfo(const sdf::Camera *_cameraSdf)
   this->dataPtr->infoMsg.add_rectification_matrix(0.0);
   this->dataPtr->infoMsg.add_rectification_matrix(1.0);
 
-  // Note that while Gazebo interprets the camera frame to be looking towards +X,
+  // Note: while Gazebo interprets the camera frame to be looking towards +X,
   // other tools, such as ROS, may interpret this frame as looking towards +Z.
   // TODO(anyone) Expose the `frame_id` as an SDF parameter so downstream users
   // can populate it with arbitrary frames.
