@@ -16,7 +16,7 @@
 */
 
 #include <ignition/msgs/image.pb.h>
-#include <ignition/msgs/pointcloud2.pb.h>
+#include <ignition/msgs/pointcloud_color.pb.h>
 
 #include <ignition/common/Image.hh>
 #include <ignition/math/Helpers.hh>
@@ -207,7 +207,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the point cloud publisher
   this->dataPtr->pointPub =
-      this->dataPtr->node.Advertise<ignition::msgs::PointCloud2>(
+      this->dataPtr->node.Advertise<ignition::msgs::PointCloudColor>(
           this->Topic() + "/points");
   if (!this->dataPtr->pointPub)
     return false;
@@ -531,7 +531,7 @@ void RgbdCameraSensorPrivate::CreateAndPublishPointCloud()
 {
   // This code was inspired by
   // https://github.com/ros-simulation/gazebo_ros_pkgs/blob/kinetic-devel/gazebo_plugins/src/gazebo_ros_openni_kinect.cpp
-  msgs::PointCloud2 msg;
+  msgs::PointCloudColor msg;
 
   double hfov = this->depthCamera->HFOV().Radian();
   unsigned int width = this->depthCamera->ImageWidth();
