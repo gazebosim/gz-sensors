@@ -225,6 +225,9 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
   if (!this->dataPtr->pub)
     return false;
 
+  if (!this->AdvertiseInfo())
+    return false;
+
   if (this->Scene())
   {
     this->CreateCamera();
@@ -255,6 +258,8 @@ bool DepthCameraSensor::CreateCamera()
 
   double far = cameraSdf->FarClip();
   double near = cameraSdf->NearClip();
+
+  this->PopulateInfo(cameraSdf);
 
   this->dataPtr->depthCamera = this->Scene()->CreateDepthCamera(
       this->Name());
@@ -459,6 +464,9 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
 
   // publish
   this->dataPtr->pub.Publish(msg);
+
+  // publish the camera info message
+  this->PublishInfo(_now);
 
   // Trigger callbacks.
   try
