@@ -26,9 +26,9 @@
 
 #include <sdf/Sensor.hh>
 
+#include <ignition/sensors/CameraSensor.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Sensor.hh>
-#include <ignition/sensors/RenderingSensor.hh>
 #include <ignition/transport.hh>
 
 
@@ -58,7 +58,7 @@ namespace ignition
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-    class RgbdCameraSensor_EXPORTS_API RgbdCameraSensor : public RenderingSensor
+    class RgbdCameraSensor_EXPORTS_API RgbdCameraSensor : public CameraSensor
     {
       /// \brief constructor
       public: RgbdCameraSensor();
@@ -108,6 +108,10 @@ namespace ignition
       /// \brief Get image height.
       /// \return height of the image
       public: virtual double NearClip() const;
+
+      /// \brief Create an RGB camera and a depth camera.
+      /// \return True on success.
+      private: bool CreateCameras();
 
       /// \brief Data pointer for private data
       /// \internal

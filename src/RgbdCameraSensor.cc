@@ -33,12 +33,6 @@
 /// \brief Private data for RgbdCameraSensor
 class ignition::sensors::RgbdCameraSensorPrivate
 {
-  /// \brief Create the cameras in a scene.
-  /// \return True on success.
-  public: bool CreateCameras(const std::string &_name,
-              ignition::rendering::ScenePtr _scene);
-
-
   /// \brief Remove a camera from a scene
   public: void RemoveCamera(ignition::rendering::ScenePtr _scene);
 
@@ -66,9 +60,6 @@ class ignition::sensors::RgbdCameraSensorPrivate
 
   /// \brief publisher to publish points clouds
   public: transport::Node::Publisher pointPub;
-
-  /// \brief Camera info publisher to publish images
-  public: transport::Node::Publisher infoPub;
 
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
@@ -105,23 +96,8 @@ class ignition::sensors::RgbdCameraSensorPrivate
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
 
-  /// \brief True to save images
-  public: bool saveImage = false;
-
-  /// \brief path directory to where images are saved
-  public: std::string saveImagePath = "./";
-
-  /// \prefix of an image name
-  public: std::string saveImagePrefix = "./";
-
-  /// \brief counter used to set the image filename
-  public: std::uint64_t saveImageCounter = 0;
-
   /// \brief SDF Sensor DOM object.
   public: sdf::Sensor sdfSensor;
-
-  /// \brief Camera information message.
-  public: msgs::CameraInfo infoMsg;
 
   /// \brief Depth camera near clip.
   public: double depthNear = 0.1;
@@ -212,14 +188,13 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
   if (!this->dataPtr->pointPub)
     return false;
 
-  this->dataPtr->infoPub =
-      this->dataPtr->node.Advertise<ignition::msgs::CameraInfo>(
-          this->Topic() + "/camera_info");
-  if (!this->dataPtr->infoPub)
+  if (!this->AdvertiseInfo())
     return false;
 
   if (this->Scene())
-    this->dataPtr->CreateCameras(this->Name(), this->Scene());
+  {
+    this->CreateCameras();
+  }
 
   this->dataPtr->initialized = true;
 
@@ -227,10 +202,9 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 }
 
 //////////////////////////////////////////////////
-bool RgbdCameraSensorPrivate::CreateCameras(const std::string &_name,
-              ignition::rendering::ScenePtr _scene)
+bool RgbdCameraSensor::CreateCameras()
 {
-  const sdf::Camera *cameraSdf = this->sdfSensor.CameraSensor();
+  const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
 
   if (!cameraSdf)
   {
@@ -238,96 +212,26 @@ bool RgbdCameraSensorPrivate::CreateCameras(const std::string &_name,
     return false;
   }
 
+  this->PopulateInfo(cameraSdf);
+
   int width = cameraSdf->ImageWidth();
   int height = cameraSdf->ImageHeight();
 
-  // Set some values of the camera info message.
-  {
-    msgs::CameraInfo::Distortion *distortion =
-      this->infoMsg.mutable_distortion();
-
-    distortion->set_distortion_model(msgs::CameraInfo::Distortion::PLUMB_BOB);
-    distortion->set_k1(cameraSdf->DistortionK1());
-    distortion->set_k2(cameraSdf->DistortionK2());
-    distortion->set_k3(cameraSdf->DistortionK3());
-    distortion->set_t1(cameraSdf->DistortionP1());
-    distortion->set_t2(cameraSdf->DistortionP2());
-
-    msgs::CameraInfo::Intrinsics *intrinsics =
-      this->infoMsg.mutable_intrinsics();
-    intrinsics->set_fx(cameraSdf->LensIntrinsicsFx());
-    intrinsics->set_fy(cameraSdf->LensIntrinsicsFy());
-    intrinsics->set_cx(cameraSdf->LensIntrinsicsCx());
-    intrinsics->set_cy(cameraSdf->LensIntrinsicsCy());
-
-    msgs::CameraInfo::Projection *proj =
-      this->infoMsg.mutable_projection();
-    proj->set_fx(cameraSdf->LensIntrinsicsFx());
-    proj->set_fy(cameraSdf->LensIntrinsicsFy());
-    proj->set_cx(cameraSdf->LensIntrinsicsCx());
-    proj->set_cy(cameraSdf->LensIntrinsicsCy());
-
-    // Set the rectifcation matrix to identity
-    this->infoMsg.add_rectification_matrix(1.0);
-    this->infoMsg.add_rectification_matrix(0.0);
-    this->infoMsg.add_rectification_matrix(0.0);
-
-    this->infoMsg.add_rectification_matrix(0.0);
-    this->infoMsg.add_rectification_matrix(1.0);
-    this->infoMsg.add_rectification_matrix(0.0);
-
-    this->infoMsg.add_rectification_matrix(0.0);
-    this->infoMsg.add_rectification_matrix(0.0);
-    this->infoMsg.add_rectification_matrix(1.0);
-
-    auto infoFrame = this->infoMsg.mutable_header()->add_data();
-    infoFrame->set_key("frame_id");
-    infoFrame->add_value(_name);
-
-    this->infoMsg.set_width(width);
-    this->infoMsg.set_height(height);
-  }
-
-  this->depthCamera = _scene->CreateDepthCamera(_name + "_depth");
-  this->depthCamera->SetImageWidth(width);
-  this->depthCamera->SetImageHeight(height);
+  this->dataPtr->depthCamera = this->Scene()->CreateDepthCamera(this->Name() + "_depth");
+  this->dataPtr->depthCamera->SetImageWidth(width);
+  this->dataPtr->depthCamera->SetImageHeight(height);
   // \todo(nkoenig) Fix this to be a parameter.
-  this->depthCamera->SetFarClipPlane(this->depthFar);
+  this->dataPtr->depthCamera->SetFarClipPlane(this->dataPtr->depthFar);
 
-  this->camera = _scene->CreateCamera(_name);
-  this->camera->SetImageWidth(width);
-  this->camera->SetImageHeight(height);
-  this->camera->SetNearClipPlane(cameraSdf->NearClip());
-  this->camera->SetFarClipPlane(cameraSdf->FarClip());
-
-  /*const std::map<SensorNoiseType, sdf::Noise> noises = {
-    {CAMERA_NOISE, cameraSdf->ImageNoise()},
-  };
-
-  for (const auto & [noiseType, noiseSdf] : noises)
-  {
-    // Add gaussian noise to camera sensor
-    if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
-    {
-      this->noises[noiseType] =
-        NoiseFactory::NewNoiseModel(noiseSdf, "depth");
-
-      std::dynamic_pointer_cast<ImageGaussianNoiseModel>(
-           this->noises[noiseType])->SetCamera(
-             this->depthCamera);
-    }
-    else if (noiseSdf.Type() != sdf::NoiseType::NONE)
-    {
-      ignwarn << "The depth camera sensor only supports Gaussian noise. "
-       << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
-       << "] is not supported." << std::endl;
-    }
-  }
-  */
+  this->dataPtr->camera = this->Scene()->CreateCamera(this->Name());
+  this->dataPtr->camera->SetImageWidth(width);
+  this->dataPtr->camera->SetImageHeight(height);
+  this->dataPtr->camera->SetNearClipPlane(cameraSdf->NearClip());
+  this->dataPtr->camera->SetFarClipPlane(cameraSdf->FarClip());
 
   // \todo(nkoeng) these parameters via sdf
-  this->depthCamera->SetAntiAliasing(2);
-  this->camera->SetAntiAliasing(2);
+  this->dataPtr->depthCamera->SetAntiAliasing(2);
+  this->dataPtr->camera->SetAntiAliasing(2);
 
   math::Angle angle = cameraSdf->HorizontalFov();
   if (angle < 0.01 || angle > IGN_PI*2)
@@ -337,29 +241,29 @@ bool RgbdCameraSensorPrivate::CreateCameras(const std::string &_name,
     return false;
   }
 
-  this->depthCamera->SetAspectRatio(static_cast<double>(width)/height);
-  this->depthCamera->SetHFOV(angle);
-  this->camera->SetAspectRatio(static_cast<double>(width)/height);
-  this->camera->SetHFOV(angle);
+  this->dataPtr->depthCamera->SetAspectRatio(static_cast<double>(width)/height);
+  this->dataPtr->depthCamera->SetHFOV(angle);
+  this->dataPtr->camera->SetAspectRatio(static_cast<double>(width)/height);
+  this->dataPtr->camera->SetHFOV(angle);
 
   // Create depth texture when the camera is reconfigured from default values
-  this->depthCamera->CreateDepthTexture();
+  this->dataPtr->depthCamera->CreateDepthTexture();
 
   // \todo(nkoenig) Port Distortion class
-  // This->distortion.reset(new Distortion());
-  // This->distortion->Load(this->sdf->GetElement("distortion"));
+  // This->dataPtr->distortion.reset(new Distortion());
+  // This->dataPtr->distortion->Load(this->dataPtr->sdf->GetElement("distortion"));
 
-  this->depthCamera->SetImageFormat(ignition::rendering::PF_FLOAT32_R);
-  this->depthImage = this->depthCamera->CreateImage();
+  this->dataPtr->depthCamera->SetImageFormat(ignition::rendering::PF_FLOAT32_R);
+  this->dataPtr->depthImage = this->dataPtr->depthCamera->CreateImage();
 
-  this->camera->SetImageFormat(ignition::rendering::PF_R8G8B8);
-  this->image = this->depthCamera->CreateImage();
+  this->dataPtr->camera->SetImageFormat(ignition::rendering::PF_R8G8B8);
+  this->dataPtr->image = this->dataPtr->depthCamera->CreateImage();
 
-  _scene->RootVisual()->AddChild(this->depthCamera);
-  _scene->RootVisual()->AddChild(this->camera);
+  this->Scene()->RootVisual()->AddChild(this->dataPtr->depthCamera);
+  this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);
 
-  this->connection = this->depthCamera->ConnectNewDepthFrame(
-      std::bind(&RgbdCameraSensorPrivate::OnNewDepthFrame, this,
+  this->dataPtr->connection = this->dataPtr->depthCamera->ConnectNewDepthFrame(
+      std::bind(&RgbdCameraSensorPrivate::OnNewDepthFrame, this->dataPtr.get(),
         std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
         std::placeholders::_4, std::placeholders::_5));
 
@@ -377,7 +281,7 @@ void RgbdCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
     RenderingSensor::SetScene(_scene);
 
     if (this->dataPtr->initialized)
-      this->dataPtr->CreateCameras(this->Name(), _scene);
+      this->CreateCameras();
   }
 }
 
@@ -453,6 +357,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     msg.set_height(height);
     msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
           this->dataPtr->camera->ImageFormat()));
+    msg.set_pixel_format(ignition::common::Image::RGB_INT8);
     msg.set_pixel_format_type(msgs::PixelFormatType::RGB_INT8);
     msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
     msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
@@ -494,10 +399,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
   this->dataPtr->CreateAndPublishPointCloud();
 
   // publish the camera info message
-  this->dataPtr->infoMsg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
-  this->dataPtr->infoMsg.mutable_header()->mutable_stamp()->set_nsec(
-      _now.nsec);
-  this->dataPtr->infoPub.Publish(this->dataPtr->infoMsg);
+  this->PublishInfo(_now);
 
   return true;
 }
