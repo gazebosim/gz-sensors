@@ -17,20 +17,17 @@
 #ifndef IGNITION_SENSORS_RGBDCAMERASENSOR_HH_
 #define IGNITION_SENSORS_RGBDCAMERASENSOR_HH_
 
-#include <ignition/msgs/image.pb.h>
-
 #include <memory>
-#include <cstdint>
-#include <mutex>
-#include <string>
 
-#include <sdf/Sensor.hh>
+#include <sdf/sdf.hh>
 
-#include <ignition/sensors/CameraSensor.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/Sensor.hh>
+#include <ignition/common/Time.hh>
+
 #include <ignition/transport.hh>
 
+#include "ignition/sensors/CameraSensor.hh"
+#include "ignition/sensors/config.hh"
+#include "ignition/sensors/Export.hh"
 
 #ifndef _WIN32
 #  define RgbdCameraSensor_EXPORTS_API
@@ -79,14 +76,6 @@ namespace ignition
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       public: virtual bool Update(const common::Time &_now) override;
-
-      /// \brief Get a pointer to the depth camera
-      /// \return Pointer to the depth camera
-      public: rendering::DepthCameraPtr DepthCamera();
-
-      /// \brief Get a pointer to the 2d image camera
-      /// \return Pointer to the 2d image camera.
-      public: rendering::CameraPtr RenderingCamera();
 
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene

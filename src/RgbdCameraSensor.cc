@@ -257,7 +257,7 @@ bool RgbdCameraSensor::CreateCameras()
   this->dataPtr->depthImage = this->dataPtr->depthCamera->CreateImage();
 
   this->dataPtr->camera->SetImageFormat(ignition::rendering::PF_R8G8B8);
-  this->dataPtr->image = this->dataPtr->depthCamera->CreateImage();
+  this->dataPtr->image = this->dataPtr->camera->CreateImage();
 
   this->Scene()->RootVisual()->AddChild(this->dataPtr->depthCamera);
   this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);
