@@ -48,9 +48,13 @@ namespace ignition
     // forward declarations
     class RgbdCameraSensorPrivate;
 
-    /// \brief Depth camera sensor class.
+    /// \brief RGBD camera sensor class.
     ///
-    /// This class creates depth image from an ignition rendering scene.
+    /// This class creates a few types of sensor data from an ignition
+    /// rendering scene:
+    /// * RGB image (same as CameraSensor)
+    /// * Depth image (same as DepthCamera)
+    /// * (future / todo) Color point cloud
     /// The scene  must be created in advance and given to Manager::Init().
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be

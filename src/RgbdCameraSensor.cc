@@ -16,7 +16,6 @@
 */
 
 #include <ignition/msgs/image.pb.h>
-#include <ignition/msgs/pointcloud_color.pb.h>
 
 #include <ignition/common/Image.hh>
 #include <ignition/math/Helpers.hh>
@@ -35,8 +34,6 @@ class ignition::sensors::RgbdCameraSensorPrivate
 {
   /// \brief Remove a camera from a scene
   public: void RemoveCamera(ignition::rendering::ScenePtr _scene);
-
-  public: void CreateAndPublishPointCloud();
 
   /// \brief Depth data callback used to get the data from the sensor
   /// \param[in] _scan pointer to the data from the sensor
@@ -57,9 +54,6 @@ class ignition::sensors::RgbdCameraSensorPrivate
 
   /// \brief publisher to publish depth images
   public: transport::Node::Publisher depthPub;
-
-  /// \brief publisher to publish points clouds
-  public: transport::Node::Publisher pointPub;
 
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
@@ -179,13 +173,6 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
           this->Topic() + "/depth_image");
   if (!this->dataPtr->depthPub)
-    return false;
-
-  // Create the point cloud publisher
-  this->dataPtr->pointPub =
-      this->dataPtr->node.Advertise<ignition::msgs::PointCloudColor>(
-          this->Topic() + "/points");
-  if (!this->dataPtr->pointPub)
     return false;
 
   if (!this->AdvertiseInfo())
@@ -395,9 +382,6 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     this->dataPtr->depthPub.Publish(msg);
   }
 
-  // Create and publish point cloud information
-  this->dataPtr->CreateAndPublishPointCloud();
-
   // publish the camera info message
   this->PublishInfo(_now);
 
@@ -426,72 +410,6 @@ double RgbdCameraSensor::FarClip() const
 double RgbdCameraSensor::NearClip() const
 {
   return this->dataPtr->sdfSensor.CameraSensor()->NearClip();
-}
-
-//////////////////////////////////////////////////
-void RgbdCameraSensorPrivate::CreateAndPublishPointCloud()
-{
-  // This code was inspired by
-  // https://github.com/ros-simulation/gazebo_ros_pkgs/blob/kinetic-devel/gazebo_plugins/src/gazebo_ros_openni_kinect.cpp
-  msgs::PointCloudColor msg;
-
-  double hfov = this->depthCamera->HFOV().Radian();
-  unsigned int width = this->depthCamera->ImageWidth();
-  unsigned int height = this->depthCamera->ImageHeight();
-
-  double fl = width / (2.0 * tan(hfov/2.0));
-
-  int index = 0;
-
-  unsigned char *imageData = this->image.Data<unsigned char>();
-
-  // convert depth to point cloud
-  for (unsigned int y = 0; y < height; ++y)
-  {
-    double pAngle = 0.0;
-    if (height > 1)
-    {
-      pAngle = atan2(static_cast<double>(y) -
-                     0.5 * static_cast<double>(height - 1), fl);
-    }
-
-    for (unsigned int x = 0; x < width; ++x)
-    {
-      double yAngle = 0.0;
-      if (width > 1)
-      {
-        yAngle = atan2(static_cast<double>(x) -
-                       0.5*static_cast<double>(width-1), fl);
-      }
-
-      double depth = this->depthBuffer[index++];
-      msgs::Vector3d *pt = msg.add_points();
-      pt->set_x(depth * tan(yAngle));
-      pt->set_y(depth * tan(pAngle));
-      pt->set_z(depth);
-
-      // put image color data for each point.
-
-      // \todo(nkoenig) we are assuming RGB_INT8 format, which is also
-      // hardcoded in this sensor.
-      msgs::Color *clr = msg.add_color();
-      if (imageData)
-      {
-        clr->set_r(imageData[x*3 + y*height*3 + 0]);
-        clr->set_g(imageData[x*3 + y*height*3 + 1]);
-        clr->set_b(imageData[x*3 + y*height*3 + 2]);
-      }
-      else
-      {
-        // No color data
-        clr->set_r(0);
-        clr->set_g(0);
-        clr->set_b(0);
-      }
-    }
-  }
-
-  this->pointPub.Publish(msg);
 }
 
 IGN_SENSORS_REGISTER_SENSOR(RgbdCameraSensor)
