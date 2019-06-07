@@ -204,7 +204,8 @@ bool RgbdCameraSensor::CreateCameras()
   int width = cameraSdf->ImageWidth();
   int height = cameraSdf->ImageHeight();
 
-  this->dataPtr->depthCamera = this->Scene()->CreateDepthCamera(this->Name() + "_depth");
+  this->dataPtr->depthCamera =
+      this->Scene()->CreateDepthCamera(this->Name() + "_depth");
   this->dataPtr->depthCamera->SetImageWidth(width);
   this->dataPtr->depthCamera->SetImageHeight(height);
   // \todo(nkoenig) Fix this to be a parameter.
