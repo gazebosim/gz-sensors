@@ -17,20 +17,17 @@
 #ifndef IGNITION_SENSORS_RGBDCAMERASENSOR_HH_
 #define IGNITION_SENSORS_RGBDCAMERASENSOR_HH_
 
-#include <ignition/msgs/image.pb.h>
-
 #include <memory>
-#include <cstdint>
-#include <mutex>
-#include <string>
 
-#include <sdf/Sensor.hh>
+#include <sdf/sdf.hh>
 
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/Sensor.hh>
-#include <ignition/sensors/RenderingSensor.hh>
+#include <ignition/common/Time.hh>
+
 #include <ignition/transport.hh>
 
+#include "ignition/sensors/CameraSensor.hh"
+#include "ignition/sensors/config.hh"
+#include "ignition/sensors/Export.hh"
 
 #ifndef _WIN32
 #  define RgbdCameraSensor_EXPORTS_API
@@ -51,14 +48,18 @@ namespace ignition
     // forward declarations
     class RgbdCameraSensorPrivate;
 
-    /// \brief Depth camera sensor class.
+    /// \brief RGBD camera sensor class.
     ///
-    /// This class creates depth image from an ignition rendering scene.
+    /// This class creates a few types of sensor data from an ignition
+    /// rendering scene:
+    /// * RGB image (same as CameraSensor)
+    /// * Depth image (same as DepthCamera)
+    /// * (future / todo) Color point cloud
     /// The scene  must be created in advance and given to Manager::Init().
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-    class RgbdCameraSensor_EXPORTS_API RgbdCameraSensor : public RenderingSensor
+    class RgbdCameraSensor_EXPORTS_API RgbdCameraSensor : public CameraSensor
     {
       /// \brief constructor
       public: RgbdCameraSensor();
@@ -80,14 +81,6 @@ namespace ignition
       /// \return true if the update was successfull
       public: virtual bool Update(const common::Time &_now) override;
 
-      /// \brief Get a pointer to the depth camera
-      /// \return Pointer to the depth camera
-      public: rendering::DepthCameraPtr DepthCamera();
-
-      /// \brief Get a pointer to the 2d image camera
-      /// \return Pointer to the 2d image camera.
-      public: rendering::CameraPtr RenderingCamera();
-
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
       public: virtual void SetScene(
@@ -108,6 +101,10 @@ namespace ignition
       /// \brief Get image height.
       /// \return height of the image
       public: virtual double NearClip() const;
+
+      /// \brief Create an RGB camera and a depth camera.
+      /// \return True on success.
+      private: bool CreateCameras();
 
       /// \brief Data pointer for private data
       /// \internal
