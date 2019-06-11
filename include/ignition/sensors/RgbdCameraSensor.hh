@@ -88,11 +88,11 @@ namespace ignition
 
       /// \brief Get image width.
       /// \return width of the image
-      public: unsigned int ImageWidth() const;
+      public: unsigned int ImageWidth() const override;
 
       /// \brief Get image height.
       /// \return height of the image
-      public: unsigned int ImageHeight() const;
+      public: unsigned int ImageHeight() const override;
 
       /// \brief Get image width.
       /// \return width of the image
