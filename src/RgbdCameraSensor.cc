@@ -179,7 +179,6 @@ bool RgbdCameraSensor::CreateCameras()
       this->Scene()->CreateDepthCamera(this->Name() + "_depth");
   this->dataPtr->depthCamera->SetImageWidth(width);
   this->dataPtr->depthCamera->SetImageHeight(height);
-  // \todo(nkoenig) Fix this to be a parameter.
   this->dataPtr->depthCamera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->depthCamera->SetFarClipPlane(cameraSdf->FarClip());
 
@@ -194,7 +193,7 @@ bool RgbdCameraSensor::CreateCameras()
   this->dataPtr->camera->SetAntiAliasing(2);
 
   math::Angle angle = cameraSdf->HorizontalFov();
-  if (angle < 0.01 || angle > IGN_PI*2)
+  if (angle < 0.01 || angle > IGN_PI * 2)
   {
     ignerr << "Invalid horizontal field of view [" << angle << "]\n";
 
@@ -287,7 +286,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 
   if (!this->dataPtr->depthCamera || !this->dataPtr->camera)
   {
-    ignerr << "Depth or image cameras do exist.\n";
+    ignerr << "Depth or image cameras don't exist.\n";
     return false;
   }
 
@@ -343,6 +342,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     msg.set_height(height);
     msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
           this->dataPtr->depthCamera->ImageFormat()));
+    msg.set_pixel_format(ignition::common::Image::R_FLOAT32);
     msg.set_pixel_format_type(msgs::PixelFormatType::R_FLOAT32);
     msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
     msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
