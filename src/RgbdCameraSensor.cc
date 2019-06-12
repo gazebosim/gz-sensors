@@ -194,6 +194,7 @@ bool RgbdCameraSensor::CreateCameras()
   this->dataPtr->camera->SetAntiAliasing(2);
 
   math::Angle angle = cameraSdf->HorizontalFov();
+  // todo(anyone) verify that rgb pixels align with d for angles >90 degrees.
   if (angle < 0.01 || angle > IGN_PI * 2)
   {
     ignerr << "Invalid horizontal field of view [" << angle << "]\n";
