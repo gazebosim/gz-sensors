@@ -27,14 +27,10 @@
 
 #include "ignition/sensors/RgbdCameraSensor.hh"
 #include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/GaussianNoiseModel.hh"
 
 /// \brief Private data for RgbdCameraSensor
 class ignition::sensors::RgbdCameraSensorPrivate
 {
-  /// \brief Remove a camera from a scene
-  public: void RemoveCamera(ignition::rendering::ScenePtr _scene);
-
   /// \brief Depth data callback used to get the data from the sensor
   /// \param[in] _scan pointer to the data from the sensor
   /// \param[in] _width width of the depth image
@@ -70,9 +66,6 @@ class ignition::sensors::RgbdCameraSensorPrivate
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
 
-  /// \brief Noise added to sensor data
-  public: std::map<SensorNoiseType, NoisePtr> noises;
-
   /// \brief Connection from depth camera with a new image
   public: ignition::common::ConnectionPtr connection;
 
@@ -94,18 +87,6 @@ class ignition::sensors::RgbdCameraSensorPrivate
 
 using namespace ignition;
 using namespace sensors;
-
-//////////////////////////////////////////////////
-void RgbdCameraSensorPrivate::RemoveCamera(
-    rendering::ScenePtr _scene)
-{
-  if (_scene)
-  {
-    // \todo(nkoenig) Remove camera from scene!
-  }
-  // this->depthCamera = nullptr;
-}
-
 
 //////////////////////////////////////////////////
 RgbdCameraSensor::RgbdCameraSensor()
@@ -260,7 +241,9 @@ void RgbdCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
   // APIs make it possible for the scene pointer to change
   if (this->Scene() != _scene)
   {
-    this->dataPtr->RemoveCamera(this->Scene());
+    // TODO(anyone) Remove cameras from current scene
+    this->dataPtr->camera = nullptr;
+    this->dataPtr->depthCamera = nullptr;
     RenderingSensor::SetScene(_scene);
 
     if (this->dataPtr->initialized)
@@ -332,6 +315,8 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 
   // create and publish the 2d image message
   {
+    // TODO(anyone) Capture calls render functions, so this is inefficient for
+    // multi-camera worlds.
     this->dataPtr->camera->Capture(this->dataPtr->image);
     unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
