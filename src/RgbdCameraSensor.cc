@@ -77,12 +77,6 @@ class ignition::sensors::RgbdCameraSensorPrivate
 
   /// \brief SDF Sensor DOM object.
   public: sdf::Sensor sdfSensor;
-
-  /// \brief Depth camera near clip.
-  public: double depthNear = 0.1;
-
-  /// \brief Depth camera far clip.
-  public: double depthFar = 6.0;
 };
 
 using namespace ignition;
@@ -186,7 +180,8 @@ bool RgbdCameraSensor::CreateCameras()
   this->dataPtr->depthCamera->SetImageWidth(width);
   this->dataPtr->depthCamera->SetImageHeight(height);
   // \todo(nkoenig) Fix this to be a parameter.
-  this->dataPtr->depthCamera->SetFarClipPlane(this->dataPtr->depthFar);
+  this->dataPtr->depthCamera->SetNearClipPlane(cameraSdf->NearClip());
+  this->dataPtr->depthCamera->SetFarClipPlane(cameraSdf->FarClip());
 
   this->dataPtr->camera = this->Scene()->CreateCamera(this->Name());
   this->dataPtr->camera->SetImageWidth(width);
@@ -270,11 +265,11 @@ void RgbdCameraSensorPrivate::OnNewDepthFrame(const float *_scan,
   for (unsigned int i = 0; i < depthSamples; ++i)
   {
     // Mask ranges outside of min/max to +/- inf, as per REP 117
-    if (this->depthBuffer[i] >= this->depthFar)
+    if (this->depthBuffer[i] >= this->sdfSensor.CameraSensor()->FarClip())
     {
       this->depthBuffer[i] = ignition::math::INF_D;
     }
-    else if (this->depthBuffer[i] <= this->depthNear)
+    else if (this->depthBuffer[i] <= this->sdfSensor.CameraSensor()->NearClip())
     {
       this->depthBuffer[i] = -ignition::math::INF_D;
     }
@@ -384,7 +379,7 @@ unsigned int RgbdCameraSensor::ImageHeight() const
 //////////////////////////////////////////////////
 double RgbdCameraSensor::FarClip() const
 {
-  return this->dataPtr->depthCamera->FarClipPlane();
+  return this->dataPtr->sdfSensor.CameraSensor()->FarClip();
 }
 
 //////////////////////////////////////////////////
