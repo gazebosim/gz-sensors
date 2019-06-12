@@ -179,6 +179,7 @@ bool RgbdCameraSensor::CreateCameras()
       this->Scene()->CreateDepthCamera(this->Name() + "_depth");
   this->dataPtr->depthCamera->SetImageWidth(width);
   this->dataPtr->depthCamera->SetImageHeight(height);
+  // TODO(anyone) Specify different clipping for each camera on SDF.
   this->dataPtr->depthCamera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->depthCamera->SetFarClipPlane(cameraSdf->FarClip());
 
@@ -374,18 +375,6 @@ unsigned int RgbdCameraSensor::ImageWidth() const
 unsigned int RgbdCameraSensor::ImageHeight() const
 {
   return this->dataPtr->depthCamera->ImageHeight();
-}
-
-//////////////////////////////////////////////////
-double RgbdCameraSensor::FarClip() const
-{
-  return this->dataPtr->sdfSensor.CameraSensor()->FarClip();
-}
-
-//////////////////////////////////////////////////
-double RgbdCameraSensor::NearClip() const
-{
-  return this->dataPtr->sdfSensor.CameraSensor()->NearClip();
 }
 
 IGN_SENSORS_REGISTER_SENSOR(RgbdCameraSensor)

@@ -94,14 +94,6 @@ namespace ignition
       /// \return height of the image
       public: virtual unsigned int ImageHeight() const override;
 
-      /// \brief Get image width.
-      /// \return width of the image
-      public: virtual double FarClip() const;
-
-      /// \brief Get image height.
-      /// \return height of the image
-      public: virtual double NearClip() const;
-
       /// \brief Create an RGB camera and a depth camera.
       /// \return True on success.
       private: bool CreateCameras();
