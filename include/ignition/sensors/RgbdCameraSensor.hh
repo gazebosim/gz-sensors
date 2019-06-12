@@ -78,7 +78,7 @@ namespace ignition
 
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
-      /// \return true if the update was successfull
+      /// \return true if the update was successful
       public: virtual bool Update(const common::Time &_now) override;
 
       /// \brief Set the rendering scene.
