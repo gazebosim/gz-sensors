@@ -70,16 +70,8 @@ class ignition::sensors::RgbdCameraSensorPrivate
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
 
-  /// \brief Pointer to a depth image to be published
-  public: ignition::rendering::Image depthImage;
-
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
-
-  /// \brief Event that is used to trigger callbacks when a new image
-  /// is generated
-  public: ignition::common::EventT<
-          void(const ignition::msgs::Image &)> imageEvent;
 
   /// \brief Connection from depth camera with a new image
   public: ignition::common::ConnectionPtr connection;
@@ -185,6 +177,10 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 
   this->dataPtr->initialized = true;
 
+  this->dataPtr->sceneChangeConnection =
+      RenderingEvents::ConnectSceneChangeCallback(
+      std::bind(&RgbdCameraSensor::SetScene, this, std::placeholders::_1));
+
   return true;
 }
 
@@ -242,7 +238,6 @@ bool RgbdCameraSensor::CreateCameras()
   // This->dataPtr->distortion->Load(this->dataPtr->sdf->GetElement("distortion"));
 
   this->dataPtr->depthCamera->SetImageFormat(ignition::rendering::PF_FLOAT32_R);
-  this->dataPtr->depthImage = this->dataPtr->depthCamera->CreateImage();
 
   this->dataPtr->camera->SetImageFormat(ignition::rendering::PF_R8G8B8);
   this->dataPtr->image = this->dataPtr->camera->CreateImage();
@@ -321,7 +316,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
   // move the depth camera to the current pose
   // \todo(nkoenig) Ignition Gazebo attaches the rendering camera with
   // this->Name() to the appropriate model link. When physics updates the
-  // link's pose, the visual is also moved. This in turn moves the rendering
+  // link's pose, the visual is also moved. This in turn moves the
   // rendering camera. The problem is that the RGBD sensor has two cameras,
   // one with a name that equals 'this->Name()' and one with a name that
   // equal 'this->Name() + "_depth"'. In order to make the depth camera
