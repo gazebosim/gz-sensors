@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
 #============================================================================
 # Initialize the project
 #============================================================================
-project(ignition-sensors2 VERSION 2.0.0)
+project(ignition-sensors2 VERSION 2.1.0)
 
 #============================================================================
 # Find ignition-cmake
@@ -13,7 +13,7 @@ find_package(ignition-cmake2 REQUIRED)
 #============================================================================
 # Configure the project
 #============================================================================
-ign_configure_project()
+ign_configure_project(VERSION_SUFFIX pre1)
 
 #============================================================================
 # Set project-specific options
@@ -65,7 +65,7 @@ endif()
 
 #--------------------------------------
 # Find ignition-msgs
-ign_find_package(ignition-msgs4 REQUIRED)
+ign_find_package(ignition-msgs4 REQUIRED VERSION 4.1.0)
 set(IGN_MSGS_VER ${ignition-msgs4_VERSION_MAJOR})
 
 #--------------------------------------

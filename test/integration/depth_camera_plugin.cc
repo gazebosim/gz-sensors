@@ -16,6 +16,8 @@
 */
 
 #include <gtest/gtest.h>
+#include <ignition/msgs/camera_info.pb.h>
+
 #include <ignition/common/Filesystem.hh>
 #include <ignition/common/Event.hh>
 #include <ignition/sensors/Manager.hh>
@@ -32,6 +34,18 @@
 std::mutex g_mutex;
 unsigned int g_depthCounter = 0;
 float *g_depthBuffer = nullptr;
+
+std::mutex g_infoMutex;
+unsigned int g_infoCounter = 0;
+ignition::msgs::CameraInfo g_infoMsg;
+
+void OnCameraInfo(const ignition::msgs::CameraInfo & _msg)
+{
+  g_infoMutex.lock();
+  g_infoCounter++;
+  g_infoMsg.CopyFrom(_msg);
+  g_infoMutex.unlock();
+}
 
 void OnImage(const ignition::msgs::Image &_msg)
 {
@@ -140,8 +154,12 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_NEAR(depthSensor->NearClip(), near_, DOUBLE_TOL);
 
   std::string topic =
-    "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF";
+    "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/image";
   WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
+
+  std::string infoTopic =
+    "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/camera_info";
+  WaitForMessageTestHelper<ignition::msgs::CameraInfo> infoHelper(infoTopic);
 
   // Update once to create image
   mgr.RunOnce(ignition::common::Time::Zero);
@@ -151,6 +169,9 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   // subscribe to the depth camera topic
   ignition::transport::Node node;
   node.Subscribe(topic, &OnImage);
+
+  // subscribe to the depth camera topic
+  node.Subscribe(infoTopic, &OnCameraInfo);
 
   // wait for a few depth camera frames
   mgr.RunOnce(ignition::common::Time::Zero, true);
@@ -162,17 +183,29 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
 
   ignition::common::Time waitTime = ignition::common::Time(0.001);
   int counter = 0;
-  for (int sleep = 0; sleep < 300 && counter == 0; ++sleep)
+  int infoCounter = 0;
+  ignition::msgs::CameraInfo infoMsg;
+  for (int sleep = 0;
+       sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
   {
     g_mutex.lock();
     counter = g_depthCounter;
     g_mutex.unlock();
+
+    g_infoMutex.lock();
+    infoCounter = g_infoCounter;
+    infoMsg = g_infoMsg;
+    g_infoMutex.unlock();
     ignition::common::Time::Sleep(waitTime);
   }
   g_mutex.lock();
+  g_infoMutex.lock();
   g_depthCounter = 0;
+  g_infoCounter = 0;
   EXPECT_GT(counter, 0);
+  EXPECT_EQ(counter, infoCounter);
   counter = 0;
+  infoCounter = 0;
 
   EXPECT_NEAR(g_depthBuffer[mid], expectedRangeAtMidPoint, DEPTH_TOL);
   // Depth sensor should see box in the middle of the image
@@ -183,7 +216,24 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_DOUBLE_EQ(g_depthBuffer[left], ignition::math::INF_D);
   int right = (midHeight+1) * depthSensor->ImageWidth() - 1;
   EXPECT_DOUBLE_EQ(g_depthBuffer[right], ignition::math::INF_D);
+  g_infoMutex.unlock();
   g_mutex.unlock();
+
+  // Check camera info
+  EXPECT_TRUE(infoMsg.has_header());
+  ASSERT_EQ(1, infoMsg.header().data().size());
+  EXPECT_EQ("frame_id", infoMsg.header().data(0).key());
+  ASSERT_EQ(1, infoMsg.header().data(0).value().size());
+  EXPECT_EQ("camera1", infoMsg.header().data(0).value(0));
+  EXPECT_TRUE(infoMsg.has_distortion());
+  EXPECT_EQ(ignition::msgs::CameraInfo::Distortion::PLUMB_BOB,
+      infoMsg.distortion().model());
+  EXPECT_EQ(5, infoMsg.distortion().k().size());
+  EXPECT_TRUE(infoMsg.has_intrinsics());
+  EXPECT_EQ(9, infoMsg.intrinsics().k().size());
+  EXPECT_TRUE(infoMsg.has_projection());
+  EXPECT_EQ(12, infoMsg.projection().p().size());
+  EXPECT_EQ(9, infoMsg.rectification_matrix().size());
 
   // Check that for a box really close it returns -inf
   root->RemoveChild(box);
@@ -193,20 +243,30 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   root->AddChild(box);
 
   mgr.RunOnce(ignition::common::Time::Zero, true);
-  for (int sleep = 0; sleep < 300 && counter == 0; ++sleep)
+  for (int sleep = 0;
+       sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
   {
     g_mutex.lock();
     counter = g_depthCounter;
     g_mutex.unlock();
+
+    g_infoMutex.lock();
+    infoCounter = g_infoCounter;
+    g_infoMutex.unlock();
     ignition::common::Time::Sleep(waitTime);
   }
 
   g_mutex.lock();
+  g_infoMutex.lock();
   g_depthCounter = 0;
+  g_infoCounter = 0;
   EXPECT_GT(counter, 0);
+  EXPECT_EQ(counter, infoCounter);
   counter = 0;
+  infoCounter = 0;
 
   EXPECT_DOUBLE_EQ(g_depthBuffer[mid], -ignition::math::INF_D);
+  g_infoMutex.unlock();
   g_mutex.unlock();
 
   // Check that for a box really far it returns inf
@@ -217,19 +277,29 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   root->AddChild(box);
 
   mgr.RunOnce(ignition::common::Time::Zero, true);
-  for (int sleep = 0; sleep < 300 && counter == 0; ++sleep)
+  for (int sleep = 0;
+       sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
   {
     g_mutex.lock();
     counter = g_depthCounter;
     g_mutex.unlock();
+
+    g_infoMutex.lock();
+    infoCounter = g_infoCounter;
+    g_infoMutex.unlock();
     ignition::common::Time::Sleep(waitTime);
   }
   g_mutex.lock();
+  g_infoMutex.lock();
   g_depthCounter = 0;
+  g_infoCounter = 0;
   EXPECT_GT(counter, 0);
+  EXPECT_EQ(counter, infoCounter);
   counter = 0;
+  infoCounter = 0;
 
   EXPECT_DOUBLE_EQ(g_depthBuffer[mid], ignition::math::INF_D);
+  g_infoMutex.unlock();
   g_mutex.unlock();
 
   // Clean up
