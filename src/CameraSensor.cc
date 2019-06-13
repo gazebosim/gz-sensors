@@ -31,9 +31,6 @@ using namespace sensors;
 /// \brief Private data for CameraSensor
 class ignition::sensors::CameraSensorPrivate
 {
-  /// \brief Remove a camera from a scene
-  public: void RemoveCamera(ignition::rendering::ScenePtr _scene);
-
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
   /// \param[in] _width width of image in pixels
@@ -190,16 +187,6 @@ bool CameraSensor::CreateCamera()
 }
 
 //////////////////////////////////////////////////
-void CameraSensorPrivate::RemoveCamera(rendering::ScenePtr _scene)
-{
-  if (_scene)
-  {
-    // \todo(nkoenig) Remove camera from scene!
-  }
-  this->camera = nullptr;
-}
-
-//////////////////////////////////////////////////
 CameraSensor::CameraSensor()
   : dataPtr(new CameraSensorPrivate())
 {
@@ -284,7 +271,8 @@ void CameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
   // APIs make it possible for the scene pointer to change
   if (this->Scene() != _scene)
   {
-    this->dataPtr->RemoveCamera(this->Scene());
+    // TODO(anyone) Remove camera from scene
+    this->dataPtr->camera = nullptr;
     RenderingSensor::SetScene(_scene);
     if (this->dataPtr->initialized)
       this->CreateCamera();

@@ -4,6 +4,10 @@
 
 ### Ignition Sensors 2.1.0 (201X-XX-XX)
 
+1. Adds an RGBD camera sensor that combines a CameraSensor and DepthCameraSensor, and also
+   outputs a pointcloud.
+    * [Pull request 70](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/70)
+
 1. Create and publish on `camera_info` topics for the Camera and DepthCamera
    sensors.
     * [Pull request 67](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/67)
@@ -13,7 +17,7 @@
 1. Zero update rate, virtual SetParent and fix gpu_lidar
     * [Pull request 66](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/66)
 
-1. Add frame_id to sensor messages
+1. Add `frame_id` to sensor messages
     * [Pull request 63](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/63)
 
 1. Restore `pixel_format` in message and add deprecation comment.
