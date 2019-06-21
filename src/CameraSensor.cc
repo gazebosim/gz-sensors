@@ -440,6 +440,18 @@ bool CameraSensor::AdvertiseInfo()
 }
 
 //////////////////////////////////////////////////
+bool CameraSensor::AdvertiseInfo(const std::string &_topic)
+{
+  this->dataPtr->infoTopic = _topic;
+
+  this->dataPtr->infoPub =
+      this->dataPtr->node.Advertise<ignition::msgs::CameraInfo>(
+      this->dataPtr->infoTopic);
+
+  return this->dataPtr->infoPub;
+}
+
+//////////////////////////////////////////////////
 void CameraSensor::PublishInfo(const ignition::common::Time &_now)
 {
   this->dataPtr->infoMsg.mutable_header()->mutable_stamp()->set_sec(_now.sec);

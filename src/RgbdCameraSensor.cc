@@ -142,7 +142,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
   if (!this->dataPtr->depthPub)
     return false;
 
-  if (!this->AdvertiseInfo())
+  if (!this->AdvertiseInfo(this->Topic() + "/camera_info"))
     return false;
 
   if (this->Scene())

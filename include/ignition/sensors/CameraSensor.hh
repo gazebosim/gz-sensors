@@ -133,6 +133,10 @@ namespace ignition
       /// \return True if successful.
       protected: bool AdvertiseInfo();
 
+      /// \brief Advertise camera info topic.
+      /// \return True if successful.
+      protected: bool AdvertiseInfo(const std::string &_topic);
+
       /// \brief Populate camera info message.
       /// \param[in] _cameraSdf Pointer to SDF object containing camera
       /// information.
