@@ -2,7 +2,12 @@
 
 ### Ignition Sensors 2.X.X (201X-XX-XX)
 
-### Ignition Sensors 2.1.0 (201X-XX-XX)
+### Ignition Sensors 2.2.X (201X-XX-XX)
+
+1. Fix camera_info topic to be on the same level as image and depth_image for RGBD Camera.
+    * [Pull request 73](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/73)
+
+### Ignition Sensors 2.1.0 (2019-06-18)
 
 1. Adds an RGBD camera sensor that combines a CameraSensor and DepthCameraSensor, and also
    outputs a pointcloud.
