@@ -2,7 +2,10 @@
 
 ### Ignition Sensors 2.X.X (201X-XX-XX)
 
-### Ignition Sensors 2.2.X (201X-XX-XX)
+### Ignition Sensors 2.2.0 (2019-06-27)
+
+1. Update the GPU Lidar to use the sensor's name as the `frame_id`.
+    * [Pull request 74](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/74)
 
 1. Fix camera_info topic to be on the same level as image and depth_image for RGBD Camera.
     * [Pull request 73](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/73)
