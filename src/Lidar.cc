@@ -199,6 +199,7 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
   auto frame = this->dataPtr->laserMsg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->Name());
+  this->dataPtr->laserMsg.set_frame(this->Name());
 
   // Store the latest laser scans into laserMsg
   msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
@@ -342,7 +343,6 @@ unsigned int Lidar::VerticalRangeCount() const
 void Lidar::SetParent(const std::string &_parent)
 {
   Sensor::SetParent(_parent);
-  this->dataPtr->laserMsg.set_frame(this->Parent());
 }
 
 //////////////////////////////////////////////////
