@@ -137,6 +137,10 @@ TEST(Camera_TEST, CreateCamera)
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(cam != nullptr);
 
+  // Check topics
+  EXPECT_EQ("/cam", cam->Topic());
+  EXPECT_EQ("/camera_info", cam->InfoTopic());
+
   // however camera is not loaded because a rendering scene is missing so
   // updates will not be successful and image size will be 0
   EXPECT_FALSE(cam->Update(ignition::common::Time()));

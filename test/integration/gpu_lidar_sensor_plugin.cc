@@ -354,7 +354,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
       LASER_TOL);
   EXPECT_DOUBLE_EQ(laserMsgs.back().ranges(last), ignition::math::INF_D);
 
-  EXPECT_EQ(laserMsgs.back().frame(), parent);
+  EXPECT_EQ(laserMsgs.back().frame(), name);
   EXPECT_NEAR(laserMsgs.back().angle_min(), horzMinAngle, 1e-4);
   EXPECT_NEAR(laserMsgs.back().angle_max(), horzMaxAngle, 1e-4);
   EXPECT_NEAR(laserMsgs.back().count(), horzSamples, 1e-4);

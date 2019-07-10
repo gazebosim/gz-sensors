@@ -30,9 +30,6 @@
 /// \brief Private data for DepthCameraSensor
 class ignition::sensors::DepthCameraSensorPrivate
 {
-  /// \brief Remove a camera from a scene
-  public: void RemoveCamera(ignition::rendering::ScenePtr _scene);
-
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
   /// \param[in] _width width of image in pixels
@@ -101,17 +98,6 @@ class ignition::sensors::DepthCameraSensorPrivate
 
 using namespace ignition;
 using namespace sensors;
-
-//////////////////////////////////////////////////
-void DepthCameraSensorPrivate::RemoveCamera(
-    rendering::ScenePtr _scene)
-{
-  if (_scene)
-  {
-    // \todo(nkoenig) Remove camera from scene!
-  }
-  // this->depthCamera = nullptr;
-}
 
 //////////////////////////////////////////////////
 bool DepthCameraSensorPrivate::SaveImage(const float *_data,
@@ -225,6 +211,9 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
   if (!this->dataPtr->pub)
     return false;
 
+  if (!this->AdvertiseInfo())
+    return false;
+
   if (this->Scene())
   {
     this->CreateCamera();
@@ -255,6 +244,8 @@ bool DepthCameraSensor::CreateCamera()
 
   double far = cameraSdf->FarClip();
   double near = cameraSdf->NearClip();
+
+  this->PopulateInfo(cameraSdf);
 
   this->dataPtr->depthCamera = this->Scene()->CreateDepthCamera(
       this->Name());
@@ -405,7 +396,8 @@ void DepthCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
   // APIs make it possible for the scene pointer to change
   if (this->Scene() != _scene)
   {
-    this->dataPtr->RemoveCamera(this->Scene());
+    // TODO(anyone) Remove camera from scene
+    this->dataPtr->depthCamera = nullptr;
     RenderingSensor::SetScene(_scene);
 
     if (this->dataPtr->initialized)
@@ -459,6 +451,9 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
 
   // publish
   this->dataPtr->pub.Publish(msg);
+
+  // publish the camera info message
+  this->PublishInfo(_now);
 
   // Trigger callbacks.
   try
