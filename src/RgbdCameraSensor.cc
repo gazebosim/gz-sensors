@@ -16,6 +16,7 @@
 */
 
 #include <ignition/msgs/image.pb.h>
+#include <ignition/msgs/pointcloud_packed.pb.h>
 
 #include <ignition/common/Image.hh>
 #include <ignition/math/Helpers.hh>
@@ -31,6 +32,9 @@
 /// \brief Private data for RgbdCameraSensor
 class ignition::sensors::RgbdCameraSensorPrivate
 {
+  /// \brief Fill a point cloud message.
+  public: void FillPointCloud();
+
   /// \brief Depth data callback used to get the data from the sensor
   /// \param[in] _scan pointer to the data from the sensor
   /// \param[in] _width width of the depth image
@@ -50,6 +54,9 @@ class ignition::sensors::RgbdCameraSensorPrivate
 
   /// \brief publisher to publish depth images
   public: transport::Node::Publisher depthPub;
+
+  /// \brief publisher to publish point cloud
+  public: transport::Node::Publisher pointPub;
 
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
@@ -77,6 +84,8 @@ class ignition::sensors::RgbdCameraSensorPrivate
 
   /// \brief SDF Sensor DOM object.
   public: sdf::Sensor sdfSensor;
+
+  public: msgs::PointCloudPacked pointMsg;
 };
 
 using namespace ignition;
@@ -142,6 +151,13 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
   if (!this->dataPtr->depthPub)
     return false;
 
+  // Create the depth image publisher
+  this->dataPtr->pointPub =
+      this->dataPtr->node.Advertise<ignition::msgs::PointCloudPacked>(
+          this->Topic() + "/points");
+  if (!this->dataPtr->pointPub)
+    return false;
+
   if (!this->AdvertiseInfo(this->Topic() + "/camera_info"))
     return false;
 
@@ -155,6 +171,45 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
   this->dataPtr->sceneChangeConnection =
       RenderingEvents::ConnectSceneChangeCallback(
       std::bind(&RgbdCameraSensor::SetScene, this, std::placeholders::_1));
+
+  // Setup the point cloud message.
+  uint32_t offset = 0;
+  msgs::PointCloudPacked::Field *field = this->dataPtr->pointMsg.add_field();
+  field->set_name("x");
+  field->set_count(1);
+  field->set_datatype(msgs::PointCloudPacked::Field::FLOAT32);
+  field->set_offset(offset);
+  offset += 4;
+
+  field = this->dataPtr->pointMsg.add_field();
+  field->set_name("y");
+  field->set_count(1);
+  field->set_datatype(msgs::PointCloudPacked::Field::FLOAT32);
+  field->set_offset(offset);
+  offset += 4;
+
+  field = this->dataPtr->pointMsg.add_field();
+  field->set_name("z");
+  field->set_count(1);
+  field->set_datatype(msgs::PointCloudPacked::Field::FLOAT32);
+  field->set_offset(offset);
+  offset += 4;
+
+  field = this->dataPtr->pointMsg.add_field();
+  field->set_name("rgb");
+  field->set_count(1);
+  field->set_datatype(msgs::PointCloudPacked::Field::FLOAT32);
+
+  /// \todo(anyone) Hardcoding this values to make ROS happy. See the todo
+  /// in FillPointClouds about byte boundaries.
+  field->set_offset(16);
+  this->dataPtr->pointMsg.set_point_step(32);
+
+  // Set the frame
+  msgs::Header::Map *frame =
+    this->dataPtr->pointMsg.mutable_header()->add_data();
+  frame->set_key("frame_id");
+  frame->add_value(this->Name());
 
   return true;
 }
@@ -360,6 +415,25 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     this->dataPtr->depthPub.Publish(msg);
   }
 
+  {
+    // Set the time stamp
+    this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_sec(
+        _now.sec);
+    this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_nsec(
+        _now.nsec);
+    this->dataPtr->pointMsg.set_width(this->ImageWidth());
+    this->dataPtr->pointMsg.set_height(this->ImageHeight());
+    this->dataPtr->pointMsg.set_row_step(
+        this->dataPtr->pointMsg.point_step() * this->ImageWidth()
+        * this->ImageHeight());
+    this->dataPtr->pointMsg.set_is_dense(true);
+
+    if (this->dataPtr->depthBuffer)
+      this->dataPtr->FillPointCloud();
+
+    this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
+  }
+
   // publish the camera info message
   this->PublishInfo(_now);
 
@@ -376,6 +450,69 @@ unsigned int RgbdCameraSensor::ImageWidth() const
 unsigned int RgbdCameraSensor::ImageHeight() const
 {
   return this->dataPtr->depthCamera->ImageHeight();
+}
+
+//////////////////////////////////////////////////
+void RgbdCameraSensorPrivate::FillPointCloud()
+{
+  // Fill message. Logic borrowed from
+  // https://github.com/ros-simulation/gazebo_ros_pkgs/blob/kinetic-devel/gazebo_plugins/src/gazebo_ros_depth_camera.cpp
+
+  uint32_t width = this->pointMsg.width();
+  uint32_t height = this->pointMsg.height();
+
+  std::string *msgBuffer = this->pointMsg.mutable_data();
+  msgBuffer->resize(this->pointMsg.row_step());
+  char *msgBufferIndex = msgBuffer->data();
+
+  // For depth calculation from image
+  double hfov = this->depthCamera->HFOV().Radian();
+  double fl = width / (2.0 * std::tan(hfov / 2.0));
+
+  unsigned char *imageData = this->image.Data<unsigned char>();
+
+  float pAngle{0.0};
+  float yAngle{0.0};
+  // Iterate over scan and populate point cloud
+  for (uint32_t j = 0; j < height; ++j)
+  {
+    pAngle = 0.0;
+    if (fl > 0 && height > 1)
+      pAngle = std::atan2((height-j) - 0.5 * (height - 1), fl);
+
+    for (uint32_t i = 0; i < width; ++i)
+    {
+      // Current point depth
+      float depth = this->depthBuffer[j * width + i];
+
+      if (fl > 0 && width > 1)
+        yAngle = std::atan2(i - 0.5 * (width - 1), fl);
+      else
+        yAngle = 0.0;
+
+      *reinterpret_cast<float*>(msgBufferIndex) = depth;
+      msgBufferIndex += 4;
+      *reinterpret_cast<float*>(msgBufferIndex) = depth * std::tan(yAngle);
+      msgBufferIndex += 4;
+      *reinterpret_cast<float*>(msgBufferIndex) =  depth * std::tan(pAngle);
+      msgBufferIndex += 4;
+
+      /// \todo(anyone) ROS wants depth and rbg data to occur at 16 byte
+      /// boundaries. The pointcloud2 message supposidly supports a tightly
+      /// packed buffer (ie no padding like this line and the += 13 below),
+      /// but rviz will crash without these buffers.
+      msgBufferIndex += 4;
+
+      // Put image color data for each point.
+      // \todo(anyone) For some reason ROS wants BGR, which seems to be
+      // a bug on the ROS side.
+      int imgIndex = i * 3 + j * width * 3;
+      *(msgBufferIndex++) = imageData[imgIndex + 2];
+      *(msgBufferIndex++) = imageData[imgIndex + 1];
+      *(msgBufferIndex++) = imageData[imgIndex + 0];
+      msgBufferIndex += 13;
+    }
+  }
 }
 
 IGN_SENSORS_REGISTER_SENSOR(RgbdCameraSensor)
