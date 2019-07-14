@@ -1,6 +1,7 @@
 set (sources
   Events.cc
   Manager.cc
+  PointCloud.cc
   Sensor.cc
   Noise.cc
   GaussianNoiseModel.cc
