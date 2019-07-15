@@ -100,6 +100,7 @@ sdf::ElementPtr GpuLidarToSDF(const std::string &name,
 
 int g_laserCounter = 0;
 std::vector<ignition::msgs::LaserScan> laserMsgs;
+std::vector<ignition::msgs::PointCloudPacked> pointMsgs;
 
 void OnNewLidarFrame(const float * /*_scan*/, unsigned int /*_width*/,
     unsigned int /*_height*/, unsigned int /*_channels*/,
@@ -112,6 +113,12 @@ void OnNewLidarFrame(const float * /*_scan*/, unsigned int /*_width*/,
 void laserCb(const ignition::msgs::LaserScan &_msg)
 {
   laserMsgs.push_back(_msg);
+}
+
+/////////////////////////////////////////////////
+void pointCb(const ignition::msgs::PointCloudPacked &_msg)
+{
+  pointMsgs.push_back(_msg);
 }
 
 class GpuLidarSensorTest: public testing::Test,
@@ -318,6 +325,8 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   // subscribe to altimeter topic
   ignition::transport::Node node;
   node.Subscribe(topic, &::laserCb);
+  std::cout << "Topic{" << topic + "/points" << "]\n";
+  node.Subscribe(topic + "/points", &::pointCb);
 
   WaitForMessageTestHelper<ignition::msgs::LaserScan> helper(topic);
   // Update sensor
@@ -338,7 +347,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   // Make sure to wait to receive the message
   ignition::common::Time waitTime = ignition::common::Time(0.01);
   int i = 0;
-  while (laserMsgs.size() < 1 && i < 300)
+  while ((laserMsgs.empty() || pointMsgs.empty()) && i < 300)
   {
     ignition::common::Time::Sleep(waitTime);
     i++;
@@ -364,6 +373,19 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   EXPECT_NEAR(laserMsgs.back().vertical_count(), vertSamples, 1e-4);
   EXPECT_NEAR(laserMsgs.back().range_min(), rangeMin, 1e-4);
   EXPECT_NEAR(laserMsgs.back().range_max(), rangeMax, 1e-4);
+
+  ASSERT_TRUE(!pointMsgs.empty());
+  EXPECT_EQ(3, pointMsgs.back().field_size());
+  EXPECT_EQ("x", pointMsgs.back().field(0).name());
+  EXPECT_EQ("y", pointMsgs.back().field(1).name());
+  EXPECT_EQ("z", pointMsgs.back().field(2).name());
+  EXPECT_EQ(static_cast<uint32_t>(vertSamples), pointMsgs.back().height());
+  EXPECT_EQ(static_cast<uint32_t>(horzSamples), pointMsgs.back().width());
+  EXPECT_FALSE(pointMsgs.back().is_bigendian());
+  EXPECT_EQ(16u, pointMsgs.back().point_step());
+  EXPECT_EQ(16u * horzSamples, pointMsgs.back().row_step());
+  EXPECT_TRUE(pointMsgs.back().is_dense());
+  EXPECT_EQ(16u * horzSamples * vertSamples, pointMsgs.back().data().size());
 
   // Clean up
   //
