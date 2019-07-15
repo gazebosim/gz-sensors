@@ -325,7 +325,6 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   // subscribe to altimeter topic
   ignition::transport::Node node;
   node.Subscribe(topic, &::laserCb);
-  std::cout << "Topic{" << topic + "/points" << "]\n";
   node.Subscribe(topic + "/points", &::pointCb);
 
   WaitForMessageTestHelper<ignition::msgs::LaserScan> helper(topic);
