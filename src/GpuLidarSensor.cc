@@ -14,7 +14,6 @@
  * limitations under the License.
  *
 */
-#include <ignition/msgs/pointcloud_packed.pb.h>
 #include <ignition/msgs/Utility.hh>
 
 #include <ignition/common/Console.hh>
@@ -26,23 +25,11 @@ using namespace ignition::sensors;
 /// \brief Private data for the GpuLidar class
 class ignition::sensors::GpuLidarSensorPrivate
 {
-  /// \brief Fill the point cloud packed message
-  public: void FillMsg();
-
   /// \brief Rendering camera
   public: ignition::rendering::GpuRaysPtr gpuRays;
 
   /// \brief Connection to the Manager's scene change event.
   public: ignition::common::ConnectionPtr sceneChangeConnection;
-
-  /// \brief The point cloud message.
-  public: msgs::PointCloudPacked pointMsg;
-
-  /// \brief Transport node.
-  public: transport::Node node;
-
-  /// \brief Publisher for the publish point cloud message.
-  public: transport::Node::Publisher pointPub;
 };
 
 //////////////////////////////////////////////////
@@ -101,30 +88,12 @@ bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  // Initialize the point message.
-  // Initialize the point message.
-  // \todo(anyone) The true value in the following function call forces
-  // the xyz and rgb fields to be aligned to memory boundaries. This is need
-  // by ROS1: https://github.com/ros/common_msgs/pull/77. Ideally, memory
-  // alignment should be configured. This same problem is in the
-  // RgbdCameraSensor.
-  msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->Name(), true,
-      {{"xyz", msgs::PointCloudPacked::Field::FLOAT32}});
-
   if (this->Scene())
     this->CreateLidar();
 
   this->dataPtr->sceneChangeConnection =
     RenderingEvents::ConnectSceneChangeCallback(
         std::bind(&GpuLidarSensor::SetScene, this, std::placeholders::_1));
-
-  // Create the point cloud publisher
-  this->dataPtr->pointPub =
-      this->dataPtr->node.Advertise<ignition::msgs::PointCloudPacked>(
-          this->Topic() + "/points");
-
-  if (!this->dataPtr->pointPub)
-    return false;
 
   this->initialized = true;
 
@@ -181,15 +150,7 @@ bool GpuLidarSensor::CreateLidar()
   this->Scene()->RootVisual()->AddChild(
       this->dataPtr->gpuRays);
 
-  // Set the values on the point message.
-  this->dataPtr->pointMsg.set_width(this->dataPtr->gpuRays->RangeCount());
-  this->dataPtr->pointMsg.set_height(
-      this->dataPtr->gpuRays->VerticalRangeCount());
-  this->dataPtr->pointMsg.set_row_step(
-      this->dataPtr->pointMsg.point_step() *
-      this->dataPtr->pointMsg.width() * this->dataPtr->pointMsg.height());
-
-  return true;
+  return Lidar::CreateLidar();
 }
 
 //////////////////////////////////////////////////
@@ -220,19 +181,6 @@ bool GpuLidarSensor::Update(const ignition::common::Time &_now)
 
   this->PublishLidarScan(_now);
 
-  {
-    // Set the time stamp
-    this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_sec(
-        _now.sec);
-    this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_nsec(
-        _now.nsec);
-
-    this->dataPtr->pointMsg.set_is_dense(true);
-
-    this->dataPtr->FillMsg();
-
-    this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
-  }
   return true;
 }
 
@@ -267,63 +215,6 @@ ignition::math::Angle GpuLidarSensor::HFOV() const
 ignition::math::Angle GpuLidarSensor::VFOV() const
 {
   return this->dataPtr->gpuRays->VFOV();
-}
-
-//////////////////////////////////////////////////
-void GpuLidarSensorPrivate::FillMsg()
-{
-  uint32_t width = this->pointMsg.width();
-  uint32_t height = this->pointMsg.height();
-  unsigned int channels = 3;
-
-  float angleStep =
-    (this->gpuRays->AngleMax() - this->gpuRays->AngleMin()).Radian() /
-    (this->gpuRays->RangeCount()-1);
-
-  float verticleAngleStep = (this->gpuRays->VerticalAngleMax() -
-      this->gpuRays->VerticalAngleMin()).Radian() /
-    (this->gpuRays->VerticalRangeCount()-1);
-
-  // Angles of ray currently processing, azimuth is horizontal, inclination
-  // is vertical
-  float inclination = this->gpuRays->VerticalAngleMin().Radian();
-
-  std::string *msgBuffer = this->pointMsg.mutable_data();
-  msgBuffer->resize(this->pointMsg.row_step());
-  char *msgBufferIndex = msgBuffer->data();
-
-  // Iterate over scan and populate point cloud
-  for (uint32_t j = 0; j < height; ++j)
-  {
-    float azimuth = this->gpuRays->AngleMin().Radian();
-
-    for (uint32_t i = 0; i < width; ++i)
-    {
-      // Index of current point, and the depth value at that point
-      auto index = j * width * channels + i * channels;
-      float depth = this->gpuRays->Data()[index];
-
-      int fieldIndex = 0;
-
-      // Convert spherical coordinates to Cartesian for pointcloud
-      // See https://en.wikipedia.org/wiki/Spherical_coordinate_system
-      *reinterpret_cast<float*>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) =
-        depth * std::cos(inclination) * std::cos(azimuth);
-      *reinterpret_cast<float*>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) =
-        depth * std::cos(inclination) * std::sin(azimuth);
-      *reinterpret_cast<float*>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) =
-        depth * std::sin(inclination);
-
-      // Move the index to the next point.
-      msgBufferIndex += this->pointMsg.point_step();
-
-      azimuth += angleStep;
-    }
-    inclination += verticleAngleStep;
-  }
 }
 
 IGN_SENSORS_REGISTER_SENSOR(GpuLidarSensor)
