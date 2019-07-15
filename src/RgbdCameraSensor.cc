@@ -152,7 +152,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
   if (!this->dataPtr->depthPub)
     return false;
 
-  // Create the depth image publisher
+  // Create the point cloud publisher
   this->dataPtr->pointPub =
       this->dataPtr->node.Advertise<ignition::msgs::PointCloudPacked>(
           this->Topic() + "/points");
@@ -170,7 +170,6 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
   msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->Name(), true,
       {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
        {"rgb", msgs::PointCloudPacked::Field::FLOAT32}});
-
 
   if (this->Scene())
   {

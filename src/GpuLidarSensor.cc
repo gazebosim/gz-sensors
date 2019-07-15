@@ -26,6 +26,7 @@ using namespace ignition::sensors;
 /// \brief Private data for the GpuLidar class
 class ignition::sensors::GpuLidarSensorPrivate
 {
+  /// \brief Fill the point cloud packed message
   public: void FillMsg();
 
   /// \brief Rendering camera
@@ -37,10 +38,10 @@ class ignition::sensors::GpuLidarSensorPrivate
   /// \brief The point cloud message.
   public: msgs::PointCloudPacked pointMsg;
 
-  /// \brief node to create publisher
+  /// \brief Transport node.
   public: transport::Node node;
 
-  /// \brief publisher to publish point cloud
+  /// \brief Publisher for the publish point cloud message.
   public: transport::Node::Publisher pointPub;
 };
 
@@ -100,22 +101,6 @@ bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  if (this->Scene())
-    this->CreateLidar();
-
-  this->dataPtr->sceneChangeConnection =
-    RenderingEvents::ConnectSceneChangeCallback(
-        std::bind(&GpuLidarSensor::SetScene, this, std::placeholders::_1));
-
-  // Create the depth image publisher
-  this->dataPtr->pointPub =
-      this->dataPtr->node.Advertise<ignition::msgs::PointCloudPacked>(
-          this->Topic() + "/points");
-
-  std::cout << "Created Topic{" << this->Topic() + "/points" << "]\n";
-  if (!this->dataPtr->pointPub)
-    return false;
-
   // Initialize the point message.
   // Initialize the point message.
   // \todo(anyone) The true value in the following function call forces
@@ -125,6 +110,21 @@ bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
   // RgbdCameraSensor.
   msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->Name(), true,
       {{"xyz", msgs::PointCloudPacked::Field::FLOAT32}});
+
+  if (this->Scene())
+    this->CreateLidar();
+
+  this->dataPtr->sceneChangeConnection =
+    RenderingEvents::ConnectSceneChangeCallback(
+        std::bind(&GpuLidarSensor::SetScene, this, std::placeholders::_1));
+
+  // Create the point cloud publisher
+  this->dataPtr->pointPub =
+      this->dataPtr->node.Advertise<ignition::msgs::PointCloudPacked>(
+          this->Topic() + "/points");
+
+  if (!this->dataPtr->pointPub)
+    return false;
 
   this->initialized = true;
 
