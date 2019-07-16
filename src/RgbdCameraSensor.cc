@@ -434,7 +434,7 @@ void RgbdCameraSensorPrivate::FillMsg()
   uint32_t height = this->pointMsg.height();
 
   std::string *msgBuffer = this->pointMsg.mutable_data();
-  msgBuffer->resize(this->pointMsg.row_step() * this->ImageHeight());
+  msgBuffer->resize(this->pointMsg.row_step() * this->pointMsg.height());
   char *msgBufferIndex = msgBuffer->data();
 
   // For depth calculation from image
@@ -456,7 +456,7 @@ void RgbdCameraSensorPrivate::FillMsg()
       int fieldIndex = 0;
 
       // Current point depth
-      float depth = this->depthBuffer[j * width + i];
+      float depth = this->depthBuffer[j * width + (width-i-1)];
 
       float yAngle = 0.0;
       if (fl > 0 && width > 1)
