@@ -229,60 +229,56 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
 
   std::lock_guard<std::mutex> lock(this->lidarMutex);
 
-  if (this->dataPtr->pub.HasConnections())
+  this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_sec(
+      _now.sec);
+  this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_nsec(
+      _now.nsec);
+  auto frame = this->dataPtr->laserMsg.mutable_header()->add_data();
+  frame->set_key("frame_id");
+  frame->add_value(this->Name());
+  this->dataPtr->laserMsg.set_frame(this->Name());
+
+  // Store the latest laser scans into laserMsg
+  msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
+      this->Pose());
+
+  const int numRays = this->RayCount() * this->VerticalRayCount();
+  if (this->dataPtr->laserMsg.ranges_size() != numRays)
   {
-    this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_sec(
-        _now.sec);
-    this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_nsec(
-        _now.nsec);
-    auto frame = this->dataPtr->laserMsg.mutable_header()->add_data();
-    frame->set_key("frame_id");
-    frame->add_value(this->Name());
-    this->dataPtr->laserMsg.set_frame(this->Name());
-
-    // Store the latest laser scans into laserMsg
-    msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
-        this->Pose());
-
-
-    const int numRays = this->RayCount() * this->VerticalRayCount();
-    if (this->dataPtr->laserMsg.ranges_size() != numRays)
+    // igndbg << "Size mismatch; allocating memory\n";
+    this->dataPtr->laserMsg.clear_ranges();
+    this->dataPtr->laserMsg.clear_intensities();
+    for (int i = 0; i < numRays; ++i)
     {
-      // igndbg << "Size mismatch; allocating memory\n";
-      this->dataPtr->laserMsg.clear_ranges();
-      this->dataPtr->laserMsg.clear_intensities();
-      for (int i = 0; i < numRays; ++i)
-      {
-        this->dataPtr->laserMsg.add_ranges(ignition::math::NAN_F);
-        this->dataPtr->laserMsg.add_intensities(ignition::math::NAN_F);
-      }
+      this->dataPtr->laserMsg.add_ranges(ignition::math::NAN_F);
+      this->dataPtr->laserMsg.add_intensities(ignition::math::NAN_F);
     }
-
-    for (unsigned int j = 0; j < this->VerticalRangeCount(); ++j)
-    {
-      for (unsigned int i = 0; i < this->RangeCount(); ++i)
-      {
-        int index = j * this->RangeCount() + i;
-        double range = this->laserBuffer[index*3];
-
-        if (this->dataPtr->noises.find(LIDAR_NOISE) !=
-            this->dataPtr->noises.end())
-        {
-          range = this->dataPtr->noises[LIDAR_NOISE]->Apply(range);
-          range = ignition::math::clamp(range,
-              this->RangeMin(), this->RangeMax());
-        }
-
-        range = ignition::math::isnan(range) ? this->RangeMax() : range;
-        this->dataPtr->laserMsg.set_ranges(index, range);
-        this->dataPtr->laserMsg.set_intensities(index,
-            this->laserBuffer[index * 3 + 1]);
-      }
-    }
-
-    // publish
-    this->dataPtr->pub.Publish(this->dataPtr->laserMsg);
   }
+
+  for (unsigned int j = 0; j < this->VerticalRangeCount(); ++j)
+  {
+    for (unsigned int i = 0; i < this->RangeCount(); ++i)
+    {
+      int index = j * this->RangeCount() + i;
+      double range = this->laserBuffer[index*3];
+
+      if (this->dataPtr->noises.find(LIDAR_NOISE) !=
+          this->dataPtr->noises.end())
+      {
+        range = this->dataPtr->noises[LIDAR_NOISE]->Apply(range);
+        range = ignition::math::clamp(range,
+            this->RangeMin(), this->RangeMax());
+      }
+
+      range = ignition::math::isnan(range) ? this->RangeMax() : range;
+      this->dataPtr->laserMsg.set_ranges(index, range);
+      this->dataPtr->laserMsg.set_intensities(index,
+          this->laserBuffer[index * 3 + 1]);
+    }
+  }
+
+  // publish
+  this->dataPtr->pub.Publish(this->dataPtr->laserMsg);
 
   // Publish the point cloud
   if (this->dataPtr->pointPub.HasConnections())
