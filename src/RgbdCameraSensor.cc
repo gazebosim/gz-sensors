@@ -461,7 +461,7 @@ void RgbdCameraSensorPrivate::FillMsg()
 
       float yAngle = 0.0;
       if (fl > 0 && width > 1)
-        yAngle = std::atan2(i - 0.5 * (width - 1), fl);
+        yAngle = std::atan2(0.5 * (width - 1) - i, fl);
 
       *reinterpret_cast<float*>(msgBufferIndex +
           this->pointMsg.field(fieldIndex++).offset()) = depth;
