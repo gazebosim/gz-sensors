@@ -14,7 +14,6 @@
  * limitations under the License.
  *
 */
-#include <ignition/msgs/pointcloud_packed.pb.h>
 #include <ignition/common/Console.hh>
 #include <sdf/Lidar.hh>
 
@@ -29,9 +28,6 @@ using namespace ignition::sensors;
 /// \brief Private data for Lidar class
 class ignition::sensors::LidarPrivate
 {
-  /// \brief Fill the point cloud packed message
-  public: void FillPointCloudMsg(float *_laserBuffer);
-
   /// \brief node to create publisher
   public: transport::Node node;
 
@@ -46,12 +42,6 @@ class ignition::sensors::LidarPrivate
 
   /// \brief Sdf sensor.
   public: sdf::Lidar sdfLidar;
-
-  /// \brief The point cloud message.
-  public: msgs::PointCloudPacked pointMsg;
-
-  /// \brief Publisher for the publish point cloud message.
-  public: transport::Node::Publisher pointPub;
 };
 
 //////////////////////////////////////////////////
@@ -85,13 +75,6 @@ void Lidar::Fini()
 //////////////////////////////////////////////////
 bool Lidar::CreateLidar()
 {
-  // Set the values on the point message.
-  this->dataPtr->pointMsg.set_width(this->RangeCount());
-  this->dataPtr->pointMsg.set_height(this->VerticalRangeCount());
-  this->dataPtr->pointMsg.set_row_step(
-      this->dataPtr->pointMsg.point_step() *
-      this->dataPtr->pointMsg.width() * this->dataPtr->pointMsg.height());
-
   return false;
 }
 
@@ -174,24 +157,6 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
        << "] is not supported." << std::endl;
     }
   }
-
-  // Create the point cloud publisher
-  this->dataPtr->pointPub =
-      this->dataPtr->node.Advertise<ignition::msgs::PointCloudPacked>(
-          this->Topic() + "/points");
-
-  if (!this->dataPtr->pointPub)
-    return false;
-
-  // Initialize the point message.
-  // Initialize the point message.
-  // \todo(anyone) The true value in the following function call forces
-  // the xyz and rgb fields to be aligned to memory boundaries. This is need
-  // by ROS1: https://github.com/ros/common_msgs/pull/77. Ideally, memory
-  // alignment should be configured. This same problem is in the
-  // RgbdCameraSensor.
-  msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->Name(), true,
-      {{"xyz", msgs::PointCloudPacked::Field::FLOAT32}});
 
   this->initialized = true;
   return true;
@@ -279,20 +244,6 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
 
   // publish
   this->dataPtr->pub.Publish(this->dataPtr->laserMsg);
-
-  // Publish the point cloud
-  if (this->dataPtr->pointPub.HasConnections())
-  {
-    // Set the time stamp
-    this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_sec(
-        _now.sec);
-    this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_nsec(
-        _now.nsec);
-
-    this->dataPtr->pointMsg.set_is_dense(true);
-    this->dataPtr->FillPointCloudMsg(this->laserBuffer);
-    this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
-  }
 
   return true;
 }
@@ -473,71 +424,6 @@ bool Lidar::IsActive() const
 //  return Sensor::IsActive() ||
 //    (this->dataPtr->pub && this->dataPtr->pub->HasConnections());
   return true;
-}
-
-//////////////////////////////////////////////////
-void LidarPrivate::FillPointCloudMsg(float *_laserBuffer)
-{
-  uint32_t width = this->pointMsg.width();
-  uint32_t height = this->pointMsg.height();
-  unsigned int channels = 3;
-
-  unsigned int rangeCount = this->sdfLidar.HorizontalScanSamples() *
-    this->sdfLidar.HorizontalScanResolution();
-  unsigned int vertRangeCount = std::max(
-      this->sdfLidar.VerticalScanSamples() *
-      this->sdfLidar.VerticalScanResolution(), 1.0);
-
-  float angleStep =
-    (this->sdfLidar.HorizontalScanMaxAngle() -
-     this->sdfLidar.HorizontalScanMinAngle()).Radian() /
-    (rangeCount - 1);
-
-  float verticleAngleStep =
-    (this->sdfLidar.VerticalScanMaxAngle() -
-     this->sdfLidar.VerticalScanMinAngle()).Radian() /
-    (vertRangeCount - 1);
-
-  // Angles of ray currently processing, azimuth is horizontal, inclination
-  // is vertical
-  float inclination = this->sdfLidar.VerticalScanMinAngle().Radian();
-
-  std::string *msgBuffer = this->pointMsg.mutable_data();
-  msgBuffer->resize(this->pointMsg.row_step());
-  char *msgBufferIndex = msgBuffer->data();
-
-  // Iterate over scan and populate point cloud
-  for (uint32_t j = 0; j < height; ++j)
-  {
-    float azimuth = this->sdfLidar.HorizontalScanMinAngle().Radian();
-
-    for (uint32_t i = 0; i < width; ++i)
-    {
-      // Index of current point, and the depth value at that point
-      auto index = j * width * channels + i * channels;
-      float depth = _laserBuffer[index];
-
-      int fieldIndex = 0;
-
-      // Convert spherical coordinates to Cartesian for pointcloud
-      // See https://en.wikipedia.org/wiki/Spherical_coordinate_system
-      *reinterpret_cast<float*>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) =
-        depth * std::cos(inclination) * std::cos(azimuth);
-      *reinterpret_cast<float*>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) =
-        depth * std::cos(inclination) * std::sin(azimuth);
-      *reinterpret_cast<float*>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) =
-        depth * std::sin(inclination);
-
-      // Move the index to the next point.
-      msgBufferIndex += this->pointMsg.point_step();
-
-      azimuth += angleStep;
-    }
-    inclination += verticleAngleStep;
-  }
 }
 
 IGN_SENSORS_REGISTER_SENSOR(Lidar)
