@@ -392,6 +392,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     this->dataPtr->depthPub.Publish(msg);
   }
 
+  if (this->dataPtr->pointPub.HasConnections() && this->dataPtr->depthBuffer)
   {
     // Set the time stamp
     this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_sec(
@@ -400,9 +401,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
         _now.nsec);
     this->dataPtr->pointMsg.set_is_dense(true);
 
-    if (this->dataPtr->depthBuffer)
-      this->dataPtr->FillMsg();
-
+    this->dataPtr->FillMsg();
     this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
   }
 
