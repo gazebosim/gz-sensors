@@ -44,7 +44,7 @@ class ignition::sensors::RgbdCameraSensorPrivate
                     const std::string &_format);
 
   /// \brief Fill the point cloud message.
-  public: void FillMsg();
+  public: void FillPointCloudMsg();
 
   /// \brief node to create publisher
   public: transport::Node node;
@@ -401,7 +401,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
         _now.nsec);
     this->dataPtr->pointMsg.set_is_dense(true);
 
-    this->dataPtr->FillMsg();
+    this->dataPtr->FillPointCloudMsg();
     this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
   }
 
@@ -424,7 +424,7 @@ unsigned int RgbdCameraSensor::ImageHeight() const
 }
 
 //////////////////////////////////////////////////
-void RgbdCameraSensorPrivate::FillMsg()
+void RgbdCameraSensorPrivate::FillPointCloudMsg()
 {
   // Fill message. Logic borrowed from
   // https://github.com/ros-simulation/gazebo_ros_pkgs/blob/kinetic-devel/gazebo_plugins/src/gazebo_ros_depth_camera.cpp
