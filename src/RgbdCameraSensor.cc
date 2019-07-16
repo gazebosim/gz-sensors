@@ -15,9 +15,8 @@
  *
 */
 
-#include <ignition/msgs/pointcloud_packed.pb.h>
-
 #include <ignition/msgs/image.pb.h>
+#include <ignition/msgs/pointcloud_packed.pb.h>
 
 #include <ignition/common/Image.hh>
 #include <ignition/math/Helpers.hh>

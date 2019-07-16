@@ -27,7 +27,7 @@ using namespace ignition::sensors;
 class ignition::sensors::GpuLidarSensorPrivate
 {
   /// \brief Fill the point cloud packed message
-  public: void FillMsg();
+  public: void FillPointCloudMsg();
 
   /// \brief Rendering camera
   public: ignition::rendering::GpuRaysPtr gpuRays;
@@ -101,7 +101,6 @@ bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  // Initialize the point message.
   // Initialize the point message.
   // \todo(anyone) The true value in the following function call forces
   // the xyz and rgb fields to be aligned to memory boundaries. This is need
@@ -232,7 +231,7 @@ bool GpuLidarSensor::Update(const ignition::common::Time &_now)
 
     this->dataPtr->pointMsg.set_is_dense(true);
 
-    this->dataPtr->FillMsg();
+    this->dataPtr->FillPointCloudMsg();
 
     this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
   }
@@ -273,7 +272,7 @@ ignition::math::Angle GpuLidarSensor::VFOV() const
 }
 
 //////////////////////////////////////////////////
-void GpuLidarSensorPrivate::FillMsg()
+void GpuLidarSensorPrivate::FillPointCloudMsg()
 {
   uint32_t width = this->pointMsg.width();
   uint32_t height = this->pointMsg.height();
