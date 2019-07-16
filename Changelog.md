@@ -1,6 +1,6 @@
 ## Ignition Sensors
 
-### Ignition Sensors 2.3.X (201X-XX-XX)
+### Ignition Sensors 2.3.0 (2019-07-16)
 
 1. The GpuLidar and Rgbd sensors publish point cloud data using 
    `msgs::PointCloudPacked`.
