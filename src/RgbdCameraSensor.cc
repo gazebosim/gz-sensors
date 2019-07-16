@@ -456,7 +456,7 @@ void RgbdCameraSensorPrivate::FillMsg()
       int fieldIndex = 0;
 
       // Current point depth
-      float depth = this->depthBuffer[j * width + (width-i-1)];
+      float depth = this->depthBuffer[j * width + i];
 
       float yAngle = 0.0;
       if (fl > 0 && width > 1)
