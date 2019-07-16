@@ -15,8 +15,9 @@
  *
 */
 
-#include <ignition/msgs/image.pb.h>
 #include <ignition/msgs/pointcloud_packed.pb.h>
+
+#include <ignition/msgs/image.pb.h>
 
 #include <ignition/common/Image.hh>
 #include <ignition/math/Helpers.hh>
@@ -28,6 +29,8 @@
 
 #include "ignition/sensors/RgbdCameraSensor.hh"
 #include "ignition/sensors/SensorFactory.hh"
+
+#include "DepthImage2Points.hh"
 
 /// \brief Private data for RgbdCameraSensor
 class ignition::sensors::RgbdCameraSensorPrivate
@@ -42,9 +45,6 @@ class ignition::sensors::RgbdCameraSensorPrivate
                     unsigned int _width, unsigned int _height,
                     unsigned int /*_channels*/,
                     const std::string &_format);
-
-  /// \brief Fill the point cloud message.
-  public: void FillMsg();
 
   /// \brief node to create publisher
   public: transport::Node node;
@@ -87,6 +87,10 @@ class ignition::sensors::RgbdCameraSensorPrivate
 
   /// \brief The point cloud message.
   public: msgs::PointCloudPacked pointMsg;
+
+  /// \brief Helper class that can fill a msgs::PointCloudPacked
+  /// image and depth data.
+  public: DepthImage2Points depth2Points;
 };
 
 using namespace ignition;
@@ -401,7 +405,10 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
         _now.nsec);
     this->dataPtr->pointMsg.set_is_dense(true);
 
-    this->dataPtr->FillMsg();
+    this->dataPtr->depth2Points.FillMsg(this->dataPtr->pointMsg,
+        this->dataPtr->depthCamera->HFOV(),
+        this->dataPtr->image.Data<unsigned char>(),
+        this->dataPtr->depthBuffer);
     this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
   }
 
@@ -423,72 +430,4 @@ unsigned int RgbdCameraSensor::ImageHeight() const
   return this->dataPtr->depthCamera->ImageHeight();
 }
 
-//////////////////////////////////////////////////
-void RgbdCameraSensorPrivate::FillMsg()
-{
-  // Fill message. Logic borrowed from
-  // https://github.com/ros-simulation/gazebo_ros_pkgs/blob/kinetic-devel/gazebo_plugins/src/gazebo_ros_depth_camera.cpp
-
-  uint32_t width = this->pointMsg.width();
-  uint32_t height = this->pointMsg.height();
-
-  std::string *msgBuffer = this->pointMsg.mutable_data();
-  msgBuffer->resize(this->pointMsg.row_step() * this->pointMsg.height());
-  char *msgBufferIndex = msgBuffer->data();
-
-  // For depth calculation from image
-  double fl = width /
-    (2.0 * std::tan(this->depthCamera->HFOV().Radian() / 2.0));
-
-  // Image and depth buffers.
-  unsigned char *imageData = this->image.Data<unsigned char>();
-
-  // Iterate over scan and populate point cloud
-  for (uint32_t j = 0; j < height; ++j)
-  {
-    float pAngle = 0.0;
-    if (fl > 0 && height > 1)
-      pAngle = std::atan2((height-j) - 0.5 * (height - 1), fl);
-
-    for (uint32_t i = 0; i < width; ++i)
-    {
-      int fieldIndex = 0;
-
-      // Current point depth
-      float depth = this->depthBuffer[j * width + i];
-
-      float yAngle = 0.0;
-      if (fl > 0 && width > 1)
-        yAngle = std::atan2(0.5 * (width - 1) - i, fl);
-
-      *reinterpret_cast<float*>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) = depth;
-      *reinterpret_cast<float*>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) =
-        depth * std::tan(yAngle);
-      *reinterpret_cast<float*>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) =
-        depth * std::tan(pAngle);
-
-      int imgIndex = i * 3 + j * width * 3;
-      int fieldOffset = this->pointMsg.field(fieldIndex).offset();
-      // Put image color data for each point, check endianess first.
-      if (this->pointMsg.is_bigendian())
-      {
-        *(msgBufferIndex + fieldOffset + 0) = imageData[imgIndex + 0];
-        *(msgBufferIndex + fieldOffset + 1) = imageData[imgIndex + 1];
-        *(msgBufferIndex + fieldOffset + 2) = imageData[imgIndex + 2];
-      }
-      else
-      {
-        *(msgBufferIndex + fieldOffset + 0) = imageData[imgIndex + 2];
-        *(msgBufferIndex + fieldOffset + 1) = imageData[imgIndex + 1];
-        *(msgBufferIndex + fieldOffset + 2) = imageData[imgIndex + 0];
-      }
-
-      // Add any padding
-      msgBufferIndex += this->pointMsg.point_step();
-    }
-  }
-}
 IGN_SENSORS_REGISTER_SENSOR(RgbdCameraSensor)

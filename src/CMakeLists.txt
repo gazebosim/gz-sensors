@@ -1,4 +1,5 @@
 set (sources
+  DepthImage2Points.cc
   Events.cc
   Manager.cc
   Sensor.cc

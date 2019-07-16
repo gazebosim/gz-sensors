@@ -15,11 +15,15 @@
  *
 */
 
+#include <ignition/msgs/pointcloud_packed.pb.h>
+
 #include <ignition/math/Helpers.hh>
 
 #include "ignition/sensors/DepthCameraSensor.hh"
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/GaussianNoiseModel.hh"
+
+#include "DepthImage2Points.hh"
 
 // undefine near and far macros from windows.h
 #ifdef _WIN32
@@ -94,6 +98,16 @@ class ignition::sensors::DepthCameraSensorPrivate
 
   /// \brief SDF Sensor DOM object.
   public: sdf::Sensor sdfSensor;
+
+  /// \brief The point cloud message.
+  public: msgs::PointCloudPacked pointMsg;
+
+  /// \brief Helper class that can fill a msgs::PointCloudPacked
+  /// image and depth data.
+  public: DepthImage2Points depth2Points;
+
+  /// \brief publisher to publish point cloud
+  public: transport::Node::Publisher pointPub;
 };
 
 using namespace ignition;
@@ -214,6 +228,22 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
   if (!this->AdvertiseInfo())
     return false;
 
+  // Create the point cloud publisher
+  this->dataPtr->pointPub =
+      this->dataPtr->node.Advertise<ignition::msgs::PointCloudPacked>(
+          this->Topic() + "/points");
+  if (!this->dataPtr->pointPub)
+    return false;
+
+  // Initialize the point message.
+  // \todo(anyone) The true value in the following function call forces
+  // the xyz and rgb fields to be aligned to memory boundaries. This is need
+  // by ROS1: https://github.com/ros/common_msgs/pull/77. Ideally, memory
+  // alignment should be configured.
+  msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->Name(), true,
+      {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
+       {"rgb", msgs::PointCloudPacked::Field::FLOAT32}});
+
   if (this->Scene())
   {
     this->CreateCamera();
@@ -330,6 +360,12 @@ bool DepthCameraSensor::CreateCamera()
       std::bind(&DepthCameraSensor::OnNewDepthFrame, this,
         std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
         std::placeholders::_4, std::placeholders::_5));
+
+  // Set the values of the point message based on the camera information.
+  this->dataPtr->pointMsg.set_width(this->ImageWidth());
+  this->dataPtr->pointMsg.set_height(this->ImageHeight());
+  this->dataPtr->pointMsg.set_row_step(
+      this->dataPtr->pointMsg.point_step() * this->ImageWidth());
 
   return true;
 }
@@ -465,6 +501,21 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
     ignerr << "Exception thrown in an image callback.\n";
   }
 
+  if (this->dataPtr->pointPub.HasConnections() && this->dataPtr->depthBuffer)
+  {
+    // Set the time stamp
+    this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_sec(
+        _now.sec);
+    this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_nsec(
+        _now.nsec);
+    this->dataPtr->pointMsg.set_is_dense(true);
+
+    this->dataPtr->depth2Points.FillMsg(this->dataPtr->pointMsg,
+        this->dataPtr->depthCamera->HFOV(),
+        this->dataPtr->image.Data<unsigned char>(),
+        this->dataPtr->depthBuffer);
+    this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
+  }
   return true;
 }
 
