@@ -187,7 +187,7 @@ bool GpuLidarSensor::CreateLidar()
       this->dataPtr->gpuRays->VerticalRangeCount());
   this->dataPtr->pointMsg.set_row_step(
       this->dataPtr->pointMsg.point_step() *
-      this->dataPtr->pointMsg.width() * this->dataPtr->pointMsg.height());
+      this->dataPtr->pointMsg.width());
 
   return true;
 }
@@ -216,10 +216,13 @@ bool GpuLidarSensor::Update(const ignition::common::Time &_now)
   }
 
   this->dataPtr->gpuRays->Update();
+
+  /// \todo(anyone) It would be nice to remove this copy.
   this->dataPtr->gpuRays->Copy(this->laserBuffer);
 
   this->PublishLidarScan(_now);
 
+  if (this->dataPtr->pointPub.HasConnections())
   {
     // Set the time stamp
     this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_sec(
@@ -289,7 +292,8 @@ void GpuLidarSensorPrivate::FillMsg()
   float inclination = this->gpuRays->VerticalAngleMin().Radian();
 
   std::string *msgBuffer = this->pointMsg.mutable_data();
-  msgBuffer->resize(this->pointMsg.row_step());
+  msgBuffer->resize(this->pointMsg.row_step() *
+      this->pointMsg.height());
   char *msgBufferIndex = msgBuffer->data();
 
   // Iterate over scan and populate point cloud
