@@ -117,6 +117,7 @@ bool CameraSensor::CreateCamera()
   this->dataPtr->camera->SetImageHeight(height);
   this->dataPtr->camera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->camera->SetFarClipPlane(cameraSdf->FarClip());
+  this->AddSensor(this->dataPtr->camera);
 
   const std::map<SensorNoiseType, sdf::Noise> noises = {
     {CAMERA_NOISE, cameraSdf->ImageNoise()},
@@ -300,7 +301,8 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
   this->dataPtr->camera->SetLocalPose(this->Pose());
 
   // generate sensor data
-  this->dataPtr->camera->Capture(this->dataPtr->image);
+  this->Render();
+  this->dataPtr->camera->Copy(this->dataPtr->image);
 
   unsigned int width = this->dataPtr->camera->ImageWidth();
   unsigned int height = this->dataPtr->camera->ImageHeight();

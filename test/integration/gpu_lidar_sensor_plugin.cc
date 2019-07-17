@@ -128,6 +128,9 @@ class GpuLidarSensorTest: public testing::Test,
 
   // Test vertical measurements
   public: void VerticalLidar(const std::string &_renderEngine);
+
+  // Test manually updating sensors
+  public: void ManualUpdate(const std::string &_renderEngine);
 };
 
 /////////////////////////////////////////////////
@@ -315,7 +318,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   sensor->SetParent(parent);
   sensor->SetScene(scene);
 
-  // subscribe to altimeter topic
+  // subscribe to gpu lidar topic
   ignition::transport::Node node;
   node.Subscribe(topic, &::laserCb);
 
@@ -639,6 +642,124 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   ignition::rendering::unloadEngine(engine->Name());
 }
 
+/////////////////////////////////////////////////
+/// \brief Test manually updating the scene with Scene::PreRender before
+/// updating the sensors
+void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
+{
+  // Create SDF describing a gpu lidar sensors sensor
+  const std::string name1 = "TestGpuLidar1";
+  const std::string name2 = "TestGpuLidar2";
+  const std::string topic1 = "/ignition/sensors/test/lidar1";
+  const std::string topic2 = "/ignition/sensors/test/lidar2";
+  const double updateRate = 30;
+  const int horzSamples = 320;
+  const double horzResolution = 1;
+  const double horzMinAngle = -IGN_PI/2.0;
+  const double horzMaxAngle = IGN_PI/2.0;
+  const double vertResolution = 1;
+  const int vertSamples = 1;
+  const double vertMinAngle = 0;
+  const double vertMaxAngle = 0;
+  const double rangeResolution = 0.01;
+  const double rangeMin = 0.1;
+  const double rangeMax = 10.0;
+  const bool alwaysOn = 1;
+  const bool visualize = 1;
+
+  // Create sensor SDF
+  ignition::math::Pose3d testPose1(ignition::math::Vector3d(0, 0, 0.1),
+      ignition::math::Quaterniond::Identity);
+  sdf::ElementPtr lidarSDF1 = GpuLidarToSDF(name1, testPose1, updateRate,
+      topic1, horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
+      vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
+      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+
+  // Create a second sensor SDF at an xy offset of 1
+  ignition::math::Pose3d testPose2(ignition::math::Vector3d(1, 1, 0.1),
+      ignition::math::Quaterniond::Identity);
+  sdf::ElementPtr lidarSDF2 = GpuLidarToSDF(name2, testPose2, updateRate,
+      topic2, horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
+      vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
+      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+
+  // Create and populate scene
+  ignition::rendering::RenderEngine *engine =
+    ignition::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    igndbg << "Engine '" << _renderEngine
+              << "' is not supported" << std::endl;
+    return;
+  }
+
+  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  ignition::rendering::VisualPtr root = scene->RootVisual();
+
+  scene->SetAmbientLight(0.3, 0.3, 0.3);
+
+  // Create a sensor manager
+  ignition::sensors::Manager mgr;
+  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
+
+  // Create a GpuLidarSensors
+  ignition::sensors::GpuLidarSensor *sensor1 =
+      mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSDF1);
+
+  // Create second GpuLidarSensor
+  ignition::sensors::GpuLidarSensor *sensor2 =
+      mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSDF2);
+
+  // Make sure the above dynamic cast worked.
+  EXPECT_TRUE(sensor1 != nullptr);
+  EXPECT_TRUE(sensor2 != nullptr);
+  sensor1->SetScene(scene);
+  sensor2->SetScene(scene);
+
+  // Create testing box
+  // box in the center of lidar1 and right of lidar2
+  ignition::math::Pose3d box01Pose(ignition::math::Vector3d(1, 0, 0.5),
+      ignition::math::Quaterniond::Identity);
+  ignition::rendering::VisualPtr visualBox1 = scene->CreateVisual("TestBox1");
+  visualBox1->AddGeometry(scene->CreateBox());
+  visualBox1->SetLocalPosition(box01Pose.Pos());
+  visualBox1->SetLocalRotation(box01Pose.Rot());
+  root->AddChild(visualBox1);
+
+  // Set sensors to manual update mode
+  sensor1->SetManualSceneUpdate(true);
+  EXPECT_TRUE(sensor1->ManualSceneUpdate());
+  sensor2->SetManualSceneUpdate(true);
+  EXPECT_TRUE(sensor2->ManualSceneUpdate());
+
+  // manually update scene
+  scene->PreRender();
+
+  // Render and update
+  mgr.RunOnce(ignition::common::Time::Zero);
+
+  int mid = horzSamples / 2;
+  int last = (horzSamples - 1);
+  double unitBoxSize = 1.0;
+  double expectedRangeAtMidPointBox1 =
+    abs(box01Pose.Pos().X()) - unitBoxSize/2;
+
+  // Sensor 1 should see box01 in front of it
+  EXPECT_DOUBLE_EQ(sensor1->Range(0), ignition::math::INF_D);
+  EXPECT_NEAR(sensor1->Range(mid), expectedRangeAtMidPointBox1, LASER_TOL);
+  EXPECT_DOUBLE_EQ(sensor1->Range(last), ignition::math::INF_D);
+
+  // Sensor 2 should see box01 to the right of it
+  EXPECT_NEAR(sensor2->Range(0), expectedRangeAtMidPointBox1, LASER_TOL);
+  EXPECT_DOUBLE_EQ(sensor2->Range(mid), ignition::math::INF_D);
+  EXPECT_DOUBLE_EQ(sensor2->Range(last), ignition::math::INF_D);
+
+  // Clean up
+  //
+  engine->DestroyScene(scene);
+  ignition::rendering::unloadEngine(engine->Name());
+}
+
 TEST_P(GpuLidarSensorTest, CreateGpuLidar)
 {
   CreateGpuLidar(GetParam());
@@ -657,6 +778,11 @@ TEST_P(GpuLidarSensorTest, TestThreeBoxes)
 TEST_P(GpuLidarSensorTest, VerticalLidar)
 {
   VerticalLidar(GetParam());
+}
+
+TEST_P(GpuLidarSensorTest, ManualUpdate)
+{
+  ManualUpdate(GetParam());
 }
 
 INSTANTIATE_TEST_CASE_P(GpuLidarSensor, GpuLidarSensorTest,

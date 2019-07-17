@@ -15,12 +15,25 @@
  *
 */
 
+#include <ignition/rendering/Camera.hh>
+
 #include "ignition/sensors/RenderingSensor.hh"
 
 /// \brief Private data class for RenderingSensor
 class ignition::sensors::RenderingSensorPrivate
 {
+  /// \brief Pointer to the scene
   public: ignition::rendering::ScenePtr scene;
+
+  /// \brief Last time when render update was called.
+  public: ignition::common::Time lastRenderTime = common::Time(-1, 0);
+
+  /// \brief Manually update the rendering scene graph
+  public: bool manualSceneUpdate = false;
+
+  /// \brief Pointer to the internal rendering sensors used for generating
+  /// sensor data
+  public: std::vector<rendering::SensorPtr::weak_type> sensors;
 };
 
 using namespace ignition;
@@ -48,3 +61,45 @@ rendering::ScenePtr RenderingSensor::Scene() const
 {
   return this->dataPtr->scene;
 }
+
+/////////////////////////////////////////////////
+void RenderingSensor::AddSensor(rendering::SensorPtr _sensor)
+{
+  this->dataPtr->sensors.push_back(_sensor);
+}
+
+/////////////////////////////////////////////////
+void RenderingSensor::SetManualSceneUpdate(bool _manual)
+{
+  this->dataPtr->manualSceneUpdate = _manual;
+}
+
+/////////////////////////////////////////////////
+bool RenderingSensor::ManualSceneUpdate() const
+{
+  return this->dataPtr->manualSceneUpdate;
+}
+
+/////////////////////////////////////////////////
+void RenderingSensor::Render()
+{
+  // skip scene update user indicated that they will do this manually
+  // It is good to do a global scene update only once per frame
+  if (!this->dataPtr->manualSceneUpdate)
+    this->dataPtr->scene->PreRender();
+
+  for (auto rs : this->dataPtr->sensors)
+  {
+    auto s = rs.lock();
+    if (!s)
+      continue;
+    rendering::CameraPtr rc =
+        std::dynamic_pointer_cast<rendering::Camera>(s);
+    if (rc)
+    {
+      rc->Render();
+      rc->PostRender();
+    }
+  }
+}
+

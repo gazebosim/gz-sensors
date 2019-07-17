@@ -148,6 +148,8 @@ bool GpuLidarSensor::CreateLidar()
   this->Scene()->RootVisual()->AddChild(
       this->dataPtr->gpuRays);
 
+  this->AddSensor(this->dataPtr->gpuRays);
+
   return true;
 }
 
@@ -174,7 +176,7 @@ bool GpuLidarSensor::Update(const ignition::common::Time &_now)
     this->laserBuffer = new float[len];
   }
 
-  this->dataPtr->gpuRays->Update();
+  this->Render();
   this->dataPtr->gpuRays->Copy(this->laserBuffer);
 
   this->PublishLidarScan(_now);
