@@ -25,9 +25,6 @@ class ignition::sensors::RenderingSensorPrivate
   /// \brief Pointer to the scene
   public: ignition::rendering::ScenePtr scene;
 
-  /// \brief Last time when render update was called.
-  public: ignition::common::Time lastRenderTime = common::Time(-1, 0);
-
   /// \brief Manually update the rendering scene graph
   public: bool manualSceneUpdate = false;
 
