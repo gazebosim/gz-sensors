@@ -80,8 +80,9 @@ bool RenderingSensor::ManualSceneUpdate() const
 /////////////////////////////////////////////////
 void RenderingSensor::Render()
 {
-  // skip scene update user indicated that they will do this manually
-  // It is good to do a global scene update only once per frame
+  // Skip scene update. The user indicated that they will do this manually.
+  // Performance is improved when a global scene update occurs only once per
+  // frame, which can be acheived using a manual scene update.
   if (!this->dataPtr->manualSceneUpdate)
     this->dataPtr->scene->PreRender();
 
