@@ -188,6 +188,8 @@ bool GpuLidarSensor::CreateLidar()
       this->dataPtr->pointMsg.point_step() *
       this->dataPtr->pointMsg.width());
 
+  this->AddSensor(this->dataPtr->gpuRays);
+
   return true;
 }
 
@@ -214,7 +216,7 @@ bool GpuLidarSensor::Update(const ignition::common::Time &_now)
     this->laserBuffer = new float[len];
   }
 
-  this->dataPtr->gpuRays->Update();
+  this->Render();
 
   /// \todo(anyone) It would be nice to remove this copy.
   this->dataPtr->gpuRays->Copy(this->laserBuffer);

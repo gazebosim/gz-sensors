@@ -209,11 +209,15 @@ bool RgbdCameraSensor::CreateCameras()
   this->dataPtr->depthCamera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->depthCamera->SetFarClipPlane(cameraSdf->FarClip());
 
+  this->AddSensor(this->dataPtr->depthCamera);
+
   this->dataPtr->camera = this->Scene()->CreateCamera(this->Name());
   this->dataPtr->camera->SetImageWidth(width);
   this->dataPtr->camera->SetImageHeight(height);
   this->dataPtr->camera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->camera->SetFarClipPlane(cameraSdf->FarClip());
+
+  this->AddSensor(this->dataPtr->camera);
 
   // \todo(nkoeng) these parameters via sdf
   this->dataPtr->depthCamera->SetAntiAliasing(2);
@@ -341,11 +345,12 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
   unsigned int width = this->dataPtr->camera->ImageWidth();
   unsigned int height = this->dataPtr->camera->ImageHeight();
 
+  // generate sensor data
+  this->Render();
+
   // create and publish the 2d image message
   {
-    // TODO(anyone) Capture calls render functions, so this is inefficient for
-    // multi-camera worlds.
-    this->dataPtr->camera->Capture(this->dataPtr->image);
+    this->dataPtr->camera->Copy(this->dataPtr->image);
     unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
     ignition::msgs::Image msg;
@@ -368,9 +373,6 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 
   // create and publish the depthmessage
   {
-    // generate sensor data
-    this->dataPtr->depthCamera->Update();
-
     ignition::msgs::Image msg;
     msg.set_width(width);
     msg.set_height(height);

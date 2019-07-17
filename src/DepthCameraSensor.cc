@@ -253,6 +253,8 @@ bool DepthCameraSensor::CreateCamera()
   this->dataPtr->depthCamera->SetImageHeight(height);
   this->dataPtr->depthCamera->SetFarClipPlane(far);
 
+  this->AddSensor(this->dataPtr->depthCamera);
+
   const std::map<SensorNoiseType, sdf::Noise> noises = {
     {CAMERA_NOISE, cameraSdf->ImageNoise()},
   };
@@ -421,7 +423,7 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
   }
 
   // generate sensor data
-  this->dataPtr->depthCamera->Update();
+  this->Render();
 
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
