@@ -192,6 +192,8 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
   if (!this->laserBuffer)
     return false;
 
+  std::lock_guard<std::mutex> lock(this->lidarMutex);
+
   this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_sec(
       _now.sec);
   this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_nsec(
@@ -204,8 +206,6 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
   // Store the latest laser scans into laserMsg
   msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
       this->Pose());
-
-  std::lock_guard<std::mutex> lock(this->lidarMutex);
 
   const int numRays = this->RayCount() * this->VerticalRayCount();
   if (this->dataPtr->laserMsg.ranges_size() != numRays)
