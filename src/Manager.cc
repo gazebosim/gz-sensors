@@ -24,6 +24,7 @@
 #include <unordered_map>
 #include <ignition/common/PluginLoader.hh>
 #include <ignition/common/Plugin.hh>
+#include <ignition/common/Profiler.hh>
 #include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>
 
@@ -135,6 +136,7 @@ bool Manager::Remove(const ignition::sensors::SensorId _id)
 //////////////////////////////////////////////////
 void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 {
+  IGN_PROFILE("SensorManager::RunOnce");
   for (auto &s : this->dataPtr->sensors)
   {
     s.second->Update(_time, _force);

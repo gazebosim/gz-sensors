@@ -15,6 +15,7 @@
  *
 */
 
+#include <ignition/common/Profiler.hh>
 #include <ignition/math/Helpers.hh>
 
 #include "ignition/sensors/DepthCameraSensor.hh"
@@ -410,6 +411,7 @@ void DepthCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 //////////////////////////////////////////////////
 bool DepthCameraSensor::Update(const ignition::common::Time &_now)
 {
+  IGN_PROFILE("DepthCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
     ignerr << "Not initialized, update ignored.\n";
