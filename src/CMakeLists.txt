@@ -20,7 +20,10 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
     ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
     ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    ${SDFormat_LIBRARIES})
+    ${SDFormat_LIBRARIES}
+  PRIVATE
+    ignition-common${IGN_COMMON_VER}::profiler
+)
 
 set(rendering_sources
   RenderingSensor.cc

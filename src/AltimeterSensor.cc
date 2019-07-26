@@ -15,6 +15,7 @@
  *
 */
 
+#include <ignition/common/Profiler.hh>
 #include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/Noise.hh"
@@ -129,6 +130,7 @@ bool AltimeterSensor::Load(sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 bool AltimeterSensor::Update(const ignition::common::Time &_now)
 {
+  IGN_PROFILE("AltimeterSensor::Update");
   if (!this->dataPtr->initialized)
   {
     ignerr << "Not initialized, update ignored.\n";

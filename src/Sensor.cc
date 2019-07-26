@@ -19,6 +19,7 @@
 #include <vector>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/common/Console.hh>
+#include <ignition/common/Profiler.hh>
 
 using namespace ignition::sensors;
 
@@ -197,6 +198,7 @@ void Sensor::SetUpdateRate(const double _hz)
 bool Sensor::Update(const ignition::common::Time &_now,
                   const bool _force)
 {
+  IGN_PROFILE("Sensor::Update");
   bool result = false;
 
   // Check if it's time to update

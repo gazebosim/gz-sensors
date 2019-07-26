@@ -19,6 +19,7 @@
 #include <ignition/msgs/pointcloud_packed.pb.h>
 
 #include <ignition/common/Image.hh>
+#include <ignition/common/Profiler.hh>
 #include <ignition/math/Helpers.hh>
 
 #include <ignition/rendering/Camera.hh>
@@ -316,6 +317,7 @@ void RgbdCameraSensorPrivate::OnNewDepthFrame(const float *_scan,
 //////////////////////////////////////////////////
 bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 {
+  IGN_PROFILE("RgbdCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
     ignerr << "Not initialized, update ignored.\n";
@@ -349,8 +351,12 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
   this->Render();
 
   // create and publish the 2d image message
+  if (this->dataPtr->imagePub.HasConnections())
   {
-    this->dataPtr->camera->Copy(this->dataPtr->image);
+    {
+      IGN_PROFILE("RgbdCameraSensor::Update Copy image");
+      this->dataPtr->camera->Copy(this->dataPtr->image);
+    }
     unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
     ignition::msgs::Image msg;
@@ -368,10 +374,14 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
 
     // publish the image message
-    this->dataPtr->imagePub.Publish(msg);
+    {
+      IGN_PROFILE("RgbdCameraSensor::Update Publish RGB image");
+      this->dataPtr->imagePub.Publish(msg);
+    }
   }
 
   // create and publish the depthmessage
+  if (this->dataPtr->depthPub.HasConnections())
   {
     ignition::msgs::Image msg;
     msg.set_width(width);
@@ -391,7 +401,10 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
         this->dataPtr->depthCamera->ImageMemorySize());
 
     // publish
-    this->dataPtr->depthPub.Publish(msg);
+    {
+      IGN_PROFILE("RgbdCameraSensor::Update Publish depth image");
+      this->dataPtr->depthPub.Publish(msg);
+    }
   }
 
   if (this->dataPtr->pointPub.HasConnections() && this->dataPtr->depthBuffer)
@@ -404,7 +417,12 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     this->dataPtr->pointMsg.set_is_dense(true);
 
     this->dataPtr->FillPointCloudMsg();
-    this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
+
+    // publish
+    {
+      IGN_PROFILE("RgbdCameraSensor::Update Publish point cloud");
+      this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
+    }
   }
 
   // publish the camera info message
@@ -428,6 +446,7 @@ unsigned int RgbdCameraSensor::ImageHeight() const
 //////////////////////////////////////////////////
 void RgbdCameraSensorPrivate::FillPointCloudMsg()
 {
+  IGN_PROFILE("RgbdCameraSensorPrivate::FillPointCloudMsg");
   // Fill message. Logic borrowed from
   // https://github.com/ros-simulation/gazebo_ros_pkgs/blob/kinetic-devel/gazebo_plugins/src/gazebo_ros_depth_camera.cpp
 

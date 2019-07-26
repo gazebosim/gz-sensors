@@ -15,6 +15,7 @@
  *
 */
 #include <ignition/common/Console.hh>
+#include <ignition/common/Profiler.hh>
 #include <sdf/Lidar.hh>
 
 #include "ignition/sensors/Lidar.hh"
@@ -189,6 +190,7 @@ bool Lidar::Update(const ignition::common::Time &/*_now*/)
 //////////////////////////////////////////////////
 bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
 {
+  IGN_PROFILE("Lidar::PublishLidarScan");
   if (!this->laserBuffer)
     return false;
 

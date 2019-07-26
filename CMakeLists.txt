@@ -20,6 +20,14 @@ ign_configure_project()
 #============================================================================
 set (DRI_TESTS TRUE CACHE BOOL "True to enable DRI tests")
 
+option(ENABLE_PROFILER "Enable Ignition Profiler" FALSE)
+
+if(ENABLE_PROFILER)
+  add_definitions("-DIGN_PROFILER_ENABLE=1")
+else()
+  add_definitions("-DIGN_PROFILER_ENABLE=0")
+endif()
+
 #============================================================================
 # Search for project-specific dependencies
 #============================================================================
@@ -40,7 +48,9 @@ set(IGN_MATH_VER ${ignition-math6_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-common
-ign_find_package(ignition-common3 REQUIRED)
+ign_find_package(ignition-common3
+                 COMPONENTS profiler
+                 REQUIRED)
 set(IGN_COMMON_VER ${ignition-common3_VERSION_MAJOR})
 
 #--------------------------------------
