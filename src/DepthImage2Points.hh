@@ -40,7 +40,7 @@ namespace ignition
   {
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
-
+    //
     /// \brief Helper class the fills a msgs::PointCloudPacked message using
     /// image and depth data. The RgbdCameraSensor and DepthCameraSensor
     /// class use this.
