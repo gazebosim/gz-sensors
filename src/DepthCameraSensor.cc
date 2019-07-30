@@ -15,6 +15,7 @@
  *
 */
 
+#include <ignition/common/Profiler.hh>
 #include <ignition/msgs/pointcloud_packed.pb.h>
 
 #include <ignition/math/Helpers.hh>
@@ -283,6 +284,8 @@ bool DepthCameraSensor::CreateCamera()
   this->dataPtr->depthCamera->SetImageHeight(height);
   this->dataPtr->depthCamera->SetFarClipPlane(far);
 
+  this->AddSensor(this->dataPtr->depthCamera);
+
   const std::map<SensorNoiseType, sdf::Noise> noises = {
     {CAMERA_NOISE, cameraSdf->ImageNoise()},
   };
@@ -444,6 +447,7 @@ void DepthCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 //////////////////////////////////////////////////
 bool DepthCameraSensor::Update(const ignition::common::Time &_now)
 {
+  IGN_PROFILE("DepthCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
     ignerr << "Not initialized, update ignored.\n";
@@ -457,7 +461,7 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
   }
 
   // generate sensor data
-  this->dataPtr->depthCamera->Update();
+  this->Render();
 
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();

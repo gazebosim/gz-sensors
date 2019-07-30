@@ -19,6 +19,7 @@
 #include <ignition/msgs/pointcloud_packed.pb.h>
 
 #include <ignition/common/Image.hh>
+#include <ignition/common/Profiler.hh>
 #include <ignition/math/Helpers.hh>
 
 #include <ignition/rendering/Camera.hh>
@@ -212,11 +213,15 @@ bool RgbdCameraSensor::CreateCameras()
   this->dataPtr->depthCamera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->depthCamera->SetFarClipPlane(cameraSdf->FarClip());
 
+  this->AddSensor(this->dataPtr->depthCamera);
+
   this->dataPtr->camera = this->Scene()->CreateCamera(this->Name());
   this->dataPtr->camera->SetImageWidth(width);
   this->dataPtr->camera->SetImageHeight(height);
   this->dataPtr->camera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->camera->SetFarClipPlane(cameraSdf->FarClip());
+
+  this->AddSensor(this->dataPtr->camera);
 
   // \todo(nkoeng) these parameters via sdf
   this->dataPtr->depthCamera->SetAntiAliasing(2);
@@ -315,6 +320,7 @@ void RgbdCameraSensorPrivate::OnNewDepthFrame(const float *_scan,
 //////////////////////////////////////////////////
 bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 {
+  IGN_PROFILE("RgbdCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
     ignerr << "Not initialized, update ignored.\n";
@@ -344,11 +350,16 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
   unsigned int width = this->dataPtr->camera->ImageWidth();
   unsigned int height = this->dataPtr->camera->ImageHeight();
 
+  // generate sensor data
+  this->Render();
+
   // create and publish the 2d image message
+  if (this->dataPtr->imagePub.HasConnections())
   {
-    // TODO(anyone) Capture calls render functions, so this is inefficient for
-    // multi-camera worlds.
-    this->dataPtr->camera->Capture(this->dataPtr->image);
+    {
+      IGN_PROFILE("RgbdCameraSensor::Update Copy image");
+      this->dataPtr->camera->Copy(this->dataPtr->image);
+    }
     unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
     ignition::msgs::Image msg;
@@ -366,14 +377,15 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
 
     // publish the image message
-    this->dataPtr->imagePub.Publish(msg);
+    {
+      IGN_PROFILE("RgbdCameraSensor::Update Publish RGB image");
+      this->dataPtr->imagePub.Publish(msg);
+    }
   }
 
   // create and publish the depthmessage
+  if (this->dataPtr->depthPub.HasConnections())
   {
-    // generate sensor data
-    this->dataPtr->depthCamera->Update();
-
     ignition::msgs::Image msg;
     msg.set_width(width);
     msg.set_height(height);
@@ -392,7 +404,10 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
         this->dataPtr->depthCamera->ImageMemorySize());
 
     // publish
-    this->dataPtr->depthPub.Publish(msg);
+    {
+      IGN_PROFILE("RgbdCameraSensor::Update Publish depth image");
+      this->dataPtr->depthPub.Publish(msg);
+    }
   }
 
   if (this->dataPtr->pointPub.HasConnections() && this->dataPtr->depthBuffer)
@@ -408,7 +423,12 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
         this->dataPtr->depthCamera->HFOV(),
         this->dataPtr->image.Data<unsigned char>(),
         this->dataPtr->depthBuffer);
-    this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
+
+    // publish
+    {
+      IGN_PROFILE("RgbdCameraSensor::Update Publish point cloud");
+      this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
+    }
   }
 
   // publish the camera info message

@@ -18,6 +18,7 @@
 #include <ignition/msgs/Utility.hh>
 
 #include <ignition/common/Console.hh>
+#include <ignition/common/Profiler.hh>
 #include "ignition/sensors/GpuLidarSensor.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
@@ -188,12 +189,15 @@ bool GpuLidarSensor::CreateLidar()
       this->dataPtr->pointMsg.point_step() *
       this->dataPtr->pointMsg.width());
 
+  this->AddSensor(this->dataPtr->gpuRays);
+
   return true;
 }
 
 //////////////////////////////////////////////////
 bool GpuLidarSensor::Update(const ignition::common::Time &_now)
 {
+  IGN_PROFILE("GpuLidarSensor::Update");
   if (!this->initialized)
   {
     ignerr << "Not initialized, update ignored.\n";
@@ -214,7 +218,7 @@ bool GpuLidarSensor::Update(const ignition::common::Time &_now)
     this->laserBuffer = new float[len];
   }
 
-  this->dataPtr->gpuRays->Update();
+  this->Render();
 
   /// \todo(anyone) It would be nice to remove this copy.
   this->dataPtr->gpuRays->Copy(this->laserBuffer);
@@ -233,7 +237,10 @@ bool GpuLidarSensor::Update(const ignition::common::Time &_now)
 
     this->dataPtr->FillPointCloudMsg();
 
-    this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
+    {
+      IGN_PROFILE("GpuLidarSensor::Update Publish point cloud");
+      this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
+    }
   }
   return true;
 }
@@ -274,6 +281,7 @@ ignition::math::Angle GpuLidarSensor::VFOV() const
 //////////////////////////////////////////////////
 void GpuLidarSensorPrivate::FillPointCloudMsg()
 {
+  IGN_PROFILE("GpuLidarSensorPrivate::FillPointCloudMsg");
   uint32_t width = this->pointMsg.width();
   uint32_t height = this->pointMsg.height();
   unsigned int channels = 3;

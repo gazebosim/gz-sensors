@@ -1,6 +1,11 @@
 ## Ignition Sensors
 
-### Ignition Sensors 2.3.X (201X-XX-XX)
+### Ignition Sensors 2.4.0 (2019-07-17)
+
+1. Support manual scene updates for rendering sensors
+    * [Pull request 81](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/81)
+
+### Ignition Sensors 2.3.0 (2019-07-16)
 
 1. The GpuLidar and Rgbd sensors publish point cloud data using 
    `msgs::PointCloudPacked`.

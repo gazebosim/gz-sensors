@@ -16,6 +16,7 @@
 */
 
 #include <ignition/msgs/magnetometer.pb.h>
+#include <ignition/common/Profiler.hh>
 #include <ignition/transport/Node.hh>
 #include <sdf/Magnetometer.hh>
 
@@ -135,6 +136,7 @@ bool MagnetometerSensor::Load(sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 bool MagnetometerSensor::Update(const ignition::common::Time &_now)
 {
+  IGN_PROFILE("MagnetometerSensor::Update");
   if (!this->dataPtr->initialized)
   {
     ignerr << "Not initialized, update ignored.\n";

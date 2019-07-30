@@ -15,6 +15,7 @@
  *
 */
 #include <ignition/msgs/camera_info.pb.h>
+#include <ignition/common/Profiler.hh>
 #include <ignition/common/StringUtils.hh>
 
 #include <ignition/math/Helpers.hh>
@@ -117,6 +118,7 @@ bool CameraSensor::CreateCamera()
   this->dataPtr->camera->SetImageHeight(height);
   this->dataPtr->camera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->camera->SetFarClipPlane(cameraSdf->FarClip());
+  this->AddSensor(this->dataPtr->camera);
 
   const std::map<SensorNoiseType, sdf::Noise> noises = {
     {CAMERA_NOISE, cameraSdf->ImageNoise()},
@@ -282,6 +284,7 @@ void CameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 //////////////////////////////////////////////////
 bool CameraSensor::Update(const ignition::common::Time &_now)
 {
+  IGN_PROFILE("CameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
     ignerr << "Not initialized, update ignored.\n";
@@ -300,7 +303,11 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
   this->dataPtr->camera->SetLocalPose(this->Pose());
 
   // generate sensor data
-  this->dataPtr->camera->Capture(this->dataPtr->image);
+  this->Render();
+  {
+    IGN_PROFILE("CameraSensor::Update Copy image");
+    this->dataPtr->camera->Copy(this->dataPtr->image);
+  }
 
   unsigned int width = this->dataPtr->camera->ImageWidth();
   unsigned int height = this->dataPtr->camera->ImageHeight();
@@ -325,26 +332,32 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
 
   // create message
   ignition::msgs::Image msg;
-  msg.set_width(width);
-  msg.set_height(height);
-  msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
-               this->dataPtr->camera->ImageFormat()));
-  // TODO(anyone) Deprecated in ign-msgs4, will be removed on ign-msgs5
-  // in favor of set_pixel_format_type.
-  msg.set_pixel_format(format);
-  msg.set_pixel_format_type(msgsPixelFormat);
-  msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
-  msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
-  auto frame = msg.mutable_header()->add_data();
-  frame->set_key("frame_id");
-  frame->add_value(this->Name());
-  msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
+  {
+    IGN_PROFILE("CameraSensor::Update Message");
+    msg.set_width(width);
+    msg.set_height(height);
+    msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
+                 this->dataPtr->camera->ImageFormat()));
+    // TODO(anyone) Deprecated in ign-msgs4, will be removed on ign-msgs5
+    // in favor of set_pixel_format_type.
+    msg.set_pixel_format(format);
+    msg.set_pixel_format_type(msgsPixelFormat);
+    msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
+    msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+    auto frame = msg.mutable_header()->add_data();
+    frame->set_key("frame_id");
+    frame->add_value(this->Name());
+    msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
+  }
 
   // publish the image message
-  this->dataPtr->pub.Publish(msg);
+  {
+    IGN_PROFILE("CameraSensor::Update Publish");
+    this->dataPtr->pub.Publish(msg);
 
-  // publish the camera info message
-  this->PublishInfo(_now);
+    // publish the camera info message
+    this->PublishInfo(_now);
+  }
 
   // Trigger callbacks.
   try
