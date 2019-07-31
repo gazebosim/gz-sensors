@@ -1,5 +1,10 @@
 ## Ignition Sensors
 
+### Ignition Sensors 2.X.X
+
+1. Deduplicate frame_ids from sensor message headers
+    * [Pull request 83](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/83)
+
 ### Ignition Sensors 2.4.0 (2019-07-17)
 
 1. Support manual scene updates for rendering sensors
