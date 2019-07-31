@@ -200,6 +200,8 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
       _now.sec);
   this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_nsec(
       _now.nsec);
+  // Remove 'data' entries before adding new ones
+  this->dataPtr->laserMsg.mutable_header()->clear_data();
   auto frame = this->dataPtr->laserMsg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->Name());
