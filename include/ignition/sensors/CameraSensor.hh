@@ -129,6 +129,15 @@ namespace ignition
       /// \return Camera info topic.
       public: std::string InfoTopic() const;
 
+      /// \brief Set baseline for stereo cameras. This is used to populate the
+      /// projection matrix in the camera info message.
+      /// \param[in] _baseline The distance from the 1st camera, in meters.
+      public: void SetBaseline(double _baseline);
+
+      /// \brief Get baseline for stereo cameras.
+      /// \return The distance from the 1st camera, in meters.
+      public: double Baseline() const;
+
       /// \brief Advertise camera info topic.
       /// \return True if successful.
       protected: bool AdvertiseInfo();
