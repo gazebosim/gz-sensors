@@ -96,6 +96,9 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief Topic for info message.
   public: std::string infoTopic{""};
+
+  /// \brief Baseline for stereo cameras.
+  public: double baseline{0.0};
 };
 
 //////////////////////////////////////////////////
@@ -511,7 +514,7 @@ void CameraSensor::PopulateInfo(const sdf::Camera *_cameraSdf)
   proj->add_p(_cameraSdf->LensIntrinsicsFx());
   proj->add_p(0.0);
   proj->add_p(_cameraSdf->LensIntrinsicsCx());
-  proj->add_p(0.0);
+  proj->add_p(-_cameraSdf->LensIntrinsicsFx() * this->dataPtr->baseline);
 
   proj->add_p(0.0);
   proj->add_p(_cameraSdf->LensIntrinsicsFy());
@@ -546,6 +549,26 @@ void CameraSensor::PopulateInfo(const sdf::Camera *_cameraSdf)
 
   this->dataPtr->infoMsg.set_width(width);
   this->dataPtr->infoMsg.set_height(height);
+}
+
+//////////////////////////////////////////////////
+void CameraSensor::SetBaseline(double _baseline)
+{
+  this->dataPtr->baseline = _baseline;
+
+  // Also update message
+  if (this->dataPtr->infoMsg.has_projection() &&
+      this->dataPtr->infoMsg.projection().p_size() == 12)
+  {
+    auto fx = this->dataPtr->infoMsg.projection().p(0);
+    this->dataPtr->infoMsg.mutable_projection()->set_p(3, -fx * _baseline);
+  }
+}
+
+//////////////////////////////////////////////////
+double CameraSensor::Baseline() const
+{
+  return this->dataPtr->baseline;
 }
 
 IGN_SENSORS_REGISTER_SENSOR(CameraSensor)
