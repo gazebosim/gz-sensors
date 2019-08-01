@@ -4,6 +4,9 @@
 
 ### Ignition Sensors 2.5.0
 
+1. Add `IGN_PROFILER_ENABLE` cmake option for enabling the ign-common profiler.
+    * [Pull request 82](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/82)
+
 1. Deduplicate `frame_ids` from sensor message headers
     * [Pull request 83](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/83)
 
