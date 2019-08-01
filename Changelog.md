@@ -2,7 +2,10 @@
 
 ### Ignition Sensors 2.X.X
 
-1. Deduplicate frame_ids from sensor message headers
+1. Move depth image point cloud calculation to helper class, publish DepthCamera PointCloudPacked.
+    * [Pull request 80](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/80)
+
+1. Deduplicate `frame_ids` from sensor message headers
     * [Pull request 83](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/83)
 
 1. Baseline for stereo cameras
