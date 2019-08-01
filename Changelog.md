@@ -2,7 +2,9 @@
 
 ### Ignition Sensors 2.X.X
 
-1. Deduplicate frame_ids from sensor message headers
+### Ignition Sensors 2.5.0
+
+1. Deduplicate `frame_ids` from sensor message headers
     * [Pull request 83](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/83)
 
 1. Baseline for stereo cameras
