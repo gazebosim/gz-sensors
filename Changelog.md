@@ -1,5 +1,13 @@
 ## Ignition Sensors
 
+### Ignition Sensors 2.X.X
+
+1. Deduplicate frame_ids from sensor message headers
+    * [Pull request 83](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/83)
+
+1. Baseline for stereo cameras
+    * [Pull request 84](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/84)
+
 ### Ignition Sensors 2.4.0 (2019-07-17)
 
 1. Support manual scene updates for rendering sensors
@@ -7,7 +15,7 @@
 
 ### Ignition Sensors 2.3.0 (2019-07-16)
 
-1. The GpuLidar and Rgbd sensors publish point cloud data using 
+1. The GpuLidar and Rgbd sensors publish point cloud data using
    `msgs::PointCloudPacked`.
     * [Pull request 78](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/78)
 
