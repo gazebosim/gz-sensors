@@ -135,7 +135,7 @@ namespace ignition
       public: void SetBaseline(double _baseline);
 
       /// \brief Get baseline for stereo cameras.
-      /// \return _baseline The distance from the 1st camera, in meters.
+      /// \return The distance from the 1st camera, in meters.
       public: double Baseline() const;
 
       /// \brief Advertise camera info topic.
