@@ -16,6 +16,7 @@
 */
 
 #include <ignition/msgs/fluid_pressure.pb.h>
+#include <ignition/common/Profiler.hh>
 #include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/GaussianNoiseModel.hh"
@@ -131,6 +132,7 @@ bool AirPressureSensor::Load(sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 bool AirPressureSensor::Update(const ignition::common::Time &_now)
 {
+  IGN_PROFILE("AirPressureSensor::Update");
   if (!this->dataPtr->initialized)
   {
     ignerr << "Not initialized, update ignored.\n";

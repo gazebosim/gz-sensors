@@ -17,6 +17,8 @@
 
 #include <mutex>
 
+#include <ignition/common/Profiler.hh>
+
 #include <ignition/transport/Node.hh>
 
 #include <ignition/math/Frustum.hh>
@@ -125,6 +127,7 @@ void LogicalCameraSensor::SetModelPoses(
 //////////////////////////////////////////////////
 bool LogicalCameraSensor::Update(const ignition::common::Time &_now)
 {
+  IGN_PROFILE("LogicalCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
     ignerr << "Not initialized, update ignored.\n";
@@ -152,6 +155,8 @@ bool LogicalCameraSensor::Update(const ignition::common::Time &_now)
 
   this->dataPtr->msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   this->dataPtr->msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+  // Remove 'data' entries before adding new ones
+  this->dataPtr->msg.mutable_header()->clear_data();
   auto frame = this->dataPtr->msg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->Name());

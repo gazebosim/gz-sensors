@@ -246,7 +246,7 @@ namespace ignition
       public: mutable std::mutex lidarMutex;
 
       /// \brief Raw buffer of laser data.
-      public: float * laserBuffer = nullptr;
+      public: float *laserBuffer = nullptr;
 
       /// \brief true if Load() has been called and was successful
       public: bool initialized = false;

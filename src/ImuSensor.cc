@@ -16,6 +16,7 @@
 */
 
 #include <ignition/msgs/imu.pb.h>
+#include <ignition/common/Profiler.hh>
 #include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/Noise.hh"
@@ -139,6 +140,7 @@ bool ImuSensor::Load(sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 bool ImuSensor::Update(const ignition::common::Time &_now)
 {
+  IGN_PROFILE("ImuSensor::Update");
   if (!this->dataPtr->initialized)
   {
     ignerr << "Not initialized, update ignored.\n";

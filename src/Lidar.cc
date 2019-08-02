@@ -15,6 +15,7 @@
  *
 */
 #include <ignition/common/Console.hh>
+#include <ignition/common/Profiler.hh>
 #include <sdf/Lidar.hh>
 
 #include "ignition/sensors/Lidar.hh"
@@ -189,13 +190,18 @@ bool Lidar::Update(const ignition::common::Time &/*_now*/)
 //////////////////////////////////////////////////
 bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
 {
+  IGN_PROFILE("Lidar::PublishLidarScan");
   if (!this->laserBuffer)
     return false;
+
+  std::lock_guard<std::mutex> lock(this->lidarMutex);
 
   this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_sec(
       _now.sec);
   this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_nsec(
       _now.nsec);
+  // Remove 'data' entries before adding new ones
+  this->dataPtr->laserMsg.mutable_header()->clear_data();
   auto frame = this->dataPtr->laserMsg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->Name());
@@ -204,8 +210,6 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
   // Store the latest laser scans into laserMsg
   msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
       this->Pose());
-
-  std::lock_guard<std::mutex> lock(this->lidarMutex);
 
   const int numRays = this->RayCount() * this->VerticalRayCount();
   if (this->dataPtr->laserMsg.ranges_size() != numRays)
