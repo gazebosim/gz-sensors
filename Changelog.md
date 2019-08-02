@@ -1,6 +1,28 @@
 ## Ignition Sensors
 
-### Ignition Sensors 2.X.X (201X-XX-XX)
+### Ignition Sensors 2.X.X
+
+### Ignition Sensors 2.5.0
+
+1. Add `IGN_PROFILER_ENABLE` cmake option for enabling the ign-common profiler.
+    * [Pull request 82](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/82)
+
+1. Deduplicate `frame_ids` from sensor message headers
+    * [Pull request 83](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/83)
+
+1. Baseline for stereo cameras
+    * [Pull request 84](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/84)
+
+### Ignition Sensors 2.4.0 (2019-07-17)
+
+1. Support manual scene updates for rendering sensors
+    * [Pull request 81](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/81)
+
+### Ignition Sensors 2.3.0 (2019-07-16)
+
+1. The GpuLidar and Rgbd sensors publish point cloud data using
+   `msgs::PointCloudPacked`.
+    * [Pull request 78](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/78)
 
 ### Ignition Sensors 2.2.0 (2019-06-27)
 

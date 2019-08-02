@@ -20,6 +20,7 @@
 #include <memory>
 
 #include <ignition/rendering/Scene.hh>
+#include <ignition/rendering/Sensor.hh>
 
 #include "ignition/sensors/rendering/Export.hh"
 #include "ignition/sensors/Sensor.hh"
@@ -54,6 +55,26 @@ namespace ignition
 
       /// \brief Get the rendering scene.
       public: rendering::ScenePtr Scene() const;
+
+      /// \brief Render update. This performs the actual render operation.
+      public: void Render();
+
+      /// \brief Set whether to update the scene graph manually. If set to true,
+      /// it is expected that rendering::Scene::PreRender is called manually
+      /// before calling Render()
+      /// \param[in] _manual True to enable manual scene graph update
+      public: void SetManualSceneUpdate(bool _manual);
+
+      /// \brief Get whether the scene graph is updated manually. Defaults to
+      /// false.
+      /// \return True if manual scene graph update is enabled, false otherwise
+      /// \sa SetManualSceneUpdate
+      public: bool ManualSceneUpdate() const;
+
+      /// \brief Add a rendering::Sensor. Its render updates will be handled
+      /// by this base class.
+      /// \param[in] _sensor Sensor to add.
+      protected: void AddSensor(rendering::SensorPtr _sensor);
 
       /// \internal
       /// \brief Data pointer for private data
