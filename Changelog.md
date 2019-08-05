@@ -1,4 +1,11 @@
-## Ignition Sensors
+## Ignition Sensors 3
+
+### Ignition Sensors 3.X.X
+
+1. Depend on ign-rendering3
+    * [Pull request 88](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/88)
+
+## Ignition Sensors 2
 
 ### Ignition Sensors 2.X.X
 
