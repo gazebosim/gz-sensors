@@ -16,7 +16,7 @@ release will remove the deprecated code.
 
 ### Modifications
 
-1. Depend on ignition-msgs4, ignition-rendering2, ignition-transport7.
+1. Depend on ignition-rendering3.
 
 ### Deprecations
 
@@ -27,6 +27,8 @@ release will remove the deprecated code.
 ## Ignition Sensors 1.X to 2.X
 
 ### Modifications
+
+1. Depend on ignition-msgs4, ignition-rendering2, ignition-transport7.
 
 ### Deprecations
 
