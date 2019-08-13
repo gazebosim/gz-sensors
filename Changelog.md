@@ -2,6 +2,9 @@
 
 ### Ignition Sensors 2.X.X
 
+1. Add intensity and ring fields to GpuLidarSensor point cloud msg
+    * [Pull request 89](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/89)
+
 ### Ignition Sensors 2.5.0
 
 1. Add `IGN_PROFILER_ENABLE` cmake option for enabling the ign-common profiler.
