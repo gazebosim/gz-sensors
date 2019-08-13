@@ -47,6 +47,14 @@ class ignition::sensors::DepthCameraSensorPrivate
   public: bool SaveImage(const float *_data, unsigned int _width,
     unsigned int _height, ignition::common::Image::PixelFormatType _format);
 
+  /// \brief Helper function to convert depth data to depth image
+  /// \param[in] _data depth data
+  /// \param[in] _imageBuffer resulting depth image data
+  /// \param[in] _width width of image
+  /// \param[in] _height height of image
+  public: bool ConvertDepthToImage(const float *_data,
+    unsigned char *_imageBuffer, unsigned int _width, unsigned int _height);
+
   /// \brief node to create publisher
   public: transport::Node node;
 
@@ -62,6 +70,9 @@ class ignition::sensors::DepthCameraSensorPrivate
   /// \brief Depth data buffer.
   public: float *depthBuffer = nullptr;
 
+  /// \brief point cloud data buffer.
+  public: float *pointCloudBuffer = nullptr;
+
   /// \brief Near clip distance.
   public: float near = 0.0;
 
@@ -76,8 +87,11 @@ class ignition::sensors::DepthCameraSensorPrivate
   public: ignition::common::EventT<
           void(const ignition::msgs::Image &)> imageEvent;
 
-  /// \brief Connection from depth camera with a new image
-  public: ignition::common::ConnectionPtr connection;
+  /// \brief Connection from depth camera with new depth data
+  public: ignition::common::ConnectionPtr depthConnection;
+
+  /// \brief Connection from depth camera with new point cloud data
+  public: ignition::common::ConnectionPtr pointCloudConnection;
 
   /// \brief Connection to the Manager's scene change event.
   public: ignition::common::ConnectionPtr sceneChangeConnection;
@@ -115,6 +129,31 @@ using namespace ignition;
 using namespace sensors;
 
 //////////////////////////////////////////////////
+bool DepthCameraSensorPrivate::ConvertDepthToImage(
+    const float *_data,
+    unsigned char *_imageBuffer,
+    unsigned int _width, unsigned int _height)
+{
+  float maxDepth = 0;
+  for (unsigned int i = 0; i < _height * _width; ++i)
+  {
+    if (_data[i] > maxDepth && !std::isinf(_data[i]))
+    {
+      maxDepth = _data[i];
+    }
+  }
+  double factor = 255 / maxDepth;
+  for (unsigned int j = 0; j < _height * _width; ++j)
+  {
+    unsigned char d = 255 - (_data[j] * factor);
+    _imageBuffer[j * 3] = d;
+    _imageBuffer[j * 3 + 1] = d;
+    _imageBuffer[j * 3 + 2] = d;
+  }
+  return true;
+}
+
+//////////////////////////////////////////////////
 bool DepthCameraSensorPrivate::SaveImage(const float *_data,
     unsigned int _width, unsigned int _height,
     ignition::common::Image::PixelFormatType /*_format*/)
@@ -136,22 +175,7 @@ bool DepthCameraSensorPrivate::SaveImage(const float *_data,
 
   unsigned char * imgDepthBuffer = new unsigned char[depthBufferSize];
 
-  float maxDepth = 0;
-  for (unsigned int i = 0; i < _height * _width; ++i)
-  {
-    if (_data[i] > maxDepth && !std::isinf(_data[i]))
-    {
-      maxDepth = _data[i];
-    }
-  }
-  double factor = 255 / maxDepth;
-  for (unsigned int j = 0; j < _height * _width; ++j)
-  {
-    unsigned char d = 255 - (_data[j] * factor);
-    imgDepthBuffer[j * 3] = d;
-    imgDepthBuffer[j * 3 + 1] = d;
-    imgDepthBuffer[j * 3 + 2] = d;
-  }
+  this->ConvertDepthToImage(_data, imgDepthBuffer, _width, _height);
 
   std::string filename = this->saveImagePrefix +
                          std::to_string(this->saveImageCounter) + ".png";
@@ -175,9 +199,12 @@ DepthCameraSensor::DepthCameraSensor()
 //////////////////////////////////////////////////
 DepthCameraSensor::~DepthCameraSensor()
 {
-  this->dataPtr->connection.reset();
+  this->dataPtr->depthConnection.reset();
+  this->dataPtr->pointCloudConnection.reset();
   if (this->dataPtr->depthBuffer)
     delete [] this->dataPtr->depthBuffer;
+  if (this->dataPtr->pointCloudBuffer)
+    delete [] this->dataPtr->pointCloudBuffer;
 }
 
 //////////////////////////////////////////////////
@@ -282,6 +309,7 @@ bool DepthCameraSensor::CreateCamera()
       this->Name());
   this->dataPtr->depthCamera->SetImageWidth(width);
   this->dataPtr->depthCamera->SetImageHeight(height);
+  this->dataPtr->depthCamera->SetNearClipPlane(near);
   this->dataPtr->depthCamera->SetFarClipPlane(far);
 
   this->AddSensor(this->dataPtr->depthCamera);
@@ -334,20 +362,20 @@ bool DepthCameraSensor::CreateCamera()
   // This->dataPtr->distortion.reset(new Distortion());
   // This->dataPtr->distortion->Load(this->sdf->GetElement("distortion"));
 
-  sdf::PixelFormatType pixelFormat = cameraSdf->PixelFormat();
-  switch (pixelFormat)
-  {
-    case sdf::PixelFormatType::R_FLOAT32:
-      this->dataPtr->depthCamera->SetImageFormat(
-          ignition::rendering::PF_FLOAT32_R);
-      break;
-    default:
-      ignerr << "Unsupported pixel format ["
-        << static_cast<int>(pixelFormat) << "]\n";
-      break;
-  }
+//  sdf::PixelFormatType pixelFormat = cameraSdf->PixelFormat();
+//  switch (pixelFormat)
+//  {
+//    case sdf::PixelFormatType::R_FLOAT32:
+//      this->dataPtr->depthCamera->SetImageFormat(
+//          ignition::rendering::PF_FLOAT32_R);
+//      break;
+//    default:
+//      ignerr << "Unsupported pixel format ["
+//        << static_cast<int>(pixelFormat) << "]\n";
+//      break;
+//  }
 
-  this->dataPtr->image = this->dataPtr->depthCamera->CreateImage();
+//  this->dataPtr->image = this->dataPtr->depthCamera->CreateImage();
 
   this->Scene()->RootVisual()->AddChild(this->dataPtr->depthCamera);
 
@@ -359,8 +387,15 @@ bool DepthCameraSensor::CreateCamera()
     this->dataPtr->saveImage = true;
   }
 
-  this->dataPtr->connection = this->dataPtr->depthCamera->ConnectNewDepthFrame(
+  this->dataPtr->depthConnection =
+      this->dataPtr->depthCamera->ConnectNewDepthFrame(
       std::bind(&DepthCameraSensor::OnNewDepthFrame, this,
+        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5));
+
+  this->dataPtr->pointCloudConnection =
+      this->dataPtr->depthCamera->ConnectNewRgbPointCloud(
+      std::bind(&DepthCameraSensor::OnNewRgbPointCloud, this,
         std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
         std::placeholders::_4, std::placeholders::_5));
 
@@ -381,8 +416,8 @@ void DepthCameraSensor::OnNewDepthFrame(const float *_scan,
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-  float near = this->NearClip();
-  float far = this->FarClip();
+//  float near = this->NearClip();
+//  float far = this->FarClip();
   unsigned int depthSamples = _width * _height;
   unsigned int depthBufferSize = depthSamples * sizeof(float);
 
@@ -394,18 +429,27 @@ void DepthCameraSensor::OnNewDepthFrame(const float *_scan,
 
   memcpy(this->dataPtr->depthBuffer, _scan, depthBufferSize);
 
-  for (unsigned int i = 0; i < depthSamples; ++i)
-  {
-    // Mask ranges outside of min/max to +/- inf, as per REP 117
-    if (this->dataPtr->depthBuffer[i] >= far)
-    {
-      this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
-    }
-    else if (this->dataPtr->depthBuffer[i] <= near)
-    {
-      this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
-    }
-  }
+//  for (unsigned int i = 0; i < _height; ++i)
+//  {
+//    for (unsigned int j = 0; j < _width; ++j)
+//    {
+//      std::cerr << this->dataPtr->depthBuffer[i*_height + j] << " " ;
+//    }
+//    std::cerr << std::endl;
+//  }
+
+//  for (unsigned int i = 0; i < depthSamples; ++i)
+//  {
+//    // Mask ranges outside of min/max to +/- inf, as per REP 117
+//    if (this->dataPtr->depthBuffer[i] >= far)
+//    {
+//      this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
+//    }
+//    else if (this->dataPtr->depthBuffer[i] <= near)
+//    {
+//      this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
+//    }
+//  }
 
   // Save image
   if (this->dataPtr->saveImage)
@@ -413,6 +457,24 @@ void DepthCameraSensor::OnNewDepthFrame(const float *_scan,
     this->dataPtr->SaveImage(_scan, _width, _height,
         format);
   }
+}
+
+/////////////////////////////////////////////////
+void DepthCameraSensor::OnNewRgbPointCloud(const float *_scan,
+                    unsigned int _width, unsigned int _height,
+                    unsigned int _channels,
+                    const std::string &/*_format*/)
+{
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+
+  unsigned int pointCloudSamples = _width * _height;
+  unsigned int pointCloudBufferSize = pointCloudSamples * _channels *
+      sizeof(float);
+
+  if (!this->dataPtr->pointCloudBuffer)
+    this->dataPtr->pointCloudBuffer = new float[pointCloudSamples * _channels];
+
+  memcpy(this->dataPtr->pointCloudBuffer, _scan, pointCloudBufferSize);
 }
 
 /////////////////////////////////////////////////
@@ -474,7 +536,7 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
   msg.set_width(width);
   msg.set_height(height);
   msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
-               this->dataPtr->depthCamera->ImageFormat()));
+               rendering::PF_FLOAT32_R));
   // TODO(anyone) Deprecated in ign-msgs4, will be removed on ign-msgs5
   // in favor of set_pixel_format_type.
   msg.set_pixel_format(commonFormat);
@@ -487,7 +549,8 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   msg.set_data(this->dataPtr->depthBuffer,
-      this->dataPtr->depthCamera->ImageMemorySize());
+      rendering::PixelUtil::MemorySize(rendering::PF_FLOAT32_R,
+      width, height));
 
   // publish
   this->dataPtr->pub.Publish(msg);
@@ -505,7 +568,8 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
     ignerr << "Exception thrown in an image callback.\n";
   }
 
-  if (this->dataPtr->pointPub.HasConnections() && this->dataPtr->depthBuffer)
+  if (this->dataPtr->pointPub.HasConnections() &&
+      this->dataPtr->pointCloudBuffer)
   {
     // Set the time stamp
     this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_sec(
@@ -514,10 +578,24 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
         _now.nsec);
     this->dataPtr->pointMsg.set_is_dense(true);
 
+    if (this->dataPtr->image.Width() != width
+        || this->dataPtr->image.Height() != height)
+    {
+      this->dataPtr->image =
+          rendering::Image(width, height, rendering::PF_R8G8B8);
+    }
+
+//    this->dataPtr->ConvertDepthToImage(this->dataPtr->depthBuffer,
+//        this->dataPtr->image.Data<unsigned char>(), width, height);
+
+//    this->dataPtr->depth2Points.FillMsg(this->dataPtr->pointMsg,
+//        this->dataPtr->depthCamera->HFOV(),
+//        this->dataPtr->image.Data<unsigned char>(),
+//        this->dataPtr->depthBuffer);
     this->dataPtr->depth2Points.FillMsg(this->dataPtr->pointMsg,
-        this->dataPtr->depthCamera->HFOV(),
-        this->dataPtr->image.Data<unsigned char>(),
-        this->dataPtr->depthBuffer);
+        this->dataPtr->pointCloudBuffer,
+        this->dataPtr->image.Data<unsigned char>());
+
     this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
   }
   return true;

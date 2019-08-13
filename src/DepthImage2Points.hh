@@ -57,6 +57,21 @@ namespace ignition
       public: void FillMsg(msgs::PointCloudPacked &_msg,
           const math::Angle &_hfov, const unsigned char *_imageData,
           const float *_depthData) const;
+
+      public: void FillMsg(msgs::PointCloudPacked &_msg,
+          const unsigned char *_imageData,
+          const float *_xyzData) const;
+
+      public: void FillMsg(msgs::PointCloudPacked &_msg,
+          const float *_pointCloudData,
+          unsigned char *_imageData = 0, float *_xyzData = 0) const;
+
+      public: void RGBImageFromPointCloud(unsigned char *_imageData,
+          const float *_pointCloudData, unsigned int _width,
+          unsigned int _height) const;
+
+      public: void DecodeRGBAFromFloat(float _rgba, uint8_t &_r, uint8_t &_g,
+          uint8_t &_b, uint8_t &_a) const;
     };
     }
   }
