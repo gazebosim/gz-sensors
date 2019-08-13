@@ -5,6 +5,16 @@
 1. Move depth image point cloud calculation to helper class, publish DepthCamera PointCloudPacked.
     * [Pull request 80](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/80)
 
+### Ignition Sensors 2.5.1 (2019-08-12)
+
+1. Add intensity and ring fields to GpuLidarSensor point cloud msg
+    * [Pull request 89](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/89)
+
+### Ignition Sensors 2.5.0
+
+1. Add `IGN_PROFILER_ENABLE` cmake option for enabling the ign-common profiler.
+    * [Pull request 82](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/82)
+
 1. Deduplicate `frame_ids` from sensor message headers
     * [Pull request 83](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/83)
 
