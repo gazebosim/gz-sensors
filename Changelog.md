@@ -2,6 +2,8 @@
 
 ### Ignition Sensors 2.X.X
 
+### Ignition Sensors 2.5.1 (2019-08-12)
+
 1. Add intensity and ring fields to GpuLidarSensor point cloud msg
     * [Pull request 89](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/89)
 
