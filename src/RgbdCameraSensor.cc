@@ -30,7 +30,7 @@
 #include "ignition/sensors/RgbdCameraSensor.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
-#include "DepthImage2Points.hh"
+#include "PointCloudUtil.hh"
 
 /// \brief Private data for RgbdCameraSensor
 class ignition::sensors::RgbdCameraSensorPrivate
@@ -104,7 +104,7 @@ class ignition::sensors::RgbdCameraSensorPrivate
 
   /// \brief Helper class that can fill a msgs::PointCloudPacked
   /// image and depth data.
-  public: DepthImage2Points depth2Points;
+  public: PointCloudUtil pointsUtil;
 };
 
 using namespace ignition;
@@ -254,8 +254,6 @@ bool RgbdCameraSensor::CreateCameras()
   // This->dataPtr->distortion.reset(new Distortion());
   // This->dataPtr->distortion->Load(this->dataPtr->sdf->GetElement("distortion"));
 
-  // this->dataPtr->depthCamera->SetImageFormat(ignition::rendering::PF_FLOAT32_R);
-
   this->Scene()->RootVisual()->AddChild(this->dataPtr->depthCamera);
 
   this->dataPtr->depthConnection =
@@ -312,19 +310,6 @@ void RgbdCameraSensorPrivate::OnNewDepthFrame(const float *_scan,
     this->depthBuffer = new float[depthSamples];
 
   memcpy(this->depthBuffer, _scan, depthBufferSize);
-
-//  for (unsigned int i = 0; i < depthSamples; ++i)
-//  {
-//    // Mask ranges outside of min/max to +/- inf, as per REP 117
-//    if (this->depthBuffer[i] >= this->sdfSensor.CameraSensor()->FarClip())
-//    {
-//      this->depthBuffer[i] = ignition::math::INF_D;
-//    }
-//    else if (this->depthBuffer[i] <= this->sdfSensor.CameraSensor()->NearClip())
-//    {
-//      this->depthBuffer[i] = -ignition::math::INF_D;
-//    }
-//  }
 }
 
 /////////////////////////////////////////////////
@@ -417,7 +402,8 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 
       {
         IGN_PROFILE("RgbdCameraSensor::Update Fill Point Cloud");
-        this->dataPtr->depth2Points.FillMsg(this->dataPtr->pointMsg,
+        // fill point cloud msg and image data
+        this->dataPtr->pointsUtil.FillMsg(this->dataPtr->pointMsg,
             this->dataPtr->pointCloudBuffer,
             this->dataPtr->image.Data<unsigned char>());
         filledImgData = true;
@@ -436,11 +422,11 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
       if (!filledImgData)
       {
         IGN_PROFILE("RgbdCameraSensor::Update Fill RGB Image");
-        this->dataPtr->depth2Points.RGBImageFromPointCloud(
+        // extract image data from point cloud data
+        this->dataPtr->pointsUtil.RGBImageFromPointCloud(
             this->dataPtr->image.Data<unsigned char>(),
             this->dataPtr->pointCloudBuffer,
             width, height);
-        filledImgData = true;
       }
 
       unsigned char *data = this->dataPtr->image.Data<unsigned char>();

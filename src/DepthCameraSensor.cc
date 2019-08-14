@@ -24,7 +24,7 @@
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/GaussianNoiseModel.hh"
 
-#include "DepthImage2Points.hh"
+#include "PointCloudUtil.hh"
 
 // undefine near and far macros from windows.h
 #ifdef _WIN32
@@ -119,7 +119,7 @@ class ignition::sensors::DepthCameraSensorPrivate
 
   /// \brief Helper class that can fill a msgs::PointCloudPacked
   /// image and depth data.
-  public: DepthImage2Points depth2Points;
+  public: PointCloudUtil pointsUtil;
 
   /// \brief publisher to publish point cloud
   public: transport::Node::Publisher pointPub;
@@ -362,21 +362,6 @@ bool DepthCameraSensor::CreateCamera()
   // This->dataPtr->distortion.reset(new Distortion());
   // This->dataPtr->distortion->Load(this->sdf->GetElement("distortion"));
 
-//  sdf::PixelFormatType pixelFormat = cameraSdf->PixelFormat();
-//  switch (pixelFormat)
-//  {
-//    case sdf::PixelFormatType::R_FLOAT32:
-//      this->dataPtr->depthCamera->SetImageFormat(
-//          ignition::rendering::PF_FLOAT32_R);
-//      break;
-//    default:
-//      ignerr << "Unsupported pixel format ["
-//        << static_cast<int>(pixelFormat) << "]\n";
-//      break;
-//  }
-
-//  this->dataPtr->image = this->dataPtr->depthCamera->CreateImage();
-
   this->Scene()->RootVisual()->AddChild(this->dataPtr->depthCamera);
 
   // Create the directory to store frames
@@ -428,28 +413,6 @@ void DepthCameraSensor::OnNewDepthFrame(const float *_scan,
     this->dataPtr->depthBuffer = new float[depthSamples];
 
   memcpy(this->dataPtr->depthBuffer, _scan, depthBufferSize);
-
-//  for (unsigned int i = 0; i < _height; ++i)
-//  {
-//    for (unsigned int j = 0; j < _width; ++j)
-//    {
-//      std::cerr << this->dataPtr->depthBuffer[i*_height + j] << " " ;
-//    }
-//    std::cerr << std::endl;
-//  }
-
-//  for (unsigned int i = 0; i < depthSamples; ++i)
-//  {
-//    // Mask ranges outside of min/max to +/- inf, as per REP 117
-//    if (this->dataPtr->depthBuffer[i] >= far)
-//    {
-//      this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
-//    }
-//    else if (this->dataPtr->depthBuffer[i] <= near)
-//    {
-//      this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
-//    }
-//  }
 
   // Save image
   if (this->dataPtr->saveImage)
@@ -585,14 +548,7 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
           rendering::Image(width, height, rendering::PF_R8G8B8);
     }
 
-//    this->dataPtr->ConvertDepthToImage(this->dataPtr->depthBuffer,
-//        this->dataPtr->image.Data<unsigned char>(), width, height);
-
-//    this->dataPtr->depth2Points.FillMsg(this->dataPtr->pointMsg,
-//        this->dataPtr->depthCamera->HFOV(),
-//        this->dataPtr->image.Data<unsigned char>(),
-//        this->dataPtr->depthBuffer);
-    this->dataPtr->depth2Points.FillMsg(this->dataPtr->pointMsg,
+    this->dataPtr->pointsUtil.FillMsg(this->dataPtr->pointMsg,
         this->dataPtr->pointCloudBuffer,
         this->dataPtr->image.Data<unsigned char>());
 

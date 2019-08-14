@@ -17,6 +17,8 @@ set(tests
 
 link_directories(${PROJECT_BINARY_DIR}/test)
 
+include_directories(${PROJECT_SOURCE_DIR}/src)
+
 # Test symbols having the right name on linux only
 if (UNIX AND NOT APPLE)
   configure_file(all_symbols_have_version.bash.in ${CMAKE_CURRENT_BINARY_DIR}/all_symbols_have_version.bash @ONLY)

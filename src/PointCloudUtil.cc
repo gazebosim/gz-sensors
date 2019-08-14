@@ -15,13 +15,13 @@
  *
 */
 
-#include "DepthImage2Points.hh"
+#include "PointCloudUtil.hh"
 
 using namespace ignition;
 using namespace sensors;
 
 //////////////////////////////////////////////////
-void DepthImage2Points::FillMsg(msgs::PointCloudPacked &_msg,
+void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
     const math::Angle &_hfov, const unsigned char *_imageData,
     const float *_depthData) const
 {
@@ -88,61 +88,7 @@ void DepthImage2Points::FillMsg(msgs::PointCloudPacked &_msg,
 }
 
 //////////////////////////////////////////////////
-void DepthImage2Points::FillMsg(msgs::PointCloudPacked &_msg,
-    const unsigned char *_imageData,
-    const float *_xyzData) const
-{
-  uint32_t width = _msg.width();
-  uint32_t height = _msg.height();
-
-  std::string *msgBuffer = _msg.mutable_data();
-  msgBuffer->resize(_msg.row_step() * _msg.height());
-  char *msgBufferIndex = msgBuffer->data();
-
-  // Iterate over scan and populate point cloud
-  for (uint32_t j = 0; j < height; ++j)
-  {
-    int pcStep = j*width*4;
-    int imgStep = j*width*3;
-    for (uint32_t i = 0; i < width; ++i)
-    {
-      int pcIndex = pcStep + i*4;
-      float x = _xyzData[pcIndex];
-      float y = _xyzData[pcIndex + 1];
-      float z = _xyzData[pcIndex + 2];
-
-      int fieldIndex = 0;
-      *reinterpret_cast<float*>(msgBufferIndex +
-          _msg.field(fieldIndex++).offset()) = x;
-      *reinterpret_cast<float*>(msgBufferIndex +
-          _msg.field(fieldIndex++).offset()) = y;
-      *reinterpret_cast<float*>(msgBufferIndex +
-          _msg.field(fieldIndex++).offset()) = z;
-
-      int imgIndex = imgStep + i * 3;
-      int fieldOffset = _msg.field(fieldIndex).offset();
-      // Put image color data for each point, check endianess first.
-      if (_msg.is_bigendian())
-      {
-        *(msgBufferIndex + fieldOffset + 0) = _imageData[imgIndex + 0];
-        *(msgBufferIndex + fieldOffset + 1) = _imageData[imgIndex + 1];
-        *(msgBufferIndex + fieldOffset + 2) = _imageData[imgIndex + 2];
-      }
-      else
-      {
-        *(msgBufferIndex + fieldOffset + 0) = _imageData[imgIndex + 2];
-        *(msgBufferIndex + fieldOffset + 1) = _imageData[imgIndex + 1];
-        *(msgBufferIndex + fieldOffset + 2) = _imageData[imgIndex + 0];
-      }
-
-      // Add any padding
-      msgBufferIndex += _msg.point_step();
-    }
-  }
-}
-
-//////////////////////////////////////////////////
-void DepthImage2Points::FillMsg(msgs::PointCloudPacked &_msg,
+void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
     const float *_pointCloudData,
     unsigned char *_imageData,
     float *_xyzData) const
@@ -219,7 +165,7 @@ void DepthImage2Points::FillMsg(msgs::PointCloudPacked &_msg,
 
 
 //////////////////////////////////////////////////
-void DepthImage2Points::RGBImageFromPointCloud(unsigned char *_imageData,
+void PointCloudUtil::RGBImageFromPointCloud(unsigned char *_imageData,
     const float *_pointCloudData, unsigned int _width, unsigned int _height)
     const
 {
@@ -246,10 +192,9 @@ void DepthImage2Points::RGBImageFromPointCloud(unsigned char *_imageData,
 }
 
 //////////////////////////////////////////////////
-void DepthImage2Points::DecodeRGBAFromFloat(float _rgba,
+void PointCloudUtil::DecodeRGBAFromFloat(float _rgba,
   uint8_t &_r, uint8_t &_g, uint8_t &_b, uint8_t &_a) const
 {
-  // cppcheck-suppress invalidPointerCast
   uint32_t *rgba = reinterpret_cast<uint32_t *>(&_rgba);
   _r = static_cast<uint8_t>(*rgba >> 24 & 0xFF);
   _g = static_cast<uint8_t>(*rgba >> 16 & 0xFF);

@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_DEPTHIMAGE2POINTS_HH_
-#define IGNITION_SENSORS_DEPTHIMAGE2POINTS_HH_
+#ifndef IGNITION_SENSORS_POINTCLOUDUTIL_HH_
+#define IGNITION_SENSORS_POINTCLOUDUTIL_HH_
 
 #include <ignition/msgs/pointcloud_packed.pb.h>
 #include <ignition/math/Angle.hh>
@@ -25,12 +25,12 @@
 #include "ignition/sensors/Export.hh"
 
 #ifndef _WIN32
-#  define DepthImage2Points_EXPORTS_API
+#  define PointCloudUtil_EXPORTS_API
 #else
 #  if (defined(DepthPoints_EXPORTS))
-#    define DepthImage2Points_EXPORTS_API __declspec(dllexport)
+#    define PointCloudUtil_EXPORTS_API __declspec(dllexport)
 #  else
-#    define DepthImage2Points_EXPORTS_API __declspec(dllimport)
+#    define PointCloudUtil_EXPORTS_API __declspec(dllimport)
 #  endif
 #endif
 
@@ -44,7 +44,7 @@ namespace ignition
     /// \brief Helper class the fills a msgs::PointCloudPacked message using
     /// image and depth data. The RgbdCameraSensor and DepthCameraSensor
     /// class use this.
-    class DepthImage2Points_EXPORTS_API DepthImage2Points
+    class PointCloudUtil_EXPORTS_API PointCloudUtil
     {
       /// \brief Fill a msgs::PointCloudPacked.
       /// \param[in,out] _msg Point cloud message to fill. This message
@@ -58,18 +58,37 @@ namespace ignition
           const math::Angle &_hfov, const unsigned char *_imageData,
           const float *_depthData) const;
 
-      public: void FillMsg(msgs::PointCloudPacked &_msg,
-          const unsigned char *_imageData,
-          const float *_xyzData) const;
-
+      /// \brief Fill a msgs::PointCloudPacked.
+      /// \param[in,out] _msg Point cloud message to fill. This message
+      /// should be initialized. See example usage in either
+      /// RgbdCameraSensor and DepthCameraSensor
+      /// \param[in] _pointCloudData Point cloud XYZ RGB data.
+      /// \param[out] _imageData Fill _imageData wth RGB data extracted
+      /// from _pointCloudData.
+      /// \param[out] _imageData Fill _xyzData wth XYZ data extracted
+      /// from _pointCloudData.
       public: void FillMsg(msgs::PointCloudPacked &_msg,
           const float *_pointCloudData,
           unsigned char *_imageData = 0, float *_xyzData = 0) const;
 
+      /// \brief Extract RGB image data from point cloud data
+      /// \param[out] _imageData RGB Image buffer to be filled.
+      /// \param[in] _pointCloudData Point cloud XYZ data.
+      /// \param[in] _width Image width
+      /// \param[in] _height Image height
       public: void RGBImageFromPointCloud(unsigned char *_imageData,
           const float *_pointCloudData, unsigned int _width,
           unsigned int _height) const;
 
+      /// \brief Decode/unpack RGBA values from a floating point value.
+      /// Point cloud data is encoded as [X, Y, Z, RGBA], with all four fields
+      /// in 32 bit float format. This function helps to unpack the last field
+      /// to individual 8 bit unsigned int R, G, B, A values.
+      /// \param[in] _rgba floating point representation of rgba
+      /// \param[out] _r Red [0-255]
+      /// \param[out] _g Green [0-255]
+      /// \param[out] _b Blue [0-255]
+      /// \param[out] _a Alpha [0-255]
       public: void DecodeRGBAFromFloat(float _rgba, uint8_t &_r, uint8_t &_g,
           uint8_t &_b, uint8_t &_a) const;
     };

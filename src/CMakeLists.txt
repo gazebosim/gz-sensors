@@ -1,10 +1,10 @@
 set (sources
-  DepthImage2Points.cc
   Events.cc
   Manager.cc
   Sensor.cc
   Noise.cc
   GaussianNoiseModel.cc
+  PointCloudUtil.cc
   SensorFactory.cc
   SensorTypes.cc
 )
