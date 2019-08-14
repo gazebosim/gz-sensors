@@ -30,8 +30,7 @@
 
 #include "PointCloudUtil.hh"
 
-// ogre1 needs higher tol
-#define DEPTH_TOL 1e-3
+#define DEPTH_TOL 1e-4
 #define DOUBLE_TOL 1e-6
 
 std::mutex g_mutex;

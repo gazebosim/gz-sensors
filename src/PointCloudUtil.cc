@@ -43,7 +43,7 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
   {
     float pAngle = 0.0;
     if (fl > 0 && height > 1)
-      pAngle = std::atan2((height-j) - 0.5 * (height - 1), fl);
+      pAngle = std::atan2((height-j-1) - 0.5 * (height - 1), fl);
 
     for (uint32_t i = 0; i < width; ++i)
     {
