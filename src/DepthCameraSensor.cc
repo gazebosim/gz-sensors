@@ -49,7 +49,7 @@ class ignition::sensors::DepthCameraSensorPrivate
 
   /// \brief Helper function to convert depth data to depth image
   /// \param[in] _data depth data
-  /// \param[in] _imageBuffer resulting depth image data
+  /// \param[out] _imageBuffer resulting depth image data
   /// \param[in] _width width of image
   /// \param[in] _height height of image
   public: bool ConvertDepthToImage(const float *_data,
