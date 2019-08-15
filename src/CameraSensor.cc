@@ -239,7 +239,7 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
           this->Topic());
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unabled to create publisher on topic["
+    ignerr << "Unable to create publisher on topic["
       << this->Topic() << "].\n";
     return false;
   }
@@ -457,8 +457,8 @@ bool CameraSensor::AdvertiseInfo()
       this->dataPtr->infoTopic);
   if (!this->dataPtr->infoPub)
   {
-    ignerr << "Unabled to create publisher on topic["
-      << this->dataPtr->infoPub << "].\n";
+    ignerr << "Unable to create publisher on topic["
+      << this->dataPtr->infoTopic << "].\n";
   }
 
   return this->dataPtr->infoPub;
@@ -474,8 +474,8 @@ bool CameraSensor::AdvertiseInfo(const std::string &_topic)
       this->dataPtr->infoTopic);
   if (!this->dataPtr->infoPub)
   {
-    ignerr << "Unabled to create publisher on topic["
-      << this->dataPtr->infoPub << "].\n";
+    ignerr << "Unable to create publisher on topic["
+      << this->dataPtr->infoTopic << "].\n";
   }
 
   return this->dataPtr->infoPub;

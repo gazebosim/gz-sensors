@@ -127,7 +127,7 @@ bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->pointPub)
   {
-    ignerr << "Unabled to create publisher on topic["
+    ignerr << "Unable to create publisher on topic["
       << this->Topic() + "/points" << "].\n";
     return false;
   }

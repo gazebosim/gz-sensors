@@ -107,7 +107,7 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unabled to create publisher on topic[" << topic << "].\n";
+    ignerr << "Unable to create publisher on topic[" << topic << "].\n";
     return false;
   }
 

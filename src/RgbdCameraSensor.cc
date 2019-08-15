@@ -165,7 +165,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
           this->Topic() + "/image");
   if (!this->dataPtr->imagePub)
   {
-    ignerr << "Unabled to create publisher on topic["
+    ignerr << "Unable to create publisher on topic["
       << this->Topic() + "/image" << "].\n";
     return false;
   }
@@ -176,7 +176,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
           this->Topic() + "/depth_image");
   if (!this->dataPtr->depthPub)
   {
-    ignerr << "Unabled to create publisher on topic["
+    ignerr << "Unable to create publisher on topic["
       << this->Topic() + "/depth_image" << "].\n";
     return false;
   }
@@ -187,7 +187,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
           this->Topic() + "/points");
   if (!this->dataPtr->pointPub)
   {
-    ignerr << "Unabled to create publisher on topic["
+    ignerr << "Unable to create publisher on topic["
       << this->Topic() + "/points" << "].\n";
     return false;
   }
