@@ -401,8 +401,6 @@ void DepthCameraSensor::OnNewDepthFrame(const float *_scan,
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-//  float near = this->NearClip();
-//  float far = this->FarClip();
   unsigned int depthSamples = _width * _height;
   unsigned int depthBufferSize = depthSamples * sizeof(float);
 
