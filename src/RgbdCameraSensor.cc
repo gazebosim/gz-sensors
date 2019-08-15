@@ -164,21 +164,33 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
           this->Topic() + "/image");
   if (!this->dataPtr->imagePub)
+  {
+    ignerr << "Unabled to create publisher on topic["
+      << this->Topic() + "/image" << "].\n";
     return false;
+  }
 
   // Create the depth image publisher
   this->dataPtr->depthPub =
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
           this->Topic() + "/depth_image");
   if (!this->dataPtr->depthPub)
+  {
+    ignerr << "Unabled to create publisher on topic["
+      << this->Topic() + "/depth_image" << "].\n";
     return false;
+  }
 
   // Create the point cloud publisher
   this->dataPtr->pointPub =
       this->dataPtr->node.Advertise<ignition::msgs::PointCloudPacked>(
           this->Topic() + "/points");
   if (!this->dataPtr->pointPub)
+  {
+    ignerr << "Unabled to create publisher on topic["
+      << this->Topic() + "/points" << "].\n";
     return false;
+  }
 
   if (!this->AdvertiseInfo(this->Topic() + "/camera_info"))
     return false;

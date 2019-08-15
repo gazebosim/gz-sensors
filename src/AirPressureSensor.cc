@@ -108,7 +108,10 @@ bool AirPressureSensor::Load(const sdf::Sensor &_sdf)
       this->dataPtr->node.Advertise<ignition::msgs::FluidPressure>(topic);
 
   if (!this->dataPtr->pub)
+  {
+    ignerr << "Unabled to create publisher on topic[" << topic << "].\n";
     return false;
+  }
 
   // Load the noise parameters
   if (_sdf.AirPressureSensor()->PressureNoise().Type() != sdf::NoiseType::NONE)

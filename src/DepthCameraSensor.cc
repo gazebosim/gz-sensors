@@ -251,7 +251,11 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
           this->Topic());
   if (!this->dataPtr->pub)
+  {
+    ignerr << "Unabled to create publisher on topic["
+      << this->Topic() << "].\n";
     return false;
+  }
 
   if (!this->AdvertiseInfo())
     return false;
@@ -261,7 +265,11 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
       this->dataPtr->node.Advertise<ignition::msgs::PointCloudPacked>(
           this->Topic() + "/points");
   if (!this->dataPtr->pointPub)
+  {
+    ignerr << "Unabled to create publisher on topic["
+      << this->Topic() + "/points" << "].\n";
     return false;
+  }
 
   // Initialize the point message.
   // \todo(anyone) The true value in the following function call forces
