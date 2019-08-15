@@ -41,7 +41,7 @@ namespace ignition
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     //
-    /// \brief Helper class the fills a msgs::PointCloudPacked message using
+    /// \brief Helper class that fills a msgs::PointCloudPacked message using
     /// image and depth data. The RgbdCameraSensor and DepthCameraSensor
     /// class use this.
     class PointCloudUtil_EXPORTS_API PointCloudUtil
@@ -49,7 +49,7 @@ namespace ignition
       /// \brief Fill a msgs::PointCloudPacked.
       /// \param[in,out] _msg Point cloud message to fill. This message
       /// should be initialized. See example usage in either
-      /// RgbdCameraSensor and DepthCameraSensor
+      /// RgbdCameraSensor and DepthCameraSensor.
       /// \param[in] _hfov Horizontal field of view of the camera that
       /// generated the image and depth data.
       /// \param[in] _imageData RGB Image data.
@@ -61,7 +61,7 @@ namespace ignition
       /// \brief Fill a msgs::PointCloudPacked.
       /// \param[in,out] _msg Point cloud message to fill. This message
       /// should be initialized. See example usage in either
-      /// RgbdCameraSensor and DepthCameraSensor
+      /// RgbdCameraSensor and DepthCameraSensor.
       /// \param[in] _pointCloudData Point cloud XYZ RGB data.
       /// \param[out] _imageData Fill _imageData wth RGB data extracted
       /// from _pointCloudData.
