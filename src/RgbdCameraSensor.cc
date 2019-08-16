@@ -404,7 +404,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
         IGN_PROFILE("RgbdCameraSensor::Update Fill Point Cloud");
         // fill point cloud msg and image data
         this->dataPtr->pointsUtil.FillMsg(this->dataPtr->pointMsg,
-            this->dataPtr->pointCloudBuffer,
+            this->dataPtr->pointCloudBuffer, true,
             this->dataPtr->image.Data<unsigned char>());
         filledImgData = true;
       }
@@ -423,7 +423,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
       {
         IGN_PROFILE("RgbdCameraSensor::Update Fill RGB Image");
         // extract image data from point cloud data
-        this->dataPtr->pointsUtil.RGBImageFromPointCloud(
+        this->dataPtr->pointsUtil.RGBFromPointCloud(
             this->dataPtr->image.Data<unsigned char>(),
             this->dataPtr->pointCloudBuffer,
             width, height);

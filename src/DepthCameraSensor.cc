@@ -73,6 +73,9 @@ class ignition::sensors::DepthCameraSensorPrivate
   /// \brief point cloud data buffer.
   public: float *pointCloudBuffer = nullptr;
 
+  /// \brief xyz data buffer.
+  public: float *xyzBuffer = nullptr;
+
   /// \brief Near clip distance.
   public: float near = 0.0;
 
@@ -205,6 +208,8 @@ DepthCameraSensor::~DepthCameraSensor()
     delete [] this->dataPtr->depthBuffer;
   if (this->dataPtr->pointCloudBuffer)
     delete [] this->dataPtr->pointCloudBuffer;
+  if (this->dataPtr->xyzBuffer)
+    delete [] this->dataPtr->xyzBuffer;
 }
 
 //////////////////////////////////////////////////
@@ -539,6 +544,9 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
         _now.nsec);
     this->dataPtr->pointMsg.set_is_dense(true);
 
+    if (!this->dataPtr->xyzBuffer)
+      this->dataPtr->xyzBuffer = new float[width*height*3];
+
     if (this->dataPtr->image.Width() != width
         || this->dataPtr->image.Height() != height)
     {
@@ -546,8 +554,19 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
           rendering::Image(width, height, rendering::PF_R8G8B8);
     }
 
-    this->dataPtr->pointsUtil.FillMsg(this->dataPtr->pointMsg,
+    // extract image data from point cloud data
+    this->dataPtr->pointsUtil.XYZFromPointCloud(
+        this->dataPtr->xyzBuffer,
         this->dataPtr->pointCloudBuffer,
+        width, height);
+
+    // convert depth to grayscale rgb image
+    this->dataPtr->ConvertDepthToImage(this->dataPtr->depthBuffer,
+        this->dataPtr->image.Data<unsigned char>(), width, height);
+
+    // fill the point cloud msg with data from xyz and rgb buffer
+    this->dataPtr->pointsUtil.FillMsg(this->dataPtr->pointMsg,
+        this->dataPtr->xyzBuffer,
         this->dataPtr->image.Data<unsigned char>());
 
     this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);

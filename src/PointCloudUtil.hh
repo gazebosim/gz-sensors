@@ -62,21 +62,41 @@ namespace ignition
       /// \param[in,out] _msg Point cloud message to fill. This message
       /// should be initialized. See example usage in either
       /// RgbdCameraSensor and DepthCameraSensor.
+      /// \param[in] _xyzData XYZ data.
+      /// \param[in] _imageData RGB data.
+      public: void FillMsg(msgs::PointCloudPacked &_msg,
+          const float *_xyzData, const unsigned char *_imageData) const;
+
+      /// \brief Fill a msgs::PointCloudPacked.
+      /// \param[in,out] _msg Point cloud message to fill. This message
+      /// should be initialized. See example usage in either
+      /// RgbdCameraSensor and DepthCameraSensor.
       /// \param[in] _pointCloudData Point cloud XYZ RGB data.
+      /// \param[in] _writeToBuffers If true, writes data to
+      /// RGB (_imageData) and XYZ (_xyzData) buffers.
       /// \param[out] _imageData Fill _imageData wth RGB data extracted
       /// from _pointCloudData.
-      /// \param[out] _imageData Fill _xyzData wth XYZ data extracted
+      /// \param[out] _xyzData Fill _xyzData wth XYZ data extracted
       /// from _pointCloudData.
       public: void FillMsg(msgs::PointCloudPacked &_msg,
-          const float *_pointCloudData,
+          const float *_pointCloudData, bool _writeToBuffers = false,
           unsigned char *_imageData = 0, float *_xyzData = 0) const;
 
-      /// \brief Extract RGB image data from point cloud data
+      /// \brief Extract RGB data from point cloud data
       /// \param[out] _imageData RGB Image buffer to be filled.
       /// \param[in] _pointCloudData Point cloud XYZ data.
       /// \param[in] _width Image width
       /// \param[in] _height Image height
-      public: void RGBImageFromPointCloud(unsigned char *_imageData,
+      public: void RGBFromPointCloud(unsigned char *_imageData,
+          const float *_pointCloudData, unsigned int _width,
+          unsigned int _height) const;
+
+      /// \brief Extract XYZ data from point cloud data
+      /// \param[out] _xyzData XYZ buffer to be filled.
+      /// \param[in] _pointCloudData Point cloud XYZ data.
+      /// \param[in] _width Image width
+      /// \param[in] _height Image height
+      public: void XYZFromPointCloud(float *_xyzData,
           const float *_pointCloudData, unsigned int _width,
           unsigned int _height) const;
 

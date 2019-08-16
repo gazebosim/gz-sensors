@@ -89,7 +89,62 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
 
 //////////////////////////////////////////////////
 void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
-    const float *_pointCloudData,
+    const float *_xyzData, const unsigned char *_imageData) const
+{
+  uint32_t width = _msg.width();
+  uint32_t height = _msg.height();
+
+  std::string *msgBuffer = _msg.mutable_data();
+  msgBuffer->resize(_msg.row_step() * _msg.height());
+  char *msgBufferIndex = msgBuffer->data();
+
+  // Iterate over scan and populate point cloud
+  for (uint32_t j = 0; j < height; ++j)
+  {
+    int step = j*width*3;
+    for (uint32_t i = 0; i < width; ++i)
+    {
+      int index = step + i*4;
+      float x = _xyzData[index];
+      float y = _xyzData[index + 1];
+      float z = _xyzData[index + 2];
+
+      int fieldIndex = 0;
+      *reinterpret_cast<float*>(msgBufferIndex +
+          _msg.field(fieldIndex++).offset()) = x;
+      *reinterpret_cast<float*>(msgBufferIndex +
+          _msg.field(fieldIndex++).offset()) = y;
+      *reinterpret_cast<float*>(msgBufferIndex +
+          _msg.field(fieldIndex++).offset()) = z;
+
+      uint8_t r = static_cast<uint8_t>(_imageData[index]);
+      uint8_t g = static_cast<uint8_t>(_imageData[index + 1]);
+      uint8_t b = static_cast<uint8_t>(_imageData[index + 2]);
+
+      int fieldOffset = _msg.field(fieldIndex).offset();
+      // Put image color data for each point, check endianess first.
+      if (_msg.is_bigendian())
+      {
+        *(msgBufferIndex + fieldOffset + 0) = r;
+        *(msgBufferIndex + fieldOffset + 1) = g;
+        *(msgBufferIndex + fieldOffset + 2) = b;
+      }
+      else
+      {
+        *(msgBufferIndex + fieldOffset + 0) = b;
+        *(msgBufferIndex + fieldOffset + 1) = g;
+        *(msgBufferIndex + fieldOffset + 2) = r;
+      }
+
+      // Add any padding
+      msgBufferIndex += _msg.point_step();
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
+    const float *_pointCloudData, bool _writeToBuffers,
     unsigned char *_imageData,
     float *_xyzData) const
 {
@@ -147,13 +202,13 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
 
       // Fill buffers
       int imgIndex = imgStep + i * 3;
-      if (_xyzData)
+      if (_writeToBuffers && _xyzData)
       {
         _xyzData[imgIndex + 0] = x;
         _xyzData[imgIndex + 1] = y;
         _xyzData[imgIndex + 2] = z;
       }
-      if (_imageData)
+      if (_writeToBuffers && _imageData)
       {
         _imageData[imgIndex + 0] = static_cast<unsigned char>(r);
         _imageData[imgIndex + 1] = static_cast<unsigned char>(g);
@@ -165,7 +220,7 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
 
 
 //////////////////////////////////////////////////
-void PointCloudUtil::RGBImageFromPointCloud(unsigned char *_imageData,
+void PointCloudUtil::RGBFromPointCloud(unsigned char *_imageData,
     const float *_pointCloudData, unsigned int _width, unsigned int _height)
     const
 {
@@ -184,9 +239,30 @@ void PointCloudUtil::RGBImageFromPointCloud(unsigned char *_imageData,
       uint8_t a = 255u;
       this->DecodeRGBAFromFloat(rgba, r, g, b, a);
       int imgIndex = imgStep + i * 3;
-      _imageData[imgIndex + 0] = static_cast<unsigned char>(r);
+      _imageData[imgIndex] = static_cast<unsigned char>(r);
       _imageData[imgIndex + 1] = static_cast<unsigned char>(g);
       _imageData[imgIndex + 2] = static_cast<unsigned char>(b);
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+void PointCloudUtil::XYZFromPointCloud(float *_xyzData,
+    const float *_pointCloudData, unsigned int _width, unsigned int _height)
+    const
+{
+  // Iterate over scan and populate image data
+  for (uint32_t j = 0; j < _height; ++j)
+  {
+    int pcStep = j*_width*4;
+    int imgStep = j*_width*3;
+    for (uint32_t i = 0; i < _width; ++i)
+    {
+      int pcIndex = pcStep + i*4;
+      int imgIndex = imgStep + i * 3;
+      _xyzData[imgIndex] = _pointCloudData[pcIndex];
+      _xyzData[imgIndex + 1] = _pointCloudData[pcIndex + 1];
+      _xyzData[imgIndex + 2] = _pointCloudData[pcIndex + 2];
     }
   }
 }
