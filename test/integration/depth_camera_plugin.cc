@@ -41,6 +41,49 @@ std::mutex g_infoMutex;
 unsigned int g_infoCounter = 0;
 ignition::msgs::CameraInfo g_infoMsg;
 
+std::mutex g_pcMutex;
+unsigned int g_pcCounter = 0;
+float *g_pointsXYZBuffer = nullptr;
+unsigned char *g_pointsRGBBuffer = nullptr;
+
+void UnpackPointCloudMsg(const ignition::msgs::PointCloudPacked &_msg,
+  float *_xyzBuffer, unsigned char *_rgbBuffer)
+{
+  std::string msgBuffer = _msg.data();
+  char *msgBufferIndex = msgBuffer.data();
+
+  for (uint32_t j = 0; j < _msg.height(); ++j)
+  {
+    for (uint32_t i = 0; i < _msg.width(); ++i)
+    {
+      int fieldIndex = 0;
+      int pointIndex = j*_msg.width()*3 + i*3;
+
+      _xyzBuffer[pointIndex] =  *reinterpret_cast<float *>(
+        msgBufferIndex + _msg.field(fieldIndex++).offset());
+      _xyzBuffer[pointIndex + 1] = *reinterpret_cast<float *>(
+        msgBufferIndex + _msg.field(fieldIndex++).offset());
+      _xyzBuffer[pointIndex + 2] = *reinterpret_cast<float *>(
+        msgBufferIndex + _msg.field(fieldIndex++).offset());
+
+      int fieldOffset = _msg.field(fieldIndex).offset();
+      if (_msg.is_bigendian())
+      {
+        _rgbBuffer[pointIndex] = *(msgBufferIndex + fieldOffset + 0);
+        _rgbBuffer[pointIndex + 1] = *(msgBufferIndex + fieldOffset + 1);
+        _rgbBuffer[pointIndex + 2] = *(msgBufferIndex + fieldOffset + 2);
+      }
+      else
+      {
+        _rgbBuffer[pointIndex] = *(msgBufferIndex + fieldOffset + 2);
+        _rgbBuffer[pointIndex + 1] = *(msgBufferIndex + fieldOffset + 1);
+        _rgbBuffer[pointIndex + 2] = *(msgBufferIndex + fieldOffset + 0);
+      }
+      msgBufferIndex += _msg.point_step();
+    }
+  }
+}
+
 void OnCameraInfo(const ignition::msgs::CameraInfo & _msg)
 {
   g_infoMutex.lock();
@@ -59,6 +102,23 @@ void OnImage(const ignition::msgs::Image &_msg)
   memcpy(g_depthBuffer, _msg.data().c_str(), depthBufferSize);
   g_depthCounter++;
   g_mutex.unlock();
+}
+
+void OnPointCloud(const ignition::msgs::PointCloudPacked &_msg)
+{
+  g_pcMutex.lock();
+
+  unsigned int pointCloudSamples = _msg.width() * _msg.height();
+  unsigned int pointCloudBufferSize = pointCloudSamples * 3;
+  if (!g_pointsXYZBuffer)
+    g_pointsXYZBuffer = new float[pointCloudBufferSize];
+  if (!g_pointsRGBBuffer)
+    g_pointsRGBBuffer = new unsigned char[pointCloudBufferSize];
+
+  UnpackPointCloudMsg(_msg, g_pointsXYZBuffer, g_pointsRGBBuffer);
+
+  g_pcCounter++;
+  g_pcMutex.unlock();
 }
 
 class DepthCameraSensorTest: public testing::Test,
@@ -159,6 +219,11 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
     "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/image";
   WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
 
+  std::string pointsTopic =
+    "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/image/points";
+  WaitForMessageTestHelper<ignition::msgs::PointCloudPacked>
+    pointsHelper(pointsTopic);
+
   std::string infoTopic =
     "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/camera_info";
   WaitForMessageTestHelper<ignition::msgs::CameraInfo> infoHelper(infoTopic);
@@ -167,10 +232,15 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   mgr.RunOnce(ignition::common::Time::Zero);
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
+  EXPECT_TRUE(pointsHelper.WaitForMessage()) << pointsHelper;
+  EXPECT_TRUE(infoHelper.WaitForMessage()) << infoHelper;
 
   // subscribe to the depth camera topic
   ignition::transport::Node node;
   node.Subscribe(topic, &OnImage);
+
+  // subscribe to the depth camera points topic
+  node.Subscribe(pointsTopic, &OnPointCloud);
 
   // subscribe to the depth camera topic
   node.Subscribe(infoTopic, &OnCameraInfo);
@@ -186,6 +256,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   ignition::common::Time waitTime = ignition::common::Time(0.001);
   int counter = 0;
   int infoCounter = 0;
+  int pcCounter = 0;
   ignition::msgs::CameraInfo infoMsg;
   for (int sleep = 0;
        sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
@@ -204,10 +275,12 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   g_infoMutex.lock();
   g_depthCounter = 0;
   g_infoCounter = 0;
+  g_pcCounter = 0;
   EXPECT_GT(counter, 0);
   EXPECT_EQ(counter, infoCounter);
   counter = 0;
   infoCounter = 0;
+  pcCounter = 0;
 
   EXPECT_NEAR(g_depthBuffer[mid], expectedRangeAtMidPoint, DEPTH_TOL);
   // Depth sensor should see box in the middle of the image
@@ -262,10 +335,12 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   g_infoMutex.lock();
   g_depthCounter = 0;
   g_infoCounter = 0;
+  g_pcCounter = 0;
   EXPECT_GT(counter, 0);
   EXPECT_EQ(counter, infoCounter);
   counter = 0;
   infoCounter = 0;
+  pcCounter = 0;
 
   EXPECT_DOUBLE_EQ(g_depthBuffer[mid], -ignition::math::INF_D);
   g_infoMutex.unlock();
@@ -295,14 +370,107 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   g_infoMutex.lock();
   g_depthCounter = 0;
   g_infoCounter = 0;
+  g_pcCounter = 0;
   EXPECT_GT(counter, 0);
   EXPECT_EQ(counter, infoCounter);
   counter = 0;
   infoCounter = 0;
+  pcCounter = 0;
 
   EXPECT_DOUBLE_EQ(g_depthBuffer[mid], ignition::math::INF_D);
   g_infoMutex.unlock();
   g_mutex.unlock();
+
+
+  // Check that the depth values for a box do not warp.
+  root->RemoveChild(box);
+  ignition::math::Vector3d boxPositionFillFrame(
+      unitBoxSize * 0.5 + 0.2, 0.0, 0.0);
+  box->SetLocalPosition(boxPositionFillFrame);
+  root->AddChild(box);
+
+  mgr.RunOnce(ignition::common::Time::Zero, true);
+  for (int sleep = 0;
+       sleep < 300 && (counter == 0 || infoCounter == 0 || pcCounter == 0);
+       ++sleep)
+  {
+    g_mutex.lock();
+    counter = g_depthCounter;
+    g_mutex.unlock();
+
+    g_infoMutex.lock();
+    infoCounter = g_infoCounter;
+    g_infoMutex.unlock();
+
+    g_pcMutex.lock();
+    pcCounter = g_pcCounter;
+    g_pcMutex.unlock();
+
+    ignition::common::Time::Sleep(waitTime);
+  }
+  g_mutex.lock();
+  g_infoMutex.lock();
+  g_pcMutex.lock();
+  g_depthCounter = 0;
+  g_infoCounter = 0;
+  g_pcCounter = 0;
+  EXPECT_GT(counter, 0);
+  EXPECT_GT(pcCounter, 0);
+  EXPECT_EQ(counter, infoCounter);
+  EXPECT_EQ(counter, pcCounter);
+  counter = 0;
+  infoCounter = 0;
+  pcCounter = 0;
+
+  double expectedDepth = boxPositionFillFrame.X() - unitBoxSize * 0.5;
+  // Verify Depth
+  {
+    // all points should have the same depth
+    for (unsigned int i = 0; i < depthSensor->ImageHeight(); ++i)
+    {
+      unsigned int step = i*depthSensor->ImageWidth();
+      for (unsigned int j = 0; j < depthSensor->ImageWidth(); ++j)
+      {
+        float d = g_depthBuffer[step + j];
+        EXPECT_FLOAT_EQ(expectedDepth, d);
+      }
+    }
+  }
+  // Verify Point Cloud XYZ
+  {
+    // all points should have the same X value
+    for (unsigned int i = 0; i < depthSensor->ImageHeight(); ++i)
+    {
+      unsigned int step = i*depthSensor->ImageWidth()*3;
+      for (unsigned int j = 0; j < depthSensor->ImageWidth(); ++j)
+      {
+        float x = g_pointsXYZBuffer[step + j*3];
+        EXPECT_FLOAT_EQ(expectedDepth, x);
+      }
+    }
+
+    // Verify Point Cloud RGB
+    // all points should be the same
+    for (unsigned int i = 0; i < depthSensor->ImageHeight(); ++i)
+    {
+      unsigned int step = i*depthSensor->ImageWidth()*3;
+      for (unsigned int j = 0; j < depthSensor->ImageWidth(); ++j)
+      {
+        unsigned int r =
+            static_cast<unsigned int>(g_pointsRGBBuffer[step + j*3]);
+        unsigned int g =
+            static_cast<unsigned int>(g_pointsRGBBuffer[step + j*3 + 1]);
+        unsigned int b =
+            static_cast<unsigned int>(g_pointsRGBBuffer[step + j*3 + 2]);
+        EXPECT_EQ(g, r);
+        EXPECT_EQ(b, g);
+      }
+    }
+  }
+
+  g_infoMutex.unlock();
+  g_mutex.unlock();
+  g_pcMutex.unlock();
 
   // Clean up
   engine->DestroyScene(scene);

@@ -104,7 +104,7 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
     int step = j*width*3;
     for (uint32_t i = 0; i < width; ++i)
     {
-      int index = step + i*4;
+      int index = step + i*3;
       float x = _xyzData[index];
       float y = _xyzData[index + 1];
       float z = _xyzData[index + 2];
