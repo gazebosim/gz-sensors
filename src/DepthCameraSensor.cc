@@ -17,7 +17,6 @@
 
 #include <ignition/msgs/pointcloud_packed.pb.h>
 #include <ignition/common/Profiler.hh>
-#include <ignition/common/StringUtils.hh>
 
 #include <ignition/math/Helpers.hh>
 
