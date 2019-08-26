@@ -106,7 +106,10 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
       this->dataPtr->node.Advertise<ignition::msgs::IMU>(topic);
 
   if (!this->dataPtr->pub)
+  {
+    ignerr << "Unable to create publisher on topic[" << topic << "].\n";
     return false;
+  }
 
   const std::map<SensorNoiseType, sdf::Noise> noises = {
     {ACCELEROMETER_X_NOISE_M_S_S, _sdf.ImuSensor()->LinearAccelerationXNoise()},

@@ -111,7 +111,10 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
       this->dataPtr->node.Advertise<ignition::msgs::LogicalCameraImage>(topic);
 
   if (!this->dataPtr->pub)
+  {
+    ignerr << "Unable to create publisher on topic[" << topic << "].\n";
     return false;
+  }
 
   this->dataPtr->initialized = true;
   return true;
