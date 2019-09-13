@@ -154,9 +154,12 @@ bool ImuSensor::Update(const ignition::common::Time &_now)
   }
 
   double dt;
-  if (this->dataPtr->prevStep == ignition::common::Time::Zero) {
+  if (this->dataPtr->prevStep == ignition::common::Time::Zero)
+  {
     dt = 0.0;
-  } else {
+  }
+  else
+  {
     dt = (_now - this->dataPtr->prevStep).Double();
   }
 
