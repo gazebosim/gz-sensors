@@ -137,9 +137,12 @@ double GaussianNoiseModel::ApplyImpl(double _in, double _dt)
   // More information about the parameters and their derivation:
   //
   // https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model
+  //
+  // This can only be generated in the case that _dt > 0.0
 
   if (this->dataPtr->dynamicBiasStdDev > 0 &&
-     this->dataPtr->dynamicBiasCorrTime > 0)
+     this->dataPtr->dynamicBiasCorrTime > 0 &&
+     _dt > 0)
   {
     double sigma_b = this->dataPtr->dynamicBiasStdDev;
     double tau = this->dataPtr->dynamicBiasCorrTime;

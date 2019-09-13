@@ -57,6 +57,12 @@ class ignition::sensors::ImuSensorPrivate
   /// \brief World pose of the imu sensor
   public: ignition::math::Pose3d worldPose;
 
+  /// \brief Flag for if time has been initialized
+  public: bool timeInitialized = false;
+
+  /// \brief Previous update time step.
+  public: ignition::common::Time prevStep { ignition::common::Time::Zero };
+
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
 };
@@ -150,7 +156,22 @@ bool ImuSensor::Update(const ignition::common::Time &_now)
     return false;
   }
 
-  const double dt = this->UpdateRate();
+  // If time has gone backwards, reinitialize.
+  if (_now < this->dataPtr->prevStep)
+  {
+    this->dataPtr->timeInitialized = false;
+  }
+
+  // Only compute dt if time is initialized and increasing.
+  double dt;
+  if (this->dataPtr->timeInitialized)
+  {
+    dt = (_now - this->dataPtr->prevStep).Double();
+  }
+  else
+  {
+    dt = 0.0;
+  }
 
   // Add contribution from gravity
   // Skip if gravity is not enabled?
@@ -193,7 +214,8 @@ bool ImuSensor::Update(const ignition::common::Time &_now)
 
   // publish
   this->dataPtr->pub.Publish(msg);
-
+  this->dataPtr->prevStep = _now;
+  this->dataPtr->timeInitialized = true;
   return true;
 }
 
