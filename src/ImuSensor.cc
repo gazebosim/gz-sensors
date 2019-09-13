@@ -110,7 +110,7 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     ignerr << "Unable to create publisher on topic[" << topic << "].\n";
     return false;
   }
-1
+
   const std::map<SensorNoiseType, sdf::Noise> noises = {
     {ACCELEROMETER_X_NOISE_M_S_S, _sdf.ImuSensor()->LinearAccelerationXNoise()},
     {ACCELEROMETER_Y_NOISE_M_S_S, _sdf.ImuSensor()->LinearAccelerationYNoise()},
