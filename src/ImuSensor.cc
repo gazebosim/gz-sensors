@@ -110,7 +110,7 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     ignerr << "Unable to create publisher on topic[" << topic << "].\n";
     return false;
   }
-
+1
   const std::map<SensorNoiseType, sdf::Noise> noises = {
     {ACCELEROMETER_X_NOISE_M_S_S, _sdf.ImuSensor()->LinearAccelerationXNoise()},
     {ACCELEROMETER_Y_NOISE_M_S_S, _sdf.ImuSensor()->LinearAccelerationYNoise()},
@@ -150,7 +150,7 @@ bool ImuSensor::Update(const ignition::common::Time &_now)
     return false;
   }
 
-  const double dt = this->UpdateRate();
+  const double dt = 1.0 / this->UpdateRate();
 
   // Add contribution from gravity
   // Skip if gravity is not enabled?
