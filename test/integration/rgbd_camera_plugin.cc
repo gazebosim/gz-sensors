@@ -33,6 +33,8 @@
 #define DEPTH_TOL 1e-4
 #define DOUBLE_TOL 1e-6
 
+using namespace ignition;
+
 std::mutex g_mutex;
 unsigned int g_depthCounter = 0;
 float *g_depthBuffer = nullptr;
