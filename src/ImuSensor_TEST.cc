@@ -24,6 +24,8 @@
 
 #include <ignition/sensors/ImuSensor.hh>
 
+using namespace ignition;
+
 // Default values for use with ADIS16448 IMU
 // These values come from the Rotors default values:
 // https://github.com/ethz-asl/rotors_simulator/blob/513bb92da0c1a0c968bdc679dffc8fe7d77de918/rotors_gazebo_plugins/include/rotors_gazebo_plugins/gazebo_imu_plugin.h#L40
