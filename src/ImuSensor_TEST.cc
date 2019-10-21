@@ -24,6 +24,8 @@
 
 #include <ignition/sensors/ImuSensor.hh>
 
+using namespace ignition;
+
 // Default values for use with ADIS16448 IMU
 // These values come from the Rotors default values:
 // https://github.com/ethz-asl/rotors_simulator/blob/513bb92da0c1a0c968bdc679dffc8fe7d77de918/rotors_gazebo_plugins/include/rotors_gazebo_plugins/gazebo_imu_plugin.h#L40
@@ -254,8 +256,8 @@ TEST(ImuSensor_TEST, ComputeNoise)
   // Note no gravity.
   sensor_truth->SetGravity(math::Vector3d::Zero);
 
-  sensor->Update(common::Time::Zero);
-  sensor_truth->Update(common::Time::Zero);
+  sensor->Update(common::Time(0, 10000000));
+  sensor_truth->Update(common::Time(0, 10000000));
 
   // Since this IMU has no noise, measurements should equal the inputs.
   EXPECT_DOUBLE_EQ(sensor_truth->AngularVelocity().X(), 0.0);
@@ -270,6 +272,20 @@ TEST(ImuSensor_TEST, ComputeNoise)
   // \TODO(mjcarroll): It's _very_ unlikely any of these numbers
   // will be exactly zero, but there are probably better ways
   // of verifying the noise is correctly added statistically.
+  EXPECT_GT(sensor->AngularVelocity().SquaredLength(), 0.0);
+  EXPECT_GT(sensor->LinearAcceleration().SquaredLength(), 0.0);
+
+  sensor->Update(common::Time(0, 20000000));
+  sensor_truth->Update(common::Time(0, 20000000));
+
+  // Since this IMU has no noise, measurements should equal the inputs.
+  EXPECT_DOUBLE_EQ(sensor_truth->AngularVelocity().X(), 0.0);
+  EXPECT_DOUBLE_EQ(sensor_truth->AngularVelocity().Y(), 0.0);
+  EXPECT_DOUBLE_EQ(sensor_truth->AngularVelocity().Z(), 0.0);
+  EXPECT_DOUBLE_EQ(sensor_truth->LinearAcceleration().X(), 0.0);
+  EXPECT_DOUBLE_EQ(sensor_truth->LinearAcceleration().Y(), 0.0);
+  EXPECT_DOUBLE_EQ(sensor_truth->LinearAcceleration().Z(), 0.0);
+
   EXPECT_GT(sensor->AngularVelocity().SquaredLength(), 0.0);
   EXPECT_GT(sensor->LinearAcceleration().SquaredLength(), 0.0);
 }

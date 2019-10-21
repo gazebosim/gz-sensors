@@ -4,6 +4,7 @@ set(dri_tests
   camera_plugin.cc
   depth_camera_plugin.cc
   gpu_lidar_sensor_plugin.cc
+  rgbd_camera_plugin.cc
 )
 
 set(tests
@@ -15,6 +16,8 @@ set(tests
 )
 
 link_directories(${PROJECT_BINARY_DIR}/test)
+
+include_directories(${PROJECT_SOURCE_DIR}/src)
 
 # Test symbols having the right name on linux only
 if (UNIX AND NOT APPLE)
@@ -33,6 +36,7 @@ if (DRI_TESTS)
       ${PROJECT_LIBRARY_TARGET_NAME}-camera
       ${PROJECT_LIBRARY_TARGET_NAME}-lidar
       ${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar
+      ${PROJECT_LIBRARY_TARGET_NAME}-rgbd_camera
   )
 endif()
 
