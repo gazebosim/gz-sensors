@@ -109,7 +109,9 @@ bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
   // alignment should be configured. This same problem is in the
   // RgbdCameraSensor.
   msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->Name(), true,
-      {{"xyz", msgs::PointCloudPacked::Field::FLOAT32}});
+      {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
+      {"intensity", msgs::PointCloudPacked::Field::FLOAT32},
+      {"ring", msgs::PointCloudPacked::Field::UINT16}});
 
   if (this->Scene())
     this->CreateLidar();
@@ -124,7 +126,11 @@ bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
           this->Topic() + "/points");
 
   if (!this->dataPtr->pointPub)
+  {
+    ignerr << "Unable to create publisher on topic["
+      << this->Topic() + "/points" << "].\n";
     return false;
+  }
 
   this->initialized = true;
 
@@ -313,20 +319,32 @@ void GpuLidarSensorPrivate::FillPointCloudMsg()
       // Index of current point, and the depth value at that point
       auto index = j * width * channels + i * channels;
       float depth = this->gpuRays->Data()[index];
+      float intensity = this->gpuRays->Data()[index + 1];
+      uint16_t ring = j;
 
       int fieldIndex = 0;
 
       // Convert spherical coordinates to Cartesian for pointcloud
       // See https://en.wikipedia.org/wiki/Spherical_coordinate_system
-      *reinterpret_cast<float*>(msgBufferIndex +
+      *reinterpret_cast<float *>(msgBufferIndex +
           this->pointMsg.field(fieldIndex++).offset()) =
         depth * std::cos(inclination) * std::cos(azimuth);
-      *reinterpret_cast<float*>(msgBufferIndex +
+
+      *reinterpret_cast<float *>(msgBufferIndex +
           this->pointMsg.field(fieldIndex++).offset()) =
         depth * std::cos(inclination) * std::sin(azimuth);
-      *reinterpret_cast<float*>(msgBufferIndex +
+
+      *reinterpret_cast<float *>(msgBufferIndex +
           this->pointMsg.field(fieldIndex++).offset()) =
         depth * std::sin(inclination);
+
+      // Intensity
+      *reinterpret_cast<float *>(msgBufferIndex +
+          this->pointMsg.field(fieldIndex++).offset()) = intensity;
+
+      // Ring
+      *reinterpret_cast<uint16_t *>(msgBufferIndex +
+          this->pointMsg.field(fieldIndex++).offset()) = ring;
 
       // Move the index to the next point.
       msgBufferIndex += this->pointMsg.point_step();
