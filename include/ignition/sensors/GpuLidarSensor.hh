@@ -19,14 +19,15 @@
 
 #include <memory>
 #include <string>
-#include <sdf/sdf.hh>
 
-#include <ignition/sensors/Lidar.hh>
-#include <ignition/sensors/RenderingEvents.hh>
+#include <sdf/sdf.hh>
 
 #include <ignition/rendering/GpuRays.hh>
 
 #include "ignition/sensors/gpu_lidar/Export.hh"
+#include "ignition/sensors/RenderingEvents.hh"
+#include "ignition/sensors/Lidar.hh"
+
 
 #ifndef _WIN32
 #  define GpuLidarSensor_EXPORTS_API
@@ -57,7 +58,6 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-//    class GpuLidarSensor_EXPORTS_API GpuLidarSensor : public Lidar
     class IGNITION_SENSORS_GPU_LIDAR_VISIBLE GpuLidarSensor : public Lidar
     {
       /// \brief constructor
@@ -74,6 +74,11 @@ namespace ignition
       /// \brief Initialize values in the sensor
       /// \return True on success
       public: virtual bool Init() override;
+
+      /// \brief Load the sensor based on data from an sdf::Sensor object.
+      /// \param[in] _sdf SDF Sensor parameters.
+      /// \return true if loading was successful
+      public: virtual bool Load(const sdf::Sensor &_sdf) override;
 
       /// \brief Load sensor sata from SDF
       /// \param[in] _sdf SDF used

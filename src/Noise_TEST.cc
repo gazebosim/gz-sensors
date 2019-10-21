@@ -37,7 +37,7 @@ sdf::ElementPtr NoiseSdf(const std::string &_type, double _mean,
   double _stddev, double _biasMean, double _biasStddev, double _precision)
 {
   std::ostringstream noiseStream;
-  noiseStream << "<sdf version='1.4'>"
+  noiseStream << "<sdf version='1.6'>"
               << "  <noise type='" << _type << "'>"
               << "    <mean>" << _mean << "</mean>"
               << "    <stddev>" << _stddev << "</stddev>"
@@ -66,7 +66,15 @@ TEST(NoiseTest, Constructor)
   // Construct and initialize
   {
     sensors::Noise noise(sensors::NoiseType::NONE);
+
+#ifndef _WIN32
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
     noise.Load(NoiseSdf("none", 0, 0, 0, 0, 0));
+#ifndef _WIN32
+#pragma GCC diagnostic pop
+#endif
   }
 }
 
@@ -74,10 +82,15 @@ TEST(NoiseTest, Constructor)
 // Test noise types
 TEST(NoiseTest, Types)
 {
+  sdf::Noise noiseDom;
+
   // NONE type
   {
     sensors::NoisePtr noise =
         sensors::NoiseFactory::NewNoiseModel(NoiseSdf("none", 0, 0, 0, 0, 0));
+    EXPECT_EQ(noise->Type(), sensors::NoiseType::NONE);
+
+    noise = sensors::NoiseFactory::NewNoiseModel(noiseDom);
     EXPECT_EQ(noise->Type(), sensors::NoiseType::NONE);
   }
 
@@ -87,6 +100,10 @@ TEST(NoiseTest, Types)
         sensors::NoiseFactory::NewNoiseModel(
         NoiseSdf("gaussian", 0, 0, 0, 0, 0));
     EXPECT_EQ(noise->Type(), sensors::NoiseType::GAUSSIAN);
+
+    noiseDom.SetType(sdf::NoiseType::GAUSSIAN);
+    noise = sensors::NoiseFactory::NewNoiseModel(noiseDom);
+    EXPECT_EQ(noise->Type(), sensors::NoiseType::GAUSSIAN);
   }
 
   // GAUSSIAN_QUANTIZED type
@@ -94,6 +111,10 @@ TEST(NoiseTest, Types)
     sensors::NoisePtr noise =
         sensors::NoiseFactory::NewNoiseModel(
         NoiseSdf("gaussian_quantized", 0, 0, 0, 0, 0));
+    EXPECT_EQ(noise->Type(), sensors::NoiseType::GAUSSIAN);
+
+    noiseDom.SetType(sdf::NoiseType::GAUSSIAN_QUANTIZED);
+    noise = sensors::NoiseFactory::NewNoiseModel(noiseDom);
     EXPECT_EQ(noise->Type(), sensors::NoiseType::GAUSSIAN);
   }
 }
@@ -363,7 +384,7 @@ TEST(NoiseTest, ApplyGaussianQuantized)
 
 //////////////////////////////////////////////////
 // Callback function for applying custom noise
-double OnApplyCustomNoise(double _in)
+double OnApplyCustomNoise(double _in, double /*_dt*/)
 {
   return _in*2;
 }
@@ -377,7 +398,8 @@ TEST(NoiseTest, OnApplyNoise)
   EXPECT_TRUE(noise->Type() == sensors::NoiseType::CUSTOM);
 
   noise->SetCustomNoiseCallback(
-    std::bind(&OnApplyCustomNoise, std::placeholders::_1));
+    std::bind(&OnApplyCustomNoise,
+      std::placeholders::_1, std::placeholders::_2));
 
   for (double i = 0; i < 100; i += 1)
   {

@@ -100,6 +100,7 @@ sdf::ElementPtr GpuLidarToSDF(const std::string &name,
 
 int g_laserCounter = 0;
 std::vector<ignition::msgs::LaserScan> laserMsgs;
+std::vector<ignition::msgs::PointCloudPacked> pointMsgs;
 
 void OnNewLidarFrame(const float * /*_scan*/, unsigned int /*_width*/,
     unsigned int /*_height*/, unsigned int /*_channels*/,
@@ -112,6 +113,12 @@ void OnNewLidarFrame(const float * /*_scan*/, unsigned int /*_width*/,
 void laserCb(const ignition::msgs::LaserScan &_msg)
 {
   laserMsgs.push_back(_msg);
+}
+
+/////////////////////////////////////////////////
+void pointCb(const ignition::msgs::PointCloudPacked &_msg)
+{
+  pointMsgs.push_back(_msg);
 }
 
 class GpuLidarSensorTest: public testing::Test,
@@ -128,6 +135,9 @@ class GpuLidarSensorTest: public testing::Test,
 
   // Test vertical measurements
   public: void VerticalLidar(const std::string &_renderEngine);
+
+  // Test manually updating sensors
+  public: void ManualUpdate(const std::string &_renderEngine);
 };
 
 /////////////////////////////////////////////////
@@ -139,12 +149,12 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   const std::string parent = "parent_link";
   const std::string topic = "/ignition/sensors/test/lidar";
   const double updateRate = 30;
-  const int horzSamples = 640;
+  const unsigned int horzSamples = 640;
   const double horzResolution = 1;
   const double horzMinAngle = -1.396263;
   const double horzMaxAngle = 1.396263;
   const double vertResolution = 1;
-  const int vertSamples = 1;
+  const unsigned int vertSamples = 1;
   const double vertMinAngle = 0;
   const double vertMaxAngle = 0;
   const double rangeResolution = 0.01;
@@ -186,7 +196,6 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   sensor->SetParent(parent);
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
-
   sensor->SetScene(scene);
 
   // Set a callback on the lidar sensor to get a scan
@@ -311,16 +320,15 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   // Create a GpuLidarSensor
   ignition::sensors::GpuLidarSensor *sensor =
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSDF);
-  sensor->SetParent(parent);
-
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
-
+  sensor->SetParent(parent);
   sensor->SetScene(scene);
 
-  // subscribe to altimeter topic
+  // subscribe to gpu lidar topic
   ignition::transport::Node node;
   node.Subscribe(topic, &::laserCb);
+  node.Subscribe(topic + "/points", &::pointCb);
 
   WaitForMessageTestHelper<ignition::msgs::LaserScan> helper(topic);
   // Update sensor
@@ -341,7 +349,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   // Make sure to wait to receive the message
   ignition::common::Time waitTime = ignition::common::Time(0.01);
   int i = 0;
-  while (laserMsgs.size() < 1 && i < 300)
+  while ((laserMsgs.empty() || pointMsgs.empty()) && i < 300)
   {
     ignition::common::Time::Sleep(waitTime);
     i++;
@@ -357,7 +365,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
       LASER_TOL);
   EXPECT_DOUBLE_EQ(laserMsgs.back().ranges(last), ignition::math::INF_D);
 
-  EXPECT_EQ(laserMsgs.back().frame(), parent);
+  EXPECT_EQ(laserMsgs.back().frame(), name);
   EXPECT_NEAR(laserMsgs.back().angle_min(), horzMinAngle, 1e-4);
   EXPECT_NEAR(laserMsgs.back().angle_max(), horzMaxAngle, 1e-4);
   EXPECT_NEAR(laserMsgs.back().count(), horzSamples, 1e-4);
@@ -367,6 +375,19 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   EXPECT_NEAR(laserMsgs.back().vertical_count(), vertSamples, 1e-4);
   EXPECT_NEAR(laserMsgs.back().range_min(), rangeMin, 1e-4);
   EXPECT_NEAR(laserMsgs.back().range_max(), rangeMax, 1e-4);
+
+  ASSERT_TRUE(!pointMsgs.empty());
+  EXPECT_EQ(3, pointMsgs.back().field_size());
+  EXPECT_EQ("x", pointMsgs.back().field(0).name());
+  EXPECT_EQ("y", pointMsgs.back().field(1).name());
+  EXPECT_EQ("z", pointMsgs.back().field(2).name());
+  EXPECT_EQ(static_cast<uint32_t>(vertSamples), pointMsgs.back().height());
+  EXPECT_EQ(static_cast<uint32_t>(horzSamples), pointMsgs.back().width());
+  EXPECT_FALSE(pointMsgs.back().is_bigendian());
+  EXPECT_EQ(16u, pointMsgs.back().point_step());
+  EXPECT_EQ(16u * horzSamples, pointMsgs.back().row_step());
+  EXPECT_TRUE(pointMsgs.back().is_dense());
+  EXPECT_EQ(16u * horzSamples * vertSamples, pointMsgs.back().data().size());
 
   // Clean up
   //
@@ -449,7 +470,6 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor1 != nullptr);
   EXPECT_TRUE(sensor2 != nullptr);
-
   sensor1->SetScene(scene);
   sensor2->SetScene(scene);
 
@@ -514,10 +534,10 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   mgr.RunOnce(ignition::common::Time::Zero, true);
 
   // Verify values out of range
-  for (int i = 0; i < sensor1->RayCount(); ++i)
+  for (unsigned int i = 0; i < sensor1->RayCount(); ++i)
     EXPECT_DOUBLE_EQ(sensor1->Range(i), ignition::math::INF_D);
 
-  for (int i = 0; i < sensor1->RayCount(); ++i)
+  for (unsigned int i = 0; i < sensor1->RayCount(); ++i)
     EXPECT_DOUBLE_EQ(sensor2->Range(i), ignition::math::INF_D);
 
   // Clean up
@@ -591,7 +611,6 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
 
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
-
   sensor->SetScene(scene);
 
   // Update sensor
@@ -630,9 +649,9 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   mgr.RunOnce(ignition::common::Time::Zero, true);
 
   // Verify all values are out of range
-  for (int j = 0; j < sensor->VerticalRayCount(); ++j)
+  for (unsigned int j = 0; j < sensor->VerticalRayCount(); ++j)
   {
-    for (int i = 0; i < sensor->RayCount(); ++i)
+    for (unsigned int i = 0; i < sensor->RayCount(); ++i)
     {
       EXPECT_DOUBLE_EQ(sensor->Range(j * sensor->RayCount() + i),
           ignition::math::INF_D);
@@ -640,6 +659,124 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   }
 
   // Clean up
+  engine->DestroyScene(scene);
+  ignition::rendering::unloadEngine(engine->Name());
+}
+
+/////////////////////////////////////////////////
+/// \brief Test manually updating the scene with Scene::PreRender before
+/// updating the sensors
+void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
+{
+  // Create SDF describing a gpu lidar sensors sensor
+  const std::string name1 = "TestGpuLidar1";
+  const std::string name2 = "TestGpuLidar2";
+  const std::string topic1 = "/ignition/sensors/test/lidar1";
+  const std::string topic2 = "/ignition/sensors/test/lidar2";
+  const double updateRate = 30;
+  const int horzSamples = 320;
+  const double horzResolution = 1;
+  const double horzMinAngle = -IGN_PI/2.0;
+  const double horzMaxAngle = IGN_PI/2.0;
+  const double vertResolution = 1;
+  const int vertSamples = 1;
+  const double vertMinAngle = 0;
+  const double vertMaxAngle = 0;
+  const double rangeResolution = 0.01;
+  const double rangeMin = 0.1;
+  const double rangeMax = 10.0;
+  const bool alwaysOn = 1;
+  const bool visualize = 1;
+
+  // Create sensor SDF
+  ignition::math::Pose3d testPose1(ignition::math::Vector3d(0, 0, 0.1),
+      ignition::math::Quaterniond::Identity);
+  sdf::ElementPtr lidarSDF1 = GpuLidarToSDF(name1, testPose1, updateRate,
+      topic1, horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
+      vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
+      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+
+  // Create a second sensor SDF at an xy offset of 1
+  ignition::math::Pose3d testPose2(ignition::math::Vector3d(1, 1, 0.1),
+      ignition::math::Quaterniond::Identity);
+  sdf::ElementPtr lidarSDF2 = GpuLidarToSDF(name2, testPose2, updateRate,
+      topic2, horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
+      vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
+      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+
+  // Create and populate scene
+  ignition::rendering::RenderEngine *engine =
+    ignition::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    igndbg << "Engine '" << _renderEngine
+              << "' is not supported" << std::endl;
+    return;
+  }
+
+  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  ignition::rendering::VisualPtr root = scene->RootVisual();
+
+  scene->SetAmbientLight(0.3, 0.3, 0.3);
+
+  // Create a sensor manager
+  ignition::sensors::Manager mgr;
+  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
+
+  // Create a GpuLidarSensors
+  ignition::sensors::GpuLidarSensor *sensor1 =
+      mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSDF1);
+
+  // Create second GpuLidarSensor
+  ignition::sensors::GpuLidarSensor *sensor2 =
+      mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSDF2);
+
+  // Make sure the above dynamic cast worked.
+  EXPECT_TRUE(sensor1 != nullptr);
+  EXPECT_TRUE(sensor2 != nullptr);
+  sensor1->SetScene(scene);
+  sensor2->SetScene(scene);
+
+  // Create testing box
+  // box in the center of lidar1 and right of lidar2
+  ignition::math::Pose3d box01Pose(ignition::math::Vector3d(1, 0, 0.5),
+      ignition::math::Quaterniond::Identity);
+  ignition::rendering::VisualPtr visualBox1 = scene->CreateVisual("TestBox1");
+  visualBox1->AddGeometry(scene->CreateBox());
+  visualBox1->SetLocalPosition(box01Pose.Pos());
+  visualBox1->SetLocalRotation(box01Pose.Rot());
+  root->AddChild(visualBox1);
+
+  // Set sensors to manual update mode
+  sensor1->SetManualSceneUpdate(true);
+  EXPECT_TRUE(sensor1->ManualSceneUpdate());
+  sensor2->SetManualSceneUpdate(true);
+  EXPECT_TRUE(sensor2->ManualSceneUpdate());
+
+  // manually update scene
+  scene->PreRender();
+
+  // Render and update
+  mgr.RunOnce(ignition::common::Time::Zero);
+
+  int mid = horzSamples / 2;
+  int last = (horzSamples - 1);
+  double unitBoxSize = 1.0;
+  double expectedRangeAtMidPointBox1 =
+    abs(box01Pose.Pos().X()) - unitBoxSize/2;
+
+  // Sensor 1 should see box01 in front of it
+  EXPECT_DOUBLE_EQ(sensor1->Range(0), ignition::math::INF_D);
+  EXPECT_NEAR(sensor1->Range(mid), expectedRangeAtMidPointBox1, LASER_TOL);
+  EXPECT_DOUBLE_EQ(sensor1->Range(last), ignition::math::INF_D);
+
+  // Sensor 2 should see box01 to the right of it
+  EXPECT_NEAR(sensor2->Range(0), expectedRangeAtMidPointBox1, LASER_TOL);
+  EXPECT_DOUBLE_EQ(sensor2->Range(mid), ignition::math::INF_D);
+  EXPECT_DOUBLE_EQ(sensor2->Range(last), ignition::math::INF_D);
+
+  // Clean up
+  //
   engine->DestroyScene(scene);
   ignition::rendering::unloadEngine(engine->Name());
 }
@@ -662,6 +799,11 @@ TEST_P(GpuLidarSensorTest, TestThreeBoxes)
 TEST_P(GpuLidarSensorTest, VerticalLidar)
 {
   VerticalLidar(GetParam());
+}
+
+TEST_P(GpuLidarSensorTest, ManualUpdate)
+{
+  ManualUpdate(GetParam());
 }
 
 INSTANTIATE_TEST_CASE_P(GpuLidarSensor, GpuLidarSensorTest,

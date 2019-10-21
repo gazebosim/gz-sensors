@@ -31,11 +31,8 @@
 
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Pose3.hh>
-
 #include <ignition/msgs.hh>
-
 #include <ignition/rendering/Camera.hh>
-
 #include <ignition/transport.hh>
 
 #include "ignition/sensors/camera/Export.hh"
@@ -44,18 +41,6 @@
 #include "ignition/sensors/Manager.hh"
 #include "ignition/sensors/RenderingEvents.hh"
 #include "ignition/sensors/RenderingSensor.hh"
-
-
-
-#ifndef _WIN32
-#  define CameraSensor_EXPORTS_API
-#else
-#  if (defined(CameraSensor_EXPORTS))
-#    define CameraSensor_EXPORTS_API __declspec(dllexport)
-#  else
-#    define CameraSensor_EXPORTS_API __declspec(dllimport)
-#  endif
-#endif
 
 namespace ignition
 {
@@ -74,7 +59,6 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-//    class CameraSensor_EXPORTS_API CameraSensor : public Sensor
     class IGNITION_SENSORS_CAMERA_VISIBLE CameraSensor : public RenderingSensor
     {
       /// \brief constructor
@@ -82,6 +66,11 @@ namespace ignition
 
       /// \brief destructor
       public: virtual ~CameraSensor();
+
+      /// \brief Load the sensor based on data from an sdf::Sensor object.
+      /// \param[in] _sdf SDF Sensor parameters.
+      /// \return true if loading was successful
+      public: virtual bool Load(const sdf::Sensor &_sdf) override;
 
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF Sensor parameters.
@@ -125,6 +114,39 @@ namespace ignition
       /// \brief Get pointer to rendering camera object.
       /// \return Camera in Ignition Rendering.
       public: rendering::CameraPtr RenderingCamera() const;
+
+      /// \brief Topic where camera info is published.
+      /// \return Camera info topic.
+      public: std::string InfoTopic() const;
+
+      /// \brief Set baseline for stereo cameras. This is used to populate the
+      /// projection matrix in the camera info message.
+      /// \param[in] _baseline The distance from the 1st camera, in meters.
+      public: void SetBaseline(double _baseline);
+
+      /// \brief Get baseline for stereo cameras.
+      /// \return The distance from the 1st camera, in meters.
+      public: double Baseline() const;
+
+      /// \brief Advertise camera info topic.
+      /// \return True if successful.
+      protected: bool AdvertiseInfo();
+
+      /// \brief Advertise camera info topic.
+      /// This version takes a string that allows one to override the
+      /// camera_info topic.
+      /// \param[in] _topic The topic on which camera info is to be published.
+      /// \return True if successful.
+      protected: bool AdvertiseInfo(const std::string &_topic);
+
+      /// \brief Populate camera info message.
+      /// \param[in] _cameraSdf Pointer to SDF object containing camera
+      /// information.
+      protected: void PopulateInfo(const sdf::Camera *_cameraSdf);
+
+      /// \brief Publish camera info message.
+      /// \param[in] _now The current time
+      protected: void PublishInfo(const ignition::common::Time &_now);
 
       /// \brief Create a camera in a scene
       /// \return True on success.

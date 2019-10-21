@@ -15,13 +15,20 @@
  *
 */
 
+// todo(anyone) remove pragma once the deprecated functions are removed in
+// ign-sensors 3
+// #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+#include "ignition/sensors/Manager.hh"
+#include <memory>
 #include <unordered_map>
+#include <ignition/common/PluginLoader.hh>
+#include <ignition/common/Plugin.hh>
+#include <ignition/common/Profiler.hh>
 #include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>
 
 #include "ignition/sensors/config.hh"
-// #include "ignition/sensors/Events.hh"
-#include "ignition/sensors/Manager.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
 using namespace ignition::sensors;
@@ -36,6 +43,9 @@ class ignition::sensors::ManagerPrivate
 
   /// \brief Loaded sensors.
   public: std::map<SensorId, std::unique_ptr<Sensor>> sensors;
+
+  /// \brief Ignition Rendering manager
+  public: ignition::rendering::ScenePtr renderingScene;
 
   /// \brief Sensor factory for creating sensors from plugins;
   public: SensorFactory sensorFactory;
@@ -68,35 +78,39 @@ bool Manager::Init()
   return true;
 }
 
-//////////////////////////////////////////////////
-//bool Manager::Init(ignition::rendering::ScenePtr _rendering)
-//{
-//  if (!_rendering)
-//  {
-//    ignerr << "Null ScenePtr cannot initialize a sensor manager.\n";
-//    return false;
-//  }
+// //////////////////////////////////////////////////
+// bool Manager::Init(ignition::rendering::ScenePtr _scene)
+// {
+//   if (!_scene)
+//   {
+//     ignerr << "Null ScenePtr cannot initialize a sensor manager.\n";
+//     return false;
+//   }
 //
-//  bool success = this->Init();
-//  if (success)
-//  {
-//    this->SetRenderingScene(_rendering);
-//  }
-//  return success;
-//}
+//   bool success = this->Init();
+//   if (success)
+//   {
+// #pragma GCC diagnostic push
+// #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+//     // The Init and SetRenderingScene functions will be removed in ign-sensors3
+//     this->SetRenderingScene(_scene);
+// #pragma GCC diagnostic pop
+//   }
+//   return success;
+// }
 
-//////////////////////////////////////////////////
-//void Manager::SetRenderingScene(ignition::rendering::ScenePtr _rendering)
-//{
-//  this->dataPtr->renderingScene = _rendering;
-//  Events::sceneEvent(this->dataPtr->renderingScene);
-//}
-
-//////////////////////////////////////////////////
-//ignition::rendering::ScenePtr Manager::RenderingScene() const
-//{
-//  return this->dataPtr->renderingScene;
-//}
+// //////////////////////////////////////////////////
+// void Manager::SetRenderingScene(ignition::rendering::ScenePtr _rendering)
+// {
+//   this->dataPtr->renderingScene = _rendering;
+//   RenderingEvents::sceneEvent(this->dataPtr->renderingScene);
+// }
+//
+// //////////////////////////////////////////////////
+// ignition::rendering::ScenePtr Manager::RenderingScene() const
+// {
+//   return this->dataPtr->renderingScene;
+// }
 
 //////////////////////////////////////////////////
 ignition::sensors::Sensor *Manager::Sensor(
@@ -121,10 +135,30 @@ bool Manager::Remove(const ignition::sensors::SensorId _id)
 //////////////////////////////////////////////////
 void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 {
+  IGN_PROFILE("SensorManager::RunOnce");
   for (auto &s : this->dataPtr->sensors)
   {
     s.second->Update(_time, _force);
   }
+}
+
+/////////////////////////////////////////////////
+ignition::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &_sdf)
+{
+  auto sensor = this->dataPtr->sensorFactory.CreateSensor(_sdf);
+  if (!sensor)
+    return NO_SENSOR;
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  // This behavior is deprecated.
+  // The users are expected to call RenderingSsensor::SetScene in ign-sensors3
+  sensor->SetScene(this->dataPtr->renderingScene);
+#pragma GCC diagnostic pop
+
+  SensorId id = sensor->Id();
+  this->dataPtr->sensors[id] = std::move(sensor);
+  return id;
 }
 
 /////////////////////////////////////////////////
@@ -134,8 +168,12 @@ ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr _sdf)
   if (!sensor)
     return NO_SENSOR;
 
-  // Set the rendering scene
-  // sensor->SetScene(this->dataPtr->renderingScene);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  // This behavior is deprecated.
+  // The users are expected to call RenderingSsensor::SetScene in ign-sensors3
+  sensor->SetScene(this->dataPtr->renderingScene);
+#pragma GCC diagnostic pop
 
   SensorId id = sensor->Id();
   this->dataPtr->sensors[id] = std::move(sensor);

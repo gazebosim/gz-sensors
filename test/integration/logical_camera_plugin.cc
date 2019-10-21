@@ -32,6 +32,12 @@
 
 #include "test_config.h"  // NOLINT(build/include)
 
+// undefine near and far macros from windows.h
+#ifdef _WIN32
+  #undef near
+  #undef far
+#endif
+
 /// \brief Helper function to create a logical camera sdf element
 sdf::ElementPtr LogicalCameraToSDF(const std::string &_name,
     const ignition::math::Pose3d &_pose, const double _updateRate,
@@ -81,7 +87,7 @@ TEST_F(LogicalCameraSensorTest, CreateLogicalCamera)
 {
   // Create SDF describing a logical camera sensor
   const std::string name = "TestLogicalCamera";
-  const std::string topic = "/ignition/sensors/test/lidar";
+  const std::string topic = "/ignition/sensors/test/logical_camera";
   const double updateRate = 30;
   const double near = 0.55;
   const double far = 5;
@@ -119,7 +125,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
 {
   // Create SDF describing a logical camera sensor
   const std::string name = "TestLogicalCamera";
-  const std::string topic = "/ignition/sensors/test/lidar";
+  const std::string topic = "/ignition/sensors/test/logical_camera";
   const double updateRate = 30;
   const double near = 0.55;
   const double far = 5;

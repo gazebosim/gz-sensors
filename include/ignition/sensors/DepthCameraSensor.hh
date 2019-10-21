@@ -46,16 +46,6 @@
 
 #include <ignition/transport.hh>
 
-#ifndef _WIN32
-#  define DepthCameraSensor_EXPORTS_API
-#else
-#  if (defined(DepthCameraSensor_EXPORTS))
-#    define DepthCameraSensor_EXPORTS_API __declspec(dllexport)
-#  else
-#    define DepthCameraSensor_EXPORTS_API __declspec(dllimport)
-#  endif
-#endif
-
 namespace ignition
 {
   namespace sensors
@@ -72,7 +62,6 @@ namespace ignition
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-//    class DepthCameraSensor_EXPORTS_API DepthCameraSensor : public CameraSensor
     class IGNITION_SENSORS_DEPTH_CAMERA_VISIBLE DepthCameraSensor
         : public CameraSensor
     {
@@ -81,6 +70,11 @@ namespace ignition
 
       /// \brief destructor
       public: virtual ~DepthCameraSensor();
+
+      /// \brief Load the sensor based on data from an sdf::Sensor object.
+      /// \param[in] _sdf SDF Sensor parameters.
+      /// \return true if loading was successful
+      public: virtual bool Load(const sdf::Sensor &_sdf) override;
 
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF Sensor parameters.
@@ -99,7 +93,7 @@ namespace ignition
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual ignition::rendering::DepthCameraPtr DepthCamera();
+      public: virtual rendering::DepthCameraPtr DepthCamera();
 
       /// \brief Depth data callback used to get the data from the sensor
       /// \param[in] _scan pointer to the data from the sensor

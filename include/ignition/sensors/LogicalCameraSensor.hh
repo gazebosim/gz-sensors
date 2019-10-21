@@ -63,8 +63,8 @@ namespace ignition
     /// A logical camera reports locations of objects. This camera finds models
     /// within the sensor's frustum and publishes information about the models
     /// on the sensor's topic.
-//    class LogicalCameraSensor_EXPORTS_API LogicalCameraSensor : public Sensor
-    class IGNITION_SENSORS_LOGICAL_CAMERA_VISIBLE LogicalCameraSensor : public Sensor
+    class IGNITION_SENSORS_LOGICAL_CAMERA_VISIBLE LogicalCameraSensor
+        : public Sensor
     {
       /// \brief constructor
       public: LogicalCameraSensor();

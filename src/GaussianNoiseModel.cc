@@ -25,6 +25,11 @@
 #include <ignition/math/Rand.hh>
 
 #include "ignition/common/Console.hh"
+#include "ignition/rendering/GaussianNoisePass.hh"
+#include "ignition/rendering/RenderPass.hh"
+#include "ignition/rendering/RenderEngine.hh"
+#include "ignition/rendering/RenderPassSystem.hh"
+
 
 using namespace ignition;
 using namespace sensors;
@@ -42,12 +47,34 @@ class ignition::sensors::GaussianNoiseModelPrivate
   /// \brief If type starts with GAUSSIAN, the bias we'll add.
   public: double bias = 0.0;
 
+  /// \brief If type starts with GAUSSIAN, the standard deviation of the
+  /// distribution from which the dynamic bias will be driven.
+  public: double dynamicBiasStdDev = 0.0;
+
+  /// \brief If type starts with GAUSSIAN, the correlation time of the
+  /// process from which the dynamic bias will be driven.
+  public: double dynamicBiasCorrTime = 0.0;
+
   /// \brief If type==GAUSSIAN_QUANTIZED, the precision to which
   /// the output signal is rounded.
   public: double precision = 0.0;
 
   /// \brief True if the type is GAUSSIAN_QUANTIZED
   public: bool quantized = false;
+};
+
+class ignition::sensors::ImageGaussianNoiseModelPrivate
+{
+  /// \brief If type starts with GAUSSIAN, the mean of the distribution
+  /// from which we sample when adding noise.
+  public: double mean = 0.0;
+
+  /// \brief If type starts with GAUSSIAN, the standard deviation of the
+  /// distribution from which we sample when adding noise.
+  public: double stdDev = 0.0;
+
+  /// \brief Gaussian noise pass.
+  public: rendering::GaussianNoisePassPtr gaussianNoisePass;
 };
 
 //////////////////////////////////////////////////
@@ -64,21 +91,21 @@ GaussianNoiseModel::~GaussianNoiseModel()
 }
 
 //////////////////////////////////////////////////
-void GaussianNoiseModel::Load(sdf::ElementPtr _sdf)
+void GaussianNoiseModel::Load(const sdf::Noise &_sdf)
 {
   Noise::Load(_sdf);
   std::ostringstream out;
 
-  this->dataPtr->mean = _sdf->Get<double>("mean");
-  this->dataPtr->stdDev = _sdf->Get<double>("stddev");
+  this->dataPtr->mean = _sdf.Mean();
+  this->dataPtr->stdDev = _sdf.StdDev();
+  this->dataPtr->dynamicBiasStdDev = _sdf.DynamicBiasStdDev();
+  this->dataPtr->dynamicBiasCorrTime = _sdf.DynamicBiasCorrelationTime();
 
   // Sample the bias
   double biasMean = 0;
   double biasStdDev = 0;
-  if (_sdf->HasElement("bias_mean"))
-    biasMean = _sdf->Get<double>("bias_mean");
-  if (_sdf->HasElement("bias_stddev"))
-    biasStdDev = _sdf->Get<double>("bias_stddev");
+  biasMean = _sdf.BiasMean();
+  biasStdDev = _sdf.BiasStdDev();
   this->dataPtr->bias = ignition::math::Rand::DblNormal(biasMean, biasStdDev);
 
   // With equal probability, we pick a negative bias (by convention,
@@ -89,26 +116,41 @@ void GaussianNoiseModel::Load(sdf::ElementPtr _sdf)
 
   this->Print(out);
 
-  if (_sdf->HasElement("precision"))
-  {
-    this->dataPtr->precision = _sdf->Get<double>("precision");
-    if (this->dataPtr->precision < 0)
-    {
-      ignerr << "Noise precision cannot be less than 0" << std::endl;
-    }
-    else if (!ignition::math::equal(this->dataPtr->precision, 0.0, 1e-6))
-    {
-      this->dataPtr->quantized = true;
-    }
-  }
+  this->dataPtr->precision = _sdf.Precision();
+  if (this->dataPtr->precision < 0)
+    ignerr << "Noise precision cannot be less than 0" << std::endl;
+  else if (!ignition::math::equal(this->dataPtr->precision, 0.0, 1e-6))
+    this->dataPtr->quantized = true;
 }
 
 //////////////////////////////////////////////////
-double GaussianNoiseModel::ApplyImpl(double _in)
+double GaussianNoiseModel::ApplyImpl(double _in, double _dt)
 {
-  // Add independent (uncorrelated) Gaussian noise to each input value.
+  // Generate independent (uncorrelated) Gaussian noise to each input value.
   double whiteNoise = ignition::math::Rand::DblNormal(
       this->dataPtr->mean, this->dataPtr->stdDev);
+
+  // Generate varying (correlated) bias to each input value.
+  // This implementation is based on the one available in Rotors:
+  // https://github.com/ethz-asl/rotors_simulator/blob/master/rotors_gazebo_plugins/src/gazebo_imu_plugin.cpp
+  //
+  // More information about the parameters and their derivation:
+  //
+  // https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model
+
+  if (this->dataPtr->dynamicBiasStdDev > 0 &&
+     this->dataPtr->dynamicBiasCorrTime > 0)
+  {
+    double sigma_b = this->dataPtr->dynamicBiasStdDev;
+    double tau = this->dataPtr->dynamicBiasCorrTime;
+
+    double sigma_b_d = sqrt(-sigma_b * sigma_b *
+        tau / 2 * expm1(-2 * _dt / tau));
+    double phi_d = exp(-_dt / tau);
+    this->dataPtr->bias = phi_d * this->dataPtr->bias +
+      ignition::math::Rand::DblNormal(0, sigma_b_d);
+  }
+
   double output = _in + this->dataPtr->bias + whiteNoise;
 
   if (this->dataPtr->quantized)
@@ -149,4 +191,58 @@ void GaussianNoiseModel::Print(std::ostream &_out) const
     << "bias[" << this->dataPtr->bias << "] "
     << "precision[" << this->dataPtr->precision << "] "
     << "quantized[" << this->dataPtr->quantized << "]";
+}
+
+//////////////////////////////////////////////////
+ImageGaussianNoiseModel::ImageGaussianNoiseModel()
+  : GaussianNoiseModel(), dataPtr(new ImageGaussianNoiseModelPrivate())
+{
+}
+
+//////////////////////////////////////////////////
+ImageGaussianNoiseModel::~ImageGaussianNoiseModel()
+{
+  delete this->dataPtr;
+  this->dataPtr = nullptr;
+}
+
+//////////////////////////////////////////////////
+void ImageGaussianNoiseModel::Load(const sdf::Noise &_sdf)
+{
+  Noise::Load(_sdf);
+
+  this->dataPtr->mean = _sdf.Mean();
+  this->dataPtr->stdDev = _sdf.StdDev();
+}
+
+//////////////////////////////////////////////////
+void ImageGaussianNoiseModel::SetCamera(rendering::CameraPtr _camera)
+{
+  if (!_camera)
+  {
+    ignerr << "Unable to apply gaussian noise, camera is null\n";
+    return;
+  }
+
+  rendering::RenderEngine *engine = _camera->Scene()->Engine();
+  rendering::RenderPassSystemPtr rpSystem = engine->RenderPassSystem();
+  if (rpSystem)
+  {
+    // add gaussian noise pass
+    rendering::RenderPassPtr noisePass =
+      rpSystem->Create<rendering::GaussianNoisePass>();
+    this->dataPtr->gaussianNoisePass =
+        std::dynamic_pointer_cast<rendering::GaussianNoisePass>(noisePass);
+    this->dataPtr->gaussianNoisePass->SetMean(this->dataPtr->mean);
+    this->dataPtr->gaussianNoisePass->SetStdDev(this->dataPtr->stdDev);
+    this->dataPtr->gaussianNoisePass->SetEnabled(true);
+    _camera->AddRenderPass(this->dataPtr->gaussianNoisePass);
+  }
+}
+
+//////////////////////////////////////////////////
+void ImageGaussianNoiseModel::Print(std::ostream &_out) const
+{
+  _out << "Image Gaussian noise, mean[" << this->dataPtr->mean << "], "
+    << "stdDev[" << this->dataPtr->stdDev << "] ";
 }

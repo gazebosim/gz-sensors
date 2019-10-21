@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
 #============================================================================
 # Initialize the project
 #============================================================================
-project(ignition-sensors1 VERSION 1.0.0)
+project(ignition-sensors3 VERSION 3.0.0)
 
 #============================================================================
 # Find ignition-cmake
@@ -13,12 +13,20 @@ find_package(ignition-cmake2 REQUIRED)
 #============================================================================
 # Configure the project
 #============================================================================
-ign_configure_project()
+ign_configure_project(VERSION_SUFFIX pre1)
 
 #============================================================================
 # Set project-specific options
 #============================================================================
 set (DRI_TESTS TRUE CACHE BOOL "True to enable DRI tests")
+
+option(ENABLE_PROFILER "Enable Ignition Profiler" FALSE)
+
+if(ENABLE_PROFILER)
+  add_definitions("-DIGN_PROFILER_ENABLE=1")
+else()
+  add_definitions("-DIGN_PROFILER_ENABLE=0")
+endif()
 
 #============================================================================
 # Search for project-specific dependencies
@@ -40,18 +48,20 @@ set(IGN_MATH_VER ${ignition-math6_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-common
-ign_find_package(ignition-common3 REQUIRED)
+ign_find_package(ignition-common3
+                 COMPONENTS profiler
+                 REQUIRED)
 set(IGN_COMMON_VER ${ignition-common3_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-transport
-ign_find_package(ignition-transport6 REQUIRED)
-set(IGN_TRANSPORT_VER ${ignition-transport6_VERSION_MAJOR})
+ign_find_package(ignition-transport7 REQUIRED)
+set(IGN_TRANSPORT_VER ${ignition-transport7_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-rendering
-ign_find_package(ignition-rendering1 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
-set(IGN_RENDERING_VER ${ignition-rendering1_VERSION_MAJOR})
+ign_find_package(ignition-rendering3 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
+set(IGN_RENDERING_VER ${ignition-rendering3_VERSION_MAJOR})
 
 if (TARGET ignition-rendering${IGN_RENDERING_VER}::ogre)
   set(HAVE_OGRE TRUE)
@@ -65,8 +75,8 @@ endif()
 
 #--------------------------------------
 # Find ignition-msgs
-ign_find_package(ignition-msgs3 REQUIRED)
-set(IGN_MSGS_VER ${ignition-msgs3_VERSION_MAJOR})
+ign_find_package(ignition-msgs4 REQUIRED VERSION 4.1.0)
+set(IGN_MSGS_VER ${ignition-msgs4_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-plugin
