@@ -22,6 +22,7 @@
 
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
+#include <ignition/rendering/Scene.hh>
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
 #include <sdf/sdf.hh>
@@ -52,6 +53,11 @@ namespace ignition
 
       /// \brief destructor
       public: virtual ~Sensor();
+
+      /// \brief Load the sensor based on data from an sdf::Sensor object.
+      /// \param[in] _sdf SDF <sensor> or <plugin> inside of <sensor>
+      /// \return true if loading was successful
+      public: virtual bool Load(const sdf::Sensor &_sdf);
 
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF <sensor> or <plugin> inside of <sensor>
@@ -101,8 +107,10 @@ namespace ignition
       /// \return _hz update rate of sensor.
       public: double UpdateRate() const;
 
-      /// \brief Set the update rate of the sensor.
-      /// \param[in] _hz update rate of sensor.
+      /// \brief Set the update rate of the sensor. An update rate of zero means
+      /// that the sensor is updated every cycle. It's zero by default.
+      /// \detail Negative rates become zero.
+      /// \param[in] _hz Update rate of sensor in Hertz.
       public: void SetUpdateRate(const double _hz);
 
       /// \brief Get the current pose.
@@ -113,13 +121,13 @@ namespace ignition
       public: void SetPose(const ignition::math::Pose3d &_pose);
 
       /// \brief Set the parent of the sensor
-      public: void SetParent(const std::string &_parent);
+      public: virtual void SetParent(const std::string &_parent);
 
       /// \brief Get name.
       /// \return Name of sensor.
       public: std::string Name() const;
 
-      /// \brief Get topic
+      /// \brief Get topic where sensor data is published.
       /// \return Topic sensor publishes data to
       public: std::string Topic() const;
 
@@ -135,6 +143,15 @@ namespace ignition
       /// \return Pointer to an SDF element that contains initialization
       /// information for this sensor.
       public: sdf::ElementPtr SDF() const;
+
+      /// \brief Set the rendering scene.
+      ///
+      /// A sensor subclass should override this function if the subclass
+      /// needs a pointer to the scene.
+      /// \param[in] _scene Pointer to the scene
+      /// \deprecated See RenderingSensor::SetScene
+      public: virtual void IGN_DEPRECATED(1) SetScene(
+          ignition::rendering::ScenePtr _scene);
 
       /// \internal
       /// \brief Data pointer for private data

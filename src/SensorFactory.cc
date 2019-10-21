@@ -98,6 +98,53 @@ std::shared_ptr<SensorInterface> SensorFactory::LoadSensorPlugin(
 }
 
 /////////////////////////////////////////////////
+std::unique_ptr<Sensor> SensorFactory::CreateSensor(const sdf::Sensor &_sdf)
+{
+  std::unique_ptr<Sensor> result;
+  std::shared_ptr<SensorInterface> sensorPlugin;
+  std::string type = _sdf.TypeStr();
+  std::string fullPath = IGN_SENSORS_PLUGIN_NAME(type);
+
+  auto it = this->dataPtr->sensorPlugins.find(type);
+  if (it != this->dataPtr->sensorPlugins.end())
+    sensorPlugin = it->second;
+  else
+  {
+    sensorPlugin = this->LoadSensorPlugin(fullPath);
+    if (!sensorPlugin)
+    {
+      ignerr << "Unable to instantiate sensor plugin for [" << fullPath
+        << "]\n";
+      return nullptr;
+    }
+
+    this->dataPtr->sensorPlugins[type] = sensorPlugin;
+  }
+
+  auto sensor = sensorPlugin->New();
+  if (!sensor)
+  {
+    ignerr << "Unable to instantiate sensor for [" << fullPath << "]\n";
+    return nullptr;
+  }
+
+  if (!sensor->Load(_sdf))
+  {
+    ignerr << "Sensor::Load failed for plugin [" << fullPath << "]\n";
+    return nullptr;
+  }
+
+  if (!sensor->Init())
+  {
+    ignerr << "Sensor::Init failed for plugin [" << fullPath << "]\n";
+    return nullptr;
+  }
+
+  result.reset(sensor);
+  return std::move(result);
+}
+
+/////////////////////////////////////////////////
 std::unique_ptr<Sensor> SensorFactory::CreateSensor(sdf::ElementPtr _sdf)
 {
   std::unique_ptr<Sensor> result;

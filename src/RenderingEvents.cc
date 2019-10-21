@@ -20,7 +20,7 @@
 using namespace ignition::sensors;
 
 ignition::common::EventT<void(const ignition::rendering::ScenePtr &)>
-RenderingEvents::sceneEvent;
+  RenderingEvents::sceneEvent;
 
 /////////////////////////////////////////////////
 ignition::common::ConnectionPtr RenderingEvents::ConnectSceneChangeCallback(

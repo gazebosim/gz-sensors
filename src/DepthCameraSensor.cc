@@ -15,19 +15,23 @@
  *
 */
 
+#include <ignition/common/Profiler.hh>
 #include <ignition/math/Helpers.hh>
 
 #include "ignition/sensors/DepthCameraSensor.hh"
+#include "ignition/sensors/SensorFactory.hh"
+#include "ignition/sensors/GaussianNoiseModel.hh"
 #include "ignition/sensors/Register.hh"
 
-using namespace ignition::sensors;
+// undefine near and far macros from windows.h
+#ifdef _WIN32
+  #undef near
+  #undef far
+#endif
 
 /// \brief Private data for DepthCameraSensor
 class ignition::sensors::DepthCameraSensorPrivate
 {
-  /// \brief Remove a camera from a scene
-  public: void RemoveCamera(ignition::rendering::ScenePtr _scene);
-
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
   /// \param[in] _width width of image in pixels
@@ -49,10 +53,7 @@ class ignition::sensors::DepthCameraSensorPrivate
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
 
-  /// \brief A scene the camera is capturing
-  public: ignition::rendering::ScenePtr scene;
-
-  /// \brief Rendering camera
+    /// \brief Rendering camera
   public: ignition::rendering::DepthCameraPtr depthCamera;
 
   /// \brief Depth data buffer.
@@ -63,6 +64,9 @@ class ignition::sensors::DepthCameraSensorPrivate
 
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
+
+  /// \brief Noise added to sensor data
+  public: std::map<SensorNoiseType, NoisePtr> noises;
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
@@ -89,18 +93,13 @@ class ignition::sensors::DepthCameraSensorPrivate
 
   /// \brief counter used to set the image filename
   public: std::uint64_t saveImageCounter = 0;
+
+  /// \brief SDF Sensor DOM object.
+  public: sdf::Sensor sdfSensor;
 };
 
-//////////////////////////////////////////////////
-void DepthCameraSensorPrivate::RemoveCamera(
-    ignition::rendering::ScenePtr _scene)
-{
-  if (_scene)
-  {
-    // \todo(nkoenig) Remove camera from scene!
-  }
-  // this->depthCamera = nullptr;
-}
+using namespace ignition;
+using namespace sensors;
 
 //////////////////////////////////////////////////
 bool DepthCameraSensorPrivate::SaveImage(const float *_data,
@@ -177,22 +176,36 @@ bool DepthCameraSensor::Init()
 //////////////////////////////////////////////////
 bool DepthCameraSensor::Load(sdf::ElementPtr _sdf)
 {
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(_sdf);
+  return this->Load(sdfSensor);
+}
+
+//////////////////////////////////////////////////
+bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
+{
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  // Check if this is being loaded via "builtin" or via a plugin
-  if (_sdf->GetName() == "sensor")
-  {
-    if (!_sdf->GetElement("camera"))
-    {
-      ignerr << "<sensor><camera> SDF element not found while attempting to "
-        << "load a ignition::sensors::DepthCameraSensor\n";
-      return false;
-    }
-  }
 
   if (!Sensor::Load(_sdf))
   {
     return false;
-    }
+  }
+
+  // Check if this is the right type
+  if (_sdf.Type() != sdf::SensorType::DEPTH_CAMERA)
+  {
+    ignerr << "Attempting to a load a Depth Camera sensor, but received "
+      << "a " << _sdf.TypeStr() << std::endl;
+  }
+
+  if (_sdf.CameraSensor() == nullptr)
+  {
+    ignerr << "Attempting to a load a Depth Camera sensor, but received "
+      << "a null sensor." << std::endl;
+    return false;
+  }
+
+  this->dataPtr->sdfSensor = _sdf;
 
   this->dataPtr->pub =
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
@@ -200,7 +213,10 @@ bool DepthCameraSensor::Load(sdf::ElementPtr _sdf)
   if (!this->dataPtr->pub)
     return false;
 
-  if (this->dataPtr->scene)
+  if (!this->AdvertiseInfo())
+    return false;
+
+  if (this->Scene())
   {
     this->CreateCamera();
   }
@@ -211,45 +227,59 @@ bool DepthCameraSensor::Load(sdf::ElementPtr _sdf)
 
   this->dataPtr->initialized = true;
 
-  return this->CameraSensor::Load(_sdf);
+  return true;
 }
 
 //////////////////////////////////////////////////
 bool DepthCameraSensor::CreateCamera()
 {
-  sdf::ElementPtr cameraElem = this->SDF()->GetElement("camera");
-  if (!cameraElem)
+  const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
+
+  if (!cameraSdf)
   {
-    ignerr << "Unable to find <camera> SDF element\n";
+    ignerr << "Unable to access camera SDF element\n";
     return false;
   }
 
-  sdf::ElementPtr imgElem = cameraElem->GetElement("image");
+  int width = cameraSdf->ImageWidth();
+  int height = cameraSdf->ImageHeight();
 
-  if (!imgElem)
-  {
-    ignerr << "Unable to find <camera><image> SDF element\n";
-    return false;
-  }
+  double far = cameraSdf->FarClip();
+  double near = cameraSdf->NearClip();
 
-  int width = imgElem->Get<int>("width");
-  int height = imgElem->Get<int>("height");
+  this->PopulateInfo(cameraSdf);
 
-
-  double far = 100.0;
-  double near = 0.3;
-  if (cameraElem->HasElement("clip"))
-  {
-    sdf::ElementPtr clipElem = cameraElem->GetElement("clip");
-    far = clipElem->Get<double>("far");
-    near = clipElem->Get<double>("near");
-  }
-
-  this->dataPtr->depthCamera = this->dataPtr->scene->CreateDepthCamera(
+  this->dataPtr->depthCamera = this->Scene()->CreateDepthCamera(
       this->Name());
   this->dataPtr->depthCamera->SetImageWidth(width);
   this->dataPtr->depthCamera->SetImageHeight(height);
   this->dataPtr->depthCamera->SetFarClipPlane(far);
+
+  this->AddSensor(this->dataPtr->depthCamera);
+
+  const std::map<SensorNoiseType, sdf::Noise> noises = {
+    {CAMERA_NOISE, cameraSdf->ImageNoise()},
+  };
+
+  for (const auto & [noiseType, noiseSdf] : noises)
+  {
+    // Add gaussian noise to camera sensor
+    if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
+    {
+      this->dataPtr->noises[noiseType] =
+        NoiseFactory::NewNoiseModel(noiseSdf, "depth");
+
+      std::dynamic_pointer_cast<ImageGaussianNoiseModel>(
+           this->dataPtr->noises[noiseType])->SetCamera(
+             this->dataPtr->depthCamera);
+    }
+    else if (noiseSdf.Type() != sdf::NoiseType::NONE)
+    {
+      ignwarn << "The depth camera sensor only supports Gaussian noise. "
+       << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
+       << "] is not supported." << std::endl;
+    }
+  }
 
   // Near clip plane not set because we need to be able to detect occlusion
   // from objects before near clip plane
@@ -258,50 +288,44 @@ bool DepthCameraSensor::CreateCamera()
   // \todo(nkoeng) these parameters via sdf
   this->dataPtr->depthCamera->SetAntiAliasing(2);
 
-  auto angle = cameraElem->Get<double>("horizontal_fov", 0);
-  if (angle.first < 0.01 || angle.first > IGN_PI*2)
+  math::Angle angle = cameraSdf->HorizontalFov();
+  if (angle < 0.01 || angle > IGN_PI*2)
   {
-    ignerr << "Invalid horizontal field of view [" << angle.first << "]\n";
+    ignerr << "Invalid horizontal field of view [" << angle << "]\n";
 
     return false;
   }
   this->dataPtr->depthCamera->SetAspectRatio(static_cast<double>(width)/height);
-  this->dataPtr->depthCamera->SetHFOV(angle.first);
+  this->dataPtr->depthCamera->SetHFOV(angle);
 
   // Create depth texture when the camera is reconfigured from default values
   this->dataPtr->depthCamera->CreateDepthTexture();
 
-  if (cameraElem->HasElement("distortion"))
-  {
-    // \todo(nkoenig) Port Distortion class
-    // This->dataPtr->distortion.reset(new Distortion());
-    // This->dataPtr->distortion->Load(this->sdf->GetElement("distortion"));
-  }
+  // \todo(nkoenig) Port Distortion class
+  // This->dataPtr->distortion.reset(new Distortion());
+  // This->dataPtr->distortion->Load(this->sdf->GetElement("distortion"));
 
-  std::string formatStr = imgElem->Get<std::string>("format");
-  ignition::common::Image::PixelFormatType format =
-    ignition::common::Image::ConvertPixelFormat(formatStr);
-  switch (format)
+  sdf::PixelFormatType pixelFormat = cameraSdf->PixelFormat();
+  switch (pixelFormat)
   {
-    case ignition::common::Image::R_FLOAT32:
+    case sdf::PixelFormatType::R_FLOAT32:
       this->dataPtr->depthCamera->SetImageFormat(
           ignition::rendering::PF_FLOAT32_R);
       break;
     default:
-      ignerr << "Unsupported pixel format [" << formatStr << "]\n";
+      ignerr << "Unsupported pixel format ["
+        << static_cast<int>(pixelFormat) << "]\n";
       break;
   }
 
   this->dataPtr->image = this->dataPtr->depthCamera->CreateImage();
 
-  this->dataPtr->scene->RootVisual()->AddChild(this->dataPtr->depthCamera);
+  this->Scene()->RootVisual()->AddChild(this->dataPtr->depthCamera);
 
   // Create the directory to store frames
-  if (cameraElem->HasElement("save") &&
-      cameraElem->GetElement("save")->Get<bool>("enabled"))
+  if (cameraSdf->SaveFrames())
   {
-    sdf::ElementPtr elem = cameraElem->GetElement("save");
-    this->dataPtr->saveImagePath = elem->Get<std::string>("path");
+    this->dataPtr->saveImagePath = cameraSdf->SaveFramesPath();
     this->dataPtr->saveImagePrefix = this->Name() + "_";
     this->dataPtr->saveImage = true;
   }
@@ -374,10 +398,11 @@ void DepthCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
-  if (this->dataPtr->scene != _scene)
+  if (this->Scene() != _scene)
   {
-    this->dataPtr->RemoveCamera(this->dataPtr->scene);
-    this->dataPtr->scene = _scene;
+    // TODO(anyone) Remove camera from scene
+    this->dataPtr->depthCamera = nullptr;
+    RenderingSensor::SetScene(_scene);
 
     if (this->dataPtr->initialized)
       this->CreateCamera();
@@ -387,6 +412,7 @@ void DepthCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 //////////////////////////////////////////////////
 bool DepthCameraSensor::Update(const ignition::common::Time &_now)
 {
+  IGN_PROFILE("DepthCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
     ignerr << "Not initialized, update ignored.\n";
@@ -400,13 +426,13 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
   }
 
   // generate sensor data
-  this->dataPtr->depthCamera->Update();
+  this->Render();
 
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
 
-  ignition::common::Image::PixelFormatType format =
-    ignition::common::Image::R_FLOAT32;
+  auto commonFormat = common::Image::R_FLOAT32;
+  auto msgsFormat = msgs::PixelFormatType::R_FLOAT32;
 
   // create message
   ignition::msgs::Image msg;
@@ -414,9 +440,15 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
   msg.set_height(height);
   msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
                this->dataPtr->depthCamera->ImageFormat()));
-  msg.set_pixel_format(format);
+  // TODO(anyone) Deprecated in ign-msgs4, will be removed on ign-msgs5
+  // in favor of set_pixel_format_type.
+  msg.set_pixel_format(commonFormat);
+  msg.set_pixel_format_type(msgsFormat);
   msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+  auto frame = msg.mutable_header()->add_data();
+  frame->set_key("frame_id");
+  frame->add_value(this->Name());
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   msg.set_data(this->dataPtr->depthBuffer,
@@ -424,6 +456,9 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
 
   // publish
   this->dataPtr->pub.Publish(msg);
+
+  // publish the camera info message
+  this->PublishInfo(_now);
 
   // Trigger callbacks.
   try

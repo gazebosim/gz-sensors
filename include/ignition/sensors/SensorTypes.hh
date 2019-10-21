@@ -97,6 +97,58 @@ namespace ignition
       /// \sa CameraSensor
       CAMERA_NOISE = 1,
 
+      /// \brief Magnetometer body-frame X axis noise in Tesla
+      /// \sa MagnetometerSensor
+      MAGNETOMETER_X_NOISE_TESLA = 2,
+
+      /// \brief Magnetometer body-frame Y axis noise in Tesla
+      /// \sa MagnetometerSensor
+      MAGNETOMETER_Y_NOISE_TESLA = 3,
+
+      /// \brief Magnetometer body-frame Z axis noise in Tesla
+      /// \sa MagnetometerSensor
+      MAGNETOMETER_Z_NOISE_TESLA = 4,
+
+      /// \brief Vertical noise stream for the altimeter sensor
+      /// \sa AltimeterSensor
+      ALTIMETER_VERTICAL_POSITION_NOISE_METERS = 5,
+
+      /// \brief Velocity noise streams for the altimeter sensor
+      /// \sa AltimeterSensor
+      ALTIMETER_VERTICAL_VELOCITY_NOISE_METERS_PER_S = 6,
+
+      /// \brief Air Pressure noise streams for the air pressure sensor
+      /// \sa AirPressureSensor
+      AIR_PRESSURE_NOISE_PASCALS = 7,
+
+      /// \brief Accelerometer body-frame X axis noise in m/s^2
+      /// \sa ImuSensor
+      ACCELEROMETER_X_NOISE_M_S_S = 8,
+
+      /// \brief Accelerometer body-frame Y axis noise in m/s^2
+      /// \sa ImuSensor
+      ACCELEROMETER_Y_NOISE_M_S_S = 9,
+
+      /// \brief Accelerometer body-frame Z axis noise in m/s^2
+      /// \sa ImuSensor
+      ACCELEROMETER_Z_NOISE_M_S_S = 10,
+
+      /// \brief Gyroscope body-frame X axis noise in m/s^2
+      /// \sa ImuSensor
+      GYROSCOPE_X_NOISE_RAD_S = 11,
+
+      /// \brief Gyroscope body-frame X axis noise in m/s^2
+      /// \sa ImuSensor
+      GYROSCOPE_Y_NOISE_RAD_S = 12,
+
+      /// \brief Gyroscope body-frame X axis noise in m/s^2
+      /// \sa ImuSensor
+      GYROSCOPE_Z_NOISE_RAD_S = 13,
+
+      /// \brief Noise streams for the Lidar sensor
+      /// \sa Lidar
+      LIDAR_NOISE = 14,
+
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not
       /// use this.

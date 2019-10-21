@@ -14,13 +14,16 @@
  * limitations under the License.
  *
 */
-
-
-#include <ignition/plugin/Register.hh>
 #include <ignition/common/Console.hh>
+#include <ignition/common/Profiler.hh>
+#include <sdf/Lidar.hh>
+
 #include "ignition/sensors/Lidar.hh"
+#include "ignition/sensors/Noise.hh"
+#include "ignition/sensors/SensorFactory.hh"
+#include "ignition/sensors/SensorTypes.hh"
+#include "ignition/sensors/GaussianNoiseModel.hh"
 #include "ignition/sensors/Register.hh"
-// #include "ignition/sensors/SensorFactory.hh"
 
 using namespace ignition::sensors;
 
@@ -36,41 +39,11 @@ class ignition::sensors::LidarPrivate
   /// \brief Laser message to publish data.
   public: ignition::msgs::LaserScan laserMsg;
 
-  /// \brief Horizontal ray count.
-  public: unsigned int horzRayCount = 0;
+  /// \brief Noise added to sensor data
+  public: std::map<SensorNoiseType, NoisePtr> noises;
 
-  /// \brief Vertical ray count.
-  public: unsigned int vertRayCount = 0;
-
-  /// \brief Horizontal range count.
-  public: unsigned int horzRangeCount = 0;
-
-  /// \brief Vertical range count.
-  public: unsigned int vertRangeCount = 0;
-
-  /// \brief Range count ratio.
-  public: double rangeCountRatio = 0;
-
-  /// \brief The minimum range.
-  public: double rangeMin = 0;
-
-  /// \brief The maximum range.
-  public: double rangeMax = 0;
-
-  /// \brief Scan SDF element.
-  public: sdf::ElementPtr scanElem;
-
-  /// \brief Horizontal SDF element.
-  public: sdf::ElementPtr horzElem;
-
-  /// \brief Vertical SDF element.
-  public: sdf::ElementPtr vertElem;
-
-  /// \brief Range SDF element.
-  public: sdf::ElementPtr rangeElem;
-
-  /// \brief Camera SDF element.
-  public: sdf::ElementPtr cameraElem;
+  /// \brief Sdf sensor.
+  public: sdf::Lidar sdfLidar;
 };
 
 //////////////////////////////////////////////////
@@ -108,22 +81,26 @@ bool Lidar::CreateLidar()
 }
 
 //////////////////////////////////////////////////
-bool Lidar::Load(sdf::ElementPtr _sdf)
+bool Lidar::Load(const sdf::Sensor &_sdf)
 {
-  // Validate that SDF has a sensor ray on it
-  if (_sdf->GetName() == "sensor")
-  {
-    if (!_sdf->GetElement("ray"))
-    {
-      ignerr << "<sensor><camera> SDF element not found while attempting to "
-        << "load a ignition::sensors::Lidar\n";
-      return false;
-    }
-  }
-
   // Load sensor element
   if (!this->Sensor::Load(_sdf))
   {
+    return false;
+  }
+
+  // Check if this is the right type
+  if (_sdf.Type() != sdf::SensorType::LIDAR &&
+      _sdf.Type() != sdf::SensorType::GPU_LIDAR)
+  {
+    ignerr << "Attempting to a load a Lidar sensor, but received "
+      << "a " << _sdf.TypeStr() << std::endl;
+  }
+
+  if (_sdf.LidarSensor() == nullptr)
+  {
+    ignerr << "Attempting to a load a Lidar sensor, but received "
+      << "a null sensor." << std::endl;
     return false;
   }
 
@@ -133,28 +110,19 @@ bool Lidar::Load(sdf::ElementPtr _sdf)
         this->Topic());
   if (!this->dataPtr->pub)
   {
+    ignerr << "Failed to advertise on topic [" << this->Topic()
+      << "]." << std::endl;
     return false;
   }
+  ignmsg << "Publishing laser scans on [" << this->Topic() << "]" << std::endl;
 
   // Load ray atributes
-  sdf::ElementPtr rayElem = this->SDF()->GetElement("ray");
-  this->dataPtr->scanElem = rayElem->GetElement("scan");
-  this->dataPtr->horzElem = this->dataPtr->scanElem->GetElement("horizontal");
-  this->dataPtr->rangeElem = rayElem->GetElement("range");
+  this->dataPtr->sdfLidar = *_sdf.LidarSensor();
 
-  if (this->dataPtr->scanElem->HasElement("vertical"))
-    this->dataPtr->vertElem = this->dataPtr->scanElem->GetElement("vertical");
-
-  this->dataPtr->horzRayCount = this->RayCount();
-  this->dataPtr->vertRayCount = this->VerticalRayCount();
-
-  if (this->dataPtr->horzRayCount == 0 || this->dataPtr->vertRayCount == 0)
+  if (this->RayCount() == 0 || this->VerticalRayCount() == 0)
   {
     ignerr << "Lidar: Image has 0 size!\n";
   }
-
-  this->dataPtr->horzRangeCount = this->RangeCount();
-  this->dataPtr->vertRangeCount = this->VerticalRangeCount();
 
   // create message
   this->dataPtr->laserMsg.set_count(this->RangeCount());
@@ -170,23 +138,38 @@ bool Lidar::Load(sdf::ElementPtr _sdf)
   this->dataPtr->laserMsg.set_vertical_angle_step(
       this->VerticalAngleResolution());
   this->dataPtr->laserMsg.set_vertical_count(
-      this->dataPtr->vertRangeCount);
+      this->VerticalRangeCount());
 
   // Handle noise model settings.
-  // if (rayElem->HasElement("noise"))
-  // {
-  //   this->noises[GPU_RAY_NOISE] =
-  //       NoiseFactory::NewNoiseModel(rayElem->GetElement("noise"),
-  //       this->Type());
-  // }
+  const std::map<SensorNoiseType, sdf::Noise> noises = {
+    {LIDAR_NOISE, this->dataPtr->sdfLidar.LidarNoise()},
+  };
 
-  // this->dataPtr->parentEntity =
-  //   this->world->EntityByName(this->ParentName());
-  // GZ_ASSERT(this->dataPtr->parentEntity != nullptr,
-  //     "Unable to get the parent entity.");
+  for (const auto & [noiseType, noiseSdf] : noises)
+  {
+    if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
+    {
+      this->dataPtr->noises[noiseType] =
+        NoiseFactory::NewNoiseModel(noiseSdf);
+    }
+    else if (noiseSdf.Type() != sdf::NoiseType::NONE)
+    {
+      ignwarn << "The lidar sensor only supports Gaussian noise. "
+       << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
+       << "] is not supported." << std::endl;
+    }
+  }
 
   this->initialized = true;
   return true;
+}
+
+//////////////////////////////////////////////////
+bool Lidar::Load(sdf::ElementPtr _sdf)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(_sdf);
+  return this->Load(sdfSensor);
 }
 
 /////////////////////////////////////////////////
@@ -208,19 +191,26 @@ bool Lidar::Update(const ignition::common::Time &/*_now*/)
 //////////////////////////////////////////////////
 bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
 {
+  IGN_PROFILE("Lidar::PublishLidarScan");
   if (!this->laserBuffer)
     return false;
+
+  std::lock_guard<std::mutex> lock(this->lidarMutex);
 
   this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_sec(
       _now.sec);
   this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_nsec(
       _now.nsec);
+  // Remove 'data' entries before adding new ones
+  this->dataPtr->laserMsg.mutable_header()->clear_data();
+  auto frame = this->dataPtr->laserMsg.mutable_header()->add_data();
+  frame->set_key("frame_id");
+  frame->add_value(this->Name());
+  this->dataPtr->laserMsg.set_frame(this->Name());
 
   // Store the latest laser scans into laserMsg
   msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
       this->Pose());
-
-  std::lock_guard<std::mutex> lock(this->lidarMutex);
 
   const int numRays = this->RayCount() * this->VerticalRayCount();
   if (this->dataPtr->laserMsg.ranges_size() != numRays)
@@ -235,23 +225,22 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
     }
   }
 
-  for (unsigned int j = 0; j < this->dataPtr->vertRangeCount; ++j)
+  for (unsigned int j = 0; j < this->VerticalRangeCount(); ++j)
   {
-    for (unsigned int i = 0; i < this->dataPtr->horzRangeCount; ++i)
+    for (unsigned int i = 0; i < this->RangeCount(); ++i)
     {
-      int index = j * this->dataPtr->horzRangeCount + i;
+      int index = j * this->RangeCount() + i;
       double range = this->laserBuffer[index*3];
 
-      // TODO(jchoclin): add LIDAR_NOISE
-      // else if (this->noises.find(GPU_RAY_NOISE) !=
-      //          this->noises.end())
-      // {
-      //   range = this->noises[GPU_RAY_NOISE]->Apply(range);
-      //   range = ignition::math::clamp(range,
-      //       this->dataPtr->rangeMin, this->dataPtr->rangeMax);
-      // }
+      if (this->dataPtr->noises.find(LIDAR_NOISE) !=
+          this->dataPtr->noises.end())
+      {
+        range = this->dataPtr->noises[LIDAR_NOISE]->Apply(range);
+        range = ignition::math::clamp(range,
+            this->RangeMin(), this->RangeMax());
+      }
 
-      range = ignition::math::isnan(range) ? this->dataPtr->rangeMax : range;
+      range = ignition::math::isnan(range) ? this->RangeMax() : range;
       this->dataPtr->laserMsg.set_ranges(index, range);
       this->dataPtr->laserMsg.set_intensities(index,
           this->laserBuffer[index * 3 + 1]);
@@ -274,43 +263,43 @@ bool Lidar::IsHorizontal() const
 //////////////////////////////////////////////////
 double Lidar::RangeCountRatio() const
 {
-  return this->dataPtr->rangeCountRatio;
+  return static_cast<double>(this->RangeCount()) / this->VerticalRangeCount();
 }
 
 //////////////////////////////////////////////////
 ignition::math::Angle Lidar::AngleMin() const
 {
-  return this->dataPtr->horzElem->Get<double>("min_angle");
+  return this->dataPtr->sdfLidar.HorizontalScanMinAngle();
 }
 
 //////////////////////////////////////////////////
 void Lidar::SetAngleMin(double _angle)
 {
-  this->dataPtr->horzElem->GetElement("min_angle")->Set(_angle);
+  this->dataPtr->sdfLidar.SetHorizontalScanMinAngle(_angle);
 }
 
 //////////////////////////////////////////////////
 ignition::math::Angle Lidar::AngleMax() const
 {
-  return this->dataPtr->horzElem->Get<double>("max_angle");
+  return this->dataPtr->sdfLidar.HorizontalScanMaxAngle();
 }
 
 //////////////////////////////////////////////////
 void Lidar::SetAngleMax(double _angle)
 {
-  this->dataPtr->horzElem->GetElement("max_angle")->Set(_angle);
+  this->dataPtr->sdfLidar.SetHorizontalScanMaxAngle(_angle);
 }
 
 //////////////////////////////////////////////////
 double Lidar::RangeMin() const
 {
-  return this->dataPtr->rangeElem->Get<double>("min");
+  return this->dataPtr->sdfLidar.RangeMin();
 }
 
 //////////////////////////////////////////////////
 double Lidar::RangeMax() const
 {
-  return this->dataPtr->rangeElem->Get<double>("max");
+  return this->dataPtr->sdfLidar.RangeMax();
 }
 
 /////////////////////////////////////////////////
@@ -323,42 +312,34 @@ double Lidar::AngleResolution() const
 //////////////////////////////////////////////////
 double Lidar::RangeResolution() const
 {
-  return this->dataPtr->rangeElem->Get<double>("resolution");
+  return this->dataPtr->sdfLidar.RangeResolution();
 }
 
 //////////////////////////////////////////////////
-int Lidar::RayCount() const
+unsigned int Lidar::RayCount() const
 {
-  return this->dataPtr->horzElem->Get<unsigned int>("samples");
+  return this->dataPtr->sdfLidar.HorizontalScanSamples();
 }
 
 //////////////////////////////////////////////////
-int Lidar::RangeCount() const
+unsigned int Lidar::RangeCount() const
 {
-  return this->RayCount() * this->dataPtr->horzElem->Get<double>("resolution");
+  return this->RayCount() * this->dataPtr->sdfLidar.HorizontalScanResolution();
 }
 
 //////////////////////////////////////////////////
-int Lidar::VerticalRayCount() const
+unsigned int Lidar::VerticalRayCount() const
 {
-  if (this->dataPtr->scanElem->HasElement("vertical"))
-    return this->dataPtr->vertElem->Get<unsigned int>("samples");
-  else
-    return 1;
+  return this->dataPtr->sdfLidar.VerticalScanSamples();
 }
 
 //////////////////////////////////////////////////
-int Lidar::VerticalRangeCount() const
+unsigned int Lidar::VerticalRangeCount() const
 {
-  if (this->dataPtr->scanElem->HasElement("vertical"))
-  {
-    int rows =  (this->VerticalRayCount() *
-          this->dataPtr->vertElem->Get<double>("resolution"));
-    if (rows > 1)
-      return rows;
-    else
-      return 1;
-  }
+  int rows = this->VerticalRayCount() *
+    this->dataPtr->sdfLidar.VerticalScanResolution();
+  if (rows > 1)
+    return rows;
   else
     return 1;
 }
@@ -367,32 +348,24 @@ int Lidar::VerticalRangeCount() const
 void Lidar::SetParent(const std::string &_parent)
 {
   Sensor::SetParent(_parent);
-  this->dataPtr->laserMsg.set_frame(this->Parent());
 }
 
 //////////////////////////////////////////////////
 ignition::math::Angle Lidar::VerticalAngleMin() const
 {
-  if (this->dataPtr->scanElem->HasElement("vertical"))
-    return this->dataPtr->vertElem->Get<double>("min_angle");
-  else
-    return ignition::math::Angle(0);
+  return this->dataPtr->sdfLidar.VerticalScanMinAngle();
 }
 
 //////////////////////////////////////////////////
 void Lidar::SetVerticalAngleMin(const double _angle)
 {
-  if (this->dataPtr->scanElem->HasElement("vertical"))
-    this->dataPtr->vertElem->GetElement("min_angle")->Set(_angle);
+  this->dataPtr->sdfLidar.SetVerticalScanMinAngle(_angle);
 }
 
 //////////////////////////////////////////////////
 ignition::math::Angle Lidar::VerticalAngleMax() const
 {
-  if (this->dataPtr->scanElem->HasElement("vertical"))
-    return this->dataPtr->vertElem->Get<double>("max_angle");
-  else
-    return ignition::math::Angle(0);
+  return this->dataPtr->sdfLidar.VerticalScanMaxAngle();
 }
 
 //////////////////////////////////////////////////
@@ -405,8 +378,7 @@ double Lidar::VerticalAngleResolution() const
 //////////////////////////////////////////////////
 void Lidar::SetVerticalAngleMax(const double _angle)
 {
-  if (this->dataPtr->scanElem->HasElement("vertical"))
-    this->dataPtr->vertElem->GetElement("max_angle")->Set(_angle);
+  this->dataPtr->sdfLidar.SetVerticalScanMaxAngle(_angle);
 }
 
 //////////////////////////////////////////////////

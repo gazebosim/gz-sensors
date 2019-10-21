@@ -15,12 +15,24 @@
  *
 */
 
+#include <ignition/common/Profiler.hh>
+
+#include <ignition/rendering/Camera.hh>
+
 #include "ignition/sensors/RenderingSensor.hh"
 
 /// \brief Private data class for RenderingSensor
 class ignition::sensors::RenderingSensorPrivate
 {
+  /// \brief Pointer to the scene
   public: ignition::rendering::ScenePtr scene;
+
+  /// \brief Manually update the rendering scene graph
+  public: bool manualSceneUpdate = false;
+
+  /// \brief Pointer to the internal rendering sensors used for generating
+  /// sensor data
+  public: std::vector<rendering::SensorPtr::weak_type> sensors;
 };
 
 using namespace ignition;
@@ -38,7 +50,57 @@ RenderingSensor::~RenderingSensor()
 }
 
 /////////////////////////////////////////////////
-void RenderingSensor::SetScene(ignition::rendering::ScenePtr _scene)
+void RenderingSensor::SetScene(rendering::ScenePtr _scene)
 {
   this->dataPtr->scene = _scene;
 }
+
+/////////////////////////////////////////////////
+rendering::ScenePtr RenderingSensor::Scene() const
+{
+  return this->dataPtr->scene;
+}
+
+/////////////////////////////////////////////////
+void RenderingSensor::AddSensor(rendering::SensorPtr _sensor)
+{
+  this->dataPtr->sensors.push_back(_sensor);
+}
+
+/////////////////////////////////////////////////
+void RenderingSensor::SetManualSceneUpdate(bool _manual)
+{
+  this->dataPtr->manualSceneUpdate = _manual;
+}
+
+/////////////////////////////////////////////////
+bool RenderingSensor::ManualSceneUpdate() const
+{
+  return this->dataPtr->manualSceneUpdate;
+}
+
+/////////////////////////////////////////////////
+void RenderingSensor::Render()
+{
+  IGN_PROFILE("RenderingSensor::Render");
+  // Skip scene update. The user indicated that they will do this manually.
+  // Performance is improved when a global scene update occurs only once per
+  // frame, which can be acheived using a manual scene update.
+  if (!this->dataPtr->manualSceneUpdate)
+    this->dataPtr->scene->PreRender();
+
+  for (auto rs : this->dataPtr->sensors)
+  {
+    auto s = rs.lock();
+    if (!s)
+      continue;
+    rendering::CameraPtr rc =
+        std::dynamic_pointer_cast<rendering::Camera>(s);
+    if (rc)
+    {
+      rc->Render();
+      rc->PostRender();
+    }
+  }
+}
+

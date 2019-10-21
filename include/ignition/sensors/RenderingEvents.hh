@@ -21,7 +21,7 @@
 #include <ignition/common/Event.hh>
 #include <ignition/rendering/Scene.hh>
 #include <ignition/sensors/config.hh>
-#include <ignition/sensors/rendering_sensor/Export.hh>
+#include <ignition/sensors/rendering/Export.hh>
 
 namespace ignition
 {
@@ -30,7 +30,7 @@ namespace ignition
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     //
-    class IGNITION_SENSORS_RENDERING_SENSOR_VISIBLE RenderingEvents
+    class IGNITION_SENSORS_RENDERING_VISIBLE RenderingEvents
     {
       /// \brief Set a callback to be called when the scene is changed.
       ///

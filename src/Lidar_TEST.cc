@@ -134,13 +134,13 @@ TEST(Lidar_TEST, CreateLaser)
   EXPECT_NEAR(sensor->RangeMax(), 10.0, 1e-6);
   EXPECT_NEAR(sensor->AngleResolution(), angleRes, 1e-3);
   EXPECT_NEAR(sensor->RangeResolution(), 0.01, 1e-3);
-  EXPECT_EQ(sensor->RayCount(), 640);
-  EXPECT_EQ(sensor->RangeCount(), 640);
+  EXPECT_EQ(sensor->RayCount(), 640u);
+  EXPECT_EQ(sensor->RangeCount(), 640u);
 
-  EXPECT_EQ(sensor->VerticalRayCount(), 1);
-  EXPECT_EQ(sensor->VerticalRangeCount(), 1);
-  EXPECT_EQ(sensor->VerticalAngleMin(), 0.0);
-  EXPECT_EQ(sensor->VerticalAngleMax(), 0.0);
+  EXPECT_EQ(sensor->VerticalRayCount(), 1u);
+  EXPECT_EQ(sensor->VerticalRangeCount(), 1u);
+  EXPECT_DOUBLE_EQ(sensor->VerticalAngleMin().Radian(), 0.0);
+  EXPECT_DOUBLE_EQ(sensor->VerticalAngleMax().Radian(), 0.0);
 
   EXPECT_TRUE(sensor->IsActive());
 }

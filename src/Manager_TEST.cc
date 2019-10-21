@@ -24,7 +24,6 @@ TEST(Manager, construct)
 {
   ignition::sensors::Manager mgr;
   EXPECT_TRUE(mgr.Init());
-  EXPECT_FALSE(mgr.Init(ignition::rendering::ScenePtr()));
 
   sdf::ElementPtr ptr;
   ignition::sensors::SensorId id = mgr.CreateSensor(ptr);

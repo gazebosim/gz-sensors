@@ -77,6 +77,11 @@ namespace ignition
       /// \return true if the update was successfull
       public: virtual bool PublishLidarScan(const common::Time &_now);
 
+      /// \brief Load the sensor based on data from an sdf::Sensor object.
+      /// \param[in] _sdf SDF Sensor parameters.
+      /// \return true if loading was successful
+      public: virtual bool Load(const sdf::Sensor &_sdf) override;
+
       /// \brief Load the sensor with SDF parameters.
       /// \param[in] _sdf SDF Sensor parameters.
       /// \return true if loading was successful
@@ -88,7 +93,7 @@ namespace ignition
 
       /// \brief Initialize values in the sensor
       /// \return True on success
-      public: void SetParent(const std::string &_parent);
+      public: void SetParent(const std::string &_parent) override;
 
       /// \brief Create Lidar sensor
       public: virtual bool CreateLidar();
@@ -135,19 +140,19 @@ namespace ignition
 
       /// \brief Get the ray count
       /// \return The number of rays
-      public: int RayCount() const;
+      public: unsigned int RayCount() const;
 
       /// \brief Get the range count
       /// \return The number of ranges
-      public: int RangeCount() const;
+      public: unsigned int RangeCount() const;
 
       /// \brief Get the vertical scan line count
       /// \return The number of scan lines vertically
-      public: int VerticalRayCount() const;
+      public: unsigned int VerticalRayCount() const;
 
       /// \brief Get the vertical scan line count
       /// \return The number of scan lines vertically
-      public: int VerticalRangeCount() const;
+      public: unsigned int VerticalRangeCount() const;
 
       /// \brief Get the vertical scan bottom angle
       /// \return The minimum angle of the scan block
@@ -241,7 +246,7 @@ namespace ignition
       public: mutable std::mutex lidarMutex;
 
       /// \brief Raw buffer of laser data.
-      public: float * laserBuffer = nullptr;
+      public: float *laserBuffer = nullptr;
 
       /// \brief true if Load() has been called and was successful
       public: bool initialized = false;

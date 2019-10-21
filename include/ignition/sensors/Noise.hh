@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 
+#include <ignition/rendering/RenderTypes.hh>
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/SensorTypes.hh>
 #include <ignition/sensors/Export.hh>
@@ -50,6 +51,16 @@ namespace ignition
       /// \return Pointer to the noise model created.
       public: static NoisePtr NewNoiseModel(sdf::ElementPtr _sdf,
           const std::string &_sensorType = "");
+
+      /// \brief Load a noise model based on the input sdf parameters and
+      /// sensor type.
+      /// \param[in] _sdf Noise sdf parameters.
+      /// \param[in] _sensorType Type of sensor. This is currently used to
+      /// distinguish between image and non image sensors in order to create
+      /// the appropriate noise model.
+      /// \return Pointer to the noise model created.
+      public: static NoisePtr NewNoiseModel(const sdf::Noise &_sdf,
+                  const std::string &_sensorType = "");
     };
 
     /// \brief Which noise types we support
@@ -75,20 +86,26 @@ namespace ignition
       public: virtual ~Noise();
 
       /// \brief Load noise parameters from sdf.
+      /// \param[in] _sdf SDF Noise DOM object.
+      public: virtual void Load(const sdf::Noise &_sdf);
+
+      /// \brief Load noise parameters from sdf.
       /// \param[in] _sdf SDF parameters.
-      /// \param[in] _sensor Type of sensor.
-      public: virtual void Load(sdf::ElementPtr _sdf);
+      /// \deprecated Use the version that accepts an sdf::Noise object.
+      public: virtual IGN_DEPRECATED(2) void Load(sdf::ElementPtr _sdf);
 
       /// \brief Apply noise to input data value.
       /// \param[in] _in Input data value.
+      /// \param[in] _dt Input data time step.
       /// \return Data with noise applied.
-      public: double Apply(double _in);
+      public: double Apply(double _in, double _dt = 0.0);
 
       /// \brief Apply noise to input data value. This gets overriden by
       /// derived classes, and called by Apply.
       /// \param[in] _in Input data value.
+      /// \param[in] _dt Input data time step.
       /// \return Data with noise applied.
-      public: virtual double ApplyImpl(double _in);
+      public: virtual double ApplyImpl(double _in, double _dt);
 
       /// \brief Accessor for NoiseType.
       /// \return Type of noise currently in use.
@@ -99,7 +116,16 @@ namespace ignition
       /// This is useful if users want to use their own noise model from a
       /// sensor plugin.
       public: virtual void SetCustomNoiseCallback(
-          std::function<double(double)> _cb);
+          std::function<double(double, double)> _cb);
+
+      /// \brief Set camera needed to create image noise. This is only needed
+      /// for image sensors, i.e. camera/multicamera/depth sensors, which use
+      /// shaders for more efficient noise generation.
+      /// \param[in] _camera Camera associated to an image sensor
+      /// \deprecated This will be provided in derived classes that support
+      /// adding noise to rendering sensors
+      public: virtual IGN_DEPRECATED(1) void SetCamera(
+          rendering::CameraPtr _camera);
 
       /// \brief Output information about the noise model.
       /// \param[in] _out Output stream

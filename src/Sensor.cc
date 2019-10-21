@@ -19,14 +19,15 @@
 #include <vector>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/common/Console.hh>
+#include <ignition/common/Profiler.hh>
 
 using namespace ignition::sensors;
 
 
 class ignition::sensors::SensorPrivate
 {
-  /// \brief Populates fields from a <sensor> element
-  public: bool PopulateFromSDF(sdf::ElementPtr _sdf);
+  /// \brief Populates fields from a <sensor> DOM
+  public: bool PopulateFromSDF(const sdf::Sensor &_sdf);
 
   /// \brief id given to sensor when constructed
   public: SensorId id;
@@ -47,19 +48,25 @@ class ignition::sensors::SensorPrivate
   public: ignition::math::Pose3d pose;
 
   /// \brief How many times the sensor will generate data per second
-  public: double updateRate = 1;
+  public: double updateRate = 0.0;
 
   /// \brief What sim time should this sensor update at
   public: ignition::common::Time nextUpdateTime;
 
+  /// \brief SDF element with sensor information.
   public: sdf::ElementPtr sdf = nullptr;
+
+  /// \brief SDF Sensor DOM object.
+  public: sdf::Sensor sdfSensor;
 };
 
 SensorId SensorPrivate::idCounter = 0;
 
 //////////////////////////////////////////////////
-bool SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
+bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
 {
+  this->sdfSensor = _sdf;
+
   // All SDF code gets auto converted to latest version. This code is
   // written assuming sdformat 1.6 is the latest
 
@@ -74,39 +81,10 @@ bool SensorPrivate::PopulateFromSDF(sdf::ElementPtr _sdf)
   // be outside the scope of this library
 
   // \todo(nkoenig) how to use frame?
-
-  if (!_sdf)
-  {
-    ignerr << "null _sdf\n";
-    return false;
-  }
-
-  if (std::string("plugin") == _sdf->GetName())
-    _sdf = _sdf->GetParent();
-
-  if (std::string("sensor") != _sdf->GetName())
-  {
-    ignerr << "SDF is not a sensor.\n";
-    _sdf->PrintValues("  ");
-    return false;
-  }
-
-  this->name = _sdf->Get<std::string>("name");
-
-  if (_sdf->HasElement("topic"))
-  {
-    this->topic = _sdf->Get<std::string>("topic");
-  }
-
-  if (_sdf->HasElement("pose"))
-  {
-    this->pose = _sdf->Get<ignition::math::Pose3d>("pose");
-  }
-
-  if (_sdf->HasElement("update_rate"))
-  {
-    this->updateRate = (_sdf->Get<double>("update_rate"));
-  }
+  this->name = _sdf.Name();
+  this->topic = _sdf.Topic();
+  this->pose = _sdf.Pose();
+  this->updateRate = _sdf.UpdateRate();
   return true;
 }
 
@@ -129,6 +107,12 @@ Sensor::~Sensor()
 }
 
 //////////////////////////////////////////////////
+bool Sensor::Load(const sdf::Sensor &_sdf)
+{
+  return this->dataPtr->PopulateFromSDF(_sdf);
+}
+
+//////////////////////////////////////////////////
 bool Sensor::Load(sdf::ElementPtr _sdf)
 {
   if (!this->dataPtr->sdf)
@@ -137,7 +121,10 @@ bool Sensor::Load(sdf::ElementPtr _sdf)
   }
   else
     this->dataPtr->sdf->Copy(_sdf);
-  return this->dataPtr->PopulateFromSDF(_sdf);
+
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(_sdf);
+  return this->dataPtr->PopulateFromSDF(sdfSensor);
 }
 
 //////////////////////////////////////////////////
@@ -197,23 +184,34 @@ double Sensor::UpdateRate() const
 //////////////////////////////////////////////////
 void Sensor::SetUpdateRate(const double _hz)
 {
-  this->dataPtr->updateRate = _hz;
+  if (_hz < 0)
+  {
+    this->dataPtr->updateRate = 0;
+  }
+  else
+  {
+    this->dataPtr->updateRate = _hz;
+  }
 }
 
 //////////////////////////////////////////////////
 bool Sensor::Update(const ignition::common::Time &_now,
                   const bool _force)
 {
+  IGN_PROFILE("Sensor::Update");
   bool result = false;
 
   // Check if it's time to update
-  if (_now < this->dataPtr->nextUpdateTime && !_force)
+  if (_now < this->dataPtr->nextUpdateTime && !_force &&
+      this->dataPtr->updateRate > 0)
+  {
     return result;
+  }
 
   // Make the update happen
   result = this->Update(_now);
 
-  if (!_force)
+  if (!_force && this->dataPtr->updateRate > 0.0)
   {
     // Update the time the plugin should be loaded
     ignition::common::Time delta(1.0 / this->dataPtr->updateRate);
@@ -227,4 +225,9 @@ bool Sensor::Update(const ignition::common::Time &_now,
 ignition::common::Time Sensor::NextUpdateTime() const
 {
   return this->dataPtr->nextUpdateTime;
+}
+
+/////////////////////////////////////////////////
+void Sensor::SetScene(ignition::rendering::ScenePtr)
+{
 }

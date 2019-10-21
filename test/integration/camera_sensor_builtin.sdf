@@ -9,12 +9,17 @@
           <horizontal_fov>1.05</horizontal_fov>
           <image>
             <width>256</width>
-            <height>256</height>
+            <height>257</height>
           </image>
           <clip>
             <near>0.1</near>
             <far>10.0</far>
           </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.007</stddev>
+          </noise>
         </camera>
       </sensor>
     </link>
