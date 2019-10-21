@@ -86,15 +86,22 @@ std::shared_ptr<SensorInterface> SensorFactory::LoadSensorPlugin(
     return std::shared_ptr<SensorInterface>();
   }
 
-  // Assume the first plugin is the one we're interested in
-  std::string pluginName = *(pluginNames.begin());
+  // Go over all plugin names and get the first one that implements
+  // ignition::sensors::SensorInterface
+  plugin::PluginPtr pluginPtr;
+  for (auto pluginName : pluginNames)
+  {
+    pluginPtr = this->dataPtr->pluginLoader.Instantiate(pluginName);
+    if (!pluginPtr)
+      continue;
 
-  auto pluginPtr =
-      this->dataPtr->pluginLoader.Instantiate(pluginName);
+    auto sensorPlugin = pluginPtr->QueryInterfaceSharedPtr<
+        ignition::sensors::SensorInterface>();
+    if (sensorPlugin)
+      return sensorPlugin;
+  }
 
-  auto sensorPlugin = pluginPtr->QueryInterfaceSharedPtr<
-      ignition::sensors::SensorInterface>();
-  return sensorPlugin;
+  return std::shared_ptr<SensorInterface>();
 }
 
 /////////////////////////////////////////////////

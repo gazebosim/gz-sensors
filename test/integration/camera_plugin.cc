@@ -70,8 +70,6 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   ASSERT_NE(sensor, nullptr);
   sensor->SetScene(scene);
 
-  sensor->SetScene(scene);
-
   ASSERT_NE(sensor->RenderingCamera(), nullptr);
   EXPECT_NE(sensor->Id(), sensor->RenderingCamera()->Id());
   EXPECT_EQ(256u, sensor->ImageWidth());

@@ -148,8 +148,6 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   ASSERT_NE(depthSensor, nullptr);
   depthSensor->SetScene(scene);
 
-  depthSensor->SetScene(scene);
-
   EXPECT_EQ(depthSensor->ImageWidth(), static_cast<unsigned int>(imgWidth));
   EXPECT_EQ(depthSensor->ImageHeight(), static_cast<unsigned int>(imgHeight));
   EXPECT_NEAR(depthSensor->FarClip(), far_, DOUBLE_TOL);

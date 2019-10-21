@@ -25,19 +25,10 @@
 
 #include <ignition/transport.hh>
 
+#include "ignition/sensors/rgbd_camera/Export.hh"
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/config.hh"
 #include "ignition/sensors/Export.hh"
-
-#ifndef _WIN32
-#  define RgbdCameraSensor_EXPORTS_API
-#else
-#  if (defined(RgbdCameraSensor_EXPORTS))
-#    define RgbdCameraSensor_EXPORTS_API __declspec(dllexport)
-#  else
-#    define RgbdCameraSensor_EXPORTS_API __declspec(dllimport)
-#  endif
-#endif
 
 namespace ignition
 {
@@ -59,7 +50,8 @@ namespace ignition
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-    class RgbdCameraSensor_EXPORTS_API RgbdCameraSensor : public CameraSensor
+    class IGNITION_SENSORS_RGBD_CAMERA_VISIBLE RgbdCameraSensor
+        : public CameraSensor
     {
       /// \brief constructor
       public: RgbdCameraSensor();

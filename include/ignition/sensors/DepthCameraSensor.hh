@@ -46,16 +46,6 @@
 
 #include <ignition/transport.hh>
 
-#ifndef _WIN32
-#  define DepthCameraSensor_EXPORTS_API
-#else
-#  if (defined(DepthCameraSensor_EXPORTS))
-#    define DepthCameraSensor_EXPORTS_API __declspec(dllexport)
-#  else
-#    define DepthCameraSensor_EXPORTS_API __declspec(dllimport)
-#  endif
-#endif
-
 namespace ignition
 {
   namespace sensors
@@ -72,7 +62,6 @@ namespace ignition
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-//    class DepthCameraSensor_EXPORTS_API DepthCameraSensor : public CameraSensor
     class IGNITION_SENSORS_DEPTH_CAMERA_VISIBLE DepthCameraSensor
         : public CameraSensor
     {

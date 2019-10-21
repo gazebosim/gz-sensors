@@ -42,17 +42,6 @@
 #include "ignition/sensors/RenderingEvents.hh"
 #include "ignition/sensors/RenderingSensor.hh"
 
-
-#ifndef _WIN32
-#  define CameraSensor_EXPORTS_API
-#else
-#  if (defined(CameraSensor_EXPORTS))
-#    define CameraSensor_EXPORTS_API __declspec(dllexport)
-#  else
-#    define CameraSensor_EXPORTS_API __declspec(dllimport)
-#  endif
-#endif
-
 namespace ignition
 {
   namespace sensors
