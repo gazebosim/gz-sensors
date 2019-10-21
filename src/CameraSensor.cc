@@ -359,5 +359,4 @@ rendering::CameraPtr CameraSensor::RenderingCamera() const
   return this->dataPtr->camera;
 }
 
-// IGN_SENSORS_REGISTER_STATIC_SENSOR("camera", CameraSensor)
-IGN_SENSORS_REGISTER_SENSOR_PLUGIN(CameraSensor)
+IGN_SENSORS_REGISTER_STATIC_SENSOR("camera", CameraSensor)

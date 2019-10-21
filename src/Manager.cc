@@ -130,7 +130,6 @@ void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 /////////////////////////////////////////////////
 ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr _sdf)
 {
-  std::cerr << "manager create sensor! " << std::endl;
   auto sensor = this->dataPtr->sensorFactory.CreateSensor(_sdf);
   if (!sensor)
     return NO_SENSOR;
