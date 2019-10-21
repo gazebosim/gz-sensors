@@ -101,7 +101,10 @@ bool MagnetometerSensor::Load(const sdf::Sensor &_sdf)
       this->dataPtr->node.Advertise<ignition::msgs::Magnetometer>(topic);
 
   if (!this->dataPtr->pub)
+  {
+    ignerr << "Unable to create publisher on topic[" << topic << "].\n";
     return false;
+  }
 
   // Load the noise parameters
   if (_sdf.MagnetometerSensor()->XNoise().Type() != sdf::NoiseType::NONE)

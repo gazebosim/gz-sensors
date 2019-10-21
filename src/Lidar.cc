@@ -110,8 +110,8 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
         this->Topic());
   if (!this->dataPtr->pub)
   {
-    ignerr << "Failed to advertise on topic [" << this->Topic()
-      << "]." << std::endl;
+    ignerr << "Unable to create publisher on topic["
+      << this->Topic() << "].\n";
     return false;
   }
   ignmsg << "Publishing laser scans on [" << this->Topic() << "]" << std::endl;

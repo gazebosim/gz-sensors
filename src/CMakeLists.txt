@@ -3,6 +3,7 @@ set (sources
   Sensor.cc
   Noise.cc
   GaussianNoiseModel.cc
+  PointCloudUtil.cc
   SensorFactory.cc
   SensorTypes.cc
 )
