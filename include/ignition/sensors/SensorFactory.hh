@@ -17,6 +17,7 @@
 #ifndef IGNITION_SENSORS_SENSORFACTORY_HH_
 #define IGNITION_SENSORS_SENSORFACTORY_HH_
 
+#include <map>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -38,10 +39,6 @@ namespace ignition
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     // forward declaration
     class SensorFactoryPrivate;
-
-    /// \def Sensor
-    /// \brief Prototype for sensor factory functions
-    typedef Sensor *(*SensorFactoryFn) ();
 
     /// \brief A factory class for creating sensors
     /// This class wll load a sensor plugin based on the given sensor type and
@@ -151,11 +148,11 @@ namespace ignition
       /// \param[in] _path Search path
       public: void AddPluginPaths(const std::string &_path);
 
-      /// \brief Register a sensor class (called by sensor registration function).
+      /// \brief Register a sensor class (called by sensor registration
+      /// function).
       /// \param[in] _sensorType Name of sensor type to register.
       /// \param[in] _factoryfn Function handle for registration.
       public: static void RegisterSensor(const std::string &_sensorType,
-                                         //SensorFactoryFn _factoryfn);
                                          SensorInterface *_interface);
 
       /// \brief load a plugin and return a pointer
@@ -165,7 +162,6 @@ namespace ignition
           const std::string &_filename);
 
       /// \brief A list of registered sensor types
-      // private: static std::map<std::string, SensorFactoryFn> sensorMap;
       private: static std::map<std::string, SensorInterface *> sensorMap;
 
       /// \brief private data pointer

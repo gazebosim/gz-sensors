@@ -26,7 +26,7 @@ namespace ignition
   {
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
-
+    //
     /// \brief Base sensor plugin interface
     class IGNITION_SENSORS_VISIBLE SensorInterface
     {
@@ -47,7 +47,6 @@ namespace ignition
                 return new SensorType();
               };
     };
-
     }
   }
 }

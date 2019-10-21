@@ -34,6 +34,7 @@
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/msgs.hh>
+#include <ignition/transport.hh>
 
 #include <ignition/rendering/DepthCamera.hh>
 
@@ -43,8 +44,6 @@
 #include "ignition/sensors/Manager.hh"
 #include "ignition/sensors/RenderingEvents.hh"
 #include "ignition/sensors/Sensor.hh"
-
-#include <ignition/transport.hh>
 
 namespace ignition
 {

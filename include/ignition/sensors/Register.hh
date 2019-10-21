@@ -29,8 +29,8 @@
 // loaded
 #define IGN_SENSORS_REGISTER_SENSOR_PLUGIN(classname) \
 IGNITION_ADD_PLUGIN(\
-   ignition::sensors::SensorPlugin<classname>, \
-   ignition::sensors::SensorInterface)
+    ignition::sensors::SensorPlugin<classname>, \
+    ignition::sensors::SensorInterface)
 #endif
 
 /// \brief Static sensor registration macro
@@ -38,7 +38,7 @@ IGNITION_ADD_PLUGIN(\
 /// Use this macro to register sensors with the sensor factory.
 #define IGN_SENSORS_REGISTER_STATIC_SENSOR(name, classname) \
 class classname##Factory : public ignition::sensors::SensorInterface { \
-public: \
+  public: \
     classname##Factory() \
     { \
         ignition::sensors::SensorFactory::RegisterSensor(name, this); \

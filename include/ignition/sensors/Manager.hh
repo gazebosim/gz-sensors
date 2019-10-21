@@ -64,22 +64,6 @@ namespace ignition
       /// \return True if successfully initialized, false if not
       public: bool Init();
 
-//      /// \brief Initialize the sensor library with rendering.
-//      /// \return True if successfully initialized, false if not
-//      /// \deprecated Call RenderingSensor::SetScene directly
-//      public: bool IGN_DEPRECATED(1) Init(
-//          ignition::rendering::ScenePtr _rendering);
-
-//      /// \brief Set or change the ignition-rendering instance used
-//      /// \deprecated Call RenderingSensor::SetScene directly
-//      public: void IGN_DEPRECATED(1) SetRenderingScene(
-//          ignition::rendering::ScenePtr _rendering);
-//
-//      /// \brief Get the rendering manager instance
-//      /// \deprecated See RenderingSensor::Scene
-//      public: ignition::rendering::ScenePtr IGN_DEPRECATED(1)
-//          RenderingScene() const;
-
       /// \brief Create a sensor from SDF with a known sensor type.
       ///
       ///   This creates sensors by looking at the given sdf element.
