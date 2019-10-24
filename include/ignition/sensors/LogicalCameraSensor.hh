@@ -23,29 +23,17 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/Console.hh>
 #include <ignition/common/PluginMacros.hh>
 #include <ignition/common/Time.hh>
 
 #include <ignition/math/Angle.hh>
-#include <ignition/math/Pose3.hh>
 
 #include <ignition/msgs.hh>
 
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/Export.hh>
-
+#include "ignition/sensors/config.hh"
+#include "ignition/sensors/Export.hh"
+#include "ignition/sensors/logical_camera/Export.hh"
 #include "ignition/sensors/Sensor.hh"
-
-#ifndef _WIN32
-#  define LogicalCameraSensor_EXPORTS_API
-#else
-#  if (defined(LogicalCameraSensor_EXPORTS))
-#    define LogicalCameraSensor_EXPORTS_API __declspec(dllexport)
-#  else
-#    define LogicalCameraSensor_EXPORTS_API __declspec(dllimport)
-#  endif
-#endif
 
 namespace ignition
 {
@@ -62,7 +50,8 @@ namespace ignition
     /// A logical camera reports locations of objects. This camera finds models
     /// within the sensor's frustum and publishes information about the models
     /// on the sensor's topic.
-    class LogicalCameraSensor_EXPORTS_API LogicalCameraSensor : public Sensor
+    class IGNITION_SENSORS_LOGICAL_CAMERA_VISIBLE LogicalCameraSensor
+      : public Sensor
     {
       /// \brief constructor
       public: LogicalCameraSensor();
