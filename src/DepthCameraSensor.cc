@@ -14,6 +14,8 @@
  * limitations under the License.
  *
 */
+#include <ignition/msgs/pointcloud_packed.pb.h>
+
 #include <mutex>
 
 #include <ignition/common/Console.hh>
@@ -23,8 +25,6 @@
 
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Helpers.hh>
-
-#include <ignition/msgs/pointcloud_packed.pb.h>
 
 #include <ignition/transport/Node.hh>
 

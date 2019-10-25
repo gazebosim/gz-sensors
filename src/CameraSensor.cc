@@ -14,6 +14,8 @@
  * limitations under the License.
  *
 */
+#include <ignition/msgs/camera_info.pb.h>
+
 #include <mutex>
 
 #include <ignition/common/Console.hh>
@@ -22,7 +24,6 @@
 #include <ignition/common/Profiler.hh>
 #include <ignition/common/StringUtils.hh>
 #include <ignition/math/Angle.hh>
-#include <ignition/msgs/camera_info.pb.h>
 #include <ignition/transport/Node.hh>
 
 #include <ignition/math/Helpers.hh>
