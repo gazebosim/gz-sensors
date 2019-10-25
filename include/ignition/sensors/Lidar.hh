@@ -23,22 +23,8 @@
 
 #include <ignition/common/Event.hh>
 
-#include <ignition/transport.hh>
-
 #include "ignition/sensors/lidar/Export.hh"
 #include "ignition/sensors/RenderingSensor.hh"
-
-
-#ifndef _WIN32
-#  define Lidar_EXPORTS_API
-#else
-#  if (defined(Lidar_EXPORTS))
-#    define Lidar_EXPORTS_API __declspec(dllexport)
-#  else
-#    define Lidar_EXPORTS_API __declspec(dllimport)
-#  endif
-#endif
-
 
 namespace ignition
 {

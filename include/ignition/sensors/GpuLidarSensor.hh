@@ -28,17 +28,6 @@
 #include "ignition/sensors/RenderingEvents.hh"
 #include "ignition/sensors/Lidar.hh"
 
-
-#ifndef _WIN32
-#  define GpuLidarSensor_EXPORTS_API
-#else
-#  if (defined(GpuLidarSensor_EXPORTS))
-#    define GpuLidarSensor_EXPORTS_API __declspec(dllexport)
-#  else
-#    define GpuLidarSensor_EXPORTS_API __declspec(dllimport)
-#  endif
-#endif
-
 namespace ignition
 {
   namespace sensors

@@ -23,11 +23,9 @@
 
 #include <ignition/common/Time.hh>
 
-#include <ignition/transport.hh>
-
-#include "ignition/sensors/rgbd_camera/Export.hh"
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/config.hh"
+#include "ignition/sensors/rgbd_camera/Export.hh"
 #include "ignition/sensors/Export.hh"
 
 namespace ignition
@@ -51,7 +49,7 @@ namespace ignition
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
     class IGNITION_SENSORS_RGBD_CAMERA_VISIBLE RgbdCameraSensor
-        : public CameraSensor
+      : public CameraSensor
     {
       /// \brief constructor
       public: RgbdCameraSensor();

@@ -19,30 +19,21 @@
 
 #include <memory>
 #include <cstdint>
-#include <mutex>
 #include <string>
 
 #include <sdf/sdf.hh>
 
 #include <ignition/common/Event.hh>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Image.hh>
-#include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Time.hh>
 
-#include <ignition/math/Angle.hh>
-#include <ignition/math/Pose3.hh>
 #include <ignition/msgs.hh>
-#include <ignition/transport.hh>
 
 #include <ignition/rendering/DepthCamera.hh>
 
 #include "ignition/sensors/depth_camera/Export.hh"
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/Export.hh"
-#include "ignition/sensors/Manager.hh"
-#include "ignition/sensors/RenderingEvents.hh"
 #include "ignition/sensors/Sensor.hh"
 
 namespace ignition
@@ -62,7 +53,7 @@ namespace ignition
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
     class IGNITION_SENSORS_DEPTH_CAMERA_VISIBLE DepthCameraSensor
-        : public CameraSensor
+      : public CameraSensor
     {
       /// \brief constructor
       public: DepthCameraSensor();

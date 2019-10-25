@@ -24,11 +24,13 @@
 
 #include <ignition/rendering/Camera.hh>
 #include <ignition/rendering/DepthCamera.hh>
+#include <ignition/transport/Node.hh>
 
 #include <sdf/Sensor.hh>
 
 #include "ignition/sensors/Register.hh"
 #include "ignition/sensors/RgbdCameraSensor.hh"
+#include "ignition/sensors/RenderingEvents.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
 #include "PointCloudUtil.hh"

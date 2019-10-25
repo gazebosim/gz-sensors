@@ -14,16 +14,26 @@
  * limitations under the License.
  *
 */
-
 #include <ignition/msgs/pointcloud_packed.pb.h>
-#include <ignition/common/Profiler.hh>
 
+#include <mutex>
+
+#include <ignition/common/Console.hh>
+#include <ignition/common/Image.hh>
+#include <ignition/common/Profiler.hh>
+#include <ignition/common/SystemPaths.hh>
+
+#include <ignition/math/Angle.hh>
 #include <ignition/math/Helpers.hh>
 
+#include <ignition/transport/Node.hh>
+
 #include "ignition/sensors/DepthCameraSensor.hh"
+#include "ignition/sensors/Manager.hh"
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/GaussianNoiseModel.hh"
 #include "ignition/sensors/Register.hh"
+#include "ignition/sensors/RenderingEvents.hh"
 
 #include "PointCloudUtil.hh"
 
