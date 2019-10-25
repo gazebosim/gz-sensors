@@ -29,7 +29,6 @@
 #include <ignition/common/Console.hh>
 
 #include "ignition/sensors/config.hh"
-#include "ignition/sensors/Events.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
 using namespace ignition::sensors;
@@ -77,40 +76,6 @@ Manager::~Manager()
 bool Manager::Init()
 {
   return true;
-}
-
-//////////////////////////////////////////////////
-bool Manager::Init(ignition::rendering::ScenePtr _scene)
-{
-  if (!_scene)
-  {
-    ignerr << "Null ScenePtr cannot initialize a sensor manager.\n";
-    return false;
-  }
-
-  bool success = this->Init();
-  if (success)
-  {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    // The Init and SetRenderingScene functions will be removed in ign-sensors3
-    this->SetRenderingScene(_scene);
-#pragma GCC diagnostic pop
-  }
-  return success;
-}
-
-//////////////////////////////////////////////////
-void Manager::SetRenderingScene(ignition::rendering::ScenePtr _rendering)
-{
-  this->dataPtr->renderingScene = _rendering;
-  Events::sceneEvent(this->dataPtr->renderingScene);
-}
-
-//////////////////////////////////////////////////
-ignition::rendering::ScenePtr Manager::RenderingScene() const
-{
-  return this->dataPtr->renderingScene;
 }
 
 //////////////////////////////////////////////////
