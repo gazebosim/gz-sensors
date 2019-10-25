@@ -1,5 +1,4 @@
 set (sources
-  Events.cc
   Manager.cc
   Sensor.cc
   Noise.cc

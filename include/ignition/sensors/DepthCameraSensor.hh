@@ -34,7 +34,6 @@
 
 #include "ignition/sensors/depth_camera/Export.hh"
 #include "ignition/sensors/CameraSensor.hh"
-#include "ignition/sensors/Events.hh"
 #include "ignition/sensors/Export.hh"
 #include "ignition/sensors/Sensor.hh"
 
