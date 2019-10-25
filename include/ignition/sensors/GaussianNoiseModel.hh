@@ -97,7 +97,6 @@ namespace ignition
       /// \brief Private data pointer.
       private: ImageGaussianNoiseModelPrivate *dataPtr = nullptr;
     };
-    /// \}
   }
   }
 }

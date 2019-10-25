@@ -17,6 +17,7 @@
 
 #include <mutex>
 
+#include <ignition/common/Console.hh>
 #include <ignition/common/Profiler.hh>
 
 #include <ignition/transport/Node.hh>
