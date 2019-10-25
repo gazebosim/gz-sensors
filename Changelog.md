@@ -2,6 +2,9 @@
 
 ### Ignition Sensors 3.X.X
 
+1. Removed deprecations from Manager.
+    * [Pull request 99](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/99)
+
 1. Depend on ign-rendering3
     * [Pull request 88](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/88)
 
