@@ -112,6 +112,15 @@ target_link_libraries(${rgbd_camera_target}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
     )
 
+set(thermal_camera_sources ThermalCameraSensor.cc)
+ign_add_component(thermal_camera SOURCES ${thermal_camera_sources} GET_TARGET_NAME thermal_camera_target)
+target_link_libraries(${thermal_camera_target}
+  PRIVATE
+    ${camera_target}
+    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+    )
+
 
 set (gtest_sources
   Manager_TEST.cc
