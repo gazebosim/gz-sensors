@@ -275,7 +275,8 @@ bool ThermalCameraSensor::CreateCamera()
 
     return false;
   }
-  this->dataPtr->thermalCamera->SetAspectRatio(static_cast<double>(width)/height);
+  this->dataPtr->thermalCamera->SetAspectRatio(
+      static_cast<double>(width)/height);
   this->dataPtr->thermalCamera->SetHFOV(angle);
 
   // \todo(nkoenig) Port Distortion class
