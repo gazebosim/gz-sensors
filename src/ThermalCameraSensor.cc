@@ -439,12 +439,16 @@ bool ThermalCameraSensor::Update(const ignition::common::Time &_now)
 //////////////////////////////////////////////////
 unsigned int ThermalCameraSensor::ImageWidth() const
 {
+  if (!this->dataPtr->thermalCamera)
+    return 0u;
   return this->dataPtr->thermalCamera->ImageWidth();
 }
 
 //////////////////////////////////////////////////
 unsigned int ThermalCameraSensor::ImageHeight() const
 {
+  if (!this->dataPtr->thermalCamera)
+    return 0u;
   return this->dataPtr->thermalCamera->ImageHeight();
 }
 
@@ -452,30 +456,52 @@ unsigned int ThermalCameraSensor::ImageHeight() const
 void ThermalCameraSensor::SetAmbientTemperature(float _ambient)
 {
   this->dataPtr->ambient = _ambient;
+  if (this->dataPtr->thermalCamera)
+  {
+    this->dataPtr->thermalCamera->SetAmbientTemperature(this->dataPtr->ambient);
+  }
 }
 
 //////////////////////////////////////////////////
 void ThermalCameraSensor::SetAmbientTemperatureRange(float _range)
 {
   this->dataPtr->ambientRange = _range;
+  if (this->dataPtr->thermalCamera)
+  {
+    this->dataPtr->thermalCamera->SetAmbientTemperatureRange(
+        this->dataPtr->ambientRange);
+  }
 }
 
 //////////////////////////////////////////////////
 void ThermalCameraSensor::SetMinTemperature(float _min)
 {
   this->dataPtr->minTemp = _min;
+  if (this->dataPtr->thermalCamera)
+  {
+    this->dataPtr->thermalCamera->SetMinTemperature(this->dataPtr->minTemp);
+  }
 }
 
 //////////////////////////////////////////////////
 void ThermalCameraSensor::SetMaxTemperature(float _max)
 {
   this->dataPtr->maxTemp = _max;
+  if (this->dataPtr->thermalCamera)
+  {
+    this->dataPtr->thermalCamera->SetMaxTemperature(this->dataPtr->maxTemp);
+  }
 }
 
 //////////////////////////////////////////////////
 void ThermalCameraSensor::SetLinearResolution(float _resolution)
 {
   this->dataPtr->resolution = _resolution;
+  if (this->dataPtr->thermalCamera)
+  {
+    this->dataPtr->thermalCamera->SetLinearResolution(
+        this->dataPtr->resolution);
+  }
 }
 
 //////////////////////////////////////////////////
