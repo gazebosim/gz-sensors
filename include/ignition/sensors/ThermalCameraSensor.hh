@@ -94,8 +94,8 @@ namespace ignition
       /// \param[in] _format string with the format
       public: void OnNewThermalFrame(const uint16_t *_scan,
                     unsigned int _width, unsigned int _height,
-                    unsigned int /*_channels*/,
-                    const std::string &/*_format*/);
+                    unsigned int _channels,
+                    const std::string &_format);
 
       /// \brief Set a callback to be called when image frame data is
       /// generated.

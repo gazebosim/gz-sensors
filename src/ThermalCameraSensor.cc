@@ -68,6 +68,13 @@ class ignition::sensors::ThermalCameraSensorPrivate
   /// \brief Thermal data buffer.
   public: uint16_t *thermalBuffer = nullptr;
 
+  /// \brief Thermal data buffer used when saving image.
+  public: unsigned char *imgThermalBuffer = nullptr;
+
+  /// \brief Thermal data buffer used when saving image.
+  public: math::Vector2i imgThermalBufferSize =
+      math::Vector2i::Zero;
+
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
 
@@ -140,6 +147,9 @@ ThermalCameraSensor::~ThermalCameraSensor()
   this->dataPtr->thermalConnection.reset();
   if (this->dataPtr->thermalBuffer)
     delete [] this->dataPtr->thermalBuffer;
+
+  if (this->dataPtr->imgThermalBuffer)
+    delete[] this->dataPtr->imgThermalBuffer;
 }
 
 //////////////////////////////////////////////////
@@ -364,7 +374,8 @@ bool ThermalCameraSensor::Update(const ignition::common::Time &_now)
     return false;
   }
 
-  if (!this->dataPtr->thermalPub.HasConnections())
+  if (!this->dataPtr->thermalPub.HasConnections() &&
+      this->dataPtr->imageEvent.ConnectionCount() == 0u)
     return false;
 
   // generate sensor data - this triggers image callback
@@ -473,22 +484,36 @@ bool ThermalCameraSensorPrivate::ConvertTemperatureToImage(
     unsigned char *_imageBuffer,
     unsigned int _width, unsigned int _height)
 {
+  // get min and max of temperature values
+  uint16_t min = std::numeric_limits<uint16_t>::max();
   uint16_t max = 0;
   for (unsigned int i = 0; i < _height * _width; ++i)
   {
-    if (_data[i] > max && !std::isinf(_data[i]))
+    uint16_t temp = _data[i];
+    if (temp > max)
+      max = temp;
+    if (temp < min)
+      min = temp;
+  }
+
+  // convert temperature to grayscale image
+  double range = static_cast<double>(max - min);
+  for (unsigned int i = 0; i < _height; ++i)
+  {
+    for (unsigned int j = 0; j < _width; ++j)
     {
-      max = _data[i];
+      uint16_t temp = _data[i*_width + j];
+      double t = static_cast<double>(temp-min) / range;
+      int r = 255*t;
+      int g = r;
+      int b = r;
+      int index = i*_width*3 + j*3;
+      _imageBuffer[index] = r;
+      _imageBuffer[index+1] = g;
+      _imageBuffer[index+2] = b;
     }
   }
-  double factor = 255 / max;
-  for (unsigned int j = 0; j < _height * _width; ++j)
-  {
-    unsigned char d = 255 - (_data[j] * factor);
-    _imageBuffer[j * 3] = d;
-    _imageBuffer[j * 3 + 1] = d;
-    _imageBuffer[j * 3 + 2] = d;
-  }
+
   return true;
 }
 
@@ -509,23 +534,27 @@ bool ThermalCameraSensorPrivate::SaveImage(const uint16_t *_data,
 
   ignition::common::Image localImage;
 
-  unsigned int samples = _width * _height;
-  unsigned int bufferSize = samples * sizeof(uint16_t);
+  if (static_cast<int>(_width) != this->imgThermalBufferSize.X() ||
+      static_cast<int>(_height) != this->imgThermalBufferSize.Y())
+  {
+    delete [] this->imgThermalBuffer;
+    unsigned int bufferSize = _width * _height * 3;
+    this->imgThermalBuffer = new unsigned char[bufferSize];
+    this->imgThermalBufferSize = math::Vector2i(_width, _height);
+  }
 
-  unsigned char *imgThermalBuffer = new unsigned char[bufferSize];
-
-  this->ConvertTemperatureToImage(_data, imgThermalBuffer, _width, _height);
+  this->ConvertTemperatureToImage(_data, this->imgThermalBuffer,
+      _width, _height);
 
   std::string filename = this->saveImagePrefix +
                          std::to_string(this->saveImageCounter) + ".png";
   ++this->saveImageCounter;
 
-  localImage.SetFromData(imgThermalBuffer, _width, _height,
+  localImage.SetFromData(this->imgThermalBuffer, _width, _height,
       common::Image::RGB_INT8);
   localImage.SavePNG(
       ignition::common::joinPaths(this->saveImagePath, filename));
 
-  delete[] imgThermalBuffer;
   return true;
 }
 
