@@ -16,7 +16,7 @@ release will remove the deprecated code.
 
 ### Modifications
 
-1. Depend on ignition-rendering3.
+1. Depend on ignition-rendering3, ignition-msgs5 and ignition-transport8.
 
 ### Deprecations
 
