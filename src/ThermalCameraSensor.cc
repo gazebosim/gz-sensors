@@ -524,6 +524,8 @@ bool ThermalCameraSensorPrivate::ConvertTemperatureToImage(
 
   // convert temperature to grayscale image
   double range = static_cast<double>(max - min);
+  if (math::equal(range, 0.0))
+    range = 1.0;
   for (unsigned int i = 0; i < _height; ++i)
   {
     for (unsigned int j = 0; j < _width; ++j)
