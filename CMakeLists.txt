@@ -55,8 +55,8 @@ set(IGN_COMMON_VER ${ignition-common3_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-transport
-ign_find_package(ignition-transport7 REQUIRED)
-set(IGN_TRANSPORT_VER ${ignition-transport7_VERSION_MAJOR})
+ign_find_package(ignition-transport8 REQUIRED)
+set(IGN_TRANSPORT_VER ${ignition-transport8_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-rendering
@@ -75,8 +75,8 @@ endif()
 
 #--------------------------------------
 # Find ignition-msgs
-ign_find_package(ignition-msgs4 REQUIRED VERSION 4.1.0)
-set(IGN_MSGS_VER ${ignition-msgs4_VERSION_MAJOR})
+ign_find_package(ignition-msgs5 REQUIRED VERSION 5.0.0)
+set(IGN_MSGS_VER ${ignition-msgs5_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-plugin
@@ -85,7 +85,7 @@ set(IGN_PLUGIN_VER ${ignition-plugin1_VERSION_MAJOR})
 
 #--------------------------------------
 # Find SDFormat
-ign_find_package(sdformat8 REQUIRED)
+ign_find_package(sdformat9 REQUIRED)
 include_directories(${SDFormat_INCLUDE_DIRS})
 
 set(IGN_SENSORS_PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
