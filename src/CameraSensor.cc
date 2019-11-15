@@ -29,12 +29,12 @@
 #include <ignition/math/Helpers.hh>
 
 #include "ignition/sensors/CameraSensor.hh"
-#include "ignition/sensors/ImageGaussianNoiseModel.hh"
-#include "ignition/sensors/ImageNoise.hh"
 #include "ignition/sensors/Manager.hh"
-#include "ignition/sensors/RenderingEvents.hh"
+#include "ignition/sensors/Noise.hh"
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/SensorTypes.hh"
+#include "ignition/sensors/RenderingEvents.hh"
+#include "ignition/sensors/GaussianNoiseModel.hh"
 
 using namespace ignition;
 using namespace sensors;
@@ -143,7 +143,7 @@ bool CameraSensor::CreateCamera()
     if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
     {
       this->dataPtr->noises[noiseType] =
-        ImageNoiseFactory::NewNoiseModel(noiseSdf, "camera");
+        NoiseFactory::NewNoiseModel(noiseSdf, "camera");
 
       std::dynamic_pointer_cast<ImageGaussianNoiseModel>(
            this->dataPtr->noises[noiseType])->SetCamera(

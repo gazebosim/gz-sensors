@@ -31,8 +31,7 @@
 #include "ignition/sensors/DepthCameraSensor.hh"
 #include "ignition/sensors/Manager.hh"
 #include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/ImageGaussianNoiseModel.hh"
-#include "ignition/sensors/ImageNoise.hh"
+#include "ignition/sensors/GaussianNoiseModel.hh"
 #include "ignition/sensors/RenderingEvents.hh"
 
 #include "PointCloudUtil.hh"
@@ -348,7 +347,7 @@ bool DepthCameraSensor::CreateCamera()
     if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
     {
       this->dataPtr->noises[noiseType] =
-        ImageNoiseFactory::NewNoiseModel(noiseSdf, "depth");
+        NoiseFactory::NewNoiseModel(noiseSdf, "depth");
 
       std::dynamic_pointer_cast<ImageGaussianNoiseModel>(
            this->dataPtr->noises[noiseType])->SetCamera(
