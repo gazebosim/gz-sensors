@@ -8,29 +8,32 @@ release will remove the deprecated code.
 
 ## Ignition Sensors 2.X to 3.X
 
-### Additions
-
-1. Rendering sensors moved to `rendering` component.
-
-1. New sensors: altimeter, IMU, magnetometer.
-
 ### Modifications
 
 1. Depend on ignition-rendering3.
 
-### Deprecations
-
-1. **include/sensors/Noise.hh**
-   + ***Deprecation*** virtual void Load(sdf::ElementPtr _sdf)
-   + ***Replacement*** virtual void Load(const sdf::Noise &_sdf)
+1. ImageGaussiaNoiseModel class is spearated out from GaussianNoiseModel source
+and header files. Similarly, noise models for rendering sensors need be created
+using the new ImageNoiseFactory class instead of NoiseFactory by including
+ImageNoise.hh.
 
 ## Ignition Sensors 1.X to 2.X
+
+### Additions
+
+1. Rendering sensors moved to `rendering` component.
+
+1. New sensors: altimeter, IMU, magnetometer, RGBD camera
 
 ### Modifications
 
 1. Depend on ignition-msgs4, ignition-rendering2, ignition-transport7.
 
 ### Deprecations
+
+1. **include/sensors/Noise.hh**
+   + ***Deprecation*** virtual void Load(sdf::ElementPtr _sdf)
+   + ***Replacement*** virtual void Load(const sdf::Noise &_sdf)
 
 1. **include/sensors/Events.hh**
     + ***Deprecation:*** public: static ignition::common::ConnectionPtr ConnectSceneChangeCallback(std::function<void(const ignition::rendering::ScenePtr &)>)
