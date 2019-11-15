@@ -2,6 +2,9 @@
 
 ### Ignition Sensors 3.X.X
 
+1. Remove deprecations in ign-sensors3
+    * [Pull request 103](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/103)
+
 1. Break out image noise classes
     * [Pull request 102](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/102)
 
