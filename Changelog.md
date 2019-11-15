@@ -2,6 +2,9 @@
 
 ### Ignition Sensors 3.X.X
 
+1. Break out image noise classes
+    * [Pull request 102](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/102)
+
 1. Updating exports and includes
     * [Pull request 98](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/98)
 
