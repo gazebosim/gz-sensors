@@ -56,9 +56,13 @@ NoisePtr NoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
       noiseType == sdf::NoiseType::GAUSSIAN_QUANTIZED)
   {
     if (_sensorType == "camera" || _sensorType == "depth" ||
-        _sensorType == "multicamera" || _sensorType == "wideanglecamera")
+        _sensorType == "multicamera" || _sensorType == "wideanglecamera" ||
+        _sensorType == "thermal_camera")
     {
-      noise.reset(new ImageGaussianNoiseModel());
+      ignerr << "Image noise requested. "
+             << "Please use ImageNoiseFactory::NoiseModel instead"
+             << std::endl;
+      return noise;
     }
     else
       noise.reset(new GaussianNoiseModel());
@@ -115,20 +119,6 @@ Noise::~Noise()
 void Noise::Load(const sdf::Noise &_sdf)
 {
   this->dataPtr->noiseDom = _sdf;
-}
-
-//////////////////////////////////////////////////
-void Noise::Load(sdf::ElementPtr _sdf)
-{
-  sdf::Noise noiseDom;
-  noiseDom.Load(_sdf);
-  this->Load(noiseDom);
-}
-
-//////////////////////////////////////////////////
-void Noise::SetCamera(rendering::CameraPtr /*_camera*/)
-{
-  ignerr << "Ignoring SetCamera: Not attached to an image sensor" << std::endl;
 }
 
 //////////////////////////////////////////////////
