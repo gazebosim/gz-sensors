@@ -22,7 +22,6 @@
 
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
-#include <ignition/rendering/Scene.hh>
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
 #include <sdf/sdf.hh>

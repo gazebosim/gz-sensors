@@ -56,9 +56,13 @@ NoisePtr NoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
       noiseType == sdf::NoiseType::GAUSSIAN_QUANTIZED)
   {
     if (_sensorType == "camera" || _sensorType == "depth" ||
-        _sensorType == "multicamera" || _sensorType == "wideanglecamera")
+        _sensorType == "multicamera" || _sensorType == "wideanglecamera" ||
+        _sensorType == "thermal_camera")
     {
-      noise.reset(new ImageGaussianNoiseModel());
+      ignerr << "Image noise requested. "
+             << "Please use ImageNoiseFactory::NoiseModel instead"
+             << std::endl;
+      return noise;
     }
     else
       noise.reset(new GaussianNoiseModel());

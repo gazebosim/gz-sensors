@@ -22,7 +22,6 @@
 #include <string>
 #include <vector>
 
-#include <ignition/rendering/RenderTypes.hh>
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/SensorTypes.hh>
 #include <ignition/sensors/Export.hh>
