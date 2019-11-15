@@ -20,10 +20,6 @@
   #include <Winsock2.h>
 #endif
 
-// #include "ignition/sensors/GaussianNoiseModel.hh"
-//#include <ignition/math/Helpers.hh>
-//#include <ignition/math/Rand.hh>
-
 #include "ignition/common/Console.hh"
 #include "ignition/sensors/ImageGaussianNoiseModel.hh"
 #include "ignition/rendering/GaussianNoisePass.hh"
