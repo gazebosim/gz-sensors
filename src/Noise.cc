@@ -118,20 +118,6 @@ void Noise::Load(const sdf::Noise &_sdf)
 }
 
 //////////////////////////////////////////////////
-void Noise::Load(sdf::ElementPtr _sdf)
-{
-  sdf::Noise noiseDom;
-  noiseDom.Load(_sdf);
-  this->Load(noiseDom);
-}
-
-//////////////////////////////////////////////////
-void Noise::SetCamera(rendering::CameraPtr /*_camera*/)
-{
-  ignerr << "Ignoring SetCamera: Not attached to an image sensor" << std::endl;
-}
-
-//////////////////////////////////////////////////
 double Noise::Apply(double _in, double _dt)
 {
   if (this->dataPtr->type == NoiseType::NONE)

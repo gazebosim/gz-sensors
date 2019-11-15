@@ -24,7 +24,6 @@
 #include <sdf/sdf.hh>
 #include <ignition/common/Time.hh>
 #include <ignition/common/Console.hh>
-#include <ignition/rendering/Scene.hh>
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Sensor.hh>
@@ -42,10 +41,6 @@ namespace ignition
     ///
     ///   This class is responsible for loading and running sensors, and
     ///   providing sensors with common environments to generat data from.
-    ///
-    ///   For rendering sensors that need information about the visible world,
-    ///   the user of this class is expected to popluate that scene and give it
-    ///   to the sensors.
     ///
     ///   The primary interface through which to load a sensor is LoadSensor().
     ///   This takes an sdf element pointer that should be configured with

@@ -89,11 +89,6 @@ namespace ignition
       /// \param[in] _sdf SDF Noise DOM object.
       public: virtual void Load(const sdf::Noise &_sdf);
 
-      /// \brief Load noise parameters from sdf.
-      /// \param[in] _sdf SDF parameters.
-      /// \deprecated Use the version that accepts an sdf::Noise object.
-      public: virtual IGN_DEPRECATED(2) void Load(sdf::ElementPtr _sdf);
-
       /// \brief Apply noise to input data value.
       /// \param[in] _in Input data value.
       /// \param[in] _dt Input data time step.
@@ -117,15 +112,6 @@ namespace ignition
       /// sensor plugin.
       public: virtual void SetCustomNoiseCallback(
           std::function<double(double, double)> _cb);
-
-      /// \brief Set camera needed to create image noise. This is only needed
-      /// for image sensors, i.e. camera/multicamera/depth sensors, which use
-      /// shaders for more efficient noise generation.
-      /// \param[in] _camera Camera associated to an image sensor
-      /// \deprecated This will be provided in derived classes that support
-      /// adding noise to rendering sensors
-      public: virtual IGN_DEPRECATED(1) void SetCamera(
-          rendering::CameraPtr _camera);
 
       /// \brief Output information about the noise model.
       /// \param[in] _out Output stream

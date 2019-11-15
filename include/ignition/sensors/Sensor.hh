@@ -144,15 +144,6 @@ namespace ignition
       /// information for this sensor.
       public: sdf::ElementPtr SDF() const;
 
-      /// \brief Set the rendering scene.
-      ///
-      /// A sensor subclass should override this function if the subclass
-      /// needs a pointer to the scene.
-      /// \param[in] _scene Pointer to the scene
-      /// \deprecated See RenderingSensor::SetScene
-      public: virtual void IGN_DEPRECATED(1) SetScene(
-          ignition::rendering::ScenePtr _scene);
-
       /// \internal
       /// \brief Data pointer for private data
       private: std::unique_ptr<SensorPrivate> dataPtr;

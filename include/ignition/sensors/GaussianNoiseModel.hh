@@ -89,7 +89,7 @@ namespace ignition
       public: virtual void Load(const sdf::Noise &_sdf) override;
 
       // Documentation inherited.
-      public: virtual void SetCamera(rendering::CameraPtr _camera) override;
+      public: virtual void SetCamera(rendering::CameraPtr _camera);
 
       /// Documentation inherited
       public: virtual void Print(std::ostream &_out) const override;
