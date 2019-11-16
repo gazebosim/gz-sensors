@@ -24,21 +24,21 @@ pipelines:
             libignition-math6-dev
             libignition-tools-dev
             libignition-plugin-dev
-            libsdformat8-dev
+            # libsdformat9-dev
             # libignition-rendering3-dev
             # libignition-msgs5-dev
             # libignition-transport8-dev
           # SDFormat (uncomment if a specific branch is needed)
-          # - apt install -y
-          #   libxml2-utils
-          #   libtinyxml-dev
-          # - hg clone http://bitbucket.org/osrf/sdformat -b magnetometer
-          # - cd sdformat
-          # - mkdir build
-          # - cd build
-          # - cmake .. -DBUILD_TESTING=false
-          # - make -j4 install
-          # - cd ../..
+          - apt install -y
+            libxml2-utils
+            libtinyxml-dev
+          - hg clone http://bitbucket.org/osrf/sdformat -b spec2_prototype_9
+          - cd sdformat
+          - mkdir build
+          - cd build
+          - cmake .. -DBUILD_TESTING=false
+          - make -j4 install
+          - cd ../..
           # Ignition msgs (uncomment if a specific branch is needed)
           - apt install -y
             libprotobuf-dev protobuf-compiler libprotoc-dev

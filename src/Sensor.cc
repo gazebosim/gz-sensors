@@ -68,7 +68,7 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
   this->sdfSensor = _sdf;
 
   // All SDF code gets auto converted to latest version. This code is
-  // written assuming sdformat 1.6 is the latest
+  // written assuming sdformat 1.7 is the latest
 
   // \todo(nkoenig) what to do with <always_on>? SDFormat docs seem
   // to say if true
@@ -83,7 +83,16 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
   // \todo(nkoenig) how to use frame?
   this->name = _sdf.Name();
   this->topic = _sdf.Topic();
+
+  // TODO(addisu) Uncomment the following when sdf::Sensor gets `ResolvePose`
+  // Try resolving the pose first, and only use the raw pose if that fails
+  // sdf::Errors errors = _sdf.ResolvePose(this->pose);
+  // if (!errors.empty())
+  // {
+  //   this->pose = _sdf.Pose();
+  // }
   this->pose = _sdf.Pose();
+
   this->updateRate = _sdf.UpdateRate();
   return true;
 }
