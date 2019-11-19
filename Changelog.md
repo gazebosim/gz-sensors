@@ -2,6 +2,9 @@
 
 ### Ignition Sensors 3.X.X
 
+1. Depend on ign-transport8 and ign-msgs5
+    * [Pull request 101](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/101)
+
 1. Add Thermal Camera Sensor
     * [Pull request 100](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/100)
 
