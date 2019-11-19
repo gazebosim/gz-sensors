@@ -16,6 +16,7 @@
 */
 #include <ignition/msgs/image.pb.h>
 
+#include <algorithm>
 #include <mutex>
 
 #include <ignition/common/Console.hh>
@@ -62,7 +63,7 @@ class ignition::sensors::ThermalCameraSensorPrivate
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
 
-    /// \brief Rendering camera
+  /// \brief Rendering camera
   public: ignition::rendering::ThermalCameraPtr thermalCamera;
 
   /// \brief Thermal data buffer.
@@ -101,7 +102,7 @@ class ignition::sensors::ThermalCameraSensorPrivate
   /// \brief path directory to where images are saved
   public: std::string saveImagePath = "./";
 
-  /// \prefix of an image name
+  /// \brief Prefix of an image name
   public: std::string saveImagePrefix = "./";
 
   /// \brief counter used to set the image filename
@@ -128,7 +129,7 @@ class ignition::sensors::ThermalCameraSensorPrivate
   /// \brief Max temperature the sensor can detect
   public: float maxTemp = ignition::math::INF_F;
 
-  /// \brief Linear resolution. Defaulst to 10mK
+  /// \brief Linear resolution. Defaults to 10mK
   public: float resolution = 0.01;
 };
 
@@ -508,16 +509,8 @@ bool ThermalCameraSensorPrivate::ConvertTemperatureToImage(
     unsigned int _width, unsigned int _height)
 {
   // get min and max of temperature values
-  uint16_t min = std::numeric_limits<uint16_t>::max();
-  uint16_t max = 0;
-  for (unsigned int i = 0; i < _height * _width; ++i)
-  {
-    uint16_t temp = _data[i];
-    if (temp > max)
-      max = temp;
-    if (temp < min)
-      min = temp;
-  }
+  const auto [min, max] = // NOLINT
+      std::minmax_element(&_data[0], &_data[_height * _width]);
 
   // convert temperature to grayscale image
   double range = static_cast<double>(max - min);
@@ -528,7 +521,7 @@ bool ThermalCameraSensorPrivate::ConvertTemperatureToImage(
     for (unsigned int j = 0; j < _width; ++j)
     {
       uint16_t temp = _data[i*_width + j];
-      double t = static_cast<double>(temp-min) / range;
+      double t = static_cast<double>(temp-*min) / range;
       int r = 255*t;
       int g = r;
       int b = r;
