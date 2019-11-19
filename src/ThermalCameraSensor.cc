@@ -395,9 +395,6 @@ bool ThermalCameraSensor::Update(const ignition::common::Time &_now)
   this->dataPtr->thermalMsg.set_height(height);
   this->dataPtr->thermalMsg.set_step(
       width * rendering::PixelUtil::BytesPerPixel(rendering::PF_L16));
-  // TODO(anyone) Deprecated in ign-msgs4, will be removed on ign-msgs5
-  // in favor of set_pixel_format_type.
-  this->dataPtr->thermalMsg.set_pixel_format(commonFormat);
   this->dataPtr->thermalMsg.set_pixel_format_type(msgsFormat);
   auto stamp = this->dataPtr->thermalMsg.mutable_header()->mutable_stamp();
   stamp->set_sec(_now.sec);
