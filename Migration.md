@@ -10,7 +10,7 @@ release will remove the deprecated code.
 
 ### Modifications
 
-1. Depend on ignition-rendering3.
+1. Depend on ignition-rendering3, ignition-msgs5 and ignition-transport8.
 
 1. ImageGaussiaNoiseModel class is spearated out from GaussianNoiseModel source
 and header files. Similarly, noise models for rendering sensors need be created

@@ -5,6 +5,9 @@
 1. Break out image noise classes
     * [Pull request 102](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/102)
 
+1. Depend on ign-transport8 and ign-msgs5
+    * [Pull request 101](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/101)
+
 1. Updating exports and includes
     * [Pull request 98](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/98)
 
