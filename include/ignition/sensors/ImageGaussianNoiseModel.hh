@@ -20,10 +20,11 @@
 
 #include <sdf/sdf.hh>
 
+#include <ignition/rendering/Camera.hh>
+
 #include "ignition/sensors/config.hh"
-#include "ignition/sensors/Export.hh"
 #include "ignition/sensors/GaussianNoiseModel.hh"
-#include "ignition/rendering/Camera.hh"
+#include "ignition/sensors/rendering/Export.hh"
 
 namespace ignition
 {
@@ -38,7 +39,7 @@ namespace ignition
     ignition/sensors/GaussianNoiseModel.hh
     **/
     /// \brief Gaussian noise class for image sensors
-    class IGNITION_SENSORS_VISIBLE ImageGaussianNoiseModel :
+    class IGNITION_SENSORS_RENDERING_VISIBLE ImageGaussianNoiseModel :
       public GaussianNoiseModel
     {
       /// \brief Constructor.

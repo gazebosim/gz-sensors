@@ -24,7 +24,7 @@
 
 #include "ignition/sensors/config.hh"
 #include "ignition/sensors/SensorTypes.hh"
-#include "ignition/sensors/Export.hh"
+#include "ignition/sensors/rendering/Export.hh"
 
 namespace ignition
 {
@@ -37,7 +37,7 @@ namespace ignition
 
     /// \class NoiseFactory Noise.hh ignition/sensors/Noise.hh
     /// \brief Use this noise manager for creating and loading noise models.
-    class IGNITION_SENSORS_VISIBLE ImageNoiseFactory
+    class IGNITION_SENSORS_RENDERING_VISIBLE ImageNoiseFactory
     {
       /// \brief Load a noise model based on the input sdf parameters and
       /// sensor type.
