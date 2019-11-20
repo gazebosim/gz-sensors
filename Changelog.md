@@ -2,7 +2,8 @@
 
 ### Ignition Sensors 3.X.X
 
-1. Depend on ign-transport8 and ign-msgs5
+1. Depend on ign-transport8, ign-msgs5, sdformat9
+    * [Pull request 101](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/101)
     * [Pull request 101](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/101)
 
 1. Updating exports and includes
