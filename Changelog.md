@@ -4,7 +4,7 @@
 
 1. Depend on ign-transport8, ign-msgs5, sdformat9
     * [Pull request 101](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/101)
-    * [Pull request 101](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/101)
+    * [Pull request 105](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/105)
 
 1. Updating exports and includes
     * [Pull request 98](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/98)
