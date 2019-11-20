@@ -15,10 +15,6 @@
  *
 */
 
-// todo(anyone) remove pragma once the deprecated functions are removed in
-// ign-sensors 3
-// #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
 #include "ignition/sensors/Manager.hh"
 #include <memory>
 #include <unordered_map>
@@ -43,9 +39,6 @@ class ignition::sensors::ManagerPrivate
 
   /// \brief Loaded sensors.
   public: std::map<SensorId, std::unique_ptr<Sensor>> sensors;
-
-  /// \brief Ignition Rendering manager
-  public: ignition::rendering::ScenePtr renderingScene;
 
   /// \brief Sensor factory for creating sensors from plugins;
   public: SensorFactory sensorFactory;
@@ -115,13 +108,6 @@ ignition::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &_sdf)
   if (!sensor)
     return NO_SENSOR;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  // This behavior is deprecated.
-  // The users are expected to call RenderingSsensor::SetScene in ign-sensors3
-  sensor->SetScene(this->dataPtr->renderingScene);
-#pragma GCC diagnostic pop
-
   SensorId id = sensor->Id();
   this->dataPtr->sensors[id] = std::move(sensor);
   return id;
@@ -133,13 +119,6 @@ ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr _sdf)
   auto sensor = this->dataPtr->sensorFactory.CreateSensor(_sdf);
   if (!sensor)
     return NO_SENSOR;
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  // This behavior is deprecated.
-  // The users are expected to call RenderingSsensor::SetScene in ign-sensors3
-  sensor->SetScene(this->dataPtr->renderingScene);
-#pragma GCC diagnostic pop
 
   SensorId id = sensor->Id();
   this->dataPtr->sensors[id] = std::move(sensor);
