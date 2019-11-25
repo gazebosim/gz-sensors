@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Open Source Robotics Foundation
+ * Copyright (C) 2019 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,16 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_GAUSSIANNOISEMODEL_HH_
-#define IGNITION_SENSORS_GAUSSIANNOISEMODEL_HH_
+#ifndef IGNITION_SENSORS_IMAGEGAUSSIANNOISEMODEL_HH_
+#define IGNITION_SENSORS_IMAGEGAUSSIANNOISEMODEL_HH_
 
 #include <sdf/sdf.hh>
 
+#include <ignition/rendering/Camera.hh>
+
 #include "ignition/sensors/config.hh"
-#include "ignition/sensors/Export.hh"
-#include "ignition/sensors/Noise.hh"
+#include "ignition/sensors/GaussianNoiseModel.hh"
+#include "ignition/sensors/rendering/Export.hh"
 
 namespace ignition
 {
@@ -30,45 +32,33 @@ namespace ignition
   {
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
-    //
     // Forward declarations
-    class GaussianNoiseModelPrivate;
+    class ImageGaussianNoiseModelPrivate;
 
-    /** \class GaussianNoiseModel GaussianNoiseModel.hh \
+    /** \class ImageGaussianNoiseModel GaussianNoiseModel.hh \
     ignition/sensors/GaussianNoiseModel.hh
     **/
-    /// \brief Gaussian noise class
-    class IGNITION_SENSORS_VISIBLE GaussianNoiseModel : public Noise
+    /// \brief Gaussian noise class for image sensors
+    class IGNITION_SENSORS_RENDERING_VISIBLE ImageGaussianNoiseModel :
+      public GaussianNoiseModel
     {
       /// \brief Constructor.
-      public: GaussianNoiseModel();
+      public: ImageGaussianNoiseModel();
 
       /// \brief Destructor.
-      public: virtual ~GaussianNoiseModel();
+      public: virtual ~ImageGaussianNoiseModel();
 
       // Documentation inherited.
       public: virtual void Load(const sdf::Noise &_sdf) override;
 
       // Documentation inherited.
-      public: double ApplyImpl(double _in, double _dt) override;
-
-      /// \brief Accessor for mean.
-      /// \return Mean of Gaussian noise.
-      public: double Mean() const;
-
-      /// \brief Accessor for stddev.
-      /// \return Standard deviation of Gaussian noise.
-      public: double StdDev() const;
-
-      /// \brief Accessor for bias.
-      /// \return Bias on output.
-      public: double Bias() const;
+      public: virtual void SetCamera(rendering::CameraPtr _camera);
 
       /// Documentation inherited
       public: virtual void Print(std::ostream &_out) const override;
 
       /// \brief Private data pointer.
-      private: GaussianNoiseModelPrivate *dataPtr = nullptr;
+      private: ImageGaussianNoiseModelPrivate *dataPtr = nullptr;
     };
   }
   }
