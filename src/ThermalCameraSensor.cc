@@ -30,7 +30,7 @@
 #include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/ThermalCameraSensor.hh"
-#include "ignition/sensors/GaussianNoiseModel.hh"
+#include "ignition/sensors/ImageGaussianNoiseModel.hh"
 #include "ignition/sensors/RenderingEvents.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
