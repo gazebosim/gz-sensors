@@ -8,8 +8,9 @@
 1. Break out image noise classes
     * [Pull request 102](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/102)
 
-1. Depend on ign-transport8 and ign-msgs5
+1. Depend on ign-transport8, ign-msgs5, sdformat9
     * [Pull request 101](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/101)
+    * [Pull request 105](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/105)
 
 1. Add Thermal Camera Sensor
     * [Pull request 100](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/100)
