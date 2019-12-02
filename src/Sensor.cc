@@ -84,14 +84,13 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
   this->name = _sdf.Name();
   this->topic = _sdf.Topic();
 
-  // TODO(addisu) Uncomment the following when sdf::Sensor gets `ResolvePose`
   // Try resolving the pose first, and only use the raw pose if that fails
-  // sdf::Errors errors = _sdf.ResolvePose(this->pose);
-  // if (!errors.empty())
-  // {
-  //   this->pose = _sdf.Pose();
-  // }
-  this->pose = _sdf.Pose();
+  auto semPose = _sdf.SemanticPose();
+  sdf::Errors errors = semPose.Resolve(this->pose);
+  if (!errors.empty())
+  {
+    this->pose = _sdf.RawPose();
+  }
 
   this->updateRate = _sdf.UpdateRate();
   return true;
