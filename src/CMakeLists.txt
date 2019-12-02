@@ -28,6 +28,8 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
 set(rendering_sources
   RenderingSensor.cc
   RenderingEvents.cc
+  ImageGaussianNoiseModel.cc
+  ImageNoise.cc
 )
 
 ign_add_component(rendering SOURCES ${rendering_sources} GET_TARGET_NAME rendering_target)
@@ -106,6 +108,15 @@ set(rgbd_camera_sources RgbdCameraSensor.cc)
 ign_add_component(rgbd_camera SOURCES ${rgbd_camera_sources} GET_TARGET_NAME rgbd_camera_target)
 target_compile_definitions(${rgbd_camera_target} PUBLIC RgbdCameraSensor_EXPORTS)
 target_link_libraries(${rgbd_camera_target}
+  PRIVATE
+    ${camera_target}
+    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+    )
+
+set(thermal_camera_sources ThermalCameraSensor.cc)
+ign_add_component(thermal_camera SOURCES ${thermal_camera_sources} GET_TARGET_NAME thermal_camera_target)
+target_link_libraries(${thermal_camera_target}
   PRIVATE
     ${camera_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}

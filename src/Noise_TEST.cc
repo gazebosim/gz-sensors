@@ -67,14 +67,9 @@ TEST(NoiseTest, Constructor)
   {
     sensors::Noise noise(sensors::NoiseType::NONE);
 
-#ifndef _WIN32
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-    noise.Load(NoiseSdf("none", 0, 0, 0, 0, 0));
-#ifndef _WIN32
-#pragma GCC diagnostic pop
-#endif
+    sdf::Noise noiseDom;
+    noiseDom.Load(NoiseSdf("none", 0, 0, 0, 0, 0));
+    noise.Load(noiseDom);
   }
 }
 
