@@ -234,8 +234,3 @@ ignition::common::Time Sensor::NextUpdateTime() const
 {
   return this->dataPtr->nextUpdateTime;
 }
-
-/////////////////////////////////////////////////
-void Sensor::SetScene(ignition::rendering::ScenePtr)
-{
-}

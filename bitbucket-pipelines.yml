@@ -32,7 +32,7 @@ pipelines:
           - apt install -y
             libxml2-utils
             libtinyxml-dev
-          - hg clone http://bitbucket.org/osrf/sdformat -b spec2_prototype_9
+          - hg clone http://bitbucket.org/osrf/sdformat -b default
           - cd sdformat
           - mkdir build
           - cd build

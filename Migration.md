@@ -8,6 +8,13 @@ release will remove the deprecated code.
 
 ## Ignition Sensors 2.X to 3.X
 
+### Additions
+
+1. The core ignition-sensors library no longer depends on ign-rendering. All
+rendering sensors and noise models are now part of the `rendering` component
+
+1. New sensors: thermal camera
+
 ### Modifications
 
 1. Depend on ignition-rendering3, ignition-msgs5 and ignition-transport8.
