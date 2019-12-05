@@ -2,6 +2,9 @@
 
 ### Ignition Sensors 3.X.X
 
+1. Add support for sdformat frame semantics
+    * [Pull request 104](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/104)
+
 1. Remove deprecations in ign-sensors3
     * [Pull request 103](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/103)
 
