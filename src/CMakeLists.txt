@@ -19,7 +19,7 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
     ignition-math${IGN_MATH_VER}::ignition-math${IGN_MATH_VER}
     ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    ${SDFormat_LIBRARIES}
+    sdformat${SDF_VER}::sdformat${SDF_VER}
   PRIVATE
     ignition-common${IGN_COMMON_VER}::profiler
 )
