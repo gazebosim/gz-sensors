@@ -239,8 +239,20 @@ bool RgbdCameraSensor::CreateCameras()
   this->dataPtr->depthCamera->SetImageWidth(width);
   this->dataPtr->depthCamera->SetImageHeight(height);
   // TODO(anyone) Specify different clipping for each camera on SDF.
-  this->dataPtr->depthCamera->SetNearClipPlane(cameraSdf->NearDepthClip());
-  this->dataPtr->depthCamera->SetFarClipPlane(cameraSdf->FarDepthClip());
+  this->dataPtr->depthCamera->SetNearClipPlane(cameraSdf->NearClip());
+  this->dataPtr->depthCamera->SetFarClipPlane(cameraSdf->FarClip());
+
+  if (cameraSdf->HasDepthCamera())
+  {
+    if (cameraSdf->HasDepthFarClip())
+    {
+      this->dataPtr->depthCamera->SetFarClipPlane(cameraSdf->DepthFarClip());
+    }
+    if (cameraSdf->HasDepthNearClip())
+    {
+      this->dataPtr->depthCamera->SetNearClipPlane(cameraSdf->DepthNearClip());
+    }
+  }
 
   this->AddSensor(this->dataPtr->depthCamera);
 

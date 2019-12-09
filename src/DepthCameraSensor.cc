@@ -312,9 +312,21 @@ bool DepthCameraSensor::CreateCamera()
 
   int width = cameraSdf->ImageWidth();
   int height = cameraSdf->ImageHeight();
+  double far = cameraSdf->FarClip();
+  double near = cameraSdf->NearClip();
+  
+  if (cameraSdf->HasDepthCamera())
+  { 
+    if (cameraSdf->HasDepthFarClip())
+    {
+      far = cameraSdf->DepthFarClip();
+    }
 
-  double far = cameraSdf->FarDepthClip();
-  double near = cameraSdf->NearDepthClip();
+    if (cameraSdf->HasDepthNearClip())
+    {
+      near = cameraSdf->DepthNearClip();
+    }
+  }
 
   this->PopulateInfo(cameraSdf);
 
