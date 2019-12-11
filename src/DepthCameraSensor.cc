@@ -316,6 +316,8 @@ bool DepthCameraSensor::CreateCamera()
   double far = cameraSdf->FarClip();
   double near = cameraSdf->NearClip();
 
+  // Depth camera clip params are new and only override the camera clip
+  // params if specified
   if (cameraSdf->HasDepthCamera())
   { 
     if (cameraSdf->HasDepthFarClip())

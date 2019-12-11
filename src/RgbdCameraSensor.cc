@@ -242,6 +242,8 @@ bool RgbdCameraSensor::CreateCameras()
   this->dataPtr->depthCamera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->depthCamera->SetFarClipPlane(cameraSdf->FarClip());
 
+  // Depth camera clip params are new and only override the camera clip
+  // params if specified
   if (cameraSdf->HasDepthCamera())
   {
     if (cameraSdf->HasDepthFarClip())
