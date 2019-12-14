@@ -93,6 +93,8 @@ class ignition::sensors::RgbdCameraSensorPrivate
   /// \brief Depth camera near clipping distance.
   public: double depthNearClip = 0.1;
 
+  /// \brief The number of channels (x, y, z, rgba, ...) in the
+  /// point cloud.
   public: unsigned int channels = 4;
 
   /// \brief Pointer to an image to be published
