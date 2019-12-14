@@ -93,6 +93,8 @@ class ignition::sensors::RgbdCameraSensorPrivate
   /// \brief Depth camera near clipping distance.
   public: double depthNearClip = 0.1;
 
+  public: unsigned int channels = 4;
+
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
 
@@ -363,6 +365,7 @@ void RgbdCameraSensorPrivate::OnNewRgbPointCloud(const float *_scan,
   unsigned int pointCloudSamples = _width * _height;
   unsigned int pointCloudBufferSize = pointCloudSamples * _channels *
       sizeof(float);
+  this->channels = _channels;
 
   if (!this->pointCloudBuffer)
     this->pointCloudBuffer = new float[pointCloudSamples * _channels];
@@ -388,6 +391,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
+  unsigned int depthSamples = height * width;
 
   // generate sensor data
   this->Render();
@@ -409,7 +413,6 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     frame->add_value(this->Name());
 
     std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-    unsigned int depthSamples = height * width;
 
     if (this->dataPtr->hasDepthNearClip || this->dataPtr->hasDepthFarClip)
     {
@@ -461,6 +464,24 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
       this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_nsec(
           _now.nsec);
       this->dataPtr->pointMsg.set_is_dense(true);
+
+      if ((this->dataPtr->hasDepthNearClip || this->dataPtr->hasDepthFarClip)
+          && this->dataPtr->depthBuffer)
+      {
+        for (unsigned int i = 0; i < depthSamples; i++)
+        {
+          if (ignition::math::equal(
+                fabs(this->dataPtr->depthBuffer[i]), ignition::math::INF_D))
+          {
+            this->dataPtr->pointCloudBuffer[i * this->dataPtr->channels] =
+              this->dataPtr->depthBuffer[i];
+            this->dataPtr->pointCloudBuffer[i * this->dataPtr->channels + 1] =
+              this->dataPtr->depthBuffer[i];
+            this->dataPtr->pointCloudBuffer[i * this->dataPtr->channels + 2] =
+              this->dataPtr->depthBuffer[i];
+          }
+        }
+      }
 
       {
         IGN_PROFILE("RgbdCameraSensor::Update Fill Point Cloud");
