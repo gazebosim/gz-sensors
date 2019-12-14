@@ -413,6 +413,10 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 
     std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
+    // The following code is a work around since ign-rendering's depth camera
+    // does not support 2 different clipping distances. An assumption is made
+    // that the depth clipping distances are within bounds of the rgb clipping
+    // distances, if not, the rgb clipping values will take priority.
     if (this->dataPtr->hasDepthNearClip || this->dataPtr->hasDepthFarClip)
     {
       for (unsigned int i = 0; i < depthSamples; i++)
@@ -469,15 +473,14 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
       {
         for (unsigned int i = 0; i < depthSamples; i++)
         {
-          if (ignition::math::equal(
-                fabs(this->dataPtr->depthBuffer[i]), ignition::math::INF_D))
+          float depthValue = this->dataPtr->depthBuffer[i];
+          if (std::isinf(depthValue))
           {
-            this->dataPtr->pointCloudBuffer[i * this->dataPtr->channels] =
-              this->dataPtr->depthBuffer[i];
-            this->dataPtr->pointCloudBuffer[i * this->dataPtr->channels + 1] =
-              this->dataPtr->depthBuffer[i];
-            this->dataPtr->pointCloudBuffer[i * this->dataPtr->channels + 2] =
-              this->dataPtr->depthBuffer[i];
+            unsigned int index = i * this->dataPtr->channels;
+
+            this->dataPtr->pointCloudBuffer[index] = depthValue;
+            this->dataPtr->pointCloudBuffer[index + 1] = depthValue;
+            this->dataPtr->pointCloudBuffer[index + 2] = depthValue;
           }
         }
       }
