@@ -81,6 +81,15 @@ class ignition::sensors::RgbdCameraSensorPrivate
   /// \brief point cloud data buffer.
   public: float *pointCloudBuffer = nullptr;
 
+  /// \brief Size of the depth buffer.
+  public: unsigned int depthSize = 0.0;
+
+  /// \brief Depth camera far clipping distance.
+  public: double depthFarClip = 10.0;
+
+  /// \brief Depth camera near clipping distance.
+  public: double depthNearClip = 0.1;
+
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
 
@@ -243,16 +252,16 @@ bool RgbdCameraSensor::CreateCameras()
   this->dataPtr->depthCamera->SetFarClipPlane(cameraSdf->FarClip());
 
   // Depth camera clip params are new and only override the camera clip
-  // params if specified
+  // params if specified.
   if (cameraSdf->HasDepthCamera())
   {
     if (cameraSdf->HasDepthFarClip())
     {
-      this->dataPtr->depthCamera->SetFarClipPlane(cameraSdf->DepthFarClip());
+      this->dataPtr->depthFarClip = cameraSdf->DepthFarClip();
     }
     if (cameraSdf->HasDepthNearClip())
     {
-      this->dataPtr->depthCamera->SetNearClipPlane(cameraSdf->DepthNearClip());
+      this->dataPtr->depthNearClip = cameraSdf->DepthNearClip();
     }
   }
 
@@ -332,6 +341,8 @@ void RgbdCameraSensorPrivate::OnNewDepthFrame(const float *_scan,
   unsigned int depthSamples = _width * _height;
   unsigned int depthBufferSize = depthSamples * sizeof(float);
 
+  this->depthSize = depthSamples;
+
   if (!this->depthBuffer)
     this->depthBuffer = new float[depthSamples];
 
@@ -395,6 +406,19 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     frame->add_value(this->Name());
 
     std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+
+    for (unsigned int i = 0; i < this->dataPtr->depthSize; i++)
+    {
+      if (this->dataPtr->depthBuffer[i] > this->dataPtr->depthFarClip)
+      {
+        this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
+      }
+      else if (this->dataPtr->depthBuffer[i] < this->dataPtr->depthNearClip)
+      {
+        this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
+      }
+    }
+
     msg.set_data(this->dataPtr->depthBuffer,
         rendering::PixelUtil::MemorySize(rendering::PF_FLOAT32_R,
         width, height));
