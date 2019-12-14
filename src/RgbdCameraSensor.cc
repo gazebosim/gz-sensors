@@ -81,8 +81,11 @@ class ignition::sensors::RgbdCameraSensorPrivate
   /// \brief point cloud data buffer.
   public: float *pointCloudBuffer = nullptr;
 
-  /// \brief Size of the depth buffer.
-  public: unsigned int depthSize = 0.0;
+  /// \brief true if a depth far clipping value has been set.
+  public: bool hasDepthFarClip = false;
+
+  /// \brief true if a depth near clipping value has been set.
+  public: bool hasDepthNearClip = false;
 
   /// \brief Depth camera far clipping distance.
   public: double depthFarClip = 10.0;
@@ -257,10 +260,12 @@ bool RgbdCameraSensor::CreateCameras()
   {
     if (cameraSdf->HasDepthFarClip())
     {
+      this->dataPtr->hasDepthFarClip = true;
       this->dataPtr->depthFarClip = cameraSdf->DepthFarClip();
     }
     if (cameraSdf->HasDepthNearClip())
     {
+      this->dataPtr->hasDepthNearClip = true;
       this->dataPtr->depthNearClip = cameraSdf->DepthNearClip();
     }
   }
@@ -341,8 +346,6 @@ void RgbdCameraSensorPrivate::OnNewDepthFrame(const float *_scan,
   unsigned int depthSamples = _width * _height;
   unsigned int depthBufferSize = depthSamples * sizeof(float);
 
-  this->depthSize = depthSamples;
-
   if (!this->depthBuffer)
     this->depthBuffer = new float[depthSamples];
 
@@ -406,19 +409,28 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     frame->add_value(this->Name());
 
     std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+    unsigned int depthSamples = height * width;
 
-    for (unsigned int i = 0; i < this->dataPtr->depthSize; i++)
+    if (this->dataPtr->hasDepthNearClip || this->dataPtr->hasDepthFarClip)
     {
-      if (this->dataPtr->depthBuffer[i] > this->dataPtr->depthFarClip)
+      for (unsigned int i = 0; i < depthSamples; i++)
       {
-        this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
-      }
-      else if (this->dataPtr->depthBuffer[i] < this->dataPtr->depthNearClip)
-      {
-        this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
+        if (this->dataPtr->hasDepthFarClip)
+        {
+          if (this->dataPtr->depthBuffer[i] > this->dataPtr->depthFarClip)
+          {
+            this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
+          }
+        }
+        if (this->dataPtr->hasDepthNearClip)
+        {
+          if (this->dataPtr->depthBuffer[i] < this->dataPtr->depthNearClip)
+          {
+            this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
+          }
+        }
       }
     }
-
     msg.set_data(this->dataPtr->depthBuffer,
         rendering::PixelUtil::MemorySize(rendering::PF_FLOAT32_R,
         width, height));
