@@ -421,19 +421,15 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     {
       for (unsigned int i = 0; i < depthSamples; i++)
       {
-        if (this->dataPtr->hasDepthFarClip)
+        if (this->dataPtr->hasDepthFarClip &&
+            (this->dataPtr->depthBuffer[i] > this->dataPtr->depthFarClip))
         {
-          if (this->dataPtr->depthBuffer[i] > this->dataPtr->depthFarClip)
-          {
-            this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
-          }
+          this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
         }
-        if (this->dataPtr->hasDepthNearClip)
+        if (this->dataPtr->hasDepthNearClip &&
+            (this->dataPtr->depthBuffer[i] < this->dataPtr->depthNearClip))
         {
-          if (this->dataPtr->depthBuffer[i] < this->dataPtr->depthNearClip)
-          {
-            this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
-          }
+          this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
         }
       }
     }
