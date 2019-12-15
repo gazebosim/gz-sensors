@@ -86,7 +86,7 @@ set(IGN_PLUGIN_VER ${ignition-plugin1_VERSION_MAJOR})
 
 #--------------------------------------
 # Find SDFormat
-ign_find_package(sdformat8 REQUIRED)
+ign_find_package(sdformat8 REQUIRED VERSION 8.7.0)
 include_directories(${SDFormat_INCLUDE_DIRS})
 
 set(IGN_SENSORS_PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})

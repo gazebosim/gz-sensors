@@ -78,19 +78,19 @@ class ignition::sensors::RgbdCameraSensorPrivate
   /// \brief Depth data buffer.
   public: float *depthBuffer = nullptr;
 
-  /// \brief point cloud data buffer.
+  /// \brief Point cloud data buffer.
   public: float *pointCloudBuffer = nullptr;
 
-  /// \brief true if a depth far clipping value has been set.
+  /// \brief True if a depth far clipping value has been set.
   public: bool hasDepthFarClip = false;
 
-  /// \brief true if a depth near clipping value has been set.
+  /// \brief True if a depth near clipping value has been set.
   public: bool hasDepthNearClip = false;
 
-  /// \brief Depth camera far clipping distance.
+  /// \brief Depth camera far clipping distance in meters.
   public: double depthFarClip = 10.0;
 
-  /// \brief Depth camera near clipping distance.
+  /// \brief Depth camera near clipping distance in meters.
   public: double depthNearClip = 0.1;
 
   /// \brief The number of channels (x, y, z, rgba, ...) in the
