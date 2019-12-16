@@ -78,8 +78,24 @@ class ignition::sensors::RgbdCameraSensorPrivate
   /// \brief Depth data buffer.
   public: float *depthBuffer = nullptr;
 
-  /// \brief point cloud data buffer.
+  /// \brief Point cloud data buffer.
   public: float *pointCloudBuffer = nullptr;
+
+  /// \brief True if a depth far clipping value has been set.
+  public: bool hasDepthFarClip = false;
+
+  /// \brief True if a depth near clipping value has been set.
+  public: bool hasDepthNearClip = false;
+
+  /// \brief Depth camera far clipping distance in meters.
+  public: double depthFarClip = 10.0;
+
+  /// \brief Depth camera near clipping distance in meters.
+  public: double depthNearClip = 0.1;
+
+  /// \brief The number of channels (x, y, z, rgba, ...) in the
+  /// point cloud.
+  public: unsigned int channels = 4;
 
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
@@ -238,9 +254,24 @@ bool RgbdCameraSensor::CreateCameras()
       this->Scene()->CreateDepthCamera(this->Name());
   this->dataPtr->depthCamera->SetImageWidth(width);
   this->dataPtr->depthCamera->SetImageHeight(height);
-  // TODO(anyone) Specify different clipping for each camera on SDF.
   this->dataPtr->depthCamera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->depthCamera->SetFarClipPlane(cameraSdf->FarClip());
+
+  // Depth camera clip params are new and only override the camera clip
+  // params if specified.
+  if (cameraSdf->HasDepthCamera())
+  {
+    if (cameraSdf->HasDepthFarClip())
+    {
+      this->dataPtr->hasDepthFarClip = true;
+      this->dataPtr->depthFarClip = cameraSdf->DepthFarClip();
+    }
+    if (cameraSdf->HasDepthNearClip())
+    {
+      this->dataPtr->hasDepthNearClip = true;
+      this->dataPtr->depthNearClip = cameraSdf->DepthNearClip();
+    }
+  }
 
   this->AddSensor(this->dataPtr->depthCamera);
 
@@ -335,6 +366,7 @@ void RgbdCameraSensorPrivate::OnNewRgbPointCloud(const float *_scan,
   unsigned int pointCloudSamples = _width * _height;
   unsigned int pointCloudBufferSize = pointCloudSamples * _channels *
       sizeof(float);
+  this->channels = _channels;
 
   if (!this->pointCloudBuffer)
     this->pointCloudBuffer = new float[pointCloudSamples * _channels];
@@ -360,6 +392,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
+  unsigned int depthSamples = height * width;
 
   // generate sensor data
   this->Render();
@@ -381,6 +414,27 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     frame->add_value(this->Name());
 
     std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+
+    // The following code is a work around since ign-rendering's depth camera
+    // does not support 2 different clipping distances. An assumption is made
+    // that the depth clipping distances are within bounds of the rgb clipping
+    // distances, if not, the rgb clipping values will take priority.
+    if (this->dataPtr->hasDepthNearClip || this->dataPtr->hasDepthFarClip)
+    {
+      for (unsigned int i = 0; i < depthSamples; i++)
+      {
+        if (this->dataPtr->hasDepthFarClip &&
+            (this->dataPtr->depthBuffer[i] > this->dataPtr->depthFarClip))
+        {
+          this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
+        }
+        if (this->dataPtr->hasDepthNearClip &&
+            (this->dataPtr->depthBuffer[i] < this->dataPtr->depthNearClip))
+        {
+          this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
+        }
+      }
+    }
     msg.set_data(this->dataPtr->depthBuffer,
         rendering::PixelUtil::MemorySize(rendering::PF_FLOAT32_R,
         width, height));
@@ -411,6 +465,23 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
       this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_nsec(
           _now.nsec);
       this->dataPtr->pointMsg.set_is_dense(true);
+
+      if ((this->dataPtr->hasDepthNearClip || this->dataPtr->hasDepthFarClip)
+          && this->dataPtr->depthBuffer)
+      {
+        for (unsigned int i = 0; i < depthSamples; i++)
+        {
+          float depthValue = this->dataPtr->depthBuffer[i];
+          if (std::isinf(depthValue))
+          {
+            unsigned int index = i * this->dataPtr->channels;
+
+            this->dataPtr->pointCloudBuffer[index] = depthValue;
+            this->dataPtr->pointCloudBuffer[index + 1] = depthValue;
+            this->dataPtr->pointCloudBuffer[index + 2] = depthValue;
+          }
+        }
+      }
 
       {
         IGN_PROFILE("RgbdCameraSensor::Update Fill Point Cloud");
