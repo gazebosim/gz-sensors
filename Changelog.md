@@ -1,6 +1,9 @@
 ## Ignition Sensors
 
-### Ignition Sensors 2.X.X (20XX-XX-XX)
+### Ignition Sensors 2.7.0 (2019-12-16)
+
+1. Add clipping for depth camera on rgbd camera sensor (requires sdformat 8.7.0)
+    * [Pull request 107](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/107)
 
 ### Ignition Sensors 2.6.1 (2019-09-13)
 
