@@ -1,6 +1,14 @@
+## Ignition Sensors 4
+
+### Ignition Sensors 4.X.X
+
+### Ignition Sensors 4.0.0 (20XX-XX-XX)
+
 ## Ignition Sensors 3
 
 ### Ignition Sensors 3.X.X
+
+### Ignition Sensors 3.0.0 (2019-03-01)
 
 1. Add support for sdformat frame semantics
     * [Pull request 104](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/104)

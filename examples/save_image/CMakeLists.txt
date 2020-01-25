@@ -3,7 +3,7 @@ project(ignition-sensors-camera-demo)
 
 # Find the Ignition Libraries used directly by the example
 find_package(ignition-rendering3 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
-find_package(ignition-sensors3 REQUIRED COMPONENTS rendering camera)
+find_package(ignition-sensors4 REQUIRED COMPONENTS rendering camera)
 
 if (TARGET ignition-rendering3::ogre)
    add_definitions(-DWITH_OGRE)
@@ -14,4 +14,4 @@ endif()
 
 add_executable(save_image main.cc)
 target_link_libraries(save_image PUBLIC
-  ignition-sensors3::camera)
+  ignition-sensors4::camera)
