@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="hokuyo_uxm30lxh">
+    <!--
+      Hokuyo UXM-30LXH(-EWAC)
+      FOV: 190deg
+      Horizontal Angular Resolution: 0.125deg
+      Min Range: 0.06m
+      Max Range: 30m
+      Resolution: 1mm
+      Accuracy: 4cm
+      Rate: 20 Hz
+      Datasheet: https://www.hokuyo-usa.com/application/files/6514/7196/2057/UXM-30LXH-EWAC-42-4104_Specifications-CE.pdf
+    -->
+    <link name="link1">
+      <sensor name="laser" type="gpu_lidar">
+        <topic>/scan</topic>
+        <pose>0 0 0.055 0 0 0</pose>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>1440</samples>
+              <resolution>1</resolution>
+              <min_angle>-1.6581</min_angle>
+              <max_angle>1.6581</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.1</min>
+            <max>30.0</max>
+            <resolution>0.001</resolution>
+          </range>
+        </ray>
+        <always_on>1</always_on>
+        <update_rate>20</update_rate>
+        <visualize>true</visualize>
+      </sensor>
+    </link>
+  </model>
+</sdf>
+
+

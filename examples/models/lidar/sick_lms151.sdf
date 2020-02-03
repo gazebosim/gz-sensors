@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="sick_lms151">
+    <!--
+      Sick LMS151
+      FOV: 270deg
+      Horizontal Angular Resolution: 0.25deg/0.50deg
+      Min Range: 0.5m
+      Max Range: 50m
+      Resolution: 1mm
+      Accuracy: 4cm
+      Rate: 25/50 Hz
+      Datasheet: https://cdn.sick.com/media/pdf/0/40/840/dataSheet_LMS151-10100_1047607_en.pdf
+
+      Note: LMS151 has two operating speeds.
+      At low speed (25 Hz), angular resolution is 0.25 deg
+      At high speed (50 Hz), angular resolution is 0.5 deg
+
+      This configuration is the low scanning speed variant.
+    -->
+    <link name="link1">
+      <sensor name="laser" type="gpu_lidar">
+        <topic>/scan</topic>
+        <pose>0.01 0 0.0175 0 -0 0</pose>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>1080</samples>
+              <resolution>1</resolution>
+              <min_angle>-2.35619</min_angle>
+              <max_angle>2.35619</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.5</min>
+            <max>50.0</max>
+            <resolution>0.001</resolution>
+          </range>
+        </ray>
+        <always_on>1</always_on>
+        <update_rate>25</update_rate>
+        <visualize>true</visualize>
+      </sensor>
+    </link>
+  </model>
+</sdf>
+
