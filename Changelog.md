@@ -4,6 +4,9 @@
 
 ### Ignition Sensors 4.0.0 (20XX-XX-XX)
 
+1. Depend on ign-rendering4
+    * [Pull request xx](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/xx)
+
 ## Ignition Sensors 3
 
 ### Ignition Sensors 3.X.X
