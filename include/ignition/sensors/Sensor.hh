@@ -17,6 +17,7 @@
 #ifndef IGNITION_SENSORS_SENSOR_HH_
 #define IGNITION_SENSORS_SENSOR_HH_
 
+#include <ignition/msgs/header.pb.h>
 #include <memory>
 #include <string>
 
@@ -152,6 +153,27 @@ namespace ignition
       /// \deprecated See RenderingSensor::SetScene
       public: virtual void IGN_DEPRECATED(1) SetScene(
           ignition::rendering::ScenePtr _scene);
+
+      /// \brief Add a sequence number to an ignition::msgs::Header. This
+      /// function can be called by a sensor that wants to add a sequence
+      /// number to a sensor message in order to have improved
+      /// accountability for generated sensor data.
+      ///
+      /// This function will add the following key-value pair to the `data`
+      /// field in the provided ignition::msgs::Header msg.
+      ///
+      /// * key: "seq"
+      /// * value: `sequence_number`
+      ///
+      /// If the "seq" key already exists, then the value will be set
+      /// without adding another key-value pair.
+      ///
+      /// The `sequence_number` starts at zero, when a sensor is created,
+      /// and is incremented by one each time this function is called.
+      /// \param[in,out] _msg The header which will receive the sequence.
+      /// \param[in] _seqKey Name of the sequence to use.
+      public: void AddSequence(ignition::msgs::Header *_msg,
+                  const std::string &_seqKey = "default");
 
       /// \internal
       /// \brief Data pointer for private data

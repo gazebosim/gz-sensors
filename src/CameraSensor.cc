@@ -359,6 +359,7 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
 
   // publish the image message
   {
+    this->AddSequence(msg.mutable_header());
     IGN_PROFILE("CameraSensor::Update Publish");
     this->dataPtr->pub.Publish(msg);
 

@@ -172,6 +172,7 @@ bool AltimeterSensor::Update(const ignition::common::Time &_now)
   msg.set_vertical_reference(this->dataPtr->verticalReference);
 
   // publish
+  this->AddSequence(msg.mutable_header());
   this->dataPtr->pub.Publish(msg);
 
   return true;

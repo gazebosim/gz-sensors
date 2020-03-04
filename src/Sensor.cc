@@ -16,6 +16,7 @@
 */
 
 #include "ignition/sensors/Sensor.hh"
+#include <map>
 #include <vector>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/common/Console.hh>
@@ -58,6 +59,11 @@ class ignition::sensors::SensorPrivate
 
   /// \brief SDF Sensor DOM object.
   public: sdf::Sensor sdfSensor;
+
+  /// \brief Sequence numbers that are used in sensor data message headers.
+  /// A map is used so that a single sensor can have multiple sensor
+  /// streams each with a sequence counter.
+  public: std::map<std::string, uint64_t> sequences;
 };
 
 SensorId SensorPrivate::idCounter = 0;
@@ -230,4 +236,34 @@ ignition::common::Time Sensor::NextUpdateTime() const
 /////////////////////////////////////////////////
 void Sensor::SetScene(ignition::rendering::ScenePtr)
 {
+}
+
+/////////////////////////////////////////////////
+void Sensor::AddSequence(ignition::msgs::Header *_msg,
+                         const std::string &_seqKey)
+{
+  std::string value = "0";
+
+  if (this->dataPtr->sequences.find(_seqKey) == this->dataPtr->sequences.end())
+    this->dataPtr->sequences[_seqKey] = 0;
+  else
+    value = std::to_string(++this->dataPtr->sequences[_seqKey]);
+
+  // Set the value if a `sequence` key already exists.
+  for (int index = 0; index < _msg->data_size(); ++index)
+  {
+    if (_msg->data(index).key() == "seq")
+    {
+      if (_msg->data(index).value_size() == 0)
+        _msg->mutable_data(index)->add_value(value);
+      else
+        _msg->mutable_data(index)->set_value(0, value);
+      return;
+    }
+  }
+
+  // Otherwise, add the sequence key-value pair.
+  ignition::msgs::Header::Map *map = _msg->add_data();
+  map->set_key("seq");
+  map->add_value(value);
 }
