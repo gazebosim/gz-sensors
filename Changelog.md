@@ -4,7 +4,7 @@
 ### Ignition Sensors 2.x.x (2020-xx-xx)
 
 1. Added sequence numbers to sensor data messages. 
-    * [Pull request 108](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/108)
+    * [Pull request 112](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/112)
 
 ### Ignition Sensors 2.7.0 (2019-12-16)
 
