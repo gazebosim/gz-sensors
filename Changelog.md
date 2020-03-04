@@ -1,5 +1,11 @@
 ## Ignition Sensors
 
+
+### Ignition Sensors 2.x.x (2020-xx-xx)
+
+1. Added sequence numbers to sensor data messages. 
+    * [Pull request 108](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/108)
+
 ### Ignition Sensors 2.7.0 (2019-12-16)
 
 1. Add clipping for depth camera on rgbd camera sensor (requires sdformat 8.7.0)

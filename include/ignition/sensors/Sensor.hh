@@ -156,7 +156,8 @@ namespace ignition
 
       /// \brief Add a sequence number to an ignition::msgs::Header. This
       /// function can be called by a sensor that wants to add a sequence
-      /// number to a sensor message.
+      /// number to a sensor message in order to have improved
+      /// accountability for generated sensor data.
       ///
       /// This function will add the following key-value pair to the `data`
       /// field in the provided ignition::msgs::Header msg.
