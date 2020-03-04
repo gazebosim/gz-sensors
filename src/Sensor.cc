@@ -16,6 +16,7 @@
 */
 
 #include "ignition/sensors/Sensor.hh"
+#include <map>
 #include <vector>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/common/Console.hh>
@@ -59,8 +60,10 @@ class ignition::sensors::SensorPrivate
   /// \brief SDF Sensor DOM object.
   public: sdf::Sensor sdfSensor;
 
-  /// \brief Sequence number that is used in sensor data message headers.
-  public: uint64_t sequence = 0;
+  /// \brief Sequence numbers that are used in sensor data message headers.
+  /// A map is used so that a single sensor can have multiple sensor
+  /// streams each with a sequence counter.
+  public: std::map<std::string, uint64_t> sequences;
 };
 
 SensorId SensorPrivate::idCounter = 0;
@@ -236,9 +239,15 @@ void Sensor::SetScene(ignition::rendering::ScenePtr)
 }
 
 /////////////////////////////////////////////////
-void Sensor::AddSequence(ignition::msgs::Header *_msg)
+void Sensor::AddSequence(ignition::msgs::Header *_msg,
+                         const std::string &_seqKey)
 {
-  std::string value = std::to_string(this->dataPtr->sequence++);
+  std::string value = "0";
+
+  if (this->dataPtr->sequences.find(_seqKey) == this->dataPtr->sequences.end())
+    this->dataPtr->sequences[_seqKey] = 0;
+  else
+    value = std::to_string(++this->dataPtr->sequences[_seqKey]);
 
   // Set the value if a `sequence` key already exists.
   for (int index = 0; index < _msg->data_size(); ++index)

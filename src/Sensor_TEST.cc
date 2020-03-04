@@ -83,6 +83,18 @@ TEST(Sensor_TEST, AddSequence)
   EXPECT_EQ(1, header.data_size());
   EXPECT_EQ(1, header.data(0).value_size());
   EXPECT_EQ("101", header.data(0).value(0));
+
+  // Add another sequence for this sensor.
+  ignition::msgs::Header header2;
+  sensor.AddSequence(&header2, "other");
+  // The original header shouldn't change
+  EXPECT_EQ(1, header.data_size());
+  EXPECT_EQ(1, header.data(0).value_size());
+  EXPECT_EQ("101", header.data(0).value(0));
+  // The new header should be set
+  EXPECT_EQ(1, header2.data_size());
+  EXPECT_EQ(1, header2.data(0).value_size());
+  EXPECT_EQ("0", header2.data(0).value(0));
 }
 
 //////////////////////////////////////////////////
