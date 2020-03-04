@@ -68,11 +68,11 @@ TEST(Sensor_TEST, AddSequence)
   TestSensor sensor;
   ignition::msgs::Header header;
   sensor.AddSequence(&header);
-  EXPECT_EQ("sequence", header.data(0).key());
+  EXPECT_EQ("seq", header.data(0).key());
   EXPECT_EQ("0", header.data(0).value(0));
 
   sensor.AddSequence(&header);
-  EXPECT_EQ("sequence", header.data(0).key());
+  EXPECT_EQ("seq", header.data(0).key());
   EXPECT_EQ("1", header.data(0).value(0));
 
   EXPECT_EQ(1, header.data_size());

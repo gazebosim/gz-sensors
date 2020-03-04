@@ -17,12 +17,12 @@
 #ifndef IGNITION_SENSORS_SENSOR_HH_
 #define IGNITION_SENSORS_SENSOR_HH_
 
+#include <ignition/msgs/header.pb.h>
 #include <memory>
 #include <string>
 
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
-#include <ignition/msgs/header.pb.h>
 #include <ignition/rendering/Scene.hh>
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
@@ -162,10 +162,10 @@ namespace ignition
       /// This function will add the following key-value pair to the `data`
       /// field in the provided ignition::msgs::Header msg.
       ///
-      /// * key: "sequence"
+      /// * key: "seq"
       /// * value: `sequence_number`
       ///
-      /// If the "sequence" key already exists, then the value will be set
+      /// If the "seq" key already exists, then the value will be set
       /// without adding another key-value pair.
       ///
       /// The `sequence_number` starts at zero, when a sensor is created,

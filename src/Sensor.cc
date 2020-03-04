@@ -243,7 +243,7 @@ void Sensor::AddSequence(ignition::msgs::Header *_msg)
   // Set the value if a `sequence` key already exists.
   for (int index = 0; index < _msg->data_size(); ++index)
   {
-    if (_msg->data(index).key() == "sequence")
+    if (_msg->data(index).key() == "seq")
     {
       if (_msg->data(index).value_size() == 0)
         _msg->mutable_data(index)->add_value(value);
@@ -255,6 +255,6 @@ void Sensor::AddSequence(ignition::msgs::Header *_msg)
 
   // Otherwise, add the sequence key-value pair.
   ignition::msgs::Header::Map *map = _msg->add_data();
-  map->set_key("sequence");
+  map->set_key("seq");
   map->add_value(value);
 }
