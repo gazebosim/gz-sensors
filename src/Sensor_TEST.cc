@@ -63,6 +63,28 @@ TEST(Sensor_TEST, Sensor)
   EXPECT_EQ(nullptr, sensor.SDF());
 }
 
+TEST(Sensor_TEST, AddSequence)
+{
+  TestSensor sensor;
+  ignition::msgs::Header header;
+  sensor.AddSequence(&header);
+  EXPECT_EQ("sequence", header.data(0).key());
+  EXPECT_EQ("0", header.data(0).value(0));
+
+  sensor.AddSequence(&header);
+  EXPECT_EQ("sequence", header.data(0).key());
+  EXPECT_EQ("1", header.data(0).value(0));
+
+  EXPECT_EQ(1, header.data_size());
+  EXPECT_EQ(1, header.data(0).value_size());
+
+  for (int i = 0; i < 100; i++)
+    sensor.AddSequence(&header);
+  EXPECT_EQ(1, header.data_size());
+  EXPECT_EQ(1, header.data(0).value_size());
+  EXPECT_EQ("101", header.data(0).value(0));
+}
+
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {

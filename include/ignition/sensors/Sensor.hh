@@ -22,6 +22,7 @@
 
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
+#include <ignition/msgs/header.pb.h>
 #include <ignition/rendering/Scene.hh>
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
@@ -152,6 +153,23 @@ namespace ignition
       /// \deprecated See RenderingSensor::SetScene
       public: virtual void IGN_DEPRECATED(1) SetScene(
           ignition::rendering::ScenePtr _scene);
+
+      /// \brief Add a sequence number to an ignition::msgs::Header. This
+      /// function can be called by a sensor that wants to add a sequence
+      /// number to a sensor message.
+      ///
+      /// This function will add the following key-value pair to the `data`
+      /// field in the provided ignition::msgs::Header msg.
+      ///
+      /// * key: "sequence"
+      /// * value: `sequence_number`
+      ///
+      /// If the "sequence" key already exists, then the value will be set
+      /// without adding another key-value pair.
+      ///
+      /// The `sequence_number` starts at zero, when a sensor is created,
+      /// and is incremented by one each time this function is called.
+      public: void AddSequence(ignition::msgs::Header *_msg);
 
       /// \internal
       /// \brief Data pointer for private data

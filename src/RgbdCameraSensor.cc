@@ -441,6 +441,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 
     // publish
     {
+      this->AddSequence(msg.mutable_header());
       IGN_PROFILE("RgbdCameraSensor::Update Publish depth image");
       this->dataPtr->depthPub.Publish(msg);
     }

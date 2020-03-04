@@ -527,6 +527,7 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
       width, height));
 
   // publish
+  this->AddSequence(msg.mutable_header());
   this->dataPtr->pub.Publish(msg);
 
   // publish the camera info message

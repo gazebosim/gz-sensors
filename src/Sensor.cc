@@ -58,6 +58,9 @@ class ignition::sensors::SensorPrivate
 
   /// \brief SDF Sensor DOM object.
   public: sdf::Sensor sdfSensor;
+
+  /// \brief Sequence number that is used in sensor data message headers.
+  public: uint64_t sequence = 0;
 };
 
 SensorId SensorPrivate::idCounter = 0;
@@ -230,4 +233,28 @@ ignition::common::Time Sensor::NextUpdateTime() const
 /////////////////////////////////////////////////
 void Sensor::SetScene(ignition::rendering::ScenePtr)
 {
+}
+
+/////////////////////////////////////////////////
+void Sensor::AddSequence(ignition::msgs::Header *_msg)
+{
+  std::string value = std::to_string(this->dataPtr->sequence++);
+
+  // Set the value if a `sequence` key already exists.
+  for (int index = 0; index < _msg->data_size(); ++index)
+  {
+    if (_msg->data(index).key() == "sequence")
+    {
+      if (_msg->data(index).value_size() == 0)
+        _msg->mutable_data(index)->add_value(value);
+      else
+        _msg->mutable_data(index)->set_value(0, value);
+      return;
+    }
+  }
+
+  // Otherwise, add the sequence key-value pair.
+  ignition::msgs::Header::Map *map = _msg->add_data();
+  map->set_key("sequence");
+  map->add_value(value);
 }
