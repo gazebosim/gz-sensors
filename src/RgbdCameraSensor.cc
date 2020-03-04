@@ -441,7 +441,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 
     // publish
     {
-      this->AddSequence(msg.mutable_header());
+      this->AddSequence(msg.mutable_header(), "depthImage");
       IGN_PROFILE("RgbdCameraSensor::Update Publish depth image");
       this->dataPtr->depthPub.Publish(msg);
     }
@@ -495,6 +495,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 
       // publish
       {
+        this->AddSequence(this->dataPtr->pointMsg.mutable_header(), "pointMsg");
         IGN_PROFILE("RgbdCameraSensor::Update Publish point cloud");
         this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
       }
@@ -532,6 +533,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 
       // publish the image message
       {
+        this->AddSequence(msg.mutable_header(), "rgbdImage");
         IGN_PROFILE("RgbdCameraSensor::Update Publish RGB image");
         this->dataPtr->imagePub.Publish(msg);
       }
