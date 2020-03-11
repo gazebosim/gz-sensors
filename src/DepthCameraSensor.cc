@@ -513,7 +513,10 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
                rendering::PF_FLOAT32_R));
   // TODO(anyone) Deprecated in ign-msgs4, will be removed on ign-msgs5
   // in favor of set_pixel_format_type.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   msg.set_pixel_format(commonFormat);
+#pragma GCC diagnostic pop
   msg.set_pixel_format_type(msgsFormat);
   msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
