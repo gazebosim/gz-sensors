@@ -405,7 +405,10 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     msg.set_height(height);
     msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
                rendering::PF_FLOAT32_R));
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     msg.set_pixel_format(ignition::common::Image::R_FLOAT32);
+#pragma GCC diagnostic pop
     msg.set_pixel_format_type(msgs::PixelFormatType::R_FLOAT32);
     msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
     msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
@@ -521,7 +524,10 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
       msg.set_height(height);
       msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
           rendering::PF_R8G8B8));
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
       msg.set_pixel_format(ignition::common::Image::RGB_INT8);
+#pragma GCC diagnostic pop
       msg.set_pixel_format_type(msgs::PixelFormatType::RGB_INT8);
       msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
       msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
