@@ -335,6 +335,8 @@ bool DepthCameraSensor::CreateCamera()
   this->dataPtr->depthCamera->SetImageHeight(height);
   this->dataPtr->depthCamera->SetNearClipPlane(near);
   this->dataPtr->depthCamera->SetFarClipPlane(far);
+  this->dataPtr->depthCamera->SetVisibilityMask(
+      cameraSdf->VisibilityMask());
 
   this->AddSensor(this->dataPtr->depthCamera);
 

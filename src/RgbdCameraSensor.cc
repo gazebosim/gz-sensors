@@ -244,6 +244,8 @@ bool RgbdCameraSensor::CreateCameras()
   this->dataPtr->depthCamera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->depthCamera->SetFarClipPlane(cameraSdf->FarClip());
 
+  this->dataPtr->depthCamera->SetVisibilityMask(cameraSdf->VisibilityMask());
+
   this->AddSensor(this->dataPtr->depthCamera);
 
   // \todo(nkoeng) these parameters via sdf
