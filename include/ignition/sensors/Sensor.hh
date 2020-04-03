@@ -17,10 +17,10 @@
 #ifndef IGNITION_SENSORS_SENSOR_HH_
 #define IGNITION_SENSORS_SENSOR_HH_
 
+#include <ignition/msgs/header.pb.h>
+
 #include <memory>
 #include <string>
-
-#include <ignition/msgs/header.pb.h>
 
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
