@@ -20,6 +20,8 @@
 #include <memory>
 #include <string>
 
+#include <ignition/msgs/header.pb.h>
+
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/sensors/config.hh>
