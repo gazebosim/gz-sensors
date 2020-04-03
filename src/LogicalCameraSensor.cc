@@ -166,6 +166,7 @@ bool LogicalCameraSensor::Update(const ignition::common::Time &_now)
   frame->add_value(this->Name());
 
   // publish
+  this->AddSequence(this->dataPtr->msg.mutable_header());
   this->dataPtr->pub.Publish(this->dataPtr->msg);
 
   return true;

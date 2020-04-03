@@ -249,6 +249,7 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
   }
 
   // publish
+  this->AddSequence(this->dataPtr->laserMsg.mutable_header());
   this->dataPtr->pub.Publish(this->dataPtr->laserMsg);
 
   return true;

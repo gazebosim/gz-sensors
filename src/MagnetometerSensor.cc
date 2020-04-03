@@ -186,6 +186,7 @@ bool MagnetometerSensor::Update(const ignition::common::Time &_now)
   msgs::Set(msg.mutable_field_tesla(), this->dataPtr->localField);
 
   // publish
+  this->AddSequence(msg.mutable_header());
   this->dataPtr->pub.Publish(msg);
 
   return true;
