@@ -245,6 +245,7 @@ bool GpuLidarSensor::Update(const ignition::common::Time &_now)
     this->dataPtr->FillPointCloudMsg();
 
     {
+      this->AddSequence(this->dataPtr->pointMsg.mutable_header());
       IGN_PROFILE("GpuLidarSensor::Update Publish point cloud");
       this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
     }
