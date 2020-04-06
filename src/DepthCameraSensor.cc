@@ -14,6 +14,7 @@
  * limitations under the License.
  *
 */
+
 #include <ignition/msgs/pointcloud_packed.pb.h>
 
 #include <mutex>
@@ -534,6 +535,7 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
       width, height));
 
   // publish
+  this->AddSequence(msg.mutable_header(), "default");
   this->dataPtr->pub.Publish(msg);
 
   // publish the camera info message
@@ -584,6 +586,7 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
         this->dataPtr->xyzBuffer,
         this->dataPtr->image.Data<unsigned char>());
 
+    this->AddSequence(this->dataPtr->pointMsg.mutable_header(), "pointMsg");
     this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
   }
   return true;
