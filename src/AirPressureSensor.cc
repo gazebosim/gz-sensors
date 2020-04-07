@@ -190,6 +190,7 @@ bool AirPressureSensor::Update(const ignition::common::Time &_now)
   msg.set_pressure(this->dataPtr->pressure);
 
   // publish
+  this->AddSequence(msg.mutable_header());
   this->dataPtr->pub.Publish(msg);
 
   return true;
