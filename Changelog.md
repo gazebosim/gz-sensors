@@ -12,9 +12,7 @@
 
 ## Ignition Sensors 3
 
-### Ignition Sensors 3.X.X
-
-### Ignition Sensors 3.0.0 (2019-03-01)
+### Ignition Sensors 3.0.0 (2019-12-10)
 
 1. Add support for sdformat frame semantics
     * [Pull request 104](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/104)
@@ -43,7 +41,15 @@
 
 ## Ignition Sensors 2
 
-### Ignition Sensors 2.X.X (20XX-XX-XX)
+### Ignition Sensors 2.8.0 (2020-03-04)
+
+1. Added sequence numbers to sensor data messages.
+    * [Pull request 112](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/112)
+
+### Ignition Sensors 2.7.0 (2019-12-16)
+
+1. Add clipping for depth camera on rgbd camera sensor (requires sdformat 8.7.0)
+    * [Pull request 107](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/107)
 
 ### Ignition Sensors 2.6.1 (2019-09-13)
 

@@ -213,6 +213,7 @@ bool ImuSensor::Update(const ignition::common::Time &_now)
   msgs::Set(msg.mutable_linear_acceleration(), this->dataPtr->linearAcc);
 
   // publish
+  this->AddSequence(msg.mutable_header());
   this->dataPtr->pub.Publish(msg);
   this->dataPtr->prevStep = _now;
   this->dataPtr->timeInitialized = true;
