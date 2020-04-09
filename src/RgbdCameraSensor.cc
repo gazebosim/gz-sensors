@@ -275,6 +275,8 @@ bool RgbdCameraSensor::CreateCameras()
     }
   }
 
+  this->dataPtr->depthCamera->SetVisibilityMask(cameraSdf->VisibilityMask());
+
   this->AddSensor(this->dataPtr->depthCamera);
 
   // \todo(nkoeng) these parameters via sdf

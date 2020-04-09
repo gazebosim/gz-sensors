@@ -4,6 +4,9 @@
 
 ### Ignition Sensors 4.0.0 (20XX-XX-XX)
 
+1. Set camera sensor visibility mask
+    * [Pull request 115](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/115)
+
 1. Depend on ign-rendering4
     * [Pull request 111](https://bitbucket.org/ignitionrobotics/ign-sensors/pull-requests/111)
 

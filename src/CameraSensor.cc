@@ -131,6 +131,7 @@ bool CameraSensor::CreateCamera()
   this->dataPtr->camera->SetImageHeight(height);
   this->dataPtr->camera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->camera->SetFarClipPlane(cameraSdf->FarClip());
+  this->dataPtr->camera->SetVisibilityMask(cameraSdf->VisibilityMask());
   this->AddSensor(this->dataPtr->camera);
 
   const std::map<SensorNoiseType, sdf::Noise> noises = {

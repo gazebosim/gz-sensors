@@ -247,6 +247,8 @@ bool ThermalCameraSensor::CreateCamera()
   this->dataPtr->thermalCamera->SetImageHeight(height);
   this->dataPtr->thermalCamera->SetNearClipPlane(nearPlane);
   this->dataPtr->thermalCamera->SetFarClipPlane(farPlane);
+  this->dataPtr->thermalCamera->SetVisibilityMask(
+      cameraSdf->VisibilityMask());
 
   this->dataPtr->thermalCamera->SetAmbientTemperature(this->dataPtr->ambient);
   this->dataPtr->thermalCamera->SetMinTemperature(this->dataPtr->minTemp);
