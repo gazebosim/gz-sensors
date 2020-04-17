@@ -10,7 +10,7 @@ pipelines:
           - wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -
           - apt-get update
           - apt-get -y install
-            cmake pkg-config cppcheck doxygen ruby-ronn curl mercurial git g++-8
+            cmake pkg-config cppcheck doxygen ruby-ronn curl git g++-8
           - update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8 --slave /usr/bin/gcov gcov /usr/bin/gcov-8
           # lcov
           - git clone https://github.com/linux-test-project/lcov.git -b v1.14
@@ -32,7 +32,7 @@ pipelines:
           # - apt install -y
           #   libxml2-utils
           #   libtinyxml-dev
-          # - hg clone http://bitbucket.org/osrf/sdformat -b default
+          # - git clone http://github.com/osrf/sdformat -b master
           # - cd sdformat
           # - mkdir build
           # - cd build
@@ -42,7 +42,7 @@ pipelines:
           # # Ignition msgs (uncomment if a specific branch is needed)
           # - apt install -y
           #   libprotobuf-dev protobuf-compiler libprotoc-dev
-          # - hg clone http://bitbucket.org/ignitionrobotics/ign-msgs -b default
+          # - git clone http://github.com/ignitionrobotics/ign-msgs -b master
           # - cd ign-msgs
           # - mkdir build
           # - cd build
@@ -52,7 +52,7 @@ pipelines:
           # # Ignition transport (uncomment if a specific branch is needed)
           # - apt install -y
           #   libzmq3-dev uuid-dev libsqlite3-dev
-          # - hg clone http://bitbucket.org/ignitionrobotics/ign-transport -b default
+          # - git clone http://github.com/ignitionrobotics/ign-transport -b master
           # - cd ign-transport
           # - mkdir build
           # - cd build
@@ -62,7 +62,7 @@ pipelines:
           # Install ign-rendering dependencies
           - apt-get -y install
             libogre-1.9-dev libogre-2.1-dev libglew-dev libfreeimage-dev freeglut3-dev libxmu-dev libxi-dev uuid-dev
-          - hg clone http://bitbucket.org/ignitionrobotics/ign-rendering -b default
+          - git clone http://github.com/ignitionrobotics/ign-rendering -b master
           - cd ign-rendering
           - mkdir build
           - cd build
