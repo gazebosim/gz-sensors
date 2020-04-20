@@ -1,6 +1,9 @@
-syntax: glob
-
+# CMake folders
 build
+
+# OS generated files
 .DS_Store
 .*.sw?
+
+# Version control generated files
 *.orig
