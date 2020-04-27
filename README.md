@@ -1,6 +1,6 @@
 # Ignition Sensors : Sensor models for simulation
 
-**Maintainer:** nate AT openrobotics DOT org 
+**Maintainer:** ichen AT openrobotics DOT org
 
 [![GitHub open issues](https://img.shields.io/github/issues-raw/ignitionrobotics/ign-sensors.svg)](https://github.com/ignitionrobotics/ign-sensors/issues)
 [![GitHub open pull requests](https://img.shields.io/github/issues-pr-raw/ignitionrobotics/ign-sensors.svg)](https://github.com/ignitionrobotics/ign-sensors/pulls)
