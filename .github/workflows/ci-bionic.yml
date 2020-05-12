@@ -32,4 +32,3 @@ jobs:
             libxi-dev
             uuid-dev
           codecov-token: ${{ secrets.CODECOV_TOKEN }}
-          source-dependencies: ../.github/ci-bionic/deps.yaml
