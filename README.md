@@ -9,10 +9,10 @@
 
 Build | Status
 -- | --
-Test coverage | [![codecov](https://codecov.io/bb/ignitionrobotics/ign-sensors/branch/default/graph/badge.svg)](https://codecov.io/bb/ignitionrobotics/ign-sensors)  
-Ubuntu Bionic | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-default-bionic-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-default-bionic-amd64)  
-Homebrew      | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-default-homebrew-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-default-homebrew-amd64)  
-Windows       | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-default-windows7-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-default-windows7-amd64)
+Test coverage | [![codecov](https://codecov.io/gh/ignitionrobotics/ign-sensors/branch/master/graph/badge.svg)](https://codecov.io/gh/ignitionrobotics/ign-sensors)  
+Ubuntu Bionic | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-master-bionic-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-master-bionic-amd64)  
+Homebrew      | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-master-homebrew-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-master-homebrew-amd64)  
+Windows       | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-master-windows7-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-master-windows7-amd64)
 
 Ignition Sensors, a component of [Ignition
 Robotics](https://ignitionrobotics.org), provides numerous sensor models
