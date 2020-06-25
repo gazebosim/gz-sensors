@@ -67,8 +67,14 @@ SensorFactory::~SensorFactory()
 std::shared_ptr<SensorPlugin> SensorFactory::LoadSensorPlugin(
     const std::string &_filename)
 {
+  this->dataPtr->systemPaths.AddPluginPaths(ignition::common::cwd());
+  this->dataPtr->systemPaths.AddPluginPaths(ignition::common::cwd() + "/" + IGN_SENSORS_PLUGIN_PATH);
+
+  std::cout << "adding " << ignition::common::cwd() << "/" << IGN_SENSORS_PLUGIN_PATH << std::endl;
+
   std::string fullPath =
       this->dataPtr->systemPaths.FindSharedLibrary(_filename);
+  std::cout << "filename is " << _filename << std::endl;
   if (fullPath.empty())
   {
     ignerr << "Unable to find sensor plugin path for [" << _filename << "]\n";
