@@ -459,10 +459,10 @@ public_headers = public_headers_no_gen + [
 ]
 
 cc_binary(
-    name = "libignition_sensors.so",
+    name = "libignition_sensors4.so",
     srcs = sources + private_headers + public_headers,
     includes = ["include"],
-    linkopts = ["-Wl,-soname,libignition_sensors.so"],
+    linkopts = ["-Wl,-soname,libignition_sensors4.so"],
     linkshared = True,
     visibility = [],
     deps = [
@@ -483,17 +483,58 @@ cc_binary(
 
 cc_library(
     name = "ign_sensors",
-    srcs = ["libignition_sensors.so"],
+    srcs = ["libignition_sensors4.so"],
     hdrs = public_headers,
     includes = ["include"],
     visibility = ["//visibility:public"],
+    deps = [
+        "//ign_common/events:events",
+        "//ign_common/graphics:graphics",
+        "//ign_common/profiler:profiler",
+        "//ign_common",
+        "//ign_rendering",
+        "//ign_transport",
+        "//ign_math",
+        "//ign_msgs",
+        "//sdformat",
+        "//ign_bazel:utilities",
+        "//ign_plugin/loader:loader",
+        "//ign_plugin/core:ign_plugin",
+    ],
 )
 
-# Need to build sensors individually due to the multiple definition error - 
-# There's a double inclusion with ign-common-graphics
-[cc_library(
+[
+cc_binary(
+    name = "libignition_sensors4-%s.so" % sensor,
+    srcs = [
+        "src/%s.cc" % sensor,
+        "include/ignition/sensors/%s.hh" % sensor,
+    ] + private_headers,
+    includes = ["include"],
+    linkopts = ["-Wl,-soname,libignition_sensors4-%s.so" % sensor],
+    linkshared = True,
+    visibility = [],
+    deps = [
+        "//ign_sensors",
+        "//ign_common/events:events",
+        "//ign_common/graphics:graphics",
+        "//ign_common/profiler:profiler",
+        "//ign_common",
+        "//ign_rendering",
+        "//ign_transport",
+        "//ign_math",
+        "//ign_msgs",
+        "//sdformat",
+        "//ign_bazel:utilities",
+        "//ign_plugin/loader:loader",
+        "//ign_plugin/core:ign_plugin",
+    ],
+) for sensor in sensors]
+
+[
+cc_library(
     name = sensor,
-    srcs = ["src/%s.cc" % sensor] + private_headers,
+    srcs = ["libignition_sensors4-%s.so" % sensor],
     hdrs = ["include/ignition/sensors/%s.hh" % sensor],
     deps = [
         "//ign_common/events:events",
@@ -512,7 +553,8 @@ cc_library(
     ],
 ) for sensor in sensors]
 
-[cc_test(
+[
+cc_test(
     name = src.replace("/", "_").replace(".cc", "").replace("src_", ""),
     srcs = [src],
     deps = [
@@ -525,24 +567,11 @@ cc_library(
         "//ign_math",
         "//ign_msgs",
         "//ign_sensors",
-        "//ign_sensors:AirPressureSensor",
-        "//ign_sensors:AltimeterSensor",
-        "//ign_sensors:CameraSensor",
-        "//ign_sensors:DepthCameraSensor",
-        "//ign_sensors:GpuLidarSensor",
-        "//ign_sensors:ImageNoise",
-        "//ign_sensors:ImuSensor",
-        "//ign_sensors:Lidar",
-        "//ign_sensors:LogicalCameraSensor",
-        "//ign_sensors:MagnetometerSensor",
-        "//ign_sensors:RenderingSensor",
-        "//ign_sensors:RgbdCameraSensor",
-        "//ign_sensors:ThermalCameraSensor",
         "//sdformat",
         "//ign_bazel:utilities",
         "//ign_plugin/loader:loader",
         "//ign_plugin/core:ign_plugin",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
-    ],
+        ] + [":%s" % sensor for sensor in sensors],
 ) for src in test_sources]
