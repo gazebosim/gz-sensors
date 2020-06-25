@@ -360,10 +360,10 @@ public_headers_no_gen = [
     "include/ignition/sensors/SensorFactory.hh",
     "include/ignition/sensors/SensorTypes.hh",
     "include/ignition/sensors/ThermalCameraSensor.hh",
+    "src/PointCloudUtil.hh",
 ]
 
 private_headers = [
-    "src/PointCloudUtil.hh",
 ]
 
 sensors = [
@@ -461,7 +461,7 @@ public_headers = public_headers_no_gen + [
 cc_binary(
     name = "libignition_sensors4.so",
     srcs = sources + private_headers + public_headers,
-    includes = ["include"],
+    includes = ["include", "src"],
     linkopts = ["-Wl,-soname,libignition_sensors4.so"],
     linkshared = True,
     visibility = [],
@@ -485,7 +485,7 @@ cc_library(
     name = "ign_sensors",
     srcs = ["libignition_sensors4.so"],
     hdrs = public_headers,
-    includes = ["include"],
+    includes = ["include", "src"],
     visibility = ["//visibility:public"],
     deps = [
         "//ign_common/events:events",
