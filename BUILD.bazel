@@ -21,8 +21,8 @@ IGN_DESIGNATION = "/tmp"
 CMAKE_INSTALL_PREFIX = "/tmp"
 IGN_LIB_INSTALL_DIR = "/tmp"
 IGN_DESIGNATION_CAP = 1
-IGN_SENSORS_PLUGIN_PATH = "/tmp"
-PROJECT_LIBRARY_TARGET_NAME = "name"
+IGN_SENSORS_PLUGIN_PATH = "ign_sensors/src"
+PROJECT_LIBRARY_TARGET_NAME = "ignition-sensors4"
 
 # Generates config.hh based on the version numbers in CMake code.
 cmake_configure_file(
@@ -372,7 +372,6 @@ sensors = [
     "CameraSensor",
     "DepthCameraSensor",
     "GpuLidarSensor",
-    "ImageNoise",
     "ImuSensor",
     "Lidar",
     "LogicalCameraSensor",
@@ -380,6 +379,22 @@ sensors = [
     "RenderingSensor",
     "RgbdCameraSensor",
     "ThermalCameraSensor",
+]
+
+# NOTE the below sensors names MUST correspond to the above sensors by index
+sensor_names = [
+   "air_pressure",
+   "altimeter",
+   "camera",
+   "depth_camera",
+   "gpu_lidar",
+   "imu",
+   "lidar",
+   "logical_camera",
+   "magnetometer",
+   "rendering",
+   "rgbd_camera",
+   "thermal_camera",
 ]
 
 sensor_sources = [
@@ -505,13 +520,13 @@ cc_library(
 
 [
 cc_binary(
-    name = "libignition_sensors4-%s.so" % sensor,
+    name = "libignition_sensors4-%s.so" % sensor_names[index],
     srcs = [
         "src/%s.cc" % sensor,
         "include/ignition/sensors/%s.hh" % sensor,
     ] + private_headers,
     includes = ["include"],
-    linkopts = ["-Wl,-soname,libignition_sensors4-%s.so" % sensor],
+    linkopts = ["-Wl,-soname,libignition_sensors4-%s.so" % sensor_names[index]],
     linkshared = True,
     visibility = [],
     deps = [
@@ -529,12 +544,12 @@ cc_binary(
         "//ign_plugin/loader:loader",
         "//ign_plugin/core:ign_plugin",
     ],
-) for sensor in sensors]
+) for index, sensor in enumerate(sensors)]
 
 [
 cc_library(
-    name = sensor,
-    srcs = ["libignition_sensors4-%s.so" % sensor],
+    name = "ignition-sensors4-%s" % sensor_names[index],
+    srcs = ["libignition_sensors4-%s.so" % sensor_names[index]],
     hdrs = ["include/ignition/sensors/%s.hh" % sensor],
     deps = [
         "//ign_common/events:events",
@@ -551,7 +566,7 @@ cc_library(
         "//ign_plugin/loader:loader",
         "//ign_plugin/core:ign_plugin",
     ],
-) for sensor in sensors]
+) for index, sensor in enumerate(sensors)]
 
 [
 cc_test(
@@ -573,5 +588,5 @@ cc_test(
         "//ign_plugin/core:ign_plugin",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
-        ] + [":%s" % sensor for sensor in sensors],
+        ] + [":ignition-sensors4-%s" % sensor for sensor in sensor_names],
 ) for src in test_sources]

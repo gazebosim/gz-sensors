@@ -37,7 +37,6 @@ sensors = [
     "CameraSensor",
     "DepthCameraSensor",
     "GpuLidarSensor",
-    "ImageNoise",
     "ImuSensor",
     "Lidar",
     "LogicalCameraSensor",
@@ -45,6 +44,22 @@ sensors = [
     "RenderingSensor",
     "RgbdCameraSensor",
     "ThermalCameraSensor",
+]
+
+# NOTE the below sensors names MUST correspond to the above sensors by index
+sensor_names = [
+   "air_pressure",
+   "altimeter",
+   "camera",
+   "depth_camera",
+   "gpu_lidar",
+   "imu",
+   "lidar",
+   "logical_camera",
+   "magnetometer",
+   "rendering",
+   "rgbd_camera",
+   "thermal_camera",
 ]
 
 [
@@ -60,7 +75,10 @@ sensors = [
           "//ign_sensors",
           "@gtest//:gtest",
           "@gtest//:gtest_main",
-          ] + ["//ign_sensors:%s" % sensor for sensor in sensors],
-        includes = [".", "plugins", "integration"],
+          ] + ["//ign_sensors:ignition-sensors4-%s" % sensor for sensor in sensor_names],
+        includes = [".", "integration"],
+        data = [":integration"],
     ) for test in glob(["integration/*.cc"])
 ]
+
+exports_files(["integration"])
