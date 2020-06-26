@@ -7,8 +7,8 @@ load(
     "generate_include_header",
 )
 load(
-    "//ign_bazel:generate_file.bzl",
-    "generate_file",
+    "//ign_bazel:ign_export_header.bzl",
+    "ign_export_header",
 )
 
 package(default_visibility = ["//visibility:public"])
@@ -52,320 +52,6 @@ cmake_configure_file(
     visibility = ["//visibility:private"],
 )
 
-generate_file(
-    name = "include/ignition/sensors/Export.hh",
-    content = """
-#pragma once
-// IGN_DEPRECATED is defined by all ignition libraries, but the version below
-// is a simplified version.  When mixing the regular ignition libraries and
-// the drake compiled ignition libraries, the compiler throws a warning about
-// the macro being multiply defined.  We undefine it before redefining it here
-// to work around that issue.  Note that the IGNITION_SENSORS_VISIBLE macro
-// shouldn't be defined multiple times, but we undefine it just in case.
-#ifdef IGNITION_SENSORS_VISIBLE
-#undef IGNITION_SENSORS_VISIBLE
-#endif
-#define IGNITION_SENSORS_VISIBLE __attribute__ ((visibility("default")))
-#ifdef IGN_DEPRECATED
-#undef IGN_DEPRECATED
-#endif
-#define IGN_DEPRECATED(version) __attribute__ ((__deprecated__))
-    """,
-    visibility = ["//visibility:private"],
-)
-
-generate_file(
-    name = "include/ignition/sensors/rendering/Export.hh",
-    content = """
-#pragma once
-// IGN_DEPRECATED is defined by all ignition libraries, but the version below
-// is a simplified version.  When mixing the regular ignition libraries and
-// the drake compiled ignition libraries, the compiler throws a warning about
-// the macro being multiply defined.  We undefine it before redefining it here
-// to work around that issue.  Note that the IGNITION_SENSORS_RENDERING_VISIBLE macro
-// shouldn't be defined multiple times, but we undefine it just in case.
-#ifdef IGNITION_SENSORS_RENDERING_VISIBLE
-#undef IGNITION_SENSORS_RENDERING_VISIBLE
-#endif
-#define IGNITION_SENSORS_RENDERING_VISIBLE __attribute__ ((visibility("default")))
-#ifdef IGN_DEPRECATED
-#undef IGN_DEPRECATED
-#endif
-#define IGN_DEPRECATED(version) __attribute__ ((__deprecated__))
-    """,
-    visibility = ["//visibility:private"],
-)
-
-generate_file(
-    name = "include/ignition/sensors/imu/Export.hh",
-    content = """
-#pragma once
-// IGN_DEPRECATED is defined by all ignition libraries, but the version below
-// is a simplified version.  When mixing the regular ignition libraries and
-// the drake compiled ignition libraries, the compiler throws a warning about
-// the macro being multiply defined.  We undefine it before redefining it here
-// to work around that issue.  Note that the IGNITION_SENSORS_IMU_VISIBLE macro
-// shouldn't be defined multiple times, but we undefine it just in case.
-#ifdef IGNITION_SENSORS_IMU_VISIBLE
-#undef IGNITION_SENSORS_IMU_VISIBLE
-#endif
-#define IGNITION_SENSORS_IMU_VISIBLE __attribute__ ((visibility("default")))
-#ifdef IGN_DEPRECATED
-#undef IGN_DEPRECATED
-#endif
-#define IGN_DEPRECATED(version) __attribute__ ((__deprecated__))
-    """,
-    visibility = ["//visibility:private"],
-)
-
-generate_file(
-    name = "include/ignition/sensors/air_pressure/Export.hh",
-    content = """
-#pragma once
-// IGN_DEPRECATED is defined by all ignition libraries, but the version below
-// is a simplified version.  When mixing the regular ignition libraries and
-// the drake compiled ignition libraries, the compiler throws a warning about
-// the macro being multiply defined.  We undefine it before redefining it here
-// to work around that issue.  Note that the IGNITION_SENSORS_AIR_PRESSURE_VISIBLE macro
-// shouldn't be defined multiple times, but we undefine it just in case.
-#ifdef IGNITION_SENSORS_AIR_PRESSURE_VISIBLE
-#undef IGNITION_SENSORS_AIR_PRESSURE_VISIBLE
-#endif
-#define IGNITION_SENSORS_AIR_PRESSURE_VISIBLE __attribute__ ((visibility("default")))
-#ifdef IGN_DEPRECATED
-#undef IGN_DEPRECATED
-#endif
-#define IGN_DEPRECATED(version) __attribute__ ((__deprecated__))
-    """,
-    visibility = ["//visibility:private"],
-)
-
-generate_file(
-    name = "include/ignition/sensors/lidar/Export.hh",
-    content = """
-#pragma once
-// IGN_DEPRECATED is defined by all ignition libraries, but the version below
-// is a simplified version.  When mixing the regular ignition libraries and
-// the drake compiled ignition libraries, the compiler throws a warning about
-// the macro being multiply defined.  We undefine it before redefining it here
-// to work around that issue.  Note that the IGNITION_SENSORS_LIDAR_VISIBLE macro
-// shouldn't be defined multiple times, but we undefine it just in case.
-#ifdef IGNITION_SENSORS_LIDAR_VISIBLE
-#undef IGNITION_SENSORS_LIDAR_VISIBLE
-#endif
-#define IGNITION_SENSORS_LIDAR_VISIBLE __attribute__ ((visibility("default")))
-#ifdef IGN_DEPRECATED
-#undef IGN_DEPRECATED
-#endif
-#define IGN_DEPRECATED(version) __attribute__ ((__deprecated__))
-    """,
-    visibility = ["//visibility:private"],
-)
-
-generate_file(
-    name = "include/ignition/sensors/depth_camera/Export.hh",
-    content = """
-#pragma once
-// IGN_DEPRECATED is defined by all ignition libraries, but the version below
-// is a simplified version.  When mixing the regular ignition libraries and
-// the drake compiled ignition libraries, the compiler throws a warning about
-// the macro being multiply defined.  We undefine it before redefining it here
-// to work around that issue.  Note that the IGNITION_SENSORS_DEPTH_CAMERA_VISIBLE macro
-// shouldn't be defined multiple times, but we undefine it just in case.
-#ifdef IGNITION_SENSORS_DEPTH_CAMERA_VISIBLE
-#undef IGNITION_SENSORS_DEPTH_CAMERA_VISIBLE
-#endif
-#define IGNITION_SENSORS_DEPTH_CAMERA_VISIBLE __attribute__ ((visibility("default")))
-#ifdef IGN_DEPRECATED
-#undef IGN_DEPRECATED
-#endif
-#define IGN_DEPRECATED(version) __attribute__ ((__deprecated__))
-    """,
-    visibility = ["//visibility:private"],
-)
-
-generate_file(
-    name = "include/ignition/sensors/logical_camera/Export.hh",
-    content = """
-#pragma once
-// IGN_DEPRECATED is defined by all ignition libraries, but the version below
-// is a simplified version.  When mixing the regular ignition libraries and
-// the drake compiled ignition libraries, the compiler throws a warning about
-// the macro being multiply defined.  We undefine it before redefining it here
-// to work around that issue.  Note that the IGNITION_SENSORS_LOGICAL_CAMERA_VISIBLE macro
-// shouldn't be defined multiple times, but we undefine it just in case.
-#ifdef IGNITION_SENSORS_LOGICAL_CAMERA_VISIBLE
-#undef IGNITION_SENSORS_LOGICAL_CAMERA_VISIBLE
-#endif
-#define IGNITION_SENSORS_LOGICAL_CAMERA_VISIBLE __attribute__ ((visibility("default")))
-#ifdef IGN_DEPRECATED
-#undef IGN_DEPRECATED
-#endif
-#define IGN_DEPRECATED(version) __attribute__ ((__deprecated__))
-    """,
-    visibility = ["//visibility:private"],
-)
-
-generate_file(
-    name = "include/ignition/sensors/thermal_camera/Export.hh",
-    content = """
-#pragma once
-// IGN_DEPRECATED is defined by all ignition libraries, but the version below
-// is a simplified version.  When mixing the regular ignition libraries and
-// the drake compiled ignition libraries, the compiler throws a warning about
-// the macro being multiply defined.  We undefine it before redefining it here
-// to work around that issue.  Note that the IGNITION_SENSORS_THERMAL_CAMERA_VISIBLE macro
-// shouldn't be defined multiple times, but we undefine it just in case.
-#ifdef IGNITION_SENSORS_THERMAL_CAMERA_VISIBLE
-#undef IGNITION_SENSORS_THERMAL_CAMERA_VISIBLE
-#endif
-#define IGNITION_SENSORS_THERMAL_CAMERA_VISIBLE __attribute__ ((visibility("default")))
-#ifdef IGN_DEPRECATED
-#undef IGN_DEPRECATED
-#endif
-#define IGN_DEPRECATED(version) __attribute__ ((__deprecated__))
-    """,
-    visibility = ["//visibility:private"],
-)
-
-generate_file(
-    name = "include/ignition/sensors/rgbd_camera/Export.hh",
-    content = """
-#pragma once
-// IGN_DEPRECATED is defined by all ignition libraries, but the version below
-// is a simplified version.  When mixing the regular ignition libraries and
-// the drake compiled ignition libraries, the compiler throws a warning about
-// the macro being multiply defined.  We undefine it before redefining it here
-// to work around that issue.  Note that the IGNITION_SENSORS_RGBD_CAMERA_VISIBLE macro
-// shouldn't be defined multiple times, but we undefine it just in case.
-#ifdef IGNITION_SENSORS_RGBD_CAMERA_VISIBLE
-#undef IGNITION_SENSORS_RGBD_CAMERA_VISIBLE
-#endif
-#define IGNITION_SENSORS_RGBD_CAMERA_VISIBLE __attribute__ ((visibility("default")))
-#ifdef IGN_DEPRECATED
-#undef IGN_DEPRECATED
-#endif
-#define IGN_DEPRECATED(version) __attribute__ ((__deprecated__))
-    """,
-    visibility = ["//visibility:private"],
-)
-
-generate_file(
-    name = "include/ignition/sensors/gpu_lidar/Export.hh",
-    content = """
-#pragma once
-// IGN_DEPRECATED is defined by all ignition libraries, but the version below
-// is a simplified version.  When mixing the regular ignition libraries and
-// the drake compiled ignition libraries, the compiler throws a warning about
-// the macro being multiply defined.  We undefine it before redefining it here
-// to work around that issue.  Note that the IGNITION_SENSORS_IMU_VISIBLE macro
-// shouldn't be defined multiple times, but we undefine it just in case.
-#ifdef IGNITION_SENSORS_GPU_LIDAR_VISIBLE
-#undef IGNITION_SENSORS_GPU_LIDAR_VISIBLE
-#endif
-#define IGNITION_SENSORS_GPU_LIDAR_VISIBLE __attribute__ ((visibility("default")))
-#ifdef IGN_DEPRECATED
-#undef IGN_DEPRECATED
-#endif
-#define IGN_DEPRECATED(version) __attribute__ ((__deprecated__))
-    """,
-    visibility = ["//visibility:private"],
-)
-
-generate_file(
-    name = "include/ignition/sensors/camera/Export.hh",
-    content = """
-#pragma once
-// IGN_DEPRECATED is defined by all ignition libraries, but the version below
-// is a simplified version.  When mixing the regular ignition libraries and
-// the drake compiled ignition libraries, the compiler throws a warning about
-// the macro being multiply defined.  We undefine it before redefining it here
-// to work around that issue.  Note that the IGNITION_SENSORS_CAMERA_VISIBLE macro
-// shouldn't be defined multiple times, but we undefine it just in case.
-#ifdef IGNITION_SENSORS_CAMERA_VISIBLE
-#undef IGNITION_SENSORS_CAMERA_VISIBLE
-#endif
-#define IGNITION_SENSORS_CAMERA_VISIBLE __attribute__ ((visibility("default")))
-#ifdef IGN_DEPRECATED
-#undef IGN_DEPRECATED
-#endif
-#define IGN_DEPRECATED(version) __attribute__ ((__deprecated__))
-    """,
-    visibility = ["//visibility:private"],
-)
-
-generate_file(
-    name = "include/ignition/sensors/altimeter/Export.hh",
-    content = """
-#pragma once
-// IGN_DEPRECATED is defined by all ignition libraries, but the version below
-// is a simplified version.  When mixing the regular ignition libraries and
-// the drake compiled ignition libraries, the compiler throws a warning about
-// the macro being multiply defined.  We undefine it before redefining it here
-// to work around that issue.  Note that the IGNITION_SENSORS_ALTIMETER_VISIBLE macro
-// shouldn't be defined multiple times, but we undefine it just in case.
-#ifdef IGNITION_SENSORS_ALTIMETER_VISIBLE
-#undef IGNITION_SENSORS_ALTIMETER_VISIBLE
-#endif
-#define IGNITION_SENSORS_ALTIMETER_VISIBLE __attribute__ ((visibility("default")))
-#ifdef IGN_DEPRECATED
-#undef IGN_DEPRECATED
-#endif
-#define IGN_DEPRECATED(version) __attribute__ ((__deprecated__))
-    """,
-    visibility = ["//visibility:private"],
-)
-
-generate_file(
-    name = "include/ignition/sensors/magnetometer/Export.hh",
-    content = """
-#pragma once
-// IGN_DEPRECATED is defined by all ignition libraries, but the version below
-// is a simplified version.  When mixing the regular ignition libraries and
-// the drake compiled ignition libraries, the compiler throws a warning about
-// the macro being multiply defined.  We undefine it before redefining it here
-// to work around that issue.  Note that the IGNITION_SENSORS_MAGNETOMETER_VISIBLE macro
-// shouldn't be defined multiple times, but we undefine it just in case.
-#ifdef IGNITION_SENSORS_MAGNETOMETER_VISIBLE
-#undef IGNITION_SENSORS_MAGNETOMETER_VISIBLE
-#endif
-#define IGNITION_SENSORS_MAGNETOMETER_VISIBLE __attribute__ ((visibility("default")))
-#ifdef IGN_DEPRECATED
-#undef IGN_DEPRECATED
-#endif
-#define IGN_DEPRECATED(version) __attribute__ ((__deprecated__))
-    """,
-    visibility = ["//visibility:private"],
-)
-
-public_headers_no_gen = [
-    "include/ignition/sensors/AirPressureSensor.hh",
-    "include/ignition/sensors/AltimeterSensor.hh",
-    "include/ignition/sensors/CameraSensor.hh",
-    "include/ignition/sensors/DepthCameraSensor.hh",
-    "include/ignition/sensors/GaussianNoiseModel.hh",
-    "include/ignition/sensors/GpuLidarSensor.hh",
-    "include/ignition/sensors/ImageGaussianNoiseModel.hh",
-    "include/ignition/sensors/ImageNoise.hh",
-    "include/ignition/sensors/ImuSensor.hh",
-    "include/ignition/sensors/Lidar.hh",
-    "include/ignition/sensors/LogicalCameraSensor.hh",
-    "include/ignition/sensors/MagnetometerSensor.hh",
-    "include/ignition/sensors/Manager.hh",
-    "include/ignition/sensors/Noise.hh",
-    "include/ignition/sensors/RenderingEvents.hh",
-    "include/ignition/sensors/RenderingSensor.hh",
-    "include/ignition/sensors/RgbdCameraSensor.hh",
-    "include/ignition/sensors/Sensor.hh",
-    "include/ignition/sensors/SensorFactory.hh",
-    "include/ignition/sensors/SensorTypes.hh",
-    "include/ignition/sensors/ThermalCameraSensor.hh",
-    "src/PointCloudUtil.hh",
-]
-
-private_headers = [
-]
-
 sensors = [
     "AirPressureSensor",
     "AltimeterSensor",
@@ -397,20 +83,35 @@ sensor_names = [
    "thermal_camera",
 ]
 
-sensor_sources = [
-    "src/AirPressureSensor.cc",
-    "src/AltimeterSensor.cc",
-    "src/CameraSensor.cc",
-    "src/DepthCameraSensor.cc",
-    "src/GpuLidarSensor.cc",
-    "src/ImuSensor.cc",
-    "src/Lidar.cc",
-    "src/LogicalCameraSensor.cc",
-    "src/MagnetometerSensor.cc",
-    "src/RenderingSensor.cc",
-    "src/RgbdCameraSensor.cc",
-    "src/ThermalCameraSensor.cc",
-]
+ign_export_header(
+    name = "include/ignition/sensors/Export.hh",
+    lib_name = "ignition-sensors",
+    export_base = "IGNITION_SENSORS",
+    visibility = ["//visibility:private"],
+)
+
+[ign_export_header(
+    name = "include/ignition/sensors/%s/Export.hh" % sensor,
+    lib_name = "ignition-sensors",
+    export_base = "IGNITION_SENSORS_%s" % sensor.upper(),
+    visibility = ["//visibility:private"],
+) for sensor in sensor_names]
+
+sensor_sources = ["src/%s.cc" % sensor for sensor in sensors]
+sensor_headers = ["include/ignition/sensors/%s.hh" % sensor for sensor in sensors]
+
+public_headers_no_gen = [
+    "include/ignition/sensors/GaussianNoiseModel.hh",
+    "include/ignition/sensors/ImageGaussianNoiseModel.hh",
+    "include/ignition/sensors/ImageNoise.hh",
+    "include/ignition/sensors/Manager.hh",
+    "include/ignition/sensors/Noise.hh",
+    "include/ignition/sensors/RenderingEvents.hh",
+    "include/ignition/sensors/Sensor.hh",
+    "include/ignition/sensors/SensorFactory.hh",
+    "include/ignition/sensors/SensorTypes.hh",
+    "src/PointCloudUtil.hh",
+] + sensor_headers
 
 sources = [
     "src/GaussianNoiseModel.cc",
@@ -434,48 +135,26 @@ test_sources = [
     "src/Sensor_TEST.cc",
 ]
 
+sensor_exports = [
+    "include/ignition/sensors/Export.hh",
+    ] + ["include/ignition/sensors/%s/Export.hh" % sensor for sensor in sensor_names]
+
 generate_include_header(
     name = "sensorshh_genrule",
     out = "include/ignition/sensors.hh",
     hdrs = public_headers_no_gen + [
         "include/ignition/sensors/config.hh",
-        "include/ignition/sensors/Export.hh",
-        "include/ignition/sensors/imu/Export.hh",
-        "include/ignition/sensors/air_pressure/Export.hh",
-        "include/ignition/sensors/lidar/Export.hh",
-        "include/ignition/sensors/depth_camera/Export.hh",
-        "include/ignition/sensors/logical_camera/Export.hh",
-        "include/ignition/sensors/thermal_camera/Export.hh",
-        "include/ignition/sensors/rgbd_camera/Export.hh",
-        "include/ignition/sensors/gpu_lidar/Export.hh",
-        "include/ignition/sensors/camera/Export.hh",
-        "include/ignition/sensors/altimeter/Export.hh",
-        "include/ignition/sensors/magnetometer/Export.hh",
-        "include/ignition/sensors/rendering/Export.hh",
-    ],
+    ] + sensor_exports,
 )
 
 public_headers = public_headers_no_gen + [
     "include/ignition/sensors/config.hh",
-    "include/ignition/sensors/Export.hh",
-    "include/ignition/sensors/imu/Export.hh",
-    "include/ignition/sensors/air_pressure/Export.hh",
-    "include/ignition/sensors/lidar/Export.hh",
-    "include/ignition/sensors/depth_camera/Export.hh",
-    "include/ignition/sensors/logical_camera/Export.hh",
-    "include/ignition/sensors/thermal_camera/Export.hh",
-    "include/ignition/sensors/rgbd_camera/Export.hh",
-    "include/ignition/sensors/gpu_lidar/Export.hh",
-    "include/ignition/sensors/camera/Export.hh",
-    "include/ignition/sensors/altimeter/Export.hh",
-    "include/ignition/sensors/magnetometer/Export.hh",
-    "include/ignition/sensors/rendering/Export.hh",
     "include/ignition/sensors.hh",
-]
+] + sensor_exports
 
 cc_binary(
     name = "libignition_sensors4.so",
-    srcs = sources + private_headers + public_headers,
+    srcs = sources + public_headers,
     includes = ["include", "src"],
     linkopts = ["-Wl,-soname,libignition_sensors4.so"],
     linkshared = True,
@@ -524,7 +203,7 @@ cc_binary(
     srcs = [
         "src/%s.cc" % sensor,
         "include/ignition/sensors/%s.hh" % sensor,
-    ] + private_headers,
+    ],
     includes = ["include"],
     linkopts = ["-Wl,-soname,libignition-sensors4-%s.so" % sensor_names[index]],
     linkshared = True,
