@@ -1,0 +1,272 @@
+load(
+    "//ign_bazel:cmake_configure_file.bzl",
+    "cmake_configure_file",
+)
+load(
+    "//ign_bazel:generate_include_header.bzl",
+    "generate_include_header",
+)
+load(
+    "//ign_bazel:ign_export_header.bzl",
+    "ign_export_header",
+)
+
+package(default_visibility = ["//visibility:public"])
+
+PROJECT_NAME = "ignition-sensors"
+PROJECT_MAJOR = 4
+PROJECT_MINOR = 0
+PROJECT_PATCH = 0
+IGN_DESIGNATION = "/tmp"
+CMAKE_INSTALL_PREFIX = "/tmp"
+IGN_LIB_INSTALL_DIR = "/tmp"
+IGN_DESIGNATION_CAP = 1
+IGN_SENSORS_PLUGIN_PATH = "ign_sensors"
+PROJECT_LIBRARY_TARGET_NAME = "ignition-sensors4"
+
+# Generates config.hh based on the version numbers in CMake code.
+cmake_configure_file(
+    name = "config",
+    src = "include/ignition/sensors/config.hh.in",
+    out = "include/ignition/sensors/config.hh",
+    cmakelists = ["CMakeLists.txt"],
+    defines = [
+        "PROJECT_VERSION_MAJOR=%d" % (PROJECT_MAJOR),
+        "PROJECT_MAJOR_VERSION=%d" % (PROJECT_MAJOR),
+        "PROJECT_MINOR_VERSION=%d" % (PROJECT_MINOR),
+        "PROJECT_PATCH_VERSION=%d" % (PROJECT_PATCH),
+        "PROJECT_VERSION_PATCH=%d" % (PROJECT_PATCH),
+        "PROJECT_VERSION_MAJOR=%d" % (PROJECT_MAJOR),
+        "PROJECT_VERSION_MINOR=%d" % (PROJECT_MINOR),
+        "PROJECT_VERSION=%d.%d" % (PROJECT_MAJOR, PROJECT_MINOR),
+        "PROJECT_VERSION_FULL=%d.%d.%d" % (PROJECT_MAJOR, PROJECT_MINOR, PROJECT_PATCH),  # noqa
+        "PROJECT_NAME_NO_VERSION=%s" % (PROJECT_NAME),
+        "PROJECT_NAME=%s" % (PROJECT_NAME),
+        "IGN_DESIGNATION=%s" % (IGN_DESIGNATION),
+        "CMAKE_INSTALL_PREFIX=%s" % (CMAKE_INSTALL_PREFIX),
+        "IGN_LIB_INSTALL_DIR=%s" % (IGN_LIB_INSTALL_DIR),
+        "IGN_DESIGNATION_CAP=%d" % (IGN_DESIGNATION_CAP),
+        "IGN_SENSORS_PLUGIN_PATH=%s" % (IGN_SENSORS_PLUGIN_PATH),
+        "PROJECT_LIBRARY_TARGET_NAME=%s" % (PROJECT_LIBRARY_TARGET_NAME),
+    ],
+    visibility = ["//visibility:private"],
+)
+
+sensors = [
+    "AirPressureSensor",
+    "AltimeterSensor",
+    "CameraSensor",
+    "DepthCameraSensor",
+    "GpuLidarSensor",
+    "ImuSensor",
+    "Lidar",
+    "LogicalCameraSensor",
+    "MagnetometerSensor",
+    "RenderingSensor",
+    "RgbdCameraSensor",
+    "ThermalCameraSensor",
+]
+
+# NOTE the below sensors names MUST correspond to the above sensors by index
+sensor_names = [
+   "air_pressure",
+   "altimeter",
+   "camera",
+   "depth_camera",
+   "gpu_lidar",
+   "imu",
+   "lidar",
+   "logical_camera",
+   "magnetometer",
+   "rendering",
+   "rgbd_camera",
+   "thermal_camera",
+]
+
+ign_export_header(
+    name = "include/ignition/sensors/Export.hh",
+    lib_name = "ignition-sensors",
+    export_base = "IGNITION_SENSORS",
+    visibility = ["//visibility:private"],
+)
+
+[ign_export_header(
+    name = "include/ignition/sensors/%s/Export.hh" % sensor,
+    lib_name = "ignition-sensors",
+    export_base = "IGNITION_SENSORS_%s" % sensor.upper(),
+    visibility = ["//visibility:private"],
+) for sensor in sensor_names]
+
+sensor_sources = ["src/%s.cc" % sensor for sensor in sensors]
+sensor_headers = ["include/ignition/sensors/%s.hh" % sensor for sensor in sensors]
+
+public_headers_no_gen = [
+    "include/ignition/sensors/GaussianNoiseModel.hh",
+    "include/ignition/sensors/ImageGaussianNoiseModel.hh",
+    "include/ignition/sensors/ImageNoise.hh",
+    "include/ignition/sensors/Manager.hh",
+    "include/ignition/sensors/Noise.hh",
+    "include/ignition/sensors/RenderingEvents.hh",
+    "include/ignition/sensors/Sensor.hh",
+    "include/ignition/sensors/SensorFactory.hh",
+    "include/ignition/sensors/SensorTypes.hh",
+    "src/PointCloudUtil.hh",
+] + sensor_headers
+
+sources = [
+    "src/GaussianNoiseModel.cc",
+    "src/ImageGaussianNoiseModel.cc",
+    "src/ImageNoise.cc",
+    "src/Manager.cc",
+    "src/Noise.cc",
+    "src/PointCloudUtil.cc",
+    "src/RenderingEvents.cc",
+    "src/Sensor.cc",
+    "src/SensorFactory.cc",
+    "src/SensorTypes.cc",
+]
+
+test_sources = [
+    "src/Camera_TEST.cc",
+    "src/ImuSensor_TEST.cc",
+    "src/Lidar_TEST.cc",
+    "src/Manager_TEST.cc",
+    "src/Noise_TEST.cc",
+    "src/Sensor_TEST.cc",
+]
+
+sensor_exports = [
+    "include/ignition/sensors/Export.hh",
+    ] + ["include/ignition/sensors/%s/Export.hh" % sensor for sensor in sensor_names]
+
+generate_include_header(
+    name = "sensorshh_genrule",
+    out = "include/ignition/sensors.hh",
+    hdrs = public_headers_no_gen + [
+        "include/ignition/sensors/config.hh",
+    ] + sensor_exports,
+)
+
+public_headers = public_headers_no_gen + [
+    "include/ignition/sensors/config.hh",
+    "include/ignition/sensors.hh",
+] + sensor_exports
+
+cc_binary(
+    name = "libignition_sensors4.so",
+    srcs = sources + public_headers,
+    includes = ["include", "src"],
+    linkopts = ["-Wl,-soname,libignition_sensors4.so"],
+    linkshared = True,
+    visibility = [],
+    deps = [
+        "//ign_common/events:events",
+        "//ign_common/graphics:graphics",
+        "//ign_common/profiler:profiler",
+        "//ign_common",
+        "//ign_rendering",
+        "//ign_transport",
+        "//ign_math",
+        "//ign_msgs",
+        "//sdformat",
+        "//ign_bazel:utilities",
+        "//ign_plugin/loader:loader",
+        "//ign_plugin/core:ign_plugin",
+    ],
+)
+
+cc_library(
+    name = "ign_sensors",
+    srcs = ["libignition_sensors4.so"],
+    hdrs = public_headers,
+    includes = ["include", "src"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//ign_common/events:events",
+        "//ign_common/graphics:graphics",
+        "//ign_common/profiler:profiler",
+        "//ign_common",
+        "//ign_rendering",
+        "//ign_transport",
+        "//ign_math",
+        "//ign_msgs",
+        "//sdformat",
+        "//ign_bazel:utilities",
+        "//ign_plugin/loader:loader",
+        "//ign_plugin/core:ign_plugin",
+    ],
+)
+
+[
+cc_binary(
+    name = "libignition-sensors4-%s.so" % sensor_names[index],
+    srcs = [
+        "src/%s.cc" % sensor,
+        "include/ignition/sensors/%s.hh" % sensor,
+    ],
+    includes = ["include"],
+    linkopts = ["-Wl,-soname,libignition-sensors4-%s.so" % sensor_names[index]],
+    linkshared = True,
+    visibility = ["//visibility:public"],
+    deps = [
+        "//ign_sensors",
+        "//ign_common/events:events",
+        "//ign_common/graphics:graphics",
+        "//ign_common/profiler:profiler",
+        "//ign_common",
+        "//ign_rendering",
+        "//ign_transport",
+        "//ign_math",
+        "//ign_msgs",
+        "//sdformat",
+        "//ign_bazel:utilities",
+        "//ign_plugin/loader:loader",
+        "//ign_plugin/core:ign_plugin",
+    ],
+) for index, sensor in enumerate(sensors)]
+
+[
+cc_library(
+    name = "ignition-sensors4-%s" % sensor_names[index],
+    srcs = ["libignition-sensors4-%s.so" % sensor_names[index]],
+    hdrs = ["include/ignition/sensors/%s.hh" % sensor],
+    deps = [
+        "//ign_common/events:events",
+        "//ign_common/graphics:graphics",
+        "//ign_common/profiler:profiler",
+        "//ign_common",
+        "//ign_rendering",
+        "//ign_transport",
+        "//ign_math",
+        "//ign_msgs",
+        "//ign_sensors",
+        "//sdformat",
+        "//ign_bazel:utilities",
+        "//ign_plugin/loader:loader",
+        "//ign_plugin/core:ign_plugin",
+    ],
+) for index, sensor in enumerate(sensors)]
+
+[
+cc_test(
+    name = src.replace("/", "_").replace(".cc", "").replace("src_", ""),
+    srcs = [src],
+    deps = [
+        "//ign_common/events:events",
+        "//ign_common/graphics:graphics",
+        "//ign_common/profiler:profiler",
+        "//ign_common",
+        "//ign_rendering",
+        "//ign_transport",
+        "//ign_math",
+        "//ign_msgs",
+        "//ign_sensors",
+        "//sdformat",
+        "//ign_bazel:utilities",
+        "//ign_plugin/loader:loader",
+        "//ign_plugin/core:ign_plugin",
+        "@gtest//:gtest",
+        "@gtest//:gtest_main",
+        ] + [":ignition-sensors4-%s" % sensor for sensor in sensor_names]
+          + [":libignition-sensors4-%s.so" % sensor for sensor in sensor_names],
+) for src in test_sources]
