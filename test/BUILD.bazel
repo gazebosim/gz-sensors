@@ -3,7 +3,7 @@ load(
     "cmake_configure_file",
 )
 
-PROJECT_SOURCE_DIR = "./ign_sensors/src"
+PROJECT_SOURCE_DIR = "./ign_sensors"
 PROJECT_BINARY_DIR = "./ign_sensors/src"
 CMAKE_BINARY_DIR = "./ign_sensors/src"
 
@@ -75,7 +75,8 @@ sensor_names = [
           "//ign_sensors",
           "@gtest//:gtest",
           "@gtest//:gtest_main",
-          ] + ["//ign_sensors:ignition-sensors4-%s" % sensor for sensor in sensor_names],
+          ] + ["//ign_sensors:ignition-sensors4-%s" % sensor for sensor in sensor_names]
+            + ["//ign_sensors:libignition-sensors4-%s.so" % sensor for sensor in sensor_names],
         includes = [".", "integration"],
         data = [":integration"],
     ) for test in glob(["integration/*.cc"])

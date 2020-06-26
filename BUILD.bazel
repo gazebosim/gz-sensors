@@ -21,7 +21,7 @@ IGN_DESIGNATION = "/tmp"
 CMAKE_INSTALL_PREFIX = "/tmp"
 IGN_LIB_INSTALL_DIR = "/tmp"
 IGN_DESIGNATION_CAP = 1
-IGN_SENSORS_PLUGIN_PATH = "ign_sensors/src"
+IGN_SENSORS_PLUGIN_PATH = "ign_sensors"
 PROJECT_LIBRARY_TARGET_NAME = "ignition-sensors4"
 
 # Generates config.hh based on the version numbers in CMake code.
@@ -520,15 +520,15 @@ cc_library(
 
 [
 cc_binary(
-    name = "libignition_sensors4-%s.so" % sensor_names[index],
+    name = "libignition-sensors4-%s.so" % sensor_names[index],
     srcs = [
         "src/%s.cc" % sensor,
         "include/ignition/sensors/%s.hh" % sensor,
     ] + private_headers,
     includes = ["include"],
-    linkopts = ["-Wl,-soname,libignition_sensors4-%s.so" % sensor_names[index]],
+    linkopts = ["-Wl,-soname,libignition-sensors4-%s.so" % sensor_names[index]],
     linkshared = True,
-    visibility = [],
+    visibility = ["//visibility:public"],
     deps = [
         "//ign_sensors",
         "//ign_common/events:events",
@@ -549,7 +549,7 @@ cc_binary(
 [
 cc_library(
     name = "ignition-sensors4-%s" % sensor_names[index],
-    srcs = ["libignition_sensors4-%s.so" % sensor_names[index]],
+    srcs = ["libignition-sensors4-%s.so" % sensor_names[index]],
     hdrs = ["include/ignition/sensors/%s.hh" % sensor],
     deps = [
         "//ign_common/events:events",
@@ -588,5 +588,6 @@ cc_test(
         "//ign_plugin/core:ign_plugin",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
-        ] + [":ignition-sensors4-%s" % sensor for sensor in sensor_names],
+        ] + [":ignition-sensors4-%s" % sensor for sensor in sensor_names]
+          + [":libignition-sensors4-%s.so" % sensor for sensor in sensor_names],
 ) for src in test_sources]
