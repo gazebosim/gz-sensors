@@ -120,6 +120,7 @@ sources = [
     "src/Manager.cc",
     "src/Noise.cc",
     "src/PointCloudUtil.cc",
+    "src/RenderingSensor.cc",
     "src/RenderingEvents.cc",
     "src/Sensor.cc",
     "src/SensorFactory.cc",
@@ -153,10 +154,10 @@ public_headers = public_headers_no_gen + [
 ] + sensor_exports
 
 cc_binary(
-    name = "libignition_sensors4.so",
+    name = "libignition-sensors4.so",
     srcs = sources + public_headers,
     includes = ["include", "src"],
-    linkopts = ["-Wl,-soname,libignition_sensors4.so"],
+    linkopts = ["-Wl,-soname,libignition-sensors4.so"],
     linkshared = True,
     visibility = [],
     deps = [
@@ -177,7 +178,7 @@ cc_binary(
 
 cc_library(
     name = "ign_sensors",
-    srcs = ["libignition_sensors4.so"],
+    srcs = ["libignition-sensors4.so"],
     hdrs = public_headers,
     includes = ["include", "src"],
     visibility = ["//visibility:public"],
@@ -197,6 +198,12 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "all",
+    deps = [":ignition-sensors4-%s" % sensor for sensor in sensor_names],
+    visibility = ["//visibility:public"],
+)
+
 [
 cc_binary(
     name = "libignition-sensors4-%s.so" % sensor_names[index],
@@ -205,7 +212,6 @@ cc_binary(
         "include/ignition/sensors/%s.hh" % sensor,
     ],
     includes = ["include"],
-    linkopts = ["-Wl,-soname,libignition-sensors4-%s.so" % sensor_names[index]],
     linkshared = True,
     visibility = ["//visibility:public"],
     deps = [
