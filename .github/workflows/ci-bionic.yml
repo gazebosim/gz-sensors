@@ -18,11 +18,11 @@ jobs:
             libignition-cmake2-dev
             libignition-common3-dev
             libignition-math6-dev
-            libignition-msgs5-dev
+            libignition-msgs6-dev
             libignition-tools-dev
             libignition-plugin-dev
-            libignition-transport8-dev
-            libsdformat9-dev
+            libignition-transport9-dev
+            libsdformat10-dev
             libogre-1.9-dev
             libogre-2.1-dev
             libglew-dev
