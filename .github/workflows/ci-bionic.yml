@@ -31,4 +31,5 @@ jobs:
             libxmu-dev
             libxi-dev
             uuid-dev
+            xvfb
           codecov-token: ${{ secrets.CODECOV_TOKEN }}
