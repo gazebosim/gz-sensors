@@ -222,6 +222,63 @@ TEST_F(AirPressureSensorTest, SensorReadings)
   EXPECT_DOUBLE_EQ(sqrt(0.2), msgNoise.variance());
 }
 
+/////////////////////////////////////////////////
+TEST_F(AirPressureSensorTest, Topic)
+{
+  const std::string name = "TestAirPressure";
+  const double updateRate = 30;
+  const bool alwaysOn = 1;
+  const bool visualize = 1;
+  auto sensorPose = ignition::math::Pose3d();
+
+  // Factory
+  ignition::sensors::SensorFactory factory;
+  factory.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH,
+      "lib"));
+
+  // Default topic
+  {
+    const std::string topic;
+    auto airPressureSdf = AirPressureToSdf(name, sensorPose,
+          updateRate, topic, alwaysOn, visualize);
+
+    auto sensor = factory.CreateSensor(airPressureSdf);
+    EXPECT_NE(nullptr, sensor);
+
+    auto airPressure =
+        dynamic_cast<ignition::sensors::AirPressureSensor *>(sensor.release());
+    ASSERT_NE(nullptr, airPressure);
+
+    EXPECT_EQ("/air_pressure", airPressure->Topic());
+  }
+
+  // Convert to valid topic
+  {
+    const std::string topic = "/topic with  spaces/@~characters//";
+    auto airPressureSdf = AirPressureToSdf(name, sensorPose,
+          updateRate, topic, alwaysOn, visualize);
+
+    auto sensor = factory.CreateSensor(airPressureSdf);
+    EXPECT_NE(nullptr, sensor);
+
+    auto airPressure =
+        dynamic_cast<ignition::sensors::AirPressureSensor *>(sensor.release());
+    ASSERT_NE(nullptr, airPressure);
+
+    EXPECT_EQ("/topic_with__spaces/characters", airPressure->Topic());
+  }
+
+  // Invalid topic
+  {
+    const std::string topic = "@@@";
+    auto airPressureSdf = AirPressureToSdf(name, sensorPose,
+          updateRate, topic, alwaysOn, visualize);
+
+    auto sensor = factory.CreateSensor(airPressureSdf);
+    ASSERT_EQ(nullptr, sensor);
+  }
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

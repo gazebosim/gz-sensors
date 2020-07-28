@@ -28,7 +28,7 @@ sdf::ElementPtr cameraToBadSdf()
     << "<sdf version='1.6'>"
     << " <model name='m1'>"
     << "  <link name='link1'>"
-    << "    <sensor name='cam_name' type='camera'>"
+    << "    <sensor name='cam_name' type='not_camera'>"
     << "      <not_camera>"
     << "      </not_camera>"
     << "    </sensor>"
@@ -45,7 +45,7 @@ sdf::ElementPtr cameraToBadSdf()
     ->GetElement("sensor");
 }
 
-sdf::ElementPtr cameraToSdf(const std::string &_type,
+sdf::ElementPtr CameraToSdf(const std::string &_type,
     const std::string &_name, double _updateRate,
     const std::string &_topic, bool _alwaysOn, bool _visualize)
 {
@@ -127,7 +127,7 @@ TEST(Camera_TEST, CreateCamera)
 {
   ignition::sensors::Manager mgr;
 
-  sdf::ElementPtr camSdf = cameraToSdf("camera", "my_camera", 60.0, "/cam",
+  sdf::ElementPtr camSdf = CameraToSdf("camera", "my_camera", 60.0, "/cam",
       true, true);
 
   // Create a CameraSensor
@@ -154,6 +154,65 @@ TEST(Camera_TEST, CreateCamera)
   ignition::sensors::CameraSensor *badCam =
     mgr.CreateSensor<ignition::sensors::CameraSensor>(camBadSdf);
   EXPECT_TRUE(badCam == nullptr);
+}
+
+/////////////////////////////////////////////////
+TEST(Camera_TEST, Topic)
+{
+  const std::string type = "camera";
+  const std::string name = "TestCamera";
+  const double updateRate = 30;
+  const bool alwaysOn = 1;
+  const bool visualize = 1;
+
+  // Factory
+  ignition::sensors::Manager mgr;
+
+  // Default topic
+  {
+    const std::string topic;
+    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
+        visualize);
+
+    auto sensorId = mgr.CreateSensor(cameraSdf);
+    EXPECT_NE(ignition::sensors::NO_SENSOR, sensorId);
+
+    auto sensor = mgr.Sensor(sensorId);
+    EXPECT_NE(nullptr, sensor);
+
+    auto camera = dynamic_cast<ignition::sensors::CameraSensor *>(sensor);
+    ASSERT_NE(nullptr, camera);
+
+    EXPECT_EQ("/camera", camera->Topic());
+  }
+
+  // Convert to valid topic
+  {
+    const std::string topic = "/topic with  spaces/@~characters//";
+    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
+        visualize);
+
+    auto sensorId = mgr.CreateSensor(cameraSdf);
+    EXPECT_NE(ignition::sensors::NO_SENSOR, sensorId);
+
+    auto sensor = mgr.Sensor(sensorId);
+    EXPECT_NE(nullptr, sensor);
+
+    auto camera = dynamic_cast<ignition::sensors::CameraSensor *>(sensor);
+    ASSERT_NE(nullptr, camera);
+
+    EXPECT_EQ("/topic_with__spaces/characters", camera->Topic());
+  }
+
+  // Invalid topic
+  {
+    const std::string topic = "@@@";
+    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
+        visualize);
+
+    auto sensorId = mgr.CreateSensor(cameraSdf);
+    EXPECT_EQ(ignition::sensors::NO_SENSOR, sensorId);
+  }
 }
 
 //////////////////////////////////////////////////

@@ -39,7 +39,7 @@
 #endif
 
 /// \brief Helper function to create a logical camera sdf element
-sdf::ElementPtr LogicalCameraToSDF(const std::string &_name,
+sdf::ElementPtr LogicalCameraToSdf(const std::string &_name,
     const ignition::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const double _near,
     const double _far, const double _horzFov,
@@ -99,7 +99,7 @@ TEST_F(LogicalCameraSensorTest, CreateLogicalCamera)
   // Create sensor SDF
   ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
       ignition::math::Quaterniond::Identity);
-  sdf::ElementPtr logicalCameraSDF = LogicalCameraToSDF(name, sensorPose,
+  sdf::ElementPtr logicalCameraSdf = LogicalCameraToSdf(name, sensorPose,
         updateRate, topic, near, far, horzFov, aspectRatio, alwaysOn,
         visualize);
 
@@ -107,7 +107,7 @@ TEST_F(LogicalCameraSensorTest, CreateLogicalCamera)
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor =
-      sf.CreateSensor<ignition::sensors::LogicalCameraSensor>(logicalCameraSDF);
+      sf.CreateSensor<ignition::sensors::LogicalCameraSensor>(logicalCameraSdf);
   EXPECT_TRUE(sensor != nullptr);
 
   EXPECT_EQ(name, sensor->Name());
@@ -137,7 +137,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   // Create sensor SDF
   ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
       ignition::math::Quaterniond::Identity);
-  sdf::ElementPtr logicalCameraSDF = LogicalCameraToSDF(name, sensorPose,
+  sdf::ElementPtr logicalCameraSdf = LogicalCameraToSdf(name, sensorPose,
         updateRate, topic, near, far, horzFov, aspectRatio, alwaysOn,
         visualize);
 
@@ -146,7 +146,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::Sensor> s =
-      sf.CreateSensor(logicalCameraSDF);
+      sf.CreateSensor(logicalCameraSdf);
   std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor(
       dynamic_cast<ignition::sensors::LogicalCameraSensor *>(s.release()));
 
@@ -228,6 +228,70 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   img = sensor->Image();
   EXPECT_EQ(sensorPose4, ignition::msgs::Convert(img.pose()));
   EXPECT_EQ(0, img.model().size());
+}
+
+/////////////////////////////////////////////////
+TEST_F(LogicalCameraSensorTest, Topic)
+{
+  const std::string name = "TestLogicalCamera";
+  const double updateRate = 30;
+  const double near = 0.55;
+  const double far = 5;
+  const double horzFov = 1.04719755;
+  const double aspectRatio = 1.778;
+  const bool alwaysOn = 1;
+  const bool visualize = 1;
+  auto sensorPose = ignition::math::Pose3d();
+
+  // Factory
+  ignition::sensors::SensorFactory factory;
+  factory.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH,
+      "lib"));
+
+  // Default topic
+  {
+    const std::string topic;
+    auto logicalCameraSdf = LogicalCameraToSdf(name, sensorPose,
+        updateRate, topic, near, far, horzFov, aspectRatio, alwaysOn,
+        visualize);
+
+    auto sensor = factory.CreateSensor(logicalCameraSdf);
+    EXPECT_NE(nullptr, sensor);
+
+    auto logicalCamera =
+        dynamic_cast<ignition::sensors::LogicalCameraSensor *>(sensor.release());
+    ASSERT_NE(nullptr, logicalCamera);
+
+    EXPECT_EQ("/logical_camera", logicalCamera->Topic());
+  }
+
+  // Convert to valid topic
+  {
+    const std::string topic = "/topic with  spaces/@~characters//";
+    auto logicalCameraSdf = LogicalCameraToSdf(name, sensorPose,
+        updateRate, topic, near, far, horzFov, aspectRatio, alwaysOn,
+        visualize);
+
+    auto sensor = factory.CreateSensor(logicalCameraSdf);
+    EXPECT_NE(nullptr, sensor);
+
+    auto logicalCamera =
+        dynamic_cast<ignition::sensors::LogicalCameraSensor *>(sensor.release());
+    ASSERT_NE(nullptr, logicalCamera);
+
+    EXPECT_EQ("/topic_with__spaces/characters", logicalCamera->Topic());
+  }
+
+  // Invalid topic
+  {
+    const std::string topic = "@@@";
+    auto logicalCameraSdf = LogicalCameraToSdf(name, sensorPose,
+        updateRate, topic, near, far, horzFov, aspectRatio, alwaysOn,
+        visualize);
+
+    auto sensor = factory.CreateSensor(logicalCameraSdf);
+    ASSERT_EQ(nullptr, sensor);
+  }
 }
 
 int main(int argc, char **argv)

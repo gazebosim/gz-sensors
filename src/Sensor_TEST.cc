@@ -63,6 +63,7 @@ TEST(Sensor_TEST, Sensor)
   EXPECT_EQ(nullptr, sensor.SDF());
 }
 
+//////////////////////////////////////////////////
 TEST(Sensor_TEST, AddSequence)
 {
   TestSensor sensor;
@@ -95,6 +96,21 @@ TEST(Sensor_TEST, AddSequence)
   EXPECT_EQ(1, header2.data_size());
   EXPECT_EQ(1, header2.data(0).value_size());
   EXPECT_EQ("0", header2.data(0).value(0));
+}
+
+//////////////////////////////////////////////////
+TEST(Sensor_TEST, Topic)
+{
+  TestSensor sensor;
+  EXPECT_EQ("", sensor.Topic());
+
+  EXPECT_TRUE(sensor.SetTopic("/topic"));
+  EXPECT_EQ("/topic", sensor.Topic());
+
+  EXPECT_TRUE(sensor.SetTopic("/topic with  spaces/@~characters//"));
+  EXPECT_EQ("/topic_with__spaces/characters", sensor.Topic());
+
+  EXPECT_FALSE(sensor.SetTopic(""));
 }
 
 //////////////////////////////////////////////////
