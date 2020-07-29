@@ -790,7 +790,6 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
 void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
 {
   const std::string name = "TestGpuLidar";
-  const std::string parent = "parent_link";
   const double updateRate = 30;
   const unsigned int horzSamples = 640;
   const double horzResolution = 1;
@@ -845,7 +844,7 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
 
   // Convert to valid topic
   {
-    const std::string topic = "/topic with  spaces/@~characters//";
+    const std::string topic = "/topic with spaces/@~characters//";
     auto lidarSdf = GpuLidarToSdf(name, testPose, updateRate, topic,
       horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
       vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
@@ -860,7 +859,7 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
     auto lidar = dynamic_cast<ignition::sensors::GpuLidarSensor *>(sensor);
     ASSERT_NE(nullptr, lidar);
 
-    EXPECT_EQ("/topic_with__spaces/characters/points", lidar->Topic());
+    EXPECT_EQ("/topic_with_spaces/characters/points", lidar->Topic());
   }
 
   // Invalid topic

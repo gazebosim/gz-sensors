@@ -259,7 +259,8 @@ TEST_F(LogicalCameraSensorTest, Topic)
     EXPECT_NE(nullptr, sensor);
 
     auto logicalCamera =
-        dynamic_cast<ignition::sensors::LogicalCameraSensor *>(sensor.release());
+        dynamic_cast<ignition::sensors::LogicalCameraSensor *>(
+        sensor.release());
     ASSERT_NE(nullptr, logicalCamera);
 
     EXPECT_EQ("/logical_camera", logicalCamera->Topic());
@@ -267,7 +268,7 @@ TEST_F(LogicalCameraSensorTest, Topic)
 
   // Convert to valid topic
   {
-    const std::string topic = "/topic with  spaces/@~characters//";
+    const std::string topic = "/topic with spaces/@~characters//";
     auto logicalCameraSdf = LogicalCameraToSdf(name, sensorPose,
         updateRate, topic, near, far, horzFov, aspectRatio, alwaysOn,
         visualize);
@@ -276,10 +277,11 @@ TEST_F(LogicalCameraSensorTest, Topic)
     EXPECT_NE(nullptr, sensor);
 
     auto logicalCamera =
-        dynamic_cast<ignition::sensors::LogicalCameraSensor *>(sensor.release());
+        dynamic_cast<ignition::sensors::LogicalCameraSensor *>(
+        sensor.release());
     ASSERT_NE(nullptr, logicalCamera);
 
-    EXPECT_EQ("/topic_with__spaces/characters", logicalCamera->Topic());
+    EXPECT_EQ("/topic_with_spaces/characters", logicalCamera->Topic());
   }
 
   // Invalid topic

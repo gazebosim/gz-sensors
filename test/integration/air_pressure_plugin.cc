@@ -254,7 +254,7 @@ TEST_F(AirPressureSensorTest, Topic)
 
   // Convert to valid topic
   {
-    const std::string topic = "/topic with  spaces/@~characters//";
+    const std::string topic = "/topic with spaces/@~characters//";
     auto airPressureSdf = AirPressureToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
@@ -265,7 +265,7 @@ TEST_F(AirPressureSensorTest, Topic)
         dynamic_cast<ignition::sensors::AirPressureSensor *>(sensor.release());
     ASSERT_NE(nullptr, airPressure);
 
-    EXPECT_EQ("/topic_with__spaces/characters", airPressure->Topic());
+    EXPECT_EQ("/topic_with_spaces/characters", airPressure->Topic());
   }
 
   // Invalid topic

@@ -104,7 +104,8 @@ bool AirPressureSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/air_pressure");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::FluidPressure>(this->Topic());
+      this->dataPtr->node.Advertise<ignition::msgs::FluidPressure>(
+      this->Topic());
 
   if (!this->dataPtr->pub)
   {

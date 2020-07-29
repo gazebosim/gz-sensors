@@ -257,7 +257,7 @@ TEST_F(ImuSensorTest, Topic)
 
   // Convert to valid topic
   {
-    const std::string topic = "/topic with  spaces/@~characters//";
+    const std::string topic = "/topic with spaces/@~characters//";
     auto imuSdf = ImuToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
@@ -268,7 +268,7 @@ TEST_F(ImuSensorTest, Topic)
         dynamic_cast<ignition::sensors::ImuSensor *>(sensor.release());
     ASSERT_NE(nullptr, imu);
 
-    EXPECT_EQ("/topic_with__spaces/characters", imu->Topic());
+    EXPECT_EQ("/topic_with_spaces/characters", imu->Topic());
   }
 
   // Invalid topic

@@ -282,7 +282,7 @@ TEST_F(AltimeterSensorTest, Topic)
 
   // Convert to valid topic
   {
-    const std::string topic = "/topic with  spaces/@~characters//";
+    const std::string topic = "/topic with spaces/@~characters//";
     auto altimeterSdf = AltimeterToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
@@ -293,7 +293,7 @@ TEST_F(AltimeterSensorTest, Topic)
         dynamic_cast<ignition::sensors::AltimeterSensor *>(sensor.release());
     ASSERT_NE(nullptr, altimeter);
 
-    EXPECT_EQ("/topic_with__spaces/characters", altimeter->Topic());
+    EXPECT_EQ("/topic_with_spaces/characters", altimeter->Topic());
   }
 
   // Invalid topic

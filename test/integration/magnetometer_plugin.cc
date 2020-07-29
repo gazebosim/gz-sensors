@@ -317,7 +317,7 @@ TEST_F(MagnetometerSensorTest, Topic)
 
   // Convert to valid topic
   {
-    const std::string topic = "/topic with  spaces/@~characters//";
+    const std::string topic = "/topic with spaces/@~characters//";
     auto magnetometerSdf = MagnetometerToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
@@ -328,7 +328,7 @@ TEST_F(MagnetometerSensorTest, Topic)
         dynamic_cast<ignition::sensors::MagnetometerSensor *>(sensor.release());
     ASSERT_NE(nullptr, magnetometer);
 
-    EXPECT_EQ("/topic_with__spaces/characters", magnetometer->Topic());
+    EXPECT_EQ("/topic_with_spaces/characters", magnetometer->Topic());
   }
 
   // Invalid topic

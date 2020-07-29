@@ -188,7 +188,7 @@ TEST(Camera_TEST, Topic)
 
   // Convert to valid topic
   {
-    const std::string topic = "/topic with  spaces/@~characters//";
+    const std::string topic = "/topic with spaces/@~characters//";
     auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
         visualize);
 
@@ -201,7 +201,7 @@ TEST(Camera_TEST, Topic)
     auto camera = dynamic_cast<ignition::sensors::CameraSensor *>(sensor);
     ASSERT_NE(nullptr, camera);
 
-    EXPECT_EQ("/topic_with__spaces/characters", camera->Topic());
+    EXPECT_EQ("/topic_with_spaces/characters", camera->Topic());
   }
 
   // Invalid topic

@@ -107,8 +107,8 @@ TEST(Sensor_TEST, Topic)
   EXPECT_TRUE(sensor.SetTopic("/topic"));
   EXPECT_EQ("/topic", sensor.Topic());
 
-  EXPECT_TRUE(sensor.SetTopic("/topic with  spaces/@~characters//"));
-  EXPECT_EQ("/topic_with__spaces/characters", sensor.Topic());
+  EXPECT_TRUE(sensor.SetTopic("/topic with spaces/@~characters//"));
+  EXPECT_EQ("/topic_with_spaces/characters", sensor.Topic());
 
   EXPECT_FALSE(sensor.SetTopic(""));
 }
