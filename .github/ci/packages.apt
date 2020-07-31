@@ -7,3 +7,4 @@ libignition-rendering2-dev
 libignition-tools-dev
 libignition-transport7-dev
 libsdformat8-dev
+xvfb
