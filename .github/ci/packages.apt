@@ -1,0 +1,9 @@
+libignition-cmake2-dev
+libignition-common3-dev
+libignition-math6-dev
+libignition-msgs4-dev
+libignition-plugin-dev
+libignition-rendering2-dev
+libignition-tools-dev
+libignition-transport7-dev
+libsdformat8-dev
