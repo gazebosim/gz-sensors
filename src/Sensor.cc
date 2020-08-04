@@ -21,6 +21,7 @@
 #include <ignition/sensors/Manager.hh>
 #include <ignition/common/Console.hh>
 #include <ignition/common/Profiler.hh>
+#include <ignition/transport/TopicUtils.hh>
 
 using namespace ignition::sensors;
 
@@ -29,6 +30,11 @@ class ignition::sensors::SensorPrivate
 {
   /// \brief Populates fields from a <sensor> DOM
   public: bool PopulateFromSDF(const sdf::Sensor &_sdf);
+
+  /// \brief Set topic where sensor data is published.
+  /// \param[in] _topic Topic sensor publishes data to.
+  /// \return True if a valid topic was set.
+  public: bool SetTopic(const std::string &_topic);
 
   /// \brief id given to sensor when constructed
   public: SensorId id;
@@ -88,7 +94,12 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
 
   // \todo(nkoenig) how to use frame?
   this->name = _sdf.Name();
-  this->topic = _sdf.Topic();
+
+  if (!_sdf.Topic().empty())
+  {
+    if (!this->SetTopic(_sdf.Topic()))
+      return false;
+  }
 
   // Try resolving the pose first, and only use the raw pose if that fails
   auto semPose = _sdf.SemanticPose();
@@ -163,6 +174,26 @@ std::string Sensor::Name() const
 std::string Sensor::Topic() const
 {
   return this->dataPtr->topic;
+}
+
+//////////////////////////////////////////////////
+bool Sensor::SetTopic(const std::string &_topic)
+{
+  return this->dataPtr->SetTopic(_topic);
+}
+
+//////////////////////////////////////////////////
+bool SensorPrivate::SetTopic(const std::string &_topic)
+{
+  auto validTopic = transport::TopicUtils::AsValidTopic(_topic);
+  if (validTopic.empty())
+  {
+    ignerr << "Failed to set sensor topic [" << _topic << "]" << std::endl;
+    return false;
+  }
+
+  this->topic = validTopic;
+  return true;
 }
 
 //////////////////////////////////////////////////
