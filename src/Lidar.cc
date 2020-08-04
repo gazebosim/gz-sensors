@@ -104,6 +104,9 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
   }
 
   // Register publisher
+  if (this->Topic().empty())
+    this->SetTopic("/lidar");
+
   this->dataPtr->pub =
       this->dataPtr->node.Advertise<ignition::msgs::LaserScan>(
         this->Topic());

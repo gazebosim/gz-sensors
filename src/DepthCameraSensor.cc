@@ -252,6 +252,9 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
 
   this->dataPtr->sdfSensor = _sdf;
 
+  if (this->Topic().empty())
+    this->SetTopic("/camera/depth");
+
   this->dataPtr->pub =
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
           this->Topic());
