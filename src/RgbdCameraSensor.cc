@@ -27,6 +27,7 @@
 
 #include <sdf/Sensor.hh>
 
+#include "ignition/sensors/GaussianNoiseModel.hh"
 #include "ignition/sensors/RgbdCameraSensor.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
@@ -99,6 +100,9 @@ class ignition::sensors::RgbdCameraSensorPrivate
 
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
+
+  /// \brief Noise added to sensor data
+  public: std::map<SensorNoiseType, NoisePtr> noises;
 
   /// \brief Connection from depth camera with new depth data
   public: ignition::common::ConnectionPtr depthConnection;
@@ -274,6 +278,30 @@ bool RgbdCameraSensor::CreateCameras()
   }
 
   this->AddSensor(this->dataPtr->depthCamera);
+
+  const std::map<SensorNoiseType, sdf::Noise> noises = {
+    {CAMERA_NOISE, cameraSdf->ImageNoise()},
+  };
+
+  for (const auto & [noiseType, noiseSdf] : noises)
+  {
+    // Add gaussian noise to camera sensor
+    if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
+    {
+      this->dataPtr->noises[noiseType] =
+        NoiseFactory::NewNoiseModel(noiseSdf, "rgbd_camera");
+
+      std::dynamic_pointer_cast<ImageGaussianNoiseModel>(
+           this->dataPtr->noises[noiseType])->SetCamera(
+             this->dataPtr->depthCamera);
+    }
+    else if (noiseSdf.Type() != sdf::NoiseType::NONE)
+    {
+      ignwarn << "The depth camera sensor only supports Gaussian noise. "
+       << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
+       << "] is not supported." << std::endl;
+    }
+  }
 
   // \todo(nkoeng) these parameters via sdf
   this->dataPtr->depthCamera->SetAntiAliasing(2);
