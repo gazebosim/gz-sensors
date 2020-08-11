@@ -319,6 +319,12 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
   // move the camera to the current pose
   this->dataPtr->camera->SetLocalPose(this->Pose());
 
+  // render only if necessary
+  if (!this->dataPtr->pub.HasConnections() &&
+      this->dataPtr->imageEvent.ConnectionCount() <= 0 &&
+      !this->dataPtr->saveImage)
+    return true;
+
   // generate sensor data
   this->Render();
   {
@@ -375,13 +381,16 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
   }
 
   // Trigger callbacks.
-  try
+  if (this->dataPtr->imageEvent.ConnectionCount() > 0)
   {
-    this->dataPtr->imageEvent(msg);
-  }
-  catch(...)
-  {
-    ignerr << "Exception thrown in an image callback.\n";
+    try
+    {
+      this->dataPtr->imageEvent(msg);
+    }
+    catch(...)
+    {
+      ignerr << "Exception thrown in an image callback.\n";
+    }
   }
 
   // Save image
