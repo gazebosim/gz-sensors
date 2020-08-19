@@ -28,6 +28,8 @@
 
 #include <ignition/math/Helpers.hh>
 
+#include <ignition/plugin/RegisterMore.hh>
+
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/ImageGaussianNoiseModel.hh"
 #include "ignition/sensors/ImageNoise.hh"

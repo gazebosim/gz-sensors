@@ -25,7 +25,6 @@
 
 #include <ignition/common/Event.hh>
 
-#include <ignition/common/PluginMacros.hh>
 #include <ignition/common/Time.hh>
 
 #include <ignition/msgs.hh>

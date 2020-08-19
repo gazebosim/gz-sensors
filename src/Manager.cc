@@ -18,8 +18,7 @@
 #include "ignition/sensors/Manager.hh"
 #include <memory>
 #include <unordered_map>
-#include <ignition/common/PluginLoader.hh>
-#include <ignition/common/Plugin.hh>
+#include <ignition/plugin/Loader.hh>
 #include <ignition/common/Profiler.hh>
 #include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>

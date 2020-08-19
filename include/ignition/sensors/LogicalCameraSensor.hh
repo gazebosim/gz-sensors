@@ -23,7 +23,7 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/PluginMacros.hh>
+#include <ignition/plugin/RegisterMore.hh>
 #include <ignition/common/Time.hh>
 
 #include <ignition/math/Angle.hh>
