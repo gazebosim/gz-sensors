@@ -101,6 +101,16 @@ void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 }
 
 /////////////////////////////////////////////////
+ignition::sensors::SensorId Manager::AddSensor(std::unique_ptr<sensors::Sensor> _sensor)
+{
+  if (!_sensor)
+    return NO_SENSOR;
+  SensorId id = _sensor->Id();
+  this->dataPtr->sensors[id] = std::move(_sensor);
+  return id;
+}
+
+/////////////////////////////////////////////////
 ignition::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &_sdf)
 {
   auto sensor = this->dataPtr->sensorFactory.CreateSensor(_sdf);

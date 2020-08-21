@@ -24,7 +24,6 @@
 
 #include <ignition/common/Console.hh>
 #include <ignition/plugin/Loader.hh>
-#include <ignition/plugin/RegisterMore.hh>
 
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
