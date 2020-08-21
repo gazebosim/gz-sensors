@@ -15,7 +15,6 @@
  *
 */
 
-#include <ignition/plugin/Register.hh>
 #include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>
 #include "ignition/sensors/config.hh"

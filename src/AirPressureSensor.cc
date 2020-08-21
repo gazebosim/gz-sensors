@@ -19,6 +19,8 @@
 #include <ignition/common/Profiler.hh>
 #include <ignition/transport/Node.hh>
 
+#include <ignition/plugin/Register.hh>
+
 #include "ignition/sensors/GaussianNoiseModel.hh"
 #include "ignition/sensors/Noise.hh"
 #include "ignition/sensors/SensorTypes.hh"

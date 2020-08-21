@@ -22,6 +22,8 @@
 #include <ignition/common/Profiler.hh>
 #include <ignition/math/Helpers.hh>
 
+#include <ignition/plugin/Register.hh>
+
 #include <ignition/rendering/Camera.hh>
 #include <ignition/rendering/DepthCamera.hh>
 #include <ignition/transport/Node.hh>

@@ -26,6 +26,8 @@
 #include "ignition/sensors/SensorTypes.hh"
 #include "ignition/sensors/GaussianNoiseModel.hh"
 
+#include <ignition/plugin/Register.hh>
+
 using namespace ignition::sensors;
 
 /// \brief Private data for Lidar class

@@ -23,6 +23,8 @@
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/AltimeterSensor.hh"
 
+#include <ignition/plugin/Register.hh>
+
 using namespace ignition;
 using namespace sensors;
 

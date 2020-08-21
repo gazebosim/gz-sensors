@@ -24,6 +24,7 @@
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/SensorTypes.hh"
 #include "ignition/sensors/MagnetometerSensor.hh"
+#include <ignition/plugin/Register.hh>
 
 using namespace ignition;
 using namespace sensors;

@@ -28,8 +28,6 @@
 
 #include <ignition/math/Helpers.hh>
 
-#include <ignition/plugin/RegisterMore.hh>
-
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/ImageGaussianNoiseModel.hh"
 #include "ignition/sensors/ImageNoise.hh"
@@ -37,6 +35,8 @@
 #include "ignition/sensors/RenderingEvents.hh"
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/SensorTypes.hh"
+
+#include <ignition/plugin/Register.hh>
 
 using namespace ignition;
 using namespace sensors;
@@ -597,3 +597,4 @@ double CameraSensor::Baseline() const
 }
 
 IGN_SENSORS_REGISTER_SENSOR(CameraSensor)
+IGNITION_ADD_PLUGIN_ALIAS(CameraSensor, "ignition::plugin::Camera")
