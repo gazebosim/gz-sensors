@@ -109,6 +109,9 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief Baseline for stereo cameras.
   public: double baseline{0.0};
+
+  /// \brief Flag to indicate if sensor is generating data
+  public: bool generatingData = false;
 };
 
 //////////////////////////////////////////////////
@@ -323,7 +326,25 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
   if (!this->dataPtr->pub.HasConnections() &&
       this->dataPtr->imageEvent.ConnectionCount() <= 0 &&
       !this->dataPtr->saveImage)
+  {
+    if (this->dataPtr->generatingData)
+    {
+      igndbg << "Disabling camera sensor: '" << this->Name() << "' data "
+             << "generation. " << std::endl;;
+      this->dataPtr->generatingData = false;
+    }
+
     return true;
+  }
+  else
+  {
+    if (!this->dataPtr->generatingData)
+    {
+      igndbg << "Enabling camera sensor: '" << this->Name() << "' data "
+             << "generation." << std::endl;;
+      this->dataPtr->generatingData = true;
+    }
+  }
 
   // generate sensor data
   this->Render();
