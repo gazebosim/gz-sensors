@@ -238,12 +238,16 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   // update sensor and verify new readings
   // there are not sensor rotations so the magnetic fields in body frame and
   // world frame should be the same
-  EXPECT_TRUE(sensor->Update(ignition::common::Time(1, 0)));
+  EXPECT_TRUE(sensor->Update(std::chrono::system_clock::time_point(
+    std::chrono::duration_cast< std::chrono::milliseconds >(
+      std::chrono::duration<int>(1)))));
   EXPECT_EQ(pose, sensor->WorldPose());
   EXPECT_EQ(worldField, sensor->WorldMagneticField());
   EXPECT_EQ(worldField, sensor->MagneticField());
 
-  EXPECT_TRUE(sensorNoise->Update(ignition::common::Time(1, 0)));
+  EXPECT_TRUE(sensorNoise->Update(std::chrono::system_clock::time_point(
+    std::chrono::duration_cast< std::chrono::milliseconds >(
+      std::chrono::duration<int>(1)))));
   EXPECT_EQ(poseNoise, sensorNoise->WorldPose());
   EXPECT_EQ(worldFieldNoise, sensorNoise->WorldMagneticField());
   // There should be noise in the MagneticField
@@ -271,7 +275,9 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   EXPECT_EQ(newPose, sensor->WorldPose());
 
   // update sensor and verify new readings
-  EXPECT_TRUE(sensor->Update(ignition::common::Time(2, 0)));
+  EXPECT_TRUE(sensor->Update(std::chrono::system_clock::time_point(
+      std::chrono::duration_cast< std::chrono::milliseconds >(
+        std::chrono::duration< double >(2)))));
   EXPECT_EQ(worldField, sensor->WorldMagneticField());
   ignition::math::Vector3d localField =
       newOrientation.RotateVectorReverse(worldField);

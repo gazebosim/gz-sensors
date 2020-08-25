@@ -24,7 +24,7 @@ using namespace sensors;
 
 class TestSensor : public Sensor
 {
-  public: bool Update(const common::Time &) override
+  public: bool Update(const std::chrono::system_clock::time_point &) override
   {
     updateCount++;
     return true;

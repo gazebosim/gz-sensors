@@ -256,8 +256,12 @@ TEST(ImuSensor_TEST, ComputeNoise)
   // Note no gravity.
   sensor_truth->SetGravity(math::Vector3d::Zero);
 
-  sensor->Update(common::Time(0, 10000000));
-  sensor_truth->Update(common::Time(0, 10000000));
+  sensor->Update(std::chrono::system_clock::time_point(
+    std::chrono::duration_cast< std::chrono::milliseconds >(
+      std::chrono::duration< double >(0.01))));
+  sensor_truth->Update(std::chrono::system_clock::time_point(
+    std::chrono::duration_cast< std::chrono::milliseconds >(
+      std::chrono::duration< double >(0.01))));
 
   // Since this IMU has no noise, measurements should equal the inputs.
   EXPECT_DOUBLE_EQ(sensor_truth->AngularVelocity().X(), 0.0);
@@ -275,8 +279,12 @@ TEST(ImuSensor_TEST, ComputeNoise)
   EXPECT_GT(sensor->AngularVelocity().SquaredLength(), 0.0);
   EXPECT_GT(sensor->LinearAcceleration().SquaredLength(), 0.0);
 
-  sensor->Update(common::Time(0, 20000000));
-  sensor_truth->Update(common::Time(0, 20000000));
+  sensor->Update(std::chrono::system_clock::time_point(
+    std::chrono::duration_cast< std::chrono::milliseconds >(
+      std::chrono::duration< double >(0.02))));
+  sensor_truth->Update(std::chrono::system_clock::time_point(
+    std::chrono::duration_cast< std::chrono::milliseconds >(
+      std::chrono::duration< double >(0.02))));
 
   // Since this IMU has no noise, measurements should equal the inputs.
   EXPECT_DOUBLE_EQ(sensor_truth->AngularVelocity().X(), 0.0);

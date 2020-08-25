@@ -76,7 +76,7 @@ namespace ignition
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) override;
+      public: virtual bool Update(const std::chrono::system_clock::time_point &_now) override;
 
       /// \brief Set a callback to be called when image frame data is
       /// generated.
@@ -138,7 +138,7 @@ namespace ignition
 
       /// \brief Publish camera info message.
       /// \param[in] _now The current time
-      protected: void PublishInfo(const ignition::common::Time &_now);
+      protected: void PublishInfo(const std::chrono::system_clock::time_point &_now);
 
       /// \brief Create a camera in a scene
       /// \return True on success.

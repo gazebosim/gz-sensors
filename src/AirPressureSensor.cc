@@ -133,7 +133,7 @@ bool AirPressureSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool AirPressureSensor::Update(const ignition::common::Time &_now)
+bool AirPressureSensor::Update(const std::chrono::system_clock::time_point &_now)
 {
   IGN_PROFILE("AirPressureSensor::Update");
   if (!this->dataPtr->initialized)
@@ -142,9 +142,13 @@ bool AirPressureSensor::Update(const ignition::common::Time &_now)
     return false;
   }
 
+  int64_t sec;
+  int32_t nsec;
+  ignition::common::Time::GetSecondsAndNanoseconds(_now, sec, nsec);
+
   msgs::FluidPressure msg;
-  msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
-  msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+  msg.mutable_header()->mutable_stamp()->set_sec(sec);
+  msg.mutable_header()->mutable_stamp()->set_nsec(nsec);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->Name());

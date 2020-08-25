@@ -230,7 +230,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   WaitForMessageTestHelper<ignition::msgs::LaserScan> helper(topic);
 
   // Update once to verify that a message is sent
-  mgr.RunOnce(ignition::common::Time::Zero);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0));
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
 
@@ -332,7 +332,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
 
   WaitForMessageTestHelper<ignition::msgs::LaserScan> helper(topic);
   // Update sensor
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0), true);
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
 
   int mid = horzSamples / 2;
@@ -505,7 +505,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   root->AddChild(visualBox3);
 
   // Update sensors
-  mgr.RunOnce(ignition::common::Time::Zero);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0));
 
   int mid = horzSamples / 2;
   int last = (horzSamples - 1);
@@ -533,7 +533,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   visualBox2->SetLocalPosition(box2PositionFar);
 
   // Update sensors
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0), true);
 
   // Verify values out of range
   for (unsigned int i = 0; i < sensor1->RayCount(); ++i)
@@ -616,7 +616,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   sensor->SetScene(scene);
 
   // Update sensor
-  mgr.RunOnce(ignition::common::Time::Zero);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0));
 
   unsigned int mid = horzSamples / 2;
   double unitBoxSize = 1.0;
@@ -648,7 +648,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
       ignition::math::Vector3d(rangeMax + 1, 0, 0));
 
   // Wait for a few more laser scans
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0), true);
 
   // Verify all values are out of range
   for (unsigned int j = 0; j < sensor->VerticalRayCount(); ++j)
@@ -759,7 +759,7 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   scene->PreRender();
 
   // Render and update
-  mgr.RunOnce(ignition::common::Time::Zero);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0));
 
   int mid = horzSamples / 2;
   int last = (horzSamples - 1);

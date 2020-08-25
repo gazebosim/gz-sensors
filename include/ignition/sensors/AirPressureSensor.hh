@@ -67,7 +67,7 @@ namespace ignition
       /// \brief Update the sensor and generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) override;
+      public: virtual bool Update(const std::chrono::system_clock::time_point &_now) override;
 
       /// \brief Set the reference altitude.
       /// \param[in] _ref Verical reference position in meters

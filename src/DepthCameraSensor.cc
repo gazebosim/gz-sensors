@@ -495,7 +495,7 @@ void DepthCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 }
 
 //////////////////////////////////////////////////
-bool DepthCameraSensor::Update(const ignition::common::Time &_now)
+bool DepthCameraSensor::Update(const std::chrono::system_clock::time_point &_now)
 {
   IGN_PROFILE("DepthCameraSensor::Update");
   if (!this->dataPtr->initialized)
@@ -525,8 +525,11 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
   msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
                rendering::PF_FLOAT32_R));
   msg.set_pixel_format_type(msgsFormat);
-  msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
-  msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+  int64_t sec;
+  int32_t nsec;
+  ignition::common::Time::GetSecondsAndNanoseconds(_now, sec, nsec);
+  msg.mutable_header()->mutable_stamp()->set_sec(sec);
+  msg.mutable_header()->mutable_stamp()->set_nsec(nsec);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->Name());
@@ -556,11 +559,10 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
   if (this->dataPtr->pointPub.HasConnections() &&
       this->dataPtr->pointCloudBuffer)
   {
+    ignition::common::Time::GetSecondsAndNanoseconds(_now, sec, nsec);
     // Set the time stamp
-    this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_sec(
-        _now.sec);
-    this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_nsec(
-        _now.nsec);
+    this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_sec(sec);
+    this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_nsec(nsec);
     this->dataPtr->pointMsg.set_is_dense(true);
 
     if (!this->dataPtr->xyzBuffer)

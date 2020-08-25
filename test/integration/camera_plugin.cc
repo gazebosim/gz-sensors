@@ -79,7 +79,7 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
 
   // Update once to create image
-  mgr.RunOnce(ignition::common::Time::Zero);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0));
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
 

@@ -229,7 +229,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   WaitForMessageTestHelper<ignition::msgs::CameraInfo> infoHelper(infoTopic);
 
   // Update once to create image
-  mgr.RunOnce(ignition::common::Time::Zero);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0));
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
   EXPECT_TRUE(pointsHelper.WaitForMessage()) << pointsHelper;
@@ -246,7 +246,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   node.Subscribe(infoTopic, &OnCameraInfo);
 
   // wait for a few depth camera frames
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0), true);
 
   int midWidth = depthSensor->ImageWidth() * 0.5;
   int midHeight = depthSensor->ImageHeight() * 0.5;
@@ -317,7 +317,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   box->SetLocalPosition(boxPositionNear);
   root->AddChild(box);
 
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0), true);
   for (int sleep = 0;
        sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
   {
@@ -353,7 +353,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   box->SetLocalPosition(boxPositionFar);
   root->AddChild(box);
 
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0), true);
   for (int sleep = 0;
        sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
   {
@@ -389,7 +389,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   box->SetLocalPosition(boxPositionFillFrame);
   root->AddChild(box);
 
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0), true);
   for (int sleep = 0;
        sleep < 300 && (counter == 0 || infoCounter == 0 || pcCounter == 0);
        ++sleep)

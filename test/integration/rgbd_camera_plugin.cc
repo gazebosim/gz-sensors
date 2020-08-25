@@ -251,7 +251,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   WaitForMessageTestHelper<ignition::msgs::CameraInfo> infoHelper(infoTopic);
 
   // Update once to create image
-  mgr.RunOnce(ignition::common::Time::Zero);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0));
 
   EXPECT_TRUE(depthHelper.WaitForMessage()) << depthHelper;
   EXPECT_TRUE(imageHelper.WaitForMessage()) << imageHelper;
@@ -271,7 +271,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   node.Subscribe(infoTopic, &OnCameraInfo);
 
   // Update once more
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0), true);
 
   // wait for an image
   ignition::common::Time waitTime = ignition::common::Time(0.001);
@@ -504,7 +504,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   box->SetLocalPosition(boxPositionNear);
   root->AddChild(box);
 
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0), true);
   for (int sleep = 0; sleep < 300 &&
       (counter == 0 || infoCounter == 0 || imgCounter == 0 || pcCounter == 0);
       ++sleep)
@@ -610,7 +610,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   box->SetLocalPosition(boxPositionFar);
   root->AddChild(box);
 
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0), true);
   for (int sleep = 0; sleep < 300 &&
       (counter == 0 || infoCounter == 0 || imgCounter == 0 || pcCounter == 0);
       ++sleep)

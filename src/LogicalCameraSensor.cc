@@ -129,7 +129,7 @@ void LogicalCameraSensor::SetModelPoses(
 }
 
 //////////////////////////////////////////////////
-bool LogicalCameraSensor::Update(const ignition::common::Time &_now)
+bool LogicalCameraSensor::Update(const std::chrono::system_clock::time_point &_now)
 {
   IGN_PROFILE("LogicalCameraSensor::Update");
   if (!this->dataPtr->initialized)
@@ -156,9 +156,11 @@ bool LogicalCameraSensor::Update(const ignition::common::Time &_now)
       msgs::Set(modelMsg->mutable_pose(), it.second - this->Pose());
     }
   }
-
-  this->dataPtr->msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
-  this->dataPtr->msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+  int64_t sec;
+  int32_t nsec;
+  ignition::common::Time::GetSecondsAndNanoseconds(_now, sec, nsec);
+  this->dataPtr->msg.mutable_header()->mutable_stamp()->set_sec(sec);
+  this->dataPtr->msg.mutable_header()->mutable_stamp()->set_nsec(nsec);
   // Remove 'data' entries before adding new ones
   this->dataPtr->msg.mutable_header()->clear_data();
   auto frame = this->dataPtr->msg.mutable_header()->add_data();

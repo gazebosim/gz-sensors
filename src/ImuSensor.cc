@@ -61,7 +61,7 @@ class ignition::sensors::ImuSensorPrivate
   public: bool timeInitialized = false;
 
   /// \brief Previous update time step.
-  public: ignition::common::Time prevStep { ignition::common::Time::Zero };
+  public: std::chrono::system_clock::time_point prevStep {std::chrono::system_clock::from_time_t(0)};
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -147,7 +147,7 @@ bool ImuSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool ImuSensor::Update(const ignition::common::Time &_now)
+bool ImuSensor::Update(const std::chrono::system_clock::time_point &_now)
 {
   IGN_PROFILE("ImuSensor::Update");
   if (!this->dataPtr->initialized)
@@ -166,7 +166,9 @@ bool ImuSensor::Update(const ignition::common::Time &_now)
   double dt;
   if (this->dataPtr->timeInitialized)
   {
-    dt = (_now - this->dataPtr->prevStep).Double();
+    auto delay = std::chrono::duration_cast<std::chrono::duration<float>>(
+        _now - this->dataPtr->prevStep);
+    dt = delay.count();
   }
   else
   {
@@ -201,8 +203,11 @@ bool ImuSensor::Update(const ignition::common::Time &_now)
       this->dataPtr->worldPose.Rot();
 
   msgs::IMU msg;
-  msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
-  msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+  int64_t sec;
+  int32_t nsec;
+  ignition::common::Time::GetSecondsAndNanoseconds(_now, sec, nsec);
+  msg.mutable_header()->mutable_stamp()->set_sec(sec);
+  msg.mutable_header()->mutable_stamp()->set_nsec(nsec);
   msg.set_entity_name(this->Name());
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");

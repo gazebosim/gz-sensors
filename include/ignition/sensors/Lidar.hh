@@ -56,12 +56,12 @@ namespace ignition
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) override;
+      public: virtual bool Update(const std::chrono::system_clock::time_point &_now) override;
 
       /// \brief Publish LaserScan message
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool PublishLidarScan(const common::Time &_now);
+      public: virtual bool PublishLidarScan(const std::chrono::system_clock::time_point &_now);
 
       /// \brief Load the sensor based on data from an sdf::Sensor object.
       /// \param[in] _sdf SDF Sensor parameters.

@@ -92,7 +92,7 @@ bool Manager::Remove(const ignition::sensors::SensorId _id)
 }
 
 //////////////////////////////////////////////////
-void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
+void Manager::RunOnce(const std::chrono::system_clock::time_point &_time, bool _force)
 {
   IGN_PROFILE("SensorManager::RunOnce");
   for (auto &s : this->dataPtr->sensors)

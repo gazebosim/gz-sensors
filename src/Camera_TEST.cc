@@ -144,7 +144,7 @@ TEST(Camera_TEST, CreateCamera)
 
   // however camera is not loaded because a rendering scene is missing so
   // updates will not be successful and image size will be 0
-  EXPECT_FALSE(cam->Update(ignition::common::Time()));
+  EXPECT_FALSE(cam->Update(std::chrono::system_clock::time_point()));
   EXPECT_EQ(0u, cam->ImageWidth());
   EXPECT_EQ(0u, cam->ImageHeight());
 

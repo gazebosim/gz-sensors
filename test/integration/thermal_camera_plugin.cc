@@ -162,7 +162,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   WaitForMessageTestHelper<ignition::msgs::CameraInfo> infoHelper(infoTopic);
 
   // Update once to create image
-  mgr.RunOnce(ignition::common::Time::Zero);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0));
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
   EXPECT_TRUE(infoHelper.WaitForMessage()) << infoHelper;
@@ -175,7 +175,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   node.Subscribe(infoTopic, &OnCameraInfo);
 
   // wait for a few thermal camera frames
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0), true);
 
   int midWidth = thermalSensor->ImageWidth() * 0.5;
   int midHeight = thermalSensor->ImageHeight() * 0.5;
@@ -248,7 +248,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   box->SetLocalPosition(boxPositionNear);
   root->AddChild(box);
 
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0), true);
   for (int sleep = 0;
        sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
   {
@@ -282,7 +282,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   box->SetLocalPosition(boxPositionFar);
   root->AddChild(box);
 
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::system_clock::from_time_t(0), true);
   for (int sleep = 0;
        sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
   {

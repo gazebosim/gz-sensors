@@ -183,14 +183,14 @@ ignition::common::ConnectionPtr Lidar::ConnectNewLidarFrame(
 }
 
 //////////////////////////////////////////////////
-bool Lidar::Update(const ignition::common::Time &/*_now*/)
+bool Lidar::Update(const std::chrono::system_clock::time_point &/*_now*/)
 {
   ignerr << "No lidar data being updated.\n";
   return false;
 }
 
 //////////////////////////////////////////////////
-bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
+bool Lidar::PublishLidarScan(const std::chrono::system_clock::time_point &_now)
 {
   IGN_PROFILE("Lidar::PublishLidarScan");
   if (!this->laserBuffer)
@@ -198,10 +198,11 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
 
   std::lock_guard<std::mutex> lock(this->lidarMutex);
 
-  this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_sec(
-      _now.sec);
-  this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_nsec(
-      _now.nsec);
+  int64_t sec;
+  int32_t nsec;
+  ignition::common::Time::GetSecondsAndNanoseconds(_now, sec, nsec);
+  this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_sec(sec);
+  this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_nsec(nsec);
   // Remove 'data' entries before adding new ones
   this->dataPtr->laserMsg.mutable_header()->clear_data();
   auto frame = this->dataPtr->laserMsg.mutable_header()->add_data();

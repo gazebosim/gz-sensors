@@ -69,7 +69,7 @@ namespace ignition
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successful
-      public: virtual bool Update(const common::Time &_now) override;
+      public: virtual bool Update(const std::chrono::system_clock::time_point &_now) override;
 
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene

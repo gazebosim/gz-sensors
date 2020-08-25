@@ -362,7 +362,7 @@ void ThermalCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 }
 
 //////////////////////////////////////////////////
-bool ThermalCameraSensor::Update(const ignition::common::Time &_now)
+bool ThermalCameraSensor::Update(const std::chrono::system_clock::time_point &_now)
 {
   IGN_PROFILE("ThermalCameraSensor::Update");
   if (!this->dataPtr->initialized)
@@ -400,8 +400,11 @@ bool ThermalCameraSensor::Update(const ignition::common::Time &_now)
       width * rendering::PixelUtil::BytesPerPixel(rendering::PF_L16));
   this->dataPtr->thermalMsg.set_pixel_format_type(msgsFormat);
   auto stamp = this->dataPtr->thermalMsg.mutable_header()->mutable_stamp();
-  stamp->set_sec(_now.sec);
-  stamp->set_nsec(_now.nsec);
+  int64_t sec;
+  int32_t nsec;
+  ignition::common::Time::GetSecondsAndNanoseconds(_now, sec, nsec);
+  stamp->set_sec(sec);
+  stamp->set_nsec(nsec);
   auto frame = this->dataPtr->thermalMsg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->Name());
