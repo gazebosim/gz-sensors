@@ -253,7 +253,8 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   int mid = midHeight * depthSensor->ImageWidth() + midWidth -1;
   double expectedRangeAtMidPoint = boxPosition.X() - unitBoxSize * 0.5;
 
-  ignition::common::Time waitTime = ignition::common::Time(0.001);
+  auto waitTime = std::chrono::duration_cast< std::chrono::milliseconds >(
+      std::chrono::duration< double >(0.001));
   int counter = 0;
   int infoCounter = 0;
   int pcCounter = 0;
@@ -269,7 +270,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
     infoCounter = g_infoCounter;
     infoMsg = g_infoMsg;
     g_infoMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
   g_mutex.lock();
   g_infoMutex.lock();
@@ -328,7 +329,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.lock();
     infoCounter = g_infoCounter;
     g_infoMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
 
   g_mutex.lock();
@@ -364,7 +365,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.lock();
     infoCounter = g_infoCounter;
     g_infoMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
   g_mutex.lock();
   g_infoMutex.lock();
@@ -406,7 +407,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
     pcCounter = g_pcCounter;
     g_pcMutex.unlock();
 
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
   g_mutex.lock();
   g_infoMutex.lock();

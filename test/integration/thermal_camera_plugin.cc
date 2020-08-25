@@ -183,7 +183,8 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   int left = midHeight * thermalSensor->ImageWidth();
   int right = (midHeight+1) * thermalSensor->ImageWidth() - 1;
 
-  ignition::common::Time waitTime = ignition::common::Time(0.001);
+  auto waitTime = std::chrono::duration_cast< std::chrono::milliseconds >(
+      std::chrono::duration< double >(0.001));
   int counter = 0;
   int infoCounter = 0;
   ignition::msgs::CameraInfo infoMsg;
@@ -198,7 +199,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
     infoCounter = g_infoCounter;
     infoMsg = g_infoMsg;
     g_infoMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
   g_mutex.lock();
   g_infoMutex.lock();
@@ -259,7 +260,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.lock();
     infoCounter = g_infoCounter;
     g_infoMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
 
   g_mutex.lock();
@@ -293,7 +294,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.lock();
     infoCounter = g_infoCounter;
     g_infoMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
   g_mutex.lock();
   g_infoMutex.lock();

@@ -347,11 +347,12 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   EXPECT_DOUBLE_EQ(sensor->Range(last), ignition::math::INF_D);
 
   // Make sure to wait to receive the message
-  ignition::common::Time waitTime = ignition::common::Time(0.01);
+  auto waitTime = std::chrono::duration_cast< std::chrono::milliseconds >(
+      std::chrono::duration< double >(0.01));
   int i = 0;
   while ((laserMsgs.empty() || pointMsgs.empty()) && i < 300)
   {
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
     i++;
   }
   EXPECT_LT(i, 300);

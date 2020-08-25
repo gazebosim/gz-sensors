@@ -274,7 +274,8 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   mgr.RunOnce(std::chrono::system_clock::from_time_t(0), true);
 
   // wait for an image
-  ignition::common::Time waitTime = ignition::common::Time(0.001);
+  auto waitTime = std::chrono::duration_cast< std::chrono::milliseconds >(
+      std::chrono::duration< double >(0.001));
   int counter = 0;
   int infoCounter = 0;
   int imgCounter = 0;
@@ -297,7 +298,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.unlock();
     g_imgMutex.unlock();
     g_pcMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
 
   g_mutex.lock();
@@ -522,7 +523,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.unlock();
     g_imgMutex.unlock();
     g_pcMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
 
   g_mutex.lock();
@@ -628,7 +629,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.unlock();
     g_imgMutex.unlock();
     g_pcMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
 
   g_mutex.lock();
