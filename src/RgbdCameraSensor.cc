@@ -410,11 +410,7 @@ bool RgbdCameraSensor::Update(const std::chrono::system_clock::time_point &_now)
     msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
                rendering::PF_FLOAT32_R));
     msg.set_pixel_format_type(msgs::PixelFormatType::R_FLOAT32);
-    int64_t sec;
-    int32_t nsec;
-    ignition::common::Time::GetSecondsAndNanoseconds(_now, sec, nsec);
-    msg.mutable_header()->mutable_stamp()->set_sec(sec);
-    msg.mutable_header()->mutable_stamp()->set_nsec(nsec);
+    *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
     auto frame = msg.mutable_header()->add_data();
     frame->set_key("frame_id");
     frame->add_value(this->Name());
@@ -466,13 +462,8 @@ bool RgbdCameraSensor::Update(const std::chrono::system_clock::time_point &_now)
     // publish point cloud msg
     if (this->dataPtr->pointPub.HasConnections())
     {
-      int64_t sec;
-      int32_t nsec;
-      ignition::common::Time::GetSecondsAndNanoseconds(_now, sec, nsec);
+      *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
       // Set the time stamp
-      this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_sec(sec);
-      this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_nsec(
-          nsec);
       this->dataPtr->pointMsg.set_is_dense(true);
 
       if ((this->dataPtr->hasDepthNearClip || this->dataPtr->hasDepthFarClip)
@@ -530,11 +521,7 @@ bool RgbdCameraSensor::Update(const std::chrono::system_clock::time_point &_now)
       msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
           rendering::PF_R8G8B8));
       msg.set_pixel_format_type(msgs::PixelFormatType::RGB_INT8);
-      int64_t sec;
-      int32_t nsec;
-      ignition::common::Time::GetSecondsAndNanoseconds(_now, sec, nsec);
-      msg.mutable_header()->mutable_stamp()->set_sec(sec);
-      msg.mutable_header()->mutable_stamp()->set_nsec(nsec);
+      *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
       auto frame = msg.mutable_header()->add_data();
       frame->set_key("frame_id");
       frame->add_value(this->Name());

@@ -198,11 +198,7 @@ bool Lidar::PublishLidarScan(const std::chrono::system_clock::time_point &_now)
 
   std::lock_guard<std::mutex> lock(this->lidarMutex);
 
-  int64_t sec;
-  int32_t nsec;
-  ignition::common::Time::GetSecondsAndNanoseconds(_now, sec, nsec);
-  this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_sec(sec);
-  this->dataPtr->laserMsg.mutable_header()->mutable_stamp()->set_nsec(nsec);
+  *this->dataPtr->laserMsg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
   // Remove 'data' entries before adding new ones
   this->dataPtr->laserMsg.mutable_header()->clear_data();
   auto frame = this->dataPtr->laserMsg.mutable_header()->add_data();

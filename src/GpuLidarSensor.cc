@@ -234,13 +234,8 @@ bool GpuLidarSensor::Update(const std::chrono::system_clock::time_point &_now)
 
   if (this->dataPtr->pointPub.HasConnections())
   {
-    int64_t sec;
-    int32_t nsec;
-    ignition::common::Time::GetSecondsAndNanoseconds(_now, sec, nsec);
     // Set the time stamp
-    this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_sec(sec);
-    this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_nsec(nsec);
-
+    *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
     this->dataPtr->pointMsg.set_is_dense(true);
 
     this->dataPtr->FillPointCloudMsg();

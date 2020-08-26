@@ -203,11 +203,7 @@ bool ImuSensor::Update(const std::chrono::system_clock::time_point &_now)
       this->dataPtr->worldPose.Rot();
 
   msgs::IMU msg;
-  int64_t sec;
-  int32_t nsec;
-  ignition::common::Time::GetSecondsAndNanoseconds(_now, sec, nsec);
-  msg.mutable_header()->mutable_stamp()->set_sec(sec);
-  msg.mutable_header()->mutable_stamp()->set_nsec(nsec);
+  *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
   msg.set_entity_name(this->Name());
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
