@@ -81,7 +81,8 @@ namespace ignition
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       /// \sa SetUpdateRate()
-      public: virtual bool Update(const std::chrono::system_clock::time_point &_now) = 0;
+      public: virtual bool Update(
+        const std::chrono::system_clock::time_point &_now) = 0;
 
       /// \brief Return the next time the sensor will generate data
       public: std::chrono::system_clock::time_point NextUpdateTime() const;
@@ -95,11 +96,13 @@ namespace ignition
       /// \param[in] _force Force the update to happen even if it's not time
       /// \return True if the update was triggered (_force was true or _now
       /// >= next_update_time) and the sensor's
-      /// bool Sensor::Update(const std::chrono::system_clock::time_point &_now) function returned true.
+      /// bool Sensor::Update(std::chrono::system_clock::time_point)
+      /// function returned true.
       /// False otherwise.
       /// \remarks If forced the NextUpdateTime() will be unchanged.
       /// \sa virtual bool Update(const common::Time &_name) = 0
-      public: bool Update(const std::chrono::system_clock::time_point &_now, const bool _force);
+      public: bool Update(
+        const std::chrono::system_clock::time_point &_now, const bool _force);
 
       /// \brief Get the update rate of the sensor.
       ///

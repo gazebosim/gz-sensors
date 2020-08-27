@@ -71,7 +71,8 @@ namespace ignition
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const std::chrono::system_clock::time_point &_now) override;
+      public: virtual bool Update(
+        const std::chrono::system_clock::time_point &_now) override;
 
       /// \brief Get the near distance. This is the distance from the
       /// frustum's vertex to the closest plane.

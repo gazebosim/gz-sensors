@@ -61,7 +61,8 @@ class ignition::sensors::ImuSensorPrivate
   public: bool timeInitialized = false;
 
   /// \brief Previous update time step.
-  public: std::chrono::system_clock::time_point prevStep {std::chrono::system_clock::from_time_t(0)};
+  public: std::chrono::system_clock::time_point prevStep
+    {std::chrono::system_clock::from_time_t(0)};
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;

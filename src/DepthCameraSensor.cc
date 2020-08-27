@@ -495,7 +495,8 @@ void DepthCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 }
 
 //////////////////////////////////////////////////
-bool DepthCameraSensor::Update(const std::chrono::system_clock::time_point &_now)
+bool DepthCameraSensor::Update(
+  const std::chrono::system_clock::time_point &_now)
 {
   IGN_PROFILE("DepthCameraSensor::Update");
   if (!this->dataPtr->initialized)
@@ -556,7 +557,8 @@ bool DepthCameraSensor::Update(const std::chrono::system_clock::time_point &_now
       this->dataPtr->pointCloudBuffer)
   {
     // Set the time stamp
-    *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+    *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
+      msgs::Convert(_now);
     this->dataPtr->pointMsg.set_is_dense(true);
 
     if (!this->dataPtr->xyzBuffer)

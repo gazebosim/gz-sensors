@@ -68,7 +68,8 @@ namespace ignition
       /// \brief Update the sensor and generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const std::chrono::system_clock::time_point &_now) override;
+      public: virtual bool Update(
+        const std::chrono::system_clock::time_point &_now) override;
 
       /// \brief Set the world pose of the sensor
       /// \param[in] _pose Pose in world frame

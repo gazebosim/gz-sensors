@@ -129,7 +129,8 @@ void LogicalCameraSensor::SetModelPoses(
 }
 
 //////////////////////////////////////////////////
-bool LogicalCameraSensor::Update(const std::chrono::system_clock::time_point &_now)
+bool LogicalCameraSensor::Update(
+  const std::chrono::system_clock::time_point &_now)
 {
   IGN_PROFILE("LogicalCameraSensor::Update");
   if (!this->dataPtr->initialized)

@@ -137,7 +137,8 @@ bool MagnetometerSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool MagnetometerSensor::Update(const std::chrono::system_clock::time_point &_now)
+bool MagnetometerSensor::Update(
+  const std::chrono::system_clock::time_point &_now)
 {
   IGN_PROFILE("MagnetometerSensor::Update");
   if (!this->dataPtr->initialized)

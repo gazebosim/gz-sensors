@@ -490,9 +490,11 @@ bool CameraSensor::AdvertiseInfo(const std::string &_topic)
 }
 
 //////////////////////////////////////////////////
-void CameraSensor::PublishInfo(const std::chrono::system_clock::time_point &_now)
+void CameraSensor::PublishInfo(
+  const std::chrono::system_clock::time_point &_now)
 {
-  *this->dataPtr->infoMsg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+  *this->dataPtr->infoMsg.mutable_header()->mutable_stamp() =
+    msgs::Convert(_now);
   this->dataPtr->infoPub.Publish(this->dataPtr->infoMsg);
 }
 

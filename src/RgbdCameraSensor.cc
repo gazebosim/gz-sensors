@@ -462,7 +462,8 @@ bool RgbdCameraSensor::Update(const std::chrono::system_clock::time_point &_now)
     // publish point cloud msg
     if (this->dataPtr->pointPub.HasConnections())
     {
-      *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+      *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
+        msgs::Convert(_now);
       // Set the time stamp
       this->dataPtr->pointMsg.set_is_dense(true);
 

@@ -52,7 +52,8 @@ class ignition::sensors::SensorPrivate
   public: double updateRate = 0.0;
 
   /// \brief What sim time should this sensor update at
-  public: std::chrono::system_clock::time_point nextUpdateTime {std::chrono::system_clock::from_time_t(0)};
+  public: std::chrono::system_clock::time_point nextUpdateTime
+    {std::chrono::system_clock::from_time_t(0)};
 
   /// \brief SDF element with sensor information.
   public: sdf::ElementPtr sdf = nullptr;
