@@ -101,7 +101,8 @@ void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 }
 
 /////////////////////////////////////////////////
-ignition::sensors::SensorId Manager::AddSensor(std::unique_ptr<sensors::Sensor> _sensor)
+ignition::sensors::SensorId Manager::AddSensor(
+  std::unique_ptr<sensors::Sensor> _sensor)
 {
   if (!_sensor)
     return NO_SENSOR;

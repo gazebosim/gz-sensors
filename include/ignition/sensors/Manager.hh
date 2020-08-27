@@ -158,7 +158,8 @@ namespace ignition
       /// \param[in] _sensor pointer to the sensor
       /// \return A sensor id that refers to the created sensor. NO_SENSOR
       /// is returned on error.
-      public: ignition::sensors::SensorId AddSensor(std::unique_ptr<sensors::Sensor> _sensor);
+      public: ignition::sensors::SensorId AddSensor(
+        std::unique_ptr<sensors::Sensor> _sensor);
 
       /// \brief Create a sensor from SDF without a known sensor type.
       ///

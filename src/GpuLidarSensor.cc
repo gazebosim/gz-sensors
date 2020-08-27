@@ -14,15 +14,15 @@
  * limitations under the License.
  *
 */
-#include <ignition/msgs/pointcloud_packed.pb.h>
-#include <ignition/msgs/Utility.hh>
-#include <ignition/transport/Node.hh>
 
 #include <ignition/common/Console.hh>
 #include <ignition/common/Profiler.hh>
-#include "ignition/sensors/GpuLidarSensor.hh"
-#include "ignition/sensors/SensorFactory.hh"
+#include <ignition/msgs/pointcloud_packed.pb.h>
+#include <ignition/msgs/Utility.hh>
 #include <ignition/plugin/Register.hh>
+#include <ignition/sensors/GpuLidarSensor.hh>
+#include <ignition/sensors/SensorFactory.hh>
+#include <ignition/transport/Node.hh>
 
 using namespace ignition::sensors;
 

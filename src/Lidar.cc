@@ -17,16 +17,14 @@
 #include <ignition/common/Console.hh>
 #include <ignition/common/Event.hh>
 #include <ignition/common/Profiler.hh>
+#include <ignition/plugin/Register.hh>
+#include <ignition/sensors/Lidar.hh>
+#include <ignition/sensors/Noise.hh>
+#include <ignition/sensors/SensorFactory.hh>
+#include <ignition/sensors/SensorTypes.hh>
+#include <ignition/sensors/GaussianNoiseModel.hh>
 #include <ignition/transport/Node.hh>
 #include <sdf/Lidar.hh>
-
-#include "ignition/sensors/Lidar.hh"
-#include "ignition/sensors/Noise.hh"
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/SensorTypes.hh"
-#include "ignition/sensors/GaussianNoiseModel.hh"
-
-#include <ignition/plugin/Register.hh>
 
 using namespace ignition::sensors;
 

@@ -14,16 +14,14 @@
  * limitations under the License.
  *
 */
-
-#include <ignition/msgs/imu.pb.h>
 #include <ignition/common/Profiler.hh>
-#include <ignition/transport/Node.hh>
-
-#include "ignition/sensors/Noise.hh"
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/SensorTypes.hh"
-#include "ignition/sensors/ImuSensor.hh"
+#include <ignition/msgs/imu.pb.h>
 #include <ignition/plugin/Register.hh>
+#include <ignition/sensors/Noise.hh>
+#include <ignition/sensors/SensorFactory.hh>
+#include <ignition/sensors/SensorTypes.hh>
+#include <ignition/sensors/ImuSensor.hh>
+#include <ignition/transport/Node.hh>
 
 using namespace ignition;
 using namespace sensors;
