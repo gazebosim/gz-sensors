@@ -15,8 +15,9 @@
  *
 */
 
-#include <ignition/common/Profiler.hh>
 #include <ignition/msgs/magnetometer.pb.h>
+
+#include <ignition/common/Profiler.hh>
 #include <ignition/plugin/Register.hh>
 #include <ignition/sensors/Noise.hh>
 #include <ignition/sensors/SensorFactory.hh>

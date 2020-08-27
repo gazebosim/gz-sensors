@@ -15,9 +15,10 @@
  *
 */
 
+#include <ignition/msgs/pointcloud_packed.pb.h>
+
 #include <ignition/common/Console.hh>
 #include <ignition/common/Profiler.hh>
-#include <ignition/msgs/pointcloud_packed.pb.h>
 #include <ignition/msgs/Utility.hh>
 #include <ignition/plugin/Register.hh>
 #include <ignition/sensors/GpuLidarSensor.hh>
