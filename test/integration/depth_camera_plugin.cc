@@ -432,7 +432,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
       for (unsigned int j = 0; j < depthSensor->ImageWidth(); ++j)
       {
         float d = g_depthBuffer[step + j];
-        EXPECT_FLOAT_EQ(expectedDepth, d);
+        EXPECT_NEAR(expectedDepth, d, DOUBLE_TOL);
       }
     }
   }
@@ -445,7 +445,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
       for (unsigned int j = 0; j < depthSensor->ImageWidth(); ++j)
       {
         float x = g_pointsXYZBuffer[step + j*3];
-        EXPECT_FLOAT_EQ(expectedDepth, x);
+        EXPECT_NEAR(expectedDepth, x, DOUBLE_TOL);
       }
     }
 
