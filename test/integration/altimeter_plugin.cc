@@ -27,7 +27,7 @@
 #include "TransportTestTools.hh"
 
 /// \brief Helper function to create an altimeter sdf element
-sdf::ElementPtr AltimeterToSDF(const std::string &_name,
+sdf::ElementPtr AltimeterToSdf(const std::string &_name,
     const ignition::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
     const bool _visualize)
@@ -124,7 +124,7 @@ TEST_F(AltimeterSensorTest, CreateAltimeter)
   // Create sensor SDF
   ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
       ignition::math::Quaterniond::Identity);
-  sdf::ElementPtr altimeterSDF = AltimeterToSDF(name, sensorPose,
+  sdf::ElementPtr altimeterSdf = AltimeterToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
   sdf::ElementPtr altimeterSdfNoise = AltimeterToSdfWithNoise(name, sensorPose,
@@ -134,7 +134,7 @@ TEST_F(AltimeterSensorTest, CreateAltimeter)
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::AltimeterSensor> sensor =
-      sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSDF);
+      sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdf);
   EXPECT_TRUE(sensor != nullptr);
 
   EXPECT_EQ(name, sensor->Name());
@@ -164,7 +164,7 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   // Create sensor SDF
   ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
       ignition::math::Quaterniond::Identity);
-  sdf::ElementPtr altimeterSDF = AltimeterToSDF(name, sensorPose,
+  sdf::ElementPtr altimeterSdf = AltimeterToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
   sdf::ElementPtr altimeterSdfNoise = AltimeterToSdfWithNoise(name, sensorPose,
@@ -175,7 +175,7 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::Sensor> s =
-      sf.CreateSensor(altimeterSDF);
+      sf.CreateSensor(altimeterSdf);
   std::unique_ptr<ignition::sensors::AltimeterSensor> sensor(
       dynamic_cast<ignition::sensors::AltimeterSensor *>(s.release()));
 
@@ -248,6 +248,63 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   EXPECT_FALSE(ignition::math::equal(pos - vertRef,
         msgNoise.vertical_position()));
   EXPECT_FALSE(ignition::math::equal(vertVel, msgNoise.vertical_velocity()));
+}
+
+/////////////////////////////////////////////////
+TEST_F(AltimeterSensorTest, Topic)
+{
+  const std::string name = "TestAltimeter";
+  const double updateRate = 30;
+  const bool alwaysOn = 1;
+  const bool visualize = 1;
+  auto sensorPose = ignition::math::Pose3d();
+
+  // Factory
+  ignition::sensors::SensorFactory factory;
+  factory.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH,
+      "lib"));
+
+  // Default topic
+  {
+    const std::string topic;
+    auto altimeterSdf = AltimeterToSdf(name, sensorPose,
+          updateRate, topic, alwaysOn, visualize);
+
+    auto sensor = factory.CreateSensor(altimeterSdf);
+    EXPECT_NE(nullptr, sensor);
+
+    auto altimeter =
+        dynamic_cast<ignition::sensors::AltimeterSensor *>(sensor.release());
+    ASSERT_NE(nullptr, altimeter);
+
+    EXPECT_EQ("/altimeter", altimeter->Topic());
+  }
+
+  // Convert to valid topic
+  {
+    const std::string topic = "/topic with spaces/@~characters//";
+    auto altimeterSdf = AltimeterToSdf(name, sensorPose,
+          updateRate, topic, alwaysOn, visualize);
+
+    auto sensor = factory.CreateSensor(altimeterSdf);
+    EXPECT_NE(nullptr, sensor);
+
+    auto altimeter =
+        dynamic_cast<ignition::sensors::AltimeterSensor *>(sensor.release());
+    ASSERT_NE(nullptr, altimeter);
+
+    EXPECT_EQ("/topic_with_spaces/characters", altimeter->Topic());
+  }
+
+  // Invalid topic
+  {
+    const std::string topic = "@@@";
+    auto altimeterSdf = AltimeterToSdf(name, sensorPose,
+          updateRate, topic, alwaysOn, visualize);
+
+    auto sensor = factory.CreateSensor(altimeterSdf);
+    ASSERT_EQ(nullptr, sensor);
+  }
 }
 
 int main(int argc, char **argv)

@@ -29,6 +29,17 @@
 
 ## Ignition Sensors 2
 
+### Ignition Sensors 2.9.0 (2020-08-07)
+
+1. Add noise to RGBD camera.
+    * [Pull Request 35](https://github.com/ignitionrobotics/ign-sensors/pull/35)
+
+1. Make sure all sensors have a default topic.When invalid topics are passed
+   in, convert them to valid topics if possible. If not possible to convert
+   into valid topic, fail gracefully.
+    * [Pull Request 33](https://github.com/ignitionrobotics/ign-sensors/pull/33)
+
+
 ### Ignition Sensors 2.8.0 (2020-03-04)
 
 1. Added sequence numbers to sensor data messages.
