@@ -188,7 +188,7 @@ namespace ignition
       /// \param _time: The current simulated time
       /// \param _force: If true, all sensors are forced to update. Otherwise
       ///        a sensor will update based on it's Hz rate.
-      public: void RunOnce(const std::chrono::system_clock::time_point &_time,
+      public: void RunOnce(const std::chrono::steady_clock::time_point &_time,
                   bool _force = false);
 
       /// \brief Adds colon delimited paths sensor plugins may be

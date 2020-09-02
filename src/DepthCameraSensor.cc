@@ -496,7 +496,7 @@ void DepthCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 
 //////////////////////////////////////////////////
 bool DepthCameraSensor::Update(
-  const std::chrono::system_clock::time_point &_now)
+  const std::chrono::steady_clock::time_point &_now)
 {
   IGN_PROFILE("DepthCameraSensor::Update");
   if (!this->dataPtr->initialized)

@@ -68,7 +68,7 @@ namespace ignition
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       public: virtual bool Update(
-        const std::chrono::system_clock::time_point &_now) override;
+        const std::chrono::steady_clock::time_point &_now) override;
 
       /// \brief Set the vertical reference position of the altimeter
       /// \param[in] _ref Verical reference position in meters

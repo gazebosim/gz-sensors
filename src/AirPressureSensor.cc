@@ -134,7 +134,7 @@ bool AirPressureSensor::Load(sdf::ElementPtr _sdf)
 
 //////////////////////////////////////////////////
 bool AirPressureSensor::Update(
-  const std::chrono::system_clock::time_point &_now)
+  const std::chrono::steady_clock::time_point &_now)
 {
   IGN_PROFILE("AirPressureSensor::Update");
   if (!this->dataPtr->initialized)

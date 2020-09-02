@@ -131,7 +131,7 @@ bool AltimeterSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool AltimeterSensor::Update(const std::chrono::system_clock::time_point &_now)
+bool AltimeterSensor::Update(const std::chrono::steady_clock::time_point &_now)
 {
   IGN_PROFILE("AltimeterSensor::Update");
   if (!this->dataPtr->initialized)

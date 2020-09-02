@@ -227,7 +227,7 @@ TEST_F(AltimeterSensorTest, SensorReadings)
 
   // verify msg received on the topic
   WaitForMessageTestHelper<ignition::msgs::Altimeter> msgHelper(topic);
-  sensor->Update(std::chrono::system_clock::time_point(
+  sensor->Update(std::chrono::steady_clock::time_point(
       std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::duration<int>(1))));
   EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
@@ -241,7 +241,7 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   // verify msg with noise received on the topic
   WaitForMessageTestHelper<ignition::msgs::Altimeter>
     msgHelperNoise(topicNoise);
-  sensorNoise->Update(std::chrono::system_clock::time_point(
+  sensorNoise->Update(std::chrono::steady_clock::time_point(
       std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::duration<int>(1))));
   EXPECT_TRUE(msgHelperNoise.WaitForMessage()) << msgHelperNoise;
