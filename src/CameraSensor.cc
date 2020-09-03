@@ -26,14 +26,15 @@
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Helpers.hh>
 #include <ignition/plugin/Register.hh>
-#include <ignition/sensors/CameraSensor.hh>
-#include <ignition/sensors/ImageGaussianNoiseModel.hh>
-#include <ignition/sensors/ImageNoise.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/RenderingEvents.hh>
-#include <ignition/sensors/SensorFactory.hh>
-#include <ignition/sensors/SensorTypes.hh>
 #include <ignition/transport/Node.hh>
+
+#include "ignition/sensors/CameraSensor.hh"
+#include "ignition/sensors/ImageGaussianNoiseModel.hh"
+#include "ignition/sensors/ImageNoise.hh"
+#include "ignition/sensors/Manager.hh"
+#include "ignition/sensors/RenderingEvents.hh"
+#include "ignition/sensors/SensorFactory.hh"
+#include "ignition/sensors/SensorTypes.hh"
 
 using namespace ignition;
 using namespace sensors;

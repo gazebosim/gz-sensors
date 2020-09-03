@@ -18,9 +18,10 @@
 #include "ignition/sensors/Sensor.hh"
 #include <map>
 #include <vector>
-#include <ignition/sensors/Manager.hh>
 #include <ignition/common/Console.hh>
 #include <ignition/common/Profiler.hh>
+
+#include "ignition/sensors/Manager.hh"
 
 using namespace ignition::sensors;
 

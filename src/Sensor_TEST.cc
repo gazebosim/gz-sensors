@@ -16,8 +16,8 @@
 */
 #include <gtest/gtest.h>
 
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/Sensor.hh>
+#include "ignition/sensors/Export.hh"
+#include "ignition/sensors/Sensor.hh"
 
 using namespace ignition;
 using namespace sensors;

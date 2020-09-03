@@ -19,12 +19,13 @@
 
 #include <ignition/common/Profiler.hh>
 #include <ignition/plugin/Register.hh>
-#include <ignition/sensors/Noise.hh>
-#include <ignition/sensors/SensorFactory.hh>
-#include <ignition/sensors/SensorTypes.hh>
-#include <ignition/sensors/MagnetometerSensor.hh>
 #include <ignition/transport/Node.hh>
 #include <sdf/Magnetometer.hh>
+
+#include "ignition/sensors/MagnetometerSensor.hh"
+#include "ignition/sensors/Noise.hh"
+#include "ignition/sensors/SensorFactory.hh"
+#include "ignition/sensors/SensorTypes.hh"
 
 using namespace ignition;
 using namespace sensors;

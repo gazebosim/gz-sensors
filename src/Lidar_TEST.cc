@@ -20,11 +20,10 @@
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Helpers.hh>
 #include <ignition/msgs.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/Manager.hh>
 
-#include <ignition/sensors/Lidar.hh>
-
+#include "ignition/sensors/Export.hh"
+#include "ignition/sensors/Manager.hh"
+#include "ignition/sensors/Lidar.hh"
 
 sdf::ElementPtr LidarToSDF(const std::string &name, double update_rate,
     const std::string &topic, double horz_samples, double horz_resolution,

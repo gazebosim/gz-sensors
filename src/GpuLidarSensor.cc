@@ -21,9 +21,10 @@
 #include <ignition/common/Profiler.hh>
 #include <ignition/msgs/Utility.hh>
 #include <ignition/plugin/Register.hh>
-#include <ignition/sensors/GpuLidarSensor.hh>
-#include <ignition/sensors/SensorFactory.hh>
 #include <ignition/transport/Node.hh>
+
+#include "ignition/sensors/GpuLidarSensor.hh"
+#include "ignition/sensors/SensorFactory.hh"
 
 using namespace ignition::sensors;
 

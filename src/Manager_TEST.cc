@@ -16,8 +16,8 @@
 */
 
 #include <gtest/gtest.h>
-#include <ignition/sensors/Manager.hh>
 
+#include "ignition/sensors/Manager.hh"
 
 //////////////////////////////////////////////////
 TEST(Manager, construct)
