@@ -594,4 +594,3 @@ double CameraSensor::Baseline() const
 }
 
 IGN_SENSORS_REGISTER_SENSOR(CameraSensor)
-IGNITION_ADD_PLUGIN_ALIAS(CameraSensor, "ignition::plugin::Camera")

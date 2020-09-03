@@ -53,10 +53,6 @@ target_link_libraries(${camera_target}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
     )
 
-target_compile_options(${camera_target}
-  PUBLIC -fvisibility=hidden -fvisibility-inlines-hidden
-)
-
 set(depth_camera_sources DepthCameraSensor.cc)
 ign_add_component(depth_camera SOURCES ${depth_camera_sources} GET_TARGET_NAME depth_camera_target)
 target_compile_definitions(${depth_camera_target} PUBLIC DepthCameraSensor_EXPORTS)
