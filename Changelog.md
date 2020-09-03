@@ -2,7 +2,7 @@
 
 ### Ignition Sensors 3.X.X (20XX-XX-XX)
 
-### Ignition Sensors 3.1.0 (2020-09-09)
+### Ignition Sensors 3.1.0 (2020-09-03)
 
 1. Update camera sensor only when needed
     * [Pull request 37](https://github.com/ignitionrobotics/ign-sensors/pull/37)
