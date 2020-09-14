@@ -94,16 +94,16 @@ bool MagnetometerSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  std::string topic = this->Topic();
-  if (topic.empty())
-    topic = "/magnetometer";
+  if (this->Topic().empty())
+    this->SetTopic("/magnetometer");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::Magnetometer>(topic);
+      this->dataPtr->node.Advertise<ignition::msgs::Magnetometer>(
+      this->Topic());
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic[" << topic << "].\n";
+    ignerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
     return false;
   }
 

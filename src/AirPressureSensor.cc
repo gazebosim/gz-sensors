@@ -102,16 +102,16 @@ bool AirPressureSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  std::string topic = this->Topic();
-  if (topic.empty())
-    topic = "/air_pressure";
+  if (this->Topic().empty())
+    this->SetTopic("/air_pressure");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::FluidPressure>(topic);
+      this->dataPtr->node.Advertise<ignition::msgs::FluidPressure>(
+      this->Topic());
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic[" << topic << "].\n";
+    ignerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
     return false;
   }
 

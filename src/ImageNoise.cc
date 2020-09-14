@@ -44,7 +44,7 @@ NoisePtr ImageNoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
   {
     if (_sensorType == "camera" || _sensorType == "depth" ||
         _sensorType == "multicamera" || _sensorType == "wideanglecamera" ||
-        _sensorType == "thermal_camera")
+        _sensorType == "thermal_camera" ||  _sensorType == "rgbd_camera")
     {
       noise.reset(new ImageGaussianNoiseModel());
     }

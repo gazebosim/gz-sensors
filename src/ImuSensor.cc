@@ -105,16 +105,15 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  std::string topic = this->Topic();
-  if (topic.empty())
-    topic = "/imu";
+  if (this->Topic().empty())
+    this->SetTopic("/imu");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::IMU>(topic);
+      this->dataPtr->node.Advertise<ignition::msgs::IMU>(this->Topic());
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic[" << topic << "].\n";
+    ignerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
     return false;
   }
 
