@@ -1,0 +1,10 @@
+libignition-cmake2-dev
+libignition-common3-dev
+libignition-math6-dev
+libignition-msgs6-dev
+libignition-plugin-dev
+libignition-rendering4-dev
+libignition-tools-dev
+libignition-transport9-dev
+libsdformat10-dev
+xvfb
