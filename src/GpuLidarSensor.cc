@@ -202,7 +202,7 @@ bool GpuLidarSensor::CreateLidar()
 }
 
 //////////////////////////////////////////////////
-bool GpuLidarSensor::Update(const std::chrono::steady_clock::time_point &_now)
+bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("GpuLidarSensor::Update");
   if (!this->initialized)

@@ -300,7 +300,7 @@ void CameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 }
 
 //////////////////////////////////////////////////
-bool CameraSensor::Update(const std::chrono::steady_clock::time_point &_now)
+bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("CameraSensor::Update");
   if (!this->dataPtr->initialized)
@@ -491,7 +491,7 @@ bool CameraSensor::AdvertiseInfo(const std::string &_topic)
 
 //////////////////////////////////////////////////
 void CameraSensor::PublishInfo(
-  const std::chrono::steady_clock::time_point &_now)
+  const std::chrono::steady_clock::duration &_now)
 {
   *this->dataPtr->infoMsg.mutable_header()->mutable_stamp() =
     msgs::Convert(_now);

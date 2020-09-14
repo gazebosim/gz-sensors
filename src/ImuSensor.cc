@@ -61,8 +61,8 @@ class ignition::sensors::ImuSensorPrivate
   public: bool timeInitialized = false;
 
   /// \brief Previous update time step.
-  public: std::chrono::steady_clock::time_point prevStep
-    {math::secNsecToTimePoint(0, 0)};
+  public: std::chrono::steady_clock::duration prevStep
+    {std::chrono::steady_clock::duration::zero()};
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -148,7 +148,7 @@ bool ImuSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool ImuSensor::Update(const std::chrono::steady_clock::time_point &_now)
+bool ImuSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("ImuSensor::Update");
   if (!this->dataPtr->initialized)

@@ -80,7 +80,7 @@ namespace ignition
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       public: virtual bool Update(
-        const std::chrono::steady_clock::time_point &_now) override;
+        const std::chrono::steady_clock::duration &_now) override;
 
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time

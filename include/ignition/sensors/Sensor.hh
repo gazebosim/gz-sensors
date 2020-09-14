@@ -82,10 +82,10 @@ namespace ignition
       /// \return true if the update was successfull
       /// \sa SetUpdateRate()
       public: virtual bool Update(
-        const std::chrono::steady_clock::time_point &_now) = 0;
+        const std::chrono::steady_clock::duration &_now) = 0;
 
       /// \brief Return the next time the sensor will generate data
-      public: std::chrono::steady_clock::time_point NextUpdateTime() const;
+      public: std::chrono::steady_clock::duration NextUpdateTime() const;
 
       /// \brief Update the sensor.
       ///
@@ -102,7 +102,7 @@ namespace ignition
       /// \remarks If forced the NextUpdateTime() will be unchanged.
       /// \sa virtual bool Update(const common::Time &_name) = 0
       public: bool Update(
-        const std::chrono::steady_clock::time_point &_now, const bool _force);
+        const std::chrono::steady_clock::duration &_now, const bool _force);
 
       /// \brief Get the update rate of the sensor.
       ///

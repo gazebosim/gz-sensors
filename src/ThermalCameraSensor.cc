@@ -363,7 +363,7 @@ void ThermalCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 
 //////////////////////////////////////////////////
 bool ThermalCameraSensor::Update(
-  const std::chrono::steady_clock::time_point &_now)
+  const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("ThermalCameraSensor::Update");
   if (!this->dataPtr->initialized)

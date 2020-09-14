@@ -52,8 +52,8 @@ class ignition::sensors::SensorPrivate
   public: double updateRate = 0.0;
 
   /// \brief What sim time should this sensor update at
-  public: std::chrono::steady_clock::time_point nextUpdateTime
-    {math::secNsecToTimePoint(0, 0)};
+  public: std::chrono::steady_clock::duration nextUpdateTime
+    {std::chrono::steady_clock::duration::zero()};
 
   /// \brief SDF element with sensor information.
   public: sdf::ElementPtr sdf = nullptr;
@@ -210,7 +210,7 @@ void Sensor::SetUpdateRate(const double _hz)
 }
 
 //////////////////////////////////////////////////
-bool Sensor::Update(const std::chrono::steady_clock::time_point &_now,
+bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
                   const bool _force)
 {
   IGN_PROFILE("Sensor::Update");
@@ -238,7 +238,7 @@ bool Sensor::Update(const std::chrono::steady_clock::time_point &_now,
 }
 
 //////////////////////////////////////////////////
-std::chrono::steady_clock::time_point Sensor::NextUpdateTime() const
+std::chrono::steady_clock::duration Sensor::NextUpdateTime() const
 {
   return this->dataPtr->nextUpdateTime;
 }

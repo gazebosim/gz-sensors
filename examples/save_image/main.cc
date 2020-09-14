@@ -113,7 +113,7 @@ int main()
     cameraSensor->ConnectImageCallback(&OnImageFrame);
 
   // Force the camera to generate an image
-  mgr.RunOnce(math::secNsecToTimePoint(0, 0), true);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
 
   return 0;
 }
