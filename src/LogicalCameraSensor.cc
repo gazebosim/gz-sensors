@@ -104,16 +104,16 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
   if (!Sensor::Load(_sdf))
     return false;
 
-  std::string topic = this->Topic();
-  if (topic.empty())
-    topic = "/logical_camera";
+  if (this->Topic().empty())
+    this->SetTopic("/logical_camera");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::LogicalCameraImage>(topic);
+      this->dataPtr->node.Advertise<ignition::msgs::LogicalCameraImage>(
+      this->Topic());
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic[" << topic << "].\n";
+    ignerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
     return false;
   }
 

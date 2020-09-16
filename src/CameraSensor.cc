@@ -109,6 +109,9 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief Baseline for stereo cameras.
   public: double baseline{0.0};
+
+  /// \brief Flag to indicate if sensor is generating data
+  public: bool generatingData = false;
 };
 
 //////////////////////////////////////////////////
@@ -245,6 +248,9 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
 
   this->dataPtr->sdfSensor = _sdf;
 
+  if (this->Topic().empty())
+    this->SetTopic("/camera");
+
   this->dataPtr->pub =
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
           this->Topic());
@@ -320,6 +326,30 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // move the camera to the current pose
   this->dataPtr->camera->SetLocalPose(this->Pose());
 
+  // render only if necessary
+  if (!this->dataPtr->pub.HasConnections() &&
+      this->dataPtr->imageEvent.ConnectionCount() <= 0 &&
+      !this->dataPtr->saveImage)
+  {
+    if (this->dataPtr->generatingData)
+    {
+      igndbg << "Disabling camera sensor: '" << this->Name() << "' data "
+             << "generation. " << std::endl;;
+      this->dataPtr->generatingData = false;
+    }
+
+    return true;
+  }
+  else
+  {
+    if (!this->dataPtr->generatingData)
+    {
+      igndbg << "Enabling camera sensor: '" << this->Name() << "' data "
+             << "generation." << std::endl;;
+      this->dataPtr->generatingData = true;
+    }
+  }
+
   // generate sensor data
   this->Render();
   {
@@ -375,13 +405,16 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   }
 
   // Trigger callbacks.
-  try
+  if (this->dataPtr->imageEvent.ConnectionCount() > 0)
   {
-    this->dataPtr->imageEvent(msg);
-  }
-  catch(...)
-  {
-    ignerr << "Exception thrown in an image callback.\n";
+    try
+    {
+      this->dataPtr->imageEvent(msg);
+    }
+    catch(...)
+    {
+      ignerr << "Exception thrown in an image callback.\n";
+    }
   }
 
   // Save image
