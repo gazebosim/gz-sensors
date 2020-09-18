@@ -81,7 +81,8 @@ namespace ignition
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       /// \sa SetUpdateRate()
-      public: virtual bool IGN_DEPRECATED(3) Update(const common::Time &_now) = 0;
+      public:
+        virtual bool IGN_DEPRECATED(3) Update(const common::Time &_now) = 0;
 
       /// \brief Force the sensor to generate data
       ///
@@ -119,7 +120,8 @@ namespace ignition
       /// False otherwise.
       /// \remarks If forced the NextUpdateTime() will be unchanged.
       /// \sa virtual bool Update(const common::Time &_name) = 0
-      public: bool IGN_DEPRECATED(3) Update(const common::Time &_now, const bool _force);
+      public: bool IGN_DEPRECATED(3)
+        Update(const common::Time &_now, const bool _force);
 
       /// \brief Update the sensor.
       ///
