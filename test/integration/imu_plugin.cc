@@ -26,7 +26,7 @@
 #include "TransportTestTools.hh"
 
 /// \brief Helper function to create an imu sdf element
-sdf::ElementPtr ImuToSDF(const std::string &_name,
+sdf::ElementPtr ImuToSdf(const std::string &_name,
     const ignition::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
     const bool _visualize)
@@ -74,14 +74,14 @@ TEST_F(ImuSensorTest, CreateImu)
   // Create sensor SDF
   ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
       ignition::math::Quaterniond::Identity);
-  sdf::ElementPtr imuSDF = ImuToSDF(name, sensorPose,
+  sdf::ElementPtr imuSdf = ImuToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
   // create the sensor using sensor factory
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::ImuSensor> sensor =
-      sf.CreateSensor<ignition::sensors::ImuSensor>(imuSDF);
+      sf.CreateSensor<ignition::sensors::ImuSensor>(imuSdf);
   EXPECT_TRUE(sensor != nullptr);
 
   EXPECT_EQ(name, sensor->Name());
@@ -102,7 +102,7 @@ TEST_F(ImuSensorTest, SensorReadings)
   // Create sensor SDF
   ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
       ignition::math::Quaterniond::Identity);
-  sdf::ElementPtr imuSDF = ImuToSDF(name, sensorPose,
+  sdf::ElementPtr imuSdf = ImuToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
   // create the sensor using sensor factory
@@ -110,7 +110,7 @@ TEST_F(ImuSensorTest, SensorReadings)
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::Sensor> s =
-      sf.CreateSensor(imuSDF);
+      sf.CreateSensor(imuSdf);
   std::unique_ptr<ignition::sensors::ImuSensor> sensor(
       dynamic_cast<ignition::sensors::ImuSensor *>(s.release()));
 
@@ -226,6 +226,62 @@ TEST_F(ImuSensorTest, SensorReadings)
   EXPECT_EQ(
       ignition::math::Quaterniond(ignition::math::Vector3d(0, 3.14, -1.57)),
       ignition::msgs::Convert(msg.orientation()));
+}
+
+/////////////////////////////////////////////////
+TEST_F(ImuSensorTest, Topic)
+{
+  const std::string name = "TestImu";
+  const double updateRate = 30;
+  const bool alwaysOn = 1;
+  const bool visualize = 1;
+  auto sensorPose = ignition::math::Pose3d();
+
+  // Factory
+  ignition::sensors::SensorFactory factory;
+  factory.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH,
+      "lib"));
+
+  // Default topic
+  {
+    const std::string topic;
+    auto imuSdf = ImuToSdf(name, sensorPose,
+          updateRate, topic, alwaysOn, visualize);
+
+    auto sensor = factory.CreateSensor(imuSdf);
+    EXPECT_NE(nullptr, sensor);
+
+    auto imu = dynamic_cast<ignition::sensors::ImuSensor *>(sensor.release());
+    ASSERT_NE(nullptr, imu);
+
+    EXPECT_EQ("/imu", imu->Topic());
+  }
+
+  // Convert to valid topic
+  {
+    const std::string topic = "/topic with spaces/@~characters//";
+    auto imuSdf = ImuToSdf(name, sensorPose,
+          updateRate, topic, alwaysOn, visualize);
+
+    auto sensor = factory.CreateSensor(imuSdf);
+    EXPECT_NE(nullptr, sensor);
+
+    auto imu =
+        dynamic_cast<ignition::sensors::ImuSensor *>(sensor.release());
+    ASSERT_NE(nullptr, imu);
+
+    EXPECT_EQ("/topic_with_spaces/characters", imu->Topic());
+  }
+
+  // Invalid topic
+  {
+    const std::string topic = "@@@";
+    auto imuSdf = ImuToSdf(name, sensorPose,
+          updateRate, topic, alwaysOn, visualize);
+
+    auto sensor = factory.CreateSensor(imuSdf);
+    ASSERT_EQ(nullptr, sensor);
+  }
 }
 
 int main(int argc, char **argv)

@@ -169,6 +169,11 @@ namespace ignition
       /// \return Topic sensor publishes data to
       public: std::string Topic() const;
 
+      /// \brief Set topic where sensor data is published.
+      /// \param[in] _topic Topic sensor publishes data to.
+      /// \return True if a valid topic was set.
+      public: bool SetTopic(const std::string &_topic);
+
       /// \brief Get parent link of the sensor.
       /// \return Parent link of sensor.
       public: std::string Parent() const;

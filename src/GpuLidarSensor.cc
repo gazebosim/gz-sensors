@@ -122,14 +122,16 @@ bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
         std::bind(&GpuLidarSensor::SetScene, this, std::placeholders::_1));
 
   // Create the point cloud publisher
+  this->SetTopic(this->Topic() + "/points");
+
   this->dataPtr->pointPub =
       this->dataPtr->node.Advertise<ignition::msgs::PointCloudPacked>(
-          this->Topic() + "/points");
+          this->Topic());
 
   if (!this->dataPtr->pointPub)
   {
     ignerr << "Unable to create publisher on topic["
-      << this->Topic() + "/points" << "].\n";
+      << this->Topic() << "].\n";
     return false;
   }
 

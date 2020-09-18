@@ -26,7 +26,7 @@
 #include "TransportTestTools.hh"
 
 /// \brief Helper function to create an magnetometer sdf element
-sdf::ElementPtr MagnetometerToSDF(const std::string &_name,
+sdf::ElementPtr MagnetometerToSdf(const std::string &_name,
     const ignition::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
     const bool _visualize)
@@ -131,7 +131,7 @@ TEST_F(MagnetometerSensorTest, CreateMagnetometer)
   // Create sensor SDF
   ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
       ignition::math::Quaterniond::Identity);
-  sdf::ElementPtr magnetometerSDF = MagnetometerToSDF(name, sensorPose,
+  sdf::ElementPtr magnetometerSdf = MagnetometerToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
   sdf::ElementPtr magnetometerNoiseSdf = MagnetometerToSdfWithNoise(name,
@@ -141,7 +141,7 @@ TEST_F(MagnetometerSensorTest, CreateMagnetometer)
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::MagnetometerSensor> sensor =
-      sf.CreateSensor<ignition::sensors::MagnetometerSensor>(magnetometerSDF);
+      sf.CreateSensor<ignition::sensors::MagnetometerSensor>(magnetometerSdf);
   EXPECT_TRUE(sensor != nullptr);
 
   std::unique_ptr<ignition::sensors::MagnetometerSensor> sensorNoise =
@@ -171,7 +171,7 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   // Create sensor SDF
   ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
       ignition::math::Quaterniond::Identity);
-  sdf::ElementPtr magnetometerSDF = MagnetometerToSDF(name, sensorPose,
+  sdf::ElementPtr magnetometerSdf = MagnetometerToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
   sdf::ElementPtr magnetometerSdfNoise = MagnetometerToSdfWithNoise(name,
       sensorPose, updateRate, noiseTopic, alwaysOn, visualize, 1.0, 0.2, 10.0);
@@ -181,7 +181,7 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::Sensor> s =
-      sf.CreateSensor(magnetometerSDF);
+      sf.CreateSensor(magnetometerSdf);
   std::unique_ptr<ignition::sensors::MagnetometerSensor> sensor(
       dynamic_cast<ignition::sensors::MagnetometerSensor *>(s.release()));
 
@@ -286,6 +286,63 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   EXPECT_EQ(2, msg.header().stamp().sec());
   EXPECT_EQ(0, msg.header().stamp().nsec());
   EXPECT_EQ(localField, ignition::msgs::Convert(msg.field_tesla()));
+}
+
+/////////////////////////////////////////////////
+TEST_F(MagnetometerSensorTest, Topic)
+{
+  const std::string name = "TestMagnetometer";
+  const double updateRate = 30;
+  const bool alwaysOn = 1;
+  const bool visualize = 1;
+  auto sensorPose = ignition::math::Pose3d();
+
+  // Factory
+  ignition::sensors::SensorFactory factory;
+  factory.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH,
+      "lib"));
+
+  // Default topic
+  {
+    const std::string topic;
+    auto magnetometerSdf = MagnetometerToSdf(name, sensorPose,
+          updateRate, topic, alwaysOn, visualize);
+
+    auto sensor = factory.CreateSensor(magnetometerSdf);
+    EXPECT_NE(nullptr, sensor);
+
+    auto magnetometer =
+        dynamic_cast<ignition::sensors::MagnetometerSensor *>(sensor.release());
+    ASSERT_NE(nullptr, magnetometer);
+
+    EXPECT_EQ("/magnetometer", magnetometer->Topic());
+  }
+
+  // Convert to valid topic
+  {
+    const std::string topic = "/topic with spaces/@~characters//";
+    auto magnetometerSdf = MagnetometerToSdf(name, sensorPose,
+          updateRate, topic, alwaysOn, visualize);
+
+    auto sensor = factory.CreateSensor(magnetometerSdf);
+    EXPECT_NE(nullptr, sensor);
+
+    auto magnetometer =
+        dynamic_cast<ignition::sensors::MagnetometerSensor *>(sensor.release());
+    ASSERT_NE(nullptr, magnetometer);
+
+    EXPECT_EQ("/topic_with_spaces/characters", magnetometer->Topic());
+  }
+
+  // Invalid topic
+  {
+    const std::string topic = "@@@";
+    auto magnetometerSdf = MagnetometerToSdf(name, sensorPose,
+          updateRate, topic, alwaysOn, visualize);
+
+    auto sensor = factory.CreateSensor(magnetometerSdf);
+    ASSERT_EQ(nullptr, sensor);
+  }
 }
 
 int main(int argc, char **argv)
