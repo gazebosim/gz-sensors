@@ -138,9 +138,10 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   ignition::sensors::Manager mgr;
   mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
-  ignition::sensors::ThermalCameraSensor *thermalSensor =
-      mgr.CreateSensor<ignition::sensors::ThermalCameraSensor>(sensorPtr);
-  ASSERT_NE(thermalSensor, nullptr);
+  std::unique_ptr<ignition::sensors::ThermalCameraSensor> thermalSensor =
+    std::make_unique<ignition::sensors::ThermalCameraSensor>();
+  EXPECT_TRUE(thermalSensor->Load(sensorPtr));
+  EXPECT_TRUE(thermalSensor->Init());
 
   float ambientTemp = 296.0;
   float ambientTempRange = 4.0;

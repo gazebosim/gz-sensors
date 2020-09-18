@@ -81,8 +81,8 @@ TEST_F(ImuSensorTest, CreateImu)
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::ImuSensor> sensor =
-      sf.CreateSensor<ignition::sensors::ImuSensor>(imuSdf);
-  EXPECT_TRUE(sensor != nullptr);
+    std::make_unique<ignition::sensors::ImuSensor>();
+  EXPECT_TRUE(sensor->Load(imuSdf));
 
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(topic, sensor->Topic());
@@ -109,8 +109,9 @@ TEST_F(ImuSensorTest, SensorReadings)
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
-  std::unique_ptr<ignition::sensors::Sensor> s =
-      sf.CreateSensor(imuSdf);
+  std::unique_ptr<ignition::sensors::ImuSensor> s =
+    std::make_unique<ignition::sensors::ImuSensor>();
+  EXPECT_TRUE(s->Load(imuSdf));
   std::unique_ptr<ignition::sensors::ImuSensor> sensor(
       dynamic_cast<ignition::sensors::ImuSensor *>(s.release()));
 
@@ -246,8 +247,9 @@ TEST_F(ImuSensorTest, Topic)
     auto imuSdf = ImuToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(imuSdf);
-    EXPECT_NE(nullptr, sensor);
+    std::unique_ptr<ignition::sensors::ImuSensor> sensor =
+      std::make_unique<ignition::sensors::ImuSensor>();
+    EXPECT_TRUE(sensor->Load(imuSdf));
 
     auto imu = dynamic_cast<ignition::sensors::ImuSensor *>(sensor.release());
     ASSERT_NE(nullptr, imu);
@@ -261,8 +263,9 @@ TEST_F(ImuSensorTest, Topic)
     auto imuSdf = ImuToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(imuSdf);
-    EXPECT_NE(nullptr, sensor);
+    std::unique_ptr<ignition::sensors::ImuSensor> sensor =
+      std::make_unique<ignition::sensors::ImuSensor>();
+    EXPECT_TRUE(sensor->Load(imuSdf));
 
     auto imu =
         dynamic_cast<ignition::sensors::ImuSensor *>(sensor.release());
@@ -277,8 +280,9 @@ TEST_F(ImuSensorTest, Topic)
     auto imuSdf = ImuToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(imuSdf);
-    ASSERT_EQ(nullptr, sensor);
+    std::unique_ptr<ignition::sensors::ImuSensor> sensor =
+      std::make_unique<ignition::sensors::ImuSensor>();
+    EXPECT_FALSE(sensor->Load(imuSdf));
   }
 }
 

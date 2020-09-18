@@ -225,8 +225,10 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   ignition::sensors::Manager mgr;
   mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
-  ignition::sensors::RgbdCameraSensor *rgbdSensor =
-      mgr.CreateSensor<ignition::sensors::RgbdCameraSensor>(sensorPtr);
+  std::unique_ptr<ignition::sensors::RgbdCameraSensor> rgbdSensor =
+    std::make_unique<ignition::sensors::RgbdCameraSensor>();
+  EXPECT_TRUE(rgbdSensor->Load(sensorPtr));
+  EXPECT_TRUE(rgbdSensor->Init());
   ASSERT_NE(rgbdSensor, nullptr);
   rgbdSensor->SetScene(scene);
 

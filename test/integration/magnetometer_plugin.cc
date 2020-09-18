@@ -140,14 +140,14 @@ TEST_F(MagnetometerSensorTest, CreateMagnetometer)
   // create the sensor using sensor factory
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
+
   std::unique_ptr<ignition::sensors::MagnetometerSensor> sensor =
-      sf.CreateSensor<ignition::sensors::MagnetometerSensor>(magnetometerSdf);
-  EXPECT_TRUE(sensor != nullptr);
+    std::make_unique<ignition::sensors::MagnetometerSensor>();
+  EXPECT_TRUE(sensor->Load(magnetometerSdf));
 
   std::unique_ptr<ignition::sensors::MagnetometerSensor> sensorNoise =
-    sf.CreateSensor<ignition::sensors::MagnetometerSensor>(
-        magnetometerNoiseSdf);
-  EXPECT_TRUE(sensorNoise != nullptr);
+    std::make_unique<ignition::sensors::MagnetometerSensor>();
+  EXPECT_TRUE(sensorNoise->Load(magnetometerNoiseSdf));
 
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(name, sensorNoise->Name());
@@ -180,13 +180,18 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
-  std::unique_ptr<ignition::sensors::Sensor> s =
-      sf.CreateSensor(magnetometerSdf);
+
+  std::unique_ptr<ignition::sensors::MagnetometerSensor> s =
+    std::make_unique<ignition::sensors::MagnetometerSensor>();
+  EXPECT_TRUE(s->Load(magnetometerSdf));
+  EXPECT_TRUE(s->Init());
   std::unique_ptr<ignition::sensors::MagnetometerSensor> sensor(
       dynamic_cast<ignition::sensors::MagnetometerSensor *>(s.release()));
 
-  std::unique_ptr<ignition::sensors::Sensor> sNoise =
-      sf.CreateSensor(magnetometerSdfNoise);
+  std::unique_ptr<ignition::sensors::MagnetometerSensor> sNoise =
+    std::make_unique<ignition::sensors::MagnetometerSensor>();
+  EXPECT_TRUE(sNoise->Load(magnetometerSdfNoise));
+  EXPECT_TRUE(sNoise->Init());
   std::unique_ptr<ignition::sensors::MagnetometerSensor> sensorNoise(
       dynamic_cast<ignition::sensors::MagnetometerSensor *>(sNoise.release()));
 
@@ -305,8 +310,9 @@ TEST_F(MagnetometerSensorTest, Topic)
     auto magnetometerSdf = MagnetometerToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(magnetometerSdf);
-    EXPECT_NE(nullptr, sensor);
+    std::unique_ptr<ignition::sensors::MagnetometerSensor> sensor =
+      std::make_unique<ignition::sensors::MagnetometerSensor>();
+    EXPECT_TRUE(sensor->Load(magnetometerSdf));
 
     auto magnetometer =
         dynamic_cast<ignition::sensors::MagnetometerSensor *>(sensor.release());
@@ -321,8 +327,9 @@ TEST_F(MagnetometerSensorTest, Topic)
     auto magnetometerSdf = MagnetometerToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(magnetometerSdf);
-    EXPECT_NE(nullptr, sensor);
+    std::unique_ptr<ignition::sensors::MagnetometerSensor> sensor =
+      std::make_unique<ignition::sensors::MagnetometerSensor>();
+    EXPECT_TRUE(sensor->Load(magnetometerSdf));
 
     auto magnetometer =
         dynamic_cast<ignition::sensors::MagnetometerSensor *>(sensor.release());
@@ -337,8 +344,9 @@ TEST_F(MagnetometerSensorTest, Topic)
     auto magnetometerSdf = MagnetometerToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(magnetometerSdf);
-    ASSERT_EQ(nullptr, sensor);
+    std::unique_ptr<ignition::sensors::MagnetometerSensor> sensor =
+      std::make_unique<ignition::sensors::MagnetometerSensor>();
+    EXPECT_FALSE(sensor->Load(magnetometerSdf));
   }
 }
 
