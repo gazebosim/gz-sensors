@@ -131,6 +131,13 @@ bool AltimeterSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
+bool AltimeterSensor::Update(
+  const ignition::common::Time &_now)
+{
+  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
+}
+
+//////////////////////////////////////////////////
 bool AltimeterSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("AltimeterSensor::Update");

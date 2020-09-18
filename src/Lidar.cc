@@ -183,6 +183,13 @@ ignition::common::ConnectionPtr Lidar::ConnectNewLidarFrame(
 }
 
 //////////////////////////////////////////////////
+bool Lidar::Update(
+  const ignition::common::Time &_now)
+{
+  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
+}
+
+//////////////////////////////////////////////////
 bool Lidar::Update(const std::chrono::steady_clock::duration &/*_now*/)
 {
   ignerr << "No lidar data being updated.\n";

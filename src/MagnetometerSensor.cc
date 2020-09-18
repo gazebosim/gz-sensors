@@ -138,6 +138,13 @@ bool MagnetometerSensor::Load(sdf::ElementPtr _sdf)
 
 //////////////////////////////////////////////////
 bool MagnetometerSensor::Update(
+  const ignition::common::Time &_now)
+{
+  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
+}
+
+//////////////////////////////////////////////////
+bool MagnetometerSensor::Update(
   const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("MagnetometerSensor::Update");

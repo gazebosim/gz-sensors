@@ -238,9 +238,23 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
 }
 
 //////////////////////////////////////////////////
-std::chrono::steady_clock::duration Sensor::NextUpdateTime() const
+bool Sensor::Update(const common::Time &_now, const bool _force)
+{
+  return Update(math::secNsecToDuration(_now.sec, _now.nsec), _force);
+}
+
+//////////////////////////////////////////////////
+std::chrono::steady_clock::duration Sensor::NextDataUpdateTime() const
 {
   return this->dataPtr->nextUpdateTime;
+}
+
+//////////////////////////////////////////////////
+ignition::common::Time Sensor::NextUpdateTime() const
+{
+  std::pair<uint64_t, uint64_t> secNsec =
+    math::durationToSecNsec(this->dataPtr->nextUpdateTime);
+  return common::Time(secNsec.first, secNsec.second);
 }
 
 /////////////////////////////////////////////////
