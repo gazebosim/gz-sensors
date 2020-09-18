@@ -92,9 +92,6 @@ void OnNewLaserFrame(int *_scanCounter, float *_scanDest,
 /// \brief Test Creation of a Lidar sensor
 TEST(Lidar_TEST, CreateLaser)
 {
-  // Create a sensor manager
-  ignition::sensors::Manager mgr;
-
   // Create SDF describing a camera sensor
   const std::string name = "TestLidar";
   const std::string topic = "/ignition/sensors/test/lidar";
@@ -118,9 +115,9 @@ TEST(Lidar_TEST, CreateLaser)
     vert_samples, vert_resolution, vert_min_angle, vert_max_angle,
     range_resolution, range_min, range_max, always_on, visualize);
 
-  // Create a CameraSensor
-  ignition::sensors::Lidar *sensor = mgr.CreateSensor<ignition::sensors::Lidar>(
-      lidarSDF);
+  std::unique_ptr<ignition::sensors::Lidar> sensor =
+    std::make_unique<ignition::sensors::Lidar>();
+  EXPECT_TRUE(sensor->Load(lidarSDF));
 
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);

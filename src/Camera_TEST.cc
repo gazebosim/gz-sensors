@@ -126,14 +126,13 @@ sdf::ElementPtr CameraToSdf(const std::string &_type,
 //////////////////////////////////////////////////
 TEST(Camera_TEST, CreateCamera)
 {
-  ignition::sensors::Manager mgr;
-
   sdf::ElementPtr camSdf = CameraToSdf("camera", "my_camera", 60.0, "/cam",
       true, true);
 
   // Create a CameraSensor
-  ignition::sensors::CameraSensor *cam =
-    mgr.CreateSensor<ignition::sensors::CameraSensor>(camSdf);
+  std::unique_ptr<ignition::sensors::CameraSensor> cam =
+    std::make_unique<ignition::sensors::CameraSensor>();
+  EXPECT_TRUE(cam->Load(camSdf));
 
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(cam != nullptr);
@@ -152,9 +151,9 @@ TEST(Camera_TEST, CreateCamera)
   sdf::ElementPtr camBadSdf = cameraToBadSdf();
 
   // Create a CameraSensor
-  ignition::sensors::CameraSensor *badCam =
-    mgr.CreateSensor<ignition::sensors::CameraSensor>(camBadSdf);
-  EXPECT_TRUE(badCam == nullptr);
+  std::unique_ptr<ignition::sensors::CameraSensor> badCam =
+    std::make_unique<ignition::sensors::CameraSensor>();
+  EXPECT_FALSE(badCam->Load(camBadSdf));
 }
 
 /////////////////////////////////////////////////
@@ -175,7 +174,12 @@ TEST(Camera_TEST, Topic)
     auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
         visualize);
 
-    auto sensorId = mgr.CreateSensor(cameraSdf);
+    // Create a CameraSensor
+    std::unique_ptr<ignition::sensors::CameraSensor> cam =
+      std::make_unique<ignition::sensors::CameraSensor>();
+    EXPECT_TRUE(cam->Load(cameraSdf));
+
+    auto sensorId = mgr.AddSensor(std::move(cam));
     EXPECT_NE(ignition::sensors::NO_SENSOR, sensorId);
 
     auto sensor = mgr.Sensor(sensorId);
@@ -193,7 +197,13 @@ TEST(Camera_TEST, Topic)
     auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
         visualize);
 
-    auto sensorId = mgr.CreateSensor(cameraSdf);
+    // Create a CameraSensor
+    std::unique_ptr<ignition::sensors::CameraSensor> cam =
+      std::make_unique<ignition::sensors::CameraSensor>();
+    EXPECT_TRUE(cam->Load(cameraSdf));
+
+    auto sensorId = mgr.AddSensor(std::move(cam));
+
     EXPECT_NE(ignition::sensors::NO_SENSOR, sensorId);
 
     auto sensor = mgr.Sensor(sensorId);
@@ -211,7 +221,15 @@ TEST(Camera_TEST, Topic)
     auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
         visualize);
 
-    auto sensorId = mgr.CreateSensor(cameraSdf);
+    // Create a CameraSensor
+    std::unique_ptr<ignition::sensors::CameraSensor> cam =
+      std::make_unique<ignition::sensors::CameraSensor>();
+    EXPECT_FALSE(cam->Load(cameraSdf));
+
+    cam = nullptr;
+
+    auto sensorId = mgr.AddSensor(std::move(cam));
+
     EXPECT_EQ(ignition::sensors::NO_SENSOR, sensorId);
   }
 }

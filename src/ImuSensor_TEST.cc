@@ -177,9 +177,6 @@ sdf::ElementPtr ImuSensorToSDF(const std::string &name, double update_rate,
 //////////////////////////////////////////////////
 TEST(ImuSensor_TEST, CreateImuSensor)
 {
-  // Create a sensor manager
-  ignition::sensors::Manager mgr;
-
   const std::string name = "TestImu";
   const std::string topic = "/ignition/sensors/test/imu";
   const double update_rate = 100;
@@ -191,19 +188,14 @@ TEST(ImuSensor_TEST, CreateImuSensor)
   sdf::ElementPtr imuSDF = ImuSensorToSDF(name, update_rate, topic,
     accelNoise, gyroNoise, always_on, visualize);
 
-  // Create an ImuSensor
-  auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(imuSDF);
-
-  // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
+  std::unique_ptr<ignition::sensors::ImuSensor> sensor =
+    std::make_unique<ignition::sensors::ImuSensor>();
+  EXPECT_TRUE(sensor->Load(imuSDF));
 }
 
 //////////////////////////////////////////////////
 TEST(ImuSensor_TEST, ComputeNoise)
 {
-  // Create a sensor manager
-  ignition::sensors::Manager mgr;
-
   sdf::ElementPtr imuSDF, imuSDF_truth;
 
   {
@@ -235,10 +227,13 @@ TEST(ImuSensor_TEST, ComputeNoise)
       accelNoise, gyroNoise, always_on, visualize);
   }
 
-  // Create an ImuSensor
-  auto sensor_truth = mgr.CreateSensor<ignition::sensors::ImuSensor>(
-      imuSDF_truth);
-  auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(imuSDF);
+  std::unique_ptr<ignition::sensors::ImuSensor> sensor_truth =
+    std::make_unique<ignition::sensors::ImuSensor>();
+  EXPECT_TRUE(sensor_truth->Load(imuSDF_truth));
+
+  std::unique_ptr<ignition::sensors::ImuSensor> sensor =
+    std::make_unique<ignition::sensors::ImuSensor>();
+  EXPECT_TRUE(sensor->Load(imuSDF));
 
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
