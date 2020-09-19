@@ -22,6 +22,7 @@
 #include <type_traits>
 #include <vector>
 #include <sdf/sdf.hh>
+#include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
 #include <ignition/common/Console.hh>
 #include <ignition/sensors/config.hh>
@@ -207,8 +208,10 @@ namespace ignition
       private: ignition::sensors::SensorId LoadSensorPlugin(
                    const std::string &_filename, sdf::ElementPtr _sdf);
 
+      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief private data pointer
       private: std::unique_ptr<ManagerPrivate> dataPtr;
+      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

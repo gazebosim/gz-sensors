@@ -15,8 +15,15 @@
  *
 */
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#endif
 #include <ignition/msgs/image.pb.h>
 #include <ignition/msgs/pointcloud_packed.pb.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include <ignition/common/Image.hh>
 #include <ignition/common/Profiler.hh>

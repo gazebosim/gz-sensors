@@ -16,14 +16,22 @@
 */
 
 #include <gtest/gtest.h>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#endif
 #include <ignition/msgs/camera_info.pb.h>
+#include <ignition/msgs.hh>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include <ignition/common/Filesystem.hh>
 #include <ignition/common/Event.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/DepthCameraSensor.hh>
 #include <ignition/rendering.hh>
-#include <ignition/msgs.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
@@ -248,8 +256,8 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   // wait for a few depth camera frames
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
 
-  int midWidth = depthSensor->ImageWidth() * 0.5;
-  int midHeight = depthSensor->ImageHeight() * 0.5;
+  int midWidth = static_cast<int>(depthSensor->ImageWidth() * 0.5);
+  int midHeight = static_cast<int>(depthSensor->ImageHeight() * 0.5);
   int mid = midHeight * depthSensor->ImageWidth() + midWidth -1;
   double expectedRangeAtMidPoint = boxPosition.X() - unitBoxSize * 0.5;
 

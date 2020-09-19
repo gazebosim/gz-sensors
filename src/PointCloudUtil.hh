@@ -18,7 +18,14 @@
 #ifndef IGNITION_SENSORS_POINTCLOUDUTIL_HH_
 #define IGNITION_SENSORS_POINTCLOUDUTIL_HH_
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#endif
 #include <ignition/msgs/pointcloud_packed.pb.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #include <ignition/math/Angle.hh>
 
 #include "ignition/sensors/config.hh"

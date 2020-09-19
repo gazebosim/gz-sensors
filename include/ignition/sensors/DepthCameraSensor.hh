@@ -28,7 +28,14 @@
 #include <ignition/common/PluginMacros.hh>
 #include <ignition/common/Time.hh>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#endif
 #include <ignition/msgs.hh>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include <ignition/rendering/DepthCamera.hh>
 
@@ -80,7 +87,7 @@ namespace ignition
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       public: virtual bool IGN_DEPRECATED(4) Update(
-        const common::Time &_now) override;
+        const ignition::common::Time &_now) override;
 
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time

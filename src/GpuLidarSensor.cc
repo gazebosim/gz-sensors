@@ -14,7 +14,15 @@
  * limitations under the License.
  *
 */
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#endif
 #include <ignition/msgs/pointcloud_packed.pb.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #include <ignition/msgs/Utility.hh>
 #include <ignition/transport/Node.hh>
 

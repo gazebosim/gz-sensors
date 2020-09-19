@@ -18,11 +18,18 @@
 #include <sdf/sdf.hh>
 
 #include <ignition/math/Helpers.hh>
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#endif
 #include <ignition/msgs.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/Manager.hh>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include <ignition/sensors/ImuSensor.hh>
+#include <ignition/sensors/Export.hh>
+#include <ignition/sensors/Manager.hh>
 
 using namespace ignition;
 
@@ -301,7 +308,3 @@ int main(int argc, char **argv)
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
-
-
-

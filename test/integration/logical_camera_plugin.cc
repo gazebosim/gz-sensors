@@ -27,7 +27,14 @@
 #include <ignition/sensors/Export.hh>
 
 #include <ignition/math/Helpers.hh>
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#endif
 #include <ignition/msgs.hh>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #include <ignition/transport/Node.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
