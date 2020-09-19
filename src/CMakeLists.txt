@@ -24,6 +24,7 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   PRIVATE
     ignition-common${IGN_COMMON_VER}::profiler
 )
+target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME} PUBLIC DepthPoints_EXPORTS)
 
 set(rendering_sources
   RenderingSensor.cc

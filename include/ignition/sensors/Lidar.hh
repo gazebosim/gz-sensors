@@ -229,9 +229,11 @@ namespace ignition
       // Documentation inherited
       public: virtual bool IsActive() const;
 
+      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Just a mutex for thread safety
       public: mutable std::mutex lidarMutex;
-
+      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
+      
       /// \brief Raw buffer of laser data.
       public: float *laserBuffer = nullptr;
 
