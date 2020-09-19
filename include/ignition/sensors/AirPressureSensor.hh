@@ -21,6 +21,7 @@
 
 #include <sdf/sdf.hh>
 
+#include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
 
 #include <ignition/sensors/config.hh>
@@ -77,9 +78,11 @@ namespace ignition
       /// \return Verical reference position in meters
       public: double ReferenceAltitude() const;
 
+      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<AirPressureSensorPrivate> dataPtr;
+      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

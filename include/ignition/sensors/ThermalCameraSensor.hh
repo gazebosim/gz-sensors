@@ -24,7 +24,7 @@
 #include <sdf/sdf.hh>
 
 #include <ignition/common/Event.hh>
-
+#include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
 
 #include <ignition/msgs.hh>
@@ -154,9 +154,11 @@ namespace ignition
       private: void OnSceneChange(ignition::rendering::ScenePtr /*_scene*/)
               { }
 
+      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<ThermalCameraSensorPrivate> dataPtr;
+      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

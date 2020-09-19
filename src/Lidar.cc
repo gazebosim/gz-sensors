@@ -330,7 +330,8 @@ unsigned int Lidar::RayCount() const
 //////////////////////////////////////////////////
 unsigned int Lidar::RangeCount() const
 {
-  return this->RayCount() * this->dataPtr->sdfLidar.HorizontalScanResolution();
+  return static_cast<unsigned int>(this->RayCount() *
+    this->dataPtr->sdfLidar.HorizontalScanResolution());
 }
 
 //////////////////////////////////////////////////
@@ -342,12 +343,12 @@ unsigned int Lidar::VerticalRayCount() const
 //////////////////////////////////////////////////
 unsigned int Lidar::VerticalRangeCount() const
 {
-  int rows = this->VerticalRayCount() *
-    this->dataPtr->sdfLidar.VerticalScanResolution();
+  unsigned int rows = static_cast<unsigned int>(this->VerticalRayCount() *
+    this->dataPtr->sdfLidar.VerticalScanResolution());
   if (rows > 1)
     return rows;
   else
-    return 1;
+    return 1u;
 }
 
 //////////////////////////////////////////////////

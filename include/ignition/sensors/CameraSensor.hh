@@ -23,6 +23,7 @@
 
 #include <sdf/sdf.hh>
 
+#include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
 
 #include <ignition/msgs.hh>
@@ -148,9 +149,11 @@ namespace ignition
       /// \param[in] _scene Pointer to the new scene.
       private: void OnSceneChange(ignition::rendering::ScenePtr /*_scene*/);
 
+      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<CameraSensorPrivate> dataPtr;
+      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

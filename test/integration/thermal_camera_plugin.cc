@@ -143,9 +143,9 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_TRUE(thermalSensor->Load(sensorPtr));
   EXPECT_TRUE(thermalSensor->Init());
 
-  float ambientTemp = 296.0;
-  float ambientTempRange = 4.0;
-  float linearResolution = 0.01;
+  float ambientTemp = 296.0f;
+  float ambientTempRange = 4.0f;
+  float linearResolution = 0.01f;
   thermalSensor->SetAmbientTemperature(ambientTemp);
   thermalSensor->SetAmbientTemperatureRange(ambientTempRange);
   thermalSensor->SetLinearResolution(linearResolution);
@@ -178,8 +178,8 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   // wait for a few thermal camera frames
   mgr.RunOnce(ignition::common::Time::Zero, true);
 
-  int midWidth = thermalSensor->ImageWidth() * 0.5;
-  int midHeight = thermalSensor->ImageHeight() * 0.5;
+  int midWidth = static_cast<int>(thermalSensor->ImageWidth() * 0.5);
+  int midHeight = static_cast<int>(thermalSensor->ImageHeight() * 0.5);
   int mid = midHeight * thermalSensor->ImageWidth() + midWidth -1;
   int left = midHeight * thermalSensor->ImageWidth();
   int right = (midHeight+1) * thermalSensor->ImageWidth() - 1;

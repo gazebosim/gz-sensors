@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 
+#include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Event.hh>
 
 #include "ignition/sensors/lidar/Export.hh"
@@ -249,9 +250,11 @@ namespace ignition
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &/*_format*/)> _subscriber);
 
+      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<LidarPrivate> dataPtr;
+      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

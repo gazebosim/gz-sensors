@@ -320,8 +320,8 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   pcCounter = 0;
 
   // depth image indices
-  int midWidth = rgbdSensor->ImageWidth() * 0.5;
-  int midHeight = rgbdSensor->ImageHeight() * 0.5;
+  int midWidth = static_cast<int>(rgbdSensor->ImageWidth() * 0.5);
+  int midHeight = static_cast<int>(rgbdSensor->ImageHeight() * 0.5);
   int mid = midHeight * rgbdSensor->ImageWidth() + midWidth -1;
   double expectedRangeAtMidPoint = boxPosition.X() - unitBoxSize * 0.5;
   int left = midHeight * rgbdSensor->ImageWidth();

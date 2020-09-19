@@ -22,6 +22,8 @@
 
 #include <sdf/sdf.hh>
 
+#include <ignition/common/SuppressWarning.hh>
+
 #include <ignition/rendering/GpuRays.hh>
 
 #include "ignition/sensors/gpu_lidar/Export.hh"
@@ -116,9 +118,11 @@ namespace ignition
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &/*_format*/)> _subscriber) override;
 
+      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<GpuLidarSensorPrivate> dataPtr;
+      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

@@ -23,6 +23,7 @@
 #include <sdf/sdf.hh>
 
 #include <ignition/common/Console.hh>
+#include <ignition/common/SuppressWarning.hh>
 #include <ignition/plugin/Loader.hh>
 
 #include <ignition/sensors/config.hh>
@@ -173,8 +174,10 @@ namespace ignition
       private: std::shared_ptr<SensorPlugin> LoadSensorPlugin(
           const std::string &_filename);
 
+      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief private data pointer
       private: std::unique_ptr<SensorFactoryPrivate> dataPtr;
+      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
 
     /// \brief Sensor registration macro
