@@ -16,7 +16,15 @@
 */
 
 #include <gtest/gtest.h>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#endif
 #include <ignition/msgs/camera_info.pb.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include <ignition/common/Filesystem.hh>
 #include <ignition/common/Event.hh>

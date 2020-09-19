@@ -15,6 +15,14 @@
  *
 */
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#endif
+#include <ignition/msgs/magnetometer.pb.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #include <ignition/msgs/magnetometer.pb.h>
 
 #include <ignition/common/Profiler.hh>
