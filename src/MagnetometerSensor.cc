@@ -23,7 +23,6 @@
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-#include <ignition/msgs/magnetometer.pb.h>
 
 #include <ignition/common/Profiler.hh>
 #include <ignition/plugin/Register.hh>
