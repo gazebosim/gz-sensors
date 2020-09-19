@@ -8,6 +8,19 @@ set (sources
   SensorTypes.cc
 )
 
+set(rendering_sources
+  RenderingSensor.cc
+  RenderingEvents.cc
+  ImageGaussianNoiseModel.cc
+  ImageNoise.cc
+)
+
+set (gtest_sources
+  Manager_TEST.cc
+  Noise_TEST.cc
+  Sensor_TEST.cc
+)
+
 # Create the library target.
 ign_create_core_library(SOURCES ${sources} CXX_STANDARD 14)
 
@@ -26,18 +39,39 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
 )
 target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME} PUBLIC DepthPoints_EXPORTS)
 
-set(rendering_sources
-  RenderingSensor.cc
-  RenderingEvents.cc
-  ImageGaussianNoiseModel.cc
-  ImageNoise.cc
-)
-
 ign_add_component(rendering SOURCES ${rendering_sources} GET_TARGET_NAME rendering_target)
 target_link_libraries(${rendering_target}
   PUBLIC
     ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
-    )
+)
+
+if (MSVC)
+  # Warning #4251 is the "dll-interface" warning that tells you when types used
+  # by a class are not being exported. These generated source files have private
+  # members that don't get exported, so they trigger this warning. However, the
+  # warning is not important since those members do not need to be interfaced
+  # with.
+  set_source_files_properties(
+      ${sources}
+      ${rendering_sources}
+      CameraSensor.cc
+      DepthCameraSensor.cc
+      Lidar.cc
+      GpuLidarSensor.cc
+      LogicalCameraSensor.cc
+      MagnetometerSensor.cc
+      ImuSensor.cc
+      AltimeterSensor.cc
+      AirPressureSensor.cc
+      RgbdCameraSensor.cc
+      ThermalCameraSensor.cc
+      Lidar_TEST.cc
+      ImuSensor_TEST.cc
+      Camera.cc
+      ${gtest_sources}
+    COMPILE_FLAGS "/wd4251 /wd4146"
+  )
+endif()
 
 
 set(camera_sources CameraSensor.cc)
@@ -52,7 +86,7 @@ target_link_libraries(${camera_target}
     ignition-plugin${IGN_PLUGIN_VER}::register
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    )
+)
 
 set(depth_camera_sources DepthCameraSensor.cc)
 ign_add_component(depth_camera SOURCES ${depth_camera_sources} GET_TARGET_NAME depth_camera_target)
@@ -62,7 +96,7 @@ target_link_libraries(${depth_camera_target}
     ${camera_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    )
+)
 
 set(lidar_sources Lidar.cc)
 ign_add_component(lidar SOURCES ${lidar_sources} GET_TARGET_NAME lidar_target)
@@ -74,7 +108,7 @@ target_link_libraries(${lidar_target}
     ignition-plugin${IGN_PLUGIN_VER}::register
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    )
+)
 
 set(gpu_lidar_sources GpuLidarSensor.cc)
 ign_add_component(gpu_lidar SOURCES ${gpu_lidar_sources} GET_TARGET_NAME gpu_lidar_target)
@@ -84,7 +118,7 @@ target_link_libraries(${gpu_lidar_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
     ${lidar_target}
-    )
+)
 
 set(logical_camera_sources LogicalCameraSensor.cc)
 ign_add_component(logical_camera SOURCES ${logical_camera_sources} GET_TARGET_NAME logical_camera_target)
@@ -94,7 +128,7 @@ target_link_libraries(${logical_camera_target}
     ignition-plugin${IGN_PLUGIN_VER}::register
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    )
+)
 
 set(magnetometer_sources MagnetometerSensor.cc)
 ign_add_component(magnetometer SOURCES ${magnetometer_sources} GET_TARGET_NAME magnetometer_target)
@@ -132,7 +166,7 @@ target_link_libraries(${rgbd_camera_target}
     ${camera_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    )
+)
 
 set(thermal_camera_sources ThermalCameraSensor.cc)
 ign_add_component(thermal_camera SOURCES ${thermal_camera_sources} GET_TARGET_NAME thermal_camera_target)
@@ -141,13 +175,6 @@ target_link_libraries(${thermal_camera_target}
     ${camera_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    )
-
-
-set (gtest_sources
-  Manager_TEST.cc
-  Noise_TEST.cc
-  Sensor_TEST.cc
 )
 
 # Build the unit tests.
