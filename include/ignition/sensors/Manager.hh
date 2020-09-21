@@ -189,7 +189,7 @@ namespace ignition
       /// \param _force: If true, all sensors are forced to update. Otherwise
       ///        a sensor will update based on it's Hz rate.
       public: void IGN_DEPRECATED(4) RunOnce(
-        const ignition::common::Time &_time, bool _force);
+        const ignition::common::Time &_time, bool _force = false);
 
       /// \brief Run the sensor generation one step.
       /// \param _time: The current simulated time

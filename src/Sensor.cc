@@ -270,7 +270,7 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
 //////////////////////////////////////////////////
 bool Sensor::Update(const ignition::common::Time &_now, const bool _force)
 {
-  return Update(math::secNsecToDuration(_now.sec, _now.nsec), _force);
+  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec), _force);
 }
 
 //////////////////////////////////////////////////
