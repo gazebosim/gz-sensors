@@ -68,6 +68,12 @@ namespace ignition
       /// \brief Publish LaserScan message
       /// \param[in] _now The current time
       /// \return true if the update was successfull
+      public: virtual bool IGN_DEPRECATED(4) PublishLidarScan(
+        const common::Time &_now);
+
+      /// \brief Publish LaserScan message
+      /// \param[in] _now The current time
+      /// \return true if the update was successfull
       public: virtual bool PublishLidarScan(
         const std::chrono::steady_clock::duration &_now);
 

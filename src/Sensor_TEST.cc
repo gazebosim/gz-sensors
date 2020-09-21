@@ -30,7 +30,7 @@ class TestSensor : public Sensor
     return true;
   }
 
-  public: bool IGN_DEPRECATED(4) Update(const common::Time &) override
+  public: bool Update(const common::Time &) override
   {
     return false;
   }

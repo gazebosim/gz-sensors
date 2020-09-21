@@ -539,6 +539,13 @@ void CameraSensor::PublishInfo(
 }
 
 //////////////////////////////////////////////////
+void CameraSensor::PublishInfo(
+  const ignition::common::Time &_now)
+{
+  this->PublishInfo(math::secNsecToDuration(_now.sec, _now.nsec));
+}
+
+//////////////////////////////////////////////////
 void CameraSensor::PopulateInfo(const sdf::Camera *_cameraSdf)
 {
   unsigned int width = _cameraSdf->ImageWidth();

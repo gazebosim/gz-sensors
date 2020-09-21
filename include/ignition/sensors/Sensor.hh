@@ -82,7 +82,7 @@ namespace ignition
       /// \return true if the update was successfull
       /// \sa SetUpdateRate()
       public:
-        virtual bool IGN_DEPRECATED(3) Update(const common::Time &_now) = 0;
+        virtual bool IGN_DEPRECATED(4) Update(const common::Time &_now) = 0;
 
       /// \brief Force the sensor to generate data
       ///
@@ -101,7 +101,7 @@ namespace ignition
         const std::chrono::steady_clock::duration &_now) = 0;
 
       /// \brief Return the next time the sensor will generate data
-      public: ignition::common::Time IGN_DEPRECATED(3) NextUpdateTime() const;
+      public: ignition::common::Time IGN_DEPRECATED(4) NextUpdateTime() const;
 
       /// \brief Return the next time the sensor will generate data
       public: std::chrono::steady_clock::duration NextDataUpdateTime() const;
@@ -120,7 +120,7 @@ namespace ignition
       /// False otherwise.
       /// \remarks If forced the NextUpdateTime() will be unchanged.
       /// \sa virtual bool Update(const common::Time &_name) = 0
-      public: bool IGN_DEPRECATED(3)
+      public: bool IGN_DEPRECATED(4)
         Update(const common::Time &_now, const bool _force);
 
       /// \brief Update the sensor.

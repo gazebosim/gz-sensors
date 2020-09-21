@@ -363,6 +363,13 @@ void ThermalCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 
 //////////////////////////////////////////////////
 bool ThermalCameraSensor::Update(
+  const common::Time &_now)
+{
+  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
+}
+
+//////////////////////////////////////////////////
+bool ThermalCameraSensor::Update(
   const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("ThermalCameraSensor::Update");

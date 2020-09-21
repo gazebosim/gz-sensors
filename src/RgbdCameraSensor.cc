@@ -408,6 +408,12 @@ void RgbdCameraSensorPrivate::OnNewRgbPointCloud(const float *_scan,
 }
 
 //////////////////////////////////////////////////
+bool RgbdCameraSensor::Update(const common::Time &_now)
+{
+  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
+}
+
+//////////////////////////////////////////////////
 bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("RgbdCameraSensor::Update");

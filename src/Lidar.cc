@@ -200,6 +200,12 @@ bool Lidar::Update(const std::chrono::steady_clock::duration &/*_now*/)
 }
 
 //////////////////////////////////////////////////
+bool Lidar::PublishLidarScan(const common::Time &_now)
+{
+  this->PublishLidarScan(math::secNsecToDuration(_now.sec, _now.nsec));
+}
+
+//////////////////////////////////////////////////
 bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("Lidar::PublishLidarScan");

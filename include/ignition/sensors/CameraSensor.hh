@@ -145,6 +145,11 @@ namespace ignition
 
       /// \brief Publish camera info message.
       /// \param[in] _now The current time
+      protected: void IGN_DEPRECATED(4) PublishInfo(
+        const ignition::common::Time &_now);
+
+      /// \brief Publish camera info message.
+      /// \param[in] _now The current time
       protected: void PublishInfo(
         const std::chrono::steady_clock::duration &_now);
 
