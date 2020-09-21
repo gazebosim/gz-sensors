@@ -26,7 +26,15 @@
 #include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#endif
 #include <ignition/msgs.hh>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <ignition/rendering/Camera.hh>
 
 #include "ignition/sensors/camera/Export.hh"

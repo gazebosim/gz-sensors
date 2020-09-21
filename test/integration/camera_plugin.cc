@@ -21,7 +21,14 @@
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/CameraSensor.hh>
 #include <ignition/rendering.hh>
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#endif
 #include <ignition/msgs.hh>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"

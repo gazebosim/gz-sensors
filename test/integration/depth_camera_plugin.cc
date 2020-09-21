@@ -22,6 +22,7 @@
 #pragma warning(disable: 4005)
 #endif
 #include <ignition/msgs/camera_info.pb.h>
+#include <ignition/msgs.hh>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
@@ -31,7 +32,6 @@
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/DepthCameraSensor.hh>
 #include <ignition/rendering.hh>
-#include <ignition/msgs.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"

@@ -52,23 +52,24 @@ if (MSVC)
   # warning is not important since those members do not need to be interfaced
   # with.
   set_source_files_properties(
-      ${sources}
+      ${gtest_sources}
       ${rendering_sources}
+      ${sources}
+      AirPressureSensor.cc
+      AltimeterSensor.cc
+      Camera.cc
       CameraSensor.cc
+      Camera_TEST.cc
       DepthCameraSensor.cc
-      Lidar.cc
       GpuLidarSensor.cc
+      ImuSensor.cc
+      ImuSensor_TEST.cc
+      Lidar.cc
+      Lidar_TEST.cc
       LogicalCameraSensor.cc
       MagnetometerSensor.cc
-      ImuSensor.cc
-      AltimeterSensor.cc
-      AirPressureSensor.cc
       RgbdCameraSensor.cc
       ThermalCameraSensor.cc
-      Lidar_TEST.cc
-      ImuSensor_TEST.cc
-      Camera.cc
-      ${gtest_sources}
     COMPILE_FLAGS "/wd4251 /wd4146"
   )
 endif()
