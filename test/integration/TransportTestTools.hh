@@ -63,7 +63,7 @@ class WaitForMessageTestHelper
     std::unique_lock<std::mutex> lock(this->mtx);
     if (this->subscriptionCreated)
     {
-      if(this->conditionVariable.wait_for(
+      if (this->conditionVariable.wait_for(
         lock,
         1s,
         [this]{return this->gotMessage;}))
