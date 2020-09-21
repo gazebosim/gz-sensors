@@ -408,7 +408,7 @@ void RgbdCameraSensorPrivate::OnNewRgbPointCloud(const float *_scan,
 }
 
 //////////////////////////////////////////////////
-bool RgbdCameraSensor::Update(const common::Time &_now)
+bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 {
   return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
 }

@@ -121,7 +121,7 @@ namespace ignition
       /// \remarks If forced the NextUpdateTime() will be unchanged.
       /// \sa virtual bool Update(const common::Time &_name) = 0
       public: bool IGN_DEPRECATED(4)
-        Update(const common::Time &_now, const bool _force);
+        Update(const ignition::common::Time &_now, const bool _force);
 
       /// \brief Update the sensor.
       ///

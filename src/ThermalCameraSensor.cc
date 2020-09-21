@@ -362,8 +362,7 @@ void ThermalCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 }
 
 //////////////////////////////////////////////////
-bool ThermalCameraSensor::Update(
-  const common::Time &_now)
+bool ThermalCameraSensor::Update(const ignition::common::Time &_now)
 {
   return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
 }

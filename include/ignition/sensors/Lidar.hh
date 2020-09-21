@@ -69,7 +69,7 @@ namespace ignition
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       public: virtual bool IGN_DEPRECATED(4) PublishLidarScan(
-        const common::Time &_now);
+        const ignition::common::Time &_now);
 
       /// \brief Publish LaserScan message
       /// \param[in] _now The current time

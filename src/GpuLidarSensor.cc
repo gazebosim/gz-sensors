@@ -204,7 +204,7 @@ bool GpuLidarSensor::CreateLidar()
 }
 
 //////////////////////////////////////////////////
-bool GpuLidarSensor::Update(const common::Time &_now)
+bool GpuLidarSensor::Update(const ignition::common::Time &_now)
 {
   return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
 }
