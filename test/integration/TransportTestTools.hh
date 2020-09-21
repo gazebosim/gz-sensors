@@ -24,6 +24,8 @@
 
 #include <ignition/transport.hh>
 
+using namespace std::chrono_literals;
+
 /// \brief class which simplifies waiting for a message to be received
 template <typename M>
 class WaitForMessageTestHelper
@@ -34,9 +36,14 @@ class WaitForMessageTestHelper
   {
     if (this->node.Subscribe(_topic, &WaitForMessageTestHelper<M>::OnMessage,
           this))
+    {
       this->subscriptionCreated = true;
+    }
     else
+    {
+      std::cerr << "Failed to create subscription to " << _topic << '\n';
       this->diagnostics = "Failed to create subscription to " + _topic;
+    }
   }
 
   protected: void OnMessage(const M &_msg)
@@ -56,7 +63,13 @@ class WaitForMessageTestHelper
     std::unique_lock<std::mutex> lock(this->mtx);
     if (this->subscriptionCreated)
     {
-      this->conditionVariable.wait(lock, [this]{return this->gotMessage;});
+      if(this->conditionVariable.wait_for(
+        lock,
+        1s,
+        [this]{return this->gotMessage;}))
+      {
+        this->diagnostics = "WaitForMessage timeout";
+      }
     }
     bool success = this->gotMessage;
     this->gotMessage = false;
