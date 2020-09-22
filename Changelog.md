@@ -4,11 +4,22 @@
 
 ### Ignition Sensors 4.0.0 (20XX-XX-XX)
 
+1. Replaced common::Time with std::chrono
+    * [Pull request 41](https://github.com/ignitionrobotics/ign-sensors/pull/41)
+
+1. GitHub migration
+    * [Pull request 12](https://github.com/ignitionrobotics/ign-sensors/pull/12)
+    * [Pull request 16](https://github.com/ignitionrobotics/ign-sensors/pull/16)
+    * [Pull request 22](https://github.com/ignitionrobotics/ign-sensors/pull/22)
+
 1. Set camera sensor visibility mask
     * [BitBucket pull request 115](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/115)
 
 1. Depend on ign-rendering4
     * [BitBucket pull request 111](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/111)
+
+1. Depend on ign-msgs6, ign-transport9, sdf10
+    * [Pull request 31](https://github.com/ignitionrobotics/ign-sensors/pull/31)
 
 ## Ignition Sensors 3
 

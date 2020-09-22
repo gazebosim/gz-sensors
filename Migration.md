@@ -6,6 +6,24 @@ notification to users that their code should be upgraded. The next major
 release will remove the deprecated code.
 
 
+## Ignition Sensors 3.X to 4.X
+
+1. **include/sensors/Sensor.hh**
+   + ***Deprecation*** virtual bool Update(const ignition::common::Time &)
+   + ***Replacement*** virtual bool Update(const std::chrono::steady_clock::duration &)
+   + ***Deprecation*** virtual bool Update(const ignition::common::Time &, const bool)
+   + ***Replacement*** virtual bool Update(const std::chrono::steady_clock::duration &, const bool)
+   + ***Deprecation*** ignition::common::Time NextUpdateTime() const
+   + ***Replacement*** std::chrono::steady_clock::duration NextDataUpdateTime() const
+
+1. **include/sensors/Manager.hh**
+   + ***Deprecation*** void RunOnce(const ignition::common::Time &, bool);
+   + ***Replacement*** void RunOnce(const std::chrono::steady_clock::duration &, bool)
+
+1. **include/sensors/Lidar.hh**
+   + ***Deprecation*** virtual bool PublishLidarScan(const ignition::common::Time &)
+   + ***Replacement*** virtual bool PublishLidarScan(const std::chrono::steady_clock::duration &)
+
 ## Ignition Sensors 2.X to 3.X
 
 ### Additions
