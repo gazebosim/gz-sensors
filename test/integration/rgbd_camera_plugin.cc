@@ -251,7 +251,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   WaitForMessageTestHelper<ignition::msgs::CameraInfo> infoHelper(infoTopic);
 
   // Update once to create image
-  mgr.RunOnce(ignition::common::Time::Zero);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
 
   EXPECT_TRUE(depthHelper.WaitForMessage()) << depthHelper;
   EXPECT_TRUE(imageHelper.WaitForMessage()) << imageHelper;
@@ -271,10 +271,11 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   node.Subscribe(infoTopic, &OnCameraInfo);
 
   // Update once more
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
 
   // wait for an image
-  ignition::common::Time waitTime = ignition::common::Time(0.001);
+  auto waitTime = std::chrono::duration_cast< std::chrono::milliseconds >(
+      std::chrono::duration< double >(0.001));
   int counter = 0;
   int infoCounter = 0;
   int imgCounter = 0;
@@ -297,7 +298,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.unlock();
     g_imgMutex.unlock();
     g_pcMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
 
   g_mutex.lock();
@@ -504,7 +505,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   box->SetLocalPosition(boxPositionNear);
   root->AddChild(box);
 
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
   for (int sleep = 0; sleep < 300 &&
       (counter == 0 || infoCounter == 0 || imgCounter == 0 || pcCounter == 0);
       ++sleep)
@@ -522,7 +523,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.unlock();
     g_imgMutex.unlock();
     g_pcMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
 
   g_mutex.lock();
@@ -610,7 +611,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   box->SetLocalPosition(boxPositionFar);
   root->AddChild(box);
 
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
   for (int sleep = 0; sleep < 300 &&
       (counter == 0 || infoCounter == 0 || imgCounter == 0 || pcCounter == 0);
       ++sleep)
@@ -628,7 +629,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.unlock();
     g_imgMutex.unlock();
     g_pcMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
 
   g_mutex.lock();

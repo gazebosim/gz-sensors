@@ -130,7 +130,14 @@ bool AltimeterSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool AltimeterSensor::Update(const ignition::common::Time &_now)
+bool AltimeterSensor::Update(
+  const ignition::common::Time &_now)
+{
+  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
+}
+
+//////////////////////////////////////////////////
+bool AltimeterSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("AltimeterSensor::Update");
   if (!this->dataPtr->initialized)
@@ -140,8 +147,7 @@ bool AltimeterSensor::Update(const ignition::common::Time &_now)
   }
 
   msgs::Altimeter msg;
-  msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
-  msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+  *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->Name());

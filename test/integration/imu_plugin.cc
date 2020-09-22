@@ -156,7 +156,8 @@ TEST_F(ImuSensorTest, SensorReadings)
   EXPECT_EQ(ignition::math::Quaterniond::Identity, sensor->Orientation());
 
   // update sensor and verify new readings
-  EXPECT_TRUE(sensor->Update(ignition::common::Time(1, 0)));
+  EXPECT_TRUE(sensor->Update(std::chrono::steady_clock::duration(
+    std::chrono::seconds(1))));
   EXPECT_EQ(orientRef, sensor->OrientationReference());
   EXPECT_EQ(gravity, sensor->Gravity());
   EXPECT_EQ(pose, sensor->WorldPose());
@@ -196,7 +197,8 @@ TEST_F(ImuSensorTest, SensorReadings)
   EXPECT_EQ(newPose, sensor->WorldPose());
 
   // update sensor and verify new readings
-  EXPECT_TRUE(sensor->Update(ignition::common::Time(2, 0)));
+  EXPECT_TRUE(sensor->Update(std::chrono::steady_clock::duration(
+    std::chrono::seconds(2))));
   EXPECT_EQ(orientRef, sensor->OrientationReference());
   EXPECT_EQ(gravity, sensor->Gravity());
   EXPECT_EQ(angularVel, sensor->AngularVelocity());

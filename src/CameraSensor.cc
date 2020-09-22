@@ -306,7 +306,14 @@ void CameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 }
 
 //////////////////////////////////////////////////
-bool CameraSensor::Update(const ignition::common::Time &_now)
+bool CameraSensor::Update(
+  const ignition::common::Time &_now)
+{
+  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
+}
+
+//////////////////////////////////////////////////
+bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("CameraSensor::Update");
   if (!this->dataPtr->initialized)
@@ -387,8 +394,7 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
     msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
                  this->dataPtr->camera->ImageFormat()));
     msg.set_pixel_format_type(msgsPixelFormat);
-    msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
-    msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+    *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
     auto frame = msg.mutable_header()->add_data();
     frame->set_key("frame_id");
     frame->add_value(this->Name());
@@ -524,12 +530,19 @@ bool CameraSensor::AdvertiseInfo(const std::string &_topic)
 }
 
 //////////////////////////////////////////////////
-void CameraSensor::PublishInfo(const ignition::common::Time &_now)
+void CameraSensor::PublishInfo(
+  const std::chrono::steady_clock::duration &_now)
 {
-  this->dataPtr->infoMsg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
-  this->dataPtr->infoMsg.mutable_header()->mutable_stamp()->set_nsec(
-      _now.nsec);
+  *this->dataPtr->infoMsg.mutable_header()->mutable_stamp() =
+    msgs::Convert(_now);
   this->dataPtr->infoPub.Publish(this->dataPtr->infoMsg);
+}
+
+//////////////////////////////////////////////////
+void CameraSensor::PublishInfo(
+  const ignition::common::Time &_now)
+{
+  this->PublishInfo(math::secNsecToDuration(_now.sec, _now.nsec));
 }
 
 //////////////////////////////////////////////////

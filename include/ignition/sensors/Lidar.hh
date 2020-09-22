@@ -53,15 +53,29 @@ namespace ignition
       /// \brief destructor
       public: virtual ~Lidar();
 
+      /// \brief Update the sensor and generate data
+      /// \param[in] _now The current time
+      /// \return true if the update was successfull
+      public: virtual bool IGN_DEPRECATED(4) Update(
+        const ignition::common::Time &_now) override;
+
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) override;
+      public: virtual bool Update(
+        const std::chrono::steady_clock::duration &_now) override;
 
       /// \brief Publish LaserScan message
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool PublishLidarScan(const common::Time &_now);
+      public: virtual bool IGN_DEPRECATED(4) PublishLidarScan(
+        const ignition::common::Time &_now);
+
+      /// \brief Publish LaserScan message
+      /// \param[in] _now The current time
+      /// \return true if the update was successfull
+      public: virtual bool PublishLidarScan(
+        const std::chrono::steady_clock::duration &_now);
 
       /// \brief Load the sensor based on data from an sdf::Sensor object.
       /// \param[in] _sdf SDF Sensor parameters.
