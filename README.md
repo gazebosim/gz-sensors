@@ -16,7 +16,7 @@ Windows       | [![Build Status](https://build.osrfoundation.org/buildStatus/ico
 
 Ignition Sensors, a component of [Ignition
 Robotics](https://ignitionrobotics.org), provides numerous sensor models
-designed to generate realistic data from simulation environments. Ignition Sensors is used in conjunction with [Ignition Libraries](https://ignitionrobotics/libs), and especially relies on the rendering capabilities from [Ignition Rendering](https://ignitionrobotics.org/libs/rendering) and physics simulation from [Ignition Physics](https://ignitionrobotics.org/libs/physics).
+designed to generate realistic data from simulation environments. Ignition Sensors is used in conjunction with [Ignition Libraries](https://ignitionrobotics.org/libs), and especially relies on the rendering capabilities from [Ignition Rendering](https://ignitionrobotics.org/libs/rendering) and physics simulation from [Ignition Physics](https://ignitionrobotics.org/libs/physics).
 
 # Table of Contents
 
@@ -29,7 +29,7 @@ designed to generate realistic data from simulation environments. Ignition Senso
 * [Source Install](#source-install)
 
     * [Prerequisites](#prerequisites)
-  
+
     * [Building from Source](#building-from-source)
 
 [Usage](#usage)
@@ -72,19 +72,19 @@ On Ubuntu systems, `apt-get` can be used to install `ignition-sensors`:
     ```
     sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
     ```
-    
+
     ```
     sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-prerelease `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-prerelease.list'
     ```
-    
+
     ```
     wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
     ```
-    
+
     ```
     sudo apt-get update
     ```
- 
+
 ```
 sudo apt install libignition-sensors-dev
 ```
@@ -101,7 +101,7 @@ sudo apt-get install libignition-sensors2-dev
 ## Source Install
 
 Source installation can be performed in UNIX systems by first installing the
-necessary prerequisites followed by building from source. 
+necessary prerequisites followed by building from source.
 
 ### Prerequisites
 
