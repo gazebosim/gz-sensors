@@ -2,10 +2,22 @@
 
 ### Ignition Sensors 4.X.X
 
-### Ignition Sensors 4.0.0 (20XX-XX-XX)
+### Ignition Sensors 4.0.0 (2020-09-30)
+
+1. Fix link in README.md
+    * [Pull request 51](https://github.com/ignitionrobotics/ign-sensors/pull/51)
+
+1. Move installation instructions from README.md to Installation tutorial
+    * [Pull request 50](https://github.com/ignitionrobotics/ign-sensors/pull/50)
+
+1. Bump ign-math to 6.6
+    * [Pull request 48](https://github.com/ignitionrobotics/ign-sensors/pull/48)
 
 1. Replaced common::Time with std::chrono
     * [Pull request 41](https://github.com/ignitionrobotics/ign-sensors/pull/41)
+
+1. Depend on ign-msgs6, ign-transport9, sdf10
+    * [Pull request 31](https://github.com/ignitionrobotics/ign-sensors/pull/31)
 
 1. GitHub migration
     * [Pull request 12](https://github.com/ignitionrobotics/ign-sensors/pull/12)
@@ -17,9 +29,6 @@
 
 1. Depend on ign-rendering4
     * [BitBucket pull request 111](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/111)
-
-1. Depend on ign-msgs6, ign-transport9, sdf10
-    * [Pull request 31](https://github.com/ignitionrobotics/ign-sensors/pull/31)
 
 ## Ignition Sensors 3
 
