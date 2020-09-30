@@ -16,7 +16,7 @@ Windows       | [![Build Status](https://build.osrfoundation.org/buildStatus/ico
 
 Ignition Sensors, a component of [Ignition
 Robotics](https://ignitionrobotics.org), provides numerous sensor models
-designed to generate realistic data from simulation environments. Ignition Sensors is used in conjunction with [Ignition Libraries](https://ignitionrobotics.org/libs), and especially relies on the rendering capabilities from [Ignition Rendering](https://ignitionrobotics.org/libs/rendering) and physics simulation from [Ignition Physics](https://ignitionrobotics.org/libs/physics).
+designed to generate realistic data from simulation environments. Ignition Sensors is used in conjunction with [Ignition Libraries](https://ignitionrobotics/libs), and especially relies on the rendering capabilities from [Ignition Rendering](https://ignitionrobotics.org/libs/rendering) and physics simulation from [Ignition Physics](https://ignitionrobotics.org/libs/physics).
 
 # Table of Contents
 
@@ -29,7 +29,7 @@ designed to generate realistic data from simulation environments. Ignition Senso
 * [Source Install](#source-install)
 
     * [Prerequisites](#prerequisites)
-
+  
     * [Building from Source](#building-from-source)
 
 [Usage](#usage)
@@ -57,99 +57,7 @@ models into sensor streams.
 
 # Install
 
-We recommend following the [Binary Install](#binary-install) instructions to get up and running as quickly and painlessly as possible.
-
-The [Source Install](#source-install) instructions should be used if you need the very latest software improvements, you need to modify the code, or you plan to make a contribution.
-
-## Binary Install
-
-On Ubuntu systems, `apt-get` can be used to install `ignition-sensors`:
-
-**Ubuntu Bionic**
-
-1. Configure package repositories.
-
-    ```
-    sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
-    ```
-
-    ```
-    sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-prerelease `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-prerelease.list'
-    ```
-
-    ```
-    wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
-    ```
-
-    ```
-    sudo apt-get update
-    ```
-
-```
-sudo apt install libignition-sensors-dev
-```
-
-At the time of this writing, there is only one released version of
-ignition-sensors. It's possible that additional versions have been released,
-  in which case you can use add a numeral (2, 3, etc) to install a different
-  version. For example, to install version 2:
-
-```
-sudo apt-get install libignition-sensors2-dev
-```
-
-## Source Install
-
-Source installation can be performed in UNIX systems by first installing the
-necessary prerequisites followed by building from source.
-
-### Prerequisites
-
-Ignition Sensors requires:
-
-  * [Ubuntu Bionic](http://releases.ubuntu.com/18.04/)
-  * [Ignition CMake](https://ignitionrobotics.org/libs/cmake)
-  * [Ignition Math](https://ignitionrobotics.org/libs/math)
-  * [Ignition Common](https://ignitionrobotics.org/libs/common)
-  * [Ignition Transport](https://ignitionrobotics.org/libs/transport)
-  * [Ignition Rendering](https://ignitionrobotics.org/libs/rendering)
-  * [Ignition Msgs](https://ignitionrobotics.org/libs/msgs)
-  * [SDFormat](https://github.com/osrf/sdformat)
-  * [Protobuf3](https://developers.google.com/protocol-buffers/)
-
-### Building from source
-
-1. Make sure you are running [Ubuntu Bionic](http://releases.ubuntu.com/18.04/).
-
-2. Install the [Prerequisites](#prerequisites).
-
-3. Configure gcc8
-
-    ```
-    sudo apt-get install g++-8
-    ```
-
-    ```
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8 --slave /usr/bin/gcov gcov /usr/bin/gcov-8
-    ```
-
-4. Clone the repository
-
-    ```
-    git clone https://github.com/ignitionrobotics/ign-sensors
-    ```
-
-5. Configure and build
-
-    ```
-    cd ign-sensors; mkdir build;cd build; cmake ..;  make
-    ```
-
-6. Optionally, install Ignition Common
-
-    ```
-    sudo make install
-    ```
+See the [installation tutorial](https://ignitionrobotics.org/api/sensors/4.0/installation.html).
 
 # Usage
 
