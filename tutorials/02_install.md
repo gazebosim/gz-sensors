@@ -19,8 +19,8 @@ sudo apt-get update
 1. Install Ignition Sensors
 
 ```{.sh}
-# This installs ign-sensors4. Change the number after libignition-sensors to the version you want
-sudo apt install libignition-sensors4-dev
+# Change <#> to a version number, like 3 or 4
+sudo apt install libignition-sensors<#>-dev
 ```
 
 ## Source Install
