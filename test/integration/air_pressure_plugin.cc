@@ -126,19 +126,17 @@ TEST_F(AirPressureSensorTest, CreateAirPressure)
   // create the sensor using sensor factory
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
-
   std::unique_ptr<ignition::sensors::AirPressureSensor> sensor =
-    std::make_unique<ignition::sensors::AirPressureSensor>();
-  EXPECT_TRUE(sensor->Load(airPressureSdf));
+      sf.CreateSensor<ignition::sensors::AirPressureSensor>(airPressureSdf);
+  EXPECT_TRUE(sensor != nullptr);
 
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(topic, sensor->Topic());
   EXPECT_DOUBLE_EQ(updateRate, sensor->UpdateRate());
 
   std::unique_ptr<ignition::sensors::AirPressureSensor> sensorNoise =
-    std::make_unique<ignition::sensors::AirPressureSensor>();
-  EXPECT_TRUE(sensorNoise->Load(airPressureSdfNoise));
-
+      sf.CreateSensor<ignition::sensors::AirPressureSensor>(
+          airPressureSdfNoise);
   EXPECT_TRUE(sensorNoise != nullptr);
 
   EXPECT_EQ(name, sensorNoise->Name());
@@ -170,23 +168,16 @@ TEST_F(AirPressureSensorTest, SensorReadings)
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
-
-  std::unique_ptr<ignition::sensors::AirPressureSensor> s =
-    std::make_unique<ignition::sensors::AirPressureSensor>();
-  EXPECT_TRUE(s->Load(airPressureSdf));
-  EXPECT_TRUE(s->Init());
-
+  std::unique_ptr<ignition::sensors::Sensor> s =
+      sf.CreateSensor(airPressureSdf);
   std::unique_ptr<ignition::sensors::AirPressureSensor> sensor(
       dynamic_cast<ignition::sensors::AirPressureSensor *>(s.release()));
 
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
 
-  std::unique_ptr<ignition::sensors::AirPressureSensor> sNoise =
-    std::make_unique<ignition::sensors::AirPressureSensor>();
-  EXPECT_TRUE(sNoise->Load(airPressureSdfNoise));
-  EXPECT_TRUE(sNoise->Init());
-
+  std::unique_ptr<ignition::sensors::Sensor> sNoise =
+      sf.CreateSensor(airPressureSdfNoise);
   std::unique_ptr<ignition::sensors::AirPressureSensor> sensorNoise(
       dynamic_cast<ignition::sensors::AirPressureSensor *>(sNoise.release()));
 
@@ -251,9 +242,9 @@ TEST_F(AirPressureSensorTest, Topic)
     auto airPressureSdf = AirPressureToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    std::unique_ptr<ignition::sensors::AirPressureSensor> sensor =
-      std::make_unique<ignition::sensors::AirPressureSensor>();
-    EXPECT_TRUE(sensor->Load(airPressureSdf));
+    auto sensor = factory.CreateSensor(airPressureSdf);
+    EXPECT_NE(nullptr, sensor);
+
     auto airPressure =
         dynamic_cast<ignition::sensors::AirPressureSensor *>(sensor.release());
     ASSERT_NE(nullptr, airPressure);
@@ -267,9 +258,8 @@ TEST_F(AirPressureSensorTest, Topic)
     auto airPressureSdf = AirPressureToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    std::unique_ptr<ignition::sensors::AirPressureSensor> sensor =
-      std::make_unique<ignition::sensors::AirPressureSensor>();
-    EXPECT_TRUE(sensor->Load(airPressureSdf));
+    auto sensor = factory.CreateSensor(airPressureSdf);
+    EXPECT_NE(nullptr, sensor);
 
     auto airPressure =
         dynamic_cast<ignition::sensors::AirPressureSensor *>(sensor.release());
@@ -284,9 +274,8 @@ TEST_F(AirPressureSensorTest, Topic)
     auto airPressureSdf = AirPressureToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    std::unique_ptr<ignition::sensors::AirPressureSensor> sensor =
-      std::make_unique<ignition::sensors::AirPressureSensor>();
-    EXPECT_FALSE(sensor->Load(airPressureSdf));
+    auto sensor = factory.CreateSensor(airPressureSdf);
+    ASSERT_EQ(nullptr, sensor);
   }
 }
 

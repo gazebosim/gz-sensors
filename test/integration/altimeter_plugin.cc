@@ -133,18 +133,17 @@ TEST_F(AltimeterSensorTest, CreateAltimeter)
   // create the sensor using sensor factory
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
-
   std::unique_ptr<ignition::sensors::AltimeterSensor> sensor =
-    std::make_unique<ignition::sensors::AltimeterSensor>();
-  EXPECT_TRUE(sensor->Load(altimeterSdf));
+      sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdf);
+  EXPECT_TRUE(sensor != nullptr);
 
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(topic, sensor->Topic());
   EXPECT_DOUBLE_EQ(updateRate, sensor->UpdateRate());
 
   std::unique_ptr<ignition::sensors::AltimeterSensor> sensorNoise =
-    std::make_unique<ignition::sensors::AltimeterSensor>();
-  EXPECT_TRUE(sensorNoise->Load(altimeterSdfNoise));
+      sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdfNoise);
+  EXPECT_TRUE(sensorNoise != nullptr);
 
   EXPECT_EQ(name, sensorNoise->Name());
   EXPECT_EQ(topicNoise, sensorNoise->Topic());
@@ -175,21 +174,16 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
-
-  std::unique_ptr<ignition::sensors::AltimeterSensor> s =
-    std::make_unique<ignition::sensors::AltimeterSensor>();
-  EXPECT_TRUE(s->Load(altimeterSdf));
-  EXPECT_TRUE(s->Init());
+  std::unique_ptr<ignition::sensors::Sensor> s =
+      sf.CreateSensor(altimeterSdf);
   std::unique_ptr<ignition::sensors::AltimeterSensor> sensor(
       dynamic_cast<ignition::sensors::AltimeterSensor *>(s.release()));
 
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
 
-  std::unique_ptr<ignition::sensors::AltimeterSensor> sNoise =
-    std::make_unique<ignition::sensors::AltimeterSensor>();
-  EXPECT_TRUE(sNoise->Load(altimeterSdfNoise));
-  EXPECT_TRUE(sNoise->Init());
+  std::unique_ptr<ignition::sensors::Sensor> sNoise =
+      sf.CreateSensor(altimeterSdfNoise);
   std::unique_ptr<ignition::sensors::AltimeterSensor> sensorNoise(
       dynamic_cast<ignition::sensors::AltimeterSensor *>(sNoise.release()));
 
@@ -276,9 +270,9 @@ TEST_F(AltimeterSensorTest, Topic)
     auto altimeterSdf = AltimeterToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    std::unique_ptr<ignition::sensors::AltimeterSensor> sensor =
-      std::make_unique<ignition::sensors::AltimeterSensor>();
-    EXPECT_TRUE(sensor->Load(altimeterSdf));
+    auto sensor = factory.CreateSensor(altimeterSdf);
+    EXPECT_NE(nullptr, sensor);
+
     auto altimeter =
         dynamic_cast<ignition::sensors::AltimeterSensor *>(sensor.release());
     ASSERT_NE(nullptr, altimeter);
@@ -292,9 +286,8 @@ TEST_F(AltimeterSensorTest, Topic)
     auto altimeterSdf = AltimeterToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    std::unique_ptr<ignition::sensors::AltimeterSensor> sensor =
-      std::make_unique<ignition::sensors::AltimeterSensor>();
-    EXPECT_TRUE(sensor->Load(altimeterSdf));
+    auto sensor = factory.CreateSensor(altimeterSdf);
+    EXPECT_NE(nullptr, sensor);
 
     auto altimeter =
         dynamic_cast<ignition::sensors::AltimeterSensor *>(sensor.release());
@@ -309,9 +302,8 @@ TEST_F(AltimeterSensorTest, Topic)
     auto altimeterSdf = AltimeterToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    std::unique_ptr<ignition::sensors::AltimeterSensor> sensor =
-      std::make_unique<ignition::sensors::AltimeterSensor>();
-    EXPECT_FALSE(sensor->Load(altimeterSdf));
+    auto sensor = factory.CreateSensor(altimeterSdf);
+    ASSERT_EQ(nullptr, sensor);
   }
 }
 

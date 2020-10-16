@@ -16,22 +16,14 @@
 */
 
 #include <gtest/gtest.h>
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#endif
 #include <ignition/msgs/camera_info.pb.h>
-#include <ignition/msgs.hh>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #include <ignition/common/Filesystem.hh>
 #include <ignition/common/Event.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/DepthCameraSensor.hh>
 #include <ignition/rendering.hh>
+#include <ignition/msgs.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
@@ -213,10 +205,9 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   ignition::sensors::Manager mgr;
   mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
-  std::unique_ptr<ignition::sensors::DepthCameraSensor> depthSensor =
-    std::make_unique<ignition::sensors::DepthCameraSensor>();
-  EXPECT_TRUE(depthSensor->Load(sensorPtr));
-  EXPECT_TRUE(depthSensor->Init());
+  ignition::sensors::DepthCameraSensor *depthSensor =
+      mgr.CreateSensor<ignition::sensors::DepthCameraSensor>(sensorPtr);
+  ASSERT_NE(depthSensor, nullptr);
   depthSensor->SetScene(scene);
 
   EXPECT_EQ(depthSensor->ImageWidth(), static_cast<unsigned int>(imgWidth));
@@ -257,8 +248,8 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   // wait for a few depth camera frames
   mgr.RunOnce(ignition::common::Time::Zero, true);
 
-  int midWidth = static_cast<int>(depthSensor->ImageWidth() * 0.5);
-  int midHeight = static_cast<int>(depthSensor->ImageHeight() * 0.5);
+  int midWidth = depthSensor->ImageWidth() * 0.5;
+  int midHeight = depthSensor->ImageHeight() * 0.5;
   int mid = midHeight * depthSensor->ImageWidth() + midWidth -1;
   double expectedRangeAtMidPoint = boxPosition.X() - unitBoxSize * 0.5;
 

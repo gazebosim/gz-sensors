@@ -16,22 +16,14 @@
 */
 
 #include <gtest/gtest.h>
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#endif
 #include <ignition/msgs/camera_info.pb.h>
-#include <ignition/msgs.hh>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #include <ignition/common/Filesystem.hh>
 #include <ignition/common/Event.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/RgbdCameraSensor.hh>
 #include <ignition/rendering.hh>
+#include <ignition/msgs.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
@@ -233,10 +225,8 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   ignition::sensors::Manager mgr;
   mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
-  std::unique_ptr<ignition::sensors::RgbdCameraSensor> rgbdSensor =
-    std::make_unique<ignition::sensors::RgbdCameraSensor>();
-  EXPECT_TRUE(rgbdSensor->Load(sensorPtr));
-  EXPECT_TRUE(rgbdSensor->Init());
+  ignition::sensors::RgbdCameraSensor *rgbdSensor =
+      mgr.CreateSensor<ignition::sensors::RgbdCameraSensor>(sensorPtr);
   ASSERT_NE(rgbdSensor, nullptr);
   rgbdSensor->SetScene(scene);
 
@@ -328,8 +318,8 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   pcCounter = 0;
 
   // depth image indices
-  int midWidth = static_cast<int>(rgbdSensor->ImageWidth() * 0.5);
-  int midHeight = static_cast<int>(rgbdSensor->ImageHeight() * 0.5);
+  int midWidth = rgbdSensor->ImageWidth() * 0.5;
+  int midHeight = rgbdSensor->ImageHeight() * 0.5;
   int mid = midHeight * rgbdSensor->ImageWidth() + midWidth -1;
   double expectedRangeAtMidPoint = boxPosition.X() - unitBoxSize * 0.5;
   int left = midHeight * rgbdSensor->ImageWidth();

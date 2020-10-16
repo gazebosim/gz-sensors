@@ -18,6 +18,7 @@
 #include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>
 #include "ignition/sensors/config.hh"
+#include <ignition/common/StringUtils.hh>
 
 #include "ignition/sensors/SensorFactory.hh"
 
@@ -84,9 +85,31 @@ std::shared_ptr<SensorPlugin> SensorFactory::LoadSensorPlugin(
 
   // Assume the last plugin is the one we're interested in
   std::string pluginName = "";
+  if (pluginNames.size() > 0)
+  {
+    pluginName = *pluginNames.begin();
+  }
+
+  auto parts = common::Split(fullPath, '-');
+  std::string sensor_type;
+  if (parts.size() > 0) {
+    sensor_type = parts.back();
+    auto parts_sensor_type_lib = common::Split(sensor_type, '_');
+    if (parts_sensor_type_lib.size() > 0) {
+      sensor_type = *parts_sensor_type_lib.begin();
+      auto parts_sensor_type = common::Split(sensor_type, '.');
+      if (parts_sensor_type.size() > 0) {
+        sensor_type = *parts_sensor_type.begin();
+      }
+    }
+    sensor_type[0] = std::toupper(sensor_type[0]);
+    sensor_type = "::" + sensor_type;
+  }
   for (auto name : pluginNames)
   {
-    pluginName = name;
+    if (name.find(sensor_type) != std::string::npos){
+      pluginName = name;
+    }
   }
 
   plugin::PluginPtr pluginPtr =

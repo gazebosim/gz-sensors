@@ -27,14 +27,7 @@
 #include <ignition/sensors/Export.hh>
 
 #include <ignition/math/Helpers.hh>
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#endif
 #include <ignition/msgs.hh>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 #include <ignition/transport/Node.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
@@ -113,10 +106,9 @@ TEST_F(LogicalCameraSensorTest, CreateLogicalCamera)
   // create the sensor using sensor factory
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
-
   std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor =
-    std::make_unique<ignition::sensors::LogicalCameraSensor>();
-  EXPECT_TRUE(sensor->Load(logicalCameraSdf));
+      sf.CreateSensor<ignition::sensors::LogicalCameraSensor>(logicalCameraSdf);
+  EXPECT_TRUE(sensor != nullptr);
 
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(topic, sensor->Topic());
@@ -153,10 +145,8 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
-
-  std::unique_ptr<ignition::sensors::LogicalCameraSensor> s =
-    std::make_unique<ignition::sensors::LogicalCameraSensor>();
-  EXPECT_TRUE(s->Load(logicalCameraSdf));
+  std::unique_ptr<ignition::sensors::Sensor> s =
+      sf.CreateSensor(logicalCameraSdf);
   std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor(
       dynamic_cast<ignition::sensors::LogicalCameraSensor *>(s.release()));
 
@@ -265,9 +255,8 @@ TEST_F(LogicalCameraSensorTest, Topic)
         updateRate, topic, near, far, horzFov, aspectRatio, alwaysOn,
         visualize);
 
-    std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor =
-      std::make_unique<ignition::sensors::LogicalCameraSensor>();
-    EXPECT_TRUE(sensor->Load(logicalCameraSdf));
+    auto sensor = factory.CreateSensor(logicalCameraSdf);
+    EXPECT_NE(nullptr, sensor);
 
     auto logicalCamera =
         dynamic_cast<ignition::sensors::LogicalCameraSensor *>(
@@ -284,9 +273,8 @@ TEST_F(LogicalCameraSensorTest, Topic)
         updateRate, topic, near, far, horzFov, aspectRatio, alwaysOn,
         visualize);
 
-    std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor =
-      std::make_unique<ignition::sensors::LogicalCameraSensor>();
-    EXPECT_TRUE(sensor->Load(logicalCameraSdf));
+    auto sensor = factory.CreateSensor(logicalCameraSdf);
+    EXPECT_NE(nullptr, sensor);
 
     auto logicalCamera =
         dynamic_cast<ignition::sensors::LogicalCameraSensor *>(
@@ -303,9 +291,8 @@ TEST_F(LogicalCameraSensorTest, Topic)
         updateRate, topic, near, far, horzFov, aspectRatio, alwaysOn,
         visualize);
 
-    std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor =
-      std::make_unique<ignition::sensors::LogicalCameraSensor>();
-    EXPECT_FALSE(sensor->Load(logicalCameraSdf));
+    auto sensor = factory.CreateSensor(logicalCameraSdf);
+    ASSERT_EQ(nullptr, sensor);
   }
 }
 

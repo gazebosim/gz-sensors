@@ -61,9 +61,10 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   auto *engine = ignition::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    ignerr << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
-    return;
+    FAIL();
+    // return;
   }
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
@@ -72,11 +73,9 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   ignition::sensors::Manager mgr;
   mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
-  std::unique_ptr<ignition::sensors::CameraSensor> sensor =
-    std::make_unique<ignition::sensors::CameraSensor>();
-  EXPECT_TRUE(sensor->Load(sensorPtr));
-  EXPECT_TRUE(sensor->Init());
-
+  ignition::sensors::CameraSensor *sensor =
+      mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
+  ASSERT_NE(sensor, nullptr);
   sensor->SetScene(scene);
 
   ASSERT_NE(sensor->RenderingCamera(), nullptr);

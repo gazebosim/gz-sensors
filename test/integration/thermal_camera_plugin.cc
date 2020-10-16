@@ -16,23 +16,14 @@
 */
 
 #include <gtest/gtest.h>
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#endif
 #include <ignition/msgs/camera_info.pb.h>
-#include <ignition/msgs.hh>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #include <ignition/common/Filesystem.hh>
 #include <ignition/common/Event.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/ThermalCameraSensor.hh>
 #include <ignition/rendering.hh>
-
+#include <ignition/msgs.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
@@ -147,14 +138,13 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   ignition::sensors::Manager mgr;
   mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
-  std::unique_ptr<ignition::sensors::ThermalCameraSensor> thermalSensor =
-    std::make_unique<ignition::sensors::ThermalCameraSensor>();
-  EXPECT_TRUE(thermalSensor->Load(sensorPtr));
-  EXPECT_TRUE(thermalSensor->Init());
+  ignition::sensors::ThermalCameraSensor *thermalSensor =
+      mgr.CreateSensor<ignition::sensors::ThermalCameraSensor>(sensorPtr);
+  ASSERT_NE(thermalSensor, nullptr);
 
-  float ambientTemp = 296.0f;
-  float ambientTempRange = 4.0f;
-  float linearResolution = 0.01f;
+  float ambientTemp = 296.0;
+  float ambientTempRange = 4.0;
+  float linearResolution = 0.01;
   thermalSensor->SetAmbientTemperature(ambientTemp);
   thermalSensor->SetAmbientTemperatureRange(ambientTempRange);
   thermalSensor->SetLinearResolution(linearResolution);
@@ -187,8 +177,8 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   // wait for a few thermal camera frames
   mgr.RunOnce(ignition::common::Time::Zero, true);
 
-  int midWidth = static_cast<int>(thermalSensor->ImageWidth() * 0.5);
-  int midHeight = static_cast<int>(thermalSensor->ImageHeight() * 0.5);
+  int midWidth = thermalSensor->ImageWidth() * 0.5;
+  int midHeight = thermalSensor->ImageHeight() * 0.5;
   int mid = midHeight * thermalSensor->ImageWidth() + midWidth -1;
   int left = midHeight * thermalSensor->ImageWidth();
   int right = (midHeight+1) * thermalSensor->ImageWidth() - 1;
