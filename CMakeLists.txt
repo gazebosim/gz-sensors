@@ -60,8 +60,8 @@ set(IGN_TRANSPORT_VER ${ignition-transport9_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-rendering
-ign_find_package(ignition-rendering4 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
-set(IGN_RENDERING_VER ${ignition-rendering4_VERSION_MAJOR})
+ign_find_package(ignition-rendering5 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
+set(IGN_RENDERING_VER ${ignition-rendering5_VERSION_MAJOR})
 
 if (TARGET ignition-rendering${IGN_RENDERING_VER}::ogre)
   set(HAVE_OGRE TRUE)
