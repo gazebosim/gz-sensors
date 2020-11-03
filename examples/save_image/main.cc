@@ -24,7 +24,22 @@
 #include <ignition/common/Image.hh>
 #include <ignition/common/Console.hh>
 #include <ignition/math/Helpers.hh>
-#include <ignition/rendering.hh>
+
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
+#include <ignition/rendering/Material.hh>
+#include <ignition/rendering/RenderEngine.hh>
+#include <ignition/rendering/RenderingIface.hh>
+#include <ignition/rendering/Scene.hh>
+#include <ignition/rendering/Visual.hh>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <ignition/sensors.hh>
 
 void OnImageFrame(const ignition::msgs::Image &_image)

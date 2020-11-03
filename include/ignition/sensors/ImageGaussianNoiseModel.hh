@@ -20,7 +20,16 @@
 
 #include <sdf/sdf.hh>
 
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/rendering/Camera.hh>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include "ignition/sensors/config.hh"
 #include "ignition/sensors/GaussianNoiseModel.hh"

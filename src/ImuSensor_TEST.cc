@@ -21,14 +21,15 @@
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
 #endif
 #include <ignition/msgs.hh>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
 
-#include <ignition/sensors/ImuSensor.hh>
 #include <ignition/sensors/Export.hh>
+#include <ignition/sensors/ImuSensor.hh>
 #include <ignition/sensors/Manager.hh>
 
 using namespace ignition;

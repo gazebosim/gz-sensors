@@ -17,6 +17,7 @@
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
 #endif
 #include <ignition/msgs/camera_info.pb.h>
 #ifdef _MSC_VER
@@ -31,9 +32,8 @@
 #include <ignition/common/Profiler.hh>
 #include <ignition/common/StringUtils.hh>
 #include <ignition/math/Angle.hh>
-#include <ignition/transport/Node.hh>
-
 #include <ignition/math/Helpers.hh>
+#include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/ImageGaussianNoiseModel.hh"
