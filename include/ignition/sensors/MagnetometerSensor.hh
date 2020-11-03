@@ -24,6 +24,8 @@
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
 
+#include <ignition/plugin/Register.hh>
+
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/magnetometer/Export.hh>
 

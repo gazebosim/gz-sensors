@@ -23,6 +23,8 @@
 
 #include <ignition/common/Time.hh>
 
+#include <ignition/plugin/Register.hh>
+
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/altimeter/Export.hh>
 

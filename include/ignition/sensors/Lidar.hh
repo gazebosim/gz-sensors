@@ -23,6 +23,8 @@
 
 #include <ignition/common/Event.hh>
 
+#include <ignition/plugin/Register.hh>
+
 #include "ignition/sensors/lidar/Export.hh"
 #include "ignition/sensors/RenderingSensor.hh"
 

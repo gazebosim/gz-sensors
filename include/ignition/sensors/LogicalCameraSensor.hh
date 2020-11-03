@@ -28,6 +28,8 @@
 
 #include <ignition/math/Angle.hh>
 
+#include <ignition/plugin/Register.hh>
+
 #include <ignition/msgs.hh>
 
 #include "ignition/sensors/config.hh"

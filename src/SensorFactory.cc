@@ -15,10 +15,10 @@
  *
 */
 
-#include <ignition/common/PluginLoader.hh>
 #include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>
 #include "ignition/sensors/config.hh"
+#include <ignition/common/StringUtils.hh>
 
 #include "ignition/sensors/SensorFactory.hh"
 
@@ -35,7 +35,7 @@ class ignition::sensors::SensorFactoryPrivate
   public: ignition::common::SystemPaths systemPaths;
 
   /// \brief For loading plugins
-  public: ignition::common::PluginLoader pluginLoader;
+  public: ignition::plugin::Loader pluginLoader;
 };
 
 using namespace ignition;
@@ -75,17 +75,45 @@ std::shared_ptr<SensorPlugin> SensorFactory::LoadSensorPlugin(
     return std::shared_ptr<SensorPlugin>();
   }
 
-  auto pluginNames = this->dataPtr->pluginLoader.LoadLibrary(fullPath);
+  auto pluginNames = this->dataPtr->pluginLoader.LoadLib(fullPath);
   if (pluginNames.empty())
   {
     ignerr << "Unable to load sensor plugin file for [" << fullPath << "]\n";
     return std::shared_ptr<SensorPlugin>();
   }
 
-  // Assume the first plugin is the one we're interested in
-  std::string pluginName = *(pluginNames.begin());
+  // Assume the last plugin is the one we're interested in
+  std::string pluginName = "";
+  if (pluginNames.size() > 0)
+  {
+    pluginName = *pluginNames.begin();
+  }
 
-  common::PluginPtr pluginPtr =
+  // split the name in token to get the right plugin name
+  auto parts = common::Split(fullPath, '-');
+  std::string sensor_type;
+  if (parts.size() > 0) {
+    sensor_type = parts.back();
+    auto parts_sensor_type_lib = common::Split(sensor_type, '_');
+    if (parts_sensor_type_lib.size() > 0) {
+      sensor_type = *parts_sensor_type_lib.begin();
+      auto parts_sensor_type = common::Split(sensor_type, '.');
+      if (parts_sensor_type.size() > 0) {
+        sensor_type = *parts_sensor_type.begin();
+      }
+    }
+    sensor_type[0] = std::toupper(sensor_type[0]);
+    sensor_type = "::" + sensor_type;
+  }
+  for (auto name : pluginNames)
+  {
+    if (name.find(sensor_type) != std::string::npos &&
+      name.find("::sensors::") != std::string::npos){
+      pluginName = name;
+    }
+  }
+
+  plugin::PluginPtr pluginPtr =
       this->dataPtr->pluginLoader.Instantiate(pluginName);
 
   auto sensorPlugin = pluginPtr->QueryInterfaceSharedPtr<

@@ -27,6 +27,9 @@
 #include <ignition/common/Time.hh>
 
 #include <ignition/msgs.hh>
+
+#include <ignition/plugin/Register.hh>
+
 #include <ignition/rendering/Camera.hh>
 
 #include "ignition/sensors/camera/Export.hh"

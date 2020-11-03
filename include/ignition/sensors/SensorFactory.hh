@@ -23,7 +23,7 @@
 #include <sdf/sdf.hh>
 
 #include <ignition/common/Console.hh>
-#include <ignition/common/PluginMacros.hh>
+#include <ignition/plugin/Loader.hh>
 
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
@@ -42,9 +42,6 @@ namespace ignition
     /// \brief Base sensor plugin interface
     class IGNITION_SENSORS_VISIBLE SensorPlugin
     {
-      /// \brief Allows using shorter APIS in common::PluginLoader
-      public: IGN_COMMON_SPECIALIZE_INTERFACE(ignition::sensors::SensorPlugin)
-
       /// \brief Instantiate new sensor
       /// \return New sensor
       public: virtual Sensor *New() = 0;
@@ -182,7 +179,7 @@ namespace ignition
 
     /// \brief Sensor registration macro
     #define IGN_SENSORS_REGISTER_SENSOR(classname) \
-    IGN_COMMON_REGISTER_SINGLE_PLUGIN(\
+    IGNITION_ADD_PLUGIN(\
        ignition::sensors::SensorTypePlugin<classname>, \
        ignition::sensors::SensorPlugin)
     }
