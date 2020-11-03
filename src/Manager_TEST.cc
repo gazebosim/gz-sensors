@@ -18,6 +18,15 @@
 #include <gtest/gtest.h>
 #include <ignition/sensors/Manager.hh>
 
+/// \brief Test sensor manager
+class Manager_TEST : public ::testing::Test
+{
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    ignition::common::Console::SetVerbosity(4);
+  }
+};
 
 //////////////////////////////////////////////////
 TEST(Manager, construct)

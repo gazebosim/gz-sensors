@@ -78,8 +78,14 @@ sdf::ElementPtr LogicalCameraToSdf(const std::string &_name,
     ->GetElement("sensor");
 }
 
+/// \brief Test logical camera sensor
 class LogicalCameraSensorTest: public testing::Test
 {
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    ignition::common::Console::SetVerbosity(4);
+  }
 };
 
 /////////////////////////////////////////////////
@@ -108,7 +114,7 @@ TEST_F(LogicalCameraSensorTest, CreateLogicalCamera)
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor =
       sf.CreateSensor<ignition::sensors::LogicalCameraSensor>(logicalCameraSdf);
-  EXPECT_TRUE(sensor != nullptr);
+  ASSERT_NE(nullptr, sensor);
 
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(topic, sensor->Topic());
@@ -151,7 +157,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
       dynamic_cast<ignition::sensors::LogicalCameraSensor *>(s.release()));
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
+  ASSERT_NE(nullptr, sensor);
 
   // verify initial image
   auto img = sensor->Image();

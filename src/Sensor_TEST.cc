@@ -16,6 +16,7 @@
 */
 #include <gtest/gtest.h>
 
+#include <ignition/common/Console.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Sensor.hh>
 
@@ -31,6 +32,16 @@ class TestSensor : public Sensor
   }
 
   public: unsigned int updateCount{0};
+};
+
+/// \brief Test sensor class
+class Sensor_TEST : public ::testing::Test
+{
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    ignition::common::Console::SetVerbosity(4);
+  }
 };
 
 //////////////////////////////////////////////////
