@@ -27,8 +27,7 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/Scene.hh>
-#include <ignition/rendering/Sensor.hh>
+#include <ignition/rendering/RenderTypes.hh>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif

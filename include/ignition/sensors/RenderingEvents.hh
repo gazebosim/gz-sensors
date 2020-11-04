@@ -58,7 +58,6 @@ namespace ignition
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Event that is used to trigger callbacks when the scene
       /// is changed
-      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       public: static ignition::common::EventT<
               void(const ignition::rendering::ScenePtr &)> sceneEvent;
       IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
