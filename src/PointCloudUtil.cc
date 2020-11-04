@@ -17,6 +17,8 @@
 
 #include "PointCloudUtil.hh"
 
+#include <string>
+
 using namespace ignition;
 using namespace sensors;
 
