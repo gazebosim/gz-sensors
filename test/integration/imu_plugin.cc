@@ -57,8 +57,14 @@ sdf::ElementPtr ImuToSdf(const std::string &_name,
     ->GetElement("sensor");
 }
 
+/// \brief Test IMU sensor
 class ImuSensorTest: public testing::Test
 {
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    ignition::common::Console::SetVerbosity(4);
+  }
 };
 
 /////////////////////////////////////////////////
@@ -82,7 +88,7 @@ TEST_F(ImuSensorTest, CreateImu)
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::ImuSensor> sensor =
       sf.CreateSensor<ignition::sensors::ImuSensor>(imuSdf);
-  EXPECT_TRUE(sensor != nullptr);
+  ASSERT_NE(nullptr, sensor);
 
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(topic, sensor->Topic());
@@ -115,7 +121,7 @@ TEST_F(ImuSensorTest, SensorReadings)
       dynamic_cast<ignition::sensors::ImuSensor *>(s.release()));
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
+  ASSERT_NE(nullptr, sensor);
 
   // subscribe to the topic
   WaitForMessageTestHelper<ignition::msgs::IMU> msgHelper(topic);
