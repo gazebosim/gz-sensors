@@ -125,7 +125,6 @@ TEST_F(AirPressureSensorTest, CreateAirPressure)
 
   // create the sensor using sensor factory
   ignition::sensors::SensorFactory sf;
-  sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::AirPressureSensor> sensor =
       sf.CreateSensor<ignition::sensors::AirPressureSensor>(airPressureSdf);
   EXPECT_TRUE(sensor != nullptr);
@@ -167,7 +166,6 @@ TEST_F(AirPressureSensorTest, SensorReadings)
   // create the sensor using sensor factory
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
-  sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::Sensor> s =
       sf.CreateSensor(airPressureSdf);
   std::unique_ptr<ignition::sensors::AirPressureSensor> sensor(
@@ -234,8 +232,6 @@ TEST_F(AirPressureSensorTest, Topic)
 
   // Factory
   ignition::sensors::SensorFactory factory;
-  factory.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH,
-      "lib"));
 
   // Default topic
   {

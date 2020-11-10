@@ -132,7 +132,6 @@ TEST_F(AltimeterSensorTest, CreateAltimeter)
 
   // create the sensor using sensor factory
   ignition::sensors::SensorFactory sf;
-  sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::AltimeterSensor> sensor =
       sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdf);
   EXPECT_TRUE(sensor != nullptr);
@@ -173,7 +172,6 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   // create the sensor using sensor factory
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
-  sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::Sensor> s =
       sf.CreateSensor(altimeterSdf);
   std::unique_ptr<ignition::sensors::AltimeterSensor> sensor(
@@ -262,8 +260,6 @@ TEST_F(AltimeterSensorTest, Topic)
 
   // Factory
   ignition::sensors::SensorFactory factory;
-  factory.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH,
-      "lib"));
 
   // Default topic
   {

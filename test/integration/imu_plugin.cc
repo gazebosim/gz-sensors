@@ -79,7 +79,6 @@ TEST_F(ImuSensorTest, CreateImu)
 
   // create the sensor using sensor factory
   ignition::sensors::SensorFactory sf;
-  sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::ImuSensor> sensor =
       sf.CreateSensor<ignition::sensors::ImuSensor>(imuSdf);
   EXPECT_TRUE(sensor != nullptr);
@@ -108,7 +107,6 @@ TEST_F(ImuSensorTest, SensorReadings)
   // create the sensor using sensor factory
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
-  sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::Sensor> s =
       sf.CreateSensor(imuSdf);
   std::unique_ptr<ignition::sensors::ImuSensor> sensor(
@@ -239,8 +237,6 @@ TEST_F(ImuSensorTest, Topic)
 
   // Factory
   ignition::sensors::SensorFactory factory;
-  factory.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH,
-      "lib"));
 
   // Default topic
   {
