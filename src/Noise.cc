@@ -25,8 +25,8 @@
 
 #include <ignition/common/Console.hh>
 
-#include <ignition/sensors/GaussianNoiseModel.hh>
-#include <ignition/sensors/Noise.hh>
+#include "ignition/sensors/GaussianNoiseModel.hh"
+#include "ignition/sensors/Noise.hh"
 
 using namespace ignition;
 using namespace sensors;
