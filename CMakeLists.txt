@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
 #============================================================================
 # Initialize the project
 #============================================================================
-project(ignition-sensors4 VERSION 4.0.0)
+project(ignition-sensors5 VERSION 5.0.0)
 
 #============================================================================
 # Find ignition-cmake
@@ -43,7 +43,7 @@ ign_find_package(IgnProtobuf
 
 #--------------------------------------
 # Find ignition-math
-ign_find_package(ignition-math6 REQUIRED)
+ign_find_package(ignition-math6 REQUIRED VERSION 6.6)
 set(IGN_MATH_VER ${ignition-math6_VERSION_MAJOR})
 
 #--------------------------------------
@@ -60,8 +60,8 @@ set(IGN_TRANSPORT_VER ${ignition-transport9_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-rendering
-ign_find_package(ignition-rendering4 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
-set(IGN_RENDERING_VER ${ignition-rendering4_VERSION_MAJOR})
+ign_find_package(ignition-rendering5 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
+set(IGN_RENDERING_VER ${ignition-rendering5_VERSION_MAJOR})
 
 if (TARGET ignition-rendering${IGN_RENDERING_VER}::ogre)
   set(HAVE_OGRE TRUE)

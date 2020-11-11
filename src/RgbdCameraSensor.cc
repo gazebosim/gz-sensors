@@ -427,6 +427,12 @@ void RgbdCameraSensorPrivate::OnNewRgbPointCloud(const float *_scan,
 //////////////////////////////////////////////////
 bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 {
+  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
+}
+
+//////////////////////////////////////////////////
+bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
+{
   IGN_PROFILE("RgbdCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
@@ -456,8 +462,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
                rendering::PF_FLOAT32_R));
     msg.set_pixel_format_type(msgs::PixelFormatType::R_FLOAT32);
-    msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
-    msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+    *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
     auto frame = msg.mutable_header()->add_data();
     frame->set_key("frame_id");
     frame->add_value(this->Name());
@@ -509,11 +514,9 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     // publish point cloud msg
     if (this->dataPtr->pointPub.HasConnections())
     {
+      *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
+        msgs::Convert(_now);
       // Set the time stamp
-      this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_sec(
-          _now.sec);
-      this->dataPtr->pointMsg.mutable_header()->mutable_stamp()->set_nsec(
-          _now.nsec);
       this->dataPtr->pointMsg.set_is_dense(true);
 
       if ((this->dataPtr->hasDepthNearClip || this->dataPtr->hasDepthFarClip)
@@ -571,8 +574,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
       msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
           rendering::PF_R8G8B8));
       msg.set_pixel_format_type(msgs::PixelFormatType::RGB_INT8);
-      msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
-      msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+      *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
       auto frame = msg.mutable_header()->add_data();
       frame->set_key("frame_id");
       frame->add_value(this->Name());

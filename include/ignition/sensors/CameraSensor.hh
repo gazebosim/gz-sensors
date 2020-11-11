@@ -81,10 +81,17 @@ namespace ignition
       /// \return True on success
       public: virtual bool Init() override;
 
+      /// \brief Update the sensor and generate data
+      /// \param[in] _now The current time
+      /// \return true if the update was successfull
+      public: virtual bool IGN_DEPRECATED(4) Update(
+        const ignition::common::Time &_now) override;
+
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) override;
+      public: virtual bool Update(
+        const std::chrono::steady_clock::duration &_now) override;
 
       /// \brief Set a callback to be called when image frame data is
       /// generated.
@@ -146,7 +153,13 @@ namespace ignition
 
       /// \brief Publish camera info message.
       /// \param[in] _now The current time
-      protected: void PublishInfo(const ignition::common::Time &_now);
+      protected: void IGN_DEPRECATED(4) PublishInfo(
+        const ignition::common::Time &_now);
+
+      /// \brief Publish camera info message.
+      /// \param[in] _now The current time
+      protected: void PublishInfo(
+        const std::chrono::steady_clock::duration &_now);
 
       /// \brief Create a camera in a scene
       /// \return True on success.

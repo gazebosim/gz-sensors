@@ -178,7 +178,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   sensor->SetModelPoses(std::move(modelPoses));
 
   // update
-  sensor->Update(ignition::common::Time::Zero);
+  sensor->Update(std::chrono::steady_clock::duration::zero());
 
   // verify box is in image
   img = sensor->Image();
@@ -196,7 +196,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   sensor->SetModelPoses(std::move(modelPoses2));
 
   // update
-  sensor->Update(ignition::common::Time::Zero);
+  sensor->Update(std::chrono::steady_clock::duration::zero());
 
   // verify box is not in the image
   img = sensor->Image();
@@ -216,7 +216,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   sensor->SetModelPoses(std::move(modelPoses3));
 
   // update
-  sensor->Update(ignition::common::Time::Zero);
+  sensor->Update(std::chrono::steady_clock::duration::zero());
 
   // verify box is in image
   img = sensor->Image();
@@ -232,7 +232,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   sensor->SetPose(sensorPose4);
 
   // update
-  sensor->Update(ignition::common::Time::Zero);
+  sensor->Update(std::chrono::steady_clock::duration::zero());
 
   // verify box is no longer in the image
   img = sensor->Image();

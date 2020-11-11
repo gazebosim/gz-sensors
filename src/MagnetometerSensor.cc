@@ -146,7 +146,15 @@ bool MagnetometerSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool MagnetometerSensor::Update(const ignition::common::Time &_now)
+bool MagnetometerSensor::Update(
+  const ignition::common::Time &_now)
+{
+  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
+}
+
+//////////////////////////////////////////////////
+bool MagnetometerSensor::Update(
+  const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("MagnetometerSensor::Update");
   if (!this->dataPtr->initialized)
@@ -161,8 +169,7 @@ bool MagnetometerSensor::Update(const ignition::common::Time &_now)
       this->dataPtr->worldField);
 
   msgs::Magnetometer msg;
-  msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
-  msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
+  *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->Name());

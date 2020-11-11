@@ -24,10 +24,15 @@ using namespace sensors;
 
 class TestSensor : public Sensor
 {
-  public: bool Update(const common::Time &) override
+  public: bool Update(const std::chrono::steady_clock::duration &) override
   {
     updateCount++;
     return true;
+  }
+
+  public: bool Update(const common::Time &) override
+  {
+    return false;
   }
 
   public: unsigned int updateCount{0};

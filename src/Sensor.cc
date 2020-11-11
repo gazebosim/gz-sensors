@@ -59,7 +59,8 @@ class ignition::sensors::SensorPrivate
   public: double updateRate = 0.0;
 
   /// \brief What sim time should this sensor update at
-  public: ignition::common::Time nextUpdateTime;
+  public: std::chrono::steady_clock::duration nextUpdateTime
+    {std::chrono::steady_clock::duration::zero()};
 
   /// \brief SDF element with sensor information.
   public: sdf::ElementPtr sdf = nullptr;
@@ -240,7 +241,7 @@ void Sensor::SetUpdateRate(const double _hz)
 }
 
 //////////////////////////////////////////////////
-bool Sensor::Update(const ignition::common::Time &_now,
+bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
                   const bool _force)
 {
   IGN_PROFILE("Sensor::Update");
@@ -259,7 +260,8 @@ bool Sensor::Update(const ignition::common::Time &_now,
   if (!_force && this->dataPtr->updateRate > 0.0)
   {
     // Update the time the plugin should be loaded
-    ignition::common::Time delta(1.0 / this->dataPtr->updateRate);
+    auto delta = std::chrono::duration_cast< std::chrono::milliseconds>
+      (std::chrono::duration< double >(1.0 / this->dataPtr->updateRate));
     this->dataPtr->nextUpdateTime += delta;
   }
 
@@ -267,9 +269,23 @@ bool Sensor::Update(const ignition::common::Time &_now,
 }
 
 //////////////////////////////////////////////////
-ignition::common::Time Sensor::NextUpdateTime() const
+bool Sensor::Update(const ignition::common::Time &_now, const bool _force)
+{
+  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec), _force);
+}
+
+//////////////////////////////////////////////////
+std::chrono::steady_clock::duration Sensor::NextDataUpdateTime() const
 {
   return this->dataPtr->nextUpdateTime;
+}
+
+//////////////////////////////////////////////////
+ignition::common::Time Sensor::NextUpdateTime() const
+{
+  std::pair<uint64_t, uint64_t> secNsec =
+    math::durationToSecNsec(this->dataPtr->nextUpdateTime);
+  return common::Time(secNsec.first, secNsec.second);
 }
 
 /////////////////////////////////////////////////

@@ -172,7 +172,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   WaitForMessageTestHelper<ignition::msgs::CameraInfo> infoHelper(infoTopic);
 
   // Update once to create image
-  mgr.RunOnce(ignition::common::Time::Zero);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
   EXPECT_TRUE(infoHelper.WaitForMessage()) << infoHelper;
@@ -185,7 +185,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   node.Subscribe(infoTopic, &OnCameraInfo);
 
   // wait for a few thermal camera frames
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
 
   int midWidth = static_cast<int>(thermalSensor->ImageWidth() * 0.5);
   int midHeight = static_cast<int>(thermalSensor->ImageHeight() * 0.5);
@@ -193,7 +193,8 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   int left = midHeight * thermalSensor->ImageWidth();
   int right = (midHeight+1) * thermalSensor->ImageWidth() - 1;
 
-  ignition::common::Time waitTime = ignition::common::Time(0.001);
+  auto waitTime = std::chrono::duration_cast< std::chrono::milliseconds >(
+      std::chrono::duration< double >(0.001));
   int counter = 0;
   int infoCounter = 0;
   ignition::msgs::CameraInfo infoMsg;
@@ -208,7 +209,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
     infoCounter = g_infoCounter;
     infoMsg = g_infoMsg;
     g_infoMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
   g_mutex.lock();
   g_infoMutex.lock();
@@ -258,7 +259,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   box->SetLocalPosition(boxPositionNear);
   root->AddChild(box);
 
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
   for (int sleep = 0;
        sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
   {
@@ -269,7 +270,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.lock();
     infoCounter = g_infoCounter;
     g_infoMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
 
   g_mutex.lock();
@@ -292,7 +293,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   box->SetLocalPosition(boxPositionFar);
   root->AddChild(box);
 
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
   for (int sleep = 0;
        sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
   {
@@ -303,7 +304,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.lock();
     infoCounter = g_infoCounter;
     g_infoMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    std::this_thread::sleep_for(waitTime);
   }
   g_mutex.lock();
   g_infoMutex.lock();

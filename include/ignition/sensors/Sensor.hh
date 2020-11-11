@@ -89,10 +89,30 @@ namespace ignition
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       /// \sa SetUpdateRate()
-      public: virtual bool Update(const common::Time &_now) = 0;
+      public:
+        virtual bool IGN_DEPRECATED(4) Update(const common::Time &_now) = 0;
+
+      /// \brief Force the sensor to generate data
+      ///
+      ///   This method must be overridden by sensors. Subclasses should not
+      ///   not make a decision about whether or not they need to update. The
+      ///   Sensor class will make sure Update() is called at the correct time.
+      ///
+      ///   If a subclass wants to have a variable update rate it should call
+      ///   SetUpdateRate().
+      ///
+      ///   A subclass should return false if there was an error while updating
+      /// \param[in] _now The current time
+      /// \return true if the update was successfull
+      /// \sa SetUpdateRate()
+      public: virtual bool Update(
+        const std::chrono::steady_clock::duration &_now) = 0;
 
       /// \brief Return the next time the sensor will generate data
-      public: common::Time NextUpdateTime() const;
+      public: ignition::common::Time IGN_DEPRECATED(4) NextUpdateTime() const;
+
+      /// \brief Return the next time the sensor will generate data
+      public: std::chrono::steady_clock::duration NextDataUpdateTime() const;
 
       /// \brief Update the sensor.
       ///
@@ -103,11 +123,30 @@ namespace ignition
       /// \param[in] _force Force the update to happen even if it's not time
       /// \return True if the update was triggered (_force was true or _now
       /// >= next_update_time) and the sensor's
-      /// bool Sensor::Update(const common::Time &_now) function returned true.
+      /// bool Sensor::Update(std::chrono::steady_clock::time_point)
+      /// function returned true.
       /// False otherwise.
       /// \remarks If forced the NextUpdateTime() will be unchanged.
       /// \sa virtual bool Update(const common::Time &_name) = 0
-      public: bool Update(const common::Time &_now, const bool _force);
+      public: bool IGN_DEPRECATED(4)
+        Update(const ignition::common::Time &_now, const bool _force);
+
+      /// \brief Update the sensor.
+      ///
+      ///   This is called by the manager, and is responsible for determining
+      ///   if this sensor needs to generate data at this time. If so, the
+      ///   subclasses' Update() method will be called.
+      /// \param[in] _now The current time
+      /// \param[in] _force Force the update to happen even if it's not time
+      /// \return True if the update was triggered (_force was true or _now
+      /// >= next_update_time) and the sensor's
+      /// bool Sensor::Update(std::chrono::steady_clock::time_point)
+      /// function returned true.
+      /// False otherwise.
+      /// \remarks If forced the NextUpdateTime() will be unchanged.
+      /// \sa virtual bool Update(const common::Time &_name) = 0
+      public: bool Update(
+        const std::chrono::steady_clock::duration &_now, const bool _force);
 
       /// \brief Get the update rate of the sensor.
       ///
