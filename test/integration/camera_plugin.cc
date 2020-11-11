@@ -20,13 +20,27 @@
 #include <ignition/common/Filesystem.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/CameraSensor.hh>
-#include <ignition/rendering.hh>
-#ifdef _MSC_VER
+
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
+#include <ignition/rendering/RenderEngine.hh>
+#include <ignition/rendering/RenderingIface.hh>
+#include <ignition/rendering/Scene.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
+#ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
 #endif
 #include <ignition/msgs.hh>
-#ifdef _MSC_VER
+#ifdef _WIN32
 #pragma warning(pop)
 #endif
 

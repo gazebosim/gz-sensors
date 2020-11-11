@@ -27,12 +27,13 @@
 #include <ignition/sensors/Export.hh>
 
 #include <ignition/math/Helpers.hh>
-#ifdef _MSC_VER
+#ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
 #endif
 #include <ignition/msgs.hh>
-#ifdef _MSC_VER
+#ifdef _WIN32
 #pragma warning(pop)
 #endif
 #include <ignition/transport/Node.hh>

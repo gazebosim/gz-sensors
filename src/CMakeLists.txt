@@ -44,36 +44,6 @@ target_link_libraries(${rendering_target}
     ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
 )
 
-if (MSVC)
-  # Warning #4251 is the "dll-interface" warning that tells you when types used
-  # by a class are not being exported. These generated source files have private
-  # members that don't get exported, so they trigger this warning. However, the
-  # warning is not important since those members do not need to be interfaced
-  # with.
-  set_source_files_properties(
-      ${gtest_sources}
-      ${rendering_sources}
-      ${sources}
-      AirPressureSensor.cc
-      AltimeterSensor.cc
-      Camera.cc
-      CameraSensor.cc
-      Camera_TEST.cc
-      DepthCameraSensor.cc
-      GpuLidarSensor.cc
-      ImuSensor.cc
-      ImuSensor_TEST.cc
-      Lidar.cc
-      Lidar_TEST.cc
-      LogicalCameraSensor.cc
-      MagnetometerSensor.cc
-      RgbdCameraSensor.cc
-      ThermalCameraSensor.cc
-    COMPILE_FLAGS "/wd4251 /wd4146"
-  )
-endif()
-
-
 set(camera_sources CameraSensor.cc)
 ign_add_component(camera SOURCES ${camera_sources} GET_TARGET_NAME camera_target)
 # custom compile definitions since the one provided automatically is versioned and will

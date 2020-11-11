@@ -20,7 +20,18 @@
 
 #include <ignition/common/Event.hh>
 #include <ignition/common/SuppressWarning.hh>
-#include <ignition/rendering/Scene.hh>
+
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
+#include <ignition/rendering/RenderTypes.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/rendering/Export.hh>
 

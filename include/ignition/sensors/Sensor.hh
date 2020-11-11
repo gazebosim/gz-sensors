@@ -17,12 +17,13 @@
 #ifndef IGNITION_SENSORS_SENSOR_HH_
 #define IGNITION_SENSORS_SENSOR_HH_
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
 #endif
 #include <ignition/msgs/header.pb.h>
-#ifdef _MSC_VER
+#ifdef _WIN32
 #pragma warning(pop)
 #endif
 

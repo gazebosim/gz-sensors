@@ -17,13 +17,14 @@
 
 #include <gtest/gtest.h>
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
 #endif
 #include <ignition/msgs/camera_info.pb.h>
 #include <ignition/msgs.hh>
-#ifdef _MSC_VER
+#ifdef _WIN32
 #pragma warning(pop)
 #endif
 
@@ -31,7 +32,21 @@
 #include <ignition/common/Event.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/DepthCameraSensor.hh>
-#include <ignition/rendering.hh>
+
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
+#include <ignition/rendering/Material.hh>
+#include <ignition/rendering/RenderEngine.hh>
+#include <ignition/rendering/RenderingIface.hh>
+#include <ignition/rendering/Scene.hh>
+#include <ignition/rendering/Visual.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
