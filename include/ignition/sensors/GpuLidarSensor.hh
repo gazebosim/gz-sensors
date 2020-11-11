@@ -31,7 +31,7 @@
 #pragma warning(disable: 4251)
 #endif
 #include <ignition/rendering/GpuRays.hh>
-#ifdef _MSC_VER
+#ifdef _WIN32
 #pragma warning(pop)
 #endif
 

@@ -32,7 +32,7 @@
 #include <ignition/rendering/RenderPass.hh>
 #include <ignition/rendering/RenderEngine.hh>
 #include <ignition/rendering/RenderPassSystem.hh>
-#ifdef _MSC_VER
+#ifdef _WIN32
 #pragma warning(pop)
 #endif
 

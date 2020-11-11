@@ -28,7 +28,7 @@
 #pragma warning(disable: 4251)
 #endif
 #include <ignition/rendering/RenderTypes.hh>
-#ifdef _MSC_VER
+#ifdef _WIN32
 #pragma warning(pop)
 #endif
 

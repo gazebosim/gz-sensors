@@ -36,7 +36,7 @@
 #include <ignition/rendering/RenderingIface.hh>
 #include <ignition/rendering/Scene.hh>
 #include <ignition/rendering/Visual.hh>
-#ifdef _MSC_VER
+#ifdef _WIN32
 #pragma warning(pop)
 #endif
 
