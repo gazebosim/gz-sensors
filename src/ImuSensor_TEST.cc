@@ -181,6 +181,15 @@ sdf::ElementPtr ImuSensorToSDF(const std::string &name, double update_rate,
     ->GetElement("sensor");
 }
 
+/// \brief Test IMU sensor
+class ImuSensor_TEST : public ::testing::Test
+{
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    ignition::common::Console::SetVerbosity(4);
+  }
+};
 
 //////////////////////////////////////////////////
 TEST(ImuSensor_TEST, CreateImuSensor)
@@ -249,8 +258,8 @@ TEST(ImuSensor_TEST, ComputeNoise)
   auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(imuSDF);
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
-  EXPECT_TRUE(sensor_truth != nullptr);
+  ASSERT_NE(nullptr, sensor);
+  ASSERT_NE(nullptr, sensor_truth);
 
   sensor->SetAngularVelocity(math::Vector3d::Zero);
   sensor->SetLinearAcceleration(math::Vector3d::Zero);

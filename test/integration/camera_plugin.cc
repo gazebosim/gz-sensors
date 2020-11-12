@@ -84,7 +84,6 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 
   // do the test
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   ignition::sensors::CameraSensor *sensor =
       mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
@@ -109,6 +108,7 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   ignition::rendering::unloadEngine(engine->Name());
 }
 
+//////////////////////////////////////////////////
 TEST_P(CameraSensorTest, ImagesWithBuiltinSDF)
 {
   ImagesWithBuiltinSDF(GetParam());
@@ -120,6 +120,7 @@ INSTANTIATE_TEST_CASE_P(CameraSensor, CameraSensorTest,
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
+  ignition::common::Console::SetVerbosity(4);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

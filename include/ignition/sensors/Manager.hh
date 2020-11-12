@@ -124,13 +124,18 @@ namespace ignition
                 {
                   T *result = dynamic_cast<T*>(this->Sensor(id));
 
-                  if (!result)
-                    ignerr << "SDF sensor type does not match template type\n";
+                  if (nullptr == result)
+                  {
+                    ignerr << "Failed to create sensor [" << id << "] of type ["
+                           << _sdf->Get<std::string>("type")
+                           << "]. SDF sensor type does not match template type."
+                           << std::endl;
+                  }
 
                   return result;
                 }
 
-                ignerr << "Failed to create sensor of type["
+                ignerr << "Failed to create sensor of type ["
                        << _sdf->Get<std::string>("type") << "]\n";
                 return nullptr;
               }

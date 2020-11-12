@@ -112,9 +112,14 @@ sdf::ElementPtr MagnetometerToSdfWithNoise(const std::string &_name,
     ->GetElement("sensor");
 }
 
-
+/// \brief Test magnetometer sensor
 class MagnetometerSensorTest: public testing::Test
 {
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    ignition::common::Console::SetVerbosity(4);
+  }
 };
 
 /////////////////////////////////////////////////
@@ -139,15 +144,14 @@ TEST_F(MagnetometerSensorTest, CreateMagnetometer)
 
   // create the sensor using sensor factory
   ignition::sensors::SensorFactory sf;
-  sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::MagnetometerSensor> sensor =
       sf.CreateSensor<ignition::sensors::MagnetometerSensor>(magnetometerSdf);
-  EXPECT_TRUE(sensor != nullptr);
+  ASSERT_NE(nullptr, sensor);
 
   std::unique_ptr<ignition::sensors::MagnetometerSensor> sensorNoise =
     sf.CreateSensor<ignition::sensors::MagnetometerSensor>(
         magnetometerNoiseSdf);
-  EXPECT_TRUE(sensorNoise != nullptr);
+  ASSERT_NE(nullptr, sensorNoise);
 
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(name, sensorNoise->Name());
@@ -179,7 +183,6 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   // create the sensor using sensor factory
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
-  sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::Sensor> s =
       sf.CreateSensor(magnetometerSdf);
   std::unique_ptr<ignition::sensors::MagnetometerSensor> sensor(
@@ -191,8 +194,8 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
       dynamic_cast<ignition::sensors::MagnetometerSensor *>(sNoise.release()));
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
-  EXPECT_TRUE(sensorNoise != nullptr);
+  ASSERT_NE(nullptr, sensor);
+  ASSERT_NE(nullptr, sensorNoise);
 
   // subscribe to the topic
   WaitForMessageTestHelper<ignition::msgs::Magnetometer> msgHelper(topic);
@@ -299,8 +302,6 @@ TEST_F(MagnetometerSensorTest, Topic)
 
   // Factory
   ignition::sensors::SensorFactory factory;
-  factory.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH,
-      "lib"));
 
   // Default topic
   {
