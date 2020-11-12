@@ -197,7 +197,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSdf);
   sensor->SetParent(parent);
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
+  ASSERT_NE(nullptr, sensor);
   sensor->SetScene(scene);
 
   // Set a callback on the lidar sensor to get a scan
@@ -322,7 +322,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   ignition::sensors::GpuLidarSensor *sensor =
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSdf);
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
+  ASSERT_NE(nullptr, sensor);
   sensor->SetParent(parent);
   sensor->SetScene(scene);
 
@@ -471,8 +471,8 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSdf2);
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor1 != nullptr);
-  EXPECT_TRUE(sensor2 != nullptr);
+  ASSERT_NE(nullptr, sensor1);
+  ASSERT_NE(nullptr, sensor2);
   sensor1->SetScene(scene);
   sensor2->SetScene(scene);
 
@@ -612,7 +612,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSdf);
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
+  ASSERT_NE(nullptr, sensor);
   sensor->SetScene(scene);
 
   // Update sensor
@@ -733,8 +733,8 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSdf2);
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor1 != nullptr);
-  EXPECT_TRUE(sensor2 != nullptr);
+  ASSERT_NE(nullptr, sensor1);
+  ASSERT_NE(nullptr, sensor2);
   sensor1->SetScene(scene);
   sensor2->SetScene(scene);
 
@@ -870,31 +870,37 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
   }
 }
 
+/////////////////////////////////////////////////
 TEST_P(GpuLidarSensorTest, CreateGpuLidar)
 {
   CreateGpuLidar(GetParam());
 }
 
+/////////////////////////////////////////////////
 TEST_P(GpuLidarSensorTest, DetectBox)
 {
   DetectBox(GetParam());
 }
 
+/////////////////////////////////////////////////
 TEST_P(GpuLidarSensorTest, TestThreeBoxes)
 {
   TestThreeBoxes(GetParam());
 }
 
+/////////////////////////////////////////////////
 TEST_P(GpuLidarSensorTest, VerticalLidar)
 {
   VerticalLidar(GetParam());
 }
 
+/////////////////////////////////////////////////
 TEST_P(GpuLidarSensorTest, ManualUpdate)
 {
   ManualUpdate(GetParam());
 }
 
+/////////////////////////////////////////////////
 TEST_P(GpuLidarSensorTest, Topic)
 {
   Topic(GetParam());
@@ -905,6 +911,7 @@ INSTANTIATE_TEST_CASE_P(GpuLidarSensor, GpuLidarSensorTest,
 
 int main(int argc, char **argv)
 {
+  ignition::common::Console::SetVerbosity(4);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

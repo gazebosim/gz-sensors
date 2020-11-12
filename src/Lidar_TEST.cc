@@ -89,6 +89,16 @@ void OnNewLaserFrame(int *_scanCounter, float *_scanDest,
   *_scanCounter += 1;
 }
 
+/// \brief Test lidar sensor
+class Lidar_TEST : public ::testing::Test
+{
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    ignition::common::Console::SetVerbosity(4);
+  }
+};
+
 /////////////////////////////////////////////////
 /// \brief Test Creation of a Lidar sensor
 TEST(Lidar_TEST, CreateLaser)
@@ -124,7 +134,7 @@ TEST(Lidar_TEST, CreateLaser)
       lidarSDF);
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
+  ASSERT_NE(nullptr, sensor);
 
   double angleRes = (sensor->AngleMax() - sensor->AngleMin()).Radian() /
                     sensor->RayCount();
