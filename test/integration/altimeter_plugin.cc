@@ -106,8 +106,14 @@ sdf::ElementPtr AltimeterToSdfWithNoise(const std::string &_name,
     ->GetElement("sensor");
 }
 
+/// \brief Test altimeter sensor
 class AltimeterSensorTest: public testing::Test
 {
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    ignition::common::Console::SetVerbosity(4);
+  }
 };
 
 /////////////////////////////////////////////////
@@ -135,7 +141,7 @@ TEST_F(AltimeterSensorTest, CreateAltimeter)
   sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::AltimeterSensor> sensor =
       sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdf);
-  EXPECT_TRUE(sensor != nullptr);
+  ASSERT_NE(nullptr, sensor);
 
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(topic, sensor->Topic());
@@ -143,7 +149,7 @@ TEST_F(AltimeterSensorTest, CreateAltimeter)
 
   std::unique_ptr<ignition::sensors::AltimeterSensor> sensorNoise =
       sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdfNoise);
-  EXPECT_TRUE(sensorNoise != nullptr);
+  ASSERT_NE(nullptr, sensorNoise);
 
   EXPECT_EQ(name, sensorNoise->Name());
   EXPECT_EQ(topicNoise, sensorNoise->Topic());
@@ -180,7 +186,7 @@ TEST_F(AltimeterSensorTest, SensorReadings)
       dynamic_cast<ignition::sensors::AltimeterSensor *>(s.release()));
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
+  ASSERT_NE(nullptr, sensor);
 
   std::unique_ptr<ignition::sensors::Sensor> sNoise =
       sf.CreateSensor(altimeterSdfNoise);
@@ -188,7 +194,7 @@ TEST_F(AltimeterSensorTest, SensorReadings)
       dynamic_cast<ignition::sensors::AltimeterSensor *>(sNoise.release()));
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensorNoise != nullptr);
+  ASSERT_NE(nullptr, sensorNoise);
 
   // verify initial readings
   EXPECT_DOUBLE_EQ(0.0, sensor->VerticalReference());

@@ -123,6 +123,16 @@ sdf::ElementPtr CameraToSdf(const std::string &_type,
     ->GetElement("sensor");
 }
 
+/// \brief Test camera sensor
+class Camera_TEST : public ::testing::Test
+{
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    ignition::common::Console::SetVerbosity(4);
+  }
+};
+
 //////////////////////////////////////////////////
 TEST(Camera_TEST, CreateCamera)
 {
@@ -136,7 +146,7 @@ TEST(Camera_TEST, CreateCamera)
     mgr.CreateSensor<ignition::sensors::CameraSensor>(camSdf);
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(cam != nullptr);
+  ASSERT_NE(nullptr, cam);
 
   // Check topics
   EXPECT_EQ("/cam", cam->Topic());

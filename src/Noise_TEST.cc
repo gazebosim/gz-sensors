@@ -19,6 +19,7 @@
 
 #include <numeric>
 
+#include <ignition/common/Console.hh>
 #include <ignition/math/Rand.hh>
 
 #include "ignition/sensors/Noise.hh"
@@ -53,6 +54,16 @@ sdf::ElementPtr NoiseSdf(const std::string &_type, double _mean,
 
   return sdf;
 }
+
+/// \brief Test sensor noise
+class NoiseTest : public ::testing::Test
+{
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    ignition::common::Console::SetVerbosity(4);
+  }
+};
 
 //////////////////////////////////////////////////
 // Test constructor

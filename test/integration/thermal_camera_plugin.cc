@@ -316,6 +316,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   ignition::rendering::unloadEngine(engine->Name());
 }
 
+//////////////////////////////////////////////////
 TEST_P(ThermalCameraSensorTest, ImagesWithBuiltinSDF)
 {
   ImagesWithBuiltinSDF(GetParam());
@@ -327,6 +328,7 @@ INSTANTIATE_TEST_CASE_P(ThermalCameraSensor, ThermalCameraSensorTest,
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
+  ignition::common::Console::SetVerbosity(4);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
