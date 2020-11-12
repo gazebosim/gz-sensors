@@ -188,7 +188,6 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create an scene with a box in it
   scene->SetAmbientLight(0.3, 0.3, 0.3);
@@ -318,7 +317,6 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensor
   ignition::sensors::GpuLidarSensor *sensor =
@@ -462,7 +460,6 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensors
   ignition::sensors::GpuLidarSensor *sensor1 =
@@ -608,7 +605,6 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensor
   ignition::sensors::GpuLidarSensor *sensor =
@@ -726,7 +722,6 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensors
   ignition::sensors::GpuLidarSensor *sensor1 =
@@ -819,7 +814,6 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
 
   // Create a GpuLidarSensor
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
 
   // Default topic
