@@ -203,7 +203,6 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
 
   // do the test
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   ignition::sensors::DepthCameraSensor *depthSensor =
       mgr.CreateSensor<ignition::sensors::DepthCameraSensor>(sensorPtr);

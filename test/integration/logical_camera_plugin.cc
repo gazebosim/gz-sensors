@@ -111,7 +111,6 @@ TEST_F(LogicalCameraSensorTest, CreateLogicalCamera)
 
   // create the sensor using sensor factory
   ignition::sensors::SensorFactory sf;
-  sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor =
       sf.CreateSensor<ignition::sensors::LogicalCameraSensor>(logicalCameraSdf);
   ASSERT_NE(nullptr, sensor);
@@ -150,7 +149,6 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   // create the sensor using sensor factory
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
-  sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::Sensor> s =
       sf.CreateSensor(logicalCameraSdf);
   std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor(
@@ -251,8 +249,6 @@ TEST_F(LogicalCameraSensorTest, Topic)
 
   // Factory
   ignition::sensors::SensorFactory factory;
-  factory.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH,
-      "lib"));
 
   // Default topic
   {

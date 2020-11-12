@@ -136,7 +136,6 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   root->AddChild(box);
 
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   ignition::sensors::ThermalCameraSensor *thermalSensor =
       mgr.CreateSensor<ignition::sensors::ThermalCameraSensor>(sensorPtr);

@@ -223,7 +223,6 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
 
   // do the test
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   ignition::sensors::RgbdCameraSensor *rgbdSensor =
       mgr.CreateSensor<ignition::sensors::RgbdCameraSensor>(sensorPtr);
