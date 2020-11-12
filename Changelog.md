@@ -32,6 +32,28 @@
 
 ## Ignition Sensors 3
 
+### Ignition Sensors 3.X.X (20XX-XX-XX)
+
+### Ignition Sensors 3.1.0 (2020-09-03)
+
+1. Update camera sensor only when needed
+    * [Pull request 37](https://github.com/ignitionrobotics/ign-sensors/pull/37)
+
+1. Add noise to RGBD camera.
+    * [Pull Request 35](https://github.com/ignitionrobotics/ign-sensors/pull/35)
+
+1. Fix version numbers in config.hh
+    * [Pull Request 42](https://github.com/ignitionrobotics/ign-sensors/pull/42)
+
+1. Make sure all sensors have a default topic. When invalid topics are passed
+   in, convert them to valid topics if possible. If not possible to convert
+   into valid topic, fail gracefully.
+    * [Pull Request 33](https://github.com/ignitionrobotics/ign-sensors/pull/33)
+
+1. GitHub migration
+    * [Pull request 11](https://github.com/ignitionrobotics/ign-sensors/pull/11)
+    * [Pull request 21](https://github.com/ignitionrobotics/ign-sensors/pull/21)
+
 ### Ignition Sensors 3.0.0 (2019-12-10)
 
 1. Add support for sdformat frame semantics
