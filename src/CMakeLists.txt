@@ -21,6 +21,14 @@ set (gtest_sources
   Sensor_TEST.cc
 )
 
+if (MSVC)
+  # TODO(louise) Remove this once warnings are suppressed in ign-rendering
+  set_source_files_properties(
+      ${rendering_sources}
+    COMPILE_FLAGS "/wd4251"
+  )
+endif()
+
 # Create the library target.
 ign_create_core_library(SOURCES ${sources} CXX_STANDARD 14)
 
