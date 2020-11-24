@@ -3,6 +3,7 @@ load(
     "IGNITION_FEATURES",
     "IGNITION_ROOT",
     "IGNITION_VISIBILITY",
+    "cmake_configure_file",
     "generate_include_header",
     "ign_config_header",
     "ign_export_header",
@@ -138,6 +139,9 @@ cc_library(
     name = "ign_sensors",
     srcs = sources,
     hdrs = public_headers,
+    defines = [
+        "WITH_OGRE2=1",
+    ],
     includes = ["include"],
     deps = [
         IGNITION_ROOT + "ign_common",
@@ -244,3 +248,86 @@ cc_test(
         "@gtest//:gtest_main",
     ],
 )
+
+cmake_configure_file(
+    name = "test_config",
+    src = "test/test_config.h.in",
+    out = "test/test_config.h",
+    cmakelists = ["test/CMakeLists.txt"],
+    defines = [
+        "PROJECT_SOURCE_DIR=./ign_sensors",
+        "PROJECT_BINARY_DIR=./ign_sensors",
+        "CMAKE_BINARY_DIR=./ign_sensors",
+        "WITH_OGRE2=1",
+    ],
+)
+
+cc_library(
+    name = "test_util",
+    hdrs = [
+        "src/PointCloudUtil.hh",
+        "test/integration/TransportTestTools.hh",
+        "test/test_config.h",
+    ],
+    data = glob(["test/integration/*.sdf"]),
+    includes = [
+        "src",
+        "test",
+        "test/integration",
+    ],
+)
+
+plugins = [
+    "air_pressure",
+    "altimeter",
+    "imu",
+    "logical_camera",
+    "magnetometer",
+]
+
+[
+    cc_test(
+        name = "INTEGRATION_%s_plugin" % plugin,
+        srcs = ["test/integration/%s_plugin.cc" % plugin],
+        data = [":libignition-sensors-%s.so" % plugin],
+        deps = [
+            ":sensors_%s" % plugin,
+            ":test_util",
+            "@gtest",
+            "@gtest//:gtest_main",
+        ],
+    )
+    for plugin in plugins
+]
+
+dri_plugins = [
+    "camera",
+    "depth_camera",
+    "gpu_lidar",
+    "rgbd_camera",
+    "thermal_camera",
+]
+
+[
+    cc_test(
+        name = "INTEGRATION_%s_plugin" % plugin,
+        srcs = ["test/integration/%s_plugin.cc" % plugin],
+        data = [
+            ":libignition-sensors-%s.so" % plugin,
+            IGNITION_ROOT + "ign_rendering/ogre2:libignition-rendering-ogre2.so",
+        ],
+        deps = [
+            ":ign_sensors",
+            ":sensors_camera",
+            ":sensors_depth_camera",
+            ":sensors_gpu_lidar",
+            ":sensors_lidar",
+            ":sensors_rgbd_camera",
+            ":sensors_thermal_camera",
+            ":test_util",
+            "@gtest",
+            "@gtest//:gtest_main",
+        ],
+    )
+    for plugin in dri_plugins
+]
