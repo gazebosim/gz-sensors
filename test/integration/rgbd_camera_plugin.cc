@@ -189,12 +189,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
 
   // Setup ign-rendering with an empty scene
   auto *engine = ignition::rendering::engine(_renderEngine);
-  if (!engine)
-  {
-    igndbg << "Engine '" << _renderEngine
-              << "' is not supported" << std::endl;
-    return;
-  }
+  ASSERT_NE(nullptr, engine) << "Engine '" << _renderEngine << "' is not supported";
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
 

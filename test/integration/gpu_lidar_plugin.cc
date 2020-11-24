@@ -176,12 +176,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
 
   // Setup ign-rendering with an empty scene
   auto *engine = ignition::rendering::engine(_renderEngine);
-  if (!engine)
-  {
-    igndbg << "Engine '" << _renderEngine
-              << "' is not supported" << std::endl;
-    return;
-  }
+  ASSERT_NE(nullptr, engine) << "Engine '" << _renderEngine << "' is not supported";
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
   ignition::rendering::VisualPtr root = scene->RootVisual();
@@ -294,12 +289,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   // Create and populate scene
   ignition::rendering::RenderEngine *engine =
     ignition::rendering::engine(_renderEngine);
-  if (!engine)
-  {
-    igndbg << "Engine '" << _renderEngine
-              << "' is not supported" << std::endl;
-    return;
-  }
+  ASSERT_NE(nullptr, engine) << "Engine '" << _renderEngine << "' is not supported";
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
   ignition::rendering::VisualPtr root = scene->RootVisual();
@@ -449,12 +439,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   // Create and populate scene
   ignition::rendering::RenderEngine *engine =
     ignition::rendering::engine(_renderEngine);
-  if (!engine)
-  {
-    igndbg << "Engine '" << _renderEngine
-              << "' is not supported" << std::endl;
-    return;
-  }
+  ASSERT_NE(nullptr, engine) << "Engine '" << _renderEngine << "' is not supported";
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
   ignition::rendering::VisualPtr root = scene->RootVisual();
@@ -584,12 +569,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   // Create and populate scene
   ignition::rendering::RenderEngine *engine =
     ignition::rendering::engine(_renderEngine);
-  if (!engine)
-  {
-    igndbg << "Engine '" << _renderEngine
-              << "' is not supported" << std::endl;
-    return;
-  }
+  ASSERT_NE(nullptr, engine) << "Engine '" << _renderEngine << "' is not supported";
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
   ignition::rendering::VisualPtr root = scene->RootVisual();
@@ -713,12 +693,7 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   // Create and populate scene
   ignition::rendering::RenderEngine *engine =
     ignition::rendering::engine(_renderEngine);
-  if (!engine)
-  {
-    igndbg << "Engine '" << _renderEngine
-              << "' is not supported" << std::endl;
-    return;
-  }
+  ASSERT_NE(nullptr, engine) << "Engine '" << _renderEngine << "' is not supported";
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
   ignition::rendering::VisualPtr root = scene->RootVisual();
@@ -809,12 +784,8 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
 
   // Scene
   auto engine = ignition::rendering::engine(_renderEngine);
-  if (!engine)
-  {
-    igndbg << "Engine '" << _renderEngine
-              << "' is not supported" << std::endl;
-    return;
-  }
+  ASSERT_NE(nullptr, engine) << "Engine '" << _renderEngine << "' is not supported";
+
   auto scene = engine->CreateScene("scene");
   EXPECT_NE(nullptr, scene);
 

@@ -3,7 +3,7 @@ set(TEST_TYPE "INTEGRATION")
 set(dri_tests
   camera_plugin.cc
   depth_camera_plugin.cc
-  gpu_lidar_sensor_plugin.cc
+  gpu_lidar_plugin.cc
   rgbd_camera_plugin.cc
   thermal_camera_plugin.cc
 )
