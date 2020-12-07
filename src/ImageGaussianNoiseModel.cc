@@ -20,13 +20,23 @@
   #include <Winsock2.h>
 #endif
 
-#include "ignition/common/Console.hh"
-#include "ignition/sensors/ImageGaussianNoiseModel.hh"
-#include "ignition/rendering/GaussianNoisePass.hh"
-#include "ignition/rendering/RenderPass.hh"
-#include "ignition/rendering/RenderEngine.hh"
-#include "ignition/rendering/RenderPassSystem.hh"
+#include <ignition/common/Console.hh>
 
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
+#include <ignition/rendering/GaussianNoisePass.hh>
+#include <ignition/rendering/RenderPass.hh>
+#include <ignition/rendering/RenderEngine.hh>
+#include <ignition/rendering/RenderPassSystem.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
+#include "ignition/sensors/ImageGaussianNoiseModel.hh"
 
 using namespace ignition;
 using namespace sensors;

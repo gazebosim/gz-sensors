@@ -22,7 +22,18 @@
 
 #include <sdf/sdf.hh>
 
+#include <ignition/common/SuppressWarning.hh>
+
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/rendering/GpuRays.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #include "ignition/sensors/gpu_lidar/Export.hh"
 #include "ignition/sensors/RenderingEvents.hh"
@@ -123,9 +134,11 @@ namespace ignition
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &/*_format*/)> _subscriber) override;
 
+      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<GpuLidarSensorPrivate> dataPtr;
+      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }
