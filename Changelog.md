@@ -1,5 +1,13 @@
 ## Ignition Sensors
 
+### Ignition Sensors 2.9.1 (2020-12-23)
+
+1. Fix version numbers in config.hh
+    * [Pull Request 42](https://github.com/ignitionrobotics/ign-sensors/pull/42)
+
+1. Resolve codecheck issues
+    * [Pull Request 57](https://github.com/ignitionrobotics/ign-sensors/pull/57)
+
 ### Ignition Sensors 2.9.0 (2020-08-07)
 
 1. Add noise to RGBD camera.
@@ -12,7 +20,7 @@
 
 ### Ignition Sensors 2.8.0 (2020-03-04)
 
-1. Added sequence numbers to sensor data messages. 
+1. Added sequence numbers to sensor data messages.
     * [BitBucket pull request 112](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/112)
 
 ### Ignition Sensors 2.7.0 (2019-12-16)
