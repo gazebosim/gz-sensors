@@ -99,7 +99,7 @@ conda install libignition-cmake<#> libignition-common<#> libignition-math<#> lib
 
 Before [ign-rendering](https://github.com/ignitionrobotics/ign-rendering) becomes available on conda-forge, follow its tutorial to build it from source.
 
-#### Building from source
+#### Build from source
 
 1. Activate the Conda environment created in the prerequisites:
 
