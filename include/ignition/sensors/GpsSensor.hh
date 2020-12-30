@@ -108,11 +108,11 @@ namespace ignition
 
       /// \brief Set the velocity of the GPS
       /// \param[in] _vel vector3 of GPS in meters per second.
-      public: void SetVelocity(ignition::math::Vector3d _vel);
+      public: void SetVelocity(ignition::math::Vector3d &_vel);
 
       /// \brief Get the velocity of the GPS sensor
       /// \return velocity vector3 in meters per second
-      public: ignition::math::Vector3d Velocity();
+      public: ignition::math::Vector3d Velocity() const;
 
 
       /// \brief Easy short hand for setting the lat/long of the gps.
