@@ -114,6 +114,9 @@ ign_add_component(imu SOURCES ${imu_sources} GET_TARGET_NAME imu_target)
 set(altimeter_sources AltimeterSensor.cc)
 ign_add_component(altimeter SOURCES ${altimeter_sources} GET_TARGET_NAME altimeter_target)
 
+set(gps_sources GpsSensor.cc)
+ign_add_component(gps SOURCES ${gps_sources} GET_TARGET_NAME gps_target)
+
 set(air_pressure_sources AirPressureSensor.cc)
 ign_add_component(air_pressure SOURCES ${air_pressure_sources} GET_TARGET_NAME air_pressure_target)
 
