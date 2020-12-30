@@ -229,6 +229,14 @@ double GpsSensor::Longitude() const {
   return this->dataPtr->longitude.Degree();
 }
 
+void   GpsSensor::SetVelocity(ignition::math::Vector3d &_vel) {
+  this->dataPtr->velocity = _vel;
+}
+
+ignition::math::Vector3d GpsSensor::Velocity() const {
+  return this->dataPtr->velocity;
+}
+
 void   GpsSensor::SetPosition(double _latitude, double _longitude, double _altitude) {
   this->SetLongitude(_longitude);
   this->SetLatitude(_latitude);
