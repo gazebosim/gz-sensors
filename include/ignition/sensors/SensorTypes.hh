@@ -148,7 +148,7 @@ namespace ignition
       /// \brief Noise streams for the Lidar sensor
       /// \sa Lidar
       LIDAR_NOISE = 14,
-      
+
       /// \brief Noise streams for the Gps position sensor
       /// \sa Gps
       GPS_HORIZONTAL_POSITION_NOISE = 15,
@@ -160,7 +160,7 @@ namespace ignition
       /// \brief Noise streams for the Gps velocity sensor
       /// \sa Gps
       GPS_HORIZONTAL_VELOCITY_NOISE = 17,
-      
+
       /// \brief Noise streams for the Gps velocity sensor
       /// \sa Gps
       GPS_VERTICAL_VELOCITY_NOISE = 18,
