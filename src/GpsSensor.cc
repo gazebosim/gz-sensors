@@ -50,7 +50,7 @@ class ignition::sensors::GpsPrivate
   public: double altitude = 0.0;
 
   /// \brief velocity
-  public: ignition::math::Vector3d velocity; 
+  public: ignition::math::Vector3d velocity;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -111,14 +111,14 @@ bool GpsSensor::Load(const sdf::Sensor &_sdf)
   {
     this->dataPtr->noises[GPS_POSITION_NOISE] =
       NoiseFactory::NewNoiseModel(
-          _sdf.GpsSensor()->PositionNoise());
+        _sdf.GpsSensor()->PositionNoise());
   }
   if (_sdf.GpsSensor()->VelocityNoise().Type()
       != sdf::NoiseType::NONE)
   {
     this->dataPtr->noises[GPS_VELOCITY_NOISE] =
       NoiseFactory::NewNoiseModel(
-          _sdf.GpsSensor()->VelocityNoise());
+        _sdf.GpsSensor()->VelocityNoise());
   }
 
   this->dataPtr->initialized = true;
@@ -157,36 +157,40 @@ bool GpsSensor::Update(const std::chrono::steady_clock::duration &_now)
   frame->set_key("frame_id");
   frame->add_value(this->Name());
 
-  // Apply gps position noise
-  if (this->dataPtr->noises.find(GPS_POSITION_NOISE) !=
+  // Apply gps horizontal position noise
+  if (this->dataPtr->noises.find(GPS_HORIZONTAL_POSITION_NOISE) !=
       this->dataPtr->noises.end())
   {
-
-    // Apply in degrees. 
     this->SetLatitude(
-      this->dataPtr->noises[GPS_POSITION_NOISE]->Apply(this->Latitude())
-    );
+      this->dataPtr->noises[GPS_HORIZONTAL_POSITION_NOISE]->Apply(
+        this->Latitude()));
+
     this->SetLongitude(
-      this->dataPtr->noises[GPS_POSITION_NOISE]->Apply(this->Longitude())
-    );
+      this->dataPtr->noises[GPS_HORIZONTAL_POSITION_NOISE]->Apply(
+        this->Longitude()));
+  }
+
+  if (this->dataPtr->noises.find(GPS_VERTICAL_POSITION_NOISE) !=
+      this->dataPtr->noises.end())
+  {
     this->SetAltitude(
-      this->dataPtr->noises[GPS_POSITION_NOISE]->Apply(this->Altitude())
-    );
+      this->dataPtr->noises[GPS_VERTICAL_POSITION_NOISE]->Apply(
+        this->Altitude()));
   }
 
   // taken from ImuSensor.cc - convenience method
   auto applyNoise = [&](SensorNoiseType noiseType, double &value)
   {
-    if(this->dataPtr->noises.find(noiseType) != this->dataPtr->noises.end()){
+    if (this->dataPtr->noises.find(noiseType) != this->dataPtr->noises.end()){
       value = this->dataPtr->noises[noiseType]->Apply(value);
     }
   };
 
-  applyNoise(GPS_VELOCITY_NOISE, this->dataPtr->velocity.X());
-  applyNoise(GPS_VELOCITY_NOISE, this->dataPtr->velocity.Y());
-  applyNoise(GPS_VELOCITY_NOISE, this->dataPtr->velocity.Z());
+  applyNoise(GPS_HORIZONTAL_VELOCITY_NOISE, this->dataPtr->velocity.X());
+  applyNoise(GPS_HORIZONTAL_VELOCITY_NOISE, this->dataPtr->velocity.Y());
+  applyNoise(GPS_VERTICAL_VELOCITY_NOISE, this->dataPtr->velocity.Z());
 
-  //normalise so that it is within +/- 180
+  // normalise so that it is within +/- 180
   this->dataPtr->latitude.Normalize();
   this->dataPtr->longitude.Normalize();
 
@@ -205,39 +209,49 @@ bool GpsSensor::Update(const std::chrono::steady_clock::duration &_now)
   return true;
 }
 
-void   GpsSensor::SetLatitude(double _latitude) {
+void   GpsSensor::SetLatitude(double _latitude)
+{
   this->dataPtr->latitude.Degree(_latitude);
 }
 
-double GpsSensor::Latitude() const {
+double GpsSensor::Latitude() const
+{
   return this->dataPtr->latitude.Degree();
 }
 
-void   GpsSensor::SetAltitude(double _altitude) {
+void   GpsSensor::SetAltitude(double _altitude)
+{
   this->dataPtr->altitude = _altitude;
 }
 
-double GpsSensor::Altitude() const {
+double GpsSensor::Altitude() const
+{
   return this->dataPtr->altitude;
 }
 
-void   GpsSensor::SetLongitude(double _longitude) {
+void   GpsSensor::SetLongitude(double _longitude)
+{
   this->dataPtr->longitude.Degree(_longitude);
 }
 
-double GpsSensor::Longitude() const {
+double GpsSensor::Longitude() const
+{
   return this->dataPtr->longitude.Degree();
 }
 
-void   GpsSensor::SetVelocity(ignition::math::Vector3d &_vel) {
+void   GpsSensor::SetVelocity(ignition::math::Vector3d &_vel)
+{
   this->dataPtr->velocity = _vel;
 }
 
-ignition::math::Vector3d GpsSensor::Velocity() const {
+ignition::math::Vector3d GpsSensor::Velocity() const
+{
   return this->dataPtr->velocity;
 }
 
-void   GpsSensor::SetPosition(double _latitude, double _longitude, double _altitude) {
+void   GpsSensor::SetPosition(double _latitude, double _longitude,
+ double _altitude)
+{
   this->SetLongitude(_longitude);
   this->SetLatitude(_latitude);
   this->SetAltitude(_altitude);
