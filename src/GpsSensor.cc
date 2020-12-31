@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Open Source Robotics Foundation
+ * Copyright (C) 2020 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,19 +106,34 @@ bool GpsSensor::Load(const sdf::Sensor &_sdf)
   }
 
   // Load the noise parameters
-  if (_sdf.GpsSensor()->PositionNoise().Type()
+
+  if (_sdf.GpsSensor()->HorizontalPositionNoise().Type()
       != sdf::NoiseType::NONE)
   {
-    this->dataPtr->noises[GPS_POSITION_NOISE] =
+    this->dataPtr->noises[GPS_HORIZONTAL_POSITION_NOISE] =
       NoiseFactory::NewNoiseModel(
-        _sdf.GpsSensor()->PositionNoise());
+        _sdf.GpsSensor()->HorizontalPositionNoise());
   }
-  if (_sdf.GpsSensor()->VelocityNoise().Type()
+  if (_sdf.GpsSensor()->VerticalPositionNoise().Type()
       != sdf::NoiseType::NONE)
   {
-    this->dataPtr->noises[GPS_VELOCITY_NOISE] =
+    this->dataPtr->noises[GPS_VERTICAL_POSITION_NOISE] =
       NoiseFactory::NewNoiseModel(
-        _sdf.GpsSensor()->VelocityNoise());
+        _sdf.GpsSensor()->VerticalPositionNoise());
+  }
+  if (_sdf.GpsSensor()->HorizontalVelocityNoise().Type()
+      != sdf::NoiseType::NONE)
+  {
+    this->dataPtr->noises[GPS_HORIZONTAL_VELOCITY_NOISE] =
+      NoiseFactory::NewNoiseModel(
+        _sdf.GpsSensor()->HorizontalVelocityNoise());
+  }
+  if (_sdf.GpsSensor()->VerticalVelocityNoise().Type()
+      != sdf::NoiseType::NONE)
+  {
+    this->dataPtr->noises[GPS_VERTICAL_VELOCITY_NOISE] =
+      NoiseFactory::NewNoiseModel(
+        _sdf.GpsSensor()->VerticalVelocityNoise());
   }
 
   this->dataPtr->initialized = true;
