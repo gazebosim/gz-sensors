@@ -118,7 +118,8 @@ namespace ignition
       /// \brief Easy short hand for setting the lat/long of the gps.
       /// \param[in] _latitude in degrees
       /// \param[in] _longitude in degrees
-      public: void SetPosition(double _latitude, double _longitude, double _altitude = 0.0);
+      public: void SetPosition(double _latitude, double _longitude,
+        double _altitude = 0.0);
 
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
