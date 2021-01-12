@@ -26,9 +26,31 @@
 #include <ignition/sensors/GpuLidarSensor.hh>
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Helpers.hh>
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 #include <ignition/transport/Node.hh>
-#include <ignition/rendering.hh>
+
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
+#include <ignition/rendering/RenderEngine.hh>
+#include <ignition/rendering/RenderingIface.hh>
+#include <ignition/rendering/Scene.hh>
+#include <ignition/rendering/Visual.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
 #include <sdf/sdf.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
@@ -188,7 +210,6 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create an scene with a box in it
   scene->SetAmbientLight(0.3, 0.3, 0.3);
@@ -318,7 +339,6 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensor
   ignition::sensors::GpuLidarSensor *sensor =
@@ -463,7 +483,6 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensors
   ignition::sensors::GpuLidarSensor *sensor1 =
@@ -609,7 +628,6 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensor
   ignition::sensors::GpuLidarSensor *sensor =
@@ -727,7 +745,6 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensors
   ignition::sensors::GpuLidarSensor *sensor1 =
@@ -820,7 +837,6 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
 
   // Create a GpuLidarSensor
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
 
   // Default topic

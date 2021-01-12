@@ -14,7 +14,16 @@
  * limitations under the License.
  *
 */
+
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs/image.pb.h>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #include <algorithm>
 #include <mutex>
@@ -130,7 +139,7 @@ class ignition::sensors::ThermalCameraSensorPrivate
   public: float maxTemp = ignition::math::INF_F;
 
   /// \brief Linear resolution. Defaults to 10mK
-  public: float resolution = 0.01;
+  public: float resolution = 0.01f;
 };
 
 using namespace ignition;
@@ -530,7 +539,7 @@ bool ThermalCameraSensorPrivate::ConvertTemperatureToImage(
     {
       uint16_t temp = _data[i*_width + j];
       double t = static_cast<double>(temp-*min) / range;
-      int r = 255*t;
+      int r = static_cast<int>(255*t);
       int g = r;
       int b = r;
       int index = i*_width*3 + j*3;
