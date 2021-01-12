@@ -8,6 +8,7 @@ Ignition @IGN_DESIGNATION_CAP@ library and how to use the library effectively.
 
 1. \subpage introduction "Introduction"
 2. \subpage installation "Installation"
+3. \subpage thermalcameraigngazebo "Thermal Camera in Ignition Gazebo": Using a thermal camera in Ignition Gazebo to detect objects of specific temperatures in camera images.
 
 ## License
 
