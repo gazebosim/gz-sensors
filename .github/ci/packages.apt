@@ -6,5 +6,5 @@ libignition-plugin-dev
 libignition-rendering5-dev
 libignition-tools-dev
 libignition-transport10-dev
-libsdformat10-dev
+libsdformat11-dev
 xvfb
