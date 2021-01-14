@@ -144,7 +144,6 @@ TEST_F(MagnetometerSensorTest, CreateMagnetometer)
 
   // create the sensor using sensor factory
   ignition::sensors::SensorFactory sf;
-  sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::MagnetometerSensor> sensor =
       sf.CreateSensor<ignition::sensors::MagnetometerSensor>(magnetometerSdf);
   ASSERT_NE(nullptr, sensor);
@@ -184,7 +183,6 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   // create the sensor using sensor factory
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
-  sf.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
   std::unique_ptr<ignition::sensors::Sensor> s =
       sf.CreateSensor(magnetometerSdf);
   std::unique_ptr<ignition::sensors::MagnetometerSensor> sensor(
@@ -304,8 +302,6 @@ TEST_F(MagnetometerSensorTest, Topic)
 
   // Factory
   ignition::sensors::SensorFactory factory;
-  factory.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH,
-      "lib"));
 
   // Default topic
   {

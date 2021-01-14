@@ -24,10 +24,29 @@
 #include <sdf/sdf.hh>
 
 #include <ignition/common/PluginMacros.hh>
+#include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
 
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/rendering/Camera.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #include "ignition/sensors/camera/Export.hh"
 #include "ignition/sensors/config.hh"
@@ -162,9 +181,11 @@ namespace ignition
       /// \param[in] _scene Pointer to the new scene.
       private: void OnSceneChange(ignition::rendering::ScenePtr /*_scene*/);
 
+      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<CameraSensorPrivate> dataPtr;
+      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

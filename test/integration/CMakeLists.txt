@@ -53,3 +53,15 @@ ign_build_tests(TYPE INTEGRATION
     ${PROJECT_LIBRARY_TARGET_NAME}-imu
 )
 
+foreach(plugin_test ${dri_tests} ${tests})
+  get_filename_component(BINARY_NAME ${plugin_test} NAME_WE)
+  set(BINARY_NAME "${TEST_TYPE}_${BINARY_NAME}")
+  if(TARGET ${BINARY_NAME})
+    set(_env_vars)
+    list(APPEND _env_vars "IGN_PLUGIN_PATH=$<TARGET_FILE_DIR:${PROJECT_LIBRARY_TARGET_NAME}>")
+    list(APPEND _env_vars "DYLD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+
+    set_tests_properties(${BINARY_NAME} PROPERTIES
+      ENVIRONMENT "${_env_vars}")
+  endif()
+endforeach()
