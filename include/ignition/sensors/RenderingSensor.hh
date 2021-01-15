@@ -19,8 +19,18 @@
 
 #include <memory>
 
-#include <ignition/rendering/Scene.hh>
-#include <ignition/rendering/Sensor.hh>
+#include <ignition/common/SuppressWarning.hh>
+
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
+#include <ignition/rendering/RenderTypes.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #include "ignition/sensors/rendering/Export.hh"
 #include "ignition/sensors/Sensor.hh"
@@ -76,9 +86,11 @@ namespace ignition
       /// \param[in] _sensor Sensor to add.
       protected: void AddSensor(rendering::SensorPtr _sensor);
 
+      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal
       /// \brief Data pointer for private data
       private: std::unique_ptr<RenderingSensorPrivate> dataPtr;
+      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

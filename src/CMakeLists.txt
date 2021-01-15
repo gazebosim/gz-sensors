@@ -8,6 +8,27 @@ set (sources
   SensorTypes.cc
 )
 
+set(rendering_sources
+  RenderingSensor.cc
+  RenderingEvents.cc
+  ImageGaussianNoiseModel.cc
+  ImageNoise.cc
+)
+
+set (gtest_sources
+  Manager_TEST.cc
+  Noise_TEST.cc
+  Sensor_TEST.cc
+)
+
+if (MSVC)
+  # TODO(louise) Remove this once warnings are suppressed in ign-rendering
+  set_source_files_properties(
+      ${rendering_sources}
+    COMPILE_FLAGS "/wd4251"
+  )
+endif()
+
 # Create the library target.
 ign_create_core_library(SOURCES ${sources} CXX_STANDARD 14)
 
@@ -23,20 +44,13 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   PRIVATE
     ignition-common${IGN_COMMON_VER}::profiler
 )
-
-set(rendering_sources
-  RenderingSensor.cc
-  RenderingEvents.cc
-  ImageGaussianNoiseModel.cc
-  ImageNoise.cc
-)
+target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME} PUBLIC DepthPoints_EXPORTS)
 
 ign_add_component(rendering SOURCES ${rendering_sources} GET_TARGET_NAME rendering_target)
 target_link_libraries(${rendering_target}
   PUBLIC
     ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
-    )
-
+)
 
 set(camera_sources CameraSensor.cc)
 ign_add_component(camera SOURCES ${camera_sources} GET_TARGET_NAME camera_target)
@@ -49,7 +63,7 @@ target_link_libraries(${camera_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    )
+)
 
 set(depth_camera_sources DepthCameraSensor.cc)
 ign_add_component(depth_camera SOURCES ${depth_camera_sources} GET_TARGET_NAME depth_camera_target)
@@ -59,7 +73,7 @@ target_link_libraries(${depth_camera_target}
     ${camera_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    )
+)
 
 set(lidar_sources Lidar.cc)
 ign_add_component(lidar SOURCES ${lidar_sources} GET_TARGET_NAME lidar_target)
@@ -70,7 +84,7 @@ target_link_libraries(${lidar_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    )
+)
 
 set(gpu_lidar_sources GpuLidarSensor.cc)
 ign_add_component(gpu_lidar SOURCES ${gpu_lidar_sources} GET_TARGET_NAME gpu_lidar_target)
@@ -80,7 +94,7 @@ target_link_libraries(${gpu_lidar_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
     ${lidar_target}
-    )
+)
 
 set(logical_camera_sources LogicalCameraSensor.cc)
 ign_add_component(logical_camera SOURCES ${logical_camera_sources} GET_TARGET_NAME logical_camera_target)
@@ -89,7 +103,7 @@ target_link_libraries(${logical_camera_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    )
+)
 
 set(magnetometer_sources MagnetometerSensor.cc)
 ign_add_component(magnetometer SOURCES ${magnetometer_sources} GET_TARGET_NAME magnetometer_target)
@@ -111,7 +125,7 @@ target_link_libraries(${rgbd_camera_target}
     ${camera_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    )
+)
 
 set(thermal_camera_sources ThermalCameraSensor.cc)
 ign_add_component(thermal_camera SOURCES ${thermal_camera_sources} GET_TARGET_NAME thermal_camera_target)
@@ -120,13 +134,6 @@ target_link_libraries(${thermal_camera_target}
     ${camera_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    )
-
-
-set (gtest_sources
-  Manager_TEST.cc
-  Noise_TEST.cc
-  Sensor_TEST.cc
 )
 
 # Build the unit tests.
@@ -136,3 +143,19 @@ ign_build_tests(TYPE UNIT SOURCES ${gtest_sources} LIB_DEPS ${rendering_target})
 ign_build_tests(TYPE UNIT SOURCES Lidar_TEST.cc LIB_DEPS ${lidar_target})
 ign_build_tests(TYPE UNIT SOURCES Camera_TEST.cc LIB_DEPS ${camera_target})
 ign_build_tests(TYPE UNIT SOURCES ImuSensor_TEST.cc LIB_DEPS ${imu_target})
+
+set(plugin_test_targets)
+list(APPEND plugin_test_targets "UNIT_Camera_TEST")
+list(APPEND plugin_test_targets "UNIT_Lidar_TEST")
+list(APPEND plugin_test_targets "UNIT_ImuSensor_TEST")
+
+foreach(plugin_test ${plugin_test_targets})
+  if(TARGET ${plugin_test})
+    set(_env_vars)
+    list(APPEND _env_vars "IGN_PLUGIN_PATH=$<TARGET_FILE_DIR:${camera_target}>")
+    list(APPEND _env_vars "DYLD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+
+    set_tests_properties(${plugin_test} PROPERTIES
+      ENVIRONMENT "${_env_vars}")
+  endif()
+endforeach()
