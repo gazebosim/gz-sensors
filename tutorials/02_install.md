@@ -19,13 +19,13 @@ sudo apt-get update
 1. Install Ignition Sensors
 
 ```
-# This installs ign-sensors4. Change the number after libignition-sensors to the version you want
-sudo apt install libignition-sensors4-dev
+# This installs ign-sensors3. Change the number after libignition-sensors to the version you want
+sudo apt install libignition-sensors3-dev
 ```
 
 ### Windows
 
-Binary install is pending ``ignition-rendering`` and ``ignition-sensors`` being added to conda-forge.
+Binary install is pending `ignition-rendering` and `ignition-sensors` being added to conda-forge.
 
 ## Source Install
 
@@ -82,7 +82,7 @@ sudo make install
 
 First, follow the [ign-cmake](https://github.com/ignitionrobotics/ign-cmake) tutorial for installing Conda, Visual Studio, CMake, etc., prerequisites, and creating a Conda environment.
 
-Navigate to ``condabin`` if necessary to use the ``conda`` command (i.e., if Conda is not in your `PATH` environment variable. You can find the location of ``condabin`` in Anaconda Prompt, ``where conda``).
+Navigate to `condabin` if necessary to use the `conda` command (i.e., if Conda is not in your `PATH` environment variable. You can find the location of `condabin` in Anaconda Prompt, `where conda`).
 
 Create if necessary, and activate a Conda environment:
 
@@ -122,14 +122,14 @@ Before [ign-rendering](https://github.com/ignitionrobotics/ign-rendering) become
     cd build
     ```
 
-    Before ``ign-rendering`` becomes available on conda-forge, we need to build it from source and specify the path containing ``ignition-rendering-config.cmake`` in ``CMAKE_PREFIX_PATH``, for cmake to find ``ign-rendering``. That path could be ``ign-rendering-install-path\lib\cmake\ignition-rendering4``, for example.
+    Before `ign-rendering` becomes available on conda-forge, we need to build it from source and specify the path containing `ignition-rendering-config.cmake` in `CMAKE_PREFIX_PATH`, for cmake to find `ign-rendering`. That path could be `ign-rendering-install-path\lib\cmake\ignition-rendering4`, for example.
 
     ```
     cmake .. -DBUILD_TESTING=OFF -DCMAKE_PREFIX_PATH=path\containing\ignition-rendering-config  # Optionally, -DCMAKE_INSTALL_PREFIX=path\to\install
     cmake --build . --config Release
     ```
 
-1. Optionally, install
+1. Optionally, install. You will likely need to run a terminal with admin privileges for this call to succeed.
 
     ```
     cmake --install . --config Release
