@@ -9,19 +9,17 @@ The source install instructions should be used if you need the very latest softw
 ### Ubuntu
 
 1. Setup your computer to accept software from packages.osrfoundation.org:
-
-```
-sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
-wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
-sudo apt-get update
-```
+  ```
+  sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
+  wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+  sudo apt-get update
+  ```
 
 1. Install Ignition Sensors
-
-```
-# This installs ign-sensors3. Change the number after libignition-sensors to the version you want
-sudo apt install libignition-sensors3-dev
-```
+  ```
+  # This installs ign-sensors3. Change the number after libignition-sensors to the version you want
+  sudo apt install libignition-sensors3-dev
+  ```
 
 ### Windows
 
@@ -52,29 +50,25 @@ Ignition Sensors requires:
 2. Install the Prerequisites.
 
 3. Configure to use gcc8 if that is not the default compiler
-
-```
-sudo apt-get install g++-8
-update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8 --slave /usr/bin/gcov gcov /usr/bin/gcov-8
-```
+  ```
+  sudo apt-get install g++-8
+  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8 --slave /usr/bin/gcov gcov /usr/bin/gcov-8
+  ```
 
 4. Clone the repository
-
-```
-git clone https://github.com/ignitionrobotics/ign-sensors
-```
+  ```
+  git clone https://github.com/ignitionrobotics/ign-sensors
+  ```
 
 5. Configure and build
-
-```
-cd ign-sensors; mkdir build; cd build; cmake ..;  make
-```
+  ```
+  cd ign-sensors; mkdir build; cd build; cmake ..;  make
+  ```
 
 6. Optionally, install the library
-
-```
-sudo make install
-```
+  ```
+  sudo make install
+  ```
 
 ### Windows
 
@@ -102,35 +96,71 @@ Before [ign-rendering](https://github.com/ignitionrobotics/ign-rendering) become
 #### Build from source
 
 1. Activate the Conda environment created in the prerequisites:
-
-    ```
-    conda activate ign-ws
-    ```
+  ```
+  conda activate ign-ws
+  ```
 
 1. Navigate to where you would like to build the library, and clone the repository.
-
-    ```
-    # Optionally, append `-b ign-sensors#` (replace # with a number) to check out a specific version
-    git clone https://github.com/ignitionrobotics/ign-sensors.git
-    ```
+  ```
+  # Optionally, append `-b ign-sensors#` (replace # with a number) to check out a specific version
+  git clone https://github.com/ignitionrobotics/ign-sensors.git
+  ```
 
 1. Configure and build
-
-    ```
-    cd ign-sensors
-    mkdir build
-    cd build
-    ```
+  ```
+  cd ign-sensors
+  mkdir build
+  cd build
+  ```
 
     Before `ign-rendering` becomes available on conda-forge, we need to build it from source and specify the path containing `ignition-rendering-config.cmake` in `CMAKE_PREFIX_PATH`, for cmake to find `ign-rendering`. That path could be `ign-rendering-install-path\lib\cmake\ignition-rendering4`, for example.
-
-    ```
-    cmake .. -DBUILD_TESTING=OFF -DCMAKE_PREFIX_PATH=path\containing\ignition-rendering-config  # Optionally, -DCMAKE_INSTALL_PREFIX=path\to\install
-    cmake --build . --config Release
-    ```
+  ```
+  cmake .. -DBUILD_TESTING=OFF -DCMAKE_PREFIX_PATH=path\containing\ignition-rendering-config  # Optionally, -DCMAKE_INSTALL_PREFIX=path\to\install
+  cmake --build . --config Release
+  ```
 
 1. Optionally, install. You will likely need to run a terminal with admin privileges for this call to succeed.
+  ```
+  cmake --install . --config Release
+  ```
 
-    ```
-    cmake --install . --config Release
-    ```
+# Documentation
+
+API and tutorials can be found at [https://ignitionrobotics.org/libs/sensors](https://ignitionrobotics.org/libs/sensors).
+
+You can also generate the documentation from a clone of this repository by following these steps.
+
+1. You will need Doxygen. On Ubuntu Doxygen can be installed using
+  ```
+  sudo apt-get install doxygen
+  ```
+
+2. Clone the repository
+  ```
+  git clone https://github.com/ignitionrobotics/ign-sensors
+  ```
+
+3. Configure and build the documentation.
+  ```
+  cd ign-sensors; mkdir build; cd build; cmake ../; make doc
+  ```
+
+4. View the documentation by running the following command from the build directory.
+  ```
+  firefox doxygen/html/index.html
+  ```
+
+# Testing
+
+Follow these steps to run tests and static code analysis in your clone of this repository.
+
+1. Run tests.
+  ```
+  make test
+  ```
+
+2. Static code checker.
+  ```
+  make codecheck
+  ```
+
