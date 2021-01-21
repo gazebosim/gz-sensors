@@ -399,6 +399,30 @@ void Lidar::SetVerticalAngleMax(const double _angle)
 }
 
 //////////////////////////////////////////////////
+double Lidar::HorizontalScanResolution() const
+{
+  return this->dataPtr->sdfLidar.HorizontalScanResolution();
+}
+
+//////////////////////////////////////////////////
+void Lidar::SetHorizontalScanResolution(const double _resolution)
+{
+  this->dataPtr->sdfLidar.SetHorizontalScanResolution(_resolution);
+}
+
+//////////////////////////////////////////////////
+double Lidar::VerticalScanResolution() const
+{
+  return this->dataPtr->sdfLidar.VerticalScanResolution();
+}
+
+//////////////////////////////////////////////////
+void Lidar::SetVerticalScanResolution(const double _resolution)
+{
+  this->dataPtr->sdfLidar.SetVerticalScanResolution(_resolution);
+} 
+
+//////////////////////////////////////////////////
 void Lidar::Ranges(std::vector<double> &_ranges) const
 {
   std::lock_guard<std::mutex> lock(this->lidarMutex);

@@ -175,6 +175,22 @@ namespace ignition
       /// \return Resolution of the angle
       public: double VerticalAngleResolution() const;
 
+      /// \brief Get the resolution of rays actually detected
+      /// \return Resolution of horizontal scans
+      public: double HorizontalScanResolution() const;
+
+      /// \brief Set the horizontal ray resolution
+      /// \param[in] _resolution The horizontal resolution of the scan
+      public: void SetHorizontalScanResolution(const double _resolution);
+
+      /// \brief Get the resolution of rays actually detected
+      /// \return Resolution of vertical scans
+      public: double VerticalScanResolution() const;
+
+      /// \brief Set the vertical ray resolution
+      /// \param[in] _resolution The vertical resolution of the scan
+      public: void SetVerticalScanResolution(const double _resolution);
+
       /// \brief Get detected range for a ray.
       ///         Warning: If you are accessing all the ray data in a loop
       ///         it's possible that the Ray will update in the middle of
