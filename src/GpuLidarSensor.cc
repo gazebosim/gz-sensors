@@ -39,7 +39,7 @@ using namespace ignition::sensors;
 class ignition::sensors::GpuLidarSensorPrivate
 {
   /// \brief Fill the point cloud packed message
-  public: void FillPointCloudMsg();
+  public: void FillPointCloudMsg(const float *_laserBuffer);
 
   /// \brief Rendering camera
   public: ignition::rendering::GpuRaysPtr gpuRays;
@@ -197,6 +197,9 @@ bool GpuLidarSensor::CreateLidar()
   this->dataPtr->gpuRays->SetVerticalRayCount(
       this->VerticalRayCount());
 
+  this->dataPtr->gpuRays->SetHorizontalResolution(this->HorizontalResolution());
+  this->dataPtr->gpuRays->SetVerticalResolution(this->VerticalResolution());
+
   this->Scene()->RootVisual()->AddChild(
       this->dataPtr->gpuRays);
 
@@ -235,8 +238,8 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
     return false;
   }
 
-  int len = this->dataPtr->gpuRays->RayCount() *
-    this->dataPtr->gpuRays->VerticalRayCount() * 3;
+  int len = this->dataPtr->gpuRays->RangeCount() *
+    this->dataPtr->gpuRays->VerticalRangeCount() * 3;
 
   if (this->laserBuffer == nullptr)
   {
@@ -248,6 +251,7 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
   /// \todo(anyone) It would be nice to remove this copy.
   this->dataPtr->gpuRays->Copy(this->laserBuffer);
 
+  this->ApplyNoise();
   this->PublishLidarScan(_now);
 
   if (this->dataPtr->pointPub.HasConnections())
@@ -257,7 +261,7 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
       msgs::Convert(_now);
     this->dataPtr->pointMsg.set_is_dense(true);
 
-    this->dataPtr->FillPointCloudMsg();
+    this->dataPtr->FillPointCloudMsg(this->laserBuffer);
 
     {
       this->AddSequence(this->dataPtr->pointMsg.mutable_header());
@@ -302,7 +306,7 @@ ignition::math::Angle GpuLidarSensor::VFOV() const
 }
 
 //////////////////////////////////////////////////
-void GpuLidarSensorPrivate::FillPointCloudMsg()
+void GpuLidarSensorPrivate::FillPointCloudMsg(const float *_laserBuffer)
 {
   IGN_PROFILE("GpuLidarSensorPrivate::FillPointCloudMsg");
   uint32_t width = this->pointMsg.width();
@@ -335,8 +339,8 @@ void GpuLidarSensorPrivate::FillPointCloudMsg()
     {
       // Index of current point, and the depth value at that point
       auto index = j * width * channels + i * channels;
-      float depth = this->gpuRays->Data()[index];
-      float intensity = this->gpuRays->Data()[index + 1];
+      float depth = _laserBuffer[index];
+      float intensity = _laserBuffer[index + 1];
       uint16_t ring = j;
 
       int fieldIndex = 0;
