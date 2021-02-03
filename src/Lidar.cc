@@ -197,9 +197,9 @@ void Lidar::ApplyNoise()
 {
   if (this->dataPtr->noises.find(LIDAR_NOISE) != this->dataPtr->noises.end())
   {
-    for (unsigned int j = 0; j < this->VerticalRangeCount(); ++j)
+    for (unsigned int j = 0; j < this->VerticalRayCount(); ++j)
     {
-      for (unsigned int i = 0; i < this->RangeCount(); ++i)
+      for (unsigned int i = 0; i < this->RayCount(); ++i)
       {
         int index = j * this->RangeCount() + i;
         double range = this->laserBuffer[index*3];
