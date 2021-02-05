@@ -78,6 +78,9 @@ class ignition::sensors::ThermalCameraSensorPrivate
   /// \brief Thermal data buffer.
   public: uint16_t *thermalBuffer = nullptr;
 
+  /// \brief Thermal data buffer 8 bit.
+  public: unsigned char *thermalBuffer8Bit = nullptr;
+
   /// \brief Thermal data buffer used when saving image.
   public: unsigned char *imgThermalBuffer = nullptr;
 
@@ -157,6 +160,9 @@ ThermalCameraSensor::~ThermalCameraSensor()
   this->dataPtr->thermalConnection.reset();
   if (this->dataPtr->thermalBuffer)
     delete [] this->dataPtr->thermalBuffer;
+
+  if (this->dataPtr->thermalBuffer8Bit)
+    delete[] this->dataPtr->thermalBuffer8Bit;
 
   if (this->dataPtr->imgThermalBuffer)
     delete[] this->dataPtr->imgThermalBuffer;
@@ -245,6 +251,8 @@ bool ThermalCameraSensor::CreateCamera()
   int width = cameraSdf->ImageWidth();
   int height = cameraSdf->ImageHeight();
 
+  sdf::PixelFormatType pixelFormat = cameraSdf->PixelFormat();
+
   double farPlane = cameraSdf->FarClip();
   double nearPlane = cameraSdf->NearClip();
 
@@ -254,6 +262,29 @@ bool ThermalCameraSensor::CreateCamera()
       this->Name());
   this->dataPtr->thermalCamera->SetImageWidth(width);
   this->dataPtr->thermalCamera->SetImageHeight(height);
+  switch (pixelFormat)
+  {
+    case sdf::PixelFormatType::L_INT8:
+    {
+      this->dataPtr->thermalCamera->SetImageFormat(rendering::PF_L8);
+      // sanity check for resolution. The default resolution 10mK is too high
+      // for 8 bit cameras since it can only capture a temperature range of
+      // 0 to 2.55 degrees Kelvin ((2^8-1) * 0.01 = 2.55).
+      if (this->dataPtr->resolution < 1.0)
+      {
+        ignwarn << "8 bit thermal camera image format selected. "
+                << "The temperature linear resolution needs to be higher "
+                << "than 1.0. Defaulting to 3.0, range = [0, 255*3] K"
+                << std::endl;
+        this->dataPtr->resolution = 3.0;
+      }
+      break;
+    }
+    case sdf::PixelFormatType::L_INT16:
+    default:
+      this->dataPtr->thermalCamera->SetImageFormat(rendering::PF_L16);
+      break;
+  }
   this->dataPtr->thermalCamera->SetNearClipPlane(nearPlane);
   this->dataPtr->thermalCamera->SetFarClipPlane(farPlane);
   this->dataPtr->thermalCamera->SetVisibilityMask(
@@ -406,14 +437,23 @@ bool ThermalCameraSensor::Update(
   unsigned int width = this->dataPtr->thermalCamera->ImageWidth();
   unsigned int height = this->dataPtr->thermalCamera->ImageHeight();
 
+
   auto commonFormat = common::Image::L_INT16;
   auto msgsFormat = msgs::PixelFormatType::L_INT16;
+  auto renderingFormat = rendering::PF_L16;
+
+  if (this->dataPtr->thermalCamera->ImageFormat() == rendering::PF_L8)
+  {
+    commonFormat = common::Image::L_INT8;
+    msgsFormat = msgs::PixelFormatType::L_INT8;
+    renderingFormat = rendering::PF_L8;
+  }
 
   // create message
   this->dataPtr->thermalMsg.set_width(width);
   this->dataPtr->thermalMsg.set_height(height);
   this->dataPtr->thermalMsg.set_step(
-      width * rendering::PixelUtil::BytesPerPixel(rendering::PF_L16));
+      width * rendering::PixelUtil::BytesPerPixel(renderingFormat));
   this->dataPtr->thermalMsg.set_pixel_format_type(msgsFormat);
   auto stamp = this->dataPtr->thermalMsg.mutable_header()->mutable_stamp();
   *stamp = msgs::Convert(_now);
@@ -422,9 +462,29 @@ bool ThermalCameraSensor::Update(
   frame->add_value(this->Name());
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  this->dataPtr->thermalMsg.set_data(this->dataPtr->thermalBuffer,
-      rendering::PixelUtil::MemorySize(rendering::PF_L16,
-      width, height));
+
+  // \todo(anyone) once ign-rendering supports an image event with unsigned char
+  // data type, we can remove this check that copies uint16_t data to char array
+  if (this->dataPtr->thermalCamera->ImageFormat() == rendering::PF_L8)
+  {
+    unsigned int len = width * height;
+    if (!this->dataPtr->thermalBuffer8Bit)
+      this->dataPtr->thermalBuffer8Bit = new unsigned char[len];
+    for (unsigned int i = 0; i < len; ++i)
+    {
+      this->dataPtr->thermalBuffer8Bit[i] =
+          static_cast<unsigned int>(this->dataPtr->thermalBuffer[i]);
+    }
+    this->dataPtr->thermalMsg.set_data(this->dataPtr->thermalBuffer8Bit,
+        rendering::PixelUtil::MemorySize(renderingFormat,
+        width, height));
+  }
+  else
+  {
+    this->dataPtr->thermalMsg.set_data(this->dataPtr->thermalBuffer,
+        rendering::PixelUtil::MemorySize(renderingFormat,
+        width, height));
+  }
 
   // publish the camera info message
   this->PublishInfo(_now);

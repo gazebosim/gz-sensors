@@ -10,7 +10,7 @@
           <image>
             <width>256</width>
             <height>256</height>
-            <format>L_16</format>
+            <format>L16</format>
           </image>
           <clip>
             <near>0.1</near>
