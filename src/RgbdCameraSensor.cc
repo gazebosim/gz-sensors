@@ -42,6 +42,7 @@
 #pragma warning(pop)
 #endif
 
+#include <ignition/plugin/Register.hh>
 #include <ignition/transport/Node.hh>
 
 #include <sdf/Sensor.hh>
@@ -609,4 +610,6 @@ unsigned int RgbdCameraSensor::ImageHeight() const
   return this->dataPtr->depthCamera->ImageHeight();
 }
 
-IGN_SENSORS_REGISTER_SENSOR(RgbdCameraSensor)
+IGNITION_ADD_PLUGIN(
+    ignition::sensors::SensorTypePlugin<RgbdCameraSensor>,
+    ignition::sensors::SensorPlugin)

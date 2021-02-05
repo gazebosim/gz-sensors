@@ -33,6 +33,7 @@
 #include <ignition/common/StringUtils.hh>
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Helpers.hh>
+#include <ignition/plugin/Register.hh>
 #include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/CameraSensor.hh"
@@ -647,4 +648,6 @@ double CameraSensor::Baseline() const
   return this->dataPtr->baseline;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(CameraSensor)
+IGNITION_ADD_PLUGIN(
+    ignition::sensors::SensorTypePlugin<CameraSensor>,
+    ignition::sensors::SensorPlugin)

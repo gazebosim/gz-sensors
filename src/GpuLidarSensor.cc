@@ -28,6 +28,7 @@
 #include <ignition/common/Console.hh>
 #include <ignition/common/Profiler.hh>
 #include <ignition/msgs/Utility.hh>
+#include <ignition/plugin/Register.hh>
 #include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/GpuLidarSensor.hh"
@@ -372,4 +373,6 @@ void GpuLidarSensorPrivate::FillPointCloudMsg()
   }
 }
 
-IGN_SENSORS_REGISTER_SENSOR(GpuLidarSensor)
+IGNITION_ADD_PLUGIN(
+    ignition::sensors::SensorTypePlugin<GpuLidarSensor>,
+    ignition::sensors::SensorPlugin)

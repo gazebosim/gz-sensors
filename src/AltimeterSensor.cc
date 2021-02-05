@@ -16,6 +16,7 @@
 */
 
 #include <ignition/common/Profiler.hh>
+#include <ignition/plugin/Register.hh>
 #include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/AltimeterSensor.hh"
@@ -219,4 +220,6 @@ double AltimeterSensor::VerticalVelocity() const
   return this->dataPtr->verticalVelocity;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(AltimeterSensor)
+IGNITION_ADD_PLUGIN(
+    ignition::sensors::SensorTypePlugin<ignition::sensors::AltimeterSensor>,
+    ignition::sensors::SensorPlugin)

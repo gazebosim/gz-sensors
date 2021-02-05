@@ -43,6 +43,7 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
     sdformat${SDF_VER}::sdformat${SDF_VER}
   PRIVATE
     ignition-common${IGN_COMMON_VER}::profiler
+    ignition-plugin${IGN_PLUGIN_VER}::loader
 )
 target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME} PUBLIC DepthPoints_EXPORTS)
 
@@ -62,6 +63,7 @@ target_link_libraries(${camera_target}
     ${rendering_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-plugin${IGN_PLUGIN_VER}::register
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
 )
 
@@ -72,6 +74,7 @@ target_link_libraries(${depth_camera_target}
   PRIVATE
     ${camera_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-plugin${IGN_PLUGIN_VER}::register
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
 )
 
@@ -83,6 +86,7 @@ target_link_libraries(${lidar_target}
     ${rendering_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-plugin${IGN_PLUGIN_VER}::register
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
 )
 
@@ -92,6 +96,7 @@ target_compile_definitions(${gpu_lidar_target} PUBLIC GpuLidarSensor_EXPORTS)
 target_link_libraries(${gpu_lidar_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-plugin${IGN_PLUGIN_VER}::register
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
     ${lidar_target}
 )
@@ -102,20 +107,37 @@ target_compile_definitions(${logical_camera_target} PUBLIC LogicalCameraSensor_E
 target_link_libraries(${logical_camera_target}
   PRIVATE
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-plugin${IGN_PLUGIN_VER}::register
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
 )
 
 set(magnetometer_sources MagnetometerSensor.cc)
 ign_add_component(magnetometer SOURCES ${magnetometer_sources} GET_TARGET_NAME magnetometer_target)
+target_link_libraries(${magnetometer_target}
+  PRIVATE
+    ignition-plugin${IGN_PLUGIN_VER}::register
+)
 
 set(imu_sources ImuSensor.cc)
 ign_add_component(imu SOURCES ${imu_sources} GET_TARGET_NAME imu_target)
+target_link_libraries(${imu_target}
+  PRIVATE
+    ignition-plugin${IGN_PLUGIN_VER}::register
+)
 
 set(altimeter_sources AltimeterSensor.cc)
 ign_add_component(altimeter SOURCES ${altimeter_sources} GET_TARGET_NAME altimeter_target)
+target_link_libraries(${altimeter_target}
+  PRIVATE
+    ignition-plugin${IGN_PLUGIN_VER}::register
+)
 
 set(air_pressure_sources AirPressureSensor.cc)
 ign_add_component(air_pressure SOURCES ${air_pressure_sources} GET_TARGET_NAME air_pressure_target)
+target_link_libraries(${air_pressure_target}
+  PRIVATE
+    ignition-plugin${IGN_PLUGIN_VER}::register
+)
 
 set(rgbd_camera_sources RgbdCameraSensor.cc)
 ign_add_component(rgbd_camera SOURCES ${rgbd_camera_sources} GET_TARGET_NAME rgbd_camera_target)
@@ -124,6 +146,7 @@ target_link_libraries(${rgbd_camera_target}
   PRIVATE
     ${camera_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-plugin${IGN_PLUGIN_VER}::register
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
 )
 
@@ -133,6 +156,7 @@ target_link_libraries(${thermal_camera_target}
   PRIVATE
     ${camera_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-plugin${IGN_PLUGIN_VER}::register
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
 )
 

@@ -39,6 +39,7 @@ if (DRI_TESTS)
       ${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar
       ${PROJECT_LIBRARY_TARGET_NAME}-rgbd_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-thermal_camera
+      ignition-plugin${IGN_PLUGIN_VER}::core
   )
 endif()
 
@@ -51,6 +52,7 @@ ign_build_tests(TYPE INTEGRATION
     ${PROJECT_LIBRARY_TARGET_NAME}-logical_camera
     ${PROJECT_LIBRARY_TARGET_NAME}-magnetometer
     ${PROJECT_LIBRARY_TARGET_NAME}-imu
+    ignition-plugin${IGN_PLUGIN_VER}::core
 )
 
 foreach(plugin_test ${dri_tests} ${tests})

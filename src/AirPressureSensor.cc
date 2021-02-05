@@ -26,6 +26,7 @@
 #endif
 
 #include <ignition/common/Profiler.hh>
+#include <ignition/plugin/Register.hh>
 #include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/GaussianNoiseModel.hh"
@@ -224,4 +225,6 @@ double AirPressureSensor::ReferenceAltitude() const
   return this->dataPtr->referenceAltitude;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(AirPressureSensor)
+IGNITION_ADD_PLUGIN(
+    ignition::sensors::SensorTypePlugin<AirPressureSensor>,
+    ignition::sensors::SensorPlugin)

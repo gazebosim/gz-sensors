@@ -36,6 +36,8 @@
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Helpers.hh>
 
+#include <ignition/plugin/Register.hh>
+
 #include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/ThermalCameraSensor.hh"
@@ -593,4 +595,6 @@ bool ThermalCameraSensorPrivate::SaveImage(const uint16_t *_data,
   return true;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(ThermalCameraSensor)
+IGNITION_ADD_PLUGIN(
+    ignition::sensors::SensorTypePlugin<ThermalCameraSensor>,
+    ignition::sensors::SensorPlugin)

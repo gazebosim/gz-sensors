@@ -17,6 +17,7 @@
 #include <ignition/common/Console.hh>
 #include <ignition/common/Event.hh>
 #include <ignition/common/Profiler.hh>
+#include <ignition/plugin/Register.hh>
 #include <ignition/transport/Node.hh>
 #include <sdf/Lidar.hh>
 
@@ -448,4 +449,6 @@ bool Lidar::IsActive() const
   return true;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(Lidar)
+IGNITION_ADD_PLUGIN(
+    ignition::sensors::SensorTypePlugin<Lidar>,
+    ignition::sensors::SensorPlugin)

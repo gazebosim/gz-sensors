@@ -26,6 +26,7 @@
 #endif
 
 #include <ignition/common/Profiler.hh>
+#include <ignition/plugin/Register.hh>
 #include <ignition/transport/Node.hh>
 #include <sdf/Magnetometer.hh>
 
@@ -238,4 +239,6 @@ math::Vector3d MagnetometerSensor::MagneticField() const
   return this->dataPtr->localField;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(MagnetometerSensor)
+IGNITION_ADD_PLUGIN(
+    ignition::sensors::SensorTypePlugin<MagnetometerSensor>,
+    ignition::sensors::SensorPlugin)
