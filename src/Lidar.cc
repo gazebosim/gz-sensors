@@ -201,7 +201,7 @@ void Lidar::ApplyNoise()
     {
       for (unsigned int i = 0; i < this->RayCount(); ++i)
       {
-        int index = j * this->RangeCount() + i;
+        int index = j * this->RayCount() + i;
         double range = this->laserBuffer[index*3];
         range = this->dataPtr->noises[LIDAR_NOISE]->Apply(range);
         range = ignition::math::clamp(range,
