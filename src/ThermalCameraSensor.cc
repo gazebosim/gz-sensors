@@ -36,7 +36,8 @@
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Helpers.hh>
 
-#include <ignition/plugin/Register.hh>
+// This plugin loads another plugin, so it shouldn't include Register.hh
+#include <ignition/plugin/RegisterMore.hh>
 
 #include <ignition/transport/Node.hh>
 

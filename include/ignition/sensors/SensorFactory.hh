@@ -169,9 +169,10 @@ namespace ignition
 
       /// \brief load a plugin and return a pointer
       /// \param[in] _filename Sensor plugin file to load.
+      /// \param[in] _type Sensor type from SDF
       /// \return Pointer to the new sensor, nullptr on error.
       private: std::shared_ptr<SensorPlugin> LoadSensorPlugin(
-          const std::string &_filename);
+          const std::string &_filename, const std::string &_type);
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief private data pointer

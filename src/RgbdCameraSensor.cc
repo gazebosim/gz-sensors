@@ -42,7 +42,8 @@
 #pragma warning(pop)
 #endif
 
-#include <ignition/plugin/Register.hh>
+// This plugin loads another plugin, so it shouldn't include Register.hh
+#include <ignition/plugin/RegisterMore.hh>
 #include <ignition/transport/Node.hh>
 
 #include <sdf/Sensor.hh>

@@ -62,7 +62,7 @@ SensorFactory::~SensorFactory()
 
 //////////////////////////////////////////////////
 std::shared_ptr<SensorPlugin> SensorFactory::LoadSensorPlugin(
-    const std::string &_filename)
+    const std::string &_filename, const std::string &_type)
 {
   std::string fullPath =
       this->dataPtr->systemPaths.FindSharedLibrary(_filename);
@@ -77,24 +77,90 @@ std::shared_ptr<SensorPlugin> SensorFactory::LoadSensorPlugin(
 
   if (pluginNames.empty())
   {
-    ignerr << "Unable to load sensor plugin file for [" << fullPath << "]\n";
+    ignerr << "Failed to load plugin [" << _filename <<
+              "] : couldn't load library on path [" << fullPath <<
+              "]." << std::endl;
     return std::shared_ptr<SensorPlugin>();
   }
 
-  // Go over all plugin names and get the first one that implements the
-  // ignition::sensors::SensorPlugin interface
-  plugin::PluginPtr plugin;
-  std::shared_ptr<sensors::SensorPlugin> sensorPlugin{nullptr};
-  for (auto pluginName : pluginNames)
-  {
-    plugin = pluginLoader.Instantiate(pluginName);
-    if (!plugin)
-      continue;
+  auto sensorNames = pluginLoader.PluginsImplementing<
+      ignition::sensors::SensorPlugin>();
 
-    sensorPlugin =
-        plugin->QueryInterfaceSharedPtr<ignition::sensors::SensorPlugin>();
-    if (sensorPlugin)
-      break;
+  if (sensorNames.empty())
+  {
+    std::stringstream error;
+    error << "Found no sensor plugins in ["
+          << _filename << "], available interfaces are:"
+          << std::endl;
+    for (auto pluginName : pluginNames)
+    {
+      error << "- " << pluginName << std::endl;
+    }
+    ignerr << error.str();
+    return nullptr;
+  }
+
+  std::string sensorName;
+  if (sensorNames.size() == 1)
+  {
+    sensorName = *sensorNames.begin();
+  }
+  else
+  {
+    // If multiple sensors are found, try to match the type
+    // This is super hacky, ideally we'd know the exact interface to look for
+    for (auto pluginName : sensorNames)
+    {
+      std::string massagedPlugin;
+      massagedPlugin.resize(pluginName.size());
+      std::transform(pluginName.begin(),
+                     pluginName.end(),
+                     massagedPlugin.begin(),
+                     ::tolower);
+
+      std::string massagedType = _type;
+      massagedType.erase(std::remove(massagedType.begin(), massagedType.end(), '_'),
+          massagedType.end());
+
+      if (massagedPlugin.find(massagedType) != std::string::npos)
+      {
+        sensorName = pluginName;
+        break;
+      }
+    }
+
+    // As a last resort, load a random one
+    if (sensorName.empty())
+    {
+      sensorName = *sensorNames.begin();
+      std::stringstream warn;
+      warn << "Found multiple sensor plugins in [" << _filename << "]:"
+            << std::endl;
+      for (auto pluginName : sensorNames)
+      {
+        warn << "- " << pluginName << std::endl;
+      }
+      warn << "Loading [" << sensorName << "]." << std::endl;
+      ignwarn << warn.str();
+    }
+  }
+
+  auto plugin = pluginLoader.Instantiate(sensorName);
+  if (!plugin)
+  {
+    ignerr << "Failed to instantiate plugin [" << sensorName << "]"
+           << std::endl;
+    return nullptr;
+  }
+
+  auto sensorPlugin =
+      plugin->QueryInterfaceSharedPtr<ignition::sensors::SensorPlugin>();
+
+  if (!sensorPlugin)
+  {
+    ignerr << "Failed to query interface from [" << sensorName << "]"
+           << std::endl;
+    return nullptr;
   }
 
   return sensorPlugin;
@@ -113,7 +179,7 @@ std::unique_ptr<Sensor> SensorFactory::CreateSensor(const sdf::Sensor &_sdf)
     sensorPlugin = it->second;
   else
   {
-    sensorPlugin = this->LoadSensorPlugin(fullPath);
+    sensorPlugin = this->LoadSensorPlugin(fullPath, type);
     if (!sensorPlugin)
     {
       ignerr << "Unable to instantiate sensor plugin for [" << fullPath
@@ -163,7 +229,7 @@ std::unique_ptr<Sensor> SensorFactory::CreateSensor(sdf::ElementPtr _sdf)
         sensorPlugin = it->second;
       else
       {
-        sensorPlugin = this->LoadSensorPlugin(fullPath);
+        sensorPlugin = this->LoadSensorPlugin(fullPath, type);
         if (!sensorPlugin)
         {
           ignerr << "Unable to instantiate sensor plugin for [" << fullPath
