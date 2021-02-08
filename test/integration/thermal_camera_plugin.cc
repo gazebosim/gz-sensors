@@ -381,9 +381,12 @@ void ThermalCameraSensorTest::Images8BitWithBuiltinSDF(
   auto cameraPtr = sensorPtr->GetElement("camera");
   ASSERT_TRUE(cameraPtr->HasElement("image"));
   auto imagePtr = cameraPtr->GetElement("image");
+
+  std::string format = imagePtr->Get<std::string>("format");
+  EXPECT_EQ("L8", format);
+
   ASSERT_TRUE(cameraPtr->HasElement("clip"));
   auto clipPtr = cameraPtr->GetElement("clip");
-
   int imgWidth = imagePtr->Get<int>("width");
   int imgHeight = imagePtr->Get<int>("height");
   double far_ = clipPtr->Get<double>("far");
@@ -446,14 +449,12 @@ void ThermalCameraSensorTest::Images8BitWithBuiltinSDF(
   EXPECT_EQ(thermalSensor->ImageWidth(), static_cast<unsigned int>(imgWidth));
   EXPECT_EQ(thermalSensor->ImageHeight(), static_cast<unsigned int>(imgHeight));
 
-  std::string topic =
-    "/test/integration/ThermalCameraPlugin_images8BitWithBuiltinSDF/image";
+  std::string topicBase =
+    "/test/integration/ThermalCameraPlugin_images8BitWithBuiltinSDF/";
+  std::string topic = topicBase + "image";
   WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
 
-  std::string infoTopic =
-    "/test/integration/ThermalCameraPlugin_images8BitWithBuiltinSDF/";
-  infoTopic += "camera_info";
-
+  std::string infoTopic = topicBase + "camera_info";
   WaitForMessageTestHelper<ignition::msgs::CameraInfo> infoHelper(infoTopic);
 
   // Update once to create image
@@ -466,7 +467,7 @@ void ThermalCameraSensorTest::Images8BitWithBuiltinSDF(
   ignition::transport::Node node;
   node.Subscribe(topic, &OnImage8Bit);
 
-  // subscribe to the thermal camera topic
+  // subscribe to the thermal camera info topic
   node.Subscribe(infoTopic, &OnCameraInfo);
 
   // wait for a few thermal camera frames

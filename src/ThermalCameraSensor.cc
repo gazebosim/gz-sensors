@@ -280,6 +280,7 @@ bool ThermalCameraSensor::CreateCamera()
       }
       break;
     }
+    // default to 16 bit if format is not recognized
     case sdf::PixelFormatType::L_INT16:
     default:
       this->dataPtr->thermalCamera->SetImageFormat(rendering::PF_L16);
@@ -473,7 +474,7 @@ bool ThermalCameraSensor::Update(
     for (unsigned int i = 0; i < len; ++i)
     {
       this->dataPtr->thermalBuffer8Bit[i] =
-          static_cast<unsigned int>(this->dataPtr->thermalBuffer[i]);
+          static_cast<uint8_t>(this->dataPtr->thermalBuffer[i]);
     }
     this->dataPtr->thermalMsg.set_data(this->dataPtr->thermalBuffer8Bit,
         rendering::PixelUtil::MemorySize(renderingFormat,
