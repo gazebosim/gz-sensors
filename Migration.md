@@ -13,6 +13,7 @@ release will remove the deprecated code.
         + ***Replacement*** IGNITION_ADD_PLUGIN(ignition::sensors::SensorTypePlugin<SensorName>, ignition::sensors::SensorPlugin)
     * Use `#include <ignition/plugin/Register.hh>`
     * Privately link against `ignition-plugin${IGN_PLUGIN_VER}::register`
+    * Sensor class name should be `CamelCaseSensor`
 
 ## Ignition Sensors 3.X to 4.X
 
