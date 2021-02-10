@@ -45,7 +45,7 @@ class ignition::sensors::SensorPrivate
   /// <update_rate> value from SDF, and zero is allowed only when zero is also
   /// in SDF.
   /// \return True if a valid topic was set.
-  public: void SetRate(const ignition::msgs::Double& _rate);
+  public: void SetRate(const ignition::msgs::Double &_rate);
 
   /// \brief id given to sensor when constructed
   public: SensorId id;
@@ -234,7 +234,7 @@ bool SensorPrivate::SetTopic(const std::string &_topic)
 }
 
 //////////////////////////////////////////////////
-void SensorPrivate::SetRate(const ignition::msgs::Double& _rate)
+void SensorPrivate::SetRate(const ignition::msgs::Double &_rate)
 {
   auto rate = _rate.data();
   if (rate < 0.0)
