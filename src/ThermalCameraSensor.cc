@@ -274,7 +274,7 @@ bool ThermalCameraSensor::CreateCamera()
       {
         ignwarn << "8 bit thermal camera image format selected. "
                 << "The temperature linear resolution needs to be higher "
-                << "than 1.0. Defaulting to 3.0, range = [0, 255*3] K"
+                << "than 1.0. Defaulting to 3.0, output range = [0, 255*3] K"
                 << std::endl;
         this->dataPtr->resolution = 3.0;
       }
