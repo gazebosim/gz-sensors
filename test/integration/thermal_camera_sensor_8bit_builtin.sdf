@@ -4,13 +4,13 @@
     <link name="link1">
       <sensor name="camera1" type="thermal_camera">
         <update_rate>10</update_rate>
-        <topic>/test/integration/ThermalCameraPlugin_imagesWithBuiltinSDF/image</topic>
+        <topic>/test/integration/ThermalCameraPlugin_images8BitWithBuiltinSDF/image</topic>
         <camera>
           <horizontal_fov>1.05</horizontal_fov>
           <image>
-            <width>256</width>
-            <height>256</height>
-            <format>L16</format>
+            <width>10</width>
+            <height>10</height>
+            <format>L8</format>
           </image>
           <clip>
             <near>0.1</near>
