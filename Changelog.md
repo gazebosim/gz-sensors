@@ -32,7 +32,25 @@
 
 ## Ignition Sensors 3
 
-### Ignition Sensors 3.X.X (20XX-XX-XX)
+### Ignition Sensors 3.2.0 (2021-02-08)
+
+1. Apply noise to lidar point cloud.
+    * [Pull request 86](https://github.com/ignitionrobotics/ign-sensors/pull/86)
+
+1. Add Windows Installation.
+    * [Pull request 82](https://github.com/ignitionrobotics/ign-sensors/pull/82)
+
+1. Added thermal camera tutorial.
+    * [Pull request 61](https://github.com/ignitionrobotics/ign-sensors/pull/61)
+
+1. Prevent segfaults on test failures, make tests verbose. 
+    * [Pull request 56](https://github.com/ignitionrobotics/ign-sensors/pull/56)
+
+1. Resolve updated codecheck issues.
+    * [Pull request 57](https://github.com/ignitionrobotics/ign-sensors/pull/57)
+
+1. Improve fork experience.
+    * [Pull request 54](https://github.com/ignitionrobotics/ign-sensors/pull/54)
 
 ### Ignition Sensors 3.1.0 (2020-09-03)
 
