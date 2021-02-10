@@ -24,6 +24,8 @@
 
 #include <ignition/sensors/Manager.hh>
 
+#include "ignition/sensors/Manager.hh"
+
 using namespace ignition::sensors;
 
 

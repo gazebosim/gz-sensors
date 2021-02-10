@@ -26,6 +26,10 @@
 #endif
 
 #include <ignition/common/Profiler.hh>
+#include <ignition/msgs/magnetometer.pb.h>
+
+#include <ignition/common/Profiler.hh>
+#include <ignition/plugin/Register.hh>
 #include <ignition/transport/Node.hh>
 #include <sdf/Magnetometer.hh>
 

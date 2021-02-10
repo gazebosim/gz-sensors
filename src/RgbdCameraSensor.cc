@@ -29,6 +29,7 @@
 #include <ignition/common/Image.hh>
 #include <ignition/common/Profiler.hh>
 #include <ignition/math/Helpers.hh>
+#include <ignition/plugin/Register.hh>
 
 // TODO(louise) Remove these pragmas once ign-rendering is disabling the
 // warnings

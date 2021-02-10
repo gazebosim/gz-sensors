@@ -57,6 +57,8 @@ class CameraSensorTest: public testing::Test,
 
 void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 {
+  ignition::common::Console::SetVerbosity(4);
+
   // get the darn test data
   std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "integration", "camera_sensor_builtin.sdf");

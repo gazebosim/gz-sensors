@@ -18,8 +18,7 @@
 #include "ignition/sensors/Manager.hh"
 #include <memory>
 #include <unordered_map>
-#include <ignition/common/PluginLoader.hh>
-#include <ignition/common/Plugin.hh>
+#include <ignition/plugin/Loader.hh>
 #include <ignition/common/Profiler.hh>
 #include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>
@@ -106,6 +105,17 @@ void Manager::RunOnce(
   {
     s.second->Update(_time, _force);
   }
+}
+
+/////////////////////////////////////////////////
+ignition::sensors::SensorId Manager::AddSensor(
+  std::unique_ptr<sensors::Sensor> _sensor)
+{
+  if (!_sensor)
+    return NO_SENSOR;
+  SensorId id = _sensor->Id();
+  this->dataPtr->sensors[id] = std::move(_sensor);
+  return id;
 }
 
 /////////////////////////////////////////////////

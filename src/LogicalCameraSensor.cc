@@ -25,6 +25,8 @@
 #include <ignition/math/Frustum.hh>
 #include <ignition/math/Helpers.hh>
 
+#include <ignition/plugin/Register.hh>
+
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/LogicalCameraSensor.hh"
 
