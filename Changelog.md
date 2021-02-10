@@ -2,6 +2,19 @@
 
 ### Ignition Sensors 4.X.X
 
+### Ignition Sensors 4.1.0 (2021-02-10)
+
+1. Added issue and PR templates.
+    * [Pull request 91](https://github.com/ignitionrobotics/ign-sensors/pull/91)
+
+1. Added `set_rate` service to all sensors.
+    * [Pull request 95](https://github.com/ignitionrobotics/ign-sensors/pull/95)
+
+1. Added support for 8 bit thermal camera image format.
+    * [Pull request 92](https://github.com/ignitionrobotics/ign-sensors/pull/92)
+
+1. All features up to version 3.2.0.
+
 ### Ignition Sensors 4.0.0 (2020-09-30)
 
 1. Fix link in README.md
