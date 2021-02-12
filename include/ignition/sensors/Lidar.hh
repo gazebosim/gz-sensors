@@ -72,6 +72,11 @@ namespace ignition
       public: virtual bool IGN_DEPRECATED(4) PublishLidarScan(
         const ignition::common::Time &_now);
 
+      /// \brief Apply noise to the laser buffer, if noise has been
+      /// configured. This should be called before PublishLidarScan if you
+      /// want the scan data to contain noise.
+      public: void ApplyNoise();
+
       /// \brief Publish LaserScan message
       /// \param[in] _now The current time
       /// \return true if the update was successfull
