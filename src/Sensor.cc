@@ -20,6 +20,8 @@
 #include <vector>
 #include <ignition/common/Console.hh>
 #include <ignition/common/Profiler.hh>
+#include <ignition/msgs/double.pb.h>
+#include <ignition/transport/Node.hh>
 #include <ignition/transport/TopicUtils.hh>
 
 #include <ignition/sensors/Manager.hh>
@@ -36,6 +38,14 @@ class ignition::sensors::SensorPrivate
   /// \param[in] _topic Topic sensor publishes data to.
   /// \return True if a valid topic was set.
   public: bool SetTopic(const std::string &_topic);
+
+  /// \brief Set the rate on which the sensor should publish its data. This
+  /// method doesn't allow to set a higher rate than what is in the SDF.
+  /// \param[in] _rate Maximum rate of the sensor. It is capped by the
+  /// <update_rate> value from SDF, and zero is allowed only when zero is also
+  /// in SDF.
+  /// \return True if a valid topic was set.
+  public: void SetRate(const ignition::msgs::Double &_rate);
 
   /// \brief id given to sensor when constructed
   public: SensorId id;
@@ -55,8 +65,16 @@ class ignition::sensors::SensorPrivate
   /// \brief Pose of the sensor
   public: ignition::math::Pose3d pose;
 
-  /// \brief How many times the sensor will generate data per second
+  /// \brief How many times the sensor will generate data per second (value from
+  /// SDF.
+  public: double sdfUpdateRate = 0.0;
+
+  /// \brief How many times the sensor will generate data per second (currently
+  /// used value).
   public: double updateRate = 0.0;
+
+  /// \brief node to create rate update service server
+  public: transport::Node node;
 
   /// \brief What sim time should this sensor update at
   public: std::chrono::steady_clock::duration nextUpdateTime
@@ -110,7 +128,7 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
     this->pose = _sdf.RawPose();
   }
 
-  this->updateRate = _sdf.UpdateRate();
+  this->sdfUpdateRate = this->updateRate = _sdf.UpdateRate();
   return true;
 }
 
@@ -135,7 +153,25 @@ Sensor::~Sensor()
 //////////////////////////////////////////////////
 bool Sensor::Load(const sdf::Sensor &_sdf)
 {
-  return this->dataPtr->PopulateFromSDF(_sdf);
+  const bool success = this->dataPtr->PopulateFromSDF(_sdf);
+  if (!success)
+    return false;
+
+  auto sensorTopic = this->Topic();
+  if (sensorTopic.empty())
+    sensorTopic = "/" + this->Name();
+
+  const auto rateTopic = sensorTopic + "/set_rate";
+
+  if (!this->dataPtr->node.Advertise(rateTopic,
+    &SensorPrivate::SetRate, this->dataPtr.get()))
+  {
+    ignerr << "Unable to create service server on topic["
+           << rateTopic << "].\n";
+    return false;
+  }
+
+  return true;
 }
 
 //////////////////////////////////////////////////
@@ -150,7 +186,7 @@ bool Sensor::Load(sdf::ElementPtr _sdf)
 
   sdf::Sensor sdfSensor;
   sdfSensor.Load(_sdf);
-  return this->dataPtr->PopulateFromSDF(sdfSensor);
+  return this->Load(sdfSensor);
 }
 
 //////////////////////////////////////////////////
@@ -195,6 +231,42 @@ bool SensorPrivate::SetTopic(const std::string &_topic)
 
   this->topic = validTopic;
   return true;
+}
+
+//////////////////////////////////////////////////
+void SensorPrivate::SetRate(const ignition::msgs::Double &_rate)
+{
+  auto rate = _rate.data();
+  if (rate < 0.0)
+    rate = 0.0;
+
+  // if SDF has zero, any value can be set; for non-zero SDF values, we need to
+  // check whether they are in bounds, i.e. greater than zero and lower or equal
+  // to the SDF value
+  if (!ignition::math::lessOrNearEqual(this->sdfUpdateRate, 0.0))
+  {
+    if (ignition::math::lessOrNearEqual(rate, 0.0))
+    {
+      ignerr << "Cannot set update rate of sensor " << this->name << " to zero "
+             << "because the <update_rate> SDF element is non-zero."
+             << std::endl;
+      return;
+    }
+    // apply the upper rate limit from SDF
+    else if (!ignition::math::lessOrNearEqual(rate, this->sdfUpdateRate))
+    {
+      ignerr << "Trying to set update rate of sensor " << this->name << " to "
+             << rate << ", but the maximum rate in <update_rate> SDF element "
+             << "is " << this->sdfUpdateRate << ". Ignoring the request."
+             << std::endl;
+      return;
+    }
+  }
+
+  igndbg << "Setting update rate of sensor " << this->name << " to " << rate
+         << " Hz" << std::endl;
+
+  this->updateRate = rate;
 }
 
 //////////////////////////////////////////////////
