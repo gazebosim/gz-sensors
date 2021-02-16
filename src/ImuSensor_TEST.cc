@@ -18,11 +18,19 @@
 #include <sdf/sdf.hh>
 
 #include <ignition/math/Helpers.hh>
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/Manager.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
+#include <ignition/sensors/Export.hh>
 #include <ignition/sensors/ImuSensor.hh>
+#include <ignition/sensors/Manager.hh>
 
 using namespace ignition;
 
@@ -173,6 +181,15 @@ sdf::ElementPtr ImuSensorToSDF(const std::string &name, double update_rate,
     ->GetElement("sensor");
 }
 
+/// \brief Test IMU sensor
+class ImuSensor_TEST : public ::testing::Test
+{
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    ignition::common::Console::SetVerbosity(4);
+  }
+};
 
 //////////////////////////////////////////////////
 TEST(ImuSensor_TEST, CreateImuSensor)
@@ -241,8 +258,8 @@ TEST(ImuSensor_TEST, ComputeNoise)
   auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(imuSDF);
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
-  EXPECT_TRUE(sensor_truth != nullptr);
+  ASSERT_NE(nullptr, sensor);
+  ASSERT_NE(nullptr, sensor_truth);
 
   sensor->SetAngularVelocity(math::Vector3d::Zero);
   sensor->SetLinearAcceleration(math::Vector3d::Zero);
@@ -301,7 +318,3 @@ int main(int argc, char **argv)
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
-
-
-

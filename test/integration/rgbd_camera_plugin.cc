@@ -16,14 +16,37 @@
 */
 
 #include <gtest/gtest.h>
+
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs/camera_info.pb.h>
+#include <ignition/msgs.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #include <ignition/common/Filesystem.hh>
 #include <ignition/common/Event.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/RgbdCameraSensor.hh>
-#include <ignition/rendering.hh>
-#include <ignition/msgs.hh>
+
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
+#include <ignition/rendering/Material.hh>
+#include <ignition/rendering/RenderEngine.hh>
+#include <ignition/rendering/RenderingIface.hh>
+#include <ignition/rendering/Scene.hh>
+#include <ignition/rendering/Visual.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
@@ -218,7 +241,6 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
 
   // do the test
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   ignition::sensors::RgbdCameraSensor *rgbdSensor =
       mgr.CreateSensor<ignition::sensors::RgbdCameraSensor>(sensorPtr);
@@ -314,8 +336,8 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   pcCounter = 0;
 
   // depth image indices
-  int midWidth = rgbdSensor->ImageWidth() * 0.5;
-  int midHeight = rgbdSensor->ImageHeight() * 0.5;
+  int midWidth = static_cast<int>(rgbdSensor->ImageWidth() * 0.5);
+  int midHeight = static_cast<int>(rgbdSensor->ImageHeight() * 0.5);
   int mid = midHeight * rgbdSensor->ImageWidth() + midWidth -1;
   double expectedRangeAtMidPoint = boxPosition.X() - unitBoxSize * 0.5;
   int left = midHeight * rgbdSensor->ImageWidth();
@@ -710,6 +732,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   ignition::rendering::unloadEngine(engine->Name());
 }
 
+//////////////////////////////////////////////////
 TEST_P(RgbdCameraSensorTest, ImagesWithBuiltinSDF)
 {
   ImagesWithBuiltinSDF(GetParam());
@@ -721,6 +744,7 @@ INSTANTIATE_TEST_CASE_P(RgbdCameraSensor, RgbdCameraSensorTest,
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
+  ignition::common::Console::SetVerbosity(4);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

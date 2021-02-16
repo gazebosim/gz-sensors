@@ -14,15 +14,23 @@
  * limitations under the License.
  *
 */
-
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs/imu.pb.h>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
 #include <ignition/common/Profiler.hh>
 #include <ignition/transport/Node.hh>
 
+#include "ignition/sensors/ImuSensor.hh"
 #include "ignition/sensors/Noise.hh"
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/SensorTypes.hh"
-#include "ignition/sensors/ImuSensor.hh"
 
 using namespace ignition;
 using namespace sensors;

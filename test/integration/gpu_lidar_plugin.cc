@@ -26,9 +26,31 @@
 #include <ignition/sensors/GpuLidarSensor.hh>
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Helpers.hh>
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 #include <ignition/transport/Node.hh>
-#include <ignition/rendering.hh>
+
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
+#include <ignition/rendering/RenderEngine.hh>
+#include <ignition/rendering/RenderingIface.hh>
+#include <ignition/rendering/Scene.hh>
+#include <ignition/rendering/Visual.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
 #include <sdf/sdf.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
@@ -183,7 +205,6 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create an scene with a box in it
   scene->SetAmbientLight(0.3, 0.3, 0.3);
@@ -193,7 +214,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSdf);
   sensor->SetParent(parent);
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
+  ASSERT_NE(nullptr, sensor);
   sensor->SetScene(scene);
 
   // Set a callback on the lidar sensor to get a scan
@@ -308,13 +329,12 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensor
   ignition::sensors::GpuLidarSensor *sensor =
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSdf);
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
+  ASSERT_NE(nullptr, sensor);
   sensor->SetParent(parent);
   sensor->SetScene(scene);
 
@@ -448,7 +468,6 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensors
   ignition::sensors::GpuLidarSensor *sensor1 =
@@ -459,8 +478,8 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSdf2);
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor1 != nullptr);
-  EXPECT_TRUE(sensor2 != nullptr);
+  ASSERT_NE(nullptr, sensor1);
+  ASSERT_NE(nullptr, sensor2);
   sensor1->SetScene(scene);
   sensor2->SetScene(scene);
 
@@ -589,14 +608,13 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensor
   ignition::sensors::GpuLidarSensor *sensor =
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSdf);
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
+  ASSERT_NE(nullptr, sensor);
   sensor->SetScene(scene);
 
   // Update sensor
@@ -702,7 +720,6 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   // Create a GpuLidarSensors
   ignition::sensors::GpuLidarSensor *sensor1 =
@@ -713,8 +730,8 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
       mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSdf2);
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor1 != nullptr);
-  EXPECT_TRUE(sensor2 != nullptr);
+  ASSERT_NE(nullptr, sensor1);
+  ASSERT_NE(nullptr, sensor2);
   sensor1->SetScene(scene);
   sensor2->SetScene(scene);
 
@@ -791,7 +808,6 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
 
   // Create a GpuLidarSensor
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
 
   // Default topic
@@ -847,31 +863,37 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
   }
 }
 
+/////////////////////////////////////////////////
 TEST_P(GpuLidarSensorTest, CreateGpuLidar)
 {
   CreateGpuLidar(GetParam());
 }
 
+/////////////////////////////////////////////////
 TEST_P(GpuLidarSensorTest, DetectBox)
 {
   DetectBox(GetParam());
 }
 
+/////////////////////////////////////////////////
 TEST_P(GpuLidarSensorTest, TestThreeBoxes)
 {
   TestThreeBoxes(GetParam());
 }
 
+/////////////////////////////////////////////////
 TEST_P(GpuLidarSensorTest, VerticalLidar)
 {
   VerticalLidar(GetParam());
 }
 
+/////////////////////////////////////////////////
 TEST_P(GpuLidarSensorTest, ManualUpdate)
 {
   ManualUpdate(GetParam());
 }
 
+/////////////////////////////////////////////////
 TEST_P(GpuLidarSensorTest, Topic)
 {
   Topic(GetParam());
@@ -882,6 +904,7 @@ INSTANTIATE_TEST_CASE_P(GpuLidarSensor, GpuLidarSensorTest,
 
 int main(int argc, char **argv)
 {
+  ignition::common::Console::SetVerbosity(4);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

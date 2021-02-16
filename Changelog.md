@@ -2,6 +2,19 @@
 
 ### Ignition Sensors 4.X.X
 
+### Ignition Sensors 4.1.0 (2021-02-10)
+
+1. Added issue and PR templates.
+    * [Pull request 91](https://github.com/ignitionrobotics/ign-sensors/pull/91)
+
+1. Added `set_rate` service to all sensors.
+    * [Pull request 95](https://github.com/ignitionrobotics/ign-sensors/pull/95)
+
+1. Added support for 8 bit thermal camera image format.
+    * [Pull request 92](https://github.com/ignitionrobotics/ign-sensors/pull/92)
+
+1. All features up to version 3.2.0.
+
 ### Ignition Sensors 4.0.0 (2020-09-30)
 
 1. Fix link in README.md
@@ -31,6 +44,46 @@
     * [BitBucket pull request 111](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/111)
 
 ## Ignition Sensors 3
+
+### Ignition Sensors 3.2.0 (2021-02-08)
+
+1. Apply noise to lidar point cloud.
+    * [Pull request 86](https://github.com/ignitionrobotics/ign-sensors/pull/86)
+
+1. Add Windows Installation.
+    * [Pull request 82](https://github.com/ignitionrobotics/ign-sensors/pull/82)
+
+1. Added thermal camera tutorial.
+    * [Pull request 61](https://github.com/ignitionrobotics/ign-sensors/pull/61)
+
+1. Prevent segfaults on test failures, make tests verbose. 
+    * [Pull request 56](https://github.com/ignitionrobotics/ign-sensors/pull/56)
+
+1. Resolve updated codecheck issues.
+    * [Pull request 57](https://github.com/ignitionrobotics/ign-sensors/pull/57)
+
+1. Improve fork experience.
+    * [Pull request 54](https://github.com/ignitionrobotics/ign-sensors/pull/54)
+
+### Ignition Sensors 3.1.0 (2020-09-03)
+
+1. Update camera sensor only when needed
+    * [Pull request 37](https://github.com/ignitionrobotics/ign-sensors/pull/37)
+
+1. Add noise to RGBD camera.
+    * [Pull Request 35](https://github.com/ignitionrobotics/ign-sensors/pull/35)
+
+1. Fix version numbers in config.hh
+    * [Pull Request 42](https://github.com/ignitionrobotics/ign-sensors/pull/42)
+
+1. Make sure all sensors have a default topic. When invalid topics are passed
+   in, convert them to valid topics if possible. If not possible to convert
+   into valid topic, fail gracefully.
+    * [Pull Request 33](https://github.com/ignitionrobotics/ign-sensors/pull/33)
+
+1. GitHub migration
+    * [Pull request 11](https://github.com/ignitionrobotics/ign-sensors/pull/11)
+    * [Pull request 21](https://github.com/ignitionrobotics/ign-sensors/pull/21)
 
 ### Ignition Sensors 3.0.0 (2019-12-10)
 

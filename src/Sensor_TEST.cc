@@ -16,8 +16,10 @@
 */
 #include <gtest/gtest.h>
 
+#include <ignition/common/Console.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Sensor.hh>
+#include <ignition/transport/Node.hh>
 
 using namespace ignition;
 using namespace sensors;
@@ -36,6 +38,16 @@ class TestSensor : public Sensor
   }
 
   public: unsigned int updateCount{0};
+};
+
+/// \brief Test sensor class
+class Sensor_TEST : public ::testing::Test
+{
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    ignition::common::Console::SetVerbosity(4);
+  }
 };
 
 //////////////////////////////////////////////////
@@ -117,6 +129,140 @@ TEST(Sensor_TEST, Topic)
 
   EXPECT_FALSE(sensor.SetTopic(""));
 }
+
+//////////////////////////////////////////////////
+TEST(Sensor_TEST, SetRateService)
+{
+  std::ostringstream stream;
+  stream
+    << "<?xml version='1.0'?>"
+    << "<sdf version='1.6'>"
+    << " <model name='m1'>"
+    << "  <link name='link1'>"
+    << "    <sensor name='test' type='altimeter'>"
+    << "      <topic>test_topic</topic>"
+    << "      <update_rate>10.0</update_rate>"
+    << "    </sensor>"
+    << "  </link>"
+    << " </model>"
+    << "</sdf>";
+
+  sdf::SDFPtr sdfParsed(new sdf::SDF());
+  sdf::init(sdfParsed);
+  ASSERT_TRUE(sdf::readString(stream.str(), sdfParsed));
+
+  TestSensor sensor;
+  ASSERT_TRUE(sensor.Load(
+    sdfParsed->Root()->GetElement("model")->GetElement("link")
+      ->GetElement("sensor")));
+
+  EXPECT_EQ("test_topic", sensor.Topic());
+  EXPECT_FLOAT_EQ(10.0, sensor.UpdateRate());
+
+  ignition::transport::Node node;
+
+  std::vector<std::string> services;
+  node.ServiceList(services);
+  ASSERT_LT(0u, services.size());
+
+  const auto serviceIt =
+    std::find(services.begin(), services.end(), "/test_topic/set_rate");
+  ASSERT_NE(services.end(), serviceIt);
+
+  std::vector<ignition::transport::ServicePublisher> publishers;
+  ASSERT_TRUE(node.ServiceInfo("/test_topic/set_rate", publishers));
+
+  ASSERT_LT(0u, publishers.size());
+
+  ignition::msgs::Double msg;
+  ignition::msgs::Empty rep;
+  bool res;
+
+  // can set value lower than in SDF
+  msg.set_data(5.0);
+  res = false;
+  EXPECT_TRUE(node.Request("/test_topic/set_rate", msg, 1000, rep, res));
+  EXPECT_TRUE(res);
+
+  EXPECT_FLOAT_EQ(5.0, sensor.UpdateRate());
+
+  // cannot set 0 if SDF has non-zero
+  msg.set_data(0.0);
+  res = false;
+  EXPECT_TRUE(node.Request("/test_topic/set_rate", msg, 1000, rep, res));
+  EXPECT_TRUE(res);
+
+  EXPECT_FLOAT_EQ(5.0, sensor.UpdateRate());
+
+  // cannot set higher than SDF value
+  msg.set_data(20.0);
+  res = false;
+  EXPECT_TRUE(node.Request("/test_topic/set_rate", msg, 1000, rep, res));
+  EXPECT_TRUE(res);
+
+  EXPECT_FLOAT_EQ(5.0, sensor.UpdateRate());
+}
+
+//////////////////////////////////////////////////
+TEST(Sensor_TEST, SetRateZeroService)
+{
+  std::ostringstream stream;
+  stream
+    << "<?xml version='1.0'?>"
+    << "<sdf version='1.6'>"
+    << " <model name='m1'>"
+    << "  <link name='link1'>"
+    << "    <sensor name='test' type='altimeter'>"
+    << "      <topic>test_topic2</topic>"
+    << "      <update_rate>0.0</update_rate>"
+    << "    </sensor>"
+    << "  </link>"
+    << " </model>"
+    << "</sdf>";
+
+  sdf::SDFPtr sdfParsed(new sdf::SDF());
+  sdf::init(sdfParsed);
+  ASSERT_TRUE(sdf::readString(stream.str(), sdfParsed));
+
+  TestSensor sensor;
+  ASSERT_TRUE(sensor.Load(
+    sdfParsed->Root()->GetElement("model")->GetElement("link")
+      ->GetElement("sensor")));
+
+  EXPECT_EQ("test_topic2", sensor.Topic());
+  EXPECT_FLOAT_EQ(0.0, sensor.UpdateRate());
+
+  ignition::transport::Node node;
+
+  ignition::msgs::Double msg;
+  ignition::msgs::Empty rep;
+  bool res;
+
+  // can set any value if SDF has 0
+  msg.set_data(5.0);
+  res = false;
+  EXPECT_TRUE(node.Request("/test_topic2/set_rate", msg, 1000, rep, res));
+  EXPECT_TRUE(res);
+
+  EXPECT_FLOAT_EQ(5.0, sensor.UpdateRate());
+
+  // can set 0 if SDF has zero
+  msg.set_data(0.0);
+  res = false;
+  EXPECT_TRUE(node.Request("/test_topic2/set_rate", msg, 1000, rep, res));
+  EXPECT_TRUE(res);
+
+  EXPECT_FLOAT_EQ(0.0, sensor.UpdateRate());
+
+  // can set any value if SDF has 0
+  msg.set_data(20.0);
+  res = false;
+  EXPECT_TRUE(node.Request("/test_topic2/set_rate", msg, 1000, rep, res));
+  EXPECT_TRUE(res);
+
+  EXPECT_FLOAT_EQ(20.0, sensor.UpdateRate());
+}
+
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)

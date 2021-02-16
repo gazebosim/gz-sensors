@@ -20,11 +20,11 @@
 #include <ignition/transport/Node.hh>
 #include <sdf/Lidar.hh>
 
+#include "ignition/sensors/GaussianNoiseModel.hh"
 #include "ignition/sensors/Lidar.hh"
 #include "ignition/sensors/Noise.hh"
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/SensorTypes.hh"
-#include "ignition/sensors/GaussianNoiseModel.hh"
 
 using namespace ignition::sensors;
 
@@ -200,6 +200,26 @@ bool Lidar::Update(const std::chrono::steady_clock::duration &/*_now*/)
 }
 
 //////////////////////////////////////////////////
+void Lidar::ApplyNoise()
+{
+  if (this->dataPtr->noises.find(LIDAR_NOISE) != this->dataPtr->noises.end())
+  {
+    for (unsigned int j = 0; j < this->VerticalRayCount(); ++j)
+    {
+      for (unsigned int i = 0; i < this->RayCount(); ++i)
+      {
+        int index = j * this->RayCount() + i;
+        double range = this->laserBuffer[index*3];
+        range = this->dataPtr->noises[LIDAR_NOISE]->Apply(range);
+        range = ignition::math::clamp(range,
+            this->RangeMin(), this->RangeMax());
+        this->laserBuffer[index*3] = range;
+      }
+    }
+  }
+}
+
+//////////////////////////////////////////////////
 bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
 {
   return this->PublishLidarScan(math::secNsecToDuration(_now.sec, _now.nsec));
@@ -246,14 +266,6 @@ bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
     {
       int index = j * this->RangeCount() + i;
       double range = this->laserBuffer[index*3];
-
-      if (this->dataPtr->noises.find(LIDAR_NOISE) !=
-          this->dataPtr->noises.end())
-      {
-        range = this->dataPtr->noises[LIDAR_NOISE]->Apply(range);
-        range = ignition::math::clamp(range,
-            this->RangeMin(), this->RangeMax());
-      }
 
       range = ignition::math::isnan(range) ? this->RangeMax() : range;
       this->dataPtr->laserMsg.set_ranges(index, range);
@@ -340,7 +352,8 @@ unsigned int Lidar::RayCount() const
 //////////////////////////////////////////////////
 unsigned int Lidar::RangeCount() const
 {
-  return this->RayCount() * this->dataPtr->sdfLidar.HorizontalScanResolution();
+  return static_cast<unsigned int>(this->RayCount() *
+    this->dataPtr->sdfLidar.HorizontalScanResolution());
 }
 
 //////////////////////////////////////////////////
@@ -352,12 +365,12 @@ unsigned int Lidar::VerticalRayCount() const
 //////////////////////////////////////////////////
 unsigned int Lidar::VerticalRangeCount() const
 {
-  int rows = this->VerticalRayCount() *
-    this->dataPtr->sdfLidar.VerticalScanResolution();
+  unsigned int rows = static_cast<unsigned int>(this->VerticalRayCount() *
+    this->dataPtr->sdfLidar.VerticalScanResolution());
   if (rows > 1)
     return rows;
   else
-    return 1;
+    return 1u;
 }
 
 //////////////////////////////////////////////////

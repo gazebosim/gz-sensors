@@ -24,13 +24,30 @@
 #include <sdf/sdf.hh>
 
 #include <ignition/common/Event.hh>
-
 #include <ignition/common/PluginMacros.hh>
+#include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
 
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/rendering/DepthCamera.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #include "ignition/sensors/depth_camera/Export.hh"
 #include "ignition/sensors/CameraSensor.hh"
@@ -80,7 +97,7 @@ namespace ignition
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       public: virtual bool IGN_DEPRECATED(4) Update(
-        const common::Time &_now) override;
+        const ignition::common::Time &_now) override;
 
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
@@ -158,9 +175,11 @@ namespace ignition
       private: void OnSceneChange(ignition::rendering::ScenePtr /*_scene*/)
               { }
 
+      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<DepthCameraSensorPrivate> dataPtr;
+      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

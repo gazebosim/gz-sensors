@@ -17,11 +17,20 @@
 #ifndef IGNITION_SENSORS_SENSOR_HH_
 #define IGNITION_SENSORS_SENSOR_HH_
 
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs/header.pb.h>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #include <memory>
 #include <string>
 
+#include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/sensors/config.hh>
@@ -210,9 +219,11 @@ namespace ignition
       public: void AddSequence(ignition::msgs::Header *_msg,
                   const std::string &_seqKey = "default");
 
+      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal
       /// \brief Data pointer for private data
       private: std::unique_ptr<SensorPrivate> dataPtr;
+      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

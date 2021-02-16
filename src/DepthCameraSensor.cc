@@ -14,8 +14,15 @@
  * limitations under the License.
  *
 */
-
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs/pointcloud_packed.pb.h>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #include <mutex>
 
@@ -160,7 +167,7 @@ bool DepthCameraSensorPrivate::ConvertDepthToImage(
   double factor = 255 / maxDepth;
   for (unsigned int j = 0; j < _height * _width; ++j)
   {
-    unsigned char d = 255 - (_data[j] * factor);
+    unsigned char d = static_cast<unsigned char>(255 - (_data[j] * factor));
     _imageBuffer[j * 3] = d;
     _imageBuffer[j * 3 + 1] = d;
     _imageBuffer[j * 3 + 2] = d;

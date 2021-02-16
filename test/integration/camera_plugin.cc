@@ -20,8 +20,29 @@
 #include <ignition/common/Filesystem.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/CameraSensor.hh>
-#include <ignition/rendering.hh>
+
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
+#include <ignition/rendering/RenderEngine.hh>
+#include <ignition/rendering/RenderingIface.hh>
+#include <ignition/rendering/Scene.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
@@ -59,7 +80,6 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 
   // do the test
   ignition::sensors::Manager mgr;
-  mgr.AddPluginPaths(ignition::common::joinPaths(PROJECT_BUILD_PATH, "lib"));
 
   ignition::sensors::CameraSensor *sensor =
       mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
@@ -84,6 +104,7 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   ignition::rendering::unloadEngine(engine->Name());
 }
 
+//////////////////////////////////////////////////
 TEST_P(CameraSensorTest, ImagesWithBuiltinSDF)
 {
   ImagesWithBuiltinSDF(GetParam());
@@ -95,6 +116,7 @@ INSTANTIATE_TEST_CASE_P(CameraSensor, CameraSensorTest,
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
+  ignition::common::Console::SetVerbosity(4);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

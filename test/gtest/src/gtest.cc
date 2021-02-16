@@ -30,7 +30,9 @@
 //
 // The Google C++ Testing and Mocking Framework (Google Test)
 
+#ifndef _WIN32
 #pragma GCC system_header
+#endif
 
 #include "gtest/gtest.h"
 #include "gtest/internal/custom/gtest.h"

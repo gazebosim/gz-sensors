@@ -19,12 +19,19 @@
 
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Helpers.hh>
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Manager.hh>
-
 #include <ignition/sensors/Lidar.hh>
-
 
 sdf::ElementPtr LidarToSDF(const std::string &name, double update_rate,
     const std::string &topic, double horz_samples, double horz_resolution,
@@ -89,6 +96,16 @@ void OnNewLaserFrame(int *_scanCounter, float *_scanDest,
   *_scanCounter += 1;
 }
 
+/// \brief Test lidar sensor
+class Lidar_TEST : public ::testing::Test
+{
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    ignition::common::Console::SetVerbosity(4);
+  }
+};
+
 /////////////////////////////////////////////////
 /// \brief Test Creation of a Lidar sensor
 TEST(Lidar_TEST, CreateLaser)
@@ -124,7 +141,7 @@ TEST(Lidar_TEST, CreateLaser)
       lidarSDF);
 
   // Make sure the above dynamic cast worked.
-  EXPECT_TRUE(sensor != nullptr);
+  ASSERT_NE(nullptr, sensor);
 
   double angleRes = (sensor->AngleMax() - sensor->AngleMin()).Radian() /
                     sensor->RayCount();
