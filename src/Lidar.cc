@@ -467,10 +467,4 @@ IGNITION_ADD_PLUGIN(
     ignition::sensors::SensorPlugin)
 IGNITION_ADD_PLUGIN_ALIAS(
     ignition::sensors::SensorTypePlugin<Lidar>,
-    "ignition::sensors::v" + std::to_string(IGNITION_SENSORS_MAJOR_VERSION) +
-    "::SensorTypePlugin<" +
-    "ignition::sensors::v" + std::to_string(IGNITION_SENSORS_MAJOR_VERSION) +
-    "::LidarSensor>")
-IGNITION_ADD_PLUGIN_ALIAS(
-    ignition::sensors::SensorTypePlugin<Lidar>,
     "lidar")
