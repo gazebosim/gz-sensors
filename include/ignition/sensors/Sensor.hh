@@ -90,8 +90,12 @@ namespace ignition
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       /// \sa SetUpdateRate()
+      /// \deprecated Use `Update` function that accepts chrono.
       public:
-        virtual bool IGN_DEPRECATED(4) Update(const common::Time &_now) = 0;
+        virtual bool IGN_DEPRECATED(4) Update(const common::Time &/*_now*/)
+        {
+          return false;
+        };
 
       /// \brief Force the sensor to generate data
       ///

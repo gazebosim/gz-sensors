@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="my_model">
+    <link name="my_link">
+      <sensor name="altimeter" type="altimeter">
+        <always_on>1</always_on>
+        <update_rate>30</update_rate>
+        <visualize>true</visualize>
+        <topic>altimeter</topic>
+        <altimeter>
+          <vertical_position>
+            <noise type="gaussian">
+              <mean>0.1</mean>
+              <stddev>0.2</stddev>
+            </noise>
+          </vertical_position>
+          <vertical_velocity>
+            <noise type="gaussian">
+              <mean>0.2</mean>
+              <stddev>0.1</stddev>
+            </noise>
+          </vertical_velocity>
+        </altimeter>
+      </sensor>
+    </link>
+  </model>
+</sdf>

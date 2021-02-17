@@ -35,6 +35,9 @@ class ignition::sensors::SensorFactoryPrivate
 
   /// \brief Stores paths to search for on file system
   public: ignition::common::SystemPaths systemPaths;
+
+  /// \brief Environment variable containing lookup paths for sensors.
+  public: const std::string pathEnv{"IGN_SENSORS_PATH"};
 };
 
 using namespace ignition;
@@ -55,6 +58,7 @@ void SensorFactory::AddPluginPaths(const std::string &_path)
 //////////////////////////////////////////////////
 SensorFactory::SensorFactory() : dataPtr(new SensorFactoryPrivate)
 {
+  this->dataPtr->systemPaths.SetPluginPathEnv(this->dataPtr->pathEnv);
 }
 
 //////////////////////////////////////////////////

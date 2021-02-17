@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<sdf version="1.7">
+  <model name="my_model">
+    <link name="my_link">
+      <sensor name="my_sensor" type="custom_sensor">
+        <update_rate>10</update_rate>
+        <topic>/custom_data</topic>
+        <noise>
+          <type>gaussian</type>
+          <mean>1.0</mean>
+          <stddev>0.05</stddev>
+        </noise>
+      </sensor>
+    </link>
+  </model>
+</sdf>
