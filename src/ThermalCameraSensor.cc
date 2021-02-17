@@ -599,3 +599,6 @@ bool ThermalCameraSensorPrivate::SaveImage(const uint16_t *_data,
 IGNITION_ADD_PLUGIN(
     ignition::sensors::SensorTypePlugin<ThermalCameraSensor>,
     ignition::sensors::SensorPlugin)
+IGNITION_ADD_PLUGIN_ALIAS(
+    ignition::sensors::SensorTypePlugin<ThermalCameraSensor>,
+    "thermal_camera")

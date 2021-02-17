@@ -228,3 +228,6 @@ double AirPressureSensor::ReferenceAltitude() const
 IGNITION_ADD_PLUGIN(
     ignition::sensors::SensorTypePlugin<AirPressureSensor>,
     ignition::sensors::SensorPlugin)
+IGNITION_ADD_PLUGIN_ALIAS(
+    ignition::sensors::SensorTypePlugin<AirPressureSensor>,
+    "air_pressure")

@@ -306,3 +306,6 @@ math::Quaterniond ImuSensor::Orientation() const
 IGNITION_ADD_PLUGIN(
     ignition::sensors::SensorTypePlugin<ImuSensor>,
     ignition::sensors::SensorPlugin)
+IGNITION_ADD_PLUGIN_ALIAS(
+    ignition::sensors::SensorTypePlugin<ImuSensor>,
+    "imu")

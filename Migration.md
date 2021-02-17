@@ -8,12 +8,14 @@ release will remove the deprecated code.
 ## Ignition Sensors 4.X to 5.X
 
 * Plugins now use Ignition Plugin instead of Ignition Common's plugin framework.
-    * Macro `IGN_SENSORS_REGISTER_SENSOR` has been removed. Use `IGNITION_ADD_PLUGIN` instead.
+    * Macro `IGN_SENSORS_REGISTER_SENSOR` has been removed. Use
+      `IGNITION_ADD_PLUGIN` and `IGNITION_ADD_PLUGIN_ALIAS` instead.
         + ***Deprecation*** IGN_SENSORS_REGISTER_SENSOR(SensorName)
-        + ***Replacement*** IGNITION_ADD_PLUGIN(ignition::sensors::SensorTypePlugin<SensorName>, ignition::sensors::SensorPlugin)
+        + ***Replacement***
+            IGNITION_ADD_PLUGIN(ignition::sensors::SensorTypePlugin<SensorClass>, ignition::sensors::SensorPlugin)
+            IGNITION_ADD_PLUGIN_ALIAS(ignition::sensors::SensorTypePlugin<SensorClass>, "sensor_type")
     * Use `#include <ignition/plugin/Register.hh>`
     * Privately link against `ignition-plugin${IGN_PLUGIN_VER}::register`
-    * Sensor class name should be `CamelCaseSensor`
 
 ## Ignition Sensors 3.X to 4.X
 

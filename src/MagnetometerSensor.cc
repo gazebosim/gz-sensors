@@ -242,3 +242,6 @@ math::Vector3d MagnetometerSensor::MagneticField() const
 IGNITION_ADD_PLUGIN(
     ignition::sensors::SensorTypePlugin<MagnetometerSensor>,
     ignition::sensors::SensorPlugin)
+IGNITION_ADD_PLUGIN_ALIAS(
+    ignition::sensors::SensorTypePlugin<MagnetometerSensor>,
+    "magnetometer")

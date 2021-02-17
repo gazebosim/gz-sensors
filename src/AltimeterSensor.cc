@@ -223,3 +223,6 @@ double AltimeterSensor::VerticalVelocity() const
 IGNITION_ADD_PLUGIN(
     ignition::sensors::SensorTypePlugin<ignition::sensors::AltimeterSensor>,
     ignition::sensors::SensorPlugin)
+IGNITION_ADD_PLUGIN_ALIAS(
+    ignition::sensors::SensorTypePlugin<ignition::sensors::AltimeterSensor>,
+    "altimeter")

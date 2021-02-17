@@ -376,3 +376,6 @@ void GpuLidarSensorPrivate::FillPointCloudMsg()
 IGNITION_ADD_PLUGIN(
     ignition::sensors::SensorTypePlugin<GpuLidarSensor>,
     ignition::sensors::SensorPlugin)
+IGNITION_ADD_PLUGIN_ALIAS(
+    ignition::sensors::SensorTypePlugin<GpuLidarSensor>,
+    "gpu_lidar")

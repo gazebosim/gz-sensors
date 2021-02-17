@@ -637,3 +637,6 @@ double DepthCameraSensor::NearClip() const
 IGNITION_ADD_PLUGIN(
     ignition::sensors::SensorTypePlugin<DepthCameraSensor>,
     ignition::sensors::SensorPlugin)
+IGNITION_ADD_PLUGIN_ALIAS(
+    ignition::sensors::SensorTypePlugin<DepthCameraSensor>,
+    "depth_camera")

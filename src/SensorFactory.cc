@@ -88,42 +88,11 @@ std::shared_ptr<SensorPlugin> SensorFactory::LoadSensorPlugin(
     return std::shared_ptr<SensorPlugin>();
   }
 
-  std::string pluginName;
-  bool capitalize{true};
-
-  // snake_case to CamelCase
-  for (const auto &c : _type)
-  {
-    if (c == '_')
-    {
-      capitalize = true;
-      continue;
-    }
-
-    if (!std::isalpha(c))
-      continue;
-
-    if (!capitalize)
-    {
-      pluginName += c;
-    }
-    else
-    {
-      pluginName += std::toupper(c);
-      capitalize = false;
-    }
-  }
-
-  auto ns = "ignition::sensors::v"
-      + std::to_string(IGNITION_SENSORS_MAJOR_VERSION) + "::";
-
-  pluginName = ns + "SensorTypePlugin<" + ns + pluginName + "Sensor>";
-
-  auto plugin = pluginLoader.Instantiate(pluginName);
+  auto plugin = pluginLoader.Instantiate(_type);
   if (!plugin)
   {
     std::stringstream error;
-    error << "Failed to instantiate plugin [" << pluginName << "] from ["
+    error << "Failed to instantiate plugin [" << _type << "] from ["
            << fullPath << "]. Available plugins:" << std::endl;
     for (auto name : pluginNames)
     {
@@ -139,7 +108,7 @@ std::shared_ptr<SensorPlugin> SensorFactory::LoadSensorPlugin(
 
   if (!sensorPlugin)
   {
-    ignerr << "Failed to query interface from [" << pluginName << "]"
+    ignerr << "Failed to query interface from [" << fullPath << "]"
            << std::endl;
     return nullptr;
   }

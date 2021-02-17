@@ -614,3 +614,6 @@ unsigned int RgbdCameraSensor::ImageHeight() const
 IGNITION_ADD_PLUGIN(
     ignition::sensors::SensorTypePlugin<RgbdCameraSensor>,
     ignition::sensors::SensorPlugin)
+IGNITION_ADD_PLUGIN_ALIAS(
+    ignition::sensors::SensorTypePlugin<RgbdCameraSensor>,
+    "rgbd_camera")

@@ -651,3 +651,6 @@ double CameraSensor::Baseline() const
 IGNITION_ADD_PLUGIN(
     ignition::sensors::SensorTypePlugin<CameraSensor>,
     ignition::sensors::SensorPlugin)
+IGNITION_ADD_PLUGIN_ALIAS(
+    ignition::sensors::SensorTypePlugin<CameraSensor>,
+    "camera")

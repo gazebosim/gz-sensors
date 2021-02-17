@@ -211,3 +211,6 @@ msgs::LogicalCameraImage LogicalCameraSensor::Image() const
 IGNITION_ADD_PLUGIN(
     ignition::sensors::SensorTypePlugin<LogicalCameraSensor>,
     ignition::sensors::SensorPlugin)
+IGNITION_ADD_PLUGIN_ALIAS(
+    ignition::sensors::SensorTypePlugin<LogicalCameraSensor>,
+    "logical_camera")
