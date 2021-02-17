@@ -43,6 +43,7 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
     sdformat${SDF_VER}::sdformat${SDF_VER}
   PRIVATE
     ignition-common${IGN_COMMON_VER}::profiler
+    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-plugin${IGN_PLUGIN_VER}::loader
 )
 target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME} PUBLIC DepthPoints_EXPORTS)
