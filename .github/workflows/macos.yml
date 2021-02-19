@@ -15,8 +15,6 @@ jobs:
       uses: Homebrew/actions/setup-homebrew@master
     - run: brew config
 
-    # Needed for X11Requirement
-    - run: brew cask install xquartz
     - name: Install base dependencies
       run: |
         brew tap osrf/simulation;
