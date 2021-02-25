@@ -20,7 +20,7 @@ pipelines:
           # Dependency: Ignition packages and sdformat
           - apt-get -y install
             libignition-cmake2-dev
-            libignition-common3-dev
+            libignition-common4-dev
             libignition-math6-dev
             libignition-msgs5-dev
             libignition-tools-dev
