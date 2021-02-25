@@ -200,6 +200,26 @@ bool Lidar::Update(const std::chrono::steady_clock::duration &/*_now*/)
 }
 
 //////////////////////////////////////////////////
+void Lidar::ApplyNoise()
+{
+  if (this->dataPtr->noises.find(LIDAR_NOISE) != this->dataPtr->noises.end())
+  {
+    for (unsigned int j = 0; j < this->VerticalRayCount(); ++j)
+    {
+      for (unsigned int i = 0; i < this->RayCount(); ++i)
+      {
+        int index = j * this->RayCount() + i;
+        double range = this->laserBuffer[index*3];
+        range = this->dataPtr->noises[LIDAR_NOISE]->Apply(range);
+        range = ignition::math::clamp(range,
+            this->RangeMin(), this->RangeMax());
+        this->laserBuffer[index*3] = range;
+      }
+    }
+  }
+}
+
+//////////////////////////////////////////////////
 bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
 {
   return this->PublishLidarScan(math::secNsecToDuration(_now.sec, _now.nsec));

@@ -39,6 +39,7 @@ using namespace ignition::sensors;
 class ignition::sensors::GpuLidarSensorPrivate
 {
   /// \brief Fill the point cloud packed message
+  /// \param[in] _laserBuffer Lidar data buffer.
   public: void FillPointCloudMsg(const float *_laserBuffer);
 
   /// \brief Rendering camera
@@ -251,7 +252,9 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
   /// \todo(anyone) It would be nice to remove this copy.
   this->dataPtr->gpuRays->Copy(this->laserBuffer);
 
+  // Apply noise before publishing the data.
   this->ApplyNoise();
+
   this->PublishLidarScan(_now);
 
   if (this->dataPtr->pointPub.HasConnections())
