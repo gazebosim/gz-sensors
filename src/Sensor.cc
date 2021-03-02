@@ -355,9 +355,16 @@ std::chrono::steady_clock::duration Sensor::NextDataUpdateTime() const
 //////////////////////////////////////////////////
 ignition::common::Time Sensor::NextUpdateTime() const
 {
+#ifndef _WIN32
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
   std::pair<uint64_t, uint64_t> secNsec =
     math::durationToSecNsec(this->dataPtr->nextUpdateTime);
   return common::Time(secNsec.first, secNsec.second);
+#ifndef _WIN32
+# pragma GCC diagnostic pop
+#endif
 }
 
 /////////////////////////////////////////////////
