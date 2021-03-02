@@ -15,15 +15,33 @@
  *
 */
 
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs/image.pb.h>
 #include <ignition/msgs/pointcloud_packed.pb.h>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #include <ignition/common/Image.hh>
 #include <ignition/common/Profiler.hh>
 #include <ignition/math/Helpers.hh>
 
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/rendering/Camera.hh>
 #include <ignition/rendering/DepthCamera.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
 #include <ignition/transport/Node.hh>
 
 #include <sdf/Sensor.hh>

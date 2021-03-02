@@ -19,12 +19,19 @@
 
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Helpers.hh>
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Manager.hh>
-
 #include <ignition/sensors/Lidar.hh>
-
 
 sdf::ElementPtr LidarToSDF(const std::string &name, double update_rate,
     const std::string &topic, double horz_samples, double horz_resolution,

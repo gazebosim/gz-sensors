@@ -16,18 +16,39 @@
 */
 
 #include <gtest/gtest.h>
+
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs/camera_info.pb.h>
+#include <ignition/msgs.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #include <ignition/common/Filesystem.hh>
 #include <ignition/common/Event.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/ThermalCameraSensor.hh>
-#include <ignition/rendering.hh>
-#include <ignition/msgs.hh>
+
+// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
+#include <ignition/rendering/RenderEngine.hh>
+#include <ignition/rendering/RenderingIface.hh>
+#include <ignition/rendering/Scene.hh>
+#include <ignition/rendering/Visual.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
-
 
 #define DOUBLE_TOL 1e-6
 
@@ -141,9 +162,9 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
       mgr.CreateSensor<ignition::sensors::ThermalCameraSensor>(sensorPtr);
   ASSERT_NE(thermalSensor, nullptr);
 
-  float ambientTemp = 296.0;
-  float ambientTempRange = 4.0;
-  float linearResolution = 0.01;
+  float ambientTemp = 296.0f;
+  float ambientTempRange = 4.0f;
+  float linearResolution = 0.01f;
   thermalSensor->SetAmbientTemperature(ambientTemp);
   thermalSensor->SetAmbientTemperatureRange(ambientTempRange);
   thermalSensor->SetLinearResolution(linearResolution);
@@ -176,8 +197,8 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   // wait for a few thermal camera frames
   mgr.RunOnce(ignition::common::Time::Zero, true);
 
-  int midWidth = thermalSensor->ImageWidth() * 0.5;
-  int midHeight = thermalSensor->ImageHeight() * 0.5;
+  int midWidth = static_cast<int>(thermalSensor->ImageWidth() * 0.5);
+  int midHeight = static_cast<int>(thermalSensor->ImageHeight() * 0.5);
   int mid = midHeight * thermalSensor->ImageWidth() + midWidth -1;
   int left = midHeight * thermalSensor->ImageWidth();
   int right = (midHeight+1) * thermalSensor->ImageWidth() - 1;
