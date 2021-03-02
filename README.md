@@ -34,6 +34,8 @@ designed to generate realistic data from simulation environments. Ignition Senso
 
 [Usage](#usage)
 
+[Supported Sensors](#supported-sensors)
+
 [Folder Structure](#folder-structure)
 
 [Code of Conduct](#code-of-conduct)
@@ -58,6 +60,54 @@ See the [installation tutorial](https://ignitionrobotics.org/api/sensors/4.0/ins
 # Usage
 
 Please refer to the [examples directory](https://github.com/ignitionrobotics/ign-sensors/raw/master/examples/).
+
+# Supported Sensors
+
+[Air Pressure Sensor](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1AirPressureSensor.html)
+
+[Altimeter](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1AltimeterSensor.html)
+
+[Camera Sensor](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1CameraSensor.html)
+
+[Depth Camera Sensor](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1DepthCameraSensor.html)
+
+[Gaussian Noise Model](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1GaussianNoiseModel.html)
+
+[GPU Lidar Sensor](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1GpuLidarSensor.html)
+
+[Image Gaussian Noise Model](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1ImageGaussianNoiseModel.html)
+
+[Image Noise Factory](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1ImageNoiseFactory.html)
+
+[IMU Sensor](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1ImuSensor.html)
+
+[Lidar](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1Lidar.html)
+
+[Logical Camera Sensor](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1LogicalCameraSensor.html)
+
+[Magnetometer Sensor](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1MagnetometerSensor.html)
+
+[Manager](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1Manager.html)
+
+[Noise](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1Noise.html)
+
+[Noise Factory](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1NoiseFactory.html)
+
+[Rendering Events](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1RenderingEvents.html)
+
+[Rendering Sensor](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1RenderingSensor.html)
+
+[RGBD Camera Sensor](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1RgbdCameraSensor.html)
+
+[Sensor](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1Sensor.html)
+
+[Sensor Factory](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1SensorFactory.html)
+
+[Sensor Plugin](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1SensorPlugin.html)
+
+[Sensor Type Plugin](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1SensorTypePlugin.html)
+
+[Thermal Camera Sensor](https://ignitionrobotics.org/api/sensors/4.1/classignition_1_1sensors_1_1ThermalCameraSensor.html)
 
 # Folder Structure
 
