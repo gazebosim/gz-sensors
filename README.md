@@ -12,7 +12,7 @@ Build | Status
 Test coverage | [![codecov](https://codecov.io/gh/ignitionrobotics/ign-sensors/branch/ign-sensors3/graph/badge.svg)](https://codecov.io/gh/ignitionrobotics/ign-sensors)
 Ubuntu Bionic | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-ign-sensors3-bionic-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-ign-sensors3-bionic-amd64)
 Homebrew      | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-ign-sensors3-homebrew-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-ign-sensors3-homebrew-amd64)
-Windows       | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-ign-sensors3-windows7-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-ign-sensors3-windows7-amd64)
+Windows       | [![Build Status](https://build.osrfoundation.org/job/ign_sensors-ign-3-win/badge/icon)](https://build.osrfoundation.org/job/ign_sensors-ign-3-win/)
 
 Ignition Sensors, a component of [Ignition
 Robotics](https://ignitionrobotics.org), provides numerous sensor models
