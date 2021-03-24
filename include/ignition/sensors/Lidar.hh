@@ -66,16 +66,16 @@ namespace ignition
       public: virtual bool Update(
         const std::chrono::steady_clock::duration &_now) override;
 
+      /// \brief Apply noise to the laser buffer, if noise has been
+      /// configured. This should be called before PublishLidarScan if you
+      /// want the scan data to contain noise.
+      public: void ApplyNoise();
+
       /// \brief Publish LaserScan message
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       public: virtual bool IGN_DEPRECATED(4) PublishLidarScan(
         const ignition::common::Time &_now);
-
-      /// \brief Apply noise to the laser buffer, if noise has been
-      /// configured. This should be called before PublishLidarScan if you
-      /// want the scan data to contain noise.
-      public: void ApplyNoise();
 
       /// \brief Publish LaserScan message
       /// \param[in] _now The current time
@@ -247,6 +247,14 @@ namespace ignition
 
       // Documentation inherited
       public: virtual bool IsActive() const;
+
+      /// \brief Get the vertical resolution.
+      /// \return The vertical resolution.
+      public: double VerticalResolution() const;
+
+      /// \brief Get the horizontal resolution.
+      /// \return The horizontal resolution.
+      public: double HorizontalResolution() const;
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Just a mutex for thread safety
