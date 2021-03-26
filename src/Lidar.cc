@@ -374,18 +374,6 @@ unsigned int Lidar::VerticalRangeCount() const
 }
 
 //////////////////////////////////////////////////
-double Lidar::HorizontalResolution() const
-{
-  return this->dataPtr->sdfLidar.HorizontalScanResolution();
-}
-
-//////////////////////////////////////////////////
-double Lidar::VerticalResolution() const
-{
-  return this->dataPtr->sdfLidar.VerticalScanResolution();
-}
-
-//////////////////////////////////////////////////
 void Lidar::SetParent(const std::string &_parent)
 {
   Sensor::SetParent(_parent);
