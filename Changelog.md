@@ -4,9 +4,6 @@
 
 ### Ignition Sensors 5.0.0 (20XX-XX-XX)
 
-1. Apply noise evenly to scans and point clouds
-    * [Pull request #89](https://github.com/ignitionrobotics/ign-sensors/pull/89)
-
 1. Bump in edifice: ign-common4
     * [Pull request #85](https://github.com/ignitionrobotics/ign-sensors/pull/85)
 
