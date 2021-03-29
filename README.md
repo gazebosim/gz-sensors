@@ -53,7 +53,7 @@ models into sensor streams.
 
 # Install
 
-See the [installation tutorial](https://ignitionrobotics.org/api/sensors/4.0/installation.html).
+See the [installation tutorial](https://ignitionrobotics.org/api/sensors/5.0/installation.html).
 
 # Usage
 

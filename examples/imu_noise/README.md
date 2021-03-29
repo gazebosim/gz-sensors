@@ -12,8 +12,30 @@ To evaluate noise, first build and run.
 mkdir build
 cd build
 cmake ..
+```
+
+### Ubuntu Or MacOS
+
+```bash
 make
+```
+
+This will generate the `sensor_noise` executable under `build`.
+
+### Windows
+
+```bash
+cmake --build . --config Release
+```
+
+This will generate the `sensor_noise.exe` executable under `build\Release`.
+
+```
+# Ubuntu or MacOS
 ./sensor_noise
+
+# Windows
+.\Release\sensor_noise.exe
 ```
 
 This will generate two series of samples, one for accelerometer and another for gyroscope.
@@ -21,13 +43,17 @@ This will generate two series of samples, one for accelerometer and another for 
 To use the analysis script, first install Allan Tools:
 
 ```
-pip install --user allantools
+pip install --user allantools scipy
 ```
 
 Then execute the script:
 
 ```
+# Ubuntu o MacOS
 ../plot_samples.py
+
+# Windows
+python.exe ..\plot_samples.py
 ```
 
 This will produce two graphs: the Allan Deviation plots for both the simulated accelerometer and gyroscope.  The values on these graphs should correspond closely to the inputs:
@@ -39,10 +65,8 @@ This will produce two graphs: the Allan Deviation plots for both the simulated a
   * sigma_N: Accelerometer Noise Density
   * sigma_K: Accelerometer Random Walk
 
-
 While this technique is used here to validate the operation of the algorithm, it could also be used
 to estimate the noise parameters for a real IMU.
-
 
 ## References:
 
