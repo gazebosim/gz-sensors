@@ -198,9 +198,6 @@ bool GpuLidarSensor::CreateLidar()
   this->dataPtr->gpuRays->SetVerticalRayCount(
       this->VerticalRayCount());
 
-  this->dataPtr->gpuRays->SetHorizontalResolution(this->HorizontalResolution());
-  this->dataPtr->gpuRays->SetVerticalResolution(this->VerticalResolution());
-
   this->Scene()->RootVisual()->AddChild(
       this->dataPtr->gpuRays);
 
@@ -239,8 +236,8 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
     return false;
   }
 
-  int len = this->dataPtr->gpuRays->RangeCount() *
-    this->dataPtr->gpuRays->VerticalRangeCount() * 3;
+  int len = this->dataPtr->gpuRays->RayCount() *
+    this->dataPtr->gpuRays->VerticalRayCount() * 3;
 
   if (this->laserBuffer == nullptr)
   {
