@@ -2,7 +2,7 @@
 
 ### Ignition Sensors 5.X.X
 
-### Ignition Sensors 5.0.0 (20XX-XX-XX)
+### Ignition Sensors 5.0.0 (2021-03-30)
 
 1. Bump in edifice: ign-common4
     * [Pull request #85](https://github.com/ignitionrobotics/ign-sensors/pull/85)
@@ -15,6 +15,10 @@
 
 1. Bump in edifice: ign-rendering5
     * [Pull request #55](https://github.com/ignitionrobotics/ign-sensors/pull/55)
+
+1. Documentation updates
+    * [Pull request #116](https://github.com/ignitionrobotics/ign-sensors/pull/116)
+    * [Pull request #114](https://github.com/ignitionrobotics/ign-sensors/pull/114)
 
 ## Ignition Sensors 4
 
