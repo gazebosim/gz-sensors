@@ -118,10 +118,10 @@ TEST(Lidar_TEST, CreateLaser)
   const std::string topic = "/ignition/sensors/test/lidar";
   const double update_rate = 30;
   const double horz_samples = 640;
-  const double horz_resolution = 2.0;
+  const double horz_resolution = 1;
   const double horz_min_angle = -1.396263;
   const double horz_max_angle = 1.396263;
-  const double vert_resolution = 0.5;
+  const double vert_resolution = 1;
   const double vert_samples = 1;
   const double vert_min_angle = 0;
   const double vert_max_angle = 0;
@@ -144,7 +144,7 @@ TEST(Lidar_TEST, CreateLaser)
   ASSERT_NE(nullptr, sensor);
 
   double angleRes = (sensor->AngleMax() - sensor->AngleMin()).Radian() /
-                    sensor->RangeCount();
+                    sensor->RayCount();
   EXPECT_EQ(sensor->AngleMin(), ignition::math::Angle(-1.396263));
   EXPECT_EQ(sensor->AngleMax(), ignition::math::Angle(1.396263));
   EXPECT_NEAR(sensor->RangeMin(), 0.08, 1e-6);
@@ -152,10 +152,7 @@ TEST(Lidar_TEST, CreateLaser)
   EXPECT_NEAR(sensor->AngleResolution(), angleRes, 1e-3);
   EXPECT_NEAR(sensor->RangeResolution(), 0.01, 1e-3);
   EXPECT_EQ(sensor->RayCount(), 640u);
-  EXPECT_EQ(sensor->RangeCount(),
-      static_cast<unsigned int>(horz_samples * horz_resolution));
-  EXPECT_NEAR(horz_resolution, sensor->HorizontalResolution(), 1e-3);
-  EXPECT_NEAR(vert_resolution, sensor->VerticalResolution(), 1e-3);
+  EXPECT_EQ(sensor->RangeCount(), 640u);
 
   EXPECT_EQ(sensor->VerticalRayCount(), 1u);
   EXPECT_EQ(sensor->VerticalRangeCount(), 1u);
