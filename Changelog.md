@@ -1,3 +1,9 @@
+## Ignition Sensors 6
+
+### Ignition Sensors 6.X.X
+
+### Ignition Sensors 6.0.0 (20XX-XX-XX)
+
 ## Ignition Sensors 5
 
 ### Ignition Sensors 5.X.X
