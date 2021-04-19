@@ -373,7 +373,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     unsigned int mb = g_imgBuffer[imgMid + 2];
     EXPECT_EQ(0u, mr);
     EXPECT_EQ(0u, mg);
-#ifdef __APPLE__
+#ifndef __APPLE__
     EXPECT_GT(mb, 0u);
 #endif
 
@@ -438,7 +438,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     unsigned int mb = g_pointsRGBBuffer[imgMid + 2];
     EXPECT_EQ(0u, mr);
     EXPECT_EQ(0u, mg);
-#ifdef __APPLE__
+#ifndef __APPLE__
     EXPECT_GT(mb, 0u);
 #endif
 

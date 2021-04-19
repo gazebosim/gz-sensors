@@ -538,7 +538,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   // Sensor 1 should see box01 and box02
   EXPECT_NEAR(sensor1->Range(0), expectedRangeAtMidPointBox2, LASER_TOL);
   EXPECT_NEAR(sensor1->Range(mid), expectedRangeAtMidPointBox1, LASER_TOL);
-#ifdef __APPLE__
+#ifndef __APPLE__
   EXPECT_DOUBLE_EQ(sensor1->Range(last), ignition::math::INF_D);
 #endif
 
@@ -654,7 +654,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   {
     double expectedRange = expectedRangeAtMidPoint / cos(angleStep);
 
-#ifdef __APPLE__
+#ifndef __APPLE__
     EXPECT_NEAR(sensor->Range(i * horzSamples + mid),
         expectedRange, VERTICAL_LASER_TOL);
 #endif
@@ -794,7 +794,7 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   // Sensor 1 should see box01 in front of it
   EXPECT_DOUBLE_EQ(sensor1->Range(0), ignition::math::INF_D);
   EXPECT_NEAR(sensor1->Range(mid), expectedRangeAtMidPointBox1, LASER_TOL);
-#ifdef __APPLE__
+#ifndef __APPLE__
   EXPECT_DOUBLE_EQ(sensor1->Range(last), ignition::math::INF_D);
 #endif
 
