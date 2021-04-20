@@ -539,6 +539,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   EXPECT_NEAR(sensor1->Range(0), expectedRangeAtMidPointBox2, LASER_TOL);
   EXPECT_NEAR(sensor1->Range(mid), expectedRangeAtMidPointBox1, LASER_TOL);
 #ifndef __APPLE__
+  // See https://github.com/ignitionrobotics/ign-sensors/issues/66
   EXPECT_DOUBLE_EQ(sensor1->Range(last), ignition::math::INF_D);
 #endif
 
@@ -655,6 +656,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
     double expectedRange = expectedRangeAtMidPoint / cos(angleStep);
 
 #ifndef __APPLE__
+    // See https://github.com/ignitionrobotics/ign-sensors/issues/66
     EXPECT_NEAR(sensor->Range(i * horzSamples + mid),
         expectedRange, VERTICAL_LASER_TOL);
 #endif
@@ -795,6 +797,7 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   EXPECT_DOUBLE_EQ(sensor1->Range(0), ignition::math::INF_D);
   EXPECT_NEAR(sensor1->Range(mid), expectedRangeAtMidPointBox1, LASER_TOL);
 #ifndef __APPLE__
+  // See https://github.com/ignitionrobotics/ign-sensors/issues/66
   EXPECT_DOUBLE_EQ(sensor1->Range(last), ignition::math::INF_D);
 #endif
 
@@ -802,6 +805,7 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   EXPECT_NEAR(sensor2->Range(0), expectedRangeAtMidPointBox1, LASER_TOL);
   EXPECT_DOUBLE_EQ(sensor2->Range(mid), ignition::math::INF_D);
 #ifndef __APPLE__
+  // See https://github.com/ignitionrobotics/ign-sensors/issues/66
   EXPECT_DOUBLE_EQ(sensor2->Range(last), ignition::math::INF_D);
 #endif
 
