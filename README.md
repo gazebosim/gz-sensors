@@ -9,10 +9,10 @@
 
 Build | Status
 -- | --
-Test coverage | [![codecov](https://codecov.io/gh/ignitionrobotics/ign-sensors/branch/master/graph/badge.svg)](https://codecov.io/gh/ignitionrobotics/ign-sensors)  
-Ubuntu Bionic | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-master-bionic-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-master-bionic-amd64)  
-Homebrew      | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-master-homebrew-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-master-homebrew-amd64)  
-Windows       | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-master-windows7-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-master-windows7-amd64)
+Test coverage | [![codecov](https://codecov.io/gh/ignitionrobotics/ign-sensors/branch/ign-sensors4/graph/badge.svg)](https://codecov.io/gh/ignitionrobotics/ign-sensors)
+Ubuntu Bionic | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-ign-sensors4-bionic-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-ign-sensors4-bionic-amd64)
+Homebrew      | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-ign-sensors4-homebrew-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-ign-sensors4-homebrew-amd64)
+Windows       | [![Build Status](https://build.osrfoundation.org/job/ign_sensors-ign-4-win/badge/icon)](https://build.osrfoundation.org/job/ign_sensors-ign-4-win/)
 
 Ignition Sensors, a component of [Ignition
 Robotics](https://ignitionrobotics.org), provides numerous sensor models
@@ -29,14 +29,10 @@ designed to generate realistic data from simulation environments. Ignition Senso
 * [Source Install](#source-install)
 
     * [Prerequisites](#prerequisites)
-  
+
     * [Building from Source](#building-from-source)
 
 [Usage](#usage)
-
-[Documentation](#documentation)
-
-[Testing](#testing)
 
 [Folder Structure](#folder-structure)
 
@@ -61,55 +57,7 @@ See the [installation tutorial](https://ignitionrobotics.org/api/sensors/4.0/ins
 
 # Usage
 
-Please refer to the [examples directory](https://github.com/ignitionrobotics/ign-sensors/raw/master/examples/).
-
-# Documentation
-
-API and tutorials can be found at [https://ignitionrobotics.org/libs/sensors](https://ignitionrobotics.org/libs/sensors).
-
-You can also generate the documentation from a clone of this repository by following these steps.
-
-1. You will need Doxygen. On Ubuntu Doxygen can be installed using
-
-    ```
-    sudo apt-get install doxygen
-    ```
-
-2. Clone the repository
-
-    ```
-    git clone https://github.com/ignitionrobotics/ign-sensors
-    ```
-
-3. Configure and build the documentation.
-
-    ```
-    cd ign-sensors; mkdir build; cd build; cmake ../; make doc
-    ```
-
-4. View the documentation by running the following command from the build directory.
-
-    ```
-    firefox doxygen/html/index.html
-    ```
-
-# Testing
-
-Follow these steps to run tests and static code analysis in your clone of this repository.
-
-1. Follow the [source install instruction](#source-install).
-
-2. Run tests.
-
-    ```
-    make test
-    ```
-
-3. Static code checker.
-
-    ```
-    make codecheck
-    ```
+Please refer to the [examples directory](https://github.com/ignitionrobotics/ign-sensors/raw/ign-sensors4/examples/).
 
 # Folder Structure
 
@@ -126,18 +74,17 @@ Refer to the following table for information about important directories and fil
 ├── tutorials                 Tutorials, written in markdown.
 ├── Changelog.md              Changelog.
 ├── CMakeLists.txt            CMake build script.
-└── README.md                 This readme.  
+└── README.md                 This readme.
 ```
 
 # Contributing
 
-Please see
-[CONTRIBUTING.md](https://github.com/ignitionrobotics/ign-gazebo/blob/master/CONTRIBUTING.md).
+Please see the [contribution guide](https://ignitionrobotics.org/docs/all/contributing).
 
 # Code of Conduct
 
 Please see
-[CODE_OF_CONDUCT.md](https://github.com/ignitionrobotics/ign-gazebo/blob/master/CODE_OF_CONDUCT.md).
+[CODE_OF_CONDUCT.md](https://github.com/ignitionrobotics/ign-gazebo/blob/main/CODE_OF_CONDUCT.md).
 
 # Versioning
 
@@ -145,4 +92,4 @@ This library uses [Semantic Versioning](https://semver.org/). Additionally, this
 
 # License
 
-This library is licensed under [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0). See also the [LICENSE](https://github.com/ignitionrobotics/ign-sensors/blob/master/LICENSE) file.
+This library is licensed under [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0). See also the [LICENSE](https://github.com/ignitionrobotics/ign-sensors/blob/main/LICENSE) file.
