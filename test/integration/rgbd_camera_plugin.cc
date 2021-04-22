@@ -374,7 +374,10 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     unsigned int mb = g_imgBuffer[imgMid + 2];
     EXPECT_EQ(0u, mr);
     EXPECT_EQ(0u, mg);
+#ifndef __APPLE__
+    // See https://github.com/ignitionrobotics/ign-sensors/issues/66
     EXPECT_GT(mb, 0u);
+#endif
 
     unsigned int lr = g_imgBuffer[imgLeft];
     unsigned int lg = g_imgBuffer[imgLeft + 1];
@@ -437,7 +440,10 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     unsigned int mb = g_pointsRGBBuffer[imgMid + 2];
     EXPECT_EQ(0u, mr);
     EXPECT_EQ(0u, mg);
+#ifndef __APPLE__
+    // See https://github.com/ignitionrobotics/ign-sensors/issues/66
     EXPECT_GT(mb, 0u);
+#endif
 
     // Far left and right points should be red (background color)
     unsigned int lr = g_pointsRGBBuffer[imgLeft];
