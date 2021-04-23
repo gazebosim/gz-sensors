@@ -18,7 +18,6 @@
 
 1. Documentation updates
     * [Pull request #116](https://github.com/ignitionrobotics/ign-sensors/pull/116)
-    * [Pull request #114](https://github.com/ignitionrobotics/ign-sensors/pull/114)
 
 ## Ignition Sensors 4
 
