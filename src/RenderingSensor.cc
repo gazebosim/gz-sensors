@@ -117,7 +117,7 @@ void RenderingSensor::Render()
   {
     // When GetLegacyAutoGpuFlush = true, that function gets
     // called per sensor, so we don't have to do anything here
-    this->dataPtr->scene->PostRenderGpuFlush();
+    this->dataPtr->scene->PostRender();
   }
 }
 
