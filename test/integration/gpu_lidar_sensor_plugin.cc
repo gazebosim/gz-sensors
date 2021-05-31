@@ -751,6 +751,7 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   ignition::rendering::VisualPtr root = scene->RootVisual();
 
   scene->SetAmbientLight(0.3, 0.3, 0.3);
+  scene->SetNumCameraPassesPerGpuFlush(6u);
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
@@ -790,6 +791,9 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
 
   // Render and update
   mgr.RunOnce(std::chrono::steady_clock::duration::zero());
+
+  // manually finish update scene
+  scene->PostRender();
 
   int mid = horzSamples / 2;
   int last = (horzSamples - 1);
