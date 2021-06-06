@@ -751,7 +751,7 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   ignition::rendering::VisualPtr root = scene->RootVisual();
 
   scene->SetAmbientLight(0.3, 0.3, 0.3);
-  scene->SetNumCameraPassesPerGpuFlush(6u);
+  scene->SetCameraPassCountPerGpuFlush(6u);
 
   // Create a sensor manager
   ignition::sensors::Manager mgr;
