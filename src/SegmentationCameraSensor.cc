@@ -20,6 +20,7 @@
 
 #include "ignition/common/Console.hh"
 #include "ignition/common/Profiler.hh"
+#include "ignition/common/Image.hh"
 #include "ignition/sensors/RenderingEvents.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
@@ -36,6 +37,17 @@ using namespace sensors;
 
 class ignition::sensors::SegmentationCameraSensorPrivate
 {
+  /// \brief Save an image
+  /// \param[in] _data the image data to be saved
+  /// \param[in] _width width of image in pixels
+  /// \param[in] _height height of image in pixels
+  /// \return True if the image was saved successfully. False can mean
+  /// that the path provided to the constructor does exist and creation
+  /// of the path was not possible.
+  /// \sa ImageSaver
+  public: bool SaveImage(const uint8_t *_data, unsigned int _width,
+    unsigned int _height);
+
   /// \brief SDF Sensor DOM Object
   public: sdf::Sensor sdfSensor;
 
@@ -75,6 +87,23 @@ class ignition::sensors::SegmentationCameraSensorPrivate
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
+
+  /// \brief True to save images
+  public: bool saveImage = false;
+
+  /// \brief path directory to where images are saved
+  public: std::string saveImagePath = "./";
+
+  /// \brief Prefix of an image name
+  public: std::string saveImagePrefix = "./";
+
+  /// \brief counter used to set the image filename
+  public: std::uint64_t saveImageCounter = 0;
+
+  /// \brief Event that is used to trigger callbacks when a new image
+  /// is generated
+  public: ignition::common::EventT<
+          void(const ignition::msgs::Image &)> imageEvent;
 };
 
 //////////////////////////////////////////////////
@@ -258,6 +287,14 @@ bool SegmentationCameraSensor::CreateCamera()
         std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
         std::placeholders::_4, std::placeholders::_5));
 
+  // Create the directory to store frames
+  if (sdfCamera->SaveFrames())
+  {
+    this->dataPtr->saveImagePath = sdfCamera->SaveFramesPath();
+    this->dataPtr->saveImagePrefix = this->Name() + "_";
+    this->dataPtr->saveImage = true;
+  }
+
   return true;
 }
 
@@ -306,8 +343,12 @@ bool SegmentationCameraSensor::Update(
   }
 
   // don't render if there is no subscribers
-  if (!this->dataPtr->publisher.HasConnections())
+  if (!this->dataPtr->publisher.HasConnections() &&
+    this->dataPtr->imageEvent.ConnectionCount() <= 0 &&
+    !this->dataPtr->saveImage)
+  {
     return false;
+  }
 
   // Actual render
   this->Render();
@@ -340,9 +381,28 @@ bool SegmentationCameraSensor::Update(
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-  // publish
+  // Publish
   this->PublishInfo(_now);
   this->dataPtr->publisher.Publish(this->dataPtr->segmentationMsg);
+
+  // Trigger callbacks.
+  if (this->dataPtr->imageEvent.ConnectionCount() > 0)
+  {
+    try
+    {
+      this->dataPtr->imageEvent(this->dataPtr->segmentationMsg);
+    }
+    catch(...)
+    {
+      ignerr << "Exception thrown in an image callback.\n";
+    }
+  }
+
+  // Save image
+  if (this->dataPtr->saveImage)
+  {
+    this->dataPtr->SaveImage(this->dataPtr->segmentationBuffer, width, height);
+  }
 
   return true;
 }
@@ -357,6 +417,37 @@ unsigned int SegmentationCameraSensor::ImageHeight() const
 unsigned int SegmentationCameraSensor::ImageWidth() const
 {
   return this->dataPtr->camera->ImageWidth();
+}
+
+/////////////////////////////////////////////////
+common::ConnectionPtr SegmentationCameraSensor::ConnectImageCallback(
+    std::function<void(const msgs::Image &)> _callback)
+{
+  return this->dataPtr->imageEvent.Connect(_callback);
+}
+
+//////////////////////////////////////////////////
+bool SegmentationCameraSensorPrivate::SaveImage(
+  const uint8_t *_data, unsigned int _width, unsigned int _height)
+{
+  // Attempt to create the directory if it doesn't exist
+  if (!ignition::common::isDirectory(this->saveImagePath))
+  {
+    if (!ignition::common::createDirectories(this->saveImagePath))
+      return false;
+  }
+
+  std::string filename = this->saveImagePrefix +
+                         std::to_string(this->saveImageCounter) + ".png";
+  ++this->saveImageCounter;
+
+  ignition::common::Image localImage;
+  localImage.SetFromData(_data, _width, _height,
+    ignition::common::Image::RGB_INT8);
+
+  localImage.SavePNG(
+      ignition::common::joinPaths(this->saveImagePath, filename));
+  return true;
 }
 
 IGN_SENSORS_REGISTER_SENSOR(SegmentationCameraSensor)
