@@ -18,6 +18,8 @@
 #ifndef IGNITION_SENSORS_SEGMENTATIONCAMERASENSOR_HH_
 #define IGNITION_SENSORS_SEGMENTATIONCAMERASENSOR_HH_
 
+#include <string>
+#include <memory>
 #include <sdf/sdf.hh>
 
 #include <ignition/common/Event.hh>
@@ -25,7 +27,7 @@
 #include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
 
-#include <ignition/msgs.hh>
+#include "ignition/msgs.hh"
 #include "ignition/transport/Node.hh"
 #include "ignition/transport/Publisher.hh"
 
@@ -94,8 +96,8 @@ namespace ignition
       /// \param[in] _height height of the Segmentation image
       /// \param[in] _channel bytes used for the Segmentation data
       /// \param[in] _format string with the format
-      public: void OnNewSegmentationFrame(const uint8_t *, unsigned int, unsigned int,
-          unsigned int, const std::string &);
+      public: void OnNewSegmentationFrame(const uint8_t *, unsigned int,
+        unsigned int, unsigned int, const std::string &);
 
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
@@ -123,6 +125,5 @@ namespace ignition
     }
   }
 }
-
 
 #endif

@@ -15,8 +15,11 @@
  *
 */
 
+#include <mutex>
+#include <memory>
+
 #include "ignition/common/Console.hh"
-#include <ignition/common/Profiler.hh>
+#include "ignition/common/Profiler.hh"
 #include "ignition/sensors/RenderingEvents.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
@@ -33,31 +36,44 @@ using namespace sensors;
 
 class ignition::sensors::SegmentationCameraSensorPrivate
 {
+  /// \brief SDF Sensor DOM Object
   public: sdf::Sensor sdfSensor;
 
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
 
+  /// \brief rendering Segmentation Camera
   public: rendering::SegmentationCameraPtr camera {nullptr};
 
+  /// \brief node to create publisher
   public: transport::Node node;
 
+  /// \brief publisher to publish segmentation image
   public: transport::Node::Publisher publisher;
 
+  /// \brief Segmentation Image Msg
   public: msgs::Image segmentationMsg;
 
+  /// \brief Topic to publish the segmentation image
   public: std::string topicSegmentation = "";
 
+  /// \brief Buffer contains the segmentation map data
   public: uint8_t *segmentationBuffer {nullptr};
 
+  /// \brief Segmentation type (Semantic / Instance)
   public: SegmentationType type {SegmentationType::Semantic};
 
+  /// \brief True if camera generates a colored map image
+  /// False if camera generates labels ids image
   public: bool isColoredMap {true};
 
+  /// \brief Connection to the new segmentation frames data
   public: common::ConnectionPtr newSegmentationConnection;
 
+  /// \brief Connection to the Manager's scene change event.
   public: common::ConnectionPtr sceneChangeConnection;
 
+  /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
 };
 
@@ -83,17 +99,37 @@ bool SegmentationCameraSensor::Init()
 /////////////////////////////////////////////////
 bool SegmentationCameraSensor::Load(sdf::ElementPtr _sdf)
 {
-  std::cout << "Load ElementPtr" << std::endl;
   sdf::Sensor sdfSensor;
   sdfSensor.Load(_sdf);
-  this->Load(sdfSensor);
+  return this->Load(sdfSensor);
 }
 
 /////////////////////////////////////////////////
 bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
 {
-  std::cout << "Load SDF" << std::endl;
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+
+  // Segmentation Type & Colored Properties
+  sdf::ElementPtr sdfElement = _sdf.Element();
+  if (sdfElement->HasElement("segmentation_type"))
+  {
+    std::string type = sdfElement->Get<std::string>("segmentation_type");
+
+    // convert type to lowercase
+    std::for_each(type.begin(), type.end(), [](char & c){
+      c = std::tolower(c);
+    });
+
+    if (type == "semantic")
+      this->dataPtr->type = SegmentationType::Semantic;
+    else if (type == "instance" || type == "panoptic")
+      this->dataPtr->type = SegmentationType::Panoptic;
+  }
+
+  if (sdfElement->HasElement("colored"))
+  {
+    this->dataPtr->isColoredMap = sdfElement->Get<bool>("colored");
+  }
 
   if (!Sensor::Load(_sdf))
   {
@@ -105,6 +141,7 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
   {
     ignerr << "Attempting to a load a Segmentation Camera sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
+    return false;
   }
 
   if (_sdf.CameraSensor() == nullptr)
@@ -137,8 +174,9 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
   }
 
   this->dataPtr->sceneChangeConnection =
-      RenderingEvents::ConnectSceneChangeCallback(
-      std::bind(&SegmentationCameraSensor::SetScene, this, std::placeholders::_1));
+    RenderingEvents::ConnectSceneChangeCallback(
+    std::bind(&SegmentationCameraSensor::SetScene, this,
+    std::placeholders::_1));
 
   this->dataPtr->initialized = true;
 
@@ -150,6 +188,7 @@ void SegmentationCameraSensor::SetScene(
   ignition::rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+
   // APIs make it possible for the scene pointer to change
   if (this->Scene() != _scene)
   {
@@ -165,7 +204,6 @@ void SegmentationCameraSensor::SetScene(
 /////////////////////////////////////////////////
 bool SegmentationCameraSensor::CreateCamera()
 {
-  std::cout << "Create Camera" << std::endl;
   auto sdfCamera = this->dataPtr->sdfSensor.CameraSensor();
   if (!sdfCamera)
   {
@@ -176,9 +214,16 @@ bool SegmentationCameraSensor::CreateCamera()
   // Camera Info Msg
   this->PopulateInfo(sdfCamera);
 
-  // Create rendering camera
-  this->dataPtr->camera = this->Scene()->CreateSegmentationCamera(
-    this->Name());
+  if (!this->dataPtr->camera)
+  {
+    // Create rendering camera
+    this->dataPtr->camera = this->Scene()->CreateSegmentationCamera(
+      this->Name());
+  }
+
+  // Segmentation properties
+  this->dataPtr->camera->SetSegmentationType(this->dataPtr->type);
+  this->dataPtr->camera->EnableColoredMap(this->dataPtr->isColoredMap);
 
   auto width = sdfCamera->ImageWidth();
   auto height = sdfCamera->ImageHeight();
@@ -227,10 +272,13 @@ void SegmentationCameraSensor::OnNewSegmentationFrame(const uint8_t * _data,
   unsigned int _width, unsigned int _height, unsigned int _channles,
   const std::string &/*_format*/)
 {
-    std::cout << "New Frame " << std::endl;
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-  // unsigned int bufferSize = _width * _height * _channles * sizeof(uint8_t);
   unsigned int bufferSize = _width * _height * _channles;
+
+  if (!this->dataPtr->segmentationBuffer)
+    this->dataPtr->segmentationBuffer = new uint8_t[bufferSize];
+
   memcpy(this->dataPtr->segmentationBuffer, _data, bufferSize);
 }
 
@@ -310,6 +358,5 @@ unsigned int SegmentationCameraSensor::ImageWidth() const
 {
   return this->dataPtr->camera->ImageWidth();
 }
-
 
 IGN_SENSORS_REGISTER_SENSOR(SegmentationCameraSensor)
