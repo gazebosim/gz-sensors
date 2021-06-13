@@ -6,6 +6,7 @@ set(dri_tests
   gpu_lidar_sensor_plugin.cc
   rgbd_camera_plugin.cc
   thermal_camera_plugin.cc
+  segmentation_camera_plugin.cc
 )
 
 set(tests
@@ -39,6 +40,7 @@ if (DRI_TESTS)
       ${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar
       ${PROJECT_LIBRARY_TARGET_NAME}-rgbd_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-thermal_camera
+      ${PROJECT_LIBRARY_TARGET_NAME}-segmentation_camera
   )
 endif()
 

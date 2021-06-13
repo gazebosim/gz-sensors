@@ -77,7 +77,7 @@ class ignition::sensors::SegmentationCameraSensorPrivate
 
   /// \brief True if camera generates a colored map image
   /// False if camera generates labels ids image
-  public: bool isColoredMap {true};
+  public: bool isColoredMap {false};
 
   /// \brief Connection to the new segmentation frames data
   public: common::ConnectionPtr newSegmentationConnection;
@@ -263,7 +263,6 @@ bool SegmentationCameraSensor::CreateCamera()
   this->dataPtr->camera->SetVisibilityMask(sdfCamera->VisibilityMask());
   this->dataPtr->camera->SetNearClipPlane(sdfCamera->NearClip());
   this->dataPtr->camera->SetFarClipPlane(sdfCamera->FarClip());
-  this->dataPtr->camera->SetHFOV(sdfCamera->HorizontalFov());
   math::Angle angle = sdfCamera->HorizontalFov();
   if (angle < 0.01 || angle > IGN_PI*2)
   {
