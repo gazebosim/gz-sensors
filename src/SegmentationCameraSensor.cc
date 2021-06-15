@@ -34,6 +34,7 @@
 
 using namespace ignition;
 using namespace sensors;
+using namespace rendering;
 
 class ignition::sensors::SegmentationCameraSensorPrivate
 {
@@ -51,16 +52,16 @@ class ignition::sensors::SegmentationCameraSensorPrivate
   /// \brief SDF Sensor DOM Object
   public: sdf::Sensor sdfSensor;
 
-  /// \brief true if Load() has been called and was successful
+  /// \brief True if Load() has been called and was successful
   public: bool initialized = false;
 
-  /// \brief rendering Segmentation Camera
+  /// \brief Rendering Segmentation Camera
   public: rendering::SegmentationCameraPtr camera {nullptr};
 
-  /// \brief node to create publisher
+  /// \brief Node to create publisher
   public: transport::Node node;
 
-  /// \brief publisher to publish segmentation image
+  /// \brief Publisher to publish segmentation image
   public: transport::Node::Publisher publisher;
 
   /// \brief Segmentation Image Msg
@@ -91,13 +92,13 @@ class ignition::sensors::SegmentationCameraSensorPrivate
   /// \brief True to save images
   public: bool saveImage = false;
 
-  /// \brief path directory to where images are saved
+  /// \brief Path directory to where images are saved
   public: std::string saveImagePath = "./";
 
   /// \brief Prefix of an image name
   public: std::string saveImagePrefix = "./";
 
-  /// \brief counter used to set the image filename
+  /// \brief Counter used to set the image filename
   public: std::uint64_t saveImageCounter = 0;
 
   /// \brief Event that is used to trigger callbacks when a new image
@@ -273,7 +274,6 @@ bool SegmentationCameraSensor::CreateCamera()
   this->dataPtr->camera->SetHFOV(angle);
 
   // Add the camera to the scene
-  // this->dataPtr->camera->SetLocalPose(sdfCamera->RawPose());
   this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);
 
   // Add the rendering sensor to handle its render
@@ -316,12 +316,6 @@ void SegmentationCameraSensor::OnNewSegmentationFrame(const uint8_t * _data,
     this->dataPtr->segmentationBuffer = new uint8_t[bufferSize];
 
   memcpy(this->dataPtr->segmentationBuffer, _data, bufferSize);
-}
-
-//////////////////////////////////////////////////
-bool SegmentationCameraSensor::Update(const ignition::common::Time &_now)
-{
-  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
 }
 
 //////////////////////////////////////////////////

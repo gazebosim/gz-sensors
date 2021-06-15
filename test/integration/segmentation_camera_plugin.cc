@@ -47,6 +47,7 @@
 #include "TransportTestTools.hh"
 
 using namespace ignition;
+using namespace rendering;
 
 class SegmentationCameraSensorTest: public testing::Test,
   public testing::WithParamInterface<const char *>
@@ -133,7 +134,7 @@ void BuildScene(rendering::ScenePtr scene)
   root->AddChild(box2);
 }
 
-
+/////////////////////////////////////////////////
 void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   const std::string &_renderEngine)
 {
@@ -246,7 +247,6 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
 
   g_mutex.unlock();
 
-
   // Instance/Panoptic Segmentation Test
   camera->SetSegmentationType(SegmentationType::Panoptic);
 
@@ -282,8 +282,8 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   g_mutex.unlock();
 
   // Clean up
-  // engine->DestroyScene(scene);
-  // ignition::rendering::unloadEngine(engine->Name());
+  engine->DestroyScene(scene);
+  ignition::rendering::unloadEngine(engine->Name());
 }
 
 
