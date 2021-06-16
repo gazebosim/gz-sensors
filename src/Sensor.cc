@@ -142,6 +142,7 @@ Sensor::Sensor() :
 //////////////////////////////////////////////////
 bool Sensor::Init()
 {
+  this->dataPtr->nextUpdateTime = std::chrono::steady_clock::duration::zero();
   return true;
 }
 

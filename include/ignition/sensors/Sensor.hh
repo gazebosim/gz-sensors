@@ -75,6 +75,9 @@ namespace ignition
       public: virtual bool Load(sdf::ElementPtr _sdf);
 
       /// \brief Initialize values in the sensor
+      /// This will set the next update time to zero. This is particularly
+      /// useful if simulation time has jumped backward, for example during
+      /// a seek backward in a log file.
       public: virtual bool Init();
 
       /// \brief Force the sensor to generate data
