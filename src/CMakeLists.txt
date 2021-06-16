@@ -137,6 +137,15 @@ target_link_libraries(${thermal_camera_target}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
 )
 
+set(boundingbox_camera_sources BoundingBoxCameraSensor.cc)
+ign_add_component(boundingbox_camera SOURCES ${boundingbox_camera_sources} GET_TARGET_NAME boundingbox_camera_target)
+target_link_libraries(${boundingbox_camera_target}
+  PRIVATE
+    ${camera_target}
+    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+    )
+
 # Build the unit tests.
 ign_build_tests(TYPE UNIT SOURCES ${gtest_sources} LIB_DEPS ${rendering_target})
 

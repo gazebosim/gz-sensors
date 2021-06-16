@@ -1,0 +1,442 @@
+/*
+ * Copyright (C) 2021 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+*/
+
+#include <mutex>
+#include <memory>
+
+#include "ignition/common/Console.hh"
+#include "ignition/common/Profiler.hh"
+#include "ignition/common/Image.hh"
+#include "ignition/sensors/RenderingEvents.hh"
+#include "ignition/sensors/SensorFactory.hh"
+
+#include "ignition/sensors/BoundingBoxCameraSensor.hh"
+#include "ignition/rendering/BoundingBoxCamera.hh"
+
+#include "ignition/transport/Node.hh"
+#include "ignition/transport/Publisher.hh"
+#include "ignition/msgs.hh"
+
+
+using namespace ignition;
+using namespace sensors;
+using namespace rendering;
+
+class ignition::sensors::BoundingBoxCameraSensorPrivate
+{
+  /// \brief SDF Sensor DOM Object
+  public: sdf::Sensor sdfSensor;
+
+  /// \brief True if Load() has been called and was successful
+  public: bool initialized = false;
+
+  /// \brief Rendering BoundingBox Camera
+  public: rendering::BoundingBoxCameraPtr boundingboxCamera {nullptr};
+
+  /// \brief Rendering RGB Camera to draw boxes on it and publish
+  /// its image (just for visualization)
+  public: rendering::CameraPtr camera {nullptr};
+
+  /// \brief Node to create publisher
+  public: transport::Node node;
+
+  /// \brief Publisher to publish Image msg with drawn boxes
+  public: transport::Node::Publisher imagePublisher;
+
+  /// \brief Publisher to publish BoundingBoxes msg
+  public: transport::Node::Publisher boxesPublisher;
+
+  /// \brief Image msg with drawn boxes on it
+  public: msgs::Image imageMsg;
+
+  /// \brief Bounding boxes msg
+  public: msgs::BoundingBoxes boxesMsg;
+
+  /// \brief Topic to publish the BoundingBox image
+  public: std::string topicBoundingBoxes = "";
+
+  /// \brief Topic to publish the BoundingBox image
+  public: std::string topicImage = "";
+
+  /// \brief True when the sensor published image with drawn boxes
+  /// False when the sensor publish only the boxes
+  public: bool IsPublishedImage {false};
+
+  /// \brief Buffer contains the BoundingBox map data
+  public: std::vector<BoundingBox> boundingBoxes;
+
+  /// \brief RGB Image to draw boxes on it
+  public: rendering::Image image;
+
+  /// \brief Buffer contains the BoundingBox map data
+  public: unsigned char *imageBuffer {nullptr};
+
+  /// \brief Connection to the new BoundingBox frames data
+  public: common::ConnectionPtr newBoundingBoxConnection;
+
+  /// \brief Connection to the Manager's scene change event.
+  public: common::ConnectionPtr sceneChangeConnection;
+
+  /// \brief Just a mutex for thread safety
+  public: std::mutex mutex;
+
+  /// \brief BoundingBoxes type
+  public: BoundingBoxType type {BoundingBoxType::VisibleBox};
+};
+
+//////////////////////////////////////////////////
+BoundingBoxCameraSensor::BoundingBoxCameraSensor()
+  : CameraSensor(), dataPtr(new BoundingBoxCameraSensorPrivate)
+{
+}
+
+/////////////////////////////////////////////////
+BoundingBoxCameraSensor::~BoundingBoxCameraSensor()
+{
+  if (this->dataPtr->imageBuffer)
+    delete this->dataPtr->imageBuffer;
+}
+
+/////////////////////////////////////////////////
+bool BoundingBoxCameraSensor::Init()
+{
+  return CameraSensor::Init();
+}
+
+/////////////////////////////////////////////////
+bool BoundingBoxCameraSensor::Load(sdf::ElementPtr _sdf)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(_sdf);
+  return this->Load(sdfSensor);
+}
+
+/////////////////////////////////////////////////
+bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
+{
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+
+  // BoundingBox Type
+  sdf::ElementPtr sdfElement = _sdf.Element();
+  if (sdfElement->HasElement("box_type"))
+  {
+    std::string type = sdfElement->Get<std::string>("box_type");
+
+    // convert type to lowercase
+    std::for_each(type.begin(), type.end(), [](char & c){
+      c = std::tolower(c);
+    });
+
+    if (type == "full" || type == "full_box")
+      this->dataPtr->type = BoundingBoxType::FullBox;
+    else if (type == "visible" || type == "visible_box")
+      this->dataPtr->type = BoundingBoxType::VisibleBox;
+  }
+
+  if (!Sensor::Load(_sdf))
+  {
+    return false;
+  }
+
+  // Check if this is the right type
+  if (_sdf.Type() != sdf::SensorType::BOUNDINGBOX_CAMERA)
+  {
+    ignerr << "Attempting to a load a BoundingBox Camera sensor, but received "
+      << "a " << _sdf.TypeStr() << std::endl;
+    return false;
+  }
+
+  if (_sdf.CameraSensor() == nullptr)
+  {
+    ignerr << "Attempting to a load a BoundingBox Camera sensor, but received "
+      << "a null sensor." << std::endl;
+    return false;
+  }
+
+  this->dataPtr->sdfSensor = _sdf;
+
+  this->dataPtr->topicBoundingBoxes = this->Topic();
+  this->dataPtr->topicImage = this->Topic() + "_image";
+
+  this->dataPtr->imagePublisher =
+    this->dataPtr->node.Advertise<ignition::msgs::Image>(
+      this->dataPtr->topicImage);
+
+  this->dataPtr->boxesPublisher =
+    this->dataPtr->node.Advertise<ignition::msgs::BoundingBoxes>(
+      this->dataPtr->topicBoundingBoxes);
+
+  if (!this->dataPtr->imagePublisher)
+  {
+    ignerr << "Unable to create publisher on topic["
+      << this->dataPtr->topicImage << "].\n";
+    return false;
+  }
+
+  if (!this->dataPtr->boxesPublisher)
+  {
+    ignerr << "Unable to create publisher on topic["
+      << this->dataPtr->topicBoundingBoxes << "].\n";
+    return false;
+  }
+
+  if (!this->AdvertiseInfo())
+    return false;
+
+  if (this->Scene())
+  {
+    this->CreateCamera();
+  }
+
+  this->dataPtr->sceneChangeConnection =
+    RenderingEvents::ConnectSceneChangeCallback(
+    std::bind(&BoundingBoxCameraSensor::SetScene, this,
+    std::placeholders::_1));
+
+  this->dataPtr->initialized = true;
+
+  return true;
+}
+
+/////////////////////////////////////////////////
+void BoundingBoxCameraSensor::SetScene(
+  ignition::rendering::ScenePtr _scene)
+{
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+
+  // APIs make it possible for the scene pointer to change
+  if (this->Scene() != _scene)
+  {
+    this->dataPtr->boundingboxCamera = nullptr;
+    this->dataPtr->camera = nullptr;
+    RenderingSensor::SetScene(_scene);
+
+    if (this->dataPtr->initialized)
+      this->CreateCamera();
+  }
+}
+
+/////////////////////////////////////////////////
+bool BoundingBoxCameraSensor::CreateCamera()
+{
+  auto sdfCamera = this->dataPtr->sdfSensor.CameraSensor();
+  if (!sdfCamera)
+  {
+    ignerr << "Unable to access camera SDF element\n";
+    return false;
+  }
+
+  // Camera Info Msg
+  this->PopulateInfo(sdfCamera);
+
+  if (!this->dataPtr->camera)
+  {
+    // Create rendering camera
+    this->dataPtr->boundingboxCamera =
+      this->Scene()->CreateBoundingBoxCamera(this->Name());
+
+    this->dataPtr->camera = this->Scene()->CreateCamera(
+      this->Name() + "_rgbCamera");
+  }
+
+  auto width = sdfCamera->ImageWidth();
+  auto height = sdfCamera->ImageHeight();
+
+  // Set Camera Properties
+  this->dataPtr->camera->SetImageFormat(rendering::PF_R8G8B8);
+  this->dataPtr->camera->SetImageWidth(width);
+  this->dataPtr->camera->SetImageHeight(height);
+  this->dataPtr->camera->SetVisibilityMask(sdfCamera->VisibilityMask());
+  this->dataPtr->camera->SetNearClipPlane(sdfCamera->NearClip());
+  this->dataPtr->camera->SetFarClipPlane(sdfCamera->FarClip());
+  this->dataPtr->camera->SetNearClipPlane(0.01);
+  this->dataPtr->camera->SetFarClipPlane(1000);
+  math::Angle angle = sdfCamera->HorizontalFov();
+  if (angle < 0.01 || angle > IGN_PI*2)
+  {
+    ignerr << "Invalid horizontal field of view [" << angle << "]\n";
+    return false;
+  }
+  double aspectRatio = static_cast<double>(width)/height;
+  this->dataPtr->camera->SetAspectRatio(aspectRatio);
+  this->dataPtr->camera->SetHFOV(angle);
+
+  this->dataPtr->boundingboxCamera->SetImageWidth(width);
+  this->dataPtr->boundingboxCamera->SetImageHeight(height);
+  this->dataPtr->boundingboxCamera->SetNearClipPlane(sdfCamera->NearClip());
+  this->dataPtr->boundingboxCamera->SetFarClipPlane(sdfCamera->FarClip());
+  this->dataPtr->boundingboxCamera->SetNearClipPlane(0.01);
+  this->dataPtr->boundingboxCamera->SetFarClipPlane(1000);
+  this->dataPtr->boundingboxCamera->SetImageFormat(PixelFormat::PF_R8G8B8);
+  this->dataPtr->boundingboxCamera->SetAspectRatio(aspectRatio);
+  this->dataPtr->boundingboxCamera->SetHFOV(angle);
+  this->dataPtr->boundingboxCamera->SetVisibilityMask(
+    sdfCamera->VisibilityMask());
+  this->dataPtr->boundingboxCamera->SetBoundingBoxType(this->dataPtr->type);
+
+  // Add the camera to the scene
+  this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);
+  this->Scene()->RootVisual()->AddChild(this->dataPtr->boundingboxCamera);
+
+  // Add the rendering sensor to handle its render, no need to add the
+  // rgb camera as we handle its render via Capture() function
+  this->AddSensor(this->dataPtr->boundingboxCamera);
+
+  // Connection to receive the BoundingBox buffer
+  this->dataPtr->newBoundingBoxConnection =
+    this->dataPtr->boundingboxCamera->ConnectNewBoundingBoxes(
+      std::bind(&BoundingBoxCameraSensor::OnNewBoundingBoxes, this,
+        std::placeholders::_1));
+
+  this->dataPtr->image = this->dataPtr->camera->CreateImage();
+
+  return true;
+}
+
+/////////////////////////////////////////////////
+rendering::BoundingBoxCameraPtr BoundingBoxCameraSensor::BoundingBoxCamera()
+{
+  return this->dataPtr->boundingboxCamera;
+}
+
+/////////////////////////////////////////////////
+void BoundingBoxCameraSensor::OnNewBoundingBoxes(
+  const std::vector<rendering::BoundingBox> &boxes)
+{
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  this->dataPtr->boundingBoxes.clear();
+  for (auto box : boxes)
+    this->dataPtr->boundingBoxes.push_back(box);
+}
+
+//////////////////////////////////////////////////
+bool BoundingBoxCameraSensor::Update(
+  const std::chrono::steady_clock::duration &_now)
+{
+  IGN_PROFILE("BoundingBoxCameraSensor::Update");
+  if (!this->dataPtr->initialized)
+  {
+    ignerr << "Not initialized, update ignored.\n";
+    return false;
+  }
+
+  if (!this->dataPtr->boundingboxCamera || !this->dataPtr->camera)
+  {
+    ignerr << "Camera doesn't exist.\n";
+    return false;
+  }
+
+  // don't render if there is no subscribers
+  if (!this->dataPtr->imagePublisher.HasConnections() &&
+    !this->dataPtr->boxesPublisher.HasConnections())
+  {
+    return false;
+  }
+
+  // Render the bounding box camera
+  this->Render();
+
+  // Publish image only if there is subscribers for it
+  this->dataPtr->IsPublishedImage =
+    this->dataPtr->imagePublisher.HasConnections();
+
+  if (this->dataPtr->IsPublishedImage)
+  {
+    // The sensor updates only the bounding box camera with its pose
+    // as it has the same name, so make rgb camera with the same pose
+    this->dataPtr->camera->SetWorldPose(
+      this->dataPtr->boundingboxCamera->WorldPose());
+
+    // Render the rgb camera
+    this->dataPtr->camera->Capture(this->dataPtr->image);
+
+    // Draw bounding boxes
+    for (auto box : this->dataPtr->boundingBoxes)
+    {
+      this->dataPtr->imageBuffer = this->dataPtr->image.Data<unsigned char>();
+
+      this->dataPtr->boundingboxCamera->DrawBoundingBox(
+        this->dataPtr->imageBuffer, box);
+    }
+
+    auto width = this->dataPtr->camera->ImageWidth();
+    auto height = this->dataPtr->camera->ImageHeight();
+
+    // Create Image message
+    this->dataPtr->imageMsg.set_width(width);
+    this->dataPtr->imageMsg.set_height(height);
+    // format
+    this->dataPtr->imageMsg.set_step(
+      width * rendering::PixelUtil::BytesPerPixel(rendering::PF_R8G8B8));
+    this->dataPtr->imageMsg.set_pixel_format_type(
+      msgs::PixelFormatType::RGB_INT8);
+    // time stamp
+    auto stamp = this->dataPtr->imageMsg.mutable_header()->mutable_stamp();
+    *stamp = msgs::Convert(_now);
+    auto frame = this->dataPtr->imageMsg.mutable_header()->add_data();
+    frame->set_key("frame_id");
+    frame->add_value(this->Name());
+    // image data
+    this->dataPtr->imageMsg.set_data(this->dataPtr->imageBuffer,
+        rendering::PixelUtil::MemorySize(rendering::PF_R8G8B8,
+        width, height));
+
+    this->AddSequence(this->dataPtr->imageMsg.mutable_header(), "rgbImage");
+    this->dataPtr->imagePublisher.Publish(this->dataPtr->imageMsg);
+  }
+
+  // Create BoundingBoxes message
+  for (auto box : this->dataPtr->boundingBoxes)
+  {
+    // box data
+    auto boxMsg = this->dataPtr->boxesMsg.add_box();
+    boxMsg->set_minx(box.minX);
+    boxMsg->set_miny(box.minY);
+    boxMsg->set_maxx(box.maxX);
+    boxMsg->set_maxy(box.maxY);
+    boxMsg->set_label(box.label);
+  }
+  // time stamp
+  auto stampBoxes = this->dataPtr->boxesMsg.mutable_header()->mutable_stamp();
+  *stampBoxes = msgs::Convert(_now);
+  auto frameBoxes = this->dataPtr->boxesMsg.mutable_header()->add_data();
+  frameBoxes->set_key("frame_id");
+  frameBoxes->add_value(this->Name());
+
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+
+  // Publish
+  this->PublishInfo(_now);
+  this->AddSequence(this->dataPtr->boxesMsg.mutable_header(), "boundingboxes");
+  this->dataPtr->boxesPublisher.Publish(this->dataPtr->boxesMsg);
+
+  return true;
+}
+
+/////////////////////////////////////////////////
+unsigned int BoundingBoxCameraSensor::ImageHeight() const
+{
+  return this->dataPtr->camera->ImageHeight();
+}
+
+/////////////////////////////////////////////////
+unsigned int BoundingBoxCameraSensor::ImageWidth() const
+{
+  return this->dataPtr->camera->ImageWidth();
+}
+
+IGN_SENSORS_REGISTER_SENSOR(BoundingBoxCameraSensor)
