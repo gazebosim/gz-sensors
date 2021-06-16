@@ -34,7 +34,7 @@ if (DRI_TESTS)
       ${dri_tests}
     LIB_DEPS
       ${IGNITION-TRANSPORT_LIBRARIES}
-      # ${PROJECT_LIBRARY_TARGET_NAME}-boundingbox_camera
+      ${PROJECT_LIBRARY_TARGET_NAME}-boundingbox_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-camera
       ${PROJECT_LIBRARY_TARGET_NAME}-lidar

@@ -379,25 +379,28 @@ bool BoundingBoxCameraSensor::Update(
     // Create Image message
     this->dataPtr->imageMsg.set_width(width);
     this->dataPtr->imageMsg.set_height(height);
-    // format
+    // Format
     this->dataPtr->imageMsg.set_step(
       width * rendering::PixelUtil::BytesPerPixel(rendering::PF_R8G8B8));
     this->dataPtr->imageMsg.set_pixel_format_type(
       msgs::PixelFormatType::RGB_INT8);
-    // time stamp
+    // Time stamp
     auto stamp = this->dataPtr->imageMsg.mutable_header()->mutable_stamp();
     *stamp = msgs::Convert(_now);
     auto frame = this->dataPtr->imageMsg.mutable_header()->add_data();
     frame->set_key("frame_id");
     frame->add_value(this->Name());
-    // image data
+    // Image data
     this->dataPtr->imageMsg.set_data(this->dataPtr->imageBuffer,
         rendering::PixelUtil::MemorySize(rendering::PF_R8G8B8,
         width, height));
 
+    // Publish
     this->AddSequence(this->dataPtr->imageMsg.mutable_header(), "rgbImage");
     this->dataPtr->imagePublisher.Publish(this->dataPtr->imageMsg);
   }
+
+  this->dataPtr->boxesMsg.Clear();
 
   // Create BoundingBoxes message
   for (auto box : this->dataPtr->boundingBoxes)
