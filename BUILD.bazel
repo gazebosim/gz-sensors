@@ -348,7 +348,7 @@ cc_test(
 
 cc_test(
     name = "INTEGRATION_gpu_lidar_plugin",
-    srcs = ["test/integration/gpu_lidar_sensor_pluginj.cc"],
+    srcs = ["test/integration/gpu_lidar_sensor_plugin.cc"],
     data = [
         ":libignition-sensors-gpu_lidar.so",
         IGNITION_ROOT + "ign_rendering/ogre2:libignition-rendering-ogre2.so",
@@ -356,6 +356,7 @@ cc_test(
     deps = [
         IGNITION_ROOT + "ign_common",
         IGNITION_ROOT + "ign_sensors",
+        IGNITION_ROOT + "ign_sensors:sensors_lidar",
         IGNITION_ROOT + "ign_sensors:sensors_gpu_lidar",
         ":test_util",
         "@gtest",
