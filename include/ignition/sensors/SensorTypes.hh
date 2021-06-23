@@ -149,6 +149,30 @@ namespace ignition
       /// \sa Lidar
       LIDAR_NOISE = 14,
 
+      /// \brief Force body-frame X axis noise in N
+      /// \sa ForceTorqueSensor
+      FORCE_X_NOISE_N = 15,
+
+      /// \brief Force body-frame Y axis noise in N
+      /// \sa ForceTorqueSensor
+      FORCE_Y_NOISE_N = 16,
+
+      /// \brief Force body-frame Z axis noise in N
+      /// \sa ForceTorqueSensor
+      FORCE_Z_NOISE_N = 17,
+
+      /// \brief Torque body-frame X axis noise in Nm
+      /// \sa ForceTorqueSensor
+      TORQUE_X_NOISE_N_M = 18,
+
+      /// \brief Torque body-frame Y axis noise in Nm
+      /// \sa ForceTorqueSensor
+      TORQUE_Y_NOISE_N_M = 19,
+
+      /// \brief Torque body-frame Z axis noise in Nm
+      /// \sa ForceTorqueSensor
+      TORQUE_Z_NOISE_N_M = 20,
+
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not
       /// use this.

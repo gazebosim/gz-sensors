@@ -111,6 +111,9 @@ ign_add_component(magnetometer SOURCES ${magnetometer_sources} GET_TARGET_NAME m
 set(imu_sources ImuSensor.cc)
 ign_add_component(imu SOURCES ${imu_sources} GET_TARGET_NAME imu_target)
 
+set(force_torque_sources ForceTorqueSensor.cc)
+ign_add_component(force_torque SOURCES ${force_torque_sources} GET_TARGET_NAME force_torque_target)
+
 set(altimeter_sources AltimeterSensor.cc)
 ign_add_component(altimeter SOURCES ${altimeter_sources} GET_TARGET_NAME altimeter_target)
 

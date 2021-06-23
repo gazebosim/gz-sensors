@@ -14,6 +14,7 @@ set(tests
   logical_camera_plugin.cc
   magnetometer_plugin.cc
   imu_plugin.cc
+  force_torque_plugin.cc
 )
 
 link_directories(${PROJECT_BINARY_DIR}/test)
@@ -51,6 +52,7 @@ ign_build_tests(TYPE INTEGRATION
     ${PROJECT_LIBRARY_TARGET_NAME}-logical_camera
     ${PROJECT_LIBRARY_TARGET_NAME}-magnetometer
     ${PROJECT_LIBRARY_TARGET_NAME}-imu
+    ${PROJECT_LIBRARY_TARGET_NAME}-force_torque
 )
 
 foreach(plugin_test ${dri_tests} ${tests})
