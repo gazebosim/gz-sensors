@@ -25,7 +25,6 @@
 
 #include <ignition/common/PluginMacros.hh>
 #include <ignition/common/SuppressWarning.hh>
-#include <ignition/common/Time.hh>
 
 #ifdef _WIN32
 #pragma warning(push)
@@ -92,12 +91,6 @@ namespace ignition
       /// \return True on success
       public: virtual bool Init() override;
 
-      /// \brief Update the sensor and generate data
-      /// \param[in] _now The current time
-      /// \return true if the update was successfull
-      public: virtual bool IGN_DEPRECATED(4) Update(
-        const ignition::common::Time &_now) override;
-
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
@@ -161,11 +154,6 @@ namespace ignition
       /// \param[in] _cameraSdf Pointer to SDF object containing camera
       /// information.
       protected: void PopulateInfo(const sdf::Camera *_cameraSdf);
-
-      /// \brief Publish camera info message.
-      /// \param[in] _now The current time
-      protected: void IGN_DEPRECATED(4) PublishInfo(
-        const ignition::common::Time &_now);
 
       /// \brief Publish camera info message.
       /// \param[in] _now The current time

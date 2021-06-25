@@ -23,7 +23,6 @@
 #include <vector>
 #include <sdf/sdf.hh>
 #include <ignition/common/SuppressWarning.hh>
-#include <ignition/common/Time.hh>
 #include <ignition/common/Console.hh>
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
@@ -189,13 +188,6 @@ namespace ignition
       /// \param[in] _sensorId ID of the sensor to remove
       /// \return True if the sensor exists and removed.
       public: bool Remove(const ignition::sensors::SensorId _id);
-
-      /// \brief Run the sensor generation one step.
-      /// \param _time: The current simulated time
-      /// \param _force: If true, all sensors are forced to update. Otherwise
-      ///        a sensor will update based on it's Hz rate.
-      public: void IGN_DEPRECATED(4) RunOnce(
-        const ignition::common::Time &_time, bool _force = false);
 
       /// \brief Run the sensor generation one step.
       /// \param _time: The current simulated time

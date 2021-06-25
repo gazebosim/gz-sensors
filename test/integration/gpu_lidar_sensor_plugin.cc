@@ -20,7 +20,6 @@
 #include <ignition/common/Console.hh>
 #include <ignition/common/Filesystem.hh>
 #include <ignition/common/Event.hh>
-#include <ignition/common/Time.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/GpuLidarSensor.hh>
