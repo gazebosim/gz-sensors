@@ -20,20 +20,18 @@
 
 #include <string>
 #include <memory>
-#include <sdf/sdf.hh>
 
 #include <ignition/common/Event.hh>
 #include <ignition/common/PluginMacros.hh>
 #include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
-
-#include "ignition/msgs.hh"
-#include "ignition/transport/Node.hh"
-#include "ignition/transport/Publisher.hh"
-
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/Export.hh"
+#include "ignition/transport/Node.hh"
+#include "ignition/transport/Publisher.hh"
 #include "ignition/sensors/Sensor.hh"
+#include "ignition/msgs.hh"
+#include <sdf/sdf.hh>
 
 namespace ignition
 {
@@ -84,13 +82,13 @@ namespace ignition
       public: virtual rendering::SegmentationCameraPtr SegmentationCamera();
 
       /// \brief Segmentation data callback used to get the data from the sensor
-      /// \param[in] _scan pointer to the data from the sensor
-      /// \param[in] _width width of the Segmentation image
-      /// \param[in] _height height of the Segmentation image
-      /// \param[in] _channel bytes used for the Segmentation data
+      /// \param[in] _data pointer to the data from the sensor
+      /// \param[in] _width width of the segmentation image
+      /// \param[in] _height height of the segmentation image
+      /// \param[in] _channels num of channels
       /// \param[in] _format string with the format
-      public: void OnNewSegmentationFrame(const uint8_t * _scan,
-        unsigned int _width, unsigned int _height, unsigned int _channel,
+      public: void OnNewSegmentationFrame(const uint8_t * _data,
+        unsigned int _width, unsigned int _height, unsigned int _channels,
         const std::string &_format);
 
       /// \brief Set a callback to be called when image frame data is

@@ -21,16 +21,13 @@
 #include "ignition/common/Console.hh"
 #include "ignition/common/Profiler.hh"
 #include "ignition/common/Image.hh"
+#include "ignition/msgs.hh"
+#include "ignition/rendering/SegmentationCamera.hh"
 #include "ignition/sensors/RenderingEvents.hh"
 #include "ignition/sensors/SensorFactory.hh"
-
 #include "ignition/sensors/SegmentationCameraSensor.hh"
-#include "ignition/rendering/SegmentationCamera.hh"
-
 #include "ignition/transport/Node.hh"
 #include "ignition/transport/Publisher.hh"
-#include "ignition/msgs.hh"
-
 
 using namespace ignition;
 using namespace sensors;
@@ -150,23 +147,6 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-  // Segmentation Type & Colored Properties
-  sdf::ElementPtr sdfElement = _sdf.Element();
-  if (sdfElement->HasElement("segmentation_type"))
-  {
-    std::string type = sdfElement->Get<std::string>("segmentation_type");
-
-    // convert type to lowercase
-    std::for_each(type.begin(), type.end(), [](char & c){
-      c = std::tolower(c);
-    });
-
-    if (type == "semantic")
-      this->dataPtr->type = rendering::SegmentationType::Semantic;
-    else if (type == "instance" || type == "panoptic")
-      this->dataPtr->type = rendering::SegmentationType::Panoptic;
-  }
-
   if (!Sensor::Load(_sdf))
   {
     return false;
@@ -189,6 +169,23 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
 
   this->dataPtr->sdfSensor = _sdf;
 
+  // Segmentation type
+  sdf::ElementPtr sdfElement = _sdf.Element();
+  if (sdfElement->HasElement("segmentation_type"))
+  {
+    auto type = sdfElement->Get<std::string>("segmentation_type");
+
+    // convert type to lowercase
+    std::for_each(type.begin(), type.end(), [](char & c){
+      c = std::tolower(c);
+    });
+
+    if (type == "semantic")
+      this->dataPtr->type = rendering::SegmentationType::Semantic;
+    else if (type == "instance" || type == "panoptic")
+      this->dataPtr->type = rendering::SegmentationType::Panoptic;
+  }
+
   // Create the segmentation colored map image publisher
   this->dataPtr->coloredMapPublisher =
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
@@ -206,12 +203,16 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  if (!this->AdvertiseInfo())
+  if (!this->AdvertiseInfo(this->Topic() + "/camera_info"))
     return false;
 
   if (this->Scene())
   {
-    this->CreateCamera();
+    if (!this->CreateCamera())
+    {
+      ignerr << "Unable to create segmentation camera sensor\n";
+      return false;
+    }
   }
 
   this->dataPtr->sceneChangeConnection =
@@ -245,7 +246,7 @@ void SegmentationCameraSensor::SetScene(
 /////////////////////////////////////////////////
 bool SegmentationCameraSensor::CreateCamera()
 {
-  auto sdfCamera = this->dataPtr->sdfSensor.CameraSensor();
+  const auto sdfCamera = this->dataPtr->sdfSensor.CameraSensor();
   if (!sdfCamera)
   {
     ignerr << "Unable to access camera SDF element\n";
@@ -357,7 +358,7 @@ bool SegmentationCameraSensor::Update(
   // don't render if there is no subscribers
   if (!this->dataPtr->coloredMapPublisher.HasConnections() &&
     !this->dataPtr->labelsMapPublisher.HasConnections() &&
-    this->dataPtr->imageEvent.ConnectionCount() <= 0 &&
+    this->dataPtr->imageEvent.ConnectionCount() <= 0u &&
     !this->dataPtr->saveImage)
   {
     return false;
@@ -390,18 +391,19 @@ bool SegmentationCameraSensor::Update(
 
   this->dataPtr->labelsMapMsg.CopyFrom(this->dataPtr->coloredMapMsg);
 
+  // Protect the data being modified by the segmentation buffers
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+
   // segmentation colored map data
   this->dataPtr->coloredMapMsg.set_data(
     this->dataPtr->segmentationColoredBuffer,
     rendering::PixelUtil::MemorySize(rendering::PF_R8G8B8,
     width, height));
 
-  // segmentation colored map data
+  // segmentation labels map data
   this->dataPtr->labelsMapMsg.set_data(this->dataPtr->segmentationLabelsBuffer,
       rendering::PixelUtil::MemorySize(rendering::PF_R8G8B8,
       width, height));
-
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   // Publish
   this->PublishInfo(_now);
@@ -409,7 +411,7 @@ bool SegmentationCameraSensor::Update(
   this->dataPtr->labelsMapPublisher.Publish(this->dataPtr->labelsMapMsg);
 
   // Trigger callbacks.
-  if (this->dataPtr->imageEvent.ConnectionCount() > 0)
+  if (this->dataPtr->imageEvent.ConnectionCount() > 0u)
   {
     try
     {
@@ -434,12 +436,16 @@ bool SegmentationCameraSensor::Update(
 /////////////////////////////////////////////////
 unsigned int SegmentationCameraSensor::ImageHeight() const
 {
+  if (!this->dataPtr->camera)
+    return 0u;
   return this->dataPtr->camera->ImageHeight();
 }
 
 /////////////////////////////////////////////////
 unsigned int SegmentationCameraSensor::ImageWidth() const
 {
+  if (!this->dataPtr->camera)
+    return 0u;
   return this->dataPtr->camera->ImageWidth();
 }
 
