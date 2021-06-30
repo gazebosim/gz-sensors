@@ -75,7 +75,7 @@ namespace ignition
 
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
-      /// \return true if the update was successfull
+      /// \return true if the update was successful
       public: virtual bool Update(
         const std::chrono::steady_clock::duration &_now) override;
 
@@ -89,8 +89,9 @@ namespace ignition
       /// \param[in] _height height of the Segmentation image
       /// \param[in] _channel bytes used for the Segmentation data
       /// \param[in] _format string with the format
-      public: void OnNewSegmentationFrame(const uint8_t *, unsigned int,
-        unsigned int, unsigned int, const std::string &);
+      public: void OnNewSegmentationFrame(const uint8_t * _scan,
+        unsigned int _width, unsigned int _height, unsigned int _channel,
+        const std::string &_format);
 
       /// \brief Set a callback to be called when image frame data is
       /// generated.

@@ -192,14 +192,16 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
 
   uint32_t backgroundLabel = 23;
   camera->SetSegmentationType(SegmentationType::Semantic);
-  camera->EnableColoredMap(false);
+  camera->EnableColoredMap(true);
   camera->SetBackgroundLabel(backgroundLabel);
   camera->SetLocalPosition(0.0, 0.0, 0.0);
   camera->SetLocalRotation(0.0, 0.0, 0.0);
 
-  // Get the Msg
+  // Topic
   std::string topic =
     "/test/integration/SegmentationCameraPlugin_imagesWithBuiltinSDF";
+  // Get the topic of the labels map
+  topic += "/labels_map";
   WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
 
   // Update once to create image
@@ -285,7 +287,6 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   engine->DestroyScene(scene);
   ignition::rendering::unloadEngine(engine->Name());
 }
-
 
 //////////////////////////////////////////////////
 TEST_P(SegmentationCameraSensorTest, ImagesWithBuiltinSDF)

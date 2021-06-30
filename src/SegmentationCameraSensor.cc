@@ -34,7 +34,6 @@
 
 using namespace ignition;
 using namespace sensors;
-using namespace rendering;
 
 class ignition::sensors::SegmentationCameraSensorPrivate
 {
@@ -61,30 +60,39 @@ class ignition::sensors::SegmentationCameraSensorPrivate
   /// \brief Node to create publisher
   public: transport::Node node;
 
-  /// \brief Publisher to publish segmentation image
-  public: transport::Node::Publisher publisher;
+  /// \brief Publisher to publish segmentation colored image
+  public: transport::Node::Publisher coloredMapPublisher;
+
+  /// \brief Publisher to publish segmentation labels image
+  public: transport::Node::Publisher labelsMapPublisher;
 
   /// \brief Segmentation Image Msg
-  public: msgs::Image segmentationMsg;
+  public: msgs::Image coloredMapMsg;
 
-  /// \brief Topic to publish the segmentation image
-  public: std::string topicSegmentation = "";
+  /// \brief Segmentation Image Msg
+  public: msgs::Image labelsMapMsg;
 
-  /// \brief Buffer contains the segmentation map data
-  public: uint8_t *segmentationBuffer {nullptr};
+  /// \brief Topic to publish the segmentation colored map
+  public: std::string topicColoredMap = "/colored_map";
+
+ /// \brief Topic to publish the segmentation labels map
+  public: std::string topicLabelsMap = "/labels_map";
+
+  /// \brief Buffer contains the segmentation colored map data
+  public: uint8_t *segmentationColoredBuffer {nullptr};
+
+  /// \brief Buffer contains the segmentation labels map data
+  public: uint8_t *segmentationLabelsBuffer {nullptr};
 
   /// \brief Segmentation type (Semantic / Instance)
-  public: SegmentationType type {SegmentationType::Semantic};
-
-  /// \brief True if camera generates a colored map image
-  /// False if camera generates labels ids image
-  public: bool isColoredMap {false};
+  public: rendering::SegmentationType type
+    {rendering::SegmentationType::Semantic};
 
   /// \brief Connection to the new segmentation frames data
-  public: common::ConnectionPtr newSegmentationConnection;
+  public: common::ConnectionPtr newSegmentationConnection {nullptr};
 
   /// \brief Connection to the Manager's scene change event.
-  public: common::ConnectionPtr sceneChangeConnection;
+  public: common::ConnectionPtr sceneChangeConnection {nullptr};
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
@@ -116,8 +124,11 @@ SegmentationCameraSensor::SegmentationCameraSensor()
 /////////////////////////////////////////////////
 SegmentationCameraSensor::~SegmentationCameraSensor()
 {
-  if (this->dataPtr->segmentationBuffer)
-    delete this->dataPtr->segmentationBuffer;
+  if (this->dataPtr->segmentationColoredBuffer)
+    delete this->dataPtr->segmentationColoredBuffer;
+
+  if (this->dataPtr->segmentationLabelsBuffer)
+    delete this->dataPtr->segmentationLabelsBuffer;
 }
 
 /////////////////////////////////////////////////
@@ -151,14 +162,9 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
     });
 
     if (type == "semantic")
-      this->dataPtr->type = SegmentationType::Semantic;
+      this->dataPtr->type = rendering::SegmentationType::Semantic;
     else if (type == "instance" || type == "panoptic")
-      this->dataPtr->type = SegmentationType::Panoptic;
-  }
-
-  if (sdfElement->HasElement("colored"))
-  {
-    this->dataPtr->isColoredMap = sdfElement->Get<bool>("colored");
+      this->dataPtr->type = rendering::SegmentationType::Panoptic;
   }
 
   if (!Sensor::Load(_sdf))
@@ -183,12 +189,17 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
 
   this->dataPtr->sdfSensor = _sdf;
 
-  // Create the thermal image publisher
-  this->dataPtr->publisher =
+  // Create the segmentation colored map image publisher
+  this->dataPtr->coloredMapPublisher =
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
-          this->Topic());
+          this->Topic() + this->dataPtr->topicColoredMap);
 
-  if (!this->dataPtr->publisher)
+  // Create the segmentation labels map image publisher
+  this->dataPtr->labelsMapPublisher =
+      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+          this->Topic() + this->dataPtr->topicLabelsMap);
+
+  if (!this->dataPtr->labelsMapPublisher || !this->dataPtr->coloredMapPublisher)
   {
     ignerr << "Unable to create publisher on topic["
       << this->Topic() << "].\n";
@@ -253,7 +264,8 @@ bool SegmentationCameraSensor::CreateCamera()
 
   // Segmentation properties
   this->dataPtr->camera->SetSegmentationType(this->dataPtr->type);
-  this->dataPtr->camera->EnableColoredMap(this->dataPtr->isColoredMap);
+  // Must be true to generate the colored map first then convert it
+  this->dataPtr->camera->EnableColoredMap(true);
 
   auto width = sdfCamera->ImageWidth();
   auto height = sdfCamera->ImageHeight();
@@ -312,10 +324,17 @@ void SegmentationCameraSensor::OnNewSegmentationFrame(const uint8_t * _data,
 
   unsigned int bufferSize = _width * _height * _channles;
 
-  if (!this->dataPtr->segmentationBuffer)
-    this->dataPtr->segmentationBuffer = new uint8_t[bufferSize];
+  if (!this->dataPtr->segmentationColoredBuffer)
+    this->dataPtr->segmentationColoredBuffer = new uint8_t[bufferSize];
 
-  memcpy(this->dataPtr->segmentationBuffer, _data, bufferSize);
+  if (!this->dataPtr->segmentationLabelsBuffer)
+    this->dataPtr->segmentationLabelsBuffer = new uint8_t[bufferSize];
+
+  memcpy(this->dataPtr->segmentationColoredBuffer, _data, bufferSize);
+
+  // Convert the colored map to labels map
+  this->dataPtr->camera->LabelMapFromColoredBuffer(
+    this->dataPtr->segmentationLabelsBuffer);
 }
 
 //////////////////////////////////////////////////
@@ -336,7 +355,8 @@ bool SegmentationCameraSensor::Update(
   }
 
   // don't render if there is no subscribers
-  if (!this->dataPtr->publisher.HasConnections() &&
+  if (!this->dataPtr->coloredMapPublisher.HasConnections() &&
+    !this->dataPtr->labelsMapPublisher.HasConnections() &&
     this->dataPtr->imageEvent.ConnectionCount() <= 0 &&
     !this->dataPtr->saveImage)
   {
@@ -346,29 +366,38 @@ bool SegmentationCameraSensor::Update(
   // Actual render
   this->Render();
 
-  if (!this->dataPtr->segmentationBuffer)
+  if (!this->dataPtr->segmentationColoredBuffer ||
+    !this->dataPtr->segmentationLabelsBuffer)
     return false;
-
 
   auto width = this->dataPtr->camera->ImageWidth();
   auto height = this->dataPtr->camera->ImageHeight();
 
-  // create message
-  this->dataPtr->segmentationMsg.set_width(width);
-  this->dataPtr->segmentationMsg.set_height(height);
+  // create colored map message
+  this->dataPtr->coloredMapMsg.set_width(width);
+  this->dataPtr->coloredMapMsg.set_height(height);
   // format
-  this->dataPtr->segmentationMsg.set_step(
+  this->dataPtr->coloredMapMsg.set_step(
     width * rendering::PixelUtil::BytesPerPixel(rendering::PF_R8G8B8));
-  this->dataPtr->segmentationMsg.set_pixel_format_type(
+  this->dataPtr->coloredMapMsg.set_pixel_format_type(
     msgs::PixelFormatType::RGB_INT8);
   // time stamp
-  auto stamp = this->dataPtr->segmentationMsg.mutable_header()->mutable_stamp();
+  auto stamp = this->dataPtr->coloredMapMsg.mutable_header()->mutable_stamp();
   *stamp = msgs::Convert(_now);
-  auto frame = this->dataPtr->segmentationMsg.mutable_header()->add_data();
+  auto frame = this->dataPtr->coloredMapMsg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->Name());
-  // segmentation data
-  this->dataPtr->segmentationMsg.set_data(this->dataPtr->segmentationBuffer,
+
+  this->dataPtr->labelsMapMsg.CopyFrom(this->dataPtr->coloredMapMsg);
+
+  // segmentation colored map data
+  this->dataPtr->coloredMapMsg.set_data(
+    this->dataPtr->segmentationColoredBuffer,
+    rendering::PixelUtil::MemorySize(rendering::PF_R8G8B8,
+    width, height));
+
+  // segmentation colored map data
+  this->dataPtr->labelsMapMsg.set_data(this->dataPtr->segmentationLabelsBuffer,
       rendering::PixelUtil::MemorySize(rendering::PF_R8G8B8,
       width, height));
 
@@ -376,14 +405,15 @@ bool SegmentationCameraSensor::Update(
 
   // Publish
   this->PublishInfo(_now);
-  this->dataPtr->publisher.Publish(this->dataPtr->segmentationMsg);
+  this->dataPtr->coloredMapPublisher.Publish(this->dataPtr->coloredMapMsg);
+  this->dataPtr->labelsMapPublisher.Publish(this->dataPtr->labelsMapMsg);
 
   // Trigger callbacks.
   if (this->dataPtr->imageEvent.ConnectionCount() > 0)
   {
     try
     {
-      this->dataPtr->imageEvent(this->dataPtr->segmentationMsg);
+      this->dataPtr->imageEvent(this->dataPtr->coloredMapMsg);
     }
     catch(...)
     {
@@ -394,7 +424,8 @@ bool SegmentationCameraSensor::Update(
   // Save image
   if (this->dataPtr->saveImage)
   {
-    this->dataPtr->SaveImage(this->dataPtr->segmentationBuffer, width, height);
+    this->dataPtr->SaveImage(
+      this->dataPtr->segmentationColoredBuffer, width, height);
   }
 
   return true;
