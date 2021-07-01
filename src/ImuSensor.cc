@@ -59,6 +59,9 @@ class ignition::sensors::ImuSensorPrivate
   /// \brief transform to Imu frame from Imu reference frame.
   public: ignition::math::Quaterniond orientation;
 
+  /// \brief True to publish orientation data.
+  public: bool orientationEnabled = true;
+
   /// \brief store gravity vector to be added to the IMU output.
   public: ignition::math::Vector3d gravity;
 
@@ -211,12 +214,6 @@ bool ImuSensor::Update(const std::chrono::steady_clock::duration &_now)
   applyNoise(GYROSCOPE_Y_NOISE_RAD_S, this->dataPtr->angularVel.Y());
   applyNoise(GYROSCOPE_Z_NOISE_RAD_S, this->dataPtr->angularVel.Z());
 
-  // Set the IMU orientation
-  // imu orientation with respect to reference frame
-  this->dataPtr->orientation =
-      this->dataPtr->orientationReference.Inverse() *
-      this->dataPtr->worldPose.Rot();
-
   msgs::IMU msg;
   *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
   msg.set_entity_name(this->Name());
@@ -224,7 +221,16 @@ bool ImuSensor::Update(const std::chrono::steady_clock::duration &_now)
   frame->set_key("frame_id");
   frame->add_value(this->Name());
 
-  msgs::Set(msg.mutable_orientation(), this->dataPtr->orientation);
+  if (this->dataPtr->orientationEnabled)
+  {
+    // Set the IMU orientation
+    // imu orientation with respect to reference frame
+    this->dataPtr->orientation =
+        this->dataPtr->orientationReference.Inverse() *
+        this->dataPtr->worldPose.Rot();
+
+    msgs::Set(msg.mutable_orientation(), this->dataPtr->orientation);
+  }
   msgs::Set(msg.mutable_angular_velocity(), this->dataPtr->angularVel);
   msgs::Set(msg.mutable_linear_acceleration(), this->dataPtr->linearAcc);
 
@@ -282,6 +288,18 @@ void ImuSensor::SetOrientationReference(const math::Quaterniond &_orient)
 math::Quaterniond ImuSensor::OrientationReference() const
 {
   return this->dataPtr->orientationReference;
+}
+
+//////////////////////////////////////////////////
+void ImuSensor::SetOrientationEnabled(bool _enabled)
+{
+  this->dataPtr->orientationEnabled = _enabled;
+}
+
+//////////////////////////////////////////////////
+bool ImuSensor::OrientationEnabled() const
+{
+  return this->dataPtr->orientationEnabled;
 }
 
 //////////////////////////////////////////////////
