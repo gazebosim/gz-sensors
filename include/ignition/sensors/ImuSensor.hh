@@ -129,8 +129,8 @@ namespace ignition
       public: void SetGravity(const math::Vector3d &_gravity);
 
       /// \brief Set whether to output orientation. Not all imu's generate
-      /// orientation values as they use addition filters to produce
-      /// orientation estimates.
+      /// orientation values as they use filters to produce orientation
+      /// estimates.
       /// \param[in] _enabled True to publish orientation data, false to leave
       /// the message field empty.
       public: void SetOrientationEnabled(bool _enabled);
