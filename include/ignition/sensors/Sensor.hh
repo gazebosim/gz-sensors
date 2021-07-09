@@ -180,6 +180,13 @@ namespace ignition
       public: void AddSequence(ignition::msgs::Header *_msg,
                   const std::string &_seqKey = "default");
 
+      /// \brief Publishes information about the performance of the sensor.
+      ///        This method is called by Update().
+      ///        When different metrics need to be published this method
+      ///        could be overriden by subclasses.
+      /// \param[in] _simTime Current time.
+      public: virtual void PublishMetrics(const ignition::common::Time &_now);
+
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal
       /// \brief Data pointer for private data

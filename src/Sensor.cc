@@ -16,16 +16,17 @@
 */
 
 #include "ignition/sensors/Sensor.hh"
+
+#include <chrono>
 #include <map>
 #include <vector>
+
 #include <ignition/common/Console.hh>
 #include <ignition/common/Profiler.hh>
+#include <ignition/transport/Node.hh>
 #include <ignition/transport/TopicUtils.hh>
 
-#include <ignition/sensors/Manager.hh>
-
 using namespace ignition::sensors;
-
 
 class ignition::sensors::SensorPrivate
 {
@@ -36,6 +37,10 @@ class ignition::sensors::SensorPrivate
   /// \param[in] _topic Topic sensor publishes data to.
   /// \return True if a valid topic was set.
   public: bool SetTopic(const std::string &_topic);
+
+  /// \brief Publishes information about the performance of the sensor.
+  /// \param[in] _now Current simulation time.
+  public: void PublishMetrics(const ignition::common::Time& _now);
 
   /// \brief id given to sensor when constructed
   public: SensorId id;
@@ -60,6 +65,18 @@ class ignition::sensors::SensorPrivate
 
   /// \brief What sim time should this sensor update at
   public: ignition::common::Time nextUpdateTime;
+
+  /// \brief Last steady clock time reading from last Update call.
+  public: std::chrono::time_point<std::chrono::steady_clock> lastClockTime;
+
+  /// \brief Last sim time at Update call.
+  public: ignition::common::Time lastUpdateTime{0};
+
+  /// \brief Transport node.
+  public: ignition::transport::Node node;
+
+  /// \brief Publishes the PerformanceSensorMetrics message.
+  public: ignition::transport::Node::Publisher performanceSensorMetricsPub;
 
   /// \brief SDF element with sensor information.
   public: sdf::ElementPtr sdf = nullptr;
@@ -197,6 +214,55 @@ bool SensorPrivate::SetTopic(const std::string &_topic)
 }
 
 //////////////////////////////////////////////////
+void Sensor::PublishMetrics(const ignition::common::Time &_now)
+{
+  return this->dataPtr->PublishMetrics(_now);
+}
+
+void SensorPrivate::PublishMetrics(const ignition::common::Time &_now) {
+  if(!this->performanceSensorMetricsPub)
+  {
+    this->performanceSensorMetricsPub =
+      node.Advertise<msgs::PerformanceSensorMetrics>(
+          this->topic + "/performance_metrics");
+  }
+  if (!performanceSensorMetricsPub ||
+      !performanceSensorMetricsPub.HasConnections())
+  {
+    return;
+  }
+
+  // Computes simulation update rate and real update rate.
+  double simUpdateRate;
+  double realUpdateRate;
+  const auto clockNow = std::chrono::steady_clock::now();
+  if(this->lastUpdateTime > 0)
+  {
+    const double diffSimUpdate = _now.Double() -
+      this->lastUpdateTime.Double();
+    simUpdateRate = 1.0 / diffSimUpdate;
+    const double diffRealUpdate =
+      std::chrono::duration_cast<std::chrono::milliseconds>(
+        clockNow - this->lastClockTime).count() * 1e-3;
+    realUpdateRate = 1.0 / diffRealUpdate;
+  }
+
+  // Update last time values.
+  this->lastUpdateTime = _now;
+  this->lastClockTime = clockNow;
+
+  // Fill performance sensor metrics message.
+  msgs::PerformanceSensorMetrics performanceSensorMetricsMsg;
+  performanceSensorMetricsMsg.set_name(this->name);
+  performanceSensorMetricsMsg.set_real_update_rate(realUpdateRate);
+  performanceSensorMetricsMsg.set_sim_update_rate(simUpdateRate);
+  performanceSensorMetricsMsg.set_nominal_update_rate(this->updateRate);
+
+  // Publish data
+  performanceSensorMetricsPub.Publish(performanceSensorMetricsMsg);
+}
+
+//////////////////////////////////////////////////
 ignition::math::Pose3d Sensor::Pose() const
 {
   return this->dataPtr->pose;
@@ -255,6 +321,9 @@ bool Sensor::Update(const ignition::common::Time &_now,
 
   // Make the update happen
   result = this->Update(_now);
+
+  // Publish metrics
+  this->PublishMetrics(_now);
 
   if (!_force && this->dataPtr->updateRate > 0.0)
   {
