@@ -63,8 +63,11 @@ class ignition::sensors::BoundingBoxCameraSensorPrivate
   /// \brief Image msg with drawn boxes on it
   public: msgs::Image imageMsg;
 
-  /// \brief Bounding boxes msg
-  public: msgs::BoundingBoxes boxesMsg;
+  /// \brief 2D axis aligned bounding boxes msg
+  public: msgs::AnnotatedAxisAligned2DBox_V boxes2DMsg;
+
+  /// \brief 3D oreinted bounding boxes msg
+  public: msgs::AnnotatedOriented3DBox_V boxes3DMsg;
 
   /// \brief Topic to publish the BoundingBox image
   public: std::string topicBoundingBoxes = "";
@@ -95,7 +98,7 @@ class ignition::sensors::BoundingBoxCameraSensorPrivate
   public: std::mutex mutex;
 
   /// \brief BoundingBoxes type
-  public: BoundingBoxType type {BoundingBoxType::VisibleBox};
+  public: BoundingBoxType type {BoundingBoxType::VisibleBox2D};
 };
 
 //////////////////////////////////////////////////
@@ -141,10 +144,18 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
       c = std::tolower(c);
     });
 
-    if (type == "full" || type == "full_box")
-      this->dataPtr->type = BoundingBoxType::FullBox;
-    else if (type == "visible" || type == "visible_box")
-      this->dataPtr->type = BoundingBoxType::VisibleBox;
+    if (type == "full_2d" || type == "full_box_2d")
+      this->dataPtr->type = BoundingBoxType::FullBox2D;
+    else if (type == "2d" || type == "visible_2d"
+      || type == "visible_box_2d")
+      this->dataPtr->type = BoundingBoxType::VisibleBox2D;
+    else if (type == "3d")
+      this->dataPtr->type = BoundingBoxType::Box3D;
+    else
+    {
+      ignerr << "Unknown bounding box type " << type << std::endl;
+      return false;
+    }
   }
 
   if (!Sensor::Load(_sdf))
@@ -176,9 +187,20 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
     this->dataPtr->node.Advertise<ignition::msgs::Image>(
       this->dataPtr->topicImage);
 
-  this->dataPtr->boxesPublisher =
-    this->dataPtr->node.Advertise<ignition::msgs::BoundingBoxes>(
+  if (this->dataPtr->type == BoundingBoxType::Box3D)
+  {
+    this->dataPtr->boxesPublisher =
+      this->dataPtr->node.Advertise<
+      ignition::msgs::AnnotatedOriented3DBox_V>(
       this->dataPtr->topicBoundingBoxes);
+  }
+  else
+  {
+    this->dataPtr->boxesPublisher =
+      this->dataPtr->node.Advertise<
+      ignition::msgs::AnnotatedAxisAligned2DBox_V>(
+      this->dataPtr->topicBoundingBoxes);
+  }
 
   if (!this->dataPtr->imagePublisher)
   {
@@ -400,23 +422,36 @@ bool BoundingBoxCameraSensor::Update(
     this->dataPtr->imagePublisher.Publish(this->dataPtr->imageMsg);
   }
 
-  this->dataPtr->boxesMsg.Clear();
+  if (this->dataPtr->type == BoundingBoxType::Box3D)
+    this->dataPtr->boxes3DMsg.Clear();
+  else
+    this->dataPtr->boxes2DMsg.Clear();
 
   // Create BoundingBoxes message
   for (auto box : this->dataPtr->boundingBoxes)
   {
     // box data
-    auto boxMsg = this->dataPtr->boxesMsg.add_box();
-    boxMsg->set_minx(box.minX);
-    boxMsg->set_miny(box.minY);
-    boxMsg->set_maxx(box.maxX);
-    boxMsg->set_maxy(box.maxY);
+    auto boxMsg = this->dataPtr->boxes2DMsg.add_boxes();
+
+    auto axisAlignedBox = new msgs::AxisAligned2DBox();
+    auto min_corner = new msgs::Vector2d();
+    auto max_corner = new msgs::Vector2d();
+
+    min_corner->set_x(box.center.X() - box.size.X() / 2);
+    min_corner->set_y(box.center.Y() - box.size.Y() / 2);
+
+    max_corner->set_x(box.center.X() + box.size.X() / 2);
+    max_corner->set_y(box.center.Y() + box.size.Y() / 2);
+
+    axisAlignedBox->set_allocated_min_corner(min_corner);
+    axisAlignedBox->set_allocated_max_corner(max_corner);
+    boxMsg->set_allocated_box(axisAlignedBox);
     boxMsg->set_label(box.label);
   }
   // time stamp
-  auto stampBoxes = this->dataPtr->boxesMsg.mutable_header()->mutable_stamp();
+  auto stampBoxes = this->dataPtr->boxes2DMsg.mutable_header()->mutable_stamp();
   *stampBoxes = msgs::Convert(_now);
-  auto frameBoxes = this->dataPtr->boxesMsg.mutable_header()->add_data();
+  auto frameBoxes = this->dataPtr->boxes2DMsg.mutable_header()->add_data();
   frameBoxes->set_key("frame_id");
   frameBoxes->add_value(this->Name());
 
@@ -424,8 +459,8 @@ bool BoundingBoxCameraSensor::Update(
 
   // Publish
   this->PublishInfo(_now);
-  this->AddSequence(this->dataPtr->boxesMsg.mutable_header(), "boundingboxes");
-  this->dataPtr->boxesPublisher.Publish(this->dataPtr->boxesMsg);
+  this->AddSequence(this->dataPtr->boxes2DMsg.mutable_header(), "boundingboxes");
+  this->dataPtr->boxesPublisher.Publish(this->dataPtr->boxes2DMsg);
 
   return true;
 }
