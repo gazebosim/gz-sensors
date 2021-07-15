@@ -423,44 +423,94 @@ bool BoundingBoxCameraSensor::Update(
   }
 
   if (this->dataPtr->type == BoundingBoxType::Box3D)
+  {
     this->dataPtr->boxes3DMsg.Clear();
+
+    // Create 3D boxes message
+    for (auto box : this->dataPtr->boundingBoxes)
+    {
+      // box data
+      auto annotated_box = this->dataPtr->boxes3DMsg.add_annotated_box();
+
+      auto oriented3DBox = new msgs::Oriented3DBox();
+      auto center = new msgs::Vector3d();
+      auto size = new msgs::Vector3d();
+      auto rotation = new msgs::Quaternion();
+
+      center->set_x(box.center.X());
+      center->set_y(box.center.Y());
+      center->set_z(box.center.Z());
+
+      size->set_x(box.size.X());
+      size->set_y(box.size.Y());
+      size->set_z(box.size.Z());
+
+      rotation->set_x(box.oreintation.X());
+      rotation->set_y(box.oreintation.Y());
+      rotation->set_z(box.oreintation.Z());
+      rotation->set_w(box.oreintation.W());
+
+      oriented3DBox->set_allocated_center(center);
+      oriented3DBox->set_allocated_orientation(rotation);
+      oriented3DBox->set_allocated_boxsize(size);
+
+      annotated_box->set_allocated_box(oriented3DBox);
+      annotated_box->set_label(box.label);
+    }
+    // time stamp
+    auto stampBoxes = this->dataPtr->boxes3DMsg.mutable_header()->mutable_stamp();
+    *stampBoxes = msgs::Convert(_now);
+    auto frameBoxes = this->dataPtr->boxes3DMsg.mutable_header()->add_data();
+    frameBoxes->set_key("frame_id");
+    frameBoxes->add_value(this->Name());
+  }
   else
+  {
     this->dataPtr->boxes2DMsg.Clear();
 
-  // Create BoundingBoxes message
-  for (auto box : this->dataPtr->boundingBoxes)
-  {
-    // box data
-    auto boxMsg = this->dataPtr->boxes2DMsg.add_boxes();
+    // Create 2D boxes message
+    for (auto box : this->dataPtr->boundingBoxes)
+    {
+      // box data
+      auto annotated_box = this->dataPtr->boxes2DMsg.add_annotated_box();
 
-    auto axisAlignedBox = new msgs::AxisAligned2DBox();
-    auto min_corner = new msgs::Vector2d();
-    auto max_corner = new msgs::Vector2d();
+      auto axisAlignedBox = new msgs::AxisAligned2DBox();
+      auto min_corner = new msgs::Vector2d();
+      auto max_corner = new msgs::Vector2d();
 
-    min_corner->set_x(box.center.X() - box.size.X() / 2);
-    min_corner->set_y(box.center.Y() - box.size.Y() / 2);
+      min_corner->set_x(box.center.X() - box.size.X() / 2);
+      min_corner->set_y(box.center.Y() - box.size.Y() / 2);
 
-    max_corner->set_x(box.center.X() + box.size.X() / 2);
-    max_corner->set_y(box.center.Y() + box.size.Y() / 2);
+      max_corner->set_x(box.center.X() + box.size.X() / 2);
+      max_corner->set_y(box.center.Y() + box.size.Y() / 2);
 
-    axisAlignedBox->set_allocated_min_corner(min_corner);
-    axisAlignedBox->set_allocated_max_corner(max_corner);
-    boxMsg->set_allocated_box(axisAlignedBox);
-    boxMsg->set_label(box.label);
+      axisAlignedBox->set_allocated_min_corner(min_corner);
+      axisAlignedBox->set_allocated_max_corner(max_corner);
+      annotated_box->set_allocated_box(axisAlignedBox);
+      annotated_box->set_label(box.label);
+    }
+    // time stamp
+    auto stampBoxes = this->dataPtr->boxes2DMsg.mutable_header()->mutable_stamp();
+    *stampBoxes = msgs::Convert(_now);
+    auto frameBoxes = this->dataPtr->boxes2DMsg.mutable_header()->add_data();
+    frameBoxes->set_key("frame_id");
+    frameBoxes->add_value(this->Name());
   }
-  // time stamp
-  auto stampBoxes = this->dataPtr->boxes2DMsg.mutable_header()->mutable_stamp();
-  *stampBoxes = msgs::Convert(_now);
-  auto frameBoxes = this->dataPtr->boxes2DMsg.mutable_header()->add_data();
-  frameBoxes->set_key("frame_id");
-  frameBoxes->add_value(this->Name());
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   // Publish
   this->PublishInfo(_now);
-  this->AddSequence(this->dataPtr->boxes2DMsg.mutable_header(), "boundingboxes");
-  this->dataPtr->boxesPublisher.Publish(this->dataPtr->boxes2DMsg);
+  if (this->dataPtr->type == BoundingBoxType::Box3D)
+  {
+    this->AddSequence(this->dataPtr->boxes3DMsg.mutable_header(), "boundingboxes");
+    this->dataPtr->boxesPublisher.Publish(this->dataPtr->boxes3DMsg);
+  }
+  else
+  {
+    this->AddSequence(this->dataPtr->boxes2DMsg.mutable_header(), "boundingboxes");
+    this->dataPtr->boxesPublisher.Publish(this->dataPtr->boxes2DMsg);
+  }
 
   return true;
 }
