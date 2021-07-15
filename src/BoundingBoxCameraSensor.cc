@@ -458,7 +458,8 @@ bool BoundingBoxCameraSensor::Update(
       annotated_box->set_label(box.label);
     }
     // time stamp
-    auto stampBoxes = this->dataPtr->boxes3DMsg.mutable_header()->mutable_stamp();
+    auto stampBoxes =
+      this->dataPtr->boxes3DMsg.mutable_header()->mutable_stamp();
     *stampBoxes = msgs::Convert(_now);
     auto frameBoxes = this->dataPtr->boxes3DMsg.mutable_header()->add_data();
     frameBoxes->set_key("frame_id");
@@ -490,7 +491,8 @@ bool BoundingBoxCameraSensor::Update(
       annotated_box->set_label(box.label);
     }
     // time stamp
-    auto stampBoxes = this->dataPtr->boxes2DMsg.mutable_header()->mutable_stamp();
+    auto stampBoxes =
+      this->dataPtr->boxes2DMsg.mutable_header()->mutable_stamp();
     *stampBoxes = msgs::Convert(_now);
     auto frameBoxes = this->dataPtr->boxes2DMsg.mutable_header()->add_data();
     frameBoxes->set_key("frame_id");
@@ -503,12 +505,14 @@ bool BoundingBoxCameraSensor::Update(
   this->PublishInfo(_now);
   if (this->dataPtr->type == BoundingBoxType::Box3D)
   {
-    this->AddSequence(this->dataPtr->boxes3DMsg.mutable_header(), "boundingboxes");
+    this->AddSequence(
+      this->dataPtr->boxes3DMsg.mutable_header(), "boundingboxes");
     this->dataPtr->boxesPublisher.Publish(this->dataPtr->boxes3DMsg);
   }
   else
   {
-    this->AddSequence(this->dataPtr->boxes2DMsg.mutable_header(), "boundingboxes");
+    this->AddSequence(
+      this->dataPtr->boxes2DMsg.mutable_header(), "boundingboxes");
     this->dataPtr->boxesPublisher.Publish(this->dataPtr->boxes2DMsg);
   }
 
