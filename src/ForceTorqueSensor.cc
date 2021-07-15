@@ -48,20 +48,11 @@ class ignition::sensors::ForceTorqueSensorPrivate
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
 
-  /// \brief Noise free body 1 force.
-  public: ignition::math::Vector3d body1Force;
+  /// \brief Noise free force
+  public: ignition::math::Vector3d force;
 
-  /// \brief Noise free body 2 force.
-  public: ignition::math::Vector3d body2Force;
-
-  /// \brief Noise free body 1 torque.
-  public: ignition::math::Vector3d body1Torque;
-
-  /// \brief Noise free body 2 torque.
-  public: ignition::math::Vector3d body2Torque;
-
-  /// \brief Parent joint, from which we get force torque info.
-      public: physics::JointWrench parentJoint;
+  /// \brief Noise free torque
+  public: ignition::math::Vector3d torque;
 
   /// \brief Which orientation we support for returning sensor measure
       public: enum MeasureFrame
@@ -197,37 +188,34 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
   frame->set_key("frame_id");
   frame->add_value(this->Name());
 
-  // *** Need to Access force Torque ***
-  physics::JointWrench wrench = this->dataPtr->parentJoint->GetForceTorque());
-
   // Get the force and torque in the appropriate frame.
   ignition::math::Vector3d measuredForce;
   ignition::math::Vector3d measuredTorque;
 
-  if (this->dataPtr->measureFrame == PARENT_LINK)
+  if (this->dataPtr->measureFrame == ForceTorqueSensorPrivate::PARENT_LINK)
   {
     if (this->dataPtr->parentToChild)
     {
-      measuredForce = wrench.body1Force;
-      measuredTorque = wrench.body1Torque;
+      measuredForce = this->dataPtr->force;
+      measuredTorque = this->dataPtr->torque;
     }
     else
     {
-      measuredForce = -1*wrench.body1Force;
-      measuredTorque = -1*wrench.body1Torque;
+      measuredForce = -1*this->dataPtr->force;
+      measuredTorque = -1*this->dataPtr->torque;
     }
   }
-  else if (this->dataPtr->measureFrame == CHILD_LINK)
+  else if (this->dataPtr->measureFrame == ForceTorqueSensorPrivate::CHILD_LINK)
   {
     if (!this->dataPtr->parentToChild)
     {
-      measuredForce = wrench.body2Force;
-      measuredTorque = wrench.body2Torque;
+      measuredForce = this->dataPtr->force;
+      measuredTorque = this->dataPtr->torque;
     }
     else
     {
-      measuredForce = -1*wrench.body2Force;
-      measuredTorque = -1*wrench.body2Torque;
+      measuredForce = -1*this->dataPtr->force;
+      measuredTorque = -1*this->dataPtr->torque;
     }
   }
   else
@@ -237,30 +225,22 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
     if (!this->dataPtr->parentToChild)
     {
       measuredForce = this->dataPtr->rotationSensorChild *
-        wrench.body2Force;
+        this->dataPtr->force;
       measuredTorque = this->dataPtr->rotationSensorChild *
-        wrench.body2Torque;
+        this->dataPtr->torque;
     }
     else
     {
       measuredForce = this->dataPtr->rotationSensorChild *
-        (-1*wrench.body2Force);
+        (-1*this->dataPtr->force);
       measuredTorque = this->dataPtr->rotationSensorChild *
-        (-1*wrench.body2Torque);
+        (-1*this->dataPtr->torque);
     }
 
   }
 
-  // this->dataPtr->force.X() = 0.1;
-  // this->dataPtr->force.Y() = 0.1;
-  // this->dataPtr->force.Z() = 0.1;
-
-  // this->dataPtr->torque.X() = 0.1;
-  // this->dataPtr->torque.Y() = 0.1;
-  // this->dataPtr->torque.Z() = 0.1;
-
-  msgs::Set(msg.mutable_force(), this->dataPtr->force);
-  msgs::Set(msg.mutable_torque(), this->dataPtr->torque);
+  msgs::Set(msg.mutable_force(), measuredForce);
+  msgs::Set(msg.mutable_torque(), measuredTorque);
 
   // publish
   this->AddSequence(msg.mutable_header());
