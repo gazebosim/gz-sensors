@@ -4,8 +4,8 @@
     <link name="link1">
       <sensor name="boundingbox_camera" type="boundingbox_camera">
         <update_rate>10</update_rate>
-        <topic>/test/integration/BoundingBoxCameraPlugin_boxesWithBuiltinSDF</topic>
-        <type>3d</type>
+        <topic>/test/integration/BoundingBox3DCameraPlugin_boxesWithBuiltinSDF</topic>
+        <box_type>3d</box_type>
         <camera>
           <image>
               <width>320</width>

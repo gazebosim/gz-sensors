@@ -36,7 +36,7 @@ using namespace rendering;
 class BoundingBoxCameraSensorTest: public testing::Test,
   public testing::WithParamInterface<const char *>
 {
-  // Create a BoundingBox Camera sensor from a SDF and gets a image message
+  // Create a BoundingBox Camera sensor from a SDF and gets a boxes message
   public: void BoxesWithBuiltinSDF(const std::string &_renderEngine);
 
   public: void Boxes3DWithBuiltinSDF(const std::string &renderEngine);
@@ -91,7 +91,7 @@ void OnNew3DBoundingBoxes(const msgs::AnnotatedOriented3DBox_V &boxes)
   int size = boxes.annotated_box_size();
   for (int i = 0; i < size; i++)
   {
-    BoundingBox box(BoundingBoxType::VisibleBox2D);
+    BoundingBox box(BoundingBoxType::Box3D);
     auto annotated_box = boxes.annotated_box(i);
     auto orientedBox = annotated_box.box();
     // center
@@ -99,8 +99,8 @@ void OnNew3DBoundingBoxes(const msgs::AnnotatedOriented3DBox_V &boxes)
       orientedBox.center().z());
     // orientation
     auto orientation = orientedBox.orientation();
-    box.oreintation.Set(orientation.x(), orientation.y(),
-      orientation.z(), orientation.w());
+    box.oreintation.Set(orientation.w(), orientation.x(),
+      orientation.y(), orientation.z());
     // size
     auto boxSize = orientedBox.boxsize();
     box.size.Set(boxSize.x(), boxSize.y(), boxSize.z());
@@ -110,7 +110,6 @@ void OnNew3DBoundingBoxes(const msgs::AnnotatedOriented3DBox_V &boxes)
   }
   g_counter++;
   g_mutex.unlock();
-  std::cout << "Received boxes " << g_counter << std::endl;
 }
 
 /// \brief wait till you read the published frame
@@ -130,7 +129,7 @@ void WaitForNewFrame()
   EXPECT_GT(counter, 0);
 }
 
-/// \brief Build the scene with 3 boxes 2 overlapping boxes which 1
+/// \brief Build a scene with 3 boxes 2 overlapping boxes which 1
 /// is behind the other, and the 3rd box is invisible behind them
 void BuildScene(rendering::ScenePtr scene)
 {
@@ -165,6 +164,21 @@ void BuildScene(rendering::ScenePtr scene)
   invisibleBox->SetLocalRotation(0, 0, 0);
   invisibleBox->SetUserData("label", 2);
   root->AddChild(invisibleBox);
+}
+
+/// \brief Build a scene with 3d oreinted box
+void BuildScene3D(rendering::ScenePtr scene)
+{
+  rendering::VisualPtr root = scene->RootVisual();
+
+  // create front box visual (the smaller box)
+  rendering::VisualPtr box = scene->CreateVisual();
+  box->AddGeometry(scene->CreateBox());
+  box->SetOrigin(0.0, 0.0, 0.0);
+  box->SetLocalPosition(math::Vector3d(2, 0, 0));
+  box->SetLocalRotation(math::Quaternion(1.0, 0.5, 0.5, 0.2));
+  box->SetUserData("label", 1);
+  root->AddChild(box);
 }
 
 /////////////////////////////////////////////////
@@ -328,7 +342,7 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   const std::string &_renderEngine)
 {
   std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
-      "integration", "boundingbox_camera_sensor_builtin.sdf");
+      "integration", "boundingbox_3d_camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
   ASSERT_TRUE(sdf::readFile(path, doc));
@@ -360,7 +374,7 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   }
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
-  BuildScene(scene);
+  BuildScene3D(scene);
 
   ignition::sensors::Manager mgr;
 
@@ -393,47 +407,42 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
     "/test/integration/BoundingBox3DCameraPlugin_boxesWithBuiltinSDF";
   WaitForMessageTestHelper<
     ignition::msgs::AnnotatedOriented3DBox_V> helper(topic);
-  std::cout << 1 << std::endl;
+
   // Update once to create image
   mgr.RunOnce(std::chrono::steady_clock::duration::zero());
-  std::cout << 1 << std::endl;
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
-  std::cout << 1 << std::endl;
 
   // subscribe to the BoundingBox camera topic
   ignition::transport::Node node;
   node.Subscribe(topic, &OnNew3DBoundingBoxes);
-  std::cout << 1 << std::endl;
 
   // wait for a few BoundingBox camera boxes
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
   // wait for a new boxes
   WaitForNewFrame();
-  std::cout << 1 << std::endl;
 
   g_mutex.lock();
   g_counter = 0;
 
   // check the hidden box
-  EXPECT_EQ(g_boxes.size(), size_t(2));
+  EXPECT_EQ(g_boxes.size(), size_t(1));
   BoundingBox box3D = g_boxes[0];
 
   double margin_error = 0.01;
-  EXPECT_NEAR(box3D.center.X(), -1, margin_error);
+  EXPECT_NEAR(box3D.center.X(), 0, margin_error);
   EXPECT_NEAR(box3D.center.Y(), 0, margin_error);
-  EXPECT_NEAR(box3D.center.Z(), -4, margin_error);
+  EXPECT_NEAR(box3D.center.Z(), -2, margin_error);
 
   EXPECT_NEAR(box3D.size.X(), 1, margin_error);
   EXPECT_NEAR(box3D.size.Y(), 1, margin_error);
   EXPECT_NEAR(box3D.size.Z(), 1, margin_error);
 
-  EXPECT_NEAR(box3D.oreintation.X(), 0.5, margin_error);
-  EXPECT_NEAR(box3D.oreintation.Y(), 0.5, margin_error);
-  EXPECT_NEAR(box3D.oreintation.Z(), -0.5, margin_error);
-  EXPECT_NEAR(box3D.oreintation.W(), -0.5, margin_error);
+  EXPECT_NEAR(box3D.oreintation.X(), 0.322329, margin_error);
+  EXPECT_NEAR(box3D.oreintation.Y(), -0.886405, margin_error);
+  EXPECT_NEAR(box3D.oreintation.Z(), -0.0805823, margin_error);
+  EXPECT_NEAR(box3D.oreintation.W(), -0.322329, margin_error);
 
-  std::cout << box3D.center << " " << box3D.size  << " " << box3D.oreintation << std::endl;
   g_mutex.unlock();
 
   // Clean up
@@ -448,10 +457,10 @@ TEST_P(BoundingBoxCameraSensorTest, BoxesWithBuiltinSDF)
 }
 
 //////////////////////////////////////////////////
-// TEST_P(BoundingBoxCameraSensorTest, Boxes3DWithBuiltinSDF)
-// {
-//   Boxes3DWithBuiltinSDF(GetParam());
-// }
+TEST_P(BoundingBoxCameraSensorTest, Boxes3DWithBuiltinSDF)
+{
+  Boxes3DWithBuiltinSDF(GetParam());
+}
 
 INSTANTIATE_TEST_CASE_P(BoundingBoxCameraSensor, BoundingBoxCameraSensorTest,
     RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
