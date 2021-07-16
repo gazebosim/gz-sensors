@@ -301,8 +301,6 @@ bool BoundingBoxCameraSensor::CreateCamera()
   this->dataPtr->boundingboxCamera->SetImageHeight(height);
   this->dataPtr->boundingboxCamera->SetNearClipPlane(sdfCamera->NearClip());
   this->dataPtr->boundingboxCamera->SetFarClipPlane(sdfCamera->FarClip());
-  this->dataPtr->boundingboxCamera->SetNearClipPlane(0.01);
-  this->dataPtr->boundingboxCamera->SetFarClipPlane(1000);
   this->dataPtr->boundingboxCamera->SetImageFormat(PixelFormat::PF_R8G8B8);
   this->dataPtr->boundingboxCamera->SetAspectRatio(aspectRatio);
   this->dataPtr->boundingboxCamera->SetHFOV(angle);
