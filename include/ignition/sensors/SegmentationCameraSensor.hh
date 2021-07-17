@@ -25,13 +25,15 @@
 #include <ignition/common/PluginMacros.hh>
 #include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
+#include <ignition/transport/Node.hh>
+#include <ignition/transport/Publisher.hh>
+#include <ignition/msgs.hh>
+#include <sdf/sdf.hh>
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/Export.hh"
-#include "ignition/transport/Node.hh"
-#include "ignition/transport/Publisher.hh"
 #include "ignition/sensors/Sensor.hh"
-#include "ignition/msgs.hh"
-#include <sdf/sdf.hh>
+
+#include "ignition/sensors/segmentation_camera/Export.hh"
 
 namespace ignition
 {
@@ -49,7 +51,8 @@ namespace ignition
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-    class SegmentationCameraSensor : public CameraSensor
+    class IGNITION_SENSORS_SEGMENTATION_CAMERA_VISIBLE
+      SegmentationCameraSensor : public CameraSensor
     {
       /// \brief constructor
       public: SegmentationCameraSensor();

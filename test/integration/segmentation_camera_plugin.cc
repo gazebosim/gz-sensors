@@ -55,10 +55,13 @@ std::mutex g_mutex;
 uint8_t *g_buffer = nullptr;
 
 /// \brief counter of received segmentation msgs
-int g_counter = 0;
+unsigned int g_counter = 0;
 
 /// \brief Label of the hidden box
-uint8_t hiddenLabel = 4;
+const uint8_t hiddenLabel = 4;
+const uint8_t leftBoxLabel = 1;
+const uint8_t rightBoxLabel = 1;
+const uint8_t middleBoxLabel = 2;
 
 /// \brief callback to get the segmentation buffer
 void OnNewSegmentationFrame(const msgs::Image &_msg)
@@ -79,15 +82,15 @@ void OnNewSegmentationFrame(const msgs::Image &_msg)
 /// \brief wait till you read the published frame
 void WaitForNewFrame(ignition::sensors::Manager &mgr)
 {
+  g_counter = 0;
+
   // wait for a few segmentation camera frames
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
 
-  g_counter = 0;
-
   auto waitTime = std::chrono::duration_cast< std::chrono::milliseconds >(
-  std::chrono::duration< double >(0.001));
+    std::chrono::duration< double >(0.001));
 
-  int counter = 0;
+  unsigned int counter = 0;
   // wait for the counter to increase
   for (int sleep = 0; sleep < 300 && counter == 0; ++sleep)
   {
@@ -96,21 +99,23 @@ void WaitForNewFrame(ignition::sensors::Manager &mgr)
     g_mutex.unlock();
     std::this_thread::sleep_for(waitTime);
   }
-  EXPECT_GT(counter, 0);
+  EXPECT_GT(counter, 0u);
 }
 
 /// \brief Build the scene with 3 boxes besides each other
-/// the 2 outer boxes have the same label & the middle is different
+/// the 2 outer boxes have the same label & the middle is different.
+/// There is also another box with a unique label that is hidden
+/// behind the middle box
 void BuildScene(rendering::ScenePtr scene)
 {
-  math::Vector3d leftPosition(3, -1.5, 0);
-  math::Vector3d rightPosition(3, 1.5, 0);
-  math::Vector3d middlePosition(3, 0, 0);
-  math::Vector3d hiddenPosition(8, 0, 0);
+  const math::Vector3d leftPosition(3, -1.5, 0);
+  const math::Vector3d rightPosition(3, 1.5, 0);
+  const math::Vector3d middlePosition(3, 0, 0);
+  const math::Vector3d hiddenPosition(8, 0, 0);
 
   rendering::VisualPtr root = scene->RootVisual();
 
-  double unitBoxSize = 1.0;
+  const double unitBoxSize = 1.0;
 
   // create box visual
   rendering::VisualPtr box = scene->CreateVisual();
@@ -118,7 +123,7 @@ void BuildScene(rendering::ScenePtr scene)
   box->SetOrigin(0.0, 0.0, 0.0);
   box->SetLocalPosition(leftPosition);
   box->SetLocalRotation(0, 0, 0);
-  box->SetUserData("label", 1);
+  box->SetUserData("label", leftBoxLabel);
   box->SetLocalScale(unitBoxSize, unitBoxSize, unitBoxSize);
   root->AddChild(box);
 
@@ -128,7 +133,7 @@ void BuildScene(rendering::ScenePtr scene)
   box1->SetOrigin(0.0, 0.0, 0.0);
   box1->SetLocalPosition(rightPosition);
   box1->SetLocalRotation(0, 0, 0);
-  box1->SetUserData("label", 1);
+  box1->SetUserData("label", rightBoxLabel);
   box1->SetLocalScale(unitBoxSize, unitBoxSize, unitBoxSize);
   root->AddChild(box1);
 
@@ -138,7 +143,7 @@ void BuildScene(rendering::ScenePtr scene)
   box2->SetOrigin(0.0, 0.0, 0.0);
   box2->SetLocalPosition(middlePosition);
   box2->SetLocalRotation(0, 0, 0);
-  box2->SetUserData("label", 2);
+  box2->SetUserData("label", middleBoxLabel);
   box2->SetLocalScale(unitBoxSize, unitBoxSize, unitBoxSize);
   root->AddChild(box2);
 
@@ -224,6 +229,7 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   auto camera = sensor->SegmentationCamera();
   ASSERT_NE(camera, nullptr);
 
+  // 23 is a random number that is not used for boxes
   uint32_t backgroundLabel = 23;
   camera->SetSegmentationType(rendering::SegmentationType::Semantic);
   camera->EnableColoredMap(true);
@@ -245,11 +251,10 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   mgr.RunOnce(std::chrono::steady_clock::duration::zero());
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
-  EXPECT_TRUE(infoHelper.WaitForMessage()) << infoHelper;
 
   // subscribe to the segmentation camera topic
   ignition::transport::Node node;
-  node.Subscribe(topic, &OnNewSegmentationFrame);
+  EXPECT_TRUE(node.Subscribe(topic, &OnNewSegmentationFrame));
 
   // wait for a new frame
   WaitForNewFrame(mgr);
@@ -265,21 +270,26 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   uint32_t rightIndex = (rightProj.Y() * width + rightProj.X()) * channels;
   uint32_t middleIndex = (middleProj.Y() * width + middleProj.X()) * channels;
 
-  // test
-  g_counter = 0;
-
   uint8_t leftLabel =   g_buffer[leftIndex];
   uint8_t rightLabel =  g_buffer[rightIndex];
   uint8_t middleLabel = g_buffer[middleIndex];
 
   // check the label
-  EXPECT_EQ(leftLabel, 1);
-  EXPECT_EQ(middleLabel, 2);
-  EXPECT_EQ(rightLabel, 1);
+  EXPECT_EQ(leftLabel, leftBoxLabel);
+  EXPECT_EQ(middleLabel, middleBoxLabel);
+  EXPECT_EQ(rightLabel, rightBoxLabel);
 
+  // check a pixel between 2 boxes & a pixel below a box
+  uint32_t betweenBoxesIndex = (120 * width + 230) * channels;
+  uint32_t belowBoxesIndex = (200 * width + 280) * channels;
   // check if the first pixel(background) = the background label
   uint8_t background = g_buffer[0];
+  uint8_t betweenBoxes = g_buffer[betweenBoxesIndex];
+  uint8_t belowBoxes = g_buffer[belowBoxesIndex];
+
   EXPECT_EQ(background, backgroundLabel);
+  EXPECT_EQ(betweenBoxes, backgroundLabel);
+  EXPECT_EQ(belowBoxes, backgroundLabel);
 
   // search for the hidden box label in all pixels
   for (int i = 0; i < height; i++)
@@ -298,23 +308,20 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   // wait for a new frame
   WaitForNewFrame(mgr);
 
-  // the label is in the last channel
-  leftLabel =   g_buffer[leftIndex   + 2];
-  rightLabel =  g_buffer[rightIndex  + 2];
-  middleLabel = g_buffer[middleIndex + 2];
+  const int labelOffset = 2;
+  leftLabel =   g_buffer[leftIndex   + labelOffset];
+  rightLabel =  g_buffer[rightIndex  + labelOffset];
+  middleLabel = g_buffer[middleIndex + labelOffset];
 
   // the instance count is in the first channel
   uint8_t leftCount =   g_buffer[leftIndex];
   uint8_t rightCount =  g_buffer[rightIndex];
   uint8_t middleCount = g_buffer[middleIndex];
 
-  // test
-  g_counter = 0;
-
   // check the label
-  EXPECT_EQ(leftLabel, 1);
-  EXPECT_EQ(middleLabel, 2);
-  EXPECT_EQ(rightLabel, 1);
+  EXPECT_EQ(leftLabel, leftBoxLabel);
+  EXPECT_EQ(middleLabel, middleBoxLabel);
+  EXPECT_EQ(rightLabel, rightBoxLabel);
 
   // instance count
   EXPECT_EQ(middleCount, 1);

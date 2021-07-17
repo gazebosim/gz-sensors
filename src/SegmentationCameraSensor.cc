@@ -18,16 +18,17 @@
 #include <mutex>
 #include <memory>
 
-#include "ignition/common/Console.hh"
-#include "ignition/common/Profiler.hh"
-#include "ignition/common/Image.hh"
-#include "ignition/msgs.hh"
-#include "ignition/rendering/SegmentationCamera.hh"
+#include <ignition/common/Console.hh>
+#include <ignition/common/Profiler.hh>
+#include <ignition/common/Image.hh>
+#include <ignition/msgs.hh>
+#include <ignition/rendering/SegmentationCamera.hh>
+#include <ignition/transport/Node.hh>
+#include <ignition/transport/Publisher.hh>
+
 #include "ignition/sensors/RenderingEvents.hh"
-#include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/SegmentationCameraSensor.hh"
-#include "ignition/transport/Node.hh"
-#include "ignition/transport/Publisher.hh"
+#include "ignition/sensors/SensorFactory.hh"
 
 using namespace ignition;
 using namespace sensors;
@@ -35,15 +36,16 @@ using namespace sensors;
 class ignition::sensors::SegmentationCameraSensorPrivate
 {
   /// \brief Save an image
-  /// \param[in] _data the image data to be saved
+  /// \param[in] _coloredBuffer buffer of colored map
+  /// \param[in] _labelsBuffer buffer of labels map
   /// \param[in] _width width of image in pixels
   /// \param[in] _height height of image in pixels
   /// \return True if the image was saved successfully. False can mean
   /// that the path provided to the constructor does exist and creation
   /// of the path was not possible.
   /// \sa ImageSaver
-  public: bool SaveImage(const uint8_t *_data, unsigned int _width,
-    unsigned int _height);
+  public: bool SaveImage(const uint8_t *_coloredBuffer,
+    const uint8_t *_labelsBuffer, unsigned int _width, unsigned int _height);
 
   /// \brief SDF Sensor DOM Object
   public: sdf::Sensor sdfSensor;
@@ -63,17 +65,17 @@ class ignition::sensors::SegmentationCameraSensorPrivate
   /// \brief Publisher to publish segmentation labels image
   public: transport::Node::Publisher labelsMapPublisher;
 
-  /// \brief Segmentation Image Msg
+  /// \brief Segmentation colored image message
   public: msgs::Image coloredMapMsg;
 
-  /// \brief Segmentation Image Msg
+  /// \brief Segmentation labels image message
   public: msgs::Image labelsMapMsg;
 
-  /// \brief Topic to publish the segmentation colored map
-  public: std::string topicColoredMap = "/colored_map";
+  /// \brief Topic suffix to publish the segmentation colored map
+  public: const std::string topicColoredMapSuffix = "/colored_map";
 
- /// \brief Topic to publish the segmentation labels map
-  public: std::string topicLabelsMap = "/labels_map";
+  /// \brief Topic suffix to publish the segmentation labels map
+  public: std::string topicLabelsMapSuffix = "/labels_map";
 
   /// \brief Buffer contains the segmentation colored map data
   public: uint8_t *segmentationColoredBuffer {nullptr};
@@ -184,25 +186,38 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
       this->dataPtr->type = rendering::SegmentationType::Semantic;
     else if (type == "instance" || type == "panoptic")
       this->dataPtr->type = rendering::SegmentationType::Panoptic;
+    else
+    {
+      igndbg << "Wrong type {" << type <<
+        "}, type should be semantic or instance or panoptic" << std::endl;
+      return false;
+    }
   }
 
   // Create the segmentation colored map image publisher
   this->dataPtr->coloredMapPublisher =
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
-          this->Topic() + this->dataPtr->topicColoredMap);
+          this->Topic() + this->dataPtr->topicColoredMapSuffix);
 
   // Create the segmentation labels map image publisher
   this->dataPtr->labelsMapPublisher =
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
-          this->Topic() + this->dataPtr->topicLabelsMap);
+          this->Topic() + this->dataPtr->topicLabelsMapSuffix);
 
-  if (!this->dataPtr->labelsMapPublisher || !this->dataPtr->coloredMapPublisher)
+  if (!this->dataPtr->labelsMapPublisher)
   {
     ignerr << "Unable to create publisher on topic["
-      << this->Topic() << "].\n";
+      << this->Topic() + this->dataPtr->topicLabelsMapSuffix << "].\n";
+    return false;
+  }
+  if (!this->dataPtr->coloredMapPublisher)
+  {
+    ignerr << "Unable to create publisher on topic["
+      << this->Topic() + this->dataPtr->topicColoredMapSuffix << "].\n";
     return false;
   }
 
+  std::cout << this->InfoTopic() << std::endl;
   if (!this->AdvertiseInfo(this->Topic() + "/camera_info"))
     return false;
 
@@ -355,11 +370,10 @@ bool SegmentationCameraSensor::Update(
     return false;
   }
 
-  // don't render if there is no subscribers
+  // don't render if there are no subscribers
   if (!this->dataPtr->coloredMapPublisher.HasConnections() &&
     !this->dataPtr->labelsMapPublisher.HasConnections() &&
-    this->dataPtr->imageEvent.ConnectionCount() <= 0u &&
-    !this->dataPtr->saveImage)
+    this->dataPtr->imageEvent.ConnectionCount() <= 0u)
   {
     return false;
   }
@@ -426,7 +440,7 @@ bool SegmentationCameraSensor::Update(
   // Save image
   if (this->dataPtr->saveImage)
   {
-    this->dataPtr->SaveImage(
+    this->dataPtr->SaveImage(this->dataPtr->segmentationLabelsBuffer,
       this->dataPtr->segmentationColoredBuffer, width, height);
   }
 
@@ -458,7 +472,8 @@ common::ConnectionPtr SegmentationCameraSensor::ConnectImageCallback(
 
 //////////////////////////////////////////////////
 bool SegmentationCameraSensorPrivate::SaveImage(
-  const uint8_t *_data, unsigned int _width, unsigned int _height)
+  const uint8_t *_coloredBuffer, const uint8_t *_labelsBuffer,
+  unsigned int _width, unsigned int _height)
 {
   // Attempt to create the directory if it doesn't exist
   if (!ignition::common::isDirectory(this->saveImagePath))
@@ -467,16 +482,29 @@ bool SegmentationCameraSensorPrivate::SaveImage(
       return false;
   }
 
-  std::string filename = this->saveImagePrefix +
+  std::string coloredName = this->saveImagePrefix + "labels_" +
                          std::to_string(this->saveImageCounter) + ".png";
+  std::string labelsName = this->saveImagePrefix + "colored_" +
+                         std::to_string(this->saveImageCounter) + ".png";
+
   ++this->saveImageCounter;
 
-  ignition::common::Image localImage;
-  localImage.SetFromData(_data, _width, _height,
+  // save colored map
+  ignition::common::Image localColoredImage;
+  localColoredImage.SetFromData(_coloredBuffer, _width, _height,
     ignition::common::Image::RGB_INT8);
 
-  localImage.SavePNG(
-      ignition::common::joinPaths(this->saveImagePath, filename));
+  localColoredImage.SavePNG(
+      ignition::common::joinPaths(this->saveImagePath, coloredName));
+
+  // save labels map
+  ignition::common::Image localLabelsImage;
+  localLabelsImage.SetFromData(_labelsBuffer, _width, _height,
+    ignition::common::Image::RGB_INT8);
+
+  localLabelsImage.SavePNG(
+      ignition::common::joinPaths(this->saveImagePath, labelsName));
+
   return true;
 }
 
