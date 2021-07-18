@@ -20,7 +20,6 @@
 #include <ignition/common/Console.hh>
 #include <ignition/common/Filesystem.hh>
 #include <ignition/common/Event.hh>
-#include <ignition/common/Time.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/GpuLidarSensor.hh>
@@ -537,7 +536,11 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   double expectedRangeAtMidPointBox2 = abs(box02Pose.Pos().Y()) - unitBoxSize/2;
 
   // Sensor 1 should see box01 and box02
-  EXPECT_NEAR(sensor1->Range(0), expectedRangeAtMidPointBox2, LASER_TOL);
+  // ign-rendering uses lower resolution textures for lidars with low sample
+  // count after: https://github.com/ignitionrobotics/ign-rendering/pull/296
+  // Side effect is the loss of precision in the depth buffer data so we relax
+  // tolerance for this check in order for test to pass.
+  EXPECT_NEAR(sensor1->Range(0), expectedRangeAtMidPointBox2, LASER_TOL + 1e-5);
   EXPECT_NEAR(sensor1->Range(mid), expectedRangeAtMidPointBox1, LASER_TOL);
 #ifndef __APPLE__
   // See https://github.com/ignitionrobotics/ign-sensors/issues/66

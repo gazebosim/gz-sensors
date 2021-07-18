@@ -313,13 +313,6 @@ void CameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 }
 
 //////////////////////////////////////////////////
-bool CameraSensor::Update(
-  const ignition::common::Time &_now)
-{
-  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
-}
-
-//////////////////////////////////////////////////
 bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("CameraSensor::Update");
@@ -543,13 +536,6 @@ void CameraSensor::PublishInfo(
   *this->dataPtr->infoMsg.mutable_header()->mutable_stamp() =
     msgs::Convert(_now);
   this->dataPtr->infoPub.Publish(this->dataPtr->infoMsg);
-}
-
-//////////////////////////////////////////////////
-void CameraSensor::PublishInfo(
-  const ignition::common::Time &_now)
-{
-  this->PublishInfo(math::secNsecToDuration(_now.sec, _now.nsec));
 }
 
 //////////////////////////////////////////////////
