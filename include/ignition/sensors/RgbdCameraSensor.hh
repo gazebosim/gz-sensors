@@ -22,7 +22,6 @@
 #include <sdf/sdf.hh>
 
 #include <ignition/common/SuppressWarning.hh>
-#include <ignition/common/Time.hh>
 
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/config.hh"
@@ -66,12 +65,6 @@ namespace ignition
       /// \brief Initialize values in the sensor
       /// \return True on success
       public: virtual bool Init() override;
-
-      /// \brief Force the sensor to generate data
-      /// \param[in] _now The current time
-      /// \return true if the update was successfull
-      public: virtual bool IGN_DEPRECATED(4) Update(
-        const ignition::common::Time &_now) override;
 
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time

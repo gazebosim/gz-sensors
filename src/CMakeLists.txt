@@ -32,9 +32,6 @@ endif()
 # Create the library target.
 ign_create_core_library(SOURCES ${sources} CXX_STANDARD 14)
 
-# todo(anyone) dependency on rendering has been moved to its own component
-# and relevant functions are deprecated in ign-sensors 2. We can remove linking
-# against ign-rendering from the core lib in ign-sensors 3
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC
     ignition-math${IGN_MATH_VER}::ignition-math${IGN_MATH_VER}
