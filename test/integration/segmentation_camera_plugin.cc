@@ -231,7 +231,7 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
 
   // 23 is a random number that is not used for boxes
   uint32_t backgroundLabel = 23;
-  camera->SetSegmentationType(rendering::SegmentationType::Semantic);
+  camera->SetSegmentationType(rendering::SegmentationType::SEMANTIC);
   camera->EnableColoredMap(true);
   camera->SetBackgroundLabel(backgroundLabel);
   camera->SetLocalPosition(0.0, 0.0, 0.0);
@@ -282,10 +282,10 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   // check a pixel between 2 boxes & a pixel below a box
   uint32_t betweenBoxesIndex = (120 * width + 230) * channels;
   uint32_t belowBoxesIndex = (200 * width + 280) * channels;
-  // check if the first pixel(background) = the background label
-  uint8_t background = g_buffer[0];
   uint8_t betweenBoxes = g_buffer[betweenBoxesIndex];
   uint8_t belowBoxes = g_buffer[belowBoxesIndex];
+  // check if the first pixel(background) = the background label
+  uint8_t background = g_buffer[0];
 
   EXPECT_EQ(background, backgroundLabel);
   EXPECT_EQ(betweenBoxes, backgroundLabel);
@@ -303,7 +303,7 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   }
 
   // Instance/Panoptic Segmentation Test
-  camera->SetSegmentationType(rendering::SegmentationType::Panoptic);
+  camera->SetSegmentationType(rendering::SegmentationType::PANOPTIC);
 
   // wait for a new frame
   WaitForNewFrame(mgr);

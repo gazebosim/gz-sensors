@@ -25,10 +25,11 @@
 #include <ignition/common/PluginMacros.hh>
 #include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
+#include <ignition/msgs.hh>
 #include <ignition/transport/Node.hh>
 #include <ignition/transport/Publisher.hh>
-#include <ignition/msgs.hh>
 #include <sdf/sdf.hh>
+
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/Export.hh"
 #include "ignition/sensors/Sensor.hh"

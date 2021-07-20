@@ -19,8 +19,8 @@
 #include <memory>
 
 #include <ignition/common/Console.hh>
-#include <ignition/common/Profiler.hh>
 #include <ignition/common/Image.hh>
+#include <ignition/common/Profiler.hh>
 #include <ignition/msgs.hh>
 #include <ignition/rendering/SegmentationCamera.hh>
 #include <ignition/transport/Node.hh>
@@ -75,7 +75,7 @@ class ignition::sensors::SegmentationCameraSensorPrivate
   public: const std::string topicColoredMapSuffix = "/colored_map";
 
   /// \brief Topic suffix to publish the segmentation labels map
-  public: std::string topicLabelsMapSuffix = "/labels_map";
+  public: const std::string topicLabelsMapSuffix = "/labels_map";
 
   /// \brief Buffer contains the segmentation colored map data
   public: uint8_t *segmentationColoredBuffer {nullptr};
@@ -85,7 +85,7 @@ class ignition::sensors::SegmentationCameraSensorPrivate
 
   /// \brief Segmentation type (Semantic / Instance)
   public: rendering::SegmentationType type
-    {rendering::SegmentationType::Semantic};
+    {rendering::SegmentationType::SEMANTIC};
 
   /// \brief Connection to the new segmentation frames data
   public: common::ConnectionPtr newSegmentationConnection {nullptr};
@@ -183,9 +183,9 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
     });
 
     if (type == "semantic")
-      this->dataPtr->type = rendering::SegmentationType::Semantic;
+      this->dataPtr->type = rendering::SegmentationType::SEMANTIC;
     else if (type == "instance" || type == "panoptic")
-      this->dataPtr->type = rendering::SegmentationType::Panoptic;
+      this->dataPtr->type = rendering::SegmentationType::PANOPTIC;
     else
     {
       igndbg << "Wrong type {" << type <<
@@ -206,18 +206,18 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->labelsMapPublisher)
   {
-    ignerr << "Unable to create publisher on topic["
+    ignerr << "Unable to create publisher on topic ["
       << this->Topic() + this->dataPtr->topicLabelsMapSuffix << "].\n";
     return false;
   }
   if (!this->dataPtr->coloredMapPublisher)
   {
-    ignerr << "Unable to create publisher on topic["
+    ignerr << "Unable to create publisher on topic ["
       << this->Topic() + this->dataPtr->topicColoredMapSuffix << "].\n";
     return false;
   }
 
-  std::cout << this->InfoTopic() << std::endl;
+  // TODO(anyone) Access the info topic from the parent class
   if (!this->AdvertiseInfo(this->Topic() + "/camera_info"))
     return false;
 
@@ -440,8 +440,8 @@ bool SegmentationCameraSensor::Update(
   // Save image
   if (this->dataPtr->saveImage)
   {
-    this->dataPtr->SaveImage(this->dataPtr->segmentationLabelsBuffer,
-      this->dataPtr->segmentationColoredBuffer, width, height);
+    this->dataPtr->SaveImage(this->dataPtr->segmentationColoredBuffer,
+      this->dataPtr->segmentationLabelsBuffer, width, height);
   }
 
   return true;
@@ -482,9 +482,9 @@ bool SegmentationCameraSensorPrivate::SaveImage(
       return false;
   }
 
-  std::string coloredName = this->saveImagePrefix + "labels_" +
+  std::string coloredName = this->saveImagePrefix + "colored_" +
                          std::to_string(this->saveImageCounter) + ".png";
-  std::string labelsName = this->saveImagePrefix + "colored_" +
+  std::string labelsName = this->saveImagePrefix + "labels_" +
                          std::to_string(this->saveImageCounter) + ".png";
 
   ++this->saveImageCounter;
