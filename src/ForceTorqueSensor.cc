@@ -234,7 +234,6 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
       measuredTorque = this->dataPtr->rotationSensorChild *
         (-1*this->dataPtr->torque);
     }
-
   }
 
   msgs::Set(msg.mutable_force(), measuredForce);
