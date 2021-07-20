@@ -20,6 +20,7 @@
 #include <sdf/sdf.hh>
 
 #include <ignition/math/Helpers.hh>
+
 #include <ignition/sensors/ForceTorqueSensor.hh>
 #include <ignition/sensors/SensorFactory.hh>
 
