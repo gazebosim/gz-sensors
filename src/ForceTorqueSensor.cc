@@ -81,7 +81,6 @@ class ignition::sensors::ForceTorqueSensorPrivate
   /// \brief Previous update time step.
   public: std::chrono::steady_clock::duration prevStep
     {std::chrono::steady_clock::duration::zero()};
-
 };
 
 //////////////////////////////////////////////////
