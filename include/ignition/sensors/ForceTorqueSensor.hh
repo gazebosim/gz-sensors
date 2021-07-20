@@ -24,10 +24,10 @@
 
 #include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
+
 #include <ignition/math/Pose3.hh>
 
 #include <ignition/sensors/config.hh>
-
 #include <ignition/sensors/force_torque/Export.hh>
 
 #include "ignition/sensors/Sensor.hh"
