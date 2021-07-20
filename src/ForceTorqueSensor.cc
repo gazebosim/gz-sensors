@@ -75,7 +75,6 @@ class ignition::sensors::ForceTorqueSensorPrivate
       ///        Necessary is the measure is specified in joint frame.
       public: ignition::math::Matrix3d rotationSensorChild;
 
-
   /// \brief Flag for if time has been initialized
   public: bool timeInitialized = false;
 
