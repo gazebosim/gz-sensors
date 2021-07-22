@@ -155,13 +155,6 @@ bool ImuSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool ImuSensor::Update(
-  const ignition::common::Time &_now)
-{
-  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
-}
-
-//////////////////////////////////////////////////
 bool ImuSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("ImuSensor::Update");

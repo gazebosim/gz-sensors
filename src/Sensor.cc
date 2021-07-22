@@ -142,6 +142,7 @@ Sensor::Sensor() :
 //////////////////////////////////////////////////
 bool Sensor::Init()
 {
+  this->dataPtr->nextUpdateTime = std::chrono::steady_clock::duration::zero();
   return true;
 }
 
@@ -341,30 +342,9 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
 }
 
 //////////////////////////////////////////////////
-bool Sensor::Update(const ignition::common::Time &_now, const bool _force)
-{
-  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec), _force);
-}
-
-//////////////////////////////////////////////////
 std::chrono::steady_clock::duration Sensor::NextDataUpdateTime() const
 {
   return this->dataPtr->nextUpdateTime;
-}
-
-//////////////////////////////////////////////////
-ignition::common::Time Sensor::NextUpdateTime() const
-{
-#ifndef _WIN32
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-  std::pair<uint64_t, uint64_t> secNsec =
-    math::durationToSecNsec(this->dataPtr->nextUpdateTime);
-  return common::Time(secNsec.first, secNsec.second);
-#ifndef _WIN32
-# pragma GCC diagnostic pop
-#endif
 }
 
 /////////////////////////////////////////////////

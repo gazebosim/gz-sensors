@@ -32,11 +32,6 @@ class TestSensor : public Sensor
     return true;
   }
 
-  public: bool Update(const common::Time &) override
-  {
-    return false;
-  }
-
   public: unsigned int updateCount{0};
 };
 
