@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_BOUNDINGBOXCAMERASENSOR2_HH_
-#define IGNITION_SENSORS_BOUNDINGBOXCAMERASENSOR2_HH_
+#ifndef IGNITION_SENSORS_BOUNDINGBOXCAMERASENSOR_HH_
+#define IGNITION_SENSORS_BOUNDINGBOXCAMERASENSOR_HH_
 
 #include <string>
 #include <memory>
@@ -26,15 +26,16 @@
 #include <ignition/common/PluginMacros.hh>
 #include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
+#include <ignition/msgs.hh>
+#include <ignition/transport/Node.hh>
+#include <ignition/transport/Publisher.hh>
+#include <ignition/rendering/BoundingBoxCamera.hh>
 
-#include "ignition/msgs.hh"
-#include "ignition/transport/Node.hh"
-#include "ignition/transport/Publisher.hh"
-
-#include "ignition/rendering/BoundingBoxCamera.hh"
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/Export.hh"
 #include "ignition/sensors/Sensor.hh"
+
+#include "ignition/sensors/boundingbox_camera/Export.hh"
 
 namespace ignition
 {
@@ -52,7 +53,8 @@ namespace ignition
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-    class BoundingBoxCameraSensor : public CameraSensor
+    class IGNITION_SENSORS_BOUNDINGBOX_CAMERA_VISIBLE
+      BoundingBoxCameraSensor : public CameraSensor
     {
       /// \brief constructor
       public: BoundingBoxCameraSensor();
@@ -82,12 +84,13 @@ namespace ignition
 
       /// \brief Get the rendering BoundingBox camera
       /// \return BoundingBox camera pointer
-      public: virtual rendering::BoundingBoxCameraPtr BoundingBoxCamera();
+      public: virtual rendering::BoundingBoxCameraPtr
+        BoundingBoxCamera() const;
 
       /// \brief Callback on new bounding boxes from bounding boxes camera
       /// \param[in] _boxes Detected bounding boxes from the camera
       public: void OnNewBoundingBoxes(
-        const std::vector<rendering::BoundingBox> &boxes);
+        const std::vector<rendering::BoundingBox> &_boxes);
 
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene

@@ -144,7 +144,7 @@ target_link_libraries(${boundingbox_camera_target}
     ${camera_target}
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-    )
+)
 
 # Build the unit tests.
 ign_build_tests(TYPE UNIT SOURCES ${gtest_sources} LIB_DEPS ${rendering_target})
