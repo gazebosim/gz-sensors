@@ -36,7 +36,7 @@ class ignition::sensors::ManagerPrivate
   public: ~ManagerPrivate();
 
   /// \brief Loaded sensors.
-  public: std::map<SensorId, std::unique_ptr<Sensor>> sensors;
+  public: std::map<SensorId, std::shared_ptr<Sensor>> sensors;
 
   /// \brief Sensor factory for creating sensors from plugins;
   public: SensorFactory sensorFactory;
@@ -98,6 +98,17 @@ void Manager::RunOnce(
   {
     s.second->Update(_time, _force);
   }
+}
+
+/////////////////////////////////////////////////
+ignition::sensors::SensorId Manager::AddSensor(
+  const std::shared_ptr<ignition::sensors::Sensor> &_sensor)
+{
+  if (!_sensor)
+    return NO_SENSOR;
+  SensorId id = _sensor->Id();
+  this->dataPtr->sensors[id] = std::move(_sensor);
+  return id;
 }
 
 /////////////////////////////////////////////////
