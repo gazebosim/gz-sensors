@@ -77,7 +77,6 @@ std::shared_ptr<SensorPlugin> SensorFactory::LoadSensorPlugin(
   }
 
   plugin::Loader pluginLoader;
-  pluginLoader.SetFlags(RTLD_LAZY | RTLD_GLOBAL);
   auto pluginNames = pluginLoader.LoadLib(fullPath);
 
   if (pluginNames.empty())
