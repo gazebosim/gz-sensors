@@ -32,7 +32,7 @@ pipelines:
           # - apt install -y
           #   libxml2-utils
           #   libtinyxml-dev
-          # - git clone http://github.com/osrf/sdformat -b master
+          # - git clone http://github.com/osrf/sdformat
           # - cd sdformat
           # - mkdir build
           # - cd build
@@ -42,7 +42,7 @@ pipelines:
           # # Ignition msgs (uncomment if a specific branch is needed)
           # - apt install -y
           #   libprotobuf-dev protobuf-compiler libprotoc-dev
-          # - git clone http://github.com/ignitionrobotics/ign-msgs -b master
+          # - git clone http://github.com/ignitionrobotics/ign-msgs
           # - cd ign-msgs
           # - mkdir build
           # - cd build
@@ -52,7 +52,7 @@ pipelines:
           # # Ignition transport (uncomment if a specific branch is needed)
           # - apt install -y
           #   libzmq3-dev uuid-dev libsqlite3-dev
-          # - git clone http://github.com/ignitionrobotics/ign-transport -b master
+          # - git clone http://github.com/ignitionrobotics/ign-transport
           # - cd ign-transport
           # - mkdir build
           # - cd build

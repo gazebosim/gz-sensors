@@ -90,12 +90,6 @@ bool Manager::Remove(const ignition::sensors::SensorId _id)
 }
 
 //////////////////////////////////////////////////
-void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
-{
-  this->RunOnce(math::secNsecToDuration(_time.sec, _time.nsec), _force);
-}
-
-//////////////////////////////////////////////////
 void Manager::RunOnce(
   const std::chrono::steady_clock::duration &_time, bool _force)
 {

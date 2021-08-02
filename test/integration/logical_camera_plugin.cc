@@ -20,7 +20,6 @@
 #include <sdf/sdf.hh>
 
 #include <ignition/common/Console.hh>
-#include <ignition/common/Time.hh>
 
 #include <ignition/sensors/LogicalCameraSensor.hh>
 #include <ignition/sensors/SensorFactory.hh>

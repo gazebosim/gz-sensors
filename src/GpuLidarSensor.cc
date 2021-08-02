@@ -216,12 +216,6 @@ bool GpuLidarSensor::CreateLidar()
 }
 
 //////////////////////////////////////////////////
-bool GpuLidarSensor::Update(const ignition::common::Time &_now)
-{
-  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
-}
-
-//////////////////////////////////////////////////
 bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("GpuLidarSensor::Update");

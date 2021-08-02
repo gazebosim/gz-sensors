@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
 #============================================================================
 # Initialize the project
 #============================================================================
-project(ignition-sensors5 VERSION 5.0.0)
+project(ignition-sensors6 VERSION 6.0.0)
 
 #============================================================================
 # Find ignition-cmake
 #============================================================================
-find_package(ignition-cmake2 REQUIRED)
+find_package(ignition-cmake2 2.8.0 REQUIRED)
 
 #============================================================================
 # Configure the project
@@ -55,13 +55,13 @@ set(IGN_COMMON_VER ${ignition-common4_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-transport
-ign_find_package(ignition-transport10 REQUIRED)
-set(IGN_TRANSPORT_VER ${ignition-transport10_VERSION_MAJOR})
+ign_find_package(ignition-transport11 REQUIRED)
+set(IGN_TRANSPORT_VER ${ignition-transport11_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-rendering
-ign_find_package(ignition-rendering5 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
-set(IGN_RENDERING_VER ${ignition-rendering5_VERSION_MAJOR})
+ign_find_package(ignition-rendering6 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
+set(IGN_RENDERING_VER ${ignition-rendering6_VERSION_MAJOR})
 
 if (TARGET ignition-rendering${IGN_RENDERING_VER}::ogre)
   set(HAVE_OGRE TRUE)
@@ -75,8 +75,8 @@ endif()
 
 #--------------------------------------
 # Find ignition-msgs
-ign_find_package(ignition-msgs7 REQUIRED)
-set(IGN_MSGS_VER ${ignition-msgs7_VERSION_MAJOR})
+ign_find_package(ignition-msgs8 REQUIRED)
+set(IGN_MSGS_VER ${ignition-msgs8_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-plugin
@@ -85,8 +85,8 @@ set(IGN_PLUGIN_VER ${ignition-plugin1_VERSION_MAJOR})
 
 #--------------------------------------
 # Find SDFormat
-ign_find_package(sdformat11 REQUIRED)
-set(SDF_VER ${sdformat11_VERSION_MAJOR})
+ign_find_package(sdformat12 REQUIRED)
+set(SDF_VER ${sdformat12_VERSION_MAJOR})
 
 set(IGN_SENSORS_PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 

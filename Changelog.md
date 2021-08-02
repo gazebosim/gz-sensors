@@ -1,3 +1,30 @@
+## Ignition Sensors 6
+
+### Ignition Sensors 6.X.X
+
+### Ignition Sensors 6.0.0 (20XX-XX-XX)
+
+## Ignition Sensors 5
+
+### Ignition Sensors 5.X.X
+
+### Ignition Sensors 5.0.0 (2021-03-30)
+
+1. Bump in edifice: ign-common4
+    * [Pull request #85](https://github.com/ignitionrobotics/ign-sensors/pull/85)
+
+1. Bump in edifice: sdformat11
+    * [Pull request #78](https://github.com/ignitionrobotics/ign-sensors/pull/78)
+
+1. Bump in edifice: ign-msgs7
+    * [Pull request #75](https://github.com/ignitionrobotics/ign-sensors/pull/75)
+
+1. Bump in edifice: ign-rendering5
+    * [Pull request #55](https://github.com/ignitionrobotics/ign-sensors/pull/55)
+
+1. Documentation updates
+    * [Pull request #116](https://github.com/ignitionrobotics/ign-sensors/pull/116)
+
 ## Ignition Sensors 4
 
 ### Ignition Sensors 4.X.X
@@ -56,7 +83,7 @@
 1. Added thermal camera tutorial.
     * [Pull request 61](https://github.com/ignitionrobotics/ign-sensors/pull/61)
 
-1. Prevent segfaults on test failures, make tests verbose. 
+1. Prevent segfaults on test failures, make tests verbose.
     * [Pull request 56](https://github.com/ignitionrobotics/ign-sensors/pull/56)
 
 1. Resolve updated codecheck issues.

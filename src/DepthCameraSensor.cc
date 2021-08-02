@@ -507,12 +507,6 @@ void DepthCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 }
 
 //////////////////////////////////////////////////
-bool DepthCameraSensor::Update(const ignition::common::Time &_now)
-{
-  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
-}
-
-//////////////////////////////////////////////////
 bool DepthCameraSensor::Update(
   const std::chrono::steady_clock::duration &_now)
 {
