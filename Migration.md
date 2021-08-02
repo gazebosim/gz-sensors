@@ -5,12 +5,12 @@ Deprecated code produces compile-time warnings. These warning serve as
 notification to users that their code should be upgraded. The next major
 release will remove the deprecated code.
 
-## Ignition Sensors 4.X to 5.X
+## Ignition Sensors 5.X to 6.X
 
 * Plugins now use Ignition Plugin instead of Ignition Common's plugin framework.
     * Macro `IGN_SENSORS_REGISTER_SENSOR` has been removed. Use
       `IGNITION_ADD_PLUGIN` and `IGNITION_ADD_PLUGIN_ALIAS` instead.
-        + ***Deprecation*** IGN_SENSORS_REGISTER_SENSOR(SensorName)
+        + ***Removed*** IGN_SENSORS_REGISTER_SENSOR(SensorName)
         + ***Replacement***
             IGNITION_ADD_PLUGIN(ignition::sensors::SensorTypePlugin<SensorClass>, ignition::sensors::SensorPlugin)
             IGNITION_ADD_PLUGIN_ALIAS(ignition::sensors::SensorTypePlugin<SensorClass>, "sensor_type")
