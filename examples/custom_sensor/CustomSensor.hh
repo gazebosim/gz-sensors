@@ -23,12 +23,12 @@
 
 namespace custom
 {
-  /// \brief CustomSensor Sensor Class
+  /// \brief Example sensor that publishes a noisy double value.
   class CustomSensor : public ignition::sensors::Sensor
   {
     /// \brief Load the sensor with SDF parameters.
     /// \param[in] _sdf SDF Sensor parameters.
-    /// \return true if loading was successful
+    /// \return True if loading was successful
     public: virtual bool Load(sdf::ElementPtr _sdf) override;
 
     /// \brief Update the sensor and generate data
@@ -38,7 +38,7 @@ namespace custom
       const std::chrono::steady_clock::duration &_now) override;
 
     /// \brief Noise that will be applied to the sensor data
-    private: ignition::sensors::NoisePtr noise;
+    private: ignition::sensors::NoisePtr noise{nullptr};
 
     /// \brief Node for communication
     private: ignition::transport::Node node;
