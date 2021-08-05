@@ -21,7 +21,6 @@
 #include <ignition/common/Profiler.hh>
 #include <ignition/math/Frustum.hh>
 #include <ignition/math/Helpers.hh>
-#include <ignition/plugin/Register.hh>
 #include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/SensorFactory.hh"
@@ -201,9 +200,3 @@ msgs::LogicalCameraImage LogicalCameraSensor::Image() const
   return this->dataPtr->msg;
 }
 
-IGNITION_ADD_PLUGIN(
-    ignition::sensors::SensorTypePlugin<LogicalCameraSensor>,
-    ignition::sensors::SensorPlugin)
-IGNITION_ADD_PLUGIN_ALIAS(
-    ignition::sensors::SensorTypePlugin<LogicalCameraSensor>,
-    "logical_camera")

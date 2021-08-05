@@ -172,20 +172,12 @@ TEST_F(AirPressureSensorTest, SensorReadings)
   // create the sensor using sensor factory
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
-  std::unique_ptr<ignition::sensors::Sensor> s =
-      sf.CreateSensor(airPressureSdf);
-  std::unique_ptr<ignition::sensors::AirPressureSensor> sensor(
-      dynamic_cast<ignition::sensors::AirPressureSensor *>(s.release()));
-
-  // Make sure the above dynamic cast worked.
+  auto sensor = sf.CreateSensor<ignition::sensors::AirPressureSensor>(
+      airPressureSdf);
   ASSERT_NE(nullptr, sensor);
 
-  std::unique_ptr<ignition::sensors::Sensor> sNoise =
-      sf.CreateSensor(airPressureSdfNoise);
-  std::unique_ptr<ignition::sensors::AirPressureSensor> sensorNoise(
-      dynamic_cast<ignition::sensors::AirPressureSensor *>(sNoise.release()));
-
-  // Make sure the above dynamic cast worked.
+  auto sensorNoise = sf.CreateSensor<ignition::sensors::AirPressureSensor>(
+      airPressureSdfNoise);
   ASSERT_NE(nullptr, sensorNoise);
 
   // verify initial readings
@@ -245,11 +237,8 @@ TEST_F(AirPressureSensorTest, Topic)
     auto airPressureSdf = AirPressureToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(airPressureSdf);
-    EXPECT_NE(nullptr, sensor);
-
-    auto airPressure =
-        dynamic_cast<ignition::sensors::AirPressureSensor *>(sensor.release());
+    auto airPressure = factory.CreateSensor<
+        ignition::sensors::AirPressureSensor>(airPressureSdf);
     ASSERT_NE(nullptr, airPressure);
 
     EXPECT_EQ("/air_pressure", airPressure->Topic());
@@ -261,11 +250,8 @@ TEST_F(AirPressureSensorTest, Topic)
     auto airPressureSdf = AirPressureToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(airPressureSdf);
-    EXPECT_NE(nullptr, sensor);
-
-    auto airPressure =
-        dynamic_cast<ignition::sensors::AirPressureSensor *>(sensor.release());
+    auto airPressure = factory.CreateSensor<
+        ignition::sensors::AirPressureSensor>(airPressureSdf);
     ASSERT_NE(nullptr, airPressure);
 
     EXPECT_EQ("/topic_with_spaces/characters", airPressure->Topic());
@@ -277,7 +263,8 @@ TEST_F(AirPressureSensorTest, Topic)
     auto airPressureSdf = AirPressureToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(airPressureSdf);
+    auto sensor = factory.CreateSensor<
+        ignition::sensors::AirPressureSensor>(airPressureSdf);
     ASSERT_EQ(nullptr, sensor);
   }
 }

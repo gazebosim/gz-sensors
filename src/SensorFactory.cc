@@ -15,50 +15,28 @@
  *
 */
 
-#include <dlfcn.h>
-
-#include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>
-#include <ignition/plugin/Loader.hh>
-#include "ignition/sensors/config.hh"
 
 #include "ignition/sensors/SensorFactory.hh"
 
 /// \brief Private data class for SensorFactory
 class ignition::sensors::SensorFactoryPrivate
 {
-  /// \brief Constructor
-  public: SensorFactoryPrivate();
-
-  /// \brief A map of loaded sensor plugins and their type.
-  public: std::map<std::string, std::shared_ptr<SensorPlugin>> sensorPlugins;
-
-  /// \brief Stores paths to search for on file system
-  public: ignition::common::SystemPaths systemPaths;
-
-  /// \brief Environment variable containing lookup paths for sensors.
-  public: const std::string pathEnv{"IGN_SENSORS_PATH"};
 };
 
 using namespace ignition;
 using namespace sensors;
 
 //////////////////////////////////////////////////
-SensorFactoryPrivate::SensorFactoryPrivate()
+void SensorFactory::AddPluginPaths(const std::string &)
 {
-  this->systemPaths.AddPluginPaths(IGN_SENSORS_PLUGIN_PATH);
-}
-
-//////////////////////////////////////////////////
-void SensorFactory::AddPluginPaths(const std::string &_path)
-{
-  this->dataPtr->systemPaths.AddPluginPaths(_path);
+  ignwarn << "Trying to add plugin paths, but Ignition Sensors doesn't support"
+          << " plugins anymore." << std::endl;
 }
 
 //////////////////////////////////////////////////
 SensorFactory::SensorFactory() : dataPtr(new SensorFactoryPrivate)
 {
-  this->dataPtr->systemPaths.SetPluginPathEnv(this->dataPtr->pathEnv);
 }
 
 //////////////////////////////////////////////////
@@ -66,157 +44,20 @@ SensorFactory::~SensorFactory()
 {
 }
 
-//////////////////////////////////////////////////
-std::shared_ptr<SensorPlugin> SensorFactory::LoadSensorPlugin(
-    const std::string &_type)
+/////////////////////////////////////////////////
+std::unique_ptr<Sensor> SensorFactory::CreateSensor(const sdf::Sensor &)
 {
-  auto filename = IGN_SENSORS_PLUGIN_NAME(_type);
-
-  std::string fullPath =
-      this->dataPtr->systemPaths.FindSharedLibrary(filename);
-  if (fullPath.empty())
-  {
-    ignerr << "Unable to find sensor plugin path for [" << filename << "]\n";
-    return std::shared_ptr<SensorPlugin>();
-  }
-
-  plugin::Loader pluginLoader;
-  auto pluginNames = pluginLoader.LoadLib(fullPath);
-
-  if (pluginNames.empty())
-  {
-    ignerr << "Failed to load plugin [" << filename <<
-              "] : couldn't load library on path [" << fullPath <<
-              "]." << std::endl;
-    return std::shared_ptr<SensorPlugin>();
-  }
-
-  auto plugin = pluginLoader.Instantiate(_type);
-  if (!plugin)
-  {
-    std::stringstream error;
-    error << "Failed to instantiate plugin [" << _type << "] from ["
-           << fullPath << "]. Available plugins:" << std::endl;
-    for (auto name : pluginNames)
-    {
-      error << "- " << name << std::endl;
-    }
-    ignerr << error.str();
-
-    return nullptr;
-  }
-
-  auto sensorPlugin =
-      plugin->QueryInterfaceSharedPtr<ignition::sensors::SensorPlugin>();
-
-  if (!sensorPlugin)
-  {
-    ignerr << "Failed to query interface from [" << fullPath << "]"
-           << std::endl;
-    return nullptr;
-  }
-
-  return sensorPlugin;
+  ignwarn << "Trying to create sensor without providing sensor type. Ignition"
+          << " Sensor doesn't support sensor registration anymore. Use the"
+          << " templated `CreateSensor` function instead." << std::endl;
+  return nullptr;
 }
 
 /////////////////////////////////////////////////
-std::unique_ptr<Sensor> SensorFactory::CreateSensor(const sdf::Sensor &_sdf)
+std::unique_ptr<Sensor> SensorFactory::CreateSensor(sdf::ElementPtr)
 {
-  std::unique_ptr<Sensor> result;
-  std::shared_ptr<SensorPlugin> sensorPlugin;
-  std::string type = _sdf.TypeStr();
-
-  auto it = this->dataPtr->sensorPlugins.find(type);
-  if (it != this->dataPtr->sensorPlugins.end())
-    sensorPlugin = it->second;
-  else
-  {
-    sensorPlugin = this->LoadSensorPlugin(type);
-    if (!sensorPlugin)
-    {
-      ignerr << "Unable to instantiate sensor plugin for [" << type
-        << "]\n";
-      return nullptr;
-    }
-
-    this->dataPtr->sensorPlugins[type] = sensorPlugin;
-  }
-
-  auto sensor = sensorPlugin->New();
-  if (!sensor)
-  {
-    ignerr << "Unable to instantiate sensor for [" << type << "]\n";
-    return nullptr;
-  }
-
-  if (!sensor->Load(_sdf))
-  {
-    ignerr << "Sensor::Load failed for plugin [" << type << "]\n";
-    return nullptr;
-  }
-
-  if (!sensor->Init())
-  {
-    ignerr << "Sensor::Init failed for plugin [" << type << "]\n";
-    return nullptr;
-  }
-
-  result.reset(sensor);
-  return result;
-}
-
-/////////////////////////////////////////////////
-std::unique_ptr<Sensor> SensorFactory::CreateSensor(sdf::ElementPtr _sdf)
-{
-  std::unique_ptr<Sensor> result;
-  if (_sdf)
-  {
-    if (_sdf->GetName() == "sensor")
-    {
-      std::shared_ptr<SensorPlugin> sensorPlugin;
-      std::string type = _sdf->Get<std::string>("type");
-      auto it = this->dataPtr->sensorPlugins.find(type);
-      if (it != this->dataPtr->sensorPlugins.end())
-        sensorPlugin = it->second;
-      else
-      {
-        sensorPlugin = this->LoadSensorPlugin(type);
-        if (!sensorPlugin)
-        {
-          ignerr << "Unable to instantiate sensor plugin for [" << type
-                 << "]\n";
-          return nullptr;
-        }
-
-        this->dataPtr->sensorPlugins[type] = sensorPlugin;
-      }
-
-      auto sensor = sensorPlugin->New();
-      if (!sensor)
-      {
-        ignerr << "Unable to instantiate sensor for [" << type << "]\n";
-        return nullptr;
-      }
-
-      if (!sensor->Load(_sdf))
-      {
-        ignerr << "Sensor::Load failed for plugin [" << type << "]\n";
-        return nullptr;
-      }
-
-      if (!sensor->Init())
-      {
-        ignerr << "Sensor::Init failed for plugin [" << type << "]\n";
-        return nullptr;
-      }
-      result.reset(sensor);
-      return result;
-    }
-    else
-    {
-      ignerr << "Provided SDF is not a <sensor> element.\n";
-    }
-  }
-
+  ignwarn << "Trying to create sensor without providing sensor type. Ignition"
+          << " Sensor doesn't support sensor registration anymore. Use the"
+          << " templated `CreateSensor` function instead." << std::endl;
   return nullptr;
 }

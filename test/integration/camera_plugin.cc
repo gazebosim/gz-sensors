@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include <ignition/common/Console.hh>
 #include <ignition/common/Filesystem.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/CameraSensor.hh>
@@ -47,10 +48,15 @@
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
-
 class CameraSensorTest: public testing::Test,
   public testing::WithParamInterface<const char *>
 {
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    ignition::common::Console::SetVerbosity(4);
+  }
+
   // Create a Camera sensor from a SDF and gets a image message
   public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
 };

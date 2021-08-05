@@ -28,7 +28,6 @@
 #include <ignition/common/Console.hh>
 #include <ignition/common/Profiler.hh>
 #include <ignition/msgs/Utility.hh>
-#include <ignition/plugin/Register.hh>
 #include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/GpuLidarSensor.hh"
@@ -109,7 +108,7 @@ void GpuLidarSensor::RemoveGpuRays(
 //////////////////////////////////////////////////
 bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
 {
-  // Check if this is being loaded via "builtin" or via a plugin
+  // Check if this is being loaded via "builtin" or via another sensor
   if (!Lidar::Load(_sdf))
   {
     return false;
@@ -371,9 +370,3 @@ void GpuLidarSensorPrivate::FillPointCloudMsg(const float *_laserBuffer)
   }
 }
 
-IGNITION_ADD_PLUGIN(
-    ignition::sensors::SensorTypePlugin<GpuLidarSensor>,
-    ignition::sensors::SensorPlugin)
-IGNITION_ADD_PLUGIN_ALIAS(
-    ignition::sensors::SensorTypePlugin<GpuLidarSensor>,
-    "gpu_lidar")

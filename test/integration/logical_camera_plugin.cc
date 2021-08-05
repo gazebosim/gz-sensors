@@ -154,14 +154,9 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
         visualize);
 
   // create the sensor using sensor factory
-  // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
-  std::unique_ptr<ignition::sensors::Sensor> s =
-      sf.CreateSensor(logicalCameraSdf);
-  std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor(
-      dynamic_cast<ignition::sensors::LogicalCameraSensor *>(s.release()));
-
-  // Make sure the above dynamic cast worked.
+  auto sensor = sf.CreateSensor<ignition::sensors::LogicalCameraSensor>(
+      logicalCameraSdf);
   ASSERT_NE(nullptr, sensor);
 
   // verify initial image
@@ -264,12 +259,8 @@ TEST_F(LogicalCameraSensorTest, Topic)
         updateRate, topic, near, far, horzFov, aspectRatio, alwaysOn,
         visualize);
 
-    auto sensor = factory.CreateSensor(logicalCameraSdf);
-    EXPECT_NE(nullptr, sensor);
-
-    auto logicalCamera =
-        dynamic_cast<ignition::sensors::LogicalCameraSensor *>(
-        sensor.release());
+    auto logicalCamera = factory.CreateSensor<
+        ignition::sensors::LogicalCameraSensor>(logicalCameraSdf);
     ASSERT_NE(nullptr, logicalCamera);
 
     EXPECT_EQ("/logical_camera", logicalCamera->Topic());
@@ -282,12 +273,8 @@ TEST_F(LogicalCameraSensorTest, Topic)
         updateRate, topic, near, far, horzFov, aspectRatio, alwaysOn,
         visualize);
 
-    auto sensor = factory.CreateSensor(logicalCameraSdf);
-    EXPECT_NE(nullptr, sensor);
-
-    auto logicalCamera =
-        dynamic_cast<ignition::sensors::LogicalCameraSensor *>(
-        sensor.release());
+    auto logicalCamera = factory.CreateSensor<
+        ignition::sensors::LogicalCameraSensor>(logicalCameraSdf);
     ASSERT_NE(nullptr, logicalCamera);
 
     EXPECT_EQ("/topic_with_spaces/characters", logicalCamera->Topic());
@@ -300,7 +287,8 @@ TEST_F(LogicalCameraSensorTest, Topic)
         updateRate, topic, near, far, horzFov, aspectRatio, alwaysOn,
         visualize);
 
-    auto sensor = factory.CreateSensor(logicalCameraSdf);
+    auto sensor = factory.CreateSensor<
+        ignition::sensors::LogicalCameraSensor>(logicalCameraSdf);
     ASSERT_EQ(nullptr, sensor);
   }
 }

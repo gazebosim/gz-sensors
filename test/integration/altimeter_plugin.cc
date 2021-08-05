@@ -178,20 +178,12 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   // create the sensor using sensor factory
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
-  std::unique_ptr<ignition::sensors::Sensor> s =
-      sf.CreateSensor(altimeterSdf);
-  std::unique_ptr<ignition::sensors::AltimeterSensor> sensor(
-      dynamic_cast<ignition::sensors::AltimeterSensor *>(s.release()));
-
-  // Make sure the above dynamic cast worked.
+  auto sensor =
+      sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdf);
   ASSERT_NE(nullptr, sensor);
 
-  std::unique_ptr<ignition::sensors::Sensor> sNoise =
-      sf.CreateSensor(altimeterSdfNoise);
-  std::unique_ptr<ignition::sensors::AltimeterSensor> sensorNoise(
-      dynamic_cast<ignition::sensors::AltimeterSensor *>(sNoise.release()));
-
-  // Make sure the above dynamic cast worked.
+  auto sensorNoise =
+      sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdfNoise);
   ASSERT_NE(nullptr, sensorNoise);
 
   // verify initial readings
@@ -273,11 +265,8 @@ TEST_F(AltimeterSensorTest, Topic)
     auto altimeterSdf = AltimeterToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(altimeterSdf);
-    EXPECT_NE(nullptr, sensor);
-
-    auto altimeter =
-        dynamic_cast<ignition::sensors::AltimeterSensor *>(sensor.release());
+    auto altimeter = factory.CreateSensor<
+        ignition::sensors::AltimeterSensor>(altimeterSdf);
     ASSERT_NE(nullptr, altimeter);
 
     EXPECT_EQ("/altimeter", altimeter->Topic());
@@ -289,11 +278,8 @@ TEST_F(AltimeterSensorTest, Topic)
     auto altimeterSdf = AltimeterToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(altimeterSdf);
-    EXPECT_NE(nullptr, sensor);
-
-    auto altimeter =
-        dynamic_cast<ignition::sensors::AltimeterSensor *>(sensor.release());
+    auto altimeter = factory.CreateSensor<
+        ignition::sensors::AltimeterSensor>(altimeterSdf);
     ASSERT_NE(nullptr, altimeter);
 
     EXPECT_EQ("/topic_with_spaces/characters", altimeter->Topic());
@@ -305,7 +291,8 @@ TEST_F(AltimeterSensorTest, Topic)
     auto altimeterSdf = AltimeterToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(altimeterSdf);
+    auto sensor = factory.CreateSensor<
+        ignition::sensors::AltimeterSensor>(altimeterSdf);
     ASSERT_EQ(nullptr, sensor);
   }
 }

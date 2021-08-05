@@ -34,8 +34,6 @@
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Helpers.hh>
 
-#include <ignition/plugin/Register.hh>
-
 #include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/DepthCameraSensor.hh"
@@ -628,9 +626,3 @@ double DepthCameraSensor::NearClip() const
   return this->dataPtr->near;
 }
 
-IGNITION_ADD_PLUGIN(
-    ignition::sensors::SensorTypePlugin<DepthCameraSensor>,
-    ignition::sensors::SensorPlugin)
-IGNITION_ADD_PLUGIN_ALIAS(
-    ignition::sensors::SensorTypePlugin<DepthCameraSensor>,
-    "depth_camera")

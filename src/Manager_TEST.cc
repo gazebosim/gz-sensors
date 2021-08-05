@@ -29,14 +29,24 @@ class Manager_TEST : public ::testing::Test
 };
 
 //////////////////////////////////////////////////
-TEST(Manager, construct)
+class DummySensor : public ignition::sensors::Sensor
+{
+   public: virtual bool Update(
+     const std::chrono::steady_clock::duration &) override
+   {
+     return true;
+   }
+};
+
+//////////////////////////////////////////////////
+TEST_F(Manager_TEST, construct)
 {
   ignition::sensors::Manager mgr;
   EXPECT_TRUE(mgr.Init());
 
-  sdf::ElementPtr ptr;
-  ignition::sensors::SensorId id = mgr.CreateSensor(ptr);
-  EXPECT_EQ(id, ignition::sensors::NO_SENSOR);
+  sdf::ElementPtr ptr{nullptr};
+  auto createdSensor = mgr.CreateSensor<DummySensor>(ptr);
+  EXPECT_EQ(nullptr, createdSensor);
 
   ignition::sensors::Sensor *sensor = mgr.Sensor(0);
   EXPECT_EQ(sensor, nullptr);
@@ -45,7 +55,7 @@ TEST(Manager, construct)
 }
 
 //////////////////////////////////////////////////
-TEST(Manager, removeSensor)
+TEST_F(Manager_TEST, removeSensor)
 {
   ignition::sensors::Manager mgr;
   EXPECT_TRUE(mgr.Init());

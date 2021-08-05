@@ -25,7 +25,6 @@
 #endif
 
 #include <ignition/common/Profiler.hh>
-#include <ignition/plugin/Register.hh>
 #include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/ImuSensor.hh"
@@ -296,9 +295,3 @@ math::Quaterniond ImuSensor::Orientation() const
   return this->dataPtr->orientation;
 }
 
-IGNITION_ADD_PLUGIN(
-    ignition::sensors::SensorTypePlugin<ImuSensor>,
-    ignition::sensors::SensorPlugin)
-IGNITION_ADD_PLUGIN_ALIAS(
-    ignition::sensors::SensorTypePlugin<ImuSensor>,
-    "imu")
