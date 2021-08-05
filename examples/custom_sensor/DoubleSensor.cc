@@ -20,6 +20,7 @@
 #include <ignition/common/Console.hh>
 #include <ignition/sensors/Noise.hh>
 #include <ignition/sensors/SensorFactory.hh>
+#include <ignition/sensors/Util.hh>
 
 #include "DoubleSensor.hh"
 
@@ -28,32 +29,11 @@ using namespace custom;
 //////////////////////////////////////////////////
 bool DoubleSensor::Load(const sdf::Sensor &_sdf)
 {
-  if (_sdf.Type() != sdf::SensorType::CUSTOM)
+  auto type = ignition::sensors::customType(_sdf);
+  if ("double" != type)
   {
     ignerr << "Trying to load custom sensor, but got type ["
-           << static_cast<int>(_sdf.Type()) << "] instead." << std::endl;
-    return false;
-  }
-
-  auto elem = _sdf.Element();
-  if (nullptr == elem)
-  {
-    ignerr << "SDF missing element pointer." << std::endl;
-    return false;
-  }
-
-  if (!elem->HasAttribute("ignition:type"))
-  {
-    ignerr << "Custom sensor missing `ignition::type` attribute. "
-           << "Not loading." << std::endl;
-    return false;
-  }
-
-  auto customType = elem->Get<std::string>("ignition:type");
-  if (customType != "double")
-  {
-    ignerr << "Trying to load sensor of type [double], but got sensor of type ["
-           << customType << "]." << std::endl;
+           << type << "] instead." << std::endl;
     return false;
   }
 
@@ -63,14 +43,14 @@ bool DoubleSensor::Load(const sdf::Sensor &_sdf)
   // Advertise topic where data will be published
   this->pub = this->node.Advertise<ignition::msgs::Double>(this->Topic());
 
-  if (!elem->HasElement("ignition:double"))
+  if (!_sdf.Element()->HasElement("ignition:double"))
   {
     igndbg << "No custom configuration for [" << this->Topic() << "]"
            << std::endl;
     return true;
   }
 
-  auto customElem = elem->GetElement("ignition:double");
+  auto customElem = _sdf.Element()->GetElement("ignition:double");
 
   if (!customElem->HasElement("noise"))
   {

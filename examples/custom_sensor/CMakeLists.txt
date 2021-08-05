@@ -7,4 +7,4 @@ find_package(ignition-sensors6 REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED DoubleSensor.cc)
 target_link_libraries(${PROJECT_NAME}
-  PRIVATE ignition-sensors6::ignition-sensors6)
+  PUBLIC ignition-sensors6::ignition-sensors6)

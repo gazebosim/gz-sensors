@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(loop_sensor)
 
 find_package(ignition-sensors6 REQUIRED
+  # Find built-in sensors
   COMPONENTS
-    # Find built-in sensors
     altimeter
 )
 

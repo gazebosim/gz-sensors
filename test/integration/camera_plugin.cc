@@ -65,7 +65,7 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 {
   // get the darn test data
   std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
-      "integration", "camera_sensor_builtin.sdf");
+      "sdf", "camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
   ASSERT_TRUE(sdf::readFile(path, doc));

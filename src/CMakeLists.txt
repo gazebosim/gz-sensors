@@ -6,6 +6,7 @@ set (sources
   PointCloudUtil.cc
   SensorFactory.cc
   SensorTypes.cc
+  Util.cc
 )
 
 set(rendering_sources
@@ -19,6 +20,7 @@ set (gtest_sources
   Manager_TEST.cc
   Noise_TEST.cc
   Sensor_TEST.cc
+  Util_TEST.cc
 )
 
 if (MSVC)
