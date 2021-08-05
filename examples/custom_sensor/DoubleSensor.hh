@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef CUSTOMSENSORSENSOR_HH_
-#define CUSTOMSENSORSENSOR_HH_
+#ifndef DOUBLESENSOR_HH_
+#define DOUBLESENSOR_HH_
 
 #include <ignition/sensors/Sensor.hh>
 #include <ignition/sensors/SensorTypes.hh>
@@ -24,18 +24,21 @@
 namespace custom
 {
   /// \brief Example sensor that publishes a noisy double value.
-  class CustomSensor : public ignition::sensors::Sensor
+  class DoubleSensor : public ignition::sensors::Sensor
   {
     /// \brief Load the sensor with SDF parameters.
     /// \param[in] _sdf SDF Sensor parameters.
     /// \return True if loading was successful
-    public: virtual bool Load(sdf::ElementPtr _sdf) override;
+    public: virtual bool Load(const sdf::Sensor &_sdf) override;
 
     /// \brief Update the sensor and generate data
     /// \param[in] _now The current time
     /// \return True if the update was successfull
     public: virtual bool Update(
       const std::chrono::steady_clock::duration &_now) override;
+
+    /// \brief Latest data
+    public: double data{0.0};
 
     /// \brief Noise that will be applied to the sensor data
     private: ignition::sensors::NoisePtr noise{nullptr};
@@ -45,9 +48,6 @@ namespace custom
 
     /// \brief Publishes sensor data
     private: ignition::transport::Node::Publisher pub;
-
-    /// \brief Latest data
-    private: double data{0.0};
   };
 }
 

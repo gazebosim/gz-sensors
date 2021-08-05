@@ -39,7 +39,7 @@ class DummySensor : public ignition::sensors::Sensor
 };
 
 //////////////////////////////////////////////////
-TEST_F(Manager_TEST, construct)
+TEST_F(Manager_TEST, Construct)
 {
   ignition::sensors::Manager mgr;
   EXPECT_TRUE(mgr.Init());
@@ -55,14 +55,44 @@ TEST_F(Manager_TEST, construct)
 }
 
 //////////////////////////////////////////////////
-TEST_F(Manager_TEST, removeSensor)
+TEST_F(Manager_TEST, AddSensor)
+{
+  ignition::sensors::Manager mgr;
+
+  // Fail
+  std::unique_ptr<DummySensor> dummyNull{nullptr};
+  EXPECT_EQ(ignition::sensors::NO_SENSOR, mgr.AddSensor(std::move(dummyNull)));
+
+  // Succeed
+  sdf::Sensor sdfSensor;
+  sdfSensor.SetTopic("/some/topic");
+  sdfSensor.SetType(sdf::SensorType::CUSTOM);
+
+  auto dummyGood = std::make_unique<DummySensor>();
+  EXPECT_TRUE(dummyGood->Load(sdfSensor));
+  EXPECT_TRUE(dummyGood->Init());
+  EXPECT_NE(ignition::sensors::NO_SENSOR, mgr.AddSensor(std::move(dummyGood)));
+}
+
+//////////////////////////////////////////////////
+TEST_F(Manager_TEST, RemoveSensor)
 {
   ignition::sensors::Manager mgr;
   EXPECT_TRUE(mgr.Init());
 
+  // Fail
   EXPECT_FALSE(mgr.Remove(ignition::sensors::NO_SENSOR));
 
-  // \todo(nkoenig) Add a sensor, then remove it
+  // Succeed
+  sdf::Sensor sdfSensor;
+  sdfSensor.SetTopic("/some/topic");
+  sdfSensor.SetType(sdf::SensorType::CUSTOM);
+
+  auto createdSensor = mgr.CreateSensor<DummySensor>(sdfSensor);
+  ASSERT_NE(nullptr, createdSensor);
+  EXPECT_NE(nullptr, mgr.Sensor(createdSensor->Id()));
+
+  EXPECT_TRUE(mgr.Remove(createdSensor->Id()));
 }
 
 //////////////////////////////////////////////////

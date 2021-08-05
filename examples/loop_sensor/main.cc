@@ -15,15 +15,17 @@
  *
 */
 
-#include <fstream>
-#include <iostream>
+#include <vector>
 
 #include <sdf/Sensor.hh>
 
 #include <ignition/common/Console.hh>
 #include <ignition/common/SignalHandler.hh>
-
 #include <ignition/sensors/Manager.hh>
+
+// Include all supported sensors
+#include <ignition/sensors/AltimeterSensor.hh>
+#include "../custom_sensor/DoubleSensor.hh"
 
 using namespace std::literals::chrono_literals;
 
@@ -39,43 +41,71 @@ int main(int argc,  char **argv)
 
   // Load file
   std::string sdfFile(argv[1]);
-  std::ifstream fileStream(sdfFile, std::ifstream::in);
 
-  std::string sdfString((std::istreambuf_iterator<char>(fileStream)),
-                         std::istreambuf_iterator<char>());
-  fileStream.close();
+  sdf::Root root;
+  auto errors = root.Load(sdfFile);
 
-  // Read SDF
-  sdf::SDFPtr sdfParsed(new sdf::SDF());
-  sdf::init(sdfParsed);
-  if (!sdf::readString(sdfString, sdfParsed))
+  for (const auto &error : errors)
   {
-    ignerr << "Failed to parse SDF: " << std::endl << sdfString << std::endl;
+    ignerr << error << std::endl;
+  }
+
+  auto world = root.WorldByIndex(0);
+  if (nullptr == world)
+  {
+    ignerr << "Failed to load world from [" << sdfFile << "]" << std::endl;
     return 1;
   }
 
-  if (!sdfParsed ||
-      !sdfParsed->Root() ||
-      !sdfParsed->Root()->GetElement("model") ||
-      !sdfParsed->Root()->GetElement("model")->GetElement("link") ||
-      !sdfParsed->Root()->GetElement("model")->GetElement("link")->
-          GetElement("sensor"))
-  {
-    ignerr << "Failed to find sensor in SDF" << std::endl;
-    return 1;
-  }
-
-  auto sdfElem = sdfParsed->Root()->GetElement("model")->GetElement("link")
-    ->GetElement("sensor");
-
-  // Create sensor
-  // TODO(louise) Create from sdf::Sensor
+  // Initiate sensor manager
   ignition::sensors::Manager mgr;
-  auto sensor = mgr.CreateSensor(sdfElem);
 
-  if (!sensor)
+  // Loop thorough SDF file and add all supported sensors to manager
+  std::vector<ignition::sensors::Sensor *> sensors;
+  for (auto m = 0; m < world->ModelCount(); ++m)
   {
-    ignerr << "Unable to load sensor" << std::endl;;
+    auto model = world->ModelByIndex(m);
+    for (auto l = 0; l < model->LinkCount(); ++l)
+    {
+      auto link = model->LinkByIndex(l);
+      for (auto s = 0; s < link->SensorCount(); ++s)
+      {
+        auto sensor = link->SensorByIndex(s);
+
+        ignition::sensors::Sensor *sensorPtr;
+        if (sensor->Type() == sdf::SensorType::ALTIMETER)
+        {
+          sensorPtr = mgr.CreateSensor<ignition::sensors::AltimeterSensor>(
+              *sensor);
+        }
+        else if (sensor->Type() == sdf::SensorType::CUSTOM)
+        {
+          sensorPtr = mgr.CreateSensor<custom::DoubleSensor>(*sensor);
+        }
+        else
+        {
+          ignerr << "Sensor type [" << static_cast<int>(sensor->Type())
+                 << "] not supported." << std::endl;
+        }
+
+        if (nullptr == sensorPtr)
+        {
+          ignerr << "Failed to create sensor [" << sensor->Name() << "]"
+                 << std::endl;
+          continue;
+        }
+
+        sensors.push_back(sensorPtr);
+
+        ignmsg << "Added sensor [" << sensor->Name() << "] to manager."
+               << std::endl;
+      }
+    }
+  }
+
+  if (sensors.empty())
+  {
+    ignerr << "No sensors have been added to the manager." << std::endl;
     return 1;
   }
 
@@ -87,9 +117,27 @@ int main(int argc,  char **argv)
     signaled = true;
   });
 
+  ignmsg << "Looping sensor manager. Press Ctrl + C to stop." << std::endl;
+
   auto time = 0s;
   while (!signaled)
   {
+    // Update each sensor using their specific APIs
+    for (const auto &sensorPtr : sensors)
+    {
+      if (auto altimeter = dynamic_cast<ignition::sensors::AltimeterSensor *>(
+          sensorPtr))
+      {
+        altimeter->SetVerticalVelocity(altimeter->VerticalVelocity() + 0.1);
+      }
+      else if (auto custom = dynamic_cast<custom::DoubleSensor *>(sensorPtr))
+      {
+        custom->data += 0.1;
+      }
+    }
+
+    // Call all sensor's own update functions, which will apply noise, publish
+    // data, etc.
     mgr.RunOnce(time, true);
     time += 1s;
     std::this_thread::sleep_for(1s);

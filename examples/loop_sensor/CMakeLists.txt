@@ -1,8 +1,21 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(loop_sensor)
 
-find_package(ignition-sensors6 REQUIRED)
+find_package(ignition-sensors6 REQUIRED
+  COMPONENTS
+    # Find built-in sensors
+    altimeter
+)
+
+# A simple example of how to find custom sensors
+add_subdirectory(../custom_sensor double_sensor)
 
 add_executable(${PROJECT_NAME} main.cc)
 target_link_libraries(${PROJECT_NAME} PUBLIC
-  ignition-sensors6::ignition-sensors6)
+  ignition-sensors6::ignition-sensors6
+
+  # Link to custom sensors
+  double_sensor
+
+  # Link to built-in sensors
+  ignition-sensors6::altimeter)

@@ -26,6 +26,8 @@ release will remove the deprecated code.
    + ***Replacement*** template<typename SensorType> std::unique_ptr<SensorType> CreateSensor(const sdf::Sensor &);
    + ***Deprecation*** void AddPluginPaths(const std::string &)
    + ***Replacement*** None; see above.
+   + ***Deprecation*** IGN_SENSORS_REGISTER_SENSOR
+   + ***Replacement*** None; see above.
 
 1. **include/sensors/Manager.hh**
    + ***Deprecation*** SensorId CreateSensor(sdf::ElementPtr);
