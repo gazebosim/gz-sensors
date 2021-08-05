@@ -21,15 +21,16 @@
 #include <string>
 #include <memory>
 #include <vector>
+
 #include <sdf/sdf.hh>
 #include <ignition/common/Event.hh>
 #include <ignition/common/PluginMacros.hh>
 #include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
 #include <ignition/msgs.hh>
+#include <ignition/rendering/BoundingBoxCamera.hh>
 #include <ignition/transport/Node.hh>
 #include <ignition/transport/Publisher.hh>
-#include <ignition/rendering/BoundingBoxCamera.hh>
 
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/Export.hh"
@@ -48,7 +49,7 @@ namespace ignition
 
     /// \brief BoundingBox camera sensor class.
     ///
-    /// This class creates BoundingBox image from an ignition rendering scene.
+    /// This class creates a BoundingBox image from an ignition rendering scene.
     /// The scene must be created in advance and given to Manager::Init().
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be

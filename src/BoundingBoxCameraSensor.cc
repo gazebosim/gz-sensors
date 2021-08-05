@@ -15,20 +15,21 @@
  *
 */
 
-#include <mutex>
+#include "ignition/sensors/BoundingBoxCameraSensor.hh"
+
 #include <memory>
+#include <mutex>
 
 #include <ignition/common/Console.hh>
-#include <ignition/common/Profiler.hh>
 #include <ignition/common/Image.hh>
-#include "ignition/sensors/RenderingEvents.hh"
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/BoundingBoxCameraSensor.hh"
+#include <ignition/common/Profiler.hh>
+#include <ignition/msgs.hh>
 #include <ignition/rendering/BoundingBoxCamera.hh>
 #include <ignition/transport/Node.hh>
 #include <ignition/transport/Publisher.hh>
-#include <ignition/msgs.hh>
 
+#include "ignition/sensors/RenderingEvents.hh"
+#include "ignition/sensors/SensorFactory.hh"
 
 using namespace ignition;
 using namespace sensors;
@@ -279,8 +280,6 @@ bool BoundingBoxCameraSensor::CreateCamera()
   this->dataPtr->rgbCamera->SetVisibilityMask(sdfCamera->VisibilityMask());
   this->dataPtr->rgbCamera->SetNearClipPlane(sdfCamera->NearClip());
   this->dataPtr->rgbCamera->SetFarClipPlane(sdfCamera->FarClip());
-  this->dataPtr->rgbCamera->SetNearClipPlane(0.01);
-  this->dataPtr->rgbCamera->SetFarClipPlane(1000);
   math::Angle angle = sdfCamera->HorizontalFov();
   if (angle < 0.01 || angle > IGN_PI*2)
   {
@@ -356,7 +355,7 @@ bool BoundingBoxCameraSensor::Update(
     return false;
   }
 
-  // don't render if there is no subscribers
+  // don't render if there are no subscribers
   if (!this->dataPtr->imagePublisher.HasConnections() &&
     !this->dataPtr->boxesPublisher.HasConnections())
   {
@@ -378,7 +377,7 @@ bool BoundingBoxCameraSensor::Update(
     this->dataPtr->rgbCamera->Capture(this->dataPtr->image);
 
     // Draw bounding boxes
-    for (auto box : this->dataPtr->boundingBoxes)
+    for (const auto &box : this->dataPtr->boundingBoxes)
     {
       this->dataPtr->imageBuffer = this->dataPtr->image.Data<unsigned char>();
 
