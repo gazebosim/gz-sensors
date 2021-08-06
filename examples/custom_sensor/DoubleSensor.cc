@@ -19,7 +19,6 @@
 
 #include <ignition/common/Console.hh>
 #include <ignition/sensors/Noise.hh>
-#include <ignition/sensors/SensorFactory.hh>
 #include <ignition/sensors/Util.hh>
 
 #include "DoubleSensor.hh"
@@ -50,6 +49,7 @@ bool DoubleSensor::Load(const sdf::Sensor &_sdf)
     return true;
   }
 
+  // Load custom sensor params
   auto customElem = _sdf.Element()->GetElement("ignition:double");
 
   if (!customElem->HasElement("noise"))

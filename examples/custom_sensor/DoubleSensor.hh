@@ -18,7 +18,6 @@
 #define DOUBLESENSOR_HH_
 
 #include <ignition/sensors/Sensor.hh>
-#include <ignition/sensors/SensorTypes.hh>
 #include <ignition/transport/Node.hh>
 
 namespace custom
