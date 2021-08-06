@@ -26,7 +26,6 @@
 #include <ignition/common/Event.hh>
 #include <ignition/common/PluginMacros.hh>
 #include <ignition/common/SuppressWarning.hh>
-#include <ignition/common/Time.hh>
 
 #ifdef _WIN32
 #pragma warning(push)
@@ -92,12 +91,6 @@ namespace ignition
       /// \brief Initialize values in the sensor
       /// \return True on success
       public: virtual bool Init() override;
-
-      /// \brief Force the sensor to generate data
-      /// \param[in] _now The current time
-      /// \return true if the update was successfull
-      public: virtual bool IGN_DEPRECATED(4) Update(
-        const ignition::common::Time &_now) override;
 
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
