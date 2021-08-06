@@ -18,8 +18,8 @@
 #ifndef IGNITION_SENSORS_SEGMENTATIONCAMERASENSOR_HH_
 #define IGNITION_SENSORS_SEGMENTATIONCAMERASENSOR_HH_
 
-#include <string>
 #include <memory>
+#include <string>
 
 #include <ignition/common/Event.hh>
 #include <ignition/common/PluginMacros.hh>
@@ -83,7 +83,7 @@ namespace ignition
 
       /// \brief Get the rendering segmentation camera
       /// \return Segmentation camera pointer
-      public: virtual rendering::SegmentationCameraPtr SegmentationCamera();
+      public: virtual rendering::SegmentationCameraPtr SegmentationCamera() const;
 
       /// \brief Segmentation data callback used to get the data from the sensor
       /// \param[in] _data pointer to the data from the sensor

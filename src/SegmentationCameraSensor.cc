@@ -15,8 +15,8 @@
  *
 */
 
-#include <mutex>
 #include <memory>
+#include <mutex>
 
 #include <ignition/common/Console.hh>
 #include <ignition/common/Image.hh>
@@ -41,9 +41,8 @@ class ignition::sensors::SegmentationCameraSensorPrivate
   /// \param[in] _width width of image in pixels
   /// \param[in] _height height of image in pixels
   /// \return True if the image was saved successfully. False can mean
-  /// that the path provided to the constructor does exist and creation
+  /// that the image save path does not exist and creation
   /// of the path was not possible.
-  /// \sa ImageSaver
   public: bool SaveImage(const uint8_t *_coloredBuffer,
     const uint8_t *_labelsBuffer, unsigned int _width, unsigned int _height);
 
@@ -188,8 +187,8 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
       this->dataPtr->type = rendering::SegmentationType::PANOPTIC;
     else
     {
-      igndbg << "Wrong type {" << type <<
-        "}, type should be semantic or instance or panoptic" << std::endl;
+      igndbg << "Wrong type [" << type <<
+        "], type should be semantic or instance or panoptic" << std::endl;
       return false;
     }
   }
@@ -327,6 +326,7 @@ bool SegmentationCameraSensor::CreateCamera()
 
 /////////////////////////////////////////////////
 rendering::SegmentationCameraPtr SegmentationCameraSensor::SegmentationCamera()
+  const
 {
   return this->dataPtr->camera;
 }

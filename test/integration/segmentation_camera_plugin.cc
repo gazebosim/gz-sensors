@@ -57,7 +57,7 @@ uint8_t *g_buffer = nullptr;
 /// \brief counter of received segmentation msgs
 unsigned int g_counter = 0;
 
-/// \brief Label of the hidden box
+/// \brief Label of the boxes in the scene
 const uint8_t hiddenLabel = 4;
 const uint8_t leftBoxLabel = 1;
 const uint8_t rightBoxLabel = 1;
@@ -223,8 +223,8 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   ASSERT_NE(sensor, nullptr);
   sensor->SetScene(scene);
 
-  EXPECT_EQ(width, (int)sensor->ImageWidth());
-  EXPECT_EQ(height, (int)sensor->ImageHeight());
+  EXPECT_EQ(width, static_cast<int>(sensor->ImageWidth()));
+  EXPECT_EQ(height, static_cast<int>(sensor->ImageHeight()));
 
   auto camera = sensor->SegmentationCamera();
   ASSERT_NE(camera, nullptr);
