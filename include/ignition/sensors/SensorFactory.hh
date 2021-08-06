@@ -66,6 +66,9 @@ namespace ignition
     /// \brief A factory class for creating sensors
     /// This class instantiates sensor objects based on the sensor type and
     /// makes sure they're initialized correctly.
+    // After removing plugin functionality, the sensor factory class doesn't
+    // hold any internal state. Consider converting the functionality in this
+    // class to helper functions.
     class IGNITION_SENSORS_VISIBLE SensorFactory
     {
       /// \brief Constructor

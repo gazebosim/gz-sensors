@@ -48,7 +48,8 @@ namespace custom
     public: const ignition::math::Vector3d &Position() const;
 
     /// \brief Previous position of the robot.
-    private: ignition::math::Vector3d prevPos;
+    private: ignition::math::Vector3d prevPos{std::nan(""), std::nan(""),
+        std::nan("")};
 
     /// \brief Latest total distance.
     private: double totalDistance{0.0};

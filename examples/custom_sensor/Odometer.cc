@@ -15,6 +15,8 @@
  *
 */
 
+#include <math.h>
+
 #include <ignition/msgs/double.pb.h>
 
 #include <ignition/common/Console.hh>
@@ -92,7 +94,10 @@ bool Odometer::Update(const std::chrono::steady_clock::duration &_now)
 //////////////////////////////////////////////////
 void Odometer::NewPosition(const ignition::math::Vector3d &_pos)
 {
-  this->totalDistance += this->prevPos.Distance(_pos);
+  if (!isnan(this->prevPos.X()))
+  {
+    this->totalDistance += this->prevPos.Distance(_pos);
+  }
   this->prevPos = _pos;
 }
 

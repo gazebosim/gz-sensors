@@ -132,7 +132,8 @@ int main(int argc,  char **argv)
       }
       else if (auto odometer = dynamic_cast<custom::Odometer *>(sensorPtr))
       {
-        odometer->NewPosition(odometer->Position() + 0.1);
+        odometer->NewPosition(odometer->Position() +
+            ignition::math::Vector3d(0.1, 0.1, 0.0));
       }
     }
 
