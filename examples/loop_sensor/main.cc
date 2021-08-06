@@ -25,7 +25,7 @@
 
 // Include all supported sensors
 #include <ignition/sensors/AltimeterSensor.hh>
-#include "../custom_sensor/DoubleSensor.hh"
+#include "../custom_sensor/Odometer.hh"
 
 using namespace std::literals::chrono_literals;
 
@@ -80,7 +80,7 @@ int main(int argc,  char **argv)
         }
         else if (sensor->Type() == sdf::SensorType::CUSTOM)
         {
-          sensorPtr = mgr.CreateSensor<custom::DoubleSensor>(*sensor);
+          sensorPtr = mgr.CreateSensor<custom::Odometer>(*sensor);
         }
         else
         {
@@ -130,9 +130,9 @@ int main(int argc,  char **argv)
       {
         altimeter->SetVerticalVelocity(altimeter->VerticalVelocity() + 0.1);
       }
-      else if (auto custom = dynamic_cast<custom::DoubleSensor *>(sensorPtr))
+      else if (auto odometer = dynamic_cast<custom::Odometer *>(sensorPtr))
       {
-        custom->data += 0.1;
+        odometer->NewPosition(odometer->Position() + 0.1);
       }
     }
 

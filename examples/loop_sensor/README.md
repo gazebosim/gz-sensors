@@ -6,7 +6,7 @@ a loop until the user closes the program.
 The example works with 2 types of sensors:
 
 * A built-in type: altimeter
-* A custom type: "double sensor"
+* A custom type: odometer
 
 ## Build
 
@@ -23,7 +23,7 @@ make
 This will generate an executable called `loop_sensor`.
 
 It will also compile the `custom_sensor` example, creating a library called
-`libdouble_sensor`.
+`libodometer`.
 
 ## Run
 
@@ -34,7 +34,7 @@ cd examples/loop_sensor/build
 ./loop_sensor ../sensors.sdf
 ```
 
-On another terminal, check that the altimeter and double sensor are generating
+On another terminal, check that the altimeter and odometer are generating
 data on a topic:
 
 ```
@@ -45,7 +45,7 @@ You should see:
 
 ```
 /altimeter
-/double
+/odometer
 ```
 
 Then listen to the altimeter data:
@@ -79,7 +79,7 @@ vertical_velocity: 10.596832320931542
 Then listen to the custom sensor:
 
 ```
-ign topic -e -t /double
+ign topic -e -t /odometer
 ```
 
 You'll see data like:
@@ -88,18 +88,18 @@ You'll see data like:
 ...
 header {
   stamp {
-    sec: 14
+    sec: 83
   }
   data {
     key: "frame_id"
-    value: "custom_double"
+    value: "custom_odometer"
   }
   data {
     key: "seq"
-    value: "14"
+    value: "83"
   }
 }
-data: 3.1325939574820185
+data: 21.632033902371308
 ...
 ```
 

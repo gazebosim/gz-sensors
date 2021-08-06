@@ -1,7 +1,7 @@
 # Custom sensor
 
-This example creates a simple custom sensor called `DoubleSensor`, which
-produces a single number as data and publishes it to a topic.
+This example creates a simple custom sensor called `Odometer`, which
+publishes the total distance travelled by a robot.
 
 ## Build
 
@@ -15,13 +15,13 @@ cmake ..
 make
 ```
 
-This will generate a shared library with the sensor called `double_sensor`.
+This will generate a shared library with the sensor called `libodometer`.
 
 ## Use
 
-This sensor with Ignition Gazebo, or with any downstream application that uses
-the Ignition Sensors API. Listed here are two ways of testing this sensor, one
-with Gazebo and one with a custom program.
+This sensor can be used with Ignition Gazebo, or with any downstream
+application that uses the Ignition Sensors API. Listed here are two ways of
+testing this sensor, one with Gazebo and one with a custom program.
 
 ### With a custom program
 

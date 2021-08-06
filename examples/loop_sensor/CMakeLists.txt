@@ -8,14 +8,14 @@ find_package(ignition-sensors6 REQUIRED
 )
 
 # A simple example of how to find custom sensors
-add_subdirectory(../custom_sensor double_sensor)
+add_subdirectory(../custom_sensor odometer)
 
 add_executable(${PROJECT_NAME} main.cc)
 target_link_libraries(${PROJECT_NAME} PUBLIC
   ignition-sensors6::ignition-sensors6
 
   # Link to custom sensors
-  double_sensor
+  odometer
 
   # Link to built-in sensors
   ignition-sensors6::altimeter)

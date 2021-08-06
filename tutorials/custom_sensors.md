@@ -3,7 +3,7 @@
 Ignition Sensors comes with various built-in sensor types ready to be used.
 Users aren't limited to those sensor types though. This tutorial will go over
 the process of implementing a custom sensor that leverages Ignition Sensors
-and can be used in downstream applications such as Ignition Gazebo.
+and can be used with downstream applications such as Ignition Gazebo.
 
 ## Why custom sensors
 
@@ -22,10 +22,12 @@ implement proprietary sensors that can't be shared publicly.
 
 ## Do I need to use Ignition Sensors?
 
-A simulated sensor is some code that can be used to extract specific data from
-a simulation. A camera extracts pixels, an IMU extracts accelerations, etc. On
-Ignition Gazebo, for example, it's possible to get information using a
-system plugin without any connection to Ignition Sensors, for example.
+A simulated sensor consists of code that can be used to extract specific data
+from a running simulation. A camera extracts pixels, an IMU extracts
+accelerations, etc. This doesn't necessarily need to be done though Ignition
+Sensors. On Ignition Gazebo, for example, it's implement functionality similar
+to a sensor just using a system plugin without any connection to Ignition
+Sensors.
 
 With that in mind, it's worth going over some of the features that Ignition
 Sensors provides that make it easier to implement sensors, instead of writing
@@ -46,6 +48,9 @@ This example is located at
 [ign-sensors/examples/custom_sensor](https://github.com/ignitionrobotics/ign-sensors/tree/main/examples/custom_sensor),
 and the integration with Ignition Gazebo is at
 [ign-gazebo/examples/plugins/custom_sensor_system](https://github.com/ignitionrobotics/ign-gazebo/tree/main/examples/plugin/custom_sensor_system).
+
+Wherever "odometer" is used, that can be substituted for any other custom sensor
+type. Seismometer? Breathalyzer? Just adapt the logic to your needs.
 
 ### SDF
 
@@ -104,6 +109,9 @@ for the full code. Here are some important pointers:
 * Check for new entities that have `ignition::gazebo::components::CustomSensor`
   during the `PreUpdate` callback and instantiate new sensors as they appear
   in simulation.
+* Don't assume all `CustomSensors` are of the type you need, be sure to check
+  the type using the `ignition::sensors::customType` function.
 * During `PostUpdate`, update all sensors with new data coming from simulation.
 * Also during `PostUpdate`, delete any sensors that have been removed from
   simulation.
+

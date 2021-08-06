@@ -22,16 +22,16 @@
             </vertical_velocity>
           </altimeter>
         </sensor>
-        <sensor name="custom_double" type="custom" ignition:type="double">
+        <sensor name="custom_odometer" type="custom" ignition:type="odometer">
           <always_on>1</always_on>
           <update_rate>30</update_rate>
-          <topic>double</topic>
-          <ignition:double>
+          <topic>odometer</topic>
+          <ignition:odometer>
             <noise type="gaussian">
               <mean>0.1</mean>
               <stddev>0.2</stddev>
             </noise>
-          </ignition:double>
+          </ignition:odometer>
         </sensor>
       </link>
     </model>

@@ -21,17 +21,17 @@
 #include <ignition/sensors/Noise.hh>
 #include <ignition/sensors/Util.hh>
 
-#include "DoubleSensor.hh"
+#include "Odometer.hh"
 
 using namespace custom;
 
 //////////////////////////////////////////////////
-bool DoubleSensor::Load(const sdf::Sensor &_sdf)
+bool Odometer::Load(const sdf::Sensor &_sdf)
 {
   auto type = ignition::sensors::customType(_sdf);
-  if ("double" != type)
+  if ("odometer" != type)
   {
-    ignerr << "Trying to load custom sensor, but got type ["
+    ignerr << "Trying to load [odometer] sensor, but got type ["
            << type << "] instead." << std::endl;
     return false;
   }
@@ -42,7 +42,7 @@ bool DoubleSensor::Load(const sdf::Sensor &_sdf)
   // Advertise topic where data will be published
   this->pub = this->node.Advertise<ignition::msgs::Double>(this->Topic());
 
-  if (!_sdf.Element()->HasElement("ignition:double"))
+  if (!_sdf.Element()->HasElement("ignition:odometer"))
   {
     igndbg << "No custom configuration for [" << this->Topic() << "]"
            << std::endl;
@@ -50,7 +50,7 @@ bool DoubleSensor::Load(const sdf::Sensor &_sdf)
   }
 
   // Load custom sensor params
-  auto customElem = _sdf.Element()->GetElement("ignition:double");
+  auto customElem = _sdf.Element()->GetElement("ignition:odometer");
 
   if (!customElem->HasElement("noise"))
   {
@@ -71,7 +71,7 @@ bool DoubleSensor::Load(const sdf::Sensor &_sdf)
 }
 
 //////////////////////////////////////////////////
-bool DoubleSensor::Update(const std::chrono::steady_clock::duration &_now)
+bool Odometer::Update(const std::chrono::steady_clock::duration &_now)
 {
   ignition::msgs::Double msg;
   *msg.mutable_header()->mutable_stamp() = ignition::msgs::Convert(_now);
@@ -79,13 +79,26 @@ bool DoubleSensor::Update(const std::chrono::steady_clock::duration &_now)
   frame->set_key("frame_id");
   frame->add_value(this->Name());
 
-  this->data = this->noise->Apply(this->data);
+  this->totalDistance = this->noise->Apply(this->totalDistance);
 
-  msg.set_data(this->data);
+  msg.set_data(this->totalDistance);
 
   this->AddSequence(msg.mutable_header());
   this->pub.Publish(msg);
 
   return true;
+}
+
+//////////////////////////////////////////////////
+void Odometer::NewPosition(const ignition::math::Vector3d &_pos)
+{
+  this->totalDistance += this->prevPos.Distance(_pos);
+  this->prevPos = _pos;
+}
+
+//////////////////////////////////////////////////
+const ignition::math::Vector3d &Odometer::Position() const
+{
+  return this->prevPos;
 }
 
