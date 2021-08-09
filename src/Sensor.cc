@@ -40,7 +40,7 @@ class ignition::sensors::SensorPrivate
 
   /// \brief Publishes information about the performance of the sensor.
   /// \param[in] _now Current simulation time.
-  public: void PublishMetrics(const ignition::common::Time& _now);
+  public: void PublishMetrics(const ignition::common::Time &_now);
 
   /// \brief id given to sensor when constructed
   public: SensorId id;
@@ -219,7 +219,8 @@ void Sensor::PublishMetrics(const ignition::common::Time &_now)
   return this->dataPtr->PublishMetrics(_now);
 }
 
-void SensorPrivate::PublishMetrics(const ignition::common::Time &_now) {
+void SensorPrivate::PublishMetrics(const ignition::common::Time &_now)
+{
   if(!this->performanceSensorMetricsPub)
   {
     this->performanceSensorMetricsPub =
