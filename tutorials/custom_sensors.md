@@ -64,18 +64,18 @@ Custom sensors follow these rules to be loaded from SDFormat:
 
 With that in mind, here's what the sensor tag would look like:
 
-```
-        <sensor name="the_odometer" type="custom" ignition:type="odometer">
-          <always_on>1</always_on>
-          <update_rate>30</update_rate>
-          <topic>odom</topic>
-          <ignition:odometer>
-            <noise type="gaussian">
-              <mean>0.2</mean>
-              <stddev>0.1</stddev>
-            </noise>
-          </ignition:odometer>
-        </sensor>
+```xml
+<sensor name="the_odometer" type="custom" ignition:type="odometer">
+  <always_on>1</always_on>
+  <update_rate>30</update_rate>
+  <topic>odom</topic>
+  <ignition:odometer>
+    <noise type="gaussian">
+      <mean>0.2</mean>
+      <stddev>0.1</stddev>
+    </noise>
+  </ignition:odometer>
+</sensor>
 ```
 
 ### Sensor implementation

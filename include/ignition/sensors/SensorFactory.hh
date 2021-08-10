@@ -46,7 +46,7 @@ namespace ignition
     {
       /// \brief Instantiate new sensor
       /// \return New sensor
-      public: virtual Sensor * IGN_DEPRECATED(6) New() = 0;
+      public: virtual Sensor IGN_DEPRECATED(6) * New() = 0;
     };
 
     /// \brief Templated class for instantiating sensors of the specified type
@@ -57,7 +57,7 @@ namespace ignition
     class SensorTypePlugin : public SensorPlugin
     {
       // Documentation inherited
-      public: SensorType * IGN_DEPRECATED(6) New() override
+      public: SensorType IGN_DEPRECATED(6) * New() override
               {
                 return new SensorType();
               };
