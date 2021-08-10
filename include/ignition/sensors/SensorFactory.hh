@@ -122,8 +122,8 @@ namespace ignition
               {
                 if (nullptr == _sdf)
                 {
-                  ignerr << "Failed to create sensor, received null SDF pointer."
-                         << std::endl;
+                  ignerr << "Failed to create sensor, received null SDF "
+                         << "pointer." << std::endl;
                   return nullptr;
                 }
 

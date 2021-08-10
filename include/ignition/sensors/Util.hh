@@ -17,6 +17,8 @@
 #ifndef IGNITION_SENSORS_UTIL_HH_
 #define IGNITION_SENSORS_UTIL_HH_
 
+#include <string>
+
 #include <sdf/Element.hh>
 #include <sdf/Sensor.hh>
 
@@ -43,7 +45,7 @@ inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
 ///
 /// \param[in] _sdf Sensor SDF object.
 /// \return _sensorType Name of sensor type.
-std::string IGNITION_SENSORS_VISIBLE customType(const sdf::Sensor &_sdf);
+std::string IGNITION_SENSORS_VISIBLE customType(const sdf::Sensor &_sdf); // NOLINT
 
 /// \brief Get the name of a sensor's custom type from SDF.
 ///
@@ -58,7 +60,7 @@ std::string IGNITION_SENSORS_VISIBLE customType(const sdf::Sensor &_sdf);
 ///
 /// \param[in] _sdf Sensor SDF object.
 /// \return _sensorType Name of sensor type.
-std::string IGNITION_SENSORS_VISIBLE customType(sdf::ElementPtr _sdf);
+std::string IGNITION_SENSORS_VISIBLE customType(sdf::ElementPtr _sdf); // NOLINT
 }
 }
 }
