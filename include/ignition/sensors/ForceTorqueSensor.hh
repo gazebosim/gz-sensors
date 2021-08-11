@@ -68,11 +68,11 @@ namespace ignition
       /// \return True on success
       public: virtual bool Init() override;
 
-      /// \brief Update the sensor and generate data
-      /// \param[in] _now The current time
-      /// \return true if the update was successfull
-      public: virtual bool IGN_DEPRECATED(4) Update(
-        const ignition::common::Time &_now) override;
+      // /// \brief Update the sensor and generate data
+      // /// \param[in] _now The current time
+      // /// \return true if the update was successfull
+      // public: virtual bool IGN_DEPRECATED(4) Update(
+      //   const ignition::common::Time &_now) override;
 
       /// \brief Update the sensor and generate data
       /// \param[in] _now The current time

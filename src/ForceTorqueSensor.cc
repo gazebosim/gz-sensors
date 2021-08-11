@@ -55,25 +55,25 @@ class ignition::sensors::ForceTorqueSensorPrivate
   public: ignition::math::Vector3d torque;
 
   /// \brief Which orientation we support for returning sensor measure
-      public: enum MeasureFrame
-      {
-        PARENT_LINK,
-        CHILD_LINK,
-        SENSOR
-      };
+  public: enum MeasureFrame
+  {
+    PARENT_LINK,
+    CHILD_LINK,
+    SENSOR
+  };
   
   /// \brief Frame in which we return the measured force torque info.
-      public: MeasureFrame measureFrame;
+  public: MeasureFrame measureFrame;
 
   /// \brief Direction of the measure
       ///        True if the measured force torque is the one applied
       ///        by the parent on the child, false otherwise
-      public: bool parentToChild;
+  public: bool parentToChild;
 
   /// \brief Rotation matrix than transforms a vector expressed in child
       ///        orientation in a vector expressed in joint orientation.
       ///        Necessary is the measure is specified in joint frame.
-      public: ignition::math::Matrix3d rotationSensorChild;
+  public: ignition::math::Matrix3d rotationSensorChild;
 
   /// \brief Flag for if time has been initialized
   public: bool timeInitialized = false;
