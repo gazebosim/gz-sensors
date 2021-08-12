@@ -79,11 +79,6 @@ ign_find_package(ignition-msgs8 REQUIRED)
 set(IGN_MSGS_VER ${ignition-msgs8_VERSION_MAJOR})
 
 #--------------------------------------
-# Find ignition-plugin
-ign_find_package(ignition-plugin1 REQUIRED COMPONENTS all)
-set(IGN_PLUGIN_VER ${ignition-plugin1_VERSION_MAJOR})
-
-#--------------------------------------
 # Find SDFormat
 ign_find_package(sdformat12 REQUIRED)
 set(SDF_VER ${sdformat12_VERSION_MAJOR})

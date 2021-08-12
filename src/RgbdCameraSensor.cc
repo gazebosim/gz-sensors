@@ -175,6 +175,14 @@ bool RgbdCameraSensor::Init()
 }
 
 //////////////////////////////////////////////////
+bool RgbdCameraSensor::Load(sdf::ElementPtr _sdf)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(_sdf);
+  return this->Load(sdfSensor);
+}
+
+//////////////////////////////////////////////////
 bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
@@ -603,4 +611,3 @@ unsigned int RgbdCameraSensor::ImageHeight() const
   return this->dataPtr->depthCamera->ImageHeight();
 }
 
-IGN_SENSORS_REGISTER_SENSOR(RgbdCameraSensor)

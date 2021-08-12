@@ -18,8 +18,6 @@
 #include "ignition/sensors/Manager.hh"
 #include <memory>
 #include <unordered_map>
-#include <ignition/common/PluginLoader.hh>
-#include <ignition/common/Plugin.hh>
 #include <ignition/common/Profiler.hh>
 #include <ignition/common/SystemPaths.hh>
 #include <ignition/common/Console.hh>
@@ -31,28 +29,9 @@ using namespace ignition::sensors;
 
 class ignition::sensors::ManagerPrivate
 {
-  /// \brief constructor
-  public: ManagerPrivate();
-
-  /// \brief destructor
-  public: ~ManagerPrivate();
-
   /// \brief Loaded sensors.
   public: std::map<SensorId, std::unique_ptr<Sensor>> sensors;
-
-  /// \brief Sensor factory for creating sensors from plugins;
-  public: SensorFactory sensorFactory;
 };
-
-//////////////////////////////////////////////////
-ManagerPrivate::ManagerPrivate()
-{
-}
-
-//////////////////////////////////////////////////
-ManagerPrivate::~ManagerPrivate()
-{
-}
 
 //////////////////////////////////////////////////
 Manager::Manager() :
@@ -80,9 +59,10 @@ ignition::sensors::Sensor *Manager::Sensor(
 }
 
 //////////////////////////////////////////////////
-void Manager::AddPluginPaths(const std::string &_paths)
+void Manager::AddPluginPaths(const std::string &)
 {
-  this->dataPtr->sensorFactory.AddPluginPaths(_paths);
+  ignwarn << "Trying to add plugin paths, but Ignition Sensors doesn't support"
+          << " plugins anymore." << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -103,25 +83,30 @@ void Manager::RunOnce(
 }
 
 /////////////////////////////////////////////////
-ignition::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &_sdf)
+ignition::sensors::SensorId Manager::AddSensor(
+  std::unique_ptr<ignition::sensors::Sensor> _sensor)
 {
-  auto sensor = this->dataPtr->sensorFactory.CreateSensor(_sdf);
-  if (!sensor)
+  if (!_sensor)
     return NO_SENSOR;
-
-  SensorId id = sensor->Id();
-  this->dataPtr->sensors[id] = std::move(sensor);
+  SensorId id = _sensor->Id();
+  this->dataPtr->sensors[id] = std::move(_sensor);
   return id;
 }
 
 /////////////////////////////////////////////////
-ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr _sdf)
+ignition::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &)
 {
-  auto sensor = this->dataPtr->sensorFactory.CreateSensor(_sdf);
-  if (!sensor)
-    return NO_SENSOR;
+  ignwarn << "Trying to create sensor without providing sensor type. Ignition"
+          << " Sensor doesn't support sensor registration anymore. Use the"
+          << " templated `CreateSensor` function instead." << std::endl;
+  return NO_SENSOR;
+}
 
-  SensorId id = sensor->Id();
-  this->dataPtr->sensors[id] = std::move(sensor);
-  return id;
+/////////////////////////////////////////////////
+ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr)
+{
+  ignwarn << "Trying to create sensor without providing sensor type. Ignition"
+          << " Sensor doesn't support sensor registration anymore. Use the"
+          << " templated `CreateSensor` function instead." << std::endl;
+  return NO_SENSOR;
 }

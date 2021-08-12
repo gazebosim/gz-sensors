@@ -866,15 +866,9 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
       vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
       rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
 
-    auto sensorId = mgr.CreateSensor(lidarSdf);
-    EXPECT_NE(ignition::sensors::NO_SENSOR, sensorId);
-
-    auto sensor = mgr.Sensor(sensorId);
-    EXPECT_NE(nullptr, sensor);
-
-    auto lidar = dynamic_cast<ignition::sensors::GpuLidarSensor *>(sensor);
+    auto lidar = mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSdf);
     ASSERT_NE(nullptr, lidar);
-
+    EXPECT_NE(ignition::sensors::NO_SENSOR, lidar->Id());
     EXPECT_EQ("/lidar/points", lidar->Topic());
   }
 
@@ -886,14 +880,9 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
       vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
       rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
 
-    auto sensorId = mgr.CreateSensor(lidarSdf);
-    EXPECT_NE(ignition::sensors::NO_SENSOR, sensorId);
-
-    auto sensor = mgr.Sensor(sensorId);
-    EXPECT_NE(nullptr, sensor);
-
-    auto lidar = dynamic_cast<ignition::sensors::GpuLidarSensor *>(sensor);
+    auto lidar = mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSdf);
     ASSERT_NE(nullptr, lidar);
+    EXPECT_NE(ignition::sensors::NO_SENSOR, lidar->Id());
 
     EXPECT_EQ("/topic_with_spaces/characters/points", lidar->Topic());
   }
@@ -906,8 +895,8 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
       vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
       rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
 
-    auto sensorId = mgr.CreateSensor(lidarSdf);
-    EXPECT_EQ(ignition::sensors::NO_SENSOR, sensorId);
+    auto sensor = mgr.CreateSensor<ignition::sensors::GpuLidarSensor>(lidarSdf);
+    EXPECT_EQ(nullptr, sensor);
   }
 }
 

@@ -108,7 +108,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
 {
   // get the darn test data
   std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
-      "integration", "thermal_camera_sensor_builtin.sdf");
+      "sdf", "thermal_camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
   ASSERT_TRUE(sdf::readFile(path, doc));
@@ -366,7 +366,7 @@ void ThermalCameraSensorTest::Images8BitWithBuiltinSDF(
 {
   // get the darn test data
   std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
-      "integration", "thermal_camera_sensor_8bit_builtin.sdf");
+      "sdf", "thermal_camera_sensor_8bit_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
   ASSERT_TRUE(sdf::readFile(path, doc));

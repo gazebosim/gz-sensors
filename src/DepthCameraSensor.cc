@@ -626,4 +626,3 @@ double DepthCameraSensor::NearClip() const
   return this->dataPtr->near;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(DepthCameraSensor)

@@ -108,7 +108,7 @@ void GpuLidarSensor::RemoveGpuRays(
 //////////////////////////////////////////////////
 bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
 {
-  // Check if this is being loaded via "builtin" or via a plugin
+  // Check if this is being loaded via "builtin" or via another sensor
   if (!Lidar::Load(_sdf))
   {
     return false;
@@ -370,4 +370,3 @@ void GpuLidarSensorPrivate::FillPointCloudMsg(const float *_laserBuffer)
   }
 }
 
-IGN_SENSORS_REGISTER_SENSOR(GpuLidarSensor)

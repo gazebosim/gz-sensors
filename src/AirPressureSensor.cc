@@ -217,4 +217,3 @@ double AirPressureSensor::ReferenceAltitude() const
   return this->dataPtr->referenceAltitude;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(AirPressureSensor)
