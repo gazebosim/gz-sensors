@@ -40,7 +40,7 @@ class ignition::sensors::SensorPrivate
 
   /// \brief Publishes information about the performance of the sensor.
   /// \param[in] _now Current simulation time.
-  public: void PublishMetrics(const ignition::common::Time &_now);
+  public: void PublishMetrics(const std::chrono::duration<double> &_now);
 
   /// \brief id given to sensor when constructed
   public: SensorId id;
@@ -67,10 +67,10 @@ class ignition::sensors::SensorPrivate
   public: ignition::common::Time nextUpdateTime;
 
   /// \brief Last steady clock time reading from last Update call.
-  public: std::chrono::time_point<std::chrono::steady_clock> lastClockTime;
+  public: std::chrono::time_point<std::chrono::steady_clock> lastRealTime;
 
   /// \brief Last sim time at Update call.
-  public: ignition::common::Time lastUpdateTime{0};
+  public: std::chrono::duration<double> lastUpdateTime{0};
 
   /// \brief Transport node.
   public: ignition::transport::Node node;
@@ -214,18 +214,26 @@ bool SensorPrivate::SetTopic(const std::string &_topic)
 }
 
 //////////////////////////////////////////////////
-void Sensor::PublishMetrics(const ignition::common::Time &_now)
+void Sensor::PublishMetrics(const std::chrono::duration<double> &_now)
 {
   return this->dataPtr->PublishMetrics(_now);
 }
 
-void SensorPrivate::PublishMetrics(const ignition::common::Time &_now)
+//////////////////////////////////////////////////
+void SensorPrivate::PublishMetrics(const std::chrono::duration<double> &_now)
 {
   if(!this->performanceSensorMetricsPub)
   {
+    const auto validTopic = transport::TopicUtils::AsValidTopic(
+      this->topic + "/performance_metrics");
+    if (validTopic.empty())
+    {
+      ignerr << "Failed to set metrics sensor topic [" << topic << "]" <<
+        std::endl;
+      return;
+    }
     this->performanceSensorMetricsPub =
-      node.Advertise<msgs::PerformanceSensorMetrics>(
-          this->topic + "/performance_metrics");
+      node.Advertise<msgs::PerformanceSensorMetrics>(validTopic);
   }
   if (!performanceSensorMetricsPub ||
       !performanceSensorMetricsPub.HasConnections())
@@ -237,20 +245,22 @@ void SensorPrivate::PublishMetrics(const ignition::common::Time &_now)
   double simUpdateRate;
   double realUpdateRate;
   const auto clockNow = std::chrono::steady_clock::now();
-  if(this->lastUpdateTime > 0)
+  // If lastUpdateTime == 0 means it wasn't initialized yet.
+  if(this->lastUpdateTime.count() > 0)
   {
-    const double diffSimUpdate = _now.Double() -
-      this->lastUpdateTime.Double();
+    const double diffSimUpdate = _now.count() -
+      this->lastUpdateTime.count();
     simUpdateRate = 1.0 / diffSimUpdate;
     const double diffRealUpdate =
-      std::chrono::duration_cast<std::chrono::milliseconds>(
-        clockNow - this->lastClockTime).count() * 1e-3;
-    realUpdateRate = 1.0 / diffRealUpdate;
+      std::chrono::duration_cast<std::chrono::duration<double>>(
+        clockNow - this->lastRealTime).count();
+    realUpdateRate = diffRealUpdate < std::numeric_limits<double>::epsilon() ?
+      std::numeric_limits<double>::infinity() : 1.0 / diffRealUpdate;
   }
 
   // Update last time values.
   this->lastUpdateTime = _now;
-  this->lastClockTime = clockNow;
+  this->lastRealTime = clockNow;
 
   // Fill performance sensor metrics message.
   msgs::PerformanceSensorMetrics performanceSensorMetricsMsg;
@@ -324,7 +334,7 @@ bool Sensor::Update(const ignition::common::Time &_now,
   result = this->Update(_now);
 
   // Publish metrics
-  this->PublishMetrics(_now);
+  this->PublishMetrics(std::chrono::duration<double>(_now.Double()));
 
   if (!_force && this->dataPtr->updateRate > 0.0)
   {

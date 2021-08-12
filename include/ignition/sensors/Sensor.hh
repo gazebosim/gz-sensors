@@ -27,6 +27,7 @@
 #pragma warning(pop)
 #endif
 
+#include <chrono>
 #include <memory>
 #include <string>
 
@@ -185,7 +186,8 @@ namespace ignition
       ///        When different metrics need to be published this method
       ///        could be overriden by subclasses.
       /// \param[in] _now Current time.
-      public: virtual void PublishMetrics(const ignition::common::Time &_now);
+      public: virtual void PublishMetrics(
+        const std::chrono::duration<double> &_now);
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal
