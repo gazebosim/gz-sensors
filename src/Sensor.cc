@@ -60,6 +60,9 @@ class ignition::sensors::SensorPrivate
   /// \brief Pose of the sensor
   public: ignition::math::Pose3d pose;
 
+  /// \brief Flag to enable publishing performance metrics.
+  public: bool enableMetrics{false};
+
   /// \brief How many times the sensor will generate data per second
   public: double updateRate = 0.0;
 
@@ -127,6 +130,8 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
   }
 
   this->updateRate = _sdf.UpdateRate();
+
+  this->enableMetrics = _sdf.EnableMetrics();
   return true;
 }
 
@@ -211,6 +216,19 @@ bool SensorPrivate::SetTopic(const std::string &_topic)
 
   this->topic = validTopic;
   return true;
+}
+
+//////////////////////////////////////////////////
+bool Sensor::EnableMetrics() const
+{
+  return this->dataPtr->enableMetrics;
+}
+
+
+//////////////////////////////////////////////////
+void Sensor::SetEnableMetrics(bool _enableMetrics)
+{
+  this->dataPtr->enableMetrics = _enableMetrics;
 }
 
 //////////////////////////////////////////////////
@@ -334,7 +352,10 @@ bool Sensor::Update(const ignition::common::Time &_now,
   result = this->Update(_now);
 
   // Publish metrics
-  this->PublishMetrics(std::chrono::duration<double>(_now.Double()));
+  if (this->EnableMetrics())
+  {
+    this->PublishMetrics(std::chrono::duration<double>(_now.Double()));
+  }
 
   if (!_force && this->dataPtr->updateRate > 0.0)
   {

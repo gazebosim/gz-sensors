@@ -147,6 +147,14 @@ namespace ignition
       /// \return True if a valid topic was set.
       public: bool SetTopic(const std::string &_topic);
 
+      /// \brief Get flag state for enabling performance metrics publication.
+      /// \return True if performance metrics are enabled, false otherwise.
+      public: bool EnableMetrics() const;
+
+      /// \brief Set flag to enable publishing performance metrics
+      /// \param[in] _enableMetrics True to enable.
+      public: void SetEnableMetrics(bool _enableMetrics);
+
       /// \brief Get parent link of the sensor.
       /// \return Parent link of sensor.
       public: std::string Parent() const;

@@ -162,6 +162,8 @@ class SensorUpdate : public ::testing::Test
   protected: const std::string kSensorName{"sensor_test"};
   // Sensor topic.
   protected: const std::string kSensorTopic{"/sensor_test"};
+  // Enable metrics flag.
+  protected: const bool kEnableMetrics{true};
   // Topic where performance metrics are published.
   protected: const std::string kPerformanceMetricTopic{
     kSensorTopic + "/performance_metrics"};
@@ -180,9 +182,11 @@ TEST_F(SensorUpdate, Update)
   sdf::Sensor sdfSensor;
   sdfSensor.SetName(kSensorName);
   sdfSensor.SetTopic(kSensorTopic);
+  sdfSensor.SetEnableMetrics(kEnableMetrics);
   std::unique_ptr<Sensor> sensor = std::make_unique<TestSensor>();
   sensor->Load(sdfSensor);
   ASSERT_EQ(kSensorTopic, sensor->Topic());
+  ASSERT_EQ(kEnableMetrics, sensor->EnableMetrics());
 
   // Call Update() method kNumberOfMessages times.
   // For each call there is also a call to Sensor::PublishMetrics() that
