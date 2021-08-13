@@ -230,8 +230,8 @@ TEST_F(ForceTorqueSensorTest, SensorReadings)
   EXPECT_EQ(1, msg.header().stamp().sec());
   EXPECT_EQ(0, msg.header().stamp().nsec());
 
-  EXPECT_EQ(ignition::math::Vector3d(0.1, 0.1, 0.1), ignition::msgs::Convert(msg.force()));
-  EXPECT_EQ(ignition::math::Vector3d(0.1, 0.1, 0.1), ignition::msgs::Convert(msg.torque()));
+  EXPECT_EQ(ignition::math::Vector3d(0, 0, 1), ignition::msgs::Convert(msg.force()));
+  EXPECT_EQ(ignition::math::Vector3d(0, 0, 1), ignition::msgs::Convert(msg.torque()));
 
 
   // // verify msg with noise received on the topic

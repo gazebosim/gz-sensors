@@ -80,6 +80,9 @@ namespace ignition
       public: virtual bool Update(
         const std::chrono::steady_clock::duration &_now) override;
 
+      public: bool Update(
+         const ignition::common::Time &_now);
+
       /// \brief Get the current joint force.
       /// \return The latested measured force.
       public: math::Vector3d Force() const;

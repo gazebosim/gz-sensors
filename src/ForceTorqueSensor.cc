@@ -53,22 +53,12 @@ class ignition::sensors::ForceTorqueSensorPrivate
 
   /// \brief Noise free torque
   public: ignition::math::Vector3d torque;
-
-  /// \brief Which orientation we support for returning sensor measure
-  public: enum MeasureFrame
-  {
-    PARENT_LINK,
-    CHILD_LINK,
-    SENSOR
-  };
   
   /// \brief Frame in which we return the measured force torque info.
-  public: MeasureFrame measureFrame;
+  public: sdf::ForceTorqueFrame measureFrame;
 
-  /// \brief Direction of the measure
-      ///        True if the measured force torque is the one applied
-      ///        by the parent on the child, false otherwise
-  public: bool parentToChild;
+  /// \brief Direction in which we return the measured force torque info.
+  public: sdf::ForceTorqueMeasureDirection measureDirection;
 
   /// \brief Rotation matrix than transforms a vector expressed in child
       ///        orientation in a vector expressed in joint orientation.
@@ -119,6 +109,12 @@ bool ForceTorqueSensor::Load(const sdf::Sensor &_sdf)
       << "a null sensor." << std::endl;
     return false;
   }
+
+  this->dataPtr->measureFrame = _sdf.ForceTorqueSensor()->Frame();
+  this->dataPtr->measureDirection = _sdf.ForceTorqueSensor()->MeasureDirection();
+
+  
+
 
   if (this->Topic().empty())
     this->SetTopic("/forcetorque");
@@ -190,9 +186,9 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
   ignition::math::Vector3d measuredForce;
   ignition::math::Vector3d measuredTorque;
 
-  if (this->dataPtr->measureFrame == ForceTorqueSensorPrivate::PARENT_LINK)
+  if (this->dataPtr->measureFrame == sdf::ForceTorqueFrame::PARENT)
   {
-    if (this->dataPtr->parentToChild)
+    if (this->dataPtr->measureDirection == sdf::ForceTorqueMeasureDirection::PARENT_TO_CHILD)
     {
       measuredForce = this->dataPtr->force;
       measuredTorque = this->dataPtr->torque;
@@ -203,9 +199,9 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
       measuredTorque = -1*this->dataPtr->torque;
     }
   }
-  else if (this->dataPtr->measureFrame == ForceTorqueSensorPrivate::CHILD_LINK)
+  else if (this->dataPtr->measureFrame == sdf::ForceTorqueFrame::CHILD)
   {
-    if (!this->dataPtr->parentToChild)
+    if (this->dataPtr->measureDirection == sdf::ForceTorqueMeasureDirection::CHILD_TO_PARENT)
     {
       measuredForce = this->dataPtr->force;
       measuredTorque = this->dataPtr->torque;
@@ -220,7 +216,7 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     ignerr << "measureFrame must be PARENT_LINK, CHILD_LINK or SENSOR\n";
 
-    if (!this->dataPtr->parentToChild)
+    if (this->dataPtr->measureDirection == sdf::ForceTorqueMeasureDirection::CHILD_TO_PARENT)
     {
       measuredForce = this->dataPtr->rotationSensorChild *
         this->dataPtr->force;
