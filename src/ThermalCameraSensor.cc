@@ -648,4 +648,3 @@ bool ThermalCameraSensorPrivate::SaveImage(const uint16_t *_data,
   return true;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(ThermalCameraSensor)

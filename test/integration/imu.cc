@@ -113,12 +113,7 @@ TEST_F(ImuSensorTest, SensorReadings)
   // create the sensor using sensor factory
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
-  std::unique_ptr<ignition::sensors::Sensor> s =
-      sf.CreateSensor(imuSdf);
-  std::unique_ptr<ignition::sensors::ImuSensor> sensor(
-      dynamic_cast<ignition::sensors::ImuSensor *>(s.release()));
-
-  // Make sure the above dynamic cast worked.
+  auto sensor = sf.CreateSensor<ignition::sensors::ImuSensor>(imuSdf);
   ASSERT_NE(nullptr, sensor);
 
   // subscribe to the topic
@@ -250,10 +245,7 @@ TEST_F(ImuSensorTest, Topic)
     auto imuSdf = ImuToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(imuSdf);
-    EXPECT_NE(nullptr, sensor);
-
-    auto imu = dynamic_cast<ignition::sensors::ImuSensor *>(sensor.release());
+    auto imu = factory.CreateSensor<ignition::sensors::ImuSensor>(imuSdf);
     ASSERT_NE(nullptr, imu);
 
     EXPECT_EQ("/imu", imu->Topic());
@@ -265,11 +257,7 @@ TEST_F(ImuSensorTest, Topic)
     auto imuSdf = ImuToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(imuSdf);
-    EXPECT_NE(nullptr, sensor);
-
-    auto imu =
-        dynamic_cast<ignition::sensors::ImuSensor *>(sensor.release());
+    auto imu = factory.CreateSensor<ignition::sensors::ImuSensor>(imuSdf);
     ASSERT_NE(nullptr, imu);
 
     EXPECT_EQ("/topic_with_spaces/characters", imu->Topic());
@@ -281,7 +269,7 @@ TEST_F(ImuSensorTest, Topic)
     auto imuSdf = ImuToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(imuSdf);
+    auto sensor = factory.CreateSensor<ignition::sensors::ImuSensor>(imuSdf);
     ASSERT_EQ(nullptr, sensor);
   }
 }

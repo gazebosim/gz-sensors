@@ -450,4 +450,3 @@ bool Lidar::IsActive() const
   return true;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(Lidar)

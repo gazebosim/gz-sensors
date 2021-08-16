@@ -183,18 +183,12 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   // create the sensor using sensor factory
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
-  std::unique_ptr<ignition::sensors::Sensor> s =
-      sf.CreateSensor(magnetometerSdf);
-  std::unique_ptr<ignition::sensors::MagnetometerSensor> sensor(
-      dynamic_cast<ignition::sensors::MagnetometerSensor *>(s.release()));
-
-  std::unique_ptr<ignition::sensors::Sensor> sNoise =
-      sf.CreateSensor(magnetometerSdfNoise);
-  std::unique_ptr<ignition::sensors::MagnetometerSensor> sensorNoise(
-      dynamic_cast<ignition::sensors::MagnetometerSensor *>(sNoise.release()));
-
-  // Make sure the above dynamic cast worked.
+  auto sensor = sf.CreateSensor<ignition::sensors::MagnetometerSensor>(
+      magnetometerSdf);
   ASSERT_NE(nullptr, sensor);
+
+  auto sensorNoise = sf.CreateSensor<ignition::sensors::MagnetometerSensor>(
+      magnetometerSdfNoise);
   ASSERT_NE(nullptr, sensorNoise);
 
   // subscribe to the topic
@@ -309,11 +303,8 @@ TEST_F(MagnetometerSensorTest, Topic)
     auto magnetometerSdf = MagnetometerToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(magnetometerSdf);
-    EXPECT_NE(nullptr, sensor);
-
-    auto magnetometer =
-        dynamic_cast<ignition::sensors::MagnetometerSensor *>(sensor.release());
+    auto magnetometer = factory.CreateSensor<
+        ignition::sensors::MagnetometerSensor>(magnetometerSdf);
     ASSERT_NE(nullptr, magnetometer);
 
     EXPECT_EQ("/magnetometer", magnetometer->Topic());
@@ -325,11 +316,8 @@ TEST_F(MagnetometerSensorTest, Topic)
     auto magnetometerSdf = MagnetometerToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(magnetometerSdf);
-    EXPECT_NE(nullptr, sensor);
-
-    auto magnetometer =
-        dynamic_cast<ignition::sensors::MagnetometerSensor *>(sensor.release());
+    auto magnetometer = factory.CreateSensor<
+        ignition::sensors::MagnetometerSensor>(magnetometerSdf);
     ASSERT_NE(nullptr, magnetometer);
 
     EXPECT_EQ("/topic_with_spaces/characters", magnetometer->Topic());
@@ -341,7 +329,8 @@ TEST_F(MagnetometerSensorTest, Topic)
     auto magnetometerSdf = MagnetometerToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(magnetometerSdf);
+    auto sensor = factory.CreateSensor<
+        ignition::sensors::MagnetometerSensor>(magnetometerSdf);
     ASSERT_EQ(nullptr, sensor);
   }
 }

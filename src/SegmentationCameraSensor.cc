@@ -507,5 +507,3 @@ bool SegmentationCameraSensorPrivate::SaveImage(
 
   return true;
 }
-
-IGN_SENSORS_REGISTER_SENSOR(SegmentationCameraSensor)

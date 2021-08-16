@@ -295,4 +295,3 @@ math::Quaterniond ImuSensor::Orientation() const
   return this->dataPtr->orientation;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(ImuSensor)

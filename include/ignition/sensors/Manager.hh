@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <type_traits>
 #include <vector>
 #include <sdf/sdf.hh>
@@ -27,6 +28,7 @@
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Sensor.hh>
+#include <ignition/sensors/SensorFactory.hh>
 
 namespace ignition
 {
@@ -60,123 +62,61 @@ namespace ignition
       /// \return True if successfully initialized, false if not
       public: bool Init();
 
-      /// \brief Create a sensor from SDF with a known sensor type.
-      ///
-      ///   This creates sensors by looking at the given sdf element.
-      ///   Sensors created with this API offer an ignition-transport interface.
-      ///   If you need a direct C++ interface to the data, you must get the
-      ///   sensor pointer and cast to the correct type.
-      ///
-      ///   A <sensor> tag may have multiple <plugin> tags. A SensorId will be
-      ///   returned for each plugin that is described in SDF.
-      ///   If there are no <plugin> tags then one of the plugins shipped with
-      ///   this library will be loaded. For example, a <sensor> tag with
-      ///   <camera> but no <plugin> will load a CameraSensor from
-      ///   ignition-sensors-camera.
+      /// \brief Create a sensor from an SDF ovject with a known sensor type.
       /// \sa Sensor()
-      /// \param[in] _sdf pointer to the sdf element
-      /// \return A pointer to the created sensor. nullptr returned on
-      /// error.
-      public: template<typename T>
-              T *CreateSensor(sdf::Sensor _sdf)
+      /// \param[in] _sdf An SDF element or DOM object.
+      /// \tparam SensorType Sensor type
+      /// \tparam SdfType It may be an `sdf::ElementPtr` containing a sensor or
+      /// an `sdf::Sensor`.
+      /// \return A pointer to the created sensor. Null returned on
+      /// error. The Manager keeps ownership of the pointer's lifetime.
+      public: template<typename SensorType, typename SdfType>
+              SensorType *CreateSensor(SdfType _sdf)
               {
-                ignition::sensors::SensorId id = this->CreateSensor(_sdf);
-
-                if (id != NO_SENSOR)
+                SensorFactory sensorFactory;
+                auto sensor = sensorFactory.CreateSensor<SensorType>(_sdf);
+                if (nullptr == sensor)
                 {
-                  T *result = dynamic_cast<T*>(this->Sensor(id));
-
-                  if (!result)
-                    ignerr << "SDF sensor type does not match template type\n";
-
-                  return result;
+                  ignerr << "Failed to create sensor." << std::endl;
+                  return nullptr;
                 }
-
-                ignerr << "Failed to create sensor of type["
-                       << _sdf.TypeStr() << "]\n";
-                return nullptr;
-              }
-
-      /// \brief Create a sensor from SDF with a known sensor type.
-      ///
-      ///   This creates sensors by looking at the given sdf element.
-      ///   Sensors created with this API offer an ignition-transport interface.
-      ///   If you need a direct C++ interface to the data, you must get the
-      ///   sensor pointer and cast to the correct type.
-      ///
-      ///   A <sensor> tag may have multiple <plugin> tags. A SensorId will be
-      ///   returned for each plugin that is described in SDF.
-      ///   If there are no <plugin> tags then one of the plugins shipped with
-      ///   this library will be loaded. For example, a <sensor> tag with
-      ///   <camera> but no <plugin> will load a CameraSensor from
-      ///   ignition-sensors-camera.
-      /// \sa Sensor()
-      /// \param[in] _sdf pointer to the sdf element
-      /// \return A pointer to the created sensor. nullptr returned on
-      /// error.
-      public: template<typename T>
-              T *CreateSensor(sdf::ElementPtr _sdf)
-              {
-                ignition::sensors::SensorId id = this->CreateSensor(_sdf);
-
-                if (id != NO_SENSOR)
+                auto result = sensor.get();
+                if (NO_SENSOR == this->AddSensor(std::move(sensor)))
                 {
-                  T *result = dynamic_cast<T*>(this->Sensor(id));
-
-                  if (nullptr == result)
-                  {
-                    ignerr << "Failed to create sensor [" << id << "] of type ["
-                           << _sdf->Get<std::string>("type")
-                           << "]. SDF sensor type does not match template type."
-                           << std::endl;
-                  }
-
-                  return result;
+                  ignerr << "Failed to add sensor." << std::endl;
+                  return nullptr;
                 }
-
-                ignerr << "Failed to create sensor of type ["
-                       << _sdf->Get<std::string>("type") << "]\n";
-                return nullptr;
+                return result;
               }
 
       /// \brief Create a sensor from SDF without a known sensor type.
-      ///
-      ///   This creates sensors by looking at the given sdf element.
-      ///   Sensors created with this API offer an ignition-transport interface.
-      ///   If you need a direct C++ interface to the data, you must get the
-      ///   sensor pointer and cast to the correct type.
-      ///
-      ///   A <sensor> tag may have multiple <plugin> tags. A SensorId will be
-      ///   returned for each plugin that is described in SDF.
-      ///   If there are no <plugin> tags then one of the plugins shipped with
-      ///   this library will be loaded. For example, a <sensor> tag with
-      ///   <camera> but no <plugin> will load a CameraSensor from
-      ///   ignition-sensors-camera.
       /// \sa Sensor()
       /// \param[in] _sdf pointer to the sdf element
       /// \return A sensor id that refers to the created sensor. NO_SENSOR
       /// is returned on erro.
-      public: ignition::sensors::SensorId CreateSensor(sdf::ElementPtr _sdf);
+      /// \deprecated Sensor registration is deprecated, so it's necessary to
+      /// provide the specific sensor type to create it. Use the templated
+      /// `CreateSensor` function.
+      public: ignition::sensors::SensorId IGN_DEPRECATED(6) CreateSensor(
+          sdf::ElementPtr _sdf);
 
       /// \brief Create a sensor from SDF without a known sensor type.
-      ///
-      ///   This creates sensors by looking at the given sdf element.
-      ///   Sensors created with this API offer an ignition-transport interface.
-      ///   If you need a direct C++ interface to the data, you must get the
-      ///   sensor pointer and cast to the correct type.
-      ///
-      ///   A <sensor> tag may have multiple <plugin> tags. A SensorId will be
-      ///   returned for each plugin that is described in SDF.
-      ///   If there are no <plugin> tags then one of the plugins shipped with
-      ///   this library will be loaded. For example, a <sensor> tag with
-      ///   <camera> but no <plugin> will load a CameraSensor from
-      ///   ignition-sensors-camera.
       /// \sa Sensor()
       /// \param[in] _sdf SDF sensor DOM object
       /// \return A sensor id that refers to the created sensor. NO_SENSOR
       /// is returned on erro.
-      public: ignition::sensors::SensorId CreateSensor(const sdf::Sensor &_sdf);
+      /// \deprecated Sensor registration is deprecated, so it's necessary to
+      /// provide the specific sensor type to create it. Use the templated
+      /// `CreateSensor` function.
+      public: ignition::sensors::SensorId IGN_DEPRECATED(6) CreateSensor(
+          const sdf::Sensor &_sdf);
 
+      /// \brief Add a sensor for this manager to manage.
+      /// \sa Sensor()
+      /// \param[in] _sensor Pointer to the sensor
+      /// \return A sensor id that refers to the created sensor. NO_SENSOR
+      /// is returned on error.
+      public: SensorId AddSensor(std::unique_ptr<Sensor> _sensor);
 
       /// \brief Get an instance of a loaded sensor by sensor id
       /// \param[in] _id Idenitifier of the sensor.
@@ -197,13 +137,7 @@ namespace ignition
                   bool _force = false);
 
       /// \brief Adds colon delimited paths sensor plugins may be
-      public: void AddPluginPaths(const std::string &_path);
-
-      /// \brief load a plugin and return a shared_ptr
-      /// \param[in] _filename Sensor plugin file to load.
-      /// \return Pointer to the new sensor, nullptr on error.
-      private: ignition::sensors::SensorId LoadSensorPlugin(
-                   const std::string &_filename, sdf::ElementPtr _sdf);
+      public: void IGN_DEPRECATED(6) AddPluginPaths(const std::string &_path);
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief private data pointer

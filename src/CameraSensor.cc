@@ -633,4 +633,3 @@ double CameraSensor::Baseline() const
   return this->dataPtr->baseline;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(CameraSensor)
