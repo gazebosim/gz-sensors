@@ -170,29 +170,6 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
 
   this->dataPtr->sdfSensor = _sdf;
 
-  // Segmentation type
-  sdf::ElementPtr sdfElement = _sdf.Element();
-  if (sdfElement->HasElement("segmentation_type"))
-  {
-    auto type = sdfElement->Get<std::string>("segmentation_type");
-
-    // convert type to lowercase
-    std::for_each(type.begin(), type.end(), [](char & c){
-      c = std::tolower(c);
-    });
-
-    if (type == "semantic")
-      this->dataPtr->type = rendering::SegmentationType::SEMANTIC;
-    else if (type == "instance" || type == "panoptic")
-      this->dataPtr->type = rendering::SegmentationType::PANOPTIC;
-    else
-    {
-      igndbg << "Wrong type [" << type <<
-        "], type should be semantic or instance or panoptic" << std::endl;
-      return false;
-    }
-  }
-
   // Create the segmentation colored map image publisher
   this->dataPtr->coloredMapPublisher =
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
@@ -265,6 +242,28 @@ bool SegmentationCameraSensor::CreateCamera()
   {
     ignerr << "Unable to access camera SDF element\n";
     return false;
+  }
+
+  // Segmentation type
+  if (sdfCamera->HasSegmentationType())
+  {
+    auto type = sdfCamera->SegmentationType();
+
+    // convert type to lowercase
+    std::for_each(type.begin(), type.end(), [](char & c){
+      c = std::tolower(c);
+    });
+
+    if (type == "semantic")
+      this->dataPtr->type = rendering::SegmentationType::SEMANTIC;
+    else if (type == "instance" || type == "panoptic")
+      this->dataPtr->type = rendering::SegmentationType::PANOPTIC;
+    else
+    {
+      igndbg << "Wrong type [" << type <<
+        "], type should be semantic or instance or panoptic" << std::endl;
+      return false;
+    }
   }
 
   // Camera Info Msg
