@@ -435,10 +435,10 @@ bool BoundingBoxCameraSensor::Update(
       size->set_y(box.size.Y());
       size->set_z(box.size.Z());
 
-      rotation->set_x(box.oreintation.X());
-      rotation->set_y(box.oreintation.Y());
-      rotation->set_z(box.oreintation.Z());
-      rotation->set_w(box.oreintation.W());
+      rotation->set_x(box.orientation.X());
+      rotation->set_y(box.orientation.Y());
+      rotation->set_z(box.orientation.Z());
+      rotation->set_w(box.orientation.W());
 
       oriented3DBox->set_allocated_center(center);
       oriented3DBox->set_allocated_orientation(rotation);

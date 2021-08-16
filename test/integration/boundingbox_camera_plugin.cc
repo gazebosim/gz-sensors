@@ -74,7 +74,7 @@ void OnNewBoundingBoxes(const msgs::AnnotatedAxisAligned2DBox_V &boxes)
     box.center.Y(min_corner.y() + box.size.Y() / 2);
     box.center.Z(0);
 
-    box.oreintation.Set(0, 0, 0, 0);
+    box.orientation.Set(0, 0, 0, 0);
     box.label = annotated_box.label();
     g_boxes.push_back(box);
   }
@@ -99,7 +99,7 @@ void OnNew3DBoundingBoxes(const msgs::AnnotatedOriented3DBox_V &boxes)
       orientedBox.center().z());
     // orientation
     auto orientation = orientedBox.orientation();
-    box.oreintation.Set(orientation.w(), orientation.x(),
+    box.orientation.Set(orientation.w(), orientation.x(),
       orientation.y(), orientation.z());
     // size
     auto boxSize = orientedBox.boxsize();
@@ -166,7 +166,7 @@ void BuildScene(rendering::ScenePtr scene)
   root->AddChild(invisibleBox);
 }
 
-/// \brief Build a scene with 3d oreinted box
+/// \brief Build a scene with 3d oriented box
 void BuildScene3D(rendering::ScenePtr scene)
 {
   rendering::VisualPtr root = scene->RootVisual();
@@ -438,10 +438,10 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   EXPECT_NEAR(box3D.size.Y(), 1, margin_error);
   EXPECT_NEAR(box3D.size.Z(), 1, margin_error);
 
-  EXPECT_NEAR(box3D.oreintation.X(), 0.322329, margin_error);
-  EXPECT_NEAR(box3D.oreintation.Y(), -0.886405, margin_error);
-  EXPECT_NEAR(box3D.oreintation.Z(), -0.0805823, margin_error);
-  EXPECT_NEAR(box3D.oreintation.W(), -0.322329, margin_error);
+  EXPECT_NEAR(box3D.orientation.X(), 0.322329, margin_error);
+  EXPECT_NEAR(box3D.orientation.Y(), -0.886405, margin_error);
+  EXPECT_NEAR(box3D.orientation.Z(), -0.0805823, margin_error);
+  EXPECT_NEAR(box3D.orientation.W(), -0.322329, margin_error);
 
   g_mutex.unlock();
 
