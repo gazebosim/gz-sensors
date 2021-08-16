@@ -6,6 +6,7 @@ set (sources
   PointCloudUtil.cc
   SensorFactory.cc
   SensorTypes.cc
+  Util.cc
 )
 
 set(rendering_sources
@@ -19,6 +20,7 @@ set (gtest_sources
   Manager_TEST.cc
   Noise_TEST.cc
   Sensor_TEST.cc
+  Util_TEST.cc
 )
 
 if (MSVC)
@@ -151,18 +153,3 @@ ign_build_tests(TYPE UNIT SOURCES Lidar_TEST.cc LIB_DEPS ${lidar_target})
 ign_build_tests(TYPE UNIT SOURCES Camera_TEST.cc LIB_DEPS ${camera_target})
 ign_build_tests(TYPE UNIT SOURCES ImuSensor_TEST.cc LIB_DEPS ${imu_target})
 
-set(plugin_test_targets)
-list(APPEND plugin_test_targets "UNIT_Camera_TEST")
-list(APPEND plugin_test_targets "UNIT_Lidar_TEST")
-list(APPEND plugin_test_targets "UNIT_ImuSensor_TEST")
-
-foreach(plugin_test ${plugin_test_targets})
-  if(TARGET ${plugin_test})
-    set(_env_vars)
-    list(APPEND _env_vars "IGN_PLUGIN_PATH=$<TARGET_FILE_DIR:${camera_target}>")
-    list(APPEND _env_vars "DYLD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-
-    set_tests_properties(${plugin_test} PROPERTIES
-      ENVIRONMENT "${_env_vars}")
-  endif()
-endforeach()

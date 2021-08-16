@@ -20,14 +20,14 @@
 #include <sdf/sdf.hh>
 
 #include <ignition/math/Helpers.hh>
-#include <ignition/sensors/AirPressureSensor.hh>
+#include <ignition/sensors/AltimeterSensor.hh>
 #include <ignition/sensors/SensorFactory.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
-/// \brief Helper function to create an air pressure sdf element
-sdf::ElementPtr AirPressureToSdf(const std::string &_name,
+/// \brief Helper function to create an altimeter sdf element
+sdf::ElementPtr AltimeterToSdf(const std::string &_name,
     const ignition::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
     const bool _visualize)
@@ -38,7 +38,7 @@ sdf::ElementPtr AirPressureToSdf(const std::string &_name,
     << "<sdf version='1.6'>"
     << " <model name='m1'>"
     << "  <link name='link1'>"
-    << "    <sensor name='" << _name << "' type='air_pressure'>"
+    << "    <sensor name='" << _name << "' type='altimeter'>"
     << "      <pose>" << _pose << "</pose>"
     << "      <topic>" << _topic << "</topic>"
     << "      <update_rate>"<< _updateRate <<"</update_rate>"
@@ -58,8 +58,8 @@ sdf::ElementPtr AirPressureToSdf(const std::string &_name,
     ->GetElement("sensor");
 }
 
-/// \brief Helper function to create an air pressure sdf element with noise
-sdf::ElementPtr AirPressureToSdfWithNoise(const std::string &_name,
+/// \brief Helper function to create an altimeter sdf element with noise
+sdf::ElementPtr AltimeterToSdfWithNoise(const std::string &_name,
     const ignition::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
     const bool _visualize, double _mean, double _stddev, double _bias)
@@ -70,21 +70,28 @@ sdf::ElementPtr AirPressureToSdfWithNoise(const std::string &_name,
     << "<sdf version='1.6'>"
     << " <model name='m1'>"
     << "  <link name='link1'>"
-    << "    <sensor name='" << _name << "' type='air_pressure'>"
+    << "    <sensor name='" << _name << "' type='altimeter'>"
     << "      <pose>" << _pose << "</pose>"
     << "      <topic>" << _topic << "</topic>"
     << "      <update_rate>"<< _updateRate <<"</update_rate>"
     << "      <alwaysOn>" << _alwaysOn <<"</alwaysOn>"
     << "      <visualize>" << _visualize << "</visualize>"
-    << "      <air_pressure>"
-    << "        <pressure>"
+    << "      <altimeter>"
+    << "        <vertical_position>"
     << "          <noise type='gaussian'>"
     << "            <mean>" << _mean << "</mean>"
     << "            <stddev>" << _stddev << "</stddev>"
     << "            <bias_mean>" << _bias << "</bias_mean>"
     << "          </noise>"
-    << "        </pressure>"
-    << "      </air_pressure>"
+    << "        </vertical_position>"
+    << "        <vertical_velocity>"
+    << "          <noise type='gaussian'>"
+    << "            <mean>" << _mean << "</mean>"
+    << "            <stddev>" << _stddev << "</stddev>"
+    << "            <bias_mean>" << _bias << "</bias_mean>"
+    << "          </noise>"
+    << "        </vertical_velocity>"
+    << "      </altimeter>"
     << "    </sensor>"
     << "  </link>"
     << " </model>"
@@ -99,8 +106,8 @@ sdf::ElementPtr AirPressureToSdfWithNoise(const std::string &_name,
     ->GetElement("sensor");
 }
 
-/// \brief Test air pressure sensor
-class AirPressureSensorTest: public testing::Test
+/// \brief Test altimeter sensor
+class AltimeterSensorTest: public testing::Test
 {
   // Documentation inherited
   protected: void SetUp() override
@@ -110,12 +117,12 @@ class AirPressureSensorTest: public testing::Test
 };
 
 /////////////////////////////////////////////////
-TEST_F(AirPressureSensorTest, CreateAirPressure)
+TEST_F(AltimeterSensorTest, CreateAltimeter)
 {
-  // Create SDF describing an air_pressure sensor
-  const std::string name = "TestAirPressure";
-  const std::string topic = "/ignition/sensors/test/air_pressure";
-  const std::string topicNoise = "/ignition/sensors/test/air_pressure_noise";
+  // Create SDF describing an altimeter sensor
+  const std::string name = "TestAltimeter";
+  const std::string topic = "/ignition/sensors/test/altimeter";
+  const std::string topicNoise = "/ignition/sensors/test/altimeter_noise";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
@@ -123,25 +130,24 @@ TEST_F(AirPressureSensorTest, CreateAirPressure)
   // Create sensor SDF
   ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
       ignition::math::Quaterniond::Identity);
-  sdf::ElementPtr airPressureSdf = AirPressureToSdf(name, sensorPose,
+  sdf::ElementPtr altimeterSdf = AltimeterToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
-  sdf::ElementPtr airPressureSdfNoise = AirPressureToSdfWithNoise(name,
-      sensorPose, updateRate, topicNoise, alwaysOn, visualize, 1.0, 0.2, 10.0);
+  sdf::ElementPtr altimeterSdfNoise = AltimeterToSdfWithNoise(name, sensorPose,
+        updateRate, topicNoise, alwaysOn, visualize, 1.0, 0.2, 10.0);
 
   // create the sensor using sensor factory
   ignition::sensors::SensorFactory sf;
-  std::unique_ptr<ignition::sensors::AirPressureSensor> sensor =
-      sf.CreateSensor<ignition::sensors::AirPressureSensor>(airPressureSdf);
+  std::unique_ptr<ignition::sensors::AltimeterSensor> sensor =
+      sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdf);
   ASSERT_NE(nullptr, sensor);
 
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(topic, sensor->Topic());
   EXPECT_DOUBLE_EQ(updateRate, sensor->UpdateRate());
 
-  std::unique_ptr<ignition::sensors::AirPressureSensor> sensorNoise =
-      sf.CreateSensor<ignition::sensors::AirPressureSensor>(
-          airPressureSdfNoise);
+  std::unique_ptr<ignition::sensors::AltimeterSensor> sensorNoise =
+      sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdfNoise);
   ASSERT_NE(nullptr, sensorNoise);
 
   EXPECT_EQ(name, sensorNoise->Name());
@@ -150,12 +156,12 @@ TEST_F(AirPressureSensorTest, CreateAirPressure)
 }
 
 /////////////////////////////////////////////////
-TEST_F(AirPressureSensorTest, SensorReadings)
+TEST_F(AltimeterSensorTest, SensorReadings)
 {
-  // Create SDF describing an air_pressure sensor
-  const std::string name = "TestAirPressure";
-  const std::string topic = "/ignition/sensors/test/air_pressure";
-  const std::string topicNoise = "/ignition/sensors/test/air_pressure_noise";
+  // Create SDF describing an altimeter sensor
+  const std::string name = "TestAltimeter";
+  const std::string topic = "/ignition/sensors/test/altimeter";
+  const std::string topicNoise = "/ignition/sensors/test/altimeter_noise";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
@@ -163,74 +169,88 @@ TEST_F(AirPressureSensorTest, SensorReadings)
   // Create sensor SDF
   ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
       ignition::math::Quaterniond::Identity);
-  sdf::ElementPtr airPressureSdf = AirPressureToSdf(name, sensorPose,
+  sdf::ElementPtr altimeterSdf = AltimeterToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
-  sdf::ElementPtr airPressureSdfNoise = AirPressureToSdfWithNoise(name,
-      sensorPose, updateRate, topicNoise, alwaysOn, visualize, 1.0, 0.2, 10.0);
+  sdf::ElementPtr altimeterSdfNoise = AltimeterToSdfWithNoise(name, sensorPose,
+        updateRate, topicNoise, alwaysOn, visualize, 1.0, 0.2, 10.0);
 
   // create the sensor using sensor factory
   // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
-  std::unique_ptr<ignition::sensors::Sensor> s =
-      sf.CreateSensor(airPressureSdf);
-  std::unique_ptr<ignition::sensors::AirPressureSensor> sensor(
-      dynamic_cast<ignition::sensors::AirPressureSensor *>(s.release()));
-
-  // Make sure the above dynamic cast worked.
+  auto sensor =
+      sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdf);
   ASSERT_NE(nullptr, sensor);
 
-  std::unique_ptr<ignition::sensors::Sensor> sNoise =
-      sf.CreateSensor(airPressureSdfNoise);
-  std::unique_ptr<ignition::sensors::AirPressureSensor> sensorNoise(
-      dynamic_cast<ignition::sensors::AirPressureSensor *>(sNoise.release()));
-
-  // Make sure the above dynamic cast worked.
+  auto sensorNoise =
+      sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdfNoise);
   ASSERT_NE(nullptr, sensorNoise);
 
   // verify initial readings
-  EXPECT_DOUBLE_EQ(0.0, sensor->ReferenceAltitude());
+  EXPECT_DOUBLE_EQ(0.0, sensor->VerticalReference());
+  EXPECT_DOUBLE_EQ(0.0, sensor->VerticalVelocity());
+  EXPECT_DOUBLE_EQ(0.0, sensor->VerticalPosition());
 
   // verify initial readings
-  EXPECT_DOUBLE_EQ(0.0, sensorNoise->ReferenceAltitude());
+  EXPECT_DOUBLE_EQ(0.0, sensorNoise->VerticalReference());
+  EXPECT_DOUBLE_EQ(0.0, sensorNoise->VerticalVelocity());
+  EXPECT_DOUBLE_EQ(0.0, sensorNoise->VerticalPosition());
 
   // set state and verify readings
   double vertRef = 1.0;
-  sensor->SetReferenceAltitude(vertRef);
-  sensorNoise->SetReferenceAltitude(vertRef);
-  EXPECT_DOUBLE_EQ(vertRef, sensor->ReferenceAltitude());
-  EXPECT_DOUBLE_EQ(vertRef, sensorNoise->ReferenceAltitude());
+  sensor->SetVerticalReference(vertRef);
+  sensorNoise->SetVerticalReference(vertRef);
+  EXPECT_DOUBLE_EQ(vertRef, sensor->VerticalReference());
+  EXPECT_DOUBLE_EQ(vertRef, sensorNoise->VerticalReference());
 
-  sensor->SetPose(sensorNoise->Pose() +
-      ignition::math::Pose3d(0, 0, 1.5, 0, 0, 0));
+  double pos = 2.0;
+  sensor->SetPosition(pos);
+  sensorNoise->SetPosition(pos);
+  EXPECT_DOUBLE_EQ(pos - vertRef, sensor->VerticalPosition());
+  EXPECT_DOUBLE_EQ(pos - vertRef, sensorNoise->VerticalPosition());
+
+  double vertVel = 3.0;
+  sensor->SetVerticalVelocity(vertVel);
+  sensorNoise->SetVerticalVelocity(vertVel);
+  EXPECT_DOUBLE_EQ(vertVel, sensor->VerticalVelocity());
+  EXPECT_DOUBLE_EQ(vertVel, sensorNoise->VerticalVelocity());
+
+  pos = -6.0;
+  sensor->SetPosition(pos);
+  sensorNoise->SetPosition(pos);
+  EXPECT_DOUBLE_EQ(pos - vertRef, sensor->VerticalPosition());
+  EXPECT_DOUBLE_EQ(pos - vertRef, sensorNoise->VerticalPosition());
 
   // verify msg received on the topic
-  WaitForMessageTestHelper<ignition::msgs::FluidPressure> msgHelper(topic);
+  WaitForMessageTestHelper<ignition::msgs::Altimeter> msgHelper(topic);
   sensor->Update(std::chrono::steady_clock::duration(std::chrono::seconds(1)));
   EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
   auto msg = msgHelper.Message();
   EXPECT_EQ(1, msg.header().stamp().sec());
   EXPECT_EQ(0, msg.header().stamp().nsec());
-  EXPECT_DOUBLE_EQ(101288.9657925308, msg.pressure());
-  EXPECT_DOUBLE_EQ(0.0, msg.variance());
+  EXPECT_DOUBLE_EQ(vertRef, msg.vertical_reference());
+  EXPECT_DOUBLE_EQ(pos - vertRef, msg.vertical_position());
+  EXPECT_DOUBLE_EQ(vertVel, msg.vertical_velocity());
 
   // verify msg with noise received on the topic
-  WaitForMessageTestHelper<ignition::msgs::FluidPressure>
+  WaitForMessageTestHelper<ignition::msgs::Altimeter>
     msgHelperNoise(topicNoise);
   sensorNoise->Update(std::chrono::steady_clock::duration(
-      std::chrono::seconds(1)));
+    std::chrono::seconds(1)));
   EXPECT_TRUE(msgHelperNoise.WaitForMessage()) << msgHelperNoise;
   auto msgNoise = msgHelperNoise.Message();
   EXPECT_EQ(1, msg.header().stamp().sec());
   EXPECT_EQ(0, msg.header().stamp().nsec());
-  EXPECT_FALSE(ignition::math::equal(101288.9657925308, msgNoise.pressure()));
-  EXPECT_DOUBLE_EQ(sqrt(0.2), msgNoise.variance());
+  EXPECT_DOUBLE_EQ(vertRef, msgNoise.vertical_reference());
+  EXPECT_FALSE(ignition::math::equal(pos - vertRef,
+        msgNoise.vertical_position()));
+  EXPECT_FALSE(ignition::math::equal(vertVel, msgNoise.vertical_velocity()));
 }
 
 /////////////////////////////////////////////////
-TEST_F(AirPressureSensorTest, Topic)
+TEST_F(AltimeterSensorTest, Topic)
 {
-  const std::string name = "TestAirPressure";
+  const std::string name = "TestAltimeter";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
@@ -242,42 +262,37 @@ TEST_F(AirPressureSensorTest, Topic)
   // Default topic
   {
     const std::string topic;
-    auto airPressureSdf = AirPressureToSdf(name, sensorPose,
+    auto altimeterSdf = AltimeterToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(airPressureSdf);
-    EXPECT_NE(nullptr, sensor);
+    auto altimeter = factory.CreateSensor<
+        ignition::sensors::AltimeterSensor>(altimeterSdf);
+    ASSERT_NE(nullptr, altimeter);
 
-    auto airPressure =
-        dynamic_cast<ignition::sensors::AirPressureSensor *>(sensor.release());
-    ASSERT_NE(nullptr, airPressure);
-
-    EXPECT_EQ("/air_pressure", airPressure->Topic());
+    EXPECT_EQ("/altimeter", altimeter->Topic());
   }
 
   // Convert to valid topic
   {
     const std::string topic = "/topic with spaces/@~characters//";
-    auto airPressureSdf = AirPressureToSdf(name, sensorPose,
+    auto altimeterSdf = AltimeterToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(airPressureSdf);
-    EXPECT_NE(nullptr, sensor);
+    auto altimeter = factory.CreateSensor<
+        ignition::sensors::AltimeterSensor>(altimeterSdf);
+    ASSERT_NE(nullptr, altimeter);
 
-    auto airPressure =
-        dynamic_cast<ignition::sensors::AirPressureSensor *>(sensor.release());
-    ASSERT_NE(nullptr, airPressure);
-
-    EXPECT_EQ("/topic_with_spaces/characters", airPressure->Topic());
+    EXPECT_EQ("/topic_with_spaces/characters", altimeter->Topic());
   }
 
   // Invalid topic
   {
     const std::string topic = "@@@";
-    auto airPressureSdf = AirPressureToSdf(name, sensorPose,
+    auto altimeterSdf = AltimeterToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor(airPressureSdf);
+    auto sensor = factory.CreateSensor<
+        ignition::sensors::AltimeterSensor>(altimeterSdf);
     ASSERT_EQ(nullptr, sensor);
   }
 }

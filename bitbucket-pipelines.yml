@@ -24,7 +24,6 @@ pipelines:
             libignition-math6-dev
             libignition-msgs5-dev
             libignition-tools-dev
-            libignition-plugin-dev
             libignition-transport8-dev
             libsdformat9-dev
           #  libignition-rendering3-dev

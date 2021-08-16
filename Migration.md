@@ -5,6 +5,37 @@ Deprecated code produces compile-time warnings. These warning serve as
 notification to users that their code should be upgraded. The next major
 release will remove the deprecated code.
 
+## Ignition Sensors 5.X to 6.X
+
+1. Sensors aren't loaded as plugins anymore. Instead, downstream libraries must
+   link to the library of the sensor they're interested in, and instantiate
+   new sensors knowing their type. For example:
+
+    * `auto camera = std::make_unique<ignition::sensors::CameraSensor>();`
+    * `auto camera = sensorFactory.CreateSensor<ignition::sensors::CameraSensor>(_sdf);`
+    * `auto camera = manager.CreateSensor<ignition::sensors::CameraSensor>(_sdf);`
+
+1. **include/sensors/SensorFactory.hh**
+   + ***Deprecation*** SensorPlugin
+   + ***Replacement*** None; see above.
+   + ***Deprecation*** SensorTypePlugin
+   + ***Replacement*** None; see above.
+   + ***Deprecation*** std::unique_ptr<Sensor> CreateSensor(sdf::ElementPtr);
+   + ***Replacement*** template<typename SensorType> std::unique_ptr<SensorType> CreateSensor(sdf::ElementPtr);
+   + ***Deprecation*** std::unique_ptr<Sensor> CreateSensor(const sdf::Sensor &);
+   + ***Replacement*** template<typename SensorType> std::unique_ptr<SensorType> CreateSensor(const sdf::Sensor &);
+   + ***Deprecation*** void AddPluginPaths(const std::string &)
+   + ***Replacement*** None; see above.
+   + ***Deprecation*** IGN_SENSORS_REGISTER_SENSOR
+   + ***Replacement*** None; see above.
+
+1. **include/sensors/Manager.hh**
+   + ***Deprecation*** SensorId CreateSensor(sdf::ElementPtr);
+   + ***Replacement*** template<typename SensorType, typename SdfType> SensorType> \*CreateSensor(SdfType);
+   + ***Deprecation*** SensorId CreateSensor(const sdf::Sensor &);
+   + ***Replacement*** template<typename SensorType, typename SdfType> SensorType \*CreateSensor(SdfType);
+   + ***Deprecation*** void AddPluginPaths(const std::string &)
+   + ***Replacement*** None; see above.
 
 ## Ignition Sensors 3.X to 4.X
 

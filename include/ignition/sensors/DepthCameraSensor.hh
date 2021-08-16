@@ -24,7 +24,6 @@
 #include <sdf/sdf.hh>
 
 #include <ignition/common/Event.hh>
-#include <ignition/common/PluginMacros.hh>
 #include <ignition/common/SuppressWarning.hh>
 
 #ifdef _WIN32

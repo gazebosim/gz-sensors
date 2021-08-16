@@ -90,7 +90,7 @@ conda activate ign-ws
 Install Ignition dependencies, replacing `<#>` with the desired versions:
 
 ```
-conda install libignition-cmake<#> libignition-common<#> libignition-math<#> libignition-transport<#> libignition-msgs<#> libignition-plugin<#> --channel conda-forge
+conda install libignition-cmake<#> libignition-common<#> libignition-math<#> libignition-transport<#> libignition-msgs<#> --channel conda-forge
 ```
 
 Before [ign-rendering](https://github.com/ignitionrobotics/ign-rendering) becomes available on conda-forge, follow its tutorial to build it from source.

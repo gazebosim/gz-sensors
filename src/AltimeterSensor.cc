@@ -212,4 +212,3 @@ double AltimeterSensor::VerticalVelocity() const
   return this->dataPtr->verticalVelocity;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(AltimeterSensor)

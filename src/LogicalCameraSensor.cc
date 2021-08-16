@@ -19,11 +19,9 @@
 
 #include <ignition/common/Console.hh>
 #include <ignition/common/Profiler.hh>
-
-#include <ignition/transport/Node.hh>
-
 #include <ignition/math/Frustum.hh>
 #include <ignition/math/Helpers.hh>
+#include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/LogicalCameraSensor.hh"
@@ -202,4 +200,3 @@ msgs::LogicalCameraImage LogicalCameraSensor::Image() const
   return this->dataPtr->msg;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(LogicalCameraSensor)

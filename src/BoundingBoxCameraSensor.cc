@@ -520,5 +520,3 @@ unsigned int BoundingBoxCameraSensor::ImageWidth() const
 {
   return this->dataPtr->rgbCamera->ImageWidth();
 }
-
-IGN_SENSORS_REGISTER_SENSOR(BoundingBoxCameraSensor)

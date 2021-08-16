@@ -231,4 +231,3 @@ math::Vector3d MagnetometerSensor::MagneticField() const
   return this->dataPtr->localField;
 }
 
-IGN_SENSORS_REGISTER_SENSOR(MagnetometerSensor)

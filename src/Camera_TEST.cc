@@ -185,15 +185,9 @@ TEST(Camera_TEST, Topic)
     auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
         visualize);
 
-    auto sensorId = mgr.CreateSensor(cameraSdf);
-    EXPECT_NE(ignition::sensors::NO_SENSOR, sensorId);
-
-    auto sensor = mgr.Sensor(sensorId);
-    EXPECT_NE(nullptr, sensor);
-
-    auto camera = dynamic_cast<ignition::sensors::CameraSensor *>(sensor);
+    auto camera = mgr.CreateSensor<ignition::sensors::CameraSensor>(cameraSdf);
     ASSERT_NE(nullptr, camera);
-
+    EXPECT_NE(ignition::sensors::NO_SENSOR, camera->Id());
     EXPECT_EQ("/camera", camera->Topic());
   }
 
@@ -203,14 +197,9 @@ TEST(Camera_TEST, Topic)
     auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
         visualize);
 
-    auto sensorId = mgr.CreateSensor(cameraSdf);
-    EXPECT_NE(ignition::sensors::NO_SENSOR, sensorId);
-
-    auto sensor = mgr.Sensor(sensorId);
-    EXPECT_NE(nullptr, sensor);
-
-    auto camera = dynamic_cast<ignition::sensors::CameraSensor *>(sensor);
+    auto camera = mgr.CreateSensor<ignition::sensors::CameraSensor>(cameraSdf);
     ASSERT_NE(nullptr, camera);
+    EXPECT_NE(ignition::sensors::NO_SENSOR, camera->Id());
 
     EXPECT_EQ("/topic_with_spaces/characters", camera->Topic());
   }
@@ -221,8 +210,8 @@ TEST(Camera_TEST, Topic)
     auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
         visualize);
 
-    auto sensorId = mgr.CreateSensor(cameraSdf);
-    EXPECT_EQ(ignition::sensors::NO_SENSOR, sensorId);
+    auto sensor = mgr.CreateSensor<ignition::sensors::CameraSensor>(cameraSdf);
+    EXPECT_EQ(nullptr, sensor);
   }
 }
 
