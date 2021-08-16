@@ -132,9 +132,9 @@ bool ForceTorqueSensor::Load(const sdf::Sensor &_sdf)
     {FORCE_X_NOISE_N, _sdf.ForceTorqueSensor()->ForceXNoise()},
     {FORCE_Y_NOISE_N, _sdf.ForceTorqueSensor()->ForceYNoise()},
     {FORCE_Z_NOISE_N, _sdf.ForceTorqueSensor()->ForceZNoise()},
-    {TORQUE_X_NOISE_N, _sdf.ForceTorqueSensor()->TorqueXNoise()},
-    {TORQUE_Y_NOISE_N, _sdf.ForceTorqueSensor()->TorqueYNoise()},
-    {TORQUE_Z_NOISE_N, _sdf.ForceTorqueSensor()->TorqueZNoise()},
+    {TORQUE_X_NOISE_N_M, _sdf.ForceTorqueSensor()->TorqueXNoise()},
+    {TORQUE_Y_NOISE_N_M, _sdf.ForceTorqueSensor()->TorqueYNoise()},
+    {TORQUE_Z_NOISE_N_M, _sdf.ForceTorqueSensor()->TorqueZNoise()},
   };
 
   for (const auto & [noiseType, noiseSdf] : noises)
