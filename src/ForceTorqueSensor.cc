@@ -71,6 +71,9 @@ class ignition::sensors::ForceTorqueSensorPrivate
   /// \brief Previous update time step.
   public: std::chrono::steady_clock::duration prevStep
     {std::chrono::steady_clock::duration::zero()};
+
+  /// \brief Noise added to sensor data
+  public: std::map<SensorNoiseType, NoisePtr> noises;
 };
 
 //////////////////////////////////////////////////
@@ -113,9 +116,6 @@ bool ForceTorqueSensor::Load(const sdf::Sensor &_sdf)
   this->dataPtr->measureFrame = _sdf.ForceTorqueSensor()->Frame();
   this->dataPtr->measureDirection = _sdf.ForceTorqueSensor()->MeasureDirection();
 
-  
-
-
   if (this->Topic().empty())
     this->SetTopic("/forcetorque");
 
@@ -126,6 +126,23 @@ bool ForceTorqueSensor::Load(const sdf::Sensor &_sdf)
   {
     ignerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
     return false;
+  }
+
+  const std::map<SensorNoiseType, sdf::Noise> noises = {
+    {FORCE_X_NOISE_N, _sdf.ForceTorqueSensor()->ForceXNoise()},
+    {FORCE_Y_NOISE_N, _sdf.ForceTorqueSensor()->ForceYNoise()},
+    {FORCE_Z_NOISE_N, _sdf.ForceTorqueSensor()->ForceZNoise()},
+    {TORQUE_X_NOISE_N, _sdf.ForceTorqueSensor()->TorqueXNoise()},
+    {TORQUE_Y_NOISE_N, _sdf.ForceTorqueSensor()->TorqueYNoise()},
+    {TORQUE_Z_NOISE_N, _sdf.ForceTorqueSensor()->TorqueZNoise()},
+  };
+
+  for (const auto & [noiseType, noiseSdf] : noises)
+  {
+    if (noiseSdf.Type() != sdf::NoiseType::NONE)
+    {
+      this->dataPtr->noises[noiseType] = NoiseFactory::NewNoiseModel(noiseSdf);
+    }
   }
 
   this->dataPtr->initialized = true;
@@ -175,6 +192,21 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     dt = 0.0;
   }
+
+  // Convenience method to apply noise to a channel, if present.
+  auto applyNoise = [&](SensorNoiseType noiseType, double & value)
+  {
+    if (this->dataPtr->noises.find(noiseType) != this->dataPtr->noises.end()) {
+      value = this->dataPtr->noises[noiseType]->Apply(value, dt);
+    }
+  };
+
+  applyNoise(FORCE_X_NOISE_N, this->dataPtr->force.X());
+  applyNoise(FORCE_Y_NOISE_N, this->dataPtr->force.Y());
+  applyNoise(FORCE_Z_NOISE_N, this->dataPtr->force.Z());
+  applyNoise(TORQUE_X_NOISE_N_M, this->dataPtr->torque.X());
+  applyNoise(TORQUE_Y_NOISE_N_M, this->dataPtr->torque.Y());
+  applyNoise(TORQUE_Z_NOISE_N_M, this->dataPtr->torque.Z());
 
   msgs::Wrench msg;
   *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
