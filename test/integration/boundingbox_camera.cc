@@ -31,7 +31,6 @@
 #include "TransportTestTools.hh"
 
 using namespace ignition;
-using namespace rendering;
 
 class BoundingBoxCameraSensorTest: public testing::Test,
   public testing::WithParamInterface<const char *>
@@ -39,29 +38,29 @@ class BoundingBoxCameraSensorTest: public testing::Test,
   // Create a BoundingBox Camera sensor from a SDF and gets a boxes message
   public: void BoxesWithBuiltinSDF(const std::string &_renderEngine);
 
-  public: void Boxes3DWithBuiltinSDF(const std::string &renderEngine);
+  public: void Boxes3DWithBuiltinSDF(const std::string &_renderEngine);
 };
 
 /// \brief mutex for thread safety
 std::mutex g_mutex;
 
 /// \brief bounding boxes from the camera
-std::vector<BoundingBox> g_boxes;
+std::vector<rendering::BoundingBox> g_boxes;
 
 /// \brief counter of received boundingboxes msg
 int g_counter = 0;
 
 /// \brief callback to receive 2d boxes from the camera
-void OnNewBoundingBoxes(const msgs::AnnotatedAxisAligned2DBox_V &boxes)
+void OnNewBoundingBoxes(const msgs::AnnotatedAxisAligned2DBox_V &_boxes)
 {
   g_mutex.lock();
   g_boxes.clear();
 
-  int size = boxes.annotated_box_size();
-  for (int i = 0; i < size; i++)
+  int size = _boxes.annotated_box_size();
+  for (int i = 0; i < size; ++i)
   {
-    BoundingBox box(BoundingBoxType::VisibleBox2D);
-    auto annotated_box = boxes.annotated_box(i);
+    rendering::BoundingBox box(rendering::BoundingBoxType::VisibleBox2D);
+    auto annotated_box = _boxes.annotated_box(i);
     auto axisAlignedBox = annotated_box.box();
     auto min_corner = axisAlignedBox.min_corner();
     auto max_corner = axisAlignedBox.max_corner();
@@ -83,16 +82,16 @@ void OnNewBoundingBoxes(const msgs::AnnotatedAxisAligned2DBox_V &boxes)
 }
 
 /// \brief callback to receive 3D boxes from the camera
-void OnNew3DBoundingBoxes(const msgs::AnnotatedOriented3DBox_V &boxes)
+void OnNew3DBoundingBoxes(const msgs::AnnotatedOriented3DBox_V &_boxes)
 {
   g_mutex.lock();
   g_boxes.clear();
 
-  int size = boxes.annotated_box_size();
-  for (int i = 0; i < size; i++)
+  int size = _boxes.annotated_box_size();
+  for (int i = 0; i < size; ++i)
   {
-    BoundingBox box(BoundingBoxType::Box3D);
-    auto annotated_box = boxes.annotated_box(i);
+    rendering::BoundingBox box(rendering::BoundingBoxType::Box3D);
+    auto annotated_box = _boxes.annotated_box(i);
     auto orientedBox = annotated_box.box();
     // center
     box.center.Set(orientedBox.center().x(), orientedBox.center().y(),
@@ -129,19 +128,20 @@ void WaitForNewFrame()
   EXPECT_GT(counter, 0);
 }
 
-/// \brief Build a scene with 3 boxes 2 overlapping boxes which 1
-/// is behind the other, and the 3rd box is invisible behind them
-void BuildScene(rendering::ScenePtr scene)
+/// \brief Build a scene with 3 overlapping boxes - one box will be fully visible,
+/// another box will be partially visible, and the last box won't be visible
+/// (it's occluded by the other 2 boxes)
+void BuildScene2d(rendering::ScenePtr _scene)
 {
   math::Vector3d occludedPosition(4, 1, 0);
   math::Vector3d frontPosition(2, 0, 0);
   math::Vector3d invisiblePosition(5, 0, 0);
 
-  rendering::VisualPtr root = scene->RootVisual();
+  rendering::VisualPtr root = _scene->RootVisual();
 
   // create front box visual (the smaller box)
-  rendering::VisualPtr occludedBox = scene->CreateVisual();
-  occludedBox->AddGeometry(scene->CreateBox());
+  rendering::VisualPtr occludedBox = _scene->CreateVisual();
+  occludedBox->AddGeometry(_scene->CreateBox());
   occludedBox->SetOrigin(0.0, 0.0, 0.0);
   occludedBox->SetLocalPosition(occludedPosition);
   occludedBox->SetLocalRotation(0, 0, 0);
@@ -149,16 +149,16 @@ void BuildScene(rendering::ScenePtr scene)
   root->AddChild(occludedBox);
 
   // create occluded box visual (the bigger box)
-  rendering::VisualPtr frontBox = scene->CreateVisual();
-  frontBox->AddGeometry(scene->CreateBox());
+  rendering::VisualPtr frontBox = _scene->CreateVisual();
+  frontBox->AddGeometry(_scene->CreateBox());
   frontBox->SetOrigin(0.0, 0.0, 0.0);
   frontBox->SetLocalPosition(frontPosition);
   frontBox->SetLocalRotation(0, 0, 0);
   frontBox->SetUserData("label", 2);
   root->AddChild(frontBox);
 
-  rendering::VisualPtr invisibleBox = scene->CreateVisual();
-  invisibleBox->AddGeometry(scene->CreateBox());
+  rendering::VisualPtr invisibleBox = _scene->CreateVisual();
+  invisibleBox->AddGeometry(_scene->CreateBox());
   invisibleBox->SetOrigin(0.0, 0.0, 0.0);
   invisibleBox->SetLocalPosition(invisiblePosition);
   invisibleBox->SetLocalRotation(0, 0, 0);
@@ -167,13 +167,13 @@ void BuildScene(rendering::ScenePtr scene)
 }
 
 /// \brief Build a scene with 3d oriented box
-void BuildScene3D(rendering::ScenePtr scene)
+void BuildScene3D(rendering::ScenePtr _scene)
 {
-  rendering::VisualPtr root = scene->RootVisual();
+  rendering::VisualPtr root = _scene->RootVisual();
 
   // create front box visual (the smaller box)
-  rendering::VisualPtr box = scene->CreateVisual();
-  box->AddGeometry(scene->CreateBox());
+  rendering::VisualPtr box = _scene->CreateVisual();
+  box->AddGeometry(_scene->CreateBox());
   box->SetOrigin(0.0, 0.0, 0.0);
   box->SetLocalPosition(math::Vector3d(2, 0, 0));
   box->SetLocalRotation(math::Quaternion(1.0, 0.5, 0.5, 0.2));
@@ -218,7 +218,7 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
   }
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
-  BuildScene(scene);
+  BuildScene2d(scene);
 
   ignition::sensors::Manager mgr;
 
@@ -228,25 +228,25 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
   std::string type = sdfSensor.TypeStr();
   EXPECT_EQ(type, "boundingbox_camera");
 
-  ignition::sensors::BoundingBoxCameraSensor *sensor =
+  auto *sensor =
     mgr.CreateSensor<ignition::sensors::BoundingBoxCameraSensor>(sdfSensor);
 
-  EXPECT_NE(sensor, nullptr);
+  ASSERT_NE(sensor, nullptr);
   sensor->SetScene(scene);
 
   EXPECT_EQ(width, sensor->ImageWidth());
   EXPECT_EQ(height, sensor->ImageHeight());
 
   auto camera = sensor->BoundingBoxCamera();
-  EXPECT_NE(camera, nullptr);
+  ASSERT_NE(camera, nullptr);
 
   camera->SetLocalPosition(0.0, 0.0, 0.0);
   camera->SetLocalRotation(0.0, 0.0, 0.0);
   camera->SetAspectRatio(1.333);
   camera->SetHFOV(IGN_PI / 2);
-  camera->SetBoundingBoxType(BoundingBoxType::VisibleBox2D);
+  camera->SetBoundingBoxType(rendering::BoundingBoxType::VisibleBox2D);
 
-  EXPECT_EQ(camera->Type(), BoundingBoxType::VisibleBox2D);
+  EXPECT_EQ(camera->Type(), rendering::BoundingBoxType::VisibleBox2D);
   EXPECT_EQ(camera->ImageWidth(), width);
   EXPECT_EQ(camera->ImageHeight(), height);
 
@@ -267,21 +267,21 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
 
   // wait for a few BoundingBox camera boxes
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
-  // wait for a new boxes
+  // wait for a new box
   WaitForNewFrame();
 
   // accepted error with +/- in pixels in comparing the box coordinates
-  double margin_error = 1;
+  double margin_error = 1.0;
 
   // Visible box test
   g_mutex.lock();
   g_counter = 0;
 
-  // check if the invisible 3rd box is not exist
+  // check that the invisible 3rd box does not exist
   EXPECT_EQ(g_boxes.size(), size_t(2));
 
-  BoundingBox occludedBox = g_boxes[0];
-  BoundingBox frontBox = g_boxes[1];
+  rendering::BoundingBox occludedBox = g_boxes[0];
+  rendering::BoundingBox frontBox = g_boxes[1];
 
   unsigned int occludedLabel = 1;
   unsigned int frontLabel = 2;
@@ -302,7 +302,7 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
   g_mutex.unlock();
 
   // Full Boxes Type Test
-  camera->SetBoundingBoxType(BoundingBoxType::FullBox2D);
+  camera->SetBoundingBoxType(rendering::BoundingBoxType::FullBox2D);
 
   // wait for bounding boxes
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
@@ -314,8 +314,8 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
 
   // check the hidden box
   EXPECT_EQ(g_boxes.size(), size_t(2));
-  BoundingBox occludedFullBox = g_boxes[0];
-  BoundingBox frontFullBox = g_boxes[1];
+  rendering::BoundingBox occludedFullBox = g_boxes[0];
+  rendering::BoundingBox frontFullBox = g_boxes[1];
 
   // coordinates of partially occluded object is bigger
   EXPECT_NEAR(occludedFullBox.center.X(), 116, margin_error);
@@ -357,6 +357,9 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   auto cameraPtr = sensorPtr->GetElement("camera");
   ASSERT_TRUE(cameraPtr->HasElement("image"));
   auto imagePtr = cameraPtr->GetElement("image");
+  ASSERT_TRUE(sensorPtr->HasElement("box_type"));
+  std::string boxType = sensorPtr->Get<std::string>("box_type");
+  ASSERT_EQ(boxType, "3d");
 
   unsigned int width = imagePtr->Get<int>("width");
   unsigned int height = imagePtr->Get<int>("height");
@@ -384,23 +387,23 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   std::string type = sdfSensor.TypeStr();
   EXPECT_EQ(type, "boundingbox_camera");
 
-  ignition::sensors::BoundingBoxCameraSensor *sensor =
+  auto *sensor =
     mgr.CreateSensor<ignition::sensors::BoundingBoxCameraSensor>(sdfSensor);
 
-  EXPECT_NE(sensor, nullptr);
+  ASSERT_NE(sensor, nullptr);
   sensor->SetScene(scene);
 
   EXPECT_EQ(width, sensor->ImageWidth());
   EXPECT_EQ(height, sensor->ImageHeight());
 
   auto camera = sensor->BoundingBoxCamera();
-  EXPECT_NE(camera, nullptr);
+  ASSERT_NE(camera, nullptr);
 
   camera->SetLocalPosition(0.0, 0.0, 0.0);
   camera->SetLocalRotation(0.0, 0.0, 0.0);
   camera->SetAspectRatio(1.333);
   camera->SetHFOV(IGN_PI / 2);
-  camera->SetBoundingBoxType(BoundingBoxType::Box3D);
+  camera->SetBoundingBoxType(rendering::BoundingBoxType::Box3D);
 
   // Get the Msg
   std::string topic =
@@ -425,9 +428,8 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   g_mutex.lock();
   g_counter = 0;
 
-  // check the hidden box
   EXPECT_EQ(g_boxes.size(), size_t(1));
-  BoundingBox box3D = g_boxes[0];
+  rendering::BoundingBox box3D = g_boxes[0];
 
   double margin_error = 0.01;
   EXPECT_NEAR(box3D.center.X(), 0, margin_error);
