@@ -5,8 +5,8 @@
       <sensor name="boundingbox_camera" type="boundingbox_camera">
         <update_rate>10</update_rate>
         <topic>/test/integration/BoundingBox3DCameraPlugin_boxesWithBuiltinSDF</topic>
-        <box_type>3d</box_type>
         <camera>
+          <box_type>3d</box_type>
           <image>
               <width>320</width>
               <height>240</height>

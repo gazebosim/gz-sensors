@@ -106,9 +106,13 @@ namespace ignition
       /// \return height of the image
       public: virtual unsigned int ImageHeight() const override;
 
-     /// \brief Create a camera in a scene
+      /// \brief Create a camera in a scene
       /// \return True on success.
       private: bool CreateCamera();
+
+      /// \brief Create boxes publisher & rgb image publisher
+      /// \return True on success.
+      private: bool CreatePublishers();
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

@@ -357,9 +357,6 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   auto cameraPtr = sensorPtr->GetElement("camera");
   ASSERT_TRUE(cameraPtr->HasElement("image"));
   auto imagePtr = cameraPtr->GetElement("image");
-  ASSERT_TRUE(sensorPtr->HasElement("box_type"));
-  std::string boxType = sensorPtr->Get<std::string>("box_type");
-  ASSERT_EQ(boxType, "3d");
 
   unsigned int width = imagePtr->Get<int>("width");
   unsigned int height = imagePtr->Get<int>("height");

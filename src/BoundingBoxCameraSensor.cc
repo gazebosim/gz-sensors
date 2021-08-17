@@ -128,11 +128,14 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
+  auto sdfCamera = _sdf.CameraSensor();
+  if (!sdfCamera)
+    return false;
+
   // BoundingBox Type
-  sdf::ElementPtr sdfElement = _sdf.Element();
-  if (sdfElement->HasElement("box_type"))
+  if (sdfCamera->HasBoundingBoxType())
   {
-    std::string type = sdfElement->Get<std::string>("box_type");
+    std::string type = sdfCamera->BoundingBoxType();
 
     // convert type to lowercase
     std::for_each(type.begin(), type.end(), [](char & c){
