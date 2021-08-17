@@ -306,9 +306,9 @@ bool BoundingBoxCameraSensor::CreateCamera()
   this->Scene()->RootVisual()->AddChild(this->dataPtr->rgbCamera);
   this->Scene()->RootVisual()->AddChild(this->dataPtr->boundingboxCamera);
 
-  // Add the rendering sensor to handle its render, no need to add the
-  // rgb camera as we handle its render via Capture() function
+  // Add the rendering sensors to handle its render
   this->AddSensor(this->dataPtr->boundingboxCamera);
+  this->AddSensor(this->dataPtr->rgbCamera);
 
   // Connection to receive the BoundingBox buffer
   this->dataPtr->newBoundingBoxConnection =
@@ -374,7 +374,7 @@ bool BoundingBoxCameraSensor::Update(
       this->dataPtr->boundingboxCamera->WorldPose());
 
     // Render the rgb camera
-    this->dataPtr->rgbCamera->Capture(this->dataPtr->image);
+    this->dataPtr->rgbCamera->Copy(this->dataPtr->image);
 
     // Draw bounding boxes
     for (const auto &box : this->dataPtr->boundingBoxes)
