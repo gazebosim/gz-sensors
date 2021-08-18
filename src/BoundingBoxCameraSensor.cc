@@ -36,6 +36,12 @@ using namespace sensors;
 
 class ignition::sensors::BoundingBoxCameraSensorPrivate
 {
+  /// \brief Save an image of rgb camera
+  public: void SaveImage();
+
+  /// \brief Save the bounding boxes
+  public: void SaveBoxes();
+
   /// \brief SDF Sensor DOM Object
   public: sdf::Sensor sdfSensor;
 
@@ -79,8 +85,11 @@ class ignition::sensors::BoundingBoxCameraSensorPrivate
   /// \brief RGB Image to draw boxes on it
   public: rendering::Image image;
 
-  /// \brief Buffer contains the BoundingBox map data
+  /// \brief Buffer contains the image data with drawn boxes
   public: unsigned char *imageBuffer {nullptr};
+
+  /// \brief Buffer contains the image data to be saved
+  public: unsigned char *saveImageBuffer {nullptr};
 
   /// \brief Connection to the new BoundingBox frames data
   public: common::ConnectionPtr newBoundingBoxConnection;
@@ -94,6 +103,24 @@ class ignition::sensors::BoundingBoxCameraSensorPrivate
   /// \brief BoundingBoxes type
   public: rendering::BoundingBoxType type
     {rendering::BoundingBoxType::VisibleBox2D};
+
+  /// \brief True to save images & boxes
+  public: bool saveSample = false;
+
+  /// \brief path directory to where images & boxes are saved
+  public: std::string savePath = "./";
+
+  /// \brief Folder to save the image
+  public: std::string saveImageFolder = "/images";
+
+  /// \brief Folder to save the bounding boxes
+  public: std::string saveBoxesFolder = "/boxes";
+
+  /// \brief Prefix of an image/boxes name
+  public: std::string savePrefix = "";
+
+  /// \brief counter used to set the sample filename
+  public: std::uint64_t saveCounter = 0;
 };
 
 //////////////////////////////////////////////////
@@ -107,6 +134,8 @@ BoundingBoxCameraSensor::~BoundingBoxCameraSensor()
 {
   if (this->dataPtr->imageBuffer)
     delete this->dataPtr->imageBuffer;
+  if (this->dataPtr->saveImageBuffer)
+    delete this->dataPtr->saveImageBuffer;
 }
 
 /////////////////////////////////////////////////
@@ -313,6 +342,18 @@ bool BoundingBoxCameraSensor::CreateCamera()
   this->AddSensor(this->dataPtr->boundingboxCamera);
   this->AddSensor(this->dataPtr->rgbCamera);
 
+  // Create the directory to store frames
+  if (sdfCamera->SaveFrames())
+  {
+    this->dataPtr->savePath = sdfCamera->SaveFramesPath();
+    this->dataPtr->saveImageFolder =
+      this->dataPtr->savePath + this->dataPtr->saveImageFolder;
+    this->dataPtr->saveBoxesFolder =
+      this->dataPtr->savePath + this->dataPtr->saveBoxesFolder;
+    this->dataPtr->saveSample = true;
+    this->dataPtr->savePrefix = this->Name() + "_";
+  }
+
   // Connection to receive the BoundingBox buffer
   this->dataPtr->newBoundingBoxConnection =
     this->dataPtr->boundingboxCamera->ConnectNewBoundingBoxes(
@@ -379,11 +420,21 @@ bool BoundingBoxCameraSensor::Update(
     // Render the rgb camera
     this->dataPtr->rgbCamera->Copy(this->dataPtr->image);
 
+    this->dataPtr->imageBuffer = this->dataPtr->image.Data<unsigned char>();
+
+    if (this->dataPtr->saveSample)
+    {
+      auto bufferSize = this->dataPtr->image.MemorySize();
+      if (!this->dataPtr->saveImageBuffer)
+        this->dataPtr->saveImageBuffer = new uint8_t[bufferSize];
+
+      memcpy(this->dataPtr->saveImageBuffer, this->dataPtr->imageBuffer,
+        bufferSize);
+    }
+
     // Draw bounding boxes
     for (const auto &box : this->dataPtr->boundingBoxes)
     {
-      this->dataPtr->imageBuffer = this->dataPtr->image.Data<unsigned char>();
-
       this->dataPtr->boundingboxCamera->DrawBoundingBox(
         this->dataPtr->imageBuffer, box);
     }
@@ -509,6 +560,14 @@ bool BoundingBoxCameraSensor::Update(
     this->dataPtr->boxesPublisher.Publish(this->dataPtr->boxes2DMsg);
   }
 
+  // Save a sample (image & its bounding boxes)
+  if (this->dataPtr->saveSample)
+  {
+    this->dataPtr->SaveImage();
+    this->dataPtr->SaveBoxes();
+    ++this->dataPtr->saveCounter;
+  }
+
   return true;
 }
 
@@ -522,4 +581,104 @@ unsigned int BoundingBoxCameraSensor::ImageHeight() const
 unsigned int BoundingBoxCameraSensor::ImageWidth() const
 {
   return this->dataPtr->rgbCamera->ImageWidth();
+}
+
+//////////////////////////////////////////////////
+void BoundingBoxCameraSensorPrivate::SaveImage()
+{
+  // Attempt to create the save directory if it doesn't exist
+  if (!ignition::common::isDirectory(this->savePath))
+  {
+    if (!ignition::common::createDirectories(this->savePath))
+      return;
+  }
+  // Attempt to create the image directory if it doesn't exist
+  if (!ignition::common::isDirectory(this->saveImageFolder))
+  {
+    if (!ignition::common::createDirectories(this->saveImageFolder))
+      return;
+  }
+
+  auto width = this->rgbCamera->ImageWidth();
+  auto height = this->rgbCamera->ImageHeight();
+  if (width == 0 || height == 0)
+    return;
+
+  ignition::common::Image localImage;
+
+  std::string filename =
+    this->savePrefix + std::to_string(this->saveCounter) + ".png";
+
+  localImage.SetFromData(this->saveImageBuffer, width, height,
+      common::Image::RGB_INT8);
+  localImage.SavePNG(
+      ignition::common::joinPaths(this->saveImageFolder, filename));
+}
+
+//////////////////////////////////////////////////
+void BoundingBoxCameraSensorPrivate::SaveBoxes()
+{
+  // Attempt to create the save directory if it doesn't exist
+  if (!ignition::common::isDirectory(this->savePath))
+  {
+    if (!ignition::common::createDirectories(this->savePath))
+      return;
+  }
+  // Attempt to create the boxes directory if it doesn't exist
+  if (!ignition::common::isDirectory(this->saveBoxesFolder))
+  {
+    if (!ignition::common::createDirectories(this->saveBoxesFolder))
+      return;
+  }
+
+  std::string filename = this->saveBoxesFolder + "/boxes_" +
+    std::to_string(this->saveCounter) + ".txt";
+  std::ofstream file(filename);
+
+  if (this->type == rendering::BoundingBoxType::Box3D)
+  {
+    for (auto box : this->boundingBoxes)
+    {
+      auto label = std::to_string(box.label);
+
+      auto x = std::to_string(box.center.X());
+      auto y = std::to_string(box.center.Y());
+      auto z = std::to_string(box.center.Z());
+
+      auto w = std::to_string(box.size.X());
+      auto h = std::to_string(box.size.Y());
+      auto l = std::to_string(box.size.Z());
+
+      auto roll = std::to_string(box.orientation.Roll());
+      auto pitch = std::to_string(box.orientation.Pitch());
+      auto yaw = std::to_string(box.orientation.Yaw());
+
+      // label x y z w h l roll pitch yaw
+      std::string sep = " ";
+      std::string boxString = label + sep + x + sep + y + sep + z + sep +
+        w + sep + h + sep + l + sep + roll + sep + pitch + sep + yaw;
+
+      file << boxString + '\n';
+    }
+  }
+  else
+  {
+    for (auto box : this->boundingBoxes)
+    {
+      auto label = std::to_string(box.label);
+
+      auto x = std::to_string(box.center.X());
+      auto y = std::to_string(box.center.Y());
+      auto width = std::to_string(box.size.X());
+      auto height = std::to_string(box.size.Y());
+
+      // label x y width height
+      std::string sep = " ";
+      std::string boxString = label + sep +
+        x + sep + y + sep + width + sep + height;
+
+      file << boxString + '\n';
+    }
+  }
+  file.close();
 }
