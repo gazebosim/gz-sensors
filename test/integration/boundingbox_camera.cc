@@ -59,7 +59,7 @@ void OnNewBoundingBoxes(const msgs::AnnotatedAxisAligned2DBox_V &_boxes)
   int size = _boxes.annotated_box_size();
   for (int i = 0; i < size; ++i)
   {
-    rendering::BoundingBox box(rendering::BoundingBoxType::VisibleBox2D);
+    rendering::BoundingBox box(rendering::BoundingBoxType::BBT_VISIBLEBOX2D);
     auto annotated_box = _boxes.annotated_box(i);
     auto axisAlignedBox = annotated_box.box();
     auto min_corner = axisAlignedBox.min_corner();
@@ -90,7 +90,7 @@ void OnNew3DBoundingBoxes(const msgs::AnnotatedOriented3DBox_V &_boxes)
   int size = _boxes.annotated_box_size();
   for (int i = 0; i < size; ++i)
   {
-    rendering::BoundingBox box(rendering::BoundingBoxType::Box3D);
+    rendering::BoundingBox box(rendering::BoundingBoxType::BBT_BOX3D);
     auto annotated_box = _boxes.annotated_box(i);
     auto orientedBox = annotated_box.box();
     // center
@@ -244,9 +244,9 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
   camera->SetLocalRotation(0.0, 0.0, 0.0);
   camera->SetAspectRatio(1.333);
   camera->SetHFOV(IGN_PI / 2);
-  camera->SetBoundingBoxType(rendering::BoundingBoxType::VisibleBox2D);
+  camera->SetBoundingBoxType(rendering::BoundingBoxType::BBT_VISIBLEBOX2D);
 
-  EXPECT_EQ(camera->Type(), rendering::BoundingBoxType::VisibleBox2D);
+  EXPECT_EQ(camera->Type(), rendering::BoundingBoxType::BBT_VISIBLEBOX2D);
   EXPECT_EQ(camera->ImageWidth(), width);
   EXPECT_EQ(camera->ImageHeight(), height);
 
@@ -302,7 +302,7 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
   g_mutex.unlock();
 
   // Full Boxes Type Test
-  camera->SetBoundingBoxType(rendering::BoundingBoxType::FullBox2D);
+  camera->SetBoundingBoxType(rendering::BoundingBoxType::BBT_FULLBOX2D);
 
   // wait for bounding boxes
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
@@ -400,7 +400,7 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   camera->SetLocalRotation(0.0, 0.0, 0.0);
   camera->SetAspectRatio(1.333);
   camera->SetHFOV(IGN_PI / 2);
-  camera->SetBoundingBoxType(rendering::BoundingBoxType::Box3D);
+  camera->SetBoundingBoxType(rendering::BoundingBoxType::BBT_BOX3D);
 
   // Get the Msg
   std::string topic =

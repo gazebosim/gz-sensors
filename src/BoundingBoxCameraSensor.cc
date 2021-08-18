@@ -102,7 +102,7 @@ class ignition::sensors::BoundingBoxCameraSensorPrivate
 
   /// \brief BoundingBoxes type
   public: rendering::BoundingBoxType type
-    {rendering::BoundingBoxType::VisibleBox2D};
+    {rendering::BoundingBoxType::BBT_VISIBLEBOX2D};
 
   /// \brief True to save images & boxes
   public: bool saveSample = false;
@@ -172,12 +172,12 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
     });
 
     if (type == "full_2d" || type == "full_box_2d")
-      this->dataPtr->type = rendering::BoundingBoxType::FullBox2D;
+      this->dataPtr->type = rendering::BoundingBoxType::BBT_FULLBOX2D;
     else if (type == "2d" || type == "visible_2d"
       || type == "visible_box_2d")
-      this->dataPtr->type = rendering::BoundingBoxType::VisibleBox2D;
+      this->dataPtr->type = rendering::BoundingBoxType::BBT_VISIBLEBOX2D;
     else if (type == "3d")
-      this->dataPtr->type = rendering::BoundingBoxType::Box3D;
+      this->dataPtr->type = rendering::BoundingBoxType::BBT_BOX3D;
     else
     {
       ignerr << "Unknown bounding box type " << type << std::endl;
@@ -214,7 +214,7 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
     this->dataPtr->node.Advertise<ignition::msgs::Image>(
       this->dataPtr->topicImage);
 
-  if (this->dataPtr->type == rendering::BoundingBoxType::Box3D)
+  if (this->dataPtr->type == rendering::BoundingBoxType::BBT_BOX3D)
   {
     this->dataPtr->boxesPublisher =
       this->dataPtr->node.Advertise<
@@ -466,7 +466,7 @@ bool BoundingBoxCameraSensor::Update(
     this->dataPtr->imagePublisher.Publish(this->dataPtr->imageMsg);
   }
 
-  if (this->dataPtr->type == rendering::BoundingBoxType::Box3D)
+  if (this->dataPtr->type == rendering::BoundingBoxType::BBT_BOX3D)
   {
     this->dataPtr->boxes3DMsg.Clear();
 
@@ -547,7 +547,7 @@ bool BoundingBoxCameraSensor::Update(
 
   // Publish
   this->PublishInfo(_now);
-  if (this->dataPtr->type == rendering::BoundingBoxType::Box3D)
+  if (this->dataPtr->type == rendering::BoundingBoxType::BBT_BOX3D)
   {
     this->AddSequence(
       this->dataPtr->boxes3DMsg.mutable_header(), "boundingboxes");
@@ -635,7 +635,7 @@ void BoundingBoxCameraSensorPrivate::SaveBoxes()
     std::to_string(this->saveCounter) + ".txt";
   std::ofstream file(filename);
 
-  if (this->type == rendering::BoundingBoxType::Box3D)
+  if (this->type == rendering::BoundingBoxType::BBT_BOX3D)
   {
     for (auto box : this->boundingBoxes)
     {
