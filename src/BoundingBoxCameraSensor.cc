@@ -166,11 +166,6 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
   {
     std::string type = sdfCamera->BoundingBoxType();
 
-    // convert type to lowercase
-    std::for_each(type.begin(), type.end(), [](char & c){
-      c = std::tolower(c);
-    });
-
     if (type == "full_2d" || type == "full_box_2d")
       this->dataPtr->type = rendering::BoundingBoxType::BBT_FULLBOX2D;
     else if (type == "2d" || type == "visible_2d"
