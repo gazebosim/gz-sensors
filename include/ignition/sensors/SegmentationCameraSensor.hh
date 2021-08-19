@@ -83,7 +83,8 @@ namespace ignition
 
       /// \brief Get the rendering segmentation camera
       /// \return Segmentation camera pointer
-      public: virtual rendering::SegmentationCameraPtr SegmentationCamera() const;
+      public: virtual rendering::SegmentationCameraPtr
+        SegmentationCamera() const;
 
       /// \brief Segmentation data callback used to get the data from the sensor
       /// \param[in] _data pointer to the data from the sensor

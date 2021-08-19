@@ -35,16 +35,11 @@ using namespace sensors;
 
 class ignition::sensors::SegmentationCameraSensorPrivate
 {
-  /// \brief Save an image
-  /// \param[in] _coloredBuffer buffer of colored map
-  /// \param[in] _labelsBuffer buffer of labels map
-  /// \param[in] _width width of image in pixels
-  /// \param[in] _height height of image in pixels
+  /// \brief Save a sample for the dataset(image & colored map & labels map)
   /// \return True if the image was saved successfully. False can mean
   /// that the image save path does not exist and creation
   /// of the path was not possible.
-  public: bool SaveImage(const uint8_t *_coloredBuffer,
-    const uint8_t *_labelsBuffer, unsigned int _width, unsigned int _height);
+  public: bool SaveSample();
 
   /// \brief SDF Sensor DOM Object
   public: sdf::Sensor sdfSensor;
@@ -54,6 +49,12 @@ class ignition::sensors::SegmentationCameraSensorPrivate
 
   /// \brief Rendering Segmentation Camera
   public: rendering::SegmentationCameraPtr camera {nullptr};
+
+  /// \brief Rendering RGB Camera to save rgb images for dataset generation
+  public: rendering::CameraPtr rgbCamera {nullptr};
+
+  /// \brief RGB Image to load the rgb camera data
+  public: rendering::Image image;
 
   /// \brief Node to create publisher
   public: transport::Node node;
@@ -82,6 +83,9 @@ class ignition::sensors::SegmentationCameraSensorPrivate
   /// \brief Buffer contains the segmentation labels map data
   public: uint8_t *segmentationLabelsBuffer {nullptr};
 
+  /// \brief Buffer contains the image data to be saved
+  public: unsigned char *saveImageBuffer {nullptr};
+
   /// \brief Segmentation type (Semantic / Instance)
   public: rendering::SegmentationType type
     {rendering::SegmentationType::SEMANTIC};
@@ -95,17 +99,26 @@ class ignition::sensors::SegmentationCameraSensorPrivate
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
 
-  /// \brief True to save images
-  public: bool saveImage = false;
+  /// \brief True to save samples
+  public: bool saveSamples = false;
+
+  /// \brief Folder to save the image
+  public: std::string saveImageFolder = "/images";
+
+  /// \brief Folder to save the segmentation colored maps
+  public: std::string saveColoredMapsFolder = "/colored_maps";
+
+  /// \brief Folder to save the segmentation labels maps
+  public: std::string saveLabelsMapsFolder = "/labels_maps";
 
   /// \brief Path directory to where images are saved
-  public: std::string saveImagePath = "./";
+  public: std::string savePath = "./";
 
   /// \brief Prefix of an image name
   public: std::string saveImagePrefix = "./";
 
   /// \brief Counter used to set the image filename
-  public: std::uint64_t saveImageCounter = 0;
+  public: std::uint64_t saveCounter = 0;
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
@@ -222,11 +235,8 @@ void SegmentationCameraSensor::SetScene(
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-  // APIs make it possible for the scene pointer to change
   if (this->Scene() != _scene)
   {
-    // TODO(anyone) Remove camera from scene
-    this->dataPtr->camera = nullptr;
     RenderingSensor::SetScene(_scene);
 
     if (this->dataPtr->initialized)
@@ -269,11 +279,31 @@ bool SegmentationCameraSensor::CreateCamera()
   // Camera Info Msg
   this->PopulateInfo(sdfCamera);
 
+  // Save frames properties
+  if (sdfCamera->SaveFrames())
+  {
+    this->dataPtr->savePath = sdfCamera->SaveFramesPath();
+    this->dataPtr->saveImagePrefix = this->Name() + "_";
+    this->dataPtr->saveSamples = true;
+
+    // Folders paths
+    this->dataPtr->saveImageFolder =
+      this->dataPtr->savePath + this->dataPtr->saveImageFolder;
+    this->dataPtr->saveColoredMapsFolder =
+      this->dataPtr->savePath + this->dataPtr->saveColoredMapsFolder;
+    this->dataPtr->saveLabelsMapsFolder =
+      this->dataPtr->savePath + this->dataPtr->saveLabelsMapsFolder;
+  }
+
   if (!this->dataPtr->camera)
   {
     // Create rendering camera
     this->dataPtr->camera = this->Scene()->CreateSegmentationCamera(
       this->Name());
+
+    if (this->dataPtr->saveSamples)
+      this->dataPtr->rgbCamera = this->Scene()->CreateCamera(
+        this->Name() + "_rgbCamera");
   }
 
   // Segmentation properties
@@ -284,19 +314,21 @@ bool SegmentationCameraSensor::CreateCamera()
   auto width = sdfCamera->ImageWidth();
   auto height = sdfCamera->ImageHeight();
 
-  // Set Camera Properties
-  this->dataPtr->camera->SetImageWidth(width);
-  this->dataPtr->camera->SetImageHeight(height);
-  this->dataPtr->camera->SetVisibilityMask(sdfCamera->VisibilityMask());
-  this->dataPtr->camera->SetNearClipPlane(sdfCamera->NearClip());
-  this->dataPtr->camera->SetFarClipPlane(sdfCamera->FarClip());
   math::Angle angle = sdfCamera->HorizontalFov();
   if (angle < 0.01 || angle > IGN_PI*2)
   {
     ignerr << "Invalid horizontal field of view [" << angle << "]\n";
     return false;
   }
-  this->dataPtr->camera->SetAspectRatio(static_cast<double>(width)/height);
+  double aspectRatio = static_cast<double>(width)/height;
+
+  // Set segmentation camera properties
+  this->dataPtr->camera->SetImageWidth(width);
+  this->dataPtr->camera->SetImageHeight(height);
+  this->dataPtr->camera->SetVisibilityMask(sdfCamera->VisibilityMask());
+  this->dataPtr->camera->SetNearClipPlane(sdfCamera->NearClip());
+  this->dataPtr->camera->SetFarClipPlane(sdfCamera->FarClip());
+  this->dataPtr->camera->SetAspectRatio(aspectRatio);
   this->dataPtr->camera->SetHFOV(angle);
 
   // Add the camera to the scene
@@ -305,20 +337,31 @@ bool SegmentationCameraSensor::CreateCamera()
   // Add the rendering sensor to handle its render
   this->AddSensor(this->dataPtr->camera);
 
+  // Add the rgb camera only if we want to generate dataset / save samples
+  if (this->dataPtr->saveSamples)
+  {
+    // Set rgb camera properties
+    this->dataPtr->rgbCamera->SetImageFormat(rendering::PF_R8G8B8);
+    this->dataPtr->rgbCamera->SetImageWidth(width);
+    this->dataPtr->rgbCamera->SetImageHeight(height);
+    this->dataPtr->rgbCamera->SetVisibilityMask(sdfCamera->VisibilityMask());
+    this->dataPtr->rgbCamera->SetNearClipPlane(sdfCamera->NearClip());
+    this->dataPtr->rgbCamera->SetFarClipPlane(sdfCamera->FarClip());
+    this->dataPtr->rgbCamera->SetAspectRatio(aspectRatio);
+    this->dataPtr->rgbCamera->SetHFOV(angle);
+
+    // Add the rgb camera to the rendering pipeline
+    this->Scene()->RootVisual()->AddChild(this->dataPtr->rgbCamera);
+    this->AddSensor(this->dataPtr->rgbCamera);
+    this->dataPtr->image = this->dataPtr->rgbCamera->CreateImage();
+  }
+
   // Connection to receive the segmentation buffer
   this->dataPtr->newSegmentationConnection =
       this->dataPtr->camera->ConnectNewSegmentationFrame(
       std::bind(&SegmentationCameraSensor::OnNewSegmentationFrame, this,
         std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
         std::placeholders::_4, std::placeholders::_5));
-
-  // Create the directory to store frames
-  if (sdfCamera->SaveFrames())
-  {
-    this->dataPtr->saveImagePath = sdfCamera->SaveFramesPath();
-    this->dataPtr->saveImagePrefix = this->Name() + "_";
-    this->dataPtr->saveImage = true;
-  }
 
   return true;
 }
@@ -369,16 +412,31 @@ bool SegmentationCameraSensor::Update(
     return false;
   }
 
-  // don't render if there are no subscribers
+  // don't render if there are no subscribers nor saving
   if (!this->dataPtr->coloredMapPublisher.HasConnections() &&
     !this->dataPtr->labelsMapPublisher.HasConnections() &&
-    this->dataPtr->imageEvent.ConnectionCount() <= 0u)
+    !this->dataPtr->saveSamples)
   {
     return false;
   }
 
+  if (this->dataPtr->saveSamples)
+  {
+    // The sensor updates only the segmentation camera with its pose
+    // as it has the same name, so make rgb camera with the same pose
+    this->dataPtr->rgbCamera->SetWorldPose(
+      this->dataPtr->camera->WorldPose());
+  }
+
   // Actual render
   this->Render();
+
+  if (this->dataPtr->saveSamples)
+  {
+    // Copy the rgb camera image data
+    this->dataPtr->rgbCamera->Copy(this->dataPtr->image);
+    this->dataPtr->saveImageBuffer = this->dataPtr->image.Data<unsigned char>();
+  }
 
   if (!this->dataPtr->segmentationColoredBuffer ||
     !this->dataPtr->segmentationLabelsBuffer)
@@ -436,12 +494,9 @@ bool SegmentationCameraSensor::Update(
     }
   }
 
-  // Save image
-  if (this->dataPtr->saveImage)
-  {
-    this->dataPtr->SaveImage(this->dataPtr->segmentationColoredBuffer,
-      this->dataPtr->segmentationLabelsBuffer, width, height);
-  }
+  // Save a sample (image & colored map & labels map)
+  if (this->dataPtr->saveSamples)
+    this->dataPtr->SaveSample();
 
   return true;
 }
@@ -470,39 +525,64 @@ common::ConnectionPtr SegmentationCameraSensor::ConnectImageCallback(
 }
 
 //////////////////////////////////////////////////
-bool SegmentationCameraSensorPrivate::SaveImage(
-  const uint8_t *_coloredBuffer, const uint8_t *_labelsBuffer,
-  unsigned int _width, unsigned int _height)
+bool SegmentationCameraSensorPrivate::SaveSample()
 {
-  // Attempt to create the directory if it doesn't exist
-  if (!ignition::common::isDirectory(this->saveImagePath))
+  // Attempt to create the directories if they don't exist
+  if (!ignition::common::isDirectory(this->savePath))
   {
-    if (!ignition::common::createDirectories(this->saveImagePath))
+    if (!ignition::common::createDirectories(this->savePath))
+      return false;
+  }
+  if (!ignition::common::isDirectory(this->saveImageFolder))
+  {
+    if (!ignition::common::createDirectories(this->saveImageFolder))
+      return false;
+  }
+  if (!ignition::common::isDirectory(this->saveColoredMapsFolder))
+  {
+    if (!ignition::common::createDirectories(this->saveColoredMapsFolder))
+      return false;
+  }
+  if (!ignition::common::isDirectory(this->saveLabelsMapsFolder))
+  {
+    if (!ignition::common::createDirectories(this->saveLabelsMapsFolder))
       return false;
   }
 
+  auto width = this->camera->ImageWidth();
+  auto height = this->camera->ImageHeight();
+
   std::string coloredName = this->saveImagePrefix + "colored_" +
-                         std::to_string(this->saveImageCounter) + ".png";
+                         std::to_string(this->saveCounter) + ".png";
   std::string labelsName = this->saveImagePrefix + "labels_" +
-                         std::to_string(this->saveImageCounter) + ".png";
+                         std::to_string(this->saveCounter) + ".png";
+  std::string rgbImageName = this->saveImagePrefix + "image_" +
+                         std::to_string(this->saveCounter) + ".png";
 
-  ++this->saveImageCounter;
+  // Save rgb image
+  ignition::common::Image rgbImage;
+  rgbImage.SetFromData(this->saveImageBuffer,
+    width, height, ignition::common::Image::RGB_INT8);
 
-  // save colored map
+  rgbImage.SavePNG(
+      ignition::common::joinPaths(this->saveImageFolder, rgbImageName));
+
+  // Save colored map
   ignition::common::Image localColoredImage;
-  localColoredImage.SetFromData(_coloredBuffer, _width, _height,
-    ignition::common::Image::RGB_INT8);
+  localColoredImage.SetFromData(this->segmentationColoredBuffer,
+    width, height, ignition::common::Image::RGB_INT8);
 
   localColoredImage.SavePNG(
-      ignition::common::joinPaths(this->saveImagePath, coloredName));
+      ignition::common::joinPaths(this->saveColoredMapsFolder, coloredName));
 
-  // save labels map
+  // Save labels map
   ignition::common::Image localLabelsImage;
-  localLabelsImage.SetFromData(_labelsBuffer, _width, _height,
-    ignition::common::Image::RGB_INT8);
+  localLabelsImage.SetFromData(this->segmentationLabelsBuffer,
+    width, height, ignition::common::Image::RGB_INT8);
 
   localLabelsImage.SavePNG(
-      ignition::common::joinPaths(this->saveImagePath, labelsName));
+      ignition::common::joinPaths(this->saveLabelsMapsFolder, labelsName));
 
+  ++this->saveCounter;
   return true;
 }
