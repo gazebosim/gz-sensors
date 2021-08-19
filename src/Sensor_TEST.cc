@@ -183,7 +183,7 @@ TEST_F(SensorUpdate, Update)
   sdfSensor.SetName(kSensorName);
   sdfSensor.SetTopic(kSensorTopic);
   sdfSensor.SetEnableMetrics(kEnableMetrics);
-  std::unique_ptr<Sensor> sensor = std::make_unique<TestSensor>();
+  std::unique_ptr<TestSensor> sensor = std::make_unique<TestSensor>();
   sensor->Load(sdfSensor);
   ASSERT_EQ(kSensorTopic, sensor->Topic());
   ASSERT_EQ(kEnableMetrics, sensor->EnableMetrics());
@@ -206,7 +206,6 @@ TEST_F(SensorUpdate, Update)
   }
   ASSERT_EQ(kNumberOfMessages, performanceMetricsMsgsCount);
 
-  auto testSensor = dynamic_cast<TestSensor*>(sensor.get());
   EXPECT_EQ(testSensor->updateCount, performanceMetricsMsgsCount);
 }
 
