@@ -191,10 +191,8 @@ namespace ignition
 
       /// \brief Publishes information about the performance of the sensor.
       ///        This method is called by Update().
-      ///        When different metrics need to be published this method
-      ///        could be overriden by subclasses.
       /// \param[in] _now Current time.
-      public: virtual void PublishMetrics(
+      public: void PublishMetrics(
         const std::chrono::duration<double> &_now);
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
