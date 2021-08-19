@@ -132,10 +132,6 @@ BoundingBoxCameraSensor::BoundingBoxCameraSensor()
 /////////////////////////////////////////////////
 BoundingBoxCameraSensor::~BoundingBoxCameraSensor()
 {
-  if (this->dataPtr->imageBuffer)
-    delete this->dataPtr->imageBuffer;
-  if (this->dataPtr->saveImageBuffer)
-    delete this->dataPtr->saveImageBuffer;
 }
 
 /////////////////////////////////////////////////
@@ -394,72 +390,69 @@ bool BoundingBoxCameraSensor::Update(
     return false;
   }
 
-  // don't render if there are no subscribers
+  // don't render if there are no subscribers nor saving
   if (!this->dataPtr->imagePublisher.HasConnections() &&
-    !this->dataPtr->boxesPublisher.HasConnections())
+    !this->dataPtr->boxesPublisher.HasConnections() &&
+    !this->dataPtr->saveSample)
   {
     return false;
   }
 
+  // The sensor updates only the bounding box camera with its pose
+  // as it has the same name, so make rgb camera with the same pose
+  this->dataPtr->rgbCamera->SetWorldPose(
+    this->dataPtr->boundingboxCamera->WorldPose());
+
   // Render the bounding box camera
   this->Render();
 
-  // Publish image only if there is subscribers for it
-  if (this->dataPtr->imagePublisher.HasConnections())
+  // Render the rgb camera
+  this->dataPtr->rgbCamera->Copy(this->dataPtr->image);
+
+  this->dataPtr->imageBuffer = this->dataPtr->image.Data<unsigned char>();
+
+  if (this->dataPtr->saveSample)
   {
-    // The sensor updates only the bounding box camera with its pose
-    // as it has the same name, so make rgb camera with the same pose
-    this->dataPtr->rgbCamera->SetWorldPose(
-      this->dataPtr->boundingboxCamera->WorldPose());
+    auto bufferSize = this->dataPtr->image.MemorySize();
+    if (!this->dataPtr->saveImageBuffer)
+      this->dataPtr->saveImageBuffer = new uint8_t[bufferSize];
 
-    // Render the rgb camera
-    this->dataPtr->rgbCamera->Copy(this->dataPtr->image);
-
-    this->dataPtr->imageBuffer = this->dataPtr->image.Data<unsigned char>();
-
-    if (this->dataPtr->saveSample)
-    {
-      auto bufferSize = this->dataPtr->image.MemorySize();
-      if (!this->dataPtr->saveImageBuffer)
-        this->dataPtr->saveImageBuffer = new uint8_t[bufferSize];
-
-      memcpy(this->dataPtr->saveImageBuffer, this->dataPtr->imageBuffer,
-        bufferSize);
-    }
-
-    // Draw bounding boxes
-    for (const auto &box : this->dataPtr->boundingBoxes)
-    {
-      this->dataPtr->boundingboxCamera->DrawBoundingBox(
-        this->dataPtr->imageBuffer, box);
-    }
-
-    auto width = this->dataPtr->rgbCamera->ImageWidth();
-    auto height = this->dataPtr->rgbCamera->ImageHeight();
-
-    // Create Image message
-    this->dataPtr->imageMsg.set_width(width);
-    this->dataPtr->imageMsg.set_height(height);
-    // Format
-    this->dataPtr->imageMsg.set_step(
-      width * rendering::PixelUtil::BytesPerPixel(rendering::PF_R8G8B8));
-    this->dataPtr->imageMsg.set_pixel_format_type(
-      msgs::PixelFormatType::RGB_INT8);
-    // Time stamp
-    auto stamp = this->dataPtr->imageMsg.mutable_header()->mutable_stamp();
-    *stamp = msgs::Convert(_now);
-    auto frame = this->dataPtr->imageMsg.mutable_header()->add_data();
-    frame->set_key("frame_id");
-    frame->add_value(this->Name());
-    // Image data
-    this->dataPtr->imageMsg.set_data(this->dataPtr->imageBuffer,
-        rendering::PixelUtil::MemorySize(rendering::PF_R8G8B8,
-        width, height));
-
-    // Publish
-    this->AddSequence(this->dataPtr->imageMsg.mutable_header(), "rgbImage");
-    this->dataPtr->imagePublisher.Publish(this->dataPtr->imageMsg);
+    memcpy(this->dataPtr->saveImageBuffer, this->dataPtr->imageBuffer,
+      bufferSize);
   }
+
+  // Draw bounding boxes
+  for (const auto &box : this->dataPtr->boundingBoxes)
+  {
+    this->dataPtr->boundingboxCamera->DrawBoundingBox(
+      this->dataPtr->imageBuffer, box);
+  }
+
+  auto width = this->dataPtr->rgbCamera->ImageWidth();
+  auto height = this->dataPtr->rgbCamera->ImageHeight();
+
+  // Create Image message
+  this->dataPtr->imageMsg.set_width(width);
+  this->dataPtr->imageMsg.set_height(height);
+  // Format
+  this->dataPtr->imageMsg.set_step(
+    width * rendering::PixelUtil::BytesPerPixel(rendering::PF_R8G8B8));
+  this->dataPtr->imageMsg.set_pixel_format_type(
+    msgs::PixelFormatType::RGB_INT8);
+  // Time stamp
+  auto stamp = this->dataPtr->imageMsg.mutable_header()->mutable_stamp();
+  *stamp = msgs::Convert(_now);
+  auto frame = this->dataPtr->imageMsg.mutable_header()->add_data();
+  frame->set_key("frame_id");
+  frame->add_value(this->Name());
+  // Image data
+  this->dataPtr->imageMsg.set_data(this->dataPtr->imageBuffer,
+      rendering::PixelUtil::MemorySize(rendering::PF_R8G8B8,
+      width, height));
+
+  // Publish
+  this->AddSequence(this->dataPtr->imageMsg.mutable_header(), "rgbImage");
+  this->dataPtr->imagePublisher.Publish(this->dataPtr->imageMsg);
 
   if (this->dataPtr->type == rendering::BoundingBoxType::BBT_BOX3D)
   {
@@ -627,11 +620,12 @@ void BoundingBoxCameraSensorPrivate::SaveBoxes()
   }
 
   std::string filename = this->saveBoxesFolder + "/boxes_" +
-    std::to_string(this->saveCounter) + ".txt";
+    std::to_string(this->saveCounter) + ".csv";
   std::ofstream file(filename);
 
   if (this->type == rendering::BoundingBoxType::BBT_BOX3D)
   {
+    file << "label,x,y,z,w,h,l,roll,pitch,yaw\n";
     for (auto box : this->boundingBoxes)
     {
       auto label = std::to_string(box.label);
@@ -649,7 +643,7 @@ void BoundingBoxCameraSensorPrivate::SaveBoxes()
       auto yaw = std::to_string(box.orientation.Yaw());
 
       // label x y z w h l roll pitch yaw
-      std::string sep = " ";
+      std::string sep = ",";
       std::string boxString = label + sep + x + sep + y + sep + z + sep +
         w + sep + h + sep + l + sep + roll + sep + pitch + sep + yaw;
 
@@ -658,6 +652,7 @@ void BoundingBoxCameraSensorPrivate::SaveBoxes()
   }
   else
   {
+    file << "label,x_center,y_center,width,height\n";
     for (auto box : this->boundingBoxes)
     {
       auto label = std::to_string(box.label);
@@ -668,7 +663,7 @@ void BoundingBoxCameraSensorPrivate::SaveBoxes()
       auto height = std::to_string(box.size.Y());
 
       // label x y width height
-      std::string sep = " ";
+      std::string sep = ",";
       std::string boxString = label + sep +
         x + sep + y + sep + width + sep + height;
 
