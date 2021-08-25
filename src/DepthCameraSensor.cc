@@ -284,6 +284,9 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
+  igndbg << "Depth images for [" << this->Name() << "] advertised on ["
+         << this->Topic() << "]" << std::endl;
+
   if (!this->AdvertiseInfo())
     return false;
 
@@ -297,6 +300,9 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
       << this->Topic() + "/points" << "].\n";
     return false;
   }
+
+  igndbg << "Points for [" << this->Name() << "] advertised on ["
+         << this->Topic() << "]" << std::endl;
 
   // Initialize the point message.
   // \todo(anyone) The true value in the following function call forces
