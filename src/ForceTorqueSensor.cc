@@ -237,6 +237,7 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
     {
       measuredForce = this->dataPtr->force;
       measuredTorque = this->dataPtr->torque;
+      ignerr << "Warning: ForceTorqueSensor::Update() " << std::endl;
     }
     else
     {
