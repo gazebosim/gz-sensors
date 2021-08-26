@@ -245,6 +245,10 @@ ign gazebo boundingbox_camera.sdf
 you will find that the dataset is saved in the given path
 
 #### Dataset Demo
+
+![dataset_generation](files/boundingbox_camera/object_detection_dataset.gif)
+
+
 ## Visualize the dataset in Python
 
 To visualize the dataset after the generation, put that code in a `.py` file then run:
