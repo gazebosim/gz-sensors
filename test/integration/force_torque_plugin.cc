@@ -215,16 +215,9 @@ TEST_F(ForceTorqueSensorTest, SensorReadings)
   sensor->SetTorque(torque);
   EXPECT_EQ(torque, sensor->Torque());
 
-
-  // double pos = 2.0;
-  // sensor->SetPosition(pos);
-  // sensorNoise->SetPosition(pos);
-  // EXPECT_DOUBLE_EQ(pos - vertRef, sensor->VerticalPosition());
-  // EXPECT_DOUBLE_EQ(pos - vertRef, sensorNoise->VerticalPosition());
-
   // verify msg received on the topic
   WaitForMessageTestHelper<ignition::msgs::Wrench> msgHelper(topic);
-  sensor->Update(std::chrono::steady_clock::duration(std::chrono::seconds(1)));
+  EXPECT_TRUE(sensor->Update(ignition::common::Time(1, 0)));
   EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
   auto msg = msgHelper.Message();
   EXPECT_EQ(1, msg.header().stamp().sec());
@@ -232,7 +225,6 @@ TEST_F(ForceTorqueSensorTest, SensorReadings)
 
   EXPECT_EQ(ignition::math::Vector3d(0, 0, 1), ignition::msgs::Convert(msg.force()));
   EXPECT_EQ(ignition::math::Vector3d(0, 0, 1), ignition::msgs::Convert(msg.torque()));
-
 
   // // verify msg with noise received on the topic
   // WaitForMessageTestHelper<ignition::msgs::Altimeter>
@@ -274,7 +266,7 @@ TEST_F(ForceTorqueSensorTest, Topic)
         dynamic_cast<ignition::sensors::ForceTorqueSensor *>(sensor.release());
     ASSERT_NE(nullptr, force_torque);
 
-    EXPECT_EQ("/forcetorque", force_torque->Topic());
+    EXPECT_EQ("/force_torque", force_torque->Topic());
   }
 
   // Convert to valid topic

@@ -25,6 +25,8 @@
 #pragma warning(pop)
 #endif
 
+#include <sdf/ForceTorque.hh>
+
 #include <ignition/common/Profiler.hh>
 #include <ignition/transport/Node.hh>
 
@@ -53,7 +55,7 @@ class ignition::sensors::ForceTorqueSensorPrivate
 
   /// \brief Noise free torque
   public: ignition::math::Vector3d torque;
-  
+
   /// \brief Frame in which we return the measured force torque info.
   public: sdf::ForceTorqueFrame measureFrame;
 
@@ -69,8 +71,7 @@ class ignition::sensors::ForceTorqueSensorPrivate
   public: bool timeInitialized = false;
 
   /// \brief Previous update time step.
-  public: std::chrono::steady_clock::duration prevStep
-    {std::chrono::steady_clock::duration::zero()};
+  public: ignition::common::Time prevStep { ignition::common::Time::Zero };
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -117,7 +118,7 @@ bool ForceTorqueSensor::Load(const sdf::Sensor &_sdf)
   this->dataPtr->measureDirection = _sdf.ForceTorqueSensor()->MeasureDirection();
 
   if (this->Topic().empty())
-    this->SetTopic("/forcetorque");
+    this->SetTopic("/force_torque");
 
   this->dataPtr->pub =
       this->dataPtr->node.Advertise<ignition::msgs::Wrench>(this->Topic());
@@ -158,14 +159,7 @@ bool ForceTorqueSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool ForceTorqueSensor::Update(
-  const ignition::common::Time &_now)
-{
-  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
-}
-
-//////////////////////////////////////////////////
-bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
+bool ForceTorqueSensor::Update(const ignition::common::Time &_now)
 {
   IGN_PROFILE("ForceTorqueSensor::Update");
   if (!this->dataPtr->initialized)
@@ -184,9 +178,7 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
   double dt;
   if (this->dataPtr->timeInitialized)
   {
-    auto delay = std::chrono::duration_cast<std::chrono::duration<float>>(
-        _now - this->dataPtr->prevStep);
-    dt = delay.count();
+    dt = (_now - this->dataPtr->prevStep).Double();
   }
   else
   {
@@ -209,7 +201,8 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
   applyNoise(TORQUE_Z_NOISE_N_M, this->dataPtr->torque.Z());
 
   msgs::Wrench msg;
-  *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+  msg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
+  msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->Name());
@@ -237,7 +230,6 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
     {
       measuredForce = this->dataPtr->force;
       measuredTorque = this->dataPtr->torque;
-      ignerr << "Warning: ForceTorqueSensor::Update() " << std::endl;
     }
     else
     {
@@ -247,8 +239,6 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
   }
   else
   {
-    ignerr << "measureFrame must be PARENT_LINK, CHILD_LINK or SENSOR\n";
-
     if (this->dataPtr->measureDirection == sdf::ForceTorqueMeasureDirection::CHILD_TO_PARENT)
     {
       measuredForce = this->dataPtr->rotationSensorChild *
