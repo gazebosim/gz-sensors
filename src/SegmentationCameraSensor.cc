@@ -188,6 +188,17 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
           this->Topic() + this->dataPtr->topicColoredMapSuffix);
 
+  if (!this->dataPtr->coloredMapPublisher)
+  {
+    ignerr << "Unable to create publisher on topic ["
+      << this->Topic() << this->dataPtr->topicColoredMapSuffix << "].\n";
+    return false;
+  }
+
+  igndbg << "Colored map image for [" << this->Name() << "] advertised on ["
+    << this->Topic() << this->dataPtr->topicColoredMapSuffix << "]"
+    << std::endl;
+
   // Create the segmentation labels map image publisher
   this->dataPtr->labelsMapPublisher =
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
@@ -196,15 +207,13 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
   if (!this->dataPtr->labelsMapPublisher)
   {
     ignerr << "Unable to create publisher on topic ["
-      << this->Topic() + this->dataPtr->topicLabelsMapSuffix << "].\n";
+      << this->Topic() << this->dataPtr->topicLabelsMapSuffix << "].\n";
     return false;
   }
-  if (!this->dataPtr->coloredMapPublisher)
-  {
-    ignerr << "Unable to create publisher on topic ["
-      << this->Topic() + this->dataPtr->topicColoredMapSuffix << "].\n";
-    return false;
-  }
+
+  igndbg << "Segmentation labels map image for [" << this->Name()
+    << "] advertised on [" << this->Topic() << this->topicLabelsMapSuffix
+    << "]" << std::endl;
 
   // TODO(anyone) Access the info topic from the parent class
   if (!this->AdvertiseInfo(this->Topic() + "/camera_info"))
