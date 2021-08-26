@@ -516,13 +516,13 @@ bool CameraSensor::AdvertiseInfo(const std::string &_topic)
       this->dataPtr->infoTopic);
   if (!this->dataPtr->infoPub)
   {
-    ignerr << "Unable to create publisher on topic["
+    ignerr << "Unable to create publisher on topic ["
       << this->dataPtr->infoTopic << "].\n";
   }
   else
   {
-    igndbg << "Camera info advertised on [" << this->dataPtr->infoTopic << "]"
-           << std::endl;
+    igndbg << "Camera info for [" << this->Name() << "] advertised on ["
+           << this->dataPtr->infoTopic << "]" << std::endl;
   }
 
   return this->dataPtr->infoPub;
