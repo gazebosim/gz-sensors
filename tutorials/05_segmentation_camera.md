@@ -38,9 +38,9 @@ Here's an example of how to attach a segmentation camera sensor to a model in a 
         </visual>
 
         <sensor name="segmentation_camera" type="segmentation">
-          <segmentation_type>instance</segmentation_type>
           <topic>segmentation</topic>
           <camera>
+            <segmentation_type>instance</segmentation_type>
             <horizontal_fov>1.047</horizontal_fov>
             <image>
               <width>800</width>
@@ -63,9 +63,9 @@ Let’s take a closer look at the portion of the code above that focuses on the 
 
 ```xml
         <sensor name="segmentation_camera" type="segmentation">
-          <segmentation_type>instance</segmentation_type>
           <topic>segmentation</topic>
           <camera>
+            <segmentation_type>instance</segmentation_type>
             <horizontal_fov>1.047</horizontal_fov>
             <image>
               <width>800</width>
@@ -95,7 +95,7 @@ As we can see, we define a sensor with the following SDF elements:
 <br>
 There's also an optional plugin used here that allows for further configuration of the segmentation camera. Here's a description of the elements in this plugin (if the plugin isn't used, the default values mentioned below are used):
 
-`<segmentation_type>`: The type of segmentation, it could be semantic segmentation (where each pixel contains the label of the object) or panoptic segmentation (which is another format of instance segmentation where each pixel contains 3 values: one for the label of the object and two for the instance count of that label)
+`<segmentation_type>`: The type of segmentation, it could be [semantic](https://www.jeremyjordan.me/semantic-segmentation/) segmentation (where each pixel contains the label of the object) or [panoptic / instance](https://hasty.ai/blog/panoptic-segmentation-explained/) segmentation (which is another format of instance segmentation where each pixel contains 3 values: one for the label of the object and two for the instance count of that label)
 
 `<segmentation_type>` available values: `semantic` for semantic segmentation and `panoptic` or `instance` for panoptic segmentation.
 
@@ -204,21 +204,193 @@ ign gazebo segmentation_camera.sdf
 ```
 
 You should see something similar to this:
-@image html files/segmentation_camera/segmentation_camera_semantic.png
+@image html files/segmentation_camera/cars_segmentation.png
 
-Note that the type is `semantic`, and in the upper `Image Display` plugin we have the colored map and in the lower `Image Display` plugin we have the label map. The colored map shows that each box (all of the boxes is labeled with the same label) has the same color of the other boxes, and in the label map they contains the same label value
+![semantic segmentation](files/segmentation_camera/cars_segmentation.png)
+
+![cars_segmentation](https://user-images.githubusercontent.com/35613645/130998489-c990d060-942f-46e9-9c83-5a6acda2146e.png)
+
+
+There are 2 segmentation cameras in the SDF world, one for semantic segmentation type and another one for instance/panoptic segmentation type:
+
+- The instance/panoptic segmentation sensor which publishes the colored map to `panoptic/colored_map` topic and the labels map to `panoptic/labels_map` topic
+
+```xml
+        <sensor name="instance_segmentation_camera" type="segmentation">
+          <topic>panoptic</topic>
+          <camera>
+            <segmentation_type>instance</segmentation_type>
+            <horizontal_fov>1.57</horizontal_fov>
+            <image>
+              <width>800</width>
+              <height>600</height>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>100</far>
+            </clip>
+            <save enabled="true">
+              <path>/home/amrelsersy/Dataset/Instance</path>
+            </save>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <visualize>true</visualize>
+        </sensor>
+      </link>
+    </model>
+
+```
+- The semantic segmentation sensor which publishes the colored map to `semantic/colored_map` topic and the labels map to `semantic/labels_map` topic
+```xml
+        <sensor name="semantic_segmentation_camera" type="segmentation">
+          <topic>semantic</topic>
+          <camera>
+            <segmentation_type>semantic</segmentation_type>
+            <horizontal_fov>1.57</horizontal_fov>
+            <image>
+              <width>800</width>
+              <height>600</height>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>100</far>
+            </clip>
+            <save enabled="true">
+              <path>/home/amrelsersy/Dataset/Semantic</path>
+            </save>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <visualize>true</visualize>
+        </sensor>
+
+```
+
+Note that the upper right `Image Display` plugin we have the colored map for semantic maps and in the lower `Image Display` plugin we have the label map. The colored map shows that all objects with the same labels (ex: all cars) have the same, and in the upper left `Image Display` plugin the `labels map` they contains the same label value
 
 <br>
 
-Change the `<segmentation_type>` to `instance` or `panoptic` and run the example again.
-
-You will see output like this:
-@image html files/segmentation_camera/segmentation_camera_panoptic.png
-
-Note that in the colored map, each object in the scene has a unique color even the objects with the same label(the boxes),  and in the label map, each pixel has a unique values (1 value for label and 2 values for number of instances of that label)
+Note that the upper right `Image Display` plugin we have the colored map for instance/panoptic segmentation, where each object in the scene has a unique color even the objects with the same label(all cars have the same label but a different color), and its labels map, each pixel has a unique values (1 value for label and 2 values for number of instances of that label)
 
 
-## Processing the segmentation camera's output
+## Segmentation Dataset Generation
+To save the output of the sensor as a segmentation dataset samples we add the `<save>` tag to the `<camera>` tag, And we specify the path to save the dataset in.
+
+```xml
+        <sensor name="segmentation_camera" type="segmentation">
+          ...
+          <camera>
+            ...
+            <save enabled="true">
+              <path>DATSET_PATH</path>
+            </save>
+          </camera>
+        </sensor>
+```
+
+Set up the paths of the sensors(there are 2 segmentation sensors in the world for both types semantic and panoptic) and run:
+```
+ign gazebo segmentation_camera.sdf
+```
+
+you will find that the datasets is saved in the given path
+
+#### Dataset Demo
+@image html files/segmentation_camera/segmentation_dataset.gif
+![segmentation_dataset](https://user-images.githubusercontent.com/35613645/131008223-0fa84feb-8395-41df-8e67-572e5f7a8255.gif)
+
+
+## Visualize the segmentation dataset via Python
+put the following code in a file and run it and give it the path of the saved dataset (the one you specified in the `<save>` tag in the SDF world)
+```
+python3 file_name.py --path DATASET_PATH
+```
+
+```python
+import cv2
+import argparse
+import os
+import numpy as np
+
+# Add the colored map to the image for visualization
+def add_colored_to_image(image, colored):
+    return cv2.addWeighted(cv2.resize(image, (colored.shape[1], colored.shape[0]) )
+                            .astype(np.uint8), 1,
+                            colored.astype(np.uint8), .5,
+                            0, cv2.CV_32F)
+
+
+# global labels map for mouse callback
+labels_map = None
+
+# Callback when you click on any pixel in the labels_map image
+# Prints the label and instance count of the clicked pixel
+def mouse_callback(event,x,y,flags,param):
+    if event == cv2.EVENT_LBUTTONDOWN:
+        # instance / panoptic
+        # label id
+        label = labels_map[y,x,0]
+
+        # instance count from the other 2 values of the pixel
+        instance_count = labels_map[y,x,1] * 256 + labels_map[y,x,2]
+
+        print(f'label: {label} .. instance count: {instance_count}')
+
+cv2.namedWindow('labels_map')
+cv2.setMouseCallback('labels_map', mouse_callback)
+
+# Arg Parser to set the dataset path
+parser = argparse.ArgumentParser()
+parser.add_argument('--path', type=str, required=True, help='Segmentation Dataset Path')
+args = parser.parse_args()
+
+# dataset path
+path = args.path
+
+# paths of images folders
+images_path = os.path.join(path, "images")
+labels_map_path = os.path.join(path, "labels_maps")
+colored_map_path = os.path.join(path, "colored_maps")
+
+# list all images paths
+images_names  = sorted(os.listdir(images_path))
+labels_names  = sorted(os.listdir(labels_map_path))
+colored_names = sorted(os.listdir(colored_map_path))
+
+# add the root path to images names
+images_paths      = [os.path.join(images_path, name) for name in images_names]
+labels_map_paths  = [os.path.join(labels_map_path, name) for name in labels_names]
+colored_map_paths = [os.path.join(colored_map_path, name) for name in  colored_names]
+
+for image_path, labels_path, colored_path in zip(images_paths, labels_map_paths, colored_map_paths):
+    image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+    labels_map = cv2.imread(labels_path, cv2.IMREAD_COLOR)
+    colored_map = cv2.imread(colored_path, cv2.IMREAD_COLOR)
+
+    colored_image = add_colored_to_image(image, colored_map)
+    cv2.imshow("segmentation", colored_image)
+
+    cv2.imshow("image", image)
+    cv2.imshow("labels_map", labels_map)
+    cv2.imshow("colored_map", colored_map)
+
+    print("Press Any Key to Continue ... ESC to exit")
+    if cv2.waitKey(0) == 27:
+        break
+
+
+cv2.destroyAllWindows()
+
+```
+You will see 4 windows(image + labels_map + colored_map + colored_image(which is a combination of the image and colord_map))
+
+![visualize_segment](https://user-images.githubusercontent.com/35613645/131020222-dcbbd641-530b-449a-a5fd-d347695a882c.png)
+
+For panoptic/instance segmentation, to parse the `labels_map` click on any pixel of the `labels_map` window to see the `label` and `instance count` of that pixel
+
+
+## Processing the segmentation sensor via ign-transport
 To visualize the output from different SDF file, you can include the model of the sensor in any SDF file then run it via ign gazebo and open the `Image Display` plugin and select the topic you specified in the `<topic>` tag with suffix `colored_map` or `labels_map`.
 
 for example, in the following topic
@@ -227,7 +399,7 @@ for example, in the following topic
 ```
 the sensor data will be publish the label map data on `segmentation/labels_map` and will publish the colored map on `segmentation/colored_map`
 
-Taking a look at the SDF file for this example.
+Taking a look at the [SDF]() file for this example.
 
 
 Here's an example for segmentation camera subscriber that gets the boxes:
