@@ -38,9 +38,9 @@ Here's an example of how to attach a bounding box camera sensor to a model in a 
        </visual>
 
        <sensor name="boundingbox_camera" type="boundingbox_camera">
-         <box_type>2d</box_type>
          <topic>boxes</topic>
          <camera>
+           <box_type>2d</box_type>
            <horizontal_fov>1.047</horizontal_fov>
            <image>
              <width>800</width>
@@ -62,9 +62,9 @@ Let’s take a closer look at the portion of the code above that focuses on the 
 
 ```xml
 <sensor name="boundingbox_camera" type="boundingbox_camera">
-         <box_type>2d</box_type>
          <topic>boxes</topic>
          <camera>
+           <box_type>2d</box_type>
            <horizontal_fov>1.047</horizontal_fov>
            <image>
              <width>800</width>
@@ -202,7 +202,8 @@ ign gazebo boundingbox_camera.sdf
 ```
 
 You should see something similar to this:
-@image html files/boundingbox_camera/boundingbox_camera_visible.png
+
+![visible_boxes](files/boundingbox_camera/boundingbox_camera_visible.png)
 
 
 Note that the mode was visible 2d, so that the occluded sphere has a bounding box on just the visible part of it, that is the way of the annotation in famous datasets such as COCO & PASCAL VOC datasets.
@@ -211,26 +212,265 @@ Note that the mode was visible 2d, so that the occluded sphere has a bounding bo
 Change the `<box_type>` to `full_2d` to see the full bounding boxes mode which shows the full box of the occluded objects, and this mode is implemented in datasets such as `KITTI` and `nuscenes`, and it is benefit in the case that you need a the model to guess the hidden parts of the objects!.
 
 You will see output like this:
-@image html files/boundingbox_camera/boundingbox_camera_full.png
 
-
+![full_boxes](files/boundingbox_camera/boundingbox_camera_full.png)
 
 
 To visualize the output from different SDF file, you can include the model of the sensor in any SDF file then run it via ign gazebo and open the `Image Display` plugin and select the topic you specified in the `<topic>` tag.
 
 
-Taking a look at the SDF file for this example.
+Taking a look at the [SDF](https://github.com/ignitionrobotics/ign-gazebo/blob/ign-gazebo5/examples/worlds/boundingbox_camera.sdf) file for this example.
+
+
+## Object Detection Dataset Generation
+To save the output of the sensor as an object detection dataset samples we add the `<save>` tag to the `<camera>` tag, And we specify the path to save the dataset in.
+
+```xml
+        <sensor name="boundingbox_camera" type="boundingbox">
+          ...
+          <camera>
+            ...
+            <save enabled="true">
+              <path>DATSET_PATH</path>
+            </save>
+          </camera>
+        </sensor>
+```
+
+Set up the path of the dataset and run:
+```
+ign gazebo boundingbox_camera.sdf
+```
+
+you will find that the dataset is saved in the given path
+
+#### Dataset Demo
+## Visualize the dataset in Python
+
+To visualize the dataset after the generation, put that code in a `.py` file then run:
+```
+python3 file_name.py --path DATASET_PATH
+```
+the `DATASET_PATH` is the save path where the dataset is saved(the one you specified in the `<save>` tag)
+
+```python
+import cv2
+import numpy as np
+import os
+import argparse
+
+# Arg Parser to set the dataset path
+parser = argparse.ArgumentParser()
+parser.add_argument('--path', type=str, required=True, help='Segmentation Dataset Path')
+args = parser.parse_args()
+
+# dataset path
+path = args.path
+
+# paths of images folders
+imageDir = os.path.join(path, "images")
+boxesDir = os.path.join(path, "boxes")
+
+imagesPaths = sorted(os.listdir(imageDir))
+boxesPaths = sorted(os.listdir(boxesDir))
+
+imagesPaths = [os.path.join(imageDir, path) for path in imagesPaths]
+boxesPaths = [os.path.join(boxesDir, path) for path in boxesPaths]
+
+for imagePath, boxesPath in zip(imagesPaths, boxesPaths):
+    boxesFile = open(boxesPath)
+    boxesLines = boxesFile.readlines()
+
+    image = cv2.imread(imagePath)
+    width, height = image.shape[1], image.shape[0]
+
+    del boxesLines[0]
+    for box in boxesLines:
+        box = box.split(',')
+        label = float(box[0])
+        x     = float(box[1])
+        y     = float(box[2])
+        w     = float(box[3])
+        h     = float(box[4])
+
+        cv2.rectangle(image, (int(x-w/2), int(y-h/2)), (int(x+w/2), int(y+h/2)), (0,255,0), 3)
+
+    print("")
+    cv2.imshow("image", image)
+    if cv2.waitKey(0) == 27:
+        cv2.destroyAllWindows()
+        break
+
+```
+
+You will see output like this
+
+![visualize_2d](files/boundingbox_camera/visualize_2d.png)
+
+Try to change the `<box_type>` to `3d` then generate the dataset again, then visualize it using the following code
+
+```python
+import cv2
+import numpy as np
+import os
+import argparse
+
+def draw_box_3d(image, corners, color=(0, 0, 255)):
+    ''' Draw 3d bounding box in image
+        corners: (8,2) array of vertices for the 3d box in following order:
+            1 -------- 0
+           /|         /|
+          2 -------- 3 .
+          | |        | |
+          . 5 -------- 4
+          |/         |/
+          6 -------- 7
+    '''
+
+    face_idx = [[0, 1, 5, 4],
+                [1, 2, 6, 5],
+                [2, 3, 7, 6],
+                [3, 0, 4, 7]]
+    for ind_f in range(3, -1, -1):
+        f = face_idx[ind_f]
+        for j in range(4):
+            cv2.line(image, (corners[f[j], 0], corners[f[j], 1]),
+                     (corners[f[(j + 1) % 4], 0], corners[f[(j + 1) % 4], 1]), color, 2, lineType=cv2.LINE_AA)
+        if ind_f == 0:
+            cv2.line(image, (corners[f[0], 0], corners[f[0], 1]),
+                     (corners[f[2], 0], corners[f[2], 1]), color, 1, lineType=cv2.LINE_AA)
+            cv2.line(image, (corners[f[1], 0], corners[f[1], 1]),
+                     (corners[f[3], 0], corners[f[3], 1]), color, 1, lineType=cv2.LINE_AA)
+
+    return image
+
+# Calculates Rotation Matrix given euler angles.
+def euler_to_rotation(theta) :
+
+    R_x = np.array([[1,         0,                  0                   ],
+                    [0,         np.cos(theta[0]), -np.sin(theta[0]) ],
+                    [0,         np.sin(theta[0]),  np.cos(theta[0])  ]
+                    ])
+
+    R_y = np.array([[np.cos(theta[1]),    0,      np.sin(theta[1])  ],
+                    [0,                   1,      0                   ],
+                    [-np.sin(theta[1]),   0,      np.cos(theta[1])  ]
+                    ])
+
+    R_z = np.array([[np.cos(theta[2]),    -np.sin(theta[2]),    0],
+                    [np.sin(theta[2]),     np.cos(theta[2]),     0],
+                    [0,                     0,                      1]
+                    ])
+
+    R = np.dot(R_z, np.dot( R_y, R_x ))
+
+    return R
+"""
+This matrix are specific for the camera configuration in the SDF world
+
+    <horizontal_fov>1.57</horizontal_fov>
+    <width>800</width>
+    <height>600</height>
+
+If any of them is changed, you have to change the projection matrix
+"""
+projMatrix = np.array([
+    [0.99975, 0, 0, 0],
+    [0, 1.333, 0, 0 ],
+    [0, 0, -1.00002, -0.02],
+    [0, 0, -1, 0]
+])
+
+
+# Arg Parser to set the dataset path
+parser = argparse.ArgumentParser()
+parser.add_argument('--path', type=str, required=True, help='Segmentation Dataset Path')
+args = parser.parse_args()
+
+# dataset path
+path = args.path
+
+# paths of images folders
+imageDir = os.path.join(path, "images")
+boxesDir = os.path.join(path, "boxes")
+
+imagesPaths = sorted(os.listdir(imageDir))
+boxesPaths = sorted(os.listdir(boxesDir))
+
+imagesPaths = [os.path.join(imageDir, path) for path in imagesPaths]
+boxesPaths = [os.path.join(boxesDir, path) for path in boxesPaths]
+
+for imagePath, boxesPath in zip(imagesPaths, boxesPaths):
+    boxesFile = open(boxesPath)
+    boxesLines = boxesFile.readlines()
+
+    image = cv2.imread(imagePath)
+    width, height = image.shape[1], image.shape[0]
+
+    del boxesLines[0]
+    for box in boxesLines:
+        box = box.split(',')
+        label = float(box[0])
+        x     = float(box[1])
+        y     = float(box[2])
+        z     = float(box[3])
+        w     = float(box[4])
+        h     = float(box[5])
+        l     = float(box[6])
+        roll  = float(box[7])
+        pitch = float(box[8])
+        yaw   = float(box[9])
+
+        R = euler_to_rotation([roll, pitch, yaw])
+
+        x_corners = [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2]
+        y_corners = [h/2, h/2, h/2, h/2, -h/2, -h/2, -h/2, -h/2]
+        z_corners = [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2]
+        corners = np.array([x_corners, y_corners, z_corners], dtype=np.float32)
+
+        corners_3d = np.dot(R, corners)
+        corners_3d = corners_3d + np.array([x,y,z], dtype=np.float32).reshape(3, 1)
+        corners_3d = corners_3d.transpose(1, 0)
+
+        pts_3d_homo = np.concatenate([corners_3d, np.ones((corners_3d.shape[0], 1), dtype=np.float32)], axis=1)
+        pts_2d = np.dot(projMatrix, pts_3d_homo.transpose(1, 0)).transpose(1, 0)
+        pts_2d = pts_2d[:, :2] / pts_2d[:, 2:]
+        pts_2d = pts_2d.astype(np.float32)
+
+        # convert from [-1,1] to [0,1] range
+        pts_2d = pts_2d.clip(-1,1)
+        xx = (pts_2d[:,0] + 1) / 2
+        yy = (1 - pts_2d[:,1]) / 2
+        xx = xx.clip(0,1)
+        yy = yy.clip(0,1)
+        # convert to screen coord
+        pts_2d = np.array([xx,yy], dtype=np.float32).T
+        pts_2d *= (width, height)
+        pts_2d = pts_2d.astype(np.int32)
+
+        image = draw_box_3d(image, pts_2d)
+
+
+    print("")
+    cv2.imshow("image", image)
+    if cv2.waitKey(0) == 27:
+        cv2.destroyAllWindows()
+        break
+```
+Note that, you shouldn't change the camera configuration to use that code, or you have to change the porjection matrix that is specified in the code.
+
+You should see output like this
+
+![visualize_3d](files/boundingbox_camera/visualize_3d.png)
 
 
 
-
-## Processing the bounding box camera's output
+## Processing the bounding box sensor via ign-transport
 In the example above, the bounding box cameras publish an axis aligned 2d bounding box message in case of 2d boxes mode (visible 2d or full 2d) or a oriented 3d bounding box message  to the topic provided in the `<topic>` tag in SDF
 For example, in the next code we publish on the topic “boxes”
 
 ```xml
       <sensor name="boundingbox_camera" type="boundingbox_camera">
-         <box_type>2d</box_type>
          <topic>boxes</topic>
 	    ....
 ```

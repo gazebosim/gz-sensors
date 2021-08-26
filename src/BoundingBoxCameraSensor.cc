@@ -17,6 +17,7 @@
 
 #include "ignition/sensors/BoundingBoxCameraSensor.hh"
 
+#include <filesystem>
 #include <memory>
 #include <mutex>
 
@@ -115,9 +116,6 @@ class ignition::sensors::BoundingBoxCameraSensorPrivate
 
   /// \brief Folder to save the bounding boxes
   public: std::string saveBoxesFolder = "/boxes";
-
-  /// \brief Prefix of an image/boxes name
-  public: std::string savePrefix = "";
 
   /// \brief counter used to set the sample filename
   public: std::uint64_t saveCounter = 0;
@@ -348,7 +346,19 @@ bool BoundingBoxCameraSensor::CreateCamera()
     this->dataPtr->saveBoxesFolder =
       this->dataPtr->savePath + this->dataPtr->saveBoxesFolder;
     this->dataPtr->saveSample = true;
-    this->dataPtr->savePrefix = this->Name() + "_";
+
+    // Set the save counter to be equal number of images in the folder + 1
+    // to continue adding to the images in the folder (multi scene datasets)
+    if (ignition::common::isDirectory(this->dataPtr->saveImageFolder))
+    {
+      for (const auto &entry : std::filesystem::directory_iterator(
+        this->dataPtr->saveImageFolder))
+      {
+        // To disable unused warning
+        (void)entry;
+        this->dataPtr->saveCounter++;
+      }
+    }
   }
 
   // Connection to receive the BoundingBox buffer
@@ -600,8 +610,13 @@ void BoundingBoxCameraSensorPrivate::SaveImage()
 
   ignition::common::Image localImage;
 
-  std::string filename =
-    this->savePrefix + std::to_string(this->saveCounter) + ".png";
+  // Save the images in format of 0000001, 0000002 .. etc
+  // Useful in sorting them in python
+  std::stringstream ss;
+  ss << std::setw(7) << std::setfill('0') << this->saveCounter;
+  std::string saveCounterString = ss.str();
+
+  std::string filename = "image_" + saveCounterString + ".png";
 
   localImage.SetFromData(this->saveImageBuffer, width, height,
       common::Image::RGB_INT8);
@@ -625,8 +640,14 @@ void BoundingBoxCameraSensorPrivate::SaveBoxes()
       return;
   }
 
+  // Save the images in format of 0000001, 0000002 .. etc
+  // Useful in sorting them in python
+  std::stringstream ss;
+  ss << std::setw(7) << std::setfill('0') << this->saveCounter;
+  std::string saveCounterString = ss.str();
+
   std::string filename = this->saveBoxesFolder + "/boxes_" +
-    std::to_string(this->saveCounter) + ".csv";
+    saveCounterString + ".csv";
   std::ofstream file(filename);
 
   if (this->type == rendering::BoundingBoxType::BBT_BOX3D)
