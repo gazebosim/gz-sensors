@@ -205,6 +205,16 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
     this->dataPtr->node.Advertise<ignition::msgs::Image>(
       this->dataPtr->topicImage);
 
+  if (!this->dataPtr->imagePublisher)
+  {
+    ignerr << "Unable to create publisher on topic ["
+      << this->dataPtr->topicImage << "].\n";
+    return false;
+  }
+
+  igndbg << "Camera images for [" << this->Name() << "] advertised on ["
+    << this->dataPtr->topicImage << "]" << std::endl;
+
   if (this->dataPtr->type == rendering::BoundingBoxType::BBT_BOX3D)
   {
     this->dataPtr->boxesPublisher =
@@ -220,19 +230,15 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
       this->dataPtr->topicBoundingBoxes);
   }
 
-  if (!this->dataPtr->imagePublisher)
-  {
-    ignerr << "Unable to create publisher on topic ["
-      << this->dataPtr->topicImage << "].\n";
-    return false;
-  }
-
   if (!this->dataPtr->boxesPublisher)
   {
     ignerr << "Unable to create publisher on topic ["
       << this->dataPtr->topicBoundingBoxes << "].\n";
     return false;
   }
+
+  igndbg << "Bounding boxes for [" << this->Name() << "] advertised on ["
+    << this->dataPtr->topicBoundingBoxes << std::endl;
 
   if (!this->AdvertiseInfo())
     return false;
