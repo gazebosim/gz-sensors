@@ -15,6 +15,7 @@
  *
 */
 
+#include <filesystem>
 #include <memory>
 #include <mutex>
 
@@ -212,7 +213,7 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
   }
 
   igndbg << "Segmentation labels map image for [" << this->Name()
-    << "] advertised on [" << this->Topic() << this->topicLabelsMapSuffix
+    << "] advertised on [" << this->Topic() << this->dataPtr->topicLabelsMapSuffix
     << "]" << std::endl;
 
   // TODO(anyone) Access the info topic from the parent class
@@ -302,6 +303,19 @@ bool SegmentationCameraSensor::CreateCamera()
       this->dataPtr->savePath + this->dataPtr->saveColoredMapsFolder;
     this->dataPtr->saveLabelsMapsFolder =
       this->dataPtr->savePath + this->dataPtr->saveLabelsMapsFolder;
+
+    // Set the save counter to be equal number of images in the folder + 1
+    // to continue adding to the images in the folder (multi scene datasets)
+    if (ignition::common::isDirectory(this->dataPtr->saveImageFolder))
+    {
+      for (const auto &entry : std::filesystem::directory_iterator(
+        this->dataPtr->saveImageFolder))
+      {
+        // To disable unused warning
+        (void)entry;
+        this->dataPtr->saveCounter++;
+      }
+    }
   }
 
   if (!this->dataPtr->camera)
@@ -561,12 +575,15 @@ bool SegmentationCameraSensorPrivate::SaveSample()
   auto width = this->camera->ImageWidth();
   auto height = this->camera->ImageHeight();
 
-  std::string coloredName = this->saveImagePrefix + "colored_" +
-                         std::to_string(this->saveCounter) + ".png";
-  std::string labelsName = this->saveImagePrefix + "labels_" +
-                         std::to_string(this->saveCounter) + ".png";
-  std::string rgbImageName = this->saveImagePrefix + "image_" +
-                         std::to_string(this->saveCounter) + ".png";
+  // Save the images in format of 0000001, 0000002 .. etc
+  // Useful in sorting them in python
+  std::stringstream ss;
+  ss << std::setw(7) << std::setfill('0') << this->saveCounter;
+  std::string saveCounterString = ss.str();
+
+  std::string coloredName = "colored_" + saveCounterString + ".png";
+  std::string labelsName = "labels_" + saveCounterString + ".png";
+  std::string rgbImageName = "image_" + saveCounterString + ".png";
 
   // Save rgb image
   ignition::common::Image rgbImage;
