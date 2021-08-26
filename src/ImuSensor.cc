@@ -124,6 +124,9 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
+  igndbg << "IMU data for [" << this->Name() << "] advertised on ["
+         << this->Topic() << "]" << std::endl;
+
   const std::map<SensorNoiseType, sdf::Noise> noises = {
     {ACCELEROMETER_X_NOISE_M_S_S, _sdf.ImuSensor()->LinearAccelerationXNoise()},
     {ACCELEROMETER_Y_NOISE_M_S_S, _sdf.ImuSensor()->LinearAccelerationYNoise()},
