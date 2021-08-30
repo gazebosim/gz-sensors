@@ -1,5 +1,29 @@
 ## Ignition Sensors 3
 
+### Ignition Sensors 3.X.X (202X-XX-XX)
+
+### Ignition Sensors 3.3.0 (2021-08-26)
+
+1. 👩‍🌾 Print debug messages when sensors advertise topics
+    * [Pull request #151](https://github.com/ignitionrobotics/ign-sensors/pull/151)
+
+1. Publish performance sensor metrics.
+    * [Pull request #146](https://github.com/ignitionrobotics/ign-sensors/pull/146)
+
+1. CI and infrastructure
+    * [Pull request #130](https://github.com/ignitionrobotics/ign-sensors/pull/130)
+    * [Pull request #150](https://github.com/ignitionrobotics/ign-sensors/pull/150)
+    * [Pull request #106](https://github.com/ignitionrobotics/ign-sensors/pull/106)
+
+1. 👩‍🌾 Disable tests that consistently fail on macOS
+    * [Pull request #121](https://github.com/ignitionrobotics/ign-sensors/pull/121)
+
+1. 👩‍🌾 Clear Windows warnings (backport #58)
+    * [Pull request #58](https://github.com/ignitionrobotics/ign-sensors/pull/58)
+
+1. Fix macOS/windows tests that failed to load library (backport #60)
+    * [Pull request #60](https://github.com/ignitionrobotics/ign-sensors/pull/60)
+
 ### Ignition Sensors 3.2.0 (2021-02-08)
 
 1. Apply noise to lidar point cloud.
@@ -11,7 +35,7 @@
 1. Added thermal camera tutorial.
     * [Pull request 61](https://github.com/ignitionrobotics/ign-sensors/pull/61)
 
-1. Prevent segfaults on test failures, make tests verbose. 
+1. Prevent segfaults on test failures, make tests verbose.
     * [Pull request 56](https://github.com/ignitionrobotics/ign-sensors/pull/56)
 
 1. Resolve updated codecheck issues.
