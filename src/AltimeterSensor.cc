@@ -100,6 +100,9 @@ bool AltimeterSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
+  igndbg << "Altimeter data for [" << this->Name() << "] advertised on ["
+         << this->Topic() << "]" << std::endl;
+
   // Load the noise parameters
   if (_sdf.AltimeterSensor()->VerticalPositionNoise().Type()
       != sdf::NoiseType::NONE)
