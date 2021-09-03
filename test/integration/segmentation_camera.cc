@@ -231,7 +231,7 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
 
   // 23 is a random number that is not used for boxes
   uint32_t backgroundLabel = 23;
-  camera->SetSegmentationType(rendering::SegmentationType::SEMANTIC);
+  camera->SetSegmentationType(rendering::SegmentationType::ST_SEMANTIC);
   camera->EnableColoredMap(true);
   camera->SetBackgroundLabel(backgroundLabel);
   camera->SetLocalPosition(0.0, 0.0, 0.0);
@@ -303,7 +303,7 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   }
 
   // Instance/Panoptic Segmentation Test
-  camera->SetSegmentationType(rendering::SegmentationType::PANOPTIC);
+  camera->SetSegmentationType(rendering::SegmentationType::ST_PANOPTIC);
 
   // wait for a new frame
   WaitForNewFrame(mgr);

@@ -89,7 +89,7 @@ class ignition::sensors::SegmentationCameraSensorPrivate
 
   /// \brief Segmentation type (Semantic / Instance)
   public: rendering::SegmentationType type
-    {rendering::SegmentationType::SEMANTIC};
+    {rendering::SegmentationType::ST_SEMANTIC};
 
   /// \brief Connection to the new segmentation frames data
   public: common::ConnectionPtr newSegmentationConnection {nullptr};
@@ -275,9 +275,9 @@ bool SegmentationCameraSensor::CreateCamera()
     });
 
     if (type == "semantic")
-      this->dataPtr->type = rendering::SegmentationType::SEMANTIC;
+      this->dataPtr->type = rendering::SegmentationType::ST_SEMANTIC;
     else if (type == "instance" || type == "panoptic")
-      this->dataPtr->type = rendering::SegmentationType::PANOPTIC;
+      this->dataPtr->type = rendering::SegmentationType::ST_PANOPTIC;
     else
     {
       igndbg << "Wrong type [" << type <<
