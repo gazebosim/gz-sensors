@@ -425,19 +425,27 @@ for imagePath, boxesPath in zip(imagesPaths, boxesPaths):
         pitch = float(box[8])
         yaw   = float(box[9])
 
+        # get the rotation matrix
         R = euler_to_rotation([roll, pitch, yaw])
 
+        # get the 8 vertices of the box (the corners) in model coordinates
         x_corners = [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2]
         y_corners = [h/2, h/2, h/2, h/2, -h/2, -h/2, -h/2, -h/2]
         z_corners = [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2]
+        # concatinate them
         corners = np.array([x_corners, y_corners, z_corners], dtype=np.float32)
 
+        # transform the corners to the 3D camera coordinates by applying the rotation then addin the position
         corners_3d = np.dot(R, corners)
         corners_3d = corners_3d + np.array([x,y,z], dtype=np.float32).reshape(3, 1)
         corners_3d = corners_3d.transpose(1, 0)
 
+        # convert the 3d points to 4d homogenous points to apply the projection matrix
         pts_3d_homo = np.concatenate([corners_3d, np.ones((corners_3d.shape[0], 1), dtype=np.float32)], axis=1)
+
+        # projection
         pts_2d = np.dot(projMatrix, pts_3d_homo.transpose(1, 0)).transpose(1, 0)
+        # devide by w component of the homogenous coord.
         pts_2d = pts_2d[:, :2] / pts_2d[:, 2:]
         pts_2d = pts_2d.astype(np.float32)
 
