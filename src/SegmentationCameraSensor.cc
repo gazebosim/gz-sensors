@@ -15,13 +15,13 @@
  *
 */
 
-#include <filesystem>
 #include <memory>
 #include <mutex>
 
 #include <ignition/common/Console.hh>
 #include <ignition/common/Image.hh>
 #include <ignition/common/Profiler.hh>
+#include <ignition/common/Util.hh>
 #include <ignition/msgs.hh>
 #include <ignition/rendering/SegmentationCamera.hh>
 #include <ignition/transport/Node.hh>
@@ -308,11 +308,10 @@ bool SegmentationCameraSensor::CreateCamera()
     // to continue adding to the images in the folder (multi scene datasets)
     if (ignition::common::isDirectory(this->dataPtr->saveImageFolder))
     {
-      for (const auto &entry : std::filesystem::directory_iterator(
-        this->dataPtr->saveImageFolder))
+      common::DirIter endIter;
+      for (common::DirIter dirIter(this->dataPtr->saveImageFolder);
+        dirIter != endIter; ++dirIter)
       {
-        // To disable unused warning
-        (void)entry;
         this->dataPtr->saveCounter++;
       }
     }
