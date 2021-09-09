@@ -198,7 +198,7 @@ TEST_F(SensorUpdate, Update)
   // publishes metrics in the correspondant topic.
   for (int sec = 0 ; sec < static_cast<int>(kNumberOfMessages) ; ++sec)
   {
-    common::Time now{sec, 0 /*nsec*/};
+    std::chrono::steady_clock::duration now = std::chrono::seconds(sec);
     sensor->Update(now, true);
   }
 
