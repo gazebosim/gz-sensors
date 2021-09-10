@@ -122,6 +122,9 @@ bool AirPressureSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
+  igndbg << "Air pressure for [" << this->Name() << "] advertised on ["
+         << this->Topic() << "]" << std::endl;
+
   // Load the noise parameters
   if (_sdf.AirPressureSensor()->PressureNoise().Type() != sdf::NoiseType::NONE)
   {
