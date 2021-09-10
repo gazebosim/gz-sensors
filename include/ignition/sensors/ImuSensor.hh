@@ -118,12 +118,26 @@ namespace ignition
       public: math::Quaterniond OrientationReference() const;
 
       /// \brief Get the orienation of the imu with respect to reference frame
-      /// \return Orientation in reference frame
+      /// \return Orientation in reference frame. If orientation is not
+      /// enabled, this will return the last computed orientation before
+      /// orientation is disabled or identity Quaternion if orientation has
+      /// never been enabled.
       public: math::Quaterniond Orientation() const;
 
       /// \brief Set the gravity vector
       /// \param[in] _gravity gravity vector in meters per second squared.
       public: void SetGravity(const math::Vector3d &_gravity);
+
+      /// \brief Set whether to output orientation. Not all imu's generate
+      /// orientation values as they use filters to produce orientation
+      /// estimates.
+      /// \param[in] _enabled True to publish orientation data, false to leave
+      /// the message field empty.
+      public: void SetOrientationEnabled(bool _enabled);
+
+      /// \brief Get whether or not orientation is enabled.
+      /// \return True if orientation is enabled, false otherwise.
+      public: bool OrientationEnabled() const;
 
       /// \brief Get the gravity vector
       /// \return Gravity vectory in meters per second squared.
