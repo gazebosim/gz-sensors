@@ -118,7 +118,9 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
       << this->Topic() << "].\n";
     return false;
   }
-  ignmsg << "Publishing laser scans on [" << this->Topic() << "]" << std::endl;
+
+  igndbg << "Laser scans for [" << this->Name() << "] advertised on ["
+         << this->Topic() << "]" << std::endl;
 
   // Load ray atributes
   this->dataPtr->sdfLidar = *_sdf.LidarSensor();
