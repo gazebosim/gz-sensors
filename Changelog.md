@@ -29,6 +29,41 @@
 
 ### Ignition Sensors 4.X.X
 
+### Ignition Sensors 4.2.0 (2021-07-12)
+
+1. Add API for enabling / disabling IMU orientation
+    * [Pull request #142](https://github.com/ignitionrobotics/ign-sensors/pull/142)
+
+1. Init will now set the nextUpdateTime to zero
+    * [Pull request #137](https://github.com/ignitionrobotics/ign-sensors/pull/137)
+
+1. Remove clamping from lidar noise
+    * [Pull request #132](https://github.com/ignitionrobotics/ign-sensors/pull/132)
+
+1. Remove tools/code_check and update codecov
+    * [Pull request #130](https://github.com/ignitionrobotics/ign-sensors/pull/130)
+
+1. Disable macOS workflow
+    * [Pull request #124](https://github.com/ignitionrobotics/ign-sensors/pull/124)
+
+1. 👩‍🌾 Disable tests that consistently fail on macOS
+    * [Pull request #121](https://github.com/ignitionrobotics/ign-sensors/pull/121)
+
+1. Master branch updates
+    * [Pull request #106](https://github.com/ignitionrobotics/ign-sensors/pull/106)
+
+1. 👩‍🌾 Clear Windows warnings (backport #58)
+    * [Pull request #102](https://github.com/ignitionrobotics/ign-sensors/pull/102)
+
+1. Update thermal camera tutorial - include varying temp. objects
+    * [Pull request #79](https://github.com/ignitionrobotics/ign-sensors/pull/79)
+
+1. Fix macOS/windows tests that failed to load library
+    * [Pull request #60](https://github.com/ignitionrobotics/ign-sensors/pull/60)
+
+1. Removed issue & PR templates
+    * [Pull request #99](https://github.com/ignitionrobotics/ign-sensors/pull/99)
+
 ### Ignition Sensors 4.1.0 (2021-02-10)
 
 1. Added issue and PR templates.
@@ -71,6 +106,30 @@
     * [BitBucket pull request 111](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/111)
 
 ## Ignition Sensors 3
+
+### Ignition Sensors 3.X.X (202X-XX-XX)
+
+### Ignition Sensors 3.3.0 (2021-08-26)
+
+1. 👩‍🌾 Print debug messages when sensors advertise topics
+    * [Pull request #151](https://github.com/ignitionrobotics/ign-sensors/pull/151)
+
+1. Publish performance sensor metrics.
+    * [Pull request #146](https://github.com/ignitionrobotics/ign-sensors/pull/146)
+
+1. CI and infrastructure
+    * [Pull request #130](https://github.com/ignitionrobotics/ign-sensors/pull/130)
+    * [Pull request #150](https://github.com/ignitionrobotics/ign-sensors/pull/150)
+    * [Pull request #106](https://github.com/ignitionrobotics/ign-sensors/pull/106)
+
+1. 👩‍🌾 Disable tests that consistently fail on macOS
+    * [Pull request #121](https://github.com/ignitionrobotics/ign-sensors/pull/121)
+
+1. 👩‍🌾 Clear Windows warnings (backport #58)
+    * [Pull request #58](https://github.com/ignitionrobotics/ign-sensors/pull/58)
+
+1. Fix macOS/windows tests that failed to load library (backport #60)
+    * [Pull request #60](https://github.com/ignitionrobotics/ign-sensors/pull/60)
 
 ### Ignition Sensors 3.2.0 (2021-02-08)
 

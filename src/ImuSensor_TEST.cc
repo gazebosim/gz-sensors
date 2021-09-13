@@ -311,6 +311,84 @@ TEST(ImuSensor_TEST, ComputeNoise)
   EXPECT_GT(sensor->LinearAcceleration().SquaredLength(), 0.0);
 }
 
+//////////////////////////////////////////////////
+TEST(ImuSensor_TEST, Orientation)
+{
+  // Create a sensor manager
+  ignition::sensors::Manager mgr;
+
+  sdf::ElementPtr imuSDF;
+
+  {
+    const std::string name = "TestImu_Truth";
+    const std::string topic = "/ignition/sensors/test/imu_truth";
+    const double updateRate = 100;
+    const auto accelNoise = noNoiseParameters(updateRate, 0.0);
+    const auto gyroNoise = noNoiseParameters(updateRate, 0.0);
+    const bool always_on = 1;
+    const bool visualize = 1;
+
+    imuSDF = ImuSensorToSDF(name, updateRate, topic,
+      accelNoise, gyroNoise, always_on, visualize);
+  }
+
+  // Create an ImuSensor
+  auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+      imuSDF);
+
+  // Make sure the above dynamic cast worked.
+  ASSERT_NE(nullptr, sensor);
+
+  math::Quaterniond orientRef;
+  math::Quaterniond orientValue(math::Vector3d(IGN_PI/2.0, 0, IGN_PI));
+  math::Pose3d pose(math::Vector3d(0, 1, 2), orientValue);
+
+  sensor->SetOrientationReference(orientRef);
+  sensor->SetWorldPose(pose);
+
+  sensor->Update(std::chrono::steady_clock::duration(
+    std::chrono::nanoseconds(10000000)));
+
+  // Check orientation
+  EXPECT_TRUE(sensor->OrientationEnabled());
+  EXPECT_EQ(orientRef, sensor->OrientationReference());
+  EXPECT_EQ(orientValue, sensor->Orientation());
+
+  // update pose and check orientation
+  math::Quaterniond newOrientValue(math::Vector3d(IGN_PI, IGN_PI/2, IGN_PI));
+  math::Pose3d newPose(math::Vector3d(0, 1, 1), newOrientValue);
+  sensor->SetWorldPose(newPose);
+
+  sensor->Update(std::chrono::steady_clock::duration(
+    std::chrono::nanoseconds(20000000)));
+
+  EXPECT_TRUE(sensor->OrientationEnabled());
+  EXPECT_EQ(orientRef, sensor->OrientationReference());
+  EXPECT_EQ(newOrientValue, sensor->Orientation());
+
+  // disable orientation and check
+  sensor->SetOrientationEnabled(false);
+  EXPECT_FALSE(sensor->OrientationEnabled());
+  EXPECT_EQ(orientRef, sensor->OrientationReference());
+  // orientation remains the same after disabling orientation
+  EXPECT_EQ(newOrientValue, sensor->Orientation());
+
+  // update world pose with orientation disabled and verify that orientation
+  // does not change
+  math::Quaterniond newOrientValue2(math::Vector3d(IGN_PI/2, IGN_PI/2, IGN_PI));
+  math::Pose3d newPose2(math::Vector3d(1, 1, 0), newOrientValue2);
+  sensor->SetWorldPose(newPose2);
+  sensor->Update(std::chrono::steady_clock::duration(
+    std::chrono::nanoseconds(20000000)));
+
+  sensor->SetOrientationEnabled(false);
+  EXPECT_FALSE(sensor->OrientationEnabled());
+  EXPECT_EQ(orientRef, sensor->OrientationReference());
+  // orientation should still be the previous value because it is not being
+  // updated.
+  EXPECT_EQ(newOrientValue, sensor->Orientation());
+
+}
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
