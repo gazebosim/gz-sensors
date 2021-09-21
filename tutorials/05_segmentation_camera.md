@@ -1,16 +1,17 @@
-# Segmentation Camera in Ignition Gazebo
+\page segmentationcamera_igngazebo Segmentation Camera in Ignition Gazebo
+
 In this tutorial, we will discuss how to use a segmentation camera sensor in Ignition Gazebo.
 
 ## Requirements
 
 Since this tutorial will show how to use a segmentation camera sensor in Ignition Gazebo, you'll need to have Ignition Gazebo installed. We recommend installing all Ignition libraries, using version Fortress or newer (the segmentation camera is not available in Ignition versions prior to Fortress).
-If you need to install Ignition, pick the version you'd like to use and then follow the installation instructions.
+If you need to install Ignition, [pick the version you'd like to use](https://ignitionrobotics.org/docs) and then follow the installation instructions.
 
 ## Setting up the segmentation camera
 Here's an example of how to attach a segmentation camera sensor to a model in a SDF file:
 
 ```xml
-    <model name="segmentation_camera">
+    <model name="segmentation_model">
       <pose>4 0 1.0 0 0.0 3.14</pose>
       <link name="link">
         <pose>0.05 0.05 0.05 0 0 0</pose>
@@ -84,6 +85,7 @@ Let’s take a closer look at the portion of the code above that focuses on the 
 
 As we can see, we define a sensor with the following SDF elements:
 * `<camera>`: The camera, which has the following child elements:
+    * `<segmentation_type>`: The type of segmentation performed by the camera. Use `semantic` for [semantic segmentation](https://www.jeremyjordan.me/semantic-segmentation/). For [panoptic (instance) segmentation](https://hasty.ai/blog/panoptic-segmentation-explained/), use `panoptic` or `instance`. The default value for `<segmentation_type>` is `semantic`.
 	* `<horizontal_fov>`: The horizontal field of view, in radians.
 	* `<image>`: The image size, in pixels.
 	* `<clip>`: The near and far clip planes. Objects are only rendered if they're within these planes.
@@ -92,26 +94,16 @@ As we can see, we define a sensor with the following SDF elements:
 * `<visualize>`: Whether the sensor should be visualized in the GUI (indicated by true) or not (indicated by false). This is currently unused by Ignition Gazebo.
 * `<topic>`: The name of the topic which will be used to publish the sensor data.
 
-<br>
-There's also an optional plugin used here that allows for further configuration of the segmentation camera. Here's a description of the elements in this plugin (if the plugin isn't used, the default values mentioned below are used):
-
-`<segmentation_type>`: The type of segmentation, it could be [semantic](https://www.jeremyjordan.me/semantic-segmentation/) segmentation (where each pixel contains the label of the object) or [panoptic / instance](https://hasty.ai/blog/panoptic-segmentation-explained/) segmentation (which is another format of instance segmentation where each pixel contains 3 values: one for the label of the object and two for the instance count of that label)
-
-`<segmentation_type>` available values: `semantic` for semantic segmentation and `panoptic` or `instance` for panoptic segmentation.
-
-Default value for the `<segmentation_type>` is `semantic` or semantic segmentation
-
-
 #### Label map & Colored map
-The segmentation sensor makes 2 types of maps:
+The segmentation sensor creates 2 maps (or images):
 
-- The `label map` which is described above where each pixel contains the label value in semantic segmentation and (label & num of instances) in case of panoptic segmentation
-- The `colored map` which is the colored version of the label map, in semantic segmentation each pixel contains the coresponding color to the label of the object, so all items of the same label will have the same color. And in panoptic segmentation, each pixel contains a unique color for each instance in the scene.
+- The `label map`: For semantic segmentation, each pixel contains the object's label. For panoptic segmentation, each pixel contains the label and object's instance count.
+- The `colored map`: A colored version of the label map. In semantic segmentation, all items of the same label will have the same color. In panoptic segmentation, each pixel contains a unique color for each instance in the scene (so, for panoptic segmentation, items of the same label will not have the same color).
 
 ## Assigning a label to a model
-Only models with labels (annotated classes) will be visible by the segmentation camera sensor, and unlabeled models will be considered as a background
+Only models with labels (annotated classes) will be visible by the segmentation camera sensor. Unlabeled models will be considered as background.
 
-To assign a label to a model we use the label plugin in the SDF file
+To assign a label to a model we use the label plugin in the SDF file:
 
 ```xml
 <model name="box">
@@ -155,7 +147,7 @@ To assign a label to a model we use the label plugin in the SDF file
     </model>
 ```
 
-Lets zoom in the label plugin
+Lets zoom in the label plugin:
 
 ```xml
           <plugin filename="ignition-gazebo-label-system" name="ignition::gazebo::systems::Label">
@@ -163,11 +155,10 @@ Lets zoom in the label plugin
           </plugin>
 ```
 
-We assign the label of the model by adding that plugin to the `<visual>` tag of the model or the `<model>` tag(will be shown below), And we add the `<label>` tag to assign the label class to the model.
+We assign the label of the model by adding the plugin to the model's `<visual>` tag.
+So, in this case, this model has a label of 10.
 
-The code above is an example for adding the label plugin as a child for the `<visual>` tag.
-
-Example for adding the label plugin as a child for the `<model>` tag
+You can also attach this plugin to the model's `<model>` tag:
 
 ```xml
     <model name="sphere">
@@ -182,7 +173,7 @@ Example for adding the label plugin as a child for the `<model>` tag
     </model>
 ```
 
-Or by including a model from ignition fuel, you can add the label plugin as a child for the <include> tag
+If you're including a model from a place like [ignition fuel](https://app.ignitionrobotics.org/dashboard), you can add the label plugin as a child for the `<include>` tag:
 
 ```xml
    <include>
@@ -197,23 +188,18 @@ Or by including a model from ignition fuel, you can add the label plugin as a ch
 ```
 
 ## Running an example:
-Now that we've discussed how a segmentation camera and models with labels can be specified, let's start with an example world that uses the segmentation camera.
+Now that we've discussed how a segmentation camera and models with labels can be specified, let's run an example world that uses the segmentation camera.
 Run the following command:
 ```
 ign gazebo segmentation_camera.sdf
 ```
 
 You should see something similar to this:
-@image html files/segmentation_camera/cars_segmentation.png
+@image html files/segmentation_camera/cars_segmentation.png width=850px
 
-![semantic segmentation](files/segmentation_camera/cars_segmentation.png)
+There are 2 segmentation cameras in the SDF world: a semantic segmentation camera, and an instance/panoptic segmentation camera.
 
-![cars_segmentation](https://user-images.githubusercontent.com/35613645/130998489-c990d060-942f-46e9-9c83-5a6acda2146e.png)
-
-
-There are 2 segmentation cameras in the SDF world, one for semantic segmentation type and another one for instance/panoptic segmentation type:
-
-- The instance/panoptic segmentation sensor which publishes the colored map to `panoptic/colored_map` topic and the labels map to `panoptic/labels_map` topic
+For the instance/panoptic segmentation camera, colored map data is published to the `panoptic/colored_map topic`, and label map data is published to the `panoptic/labels_map` topic:
 
 ```xml
         <sensor name="instance_segmentation_camera" type="segmentation">
@@ -230,18 +216,17 @@ There are 2 segmentation cameras in the SDF world, one for semantic segmentation
               <far>100</far>
             </clip>
             <save enabled="true">
-              <path>/home/amrelsersy/Dataset/Instance</path>
+              <path>segmentation_data/instance_camera</path>
             </save>
           </camera>
           <always_on>1</always_on>
           <update_rate>30</update_rate>
           <visualize>true</visualize>
         </sensor>
-      </link>
-    </model>
-
 ```
-- The semantic segmentation sensor which publishes the colored map to `semantic/colored_map` topic and the labels map to `semantic/labels_map` topic
+
+For the semantic segmentation camera, colored map data is published to the `semantic/colored_map` topic, and label map data is published to the `semantic/labels_map` topic:
+
 ```xml
         <sensor name="semantic_segmentation_camera" type="segmentation">
           <topic>semantic</topic>
@@ -257,25 +242,17 @@ There are 2 segmentation cameras in the SDF world, one for semantic segmentation
               <far>100</far>
             </clip>
             <save enabled="true">
-              <path>/home/amrelsersy/Dataset/Semantic</path>
+              <path>segmentation_data/semantic_camera</path>
             </save>
           </camera>
           <always_on>1</always_on>
           <update_rate>30</update_rate>
           <visualize>true</visualize>
         </sensor>
-
 ```
 
-Note that the upper right `Image Display` plugin we have the colored map for semantic maps and in the lower `Image Display` plugin we have the label map. The colored map shows that all objects with the same labels (ex: all cars) have the same, and in the upper left `Image Display` plugin the `labels map` they contains the same label value
-
-<br>
-
-Note that the upper right `Image Display` plugin we have the colored map for instance/panoptic segmentation, where each object in the scene has a unique color even the objects with the same label(all cars have the same label but a different color), and its labels map, each pixel has a unique values (1 value for label and 2 values for number of instances of that label)
-
-
 ## Segmentation Dataset Generation
-To save the output of the sensor as a segmentation dataset samples we add the `<save>` tag to the `<camera>` tag, And we specify the path to save the dataset in.
+To save the output of the sensor as segmentation dataset samples, we add the `<save>` tag to the `<camera>` tag, and we specify the path to save the dataset in.
 
 ```xml
         <sensor name="segmentation_camera" type="segmentation">
@@ -289,23 +266,22 @@ To save the output of the sensor as a segmentation dataset samples we add the `<
         </sensor>
 ```
 
-Set up the paths of the sensors(there are 2 segmentation sensors in the world for both types semantic and panoptic) and run:
-```
-ign gazebo segmentation_camera.sdf
-```
-
-you will find that the datasets is saved in the given path
+In the example world we just ran (`segmentation_camera.sdf`), you'll notice that the panoptic camera is saving data to `segmentation_data/instance_camera`, while the semenatic camera is saving data to
+`segmentation_data/semantic_camera` (these are relative paths).
 
 #### Dataset Demo
-@image html files/segmentation_camera/segmentation_dataset.gif
-![segmentation_dataset](https://user-images.githubusercontent.com/35613645/131008223-0fa84feb-8395-41df-8e67-572e5f7a8255.gif)
 
+Up to this point, we have left simulation paused.
+Go ahead and start simulation by pressing the play button at the bottom-left part of the GUI.
+You'll see the camera drop, capturing updated segmentation images along the way:
+
+@image html files/segmentation_camera/segmentation_dataset.gif
+
+Once the camera has reached the ground plane, you can go ahead and close Ignition Gazebo.
+We will now discuss how to visualize the segmentation data that was just generated by Ignition Gazebo.
 
 ## Visualize the segmentation dataset via Python
-put the following code in a file and run it and give it the path of the saved dataset (the one you specified in the `<save>` tag in the SDF world)
-```
-python3 file_name.py --path DATASET_PATH
-```
+Put the following code in a Python script called `segmentation_visualizer.py`:
 
 ```python
 import cv2
@@ -315,18 +291,17 @@ import numpy as np
 
 # Add the colored map to the image for visualization
 def add_colored_to_image(image, colored):
-    return cv2.addWeighted(cv2.resize(image, (colored.shape[1], colored.shape[0]) )
+    return cv2.addWeighted(cv2.resize(image, (colored.shape[1], colored.shape[0]))
                             .astype(np.uint8), 1,
                             colored.astype(np.uint8), .5,
                             0, cv2.CV_32F)
-
 
 # global labels map for mouse callback
 labels_map = None
 
 # Callback when you click on any pixel in the labels_map image
 # Prints the label and instance count of the clicked pixel
-def mouse_callback(event,x,y,flags,param):
+def mouse_callback(event, x, y, flags, param):
     if event == cv2.EVENT_LBUTTONDOWN:
         # instance / panoptic
         # label id
@@ -379,35 +354,44 @@ for image_path, labels_path, colored_path in zip(images_paths, labels_map_paths,
     if cv2.waitKey(0) == 27:
         break
 
-
 cv2.destroyAllWindows()
-
 ```
-You will see 4 windows(image + labels_map + colored_map + colored_image(which is a combination of the image and colord_map))
 
-![visualize_segment](https://user-images.githubusercontent.com/35613645/131020222-dcbbd641-530b-449a-a5fd-d347695a882c.png)
+Make sure you have all of the dependencies that are needed in order to run this Python script:
+* https://pypi.org/project/opencv-python/
+* https://numpy.org/install/
 
-For panoptic/instance segmentation, to parse the `labels_map` click on any pixel of the `labels_map` window to see the `label` and `instance count` of that pixel
+Run the script, setting the `--path` argument to what you specified for the `<save>` tag in the SDF file.
+Since we set the panoptic save path to `segmentation_data/instance_camera`, we'd run the following command to view the panoptic segmentation data:
+```
+python3 segmentation_visualizer.py --path segmentation_data/instance_camera
+```
+
+You will see 4 windows: `image`, `labels_map`, `colored_map`, and `colored_image` (which is a combination of the image and colored_map).
+
+@image html files/segmentation_camera/segmentation_images.png width=900px
+
+For panoptic/instance segmentation, to parse the `labels_map`, click on any pixel on the `labels_map` window to see the `label` and `instance count` of that pixel.
 
 
 ## Processing the segmentation sensor via ign-transport
-To visualize the output from different SDF file, you can include the model of the sensor in any SDF file then run it via ign gazebo and open the `Image Display` plugin and select the topic you specified in the `<topic>` tag with suffix `colored_map` or `labels_map`.
+It's possible to process the segmentation data in real time via `ign-transport`.
+You will need to which topics to subscribe to in order to receive this information.
 
-for example, in the following topic
+Consider the following SDF snippet from the segmentation camera:
 ```xml
     <topic>segmentation</topic>
 ```
-the sensor data will be publish the label map data on `segmentation/labels_map` and will publish the colored map on `segmentation/colored_map`
 
-Taking a look at the [SDF]() file for this example.
+In this scenario, the sensor data will publish the label map data to `segmentation/labels_map`, and the colored map data to `segmentation/colored_map`.
+We can write some c++ code that subscribes to these topics:
 
-
-Here's an example for segmentation camera subscriber that gets the boxes:
 ```cpp
 #include <cstdint>
+
 #include <ignition/msgs.hh>
-#include <ignition/transport.hh>
 #include <ignition/rendering.hh>
+#include <ignition/transport.hh>
 
 void OnNewLabelMap(const ignition::msgs::Image &_msg)
 {
@@ -415,21 +399,23 @@ void OnNewLabelMap(const ignition::msgs::Image &_msg)
   auto height = _msg.height();
   auto buffer = _msg.data();
 
-  for (uint32_t i = 0; i < height; i++)
+  for (uint32_t i = 0; i < height; ++i)
   {
-    for (uint32_t j = 0; j < width; j++)
+    for (uint32_t j = 0; j < width; ++j)
     {
       auto index = (i * width + j) * 3;
 
-      // label id of the pixel
+      // label id of the pixel is in the last channel
       auto label = buffer[index + 2];
 
-      // in case of semantic segmentation, instance count will contain
-      // the same value of the label
+      // In case of semantic segmentation, instance count is ignored.
+      //
+      // For panoptic segmentation, we can get the instance count as follows:
       // 16 bit value for instance count
       auto instanceCount1 = buffer[index + 1];
       auto instanceCount2 = buffer[index];
-      // get the 16 bit decimal value from the 2 parts of 8 bits
+      // get the 16-bit decimal value from the two 8-bit values by left-shifting
+      // instanceCount1 by 8 bits
       auto instanceCount = instanceCount1 * 256 + instanceCount2;
     }
   }
@@ -441,9 +427,9 @@ void OnNewColoredMap(const ignition::msgs::Image &_msg)
   auto height = _msg.height();
   auto buffer = _msg.data();
 
-  for (uint32_t i = 0; i < height; i++)
+  for (uint32_t i = 0; i < height; ++i)
   {
-    for (uint32_t j = 0; j < width; j++)
+    for (uint32_t j = 0; j < width; ++j)
     {
       auto index = (i * width + j) * 3;
       auto r = buffer[index + 2];
@@ -460,7 +446,8 @@ int main(int argc, char **argv)
   if (!node.Subscribe("/segmentation/colored_map", &OnNewColoredMap) ||
     !node.Subscribe("/segmentation/labels_map", &OnNewLabelMap))
   {
-    std::cerr << "Error subscribing to the boundingbox camera topic" << std::endl;
+    std::cerr << "Error subscribing to the boundingbox camera topic"
+              << std::endl;
     return -1;
   }
 
@@ -469,35 +456,5 @@ int main(int argc, char **argv)
 }
 ```
 
-And Its CMakeLists.txt file
-
-```cmake
-cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(ignition-sensors-camera-demo)
-
-# Find the Ignition Libraries used directly by the example
-find_package(ignition-rendering6 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
-find_package(ignition-sensors6 REQUIRED COMPONENTS rendering camera)
-
-if (TARGET ignition-rendering6::ogre)
-  add_definitions(-DWITH_OGRE)
-endif()
-if (TARGET ignition-rendering6::ogre2)
-  add_definitions(-DWITH_OGRE2)
-endif()
-
-add_executable(segmentation_camera main.cc)
-target_link_libraries(segmentation_camera PUBLIC
- ignition-sensors6::camera)
-
-```
-
-To run the code
-```cmd
-mkdir build
-cd build
-cmake ..
-make
-./segmentation_camera
-```
-
+If you'd like to gain a better understanding of how the subscriber code works,
+you can go through the [ign-transport tutorials](https://ignitionrobotics.org/api/transport/11.0/tutorials.html).
