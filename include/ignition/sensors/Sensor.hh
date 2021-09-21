@@ -27,6 +27,7 @@
 #pragma warning(pop)
 #endif
 
+#include <chrono>
 #include <memory>
 #include <string>
 
@@ -150,6 +151,14 @@ namespace ignition
       /// \return True if a valid topic was set.
       public: bool SetTopic(const std::string &_topic);
 
+      /// \brief Get flag state for enabling performance metrics publication.
+      /// \return True if performance metrics are enabled, false otherwise.
+      public: bool EnableMetrics() const;
+
+      /// \brief Set flag to enable publishing performance metrics
+      /// \param[in] _enableMetrics True to enable.
+      public: void SetEnableMetrics(bool _enableMetrics);
+
       /// \brief Get parent link of the sensor.
       /// \return Parent link of sensor.
       public: std::string Parent() const;
@@ -183,6 +192,12 @@ namespace ignition
       /// \param[in] _seqKey Name of the sequence to use.
       public: void AddSequence(ignition::msgs::Header *_msg,
                   const std::string &_seqKey = "default");
+
+      /// \brief Publishes information about the performance of the sensor.
+      ///        This method is called by Update().
+      /// \param[in] _now Current time.
+      public: void PublishMetrics(
+        const std::chrono::duration<double> &_now);
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal

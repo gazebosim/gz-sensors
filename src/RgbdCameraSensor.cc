@@ -219,6 +219,9 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
+  igndbg << "RGB images for [" << this->Name() << "] advertised on ["
+         << this->Topic() << "/image]" << std::endl;
+
   // Create the depth image publisher
   this->dataPtr->depthPub =
       this->dataPtr->node.Advertise<ignition::msgs::Image>(
@@ -230,6 +233,9 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
+  igndbg << "Depth images for [" << this->Name() << "] advertised on ["
+         << this->Topic() << "/depth_image]" << std::endl;
+
   // Create the point cloud publisher
   this->dataPtr->pointPub =
       this->dataPtr->node.Advertise<ignition::msgs::PointCloudPacked>(
@@ -240,6 +246,9 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
       << this->Topic() + "/points" << "].\n";
     return false;
   }
+
+  igndbg << "Points for [" << this->Name() << "] advertised on ["
+         << this->Topic() << "/points]" << std::endl;
 
   if (!this->AdvertiseInfo(this->Topic() + "/camera_info"))
     return false;
