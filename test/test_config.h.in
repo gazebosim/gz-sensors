@@ -10,28 +10,13 @@
     ignition::rendering::TestValues())
 
 // Configure tests based on installed render engines
-#define WITH_OGRE_AND_NO_OGRE2 (WITH_OGRE && !WITH_OGRE2)
-#define WITH_NO_OGRE_AND_OGRE2 (!WITH_OGRE && WITH_OGRE2)
-#define WITH_OGRE_AND_OGRE2 (WITH_OGRE && WITH_OGRE2)
-#define NO_OGRE_AND_NO_OGRE2 (!WITH_OGRE && !WITH_OGRE2)
-
-#if WITH_OGRE_AND_NO_OGRE2
+// ogre 1.x and ogre 2.x tests can not be run at the same time
+// so use only ogre2 by default.
+#if WITH_OGRE2 && !defined(__APPLE__)
+static const std::vector<const char *> kRenderEngineTestValues{"ogre2"};
+#elif WITH_OGRE
 static const std::vector<const char *> kRenderEngineTestValues{"ogre"};
-#endif
-
-#if WITH_NO_OGRE_AND_OGRE2
-static const std::vector<const char *> kRenderEngineTestValues{"ogre2"};
-#endif
-
-// It cannot run tests with both ogre render engines at the same time
-// so it will use only ogre2 by default.
-#if WITH_OGRE_AND_OGRE2
-static const std::vector<const char *> kRenderEngineTestValues{"ogre2"};
-#endif
-
-// If no render engines are installed it will try to use none, it won't
-// find any and the test will pass.
-#if NO_OGRE_AND_NO_OGRE2
+#else
 static const std::vector<const char *> kRenderEngineTestValues{"none"};
 #endif
 
