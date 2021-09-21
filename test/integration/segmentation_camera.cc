@@ -266,9 +266,12 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
 
   // get their index in the buffer
   const uint32_t channels = 3;
-  uint32_t leftIndex = (leftProj.Y() * width + leftProj.X()) * channels;
-  uint32_t rightIndex = (rightProj.Y() * width + rightProj.X()) * channels;
-  uint32_t middleIndex = (middleProj.Y() * width + middleProj.X()) * channels;
+  uint32_t leftIndex =
+    static_cast<uint32_t>((leftProj.Y() * width + leftProj.X()) * channels);
+  uint32_t rightIndex =
+    static_cast<uint32_t>((rightProj.Y() * width + rightProj.X()) * channels);
+  uint32_t middleIndex =
+    static_cast<uint32_t>((middleProj.Y() * width + middleProj.X()) * channels);
 
   uint8_t leftLabel =   g_buffer[leftIndex];
   uint8_t rightLabel =  g_buffer[rightIndex];

@@ -36,7 +36,7 @@ using namespace sensors;
 
 class ignition::sensors::SegmentationCameraSensorPrivate
 {
-  /// \brief Save a sample for the dataset(image & colored map & labels map)
+  /// \brief Save a sample for the dataset (image & colored map & labels map)
   /// \return True if the image was saved successfully. False can mean
   /// that the image save path does not exist and creation
   /// of the path was not possible.
@@ -137,10 +137,16 @@ SegmentationCameraSensor::SegmentationCameraSensor()
 SegmentationCameraSensor::~SegmentationCameraSensor()
 {
   if (this->dataPtr->segmentationColoredBuffer)
-    delete this->dataPtr->segmentationColoredBuffer;
+  {
+    delete [] this->dataPtr->segmentationColoredBuffer;
+    this->dataPtr->segmentationColoredBuffer = nullptr;
+  }
 
   if (this->dataPtr->segmentationLabelsBuffer)
-    delete this->dataPtr->segmentationLabelsBuffer;
+  {
+    delete [] this->dataPtr->segmentationLabelsBuffer;
+    this->dataPtr->segmentationLabelsBuffer = nullptr;
+  }
 }
 
 /////////////////////////////////////////////////
@@ -197,8 +203,7 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
   }
 
   igndbg << "Colored map image for [" << this->Name() << "] advertised on ["
-    << this->Topic() << this->dataPtr->topicColoredMapSuffix << "]"
-    << std::endl;
+    << this->Topic() << this->dataPtr->topicColoredMapSuffix << "]\n";
 
   // Create the segmentation labels map image publisher
   this->dataPtr->labelsMapPublisher =
@@ -213,8 +218,8 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
   }
 
   igndbg << "Segmentation labels map image for [" << this->Name()
-    << "] advertised on [" << this->Topic() << this->dataPtr->topicLabelsMapSuffix
-    << "]" << std::endl;
+    << "] advertised on [" << this->Topic()
+    << this->dataPtr->topicLabelsMapSuffix << "]\n";
 
   // TODO(anyone) Access the info topic from the parent class
   if (!this->AdvertiseInfo(this->Topic() + "/camera_info"))

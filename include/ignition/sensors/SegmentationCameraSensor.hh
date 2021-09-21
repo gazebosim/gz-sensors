@@ -47,7 +47,7 @@ namespace ignition
 
     /// \brief Segmentation camera sensor class.
     ///
-    /// This class creates Segmentation image from an ignition rendering scene.
+    /// This class creates segmentation images from an ignition rendering scene.
     /// The scene must be created in advance and given to Manager::Init().
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
@@ -83,8 +83,7 @@ namespace ignition
 
       /// \brief Get the rendering segmentation camera
       /// \return Segmentation camera pointer
-      public: virtual rendering::SegmentationCameraPtr
-        SegmentationCamera() const;
+      public: rendering::SegmentationCameraPtr SegmentationCamera() const;
 
       /// \brief Segmentation data callback used to get the data from the sensor
       /// \param[in] _data pointer to the data from the sensor
@@ -105,8 +104,7 @@ namespace ignition
       /// \return A connection pointer that must remain in scope. When the
       /// connection pointer falls out of scope, the connection is broken.
       public: ignition::common::ConnectionPtr ConnectImageCallback(
-                  std::function<
-                  void(const ignition::msgs::Image &)> _callback);
+                  std::function<void(const ignition::msgs::Image &)> _callback);
 
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
