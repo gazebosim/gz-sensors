@@ -301,7 +301,7 @@ INSTANTIATE_TEST_CASE_P(
     FrameAndDirection, ForceTorqueSensorTest,
     ::testing::Combine(::testing::Values("child", "parent", "sensor"),
                        ::testing::Values("parent_to_child",
-                                         "child_to_parent")),);
+                                         "child_to_parent")), );
 
 int main(int argc, char **argv)
 {
