@@ -432,9 +432,9 @@ void OnNewColoredMap(const ignition::msgs::Image &_msg)
     for (uint32_t j = 0; j < width; ++j)
     {
       auto index = (i * width + j) * 3;
-      auto r = buffer[index + 2];
+      auto r = buffer[index];
       auto g = buffer[index + 1];
-      auto b = buffer[index];
+      auto b = buffer[index + 2];
     }
   }
 }
