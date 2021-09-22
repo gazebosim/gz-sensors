@@ -2,7 +2,31 @@
 
 ### Ignition Sensors 6.X.X
 
-### Ignition Sensors 6.0.0 (20XX-XX-XX)
+### Ignition Sensors 6.0.0 (2021-09-22)
+
+1. Bumps in fortress: ign-sensors6
+    * [Pull request #120](https://github.com/ignitionrobotics/ign-sensors/pull/120)
+
+1. Port codecov to new configuration 
+    * [Pull request #129](https://github.com/ignitionrobotics/ign-sensors/pull/129)
+
+1. Remove deprecations: tock 
+    * [Pull request #141](https://github.com/ignitionrobotics/ign-sensors/pull/141)
+
+1. Make Sensors aware of CameraPassCountPerGpuFlush & Scene::PostFrame 
+    * [Pull request #145](https://github.com/ignitionrobotics/ign-sensors/pull/145)
+
+1. Remove plugin interface and support custom sensors
+    * [Pull request #90](https://github.com/ignitionrobotics/ign-sensors/pull/90)
+
+1. Run ogre 1.x tests on macos 
+    * [Pull request #156](https://github.com/ignitionrobotics/ign-sensors/pull/156)
+
+1. Segmentation sensor 
+    * [Pull request #133](https://github.com/ignitionrobotics/ign-sensors/pull/133)
+
+1. Joint Force-Torque Sensor 
+    * [Pull request #144](https://github.com/ignitionrobotics/ign-sensors/pull/144)
 
 ## Ignition Sensors 5
 
