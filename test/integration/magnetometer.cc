@@ -181,7 +181,6 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
       sensorPose, updateRate, noiseTopic, alwaysOn, visualize, 1.0, 0.2, 10.0);
 
   // create the sensor using sensor factory
-  // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
   auto sensor = sf.CreateSensor<ignition::sensors::MagnetometerSensor>(
       magnetometerSdf);

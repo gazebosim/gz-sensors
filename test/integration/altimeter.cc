@@ -176,7 +176,6 @@ TEST_F(AltimeterSensorTest, SensorReadings)
         updateRate, topicNoise, alwaysOn, visualize, 1.0, 0.2, 10.0);
 
   // create the sensor using sensor factory
-  // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
   auto sensor =
       sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdf);

@@ -89,7 +89,7 @@ class ignition::sensors::ForceTorqueSensorPrivate
 
 //////////////////////////////////////////////////
 ForceTorqueSensor::ForceTorqueSensor()
-  : dataPtr(new ForceTorqueSensorPrivate())
+  : dataPtr(std::make_unique<ForceTorqueSensorPrivate>())
 {
 }
 

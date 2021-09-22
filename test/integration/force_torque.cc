@@ -202,7 +202,6 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
   ASSERT_NE(nullptr, forcetorqueSdf);
 
   // create the sensor using sensor factory
-  // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
   auto sensor =
       sf.CreateSensor<ignition::sensors::ForceTorqueSensor>(forcetorqueSdf);
