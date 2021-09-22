@@ -205,7 +205,6 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
         this->dataPtr->rotationParentInSensor.Inverse() * this->dataPtr->force;
     measuredTorque =
         this->dataPtr->rotationParentInSensor.Inverse() * this->dataPtr->torque;
-
   }
   else if (this->dataPtr->measureFrame == sdf::ForceTorqueFrame::CHILD)
   {
@@ -213,25 +212,11 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
         this->dataPtr->rotationChildInSensor.Inverse() * this->dataPtr->force;
     measuredTorque =
         this->dataPtr->rotationChildInSensor.Inverse() * this->dataPtr->torque;
-
-    if (this->dataPtr->measureDirection ==
-        sdf::ForceTorqueMeasureDirection::CHILD_TO_PARENT)
-    {
-      measuredForce *= -1;
-      measuredTorque *= -1;
-    }
   }
   else if (this->dataPtr->measureFrame == sdf::ForceTorqueFrame::SENSOR)
   {
     measuredForce = this->dataPtr->force;
     measuredTorque = this->dataPtr->torque;
-
-    if (this->dataPtr->measureDirection ==
-        sdf::ForceTorqueMeasureDirection::CHILD_TO_PARENT)
-    {
-      measuredForce *= -1;
-      measuredTorque *= -1;
-    }
   }
   else
   {

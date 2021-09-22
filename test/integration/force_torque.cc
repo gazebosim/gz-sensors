@@ -56,7 +56,7 @@ void CreateForceTorqueToSdf(const std::string &_name,
     << "        <visualize>" << _visualize << "</visualize>"
     << "        <force_torque>"
     << "          <frame>child</frame>"
-    << "          <measure_direction>child_to_parent</measure_direction>"
+    << "          <measure_direction>parent_to_child</measure_direction>"
     << "          <force>"
     << "            <x>"
     << "              <noise type='gaussian'>"
@@ -138,7 +138,6 @@ TEST_F(ForceTorqueSensorTest, CreateForceTorqueSensor)
   const std::string name = "TestForceTorqueSensor";
   const std::string topic = "/ignition/sensors/test/force_torque";
 
-  // const std::string topicNoise = "/ignition/sensors/test/altimeter_noise";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
@@ -171,7 +170,6 @@ TEST_F(ForceTorqueSensorTest, SensorReadings)
   // Create SDF describing a a force torque sensor
   const std::string name = "TestForceTorqueSensor";
   const std::string topic = "/ignition/sensors/test/force_torque";
-  // const std::string topicNoise = "/ignition/sensors/test/altimeter_noise";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
@@ -230,7 +228,7 @@ TEST_F(ForceTorqueSensorTest, SensorReadings)
     EXPECT_EQ(force + forceNoiseMean, ignition::msgs::Convert(msg.force()));
     EXPECT_EQ(torque + torqueNoiseMean, ignition::msgs::Convert(msg.torque()));
 
-    // The Force() and Torque() functions return the noise-free forces and 
+    // The Force() and Torque() functions return the noise-free forces and
     // torques in the sensor frame
     EXPECT_EQ(force, sensor->Force());
     EXPECT_EQ(torque, sensor->Torque());
@@ -250,13 +248,13 @@ TEST_F(ForceTorqueSensorTest, SensorReadings)
               ignition::msgs::Convert(msg.force()));
     EXPECT_EQ((rotChildInSensor.Inverse() * torque) + torqueNoiseMean,
               ignition::msgs::Convert(msg.torque()));
-    // The Force() and Torque() functions return the noise-free forces and 
+    // The Force() and Torque() functions return the noise-free forces and
     // torques in the sensor frame
     EXPECT_EQ(force, sensor->Force());
     EXPECT_EQ(torque, sensor->Torque());
   }
 
-  // Set rotation of parent. This should not affect the ouptut because the 
+  // Set rotation of parent. This should not affect the output because the
   // measurement frame is "child".
   const math::Quaterniond rotParentInSensor{math::Vector3d{0.1, 0.2, 0.3}};
   sensor->SetRotationParentInSensor(rotParentInSensor);
@@ -271,7 +269,7 @@ TEST_F(ForceTorqueSensorTest, SensorReadings)
               ignition::msgs::Convert(msg.force()));
     EXPECT_EQ((rotChildInSensor.Inverse() * torque) + torqueNoiseMean,
               ignition::msgs::Convert(msg.torque()));
-    // The Force() and Torque() functions return the noise-free forces and 
+    // The Force() and Torque() functions return the noise-free forces and
     // torques in the sensor frame
     EXPECT_EQ(force, sensor->Force());
     EXPECT_EQ(torque, sensor->Torque());

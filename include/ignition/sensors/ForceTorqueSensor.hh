@@ -87,7 +87,7 @@ namespace ignition
       /// \return The latest measured torque.
       public: math::Vector3d Torque() const;
 
-      /// \brief Set the torque vector in sensor frame and where the torque is 
+      /// \brief Set the torque vector in sensor frame and where the torque is
       /// applied on the child (parent-to-child)
       /// \param[in] _torque torque vector in newton.
       public: void SetTorque(const math::Vector3d &_torque);
