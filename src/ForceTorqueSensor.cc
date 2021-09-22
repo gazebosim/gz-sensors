@@ -48,22 +48,33 @@ class ignition::sensors::ForceTorqueSensorPrivate
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
 
-  /// \brief Noise free force
-  public: ignition::math::Vector3d force;
+  /// \brief Noise free force as set by SetForce
+  public: ignition::math::Vector3d force{0, 0, 0};
 
-  /// \brief Noise free torque
-  public: ignition::math::Vector3d torque;
-  
+  /// \brief Noise free torque as set by SetTorque
+  public: ignition::math::Vector3d torque{0, 0, 0};
+
   /// \brief Frame in which we return the measured force torque info.
   public: sdf::ForceTorqueFrame measureFrame;
 
   /// \brief Direction in which we return the measured force torque info.
   public: sdf::ForceTorqueMeasureDirection measureDirection;
 
-  /// \brief Rotation matrix than transforms a vector expressed in child
-      ///        orientation in a vector expressed in joint orientation.
-      ///        Necessary is the measure is specified in joint frame.
-  public: ignition::math::Matrix3d rotationSensorChild;
+  /// \brief Rotation matrix that transforms a vector expressed in the parent
+  ///  frame to a vector expressed in the sensor frame.
+  ///  \note We store the rotation as a 3x3 matrix because matrix-vector
+  ///  product is than quaternion-vector when there are a lot of vectors and the
+  ///  rotation is not changing frequently.
+  public: ignition::math::Matrix3d rotationParentInSensor{
+              ignition::math::Matrix3d::Identity};
+
+  /// \brief Rotation matrix that transforms a vector expressed in the child
+  /// frame to a vector expressed in the sensor frame.
+  ///  \note We store the rotation as a 3x3 matrix because matrix-vector
+  ///  product is than quaternion-vector when there are a lot of vectors and the
+  ///  rotation is not changing frequently.
+  public: ignition::math::Matrix3d rotationChildInSensor{
+              ignition::math::Matrix3d::Identity};
 
   /// \brief Flag for if time has been initialized
   public: bool timeInitialized = false;
@@ -83,9 +94,7 @@ ForceTorqueSensor::ForceTorqueSensor()
 }
 
 //////////////////////////////////////////////////
-ForceTorqueSensor::~ForceTorqueSensor()
-{
-}
+ForceTorqueSensor::~ForceTorqueSensor() = default;
 
 //////////////////////////////////////////////////
 bool ForceTorqueSensor::Init()
@@ -114,7 +123,8 @@ bool ForceTorqueSensor::Load(const sdf::Sensor &_sdf)
   }
 
   this->dataPtr->measureFrame = _sdf.ForceTorqueSensor()->Frame();
-  this->dataPtr->measureDirection = _sdf.ForceTorqueSensor()->MeasureDirection();
+  this->dataPtr->measureDirection =
+      _sdf.ForceTorqueSensor()->MeasureDirection();
 
   if (this->Topic().empty())
     this->SetTopic("/forcetorque");
@@ -158,13 +168,6 @@ bool ForceTorqueSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool ForceTorqueSensor::Update(
-  const ignition::common::Time &_now)
-{
-  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
-}
-
-//////////////////////////////////////////////////
 bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("ForceTorqueSensor::Update");
@@ -192,78 +195,77 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     dt = 0.0;
   }
-
-  // Convenience method to apply noise to a channel, if present.
-  auto applyNoise = [&](SensorNoiseType noiseType, double & value)
-  {
-    if (this->dataPtr->noises.find(noiseType) != this->dataPtr->noises.end()) {
-      value = this->dataPtr->noises[noiseType]->Apply(value, dt);
-    }
-  };
-
-  applyNoise(FORCE_X_NOISE_N, this->dataPtr->force.X());
-  applyNoise(FORCE_Y_NOISE_N, this->dataPtr->force.Y());
-  applyNoise(FORCE_Z_NOISE_N, this->dataPtr->force.Z());
-  applyNoise(TORQUE_X_NOISE_N_M, this->dataPtr->torque.X());
-  applyNoise(TORQUE_Y_NOISE_N_M, this->dataPtr->torque.Y());
-  applyNoise(TORQUE_Z_NOISE_N_M, this->dataPtr->torque.Z());
-
-  msgs::Wrench msg;
-  *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
-  auto frame = msg.mutable_header()->add_data();
-  frame->set_key("frame_id");
-  frame->add_value(this->Name());
-
   // Get the force and torque in the appropriate frame.
   ignition::math::Vector3d measuredForce;
   ignition::math::Vector3d measuredTorque;
 
   if (this->dataPtr->measureFrame == sdf::ForceTorqueFrame::PARENT)
   {
-    if (this->dataPtr->measureDirection == sdf::ForceTorqueMeasureDirection::PARENT_TO_CHILD)
-    {
-      measuredForce = this->dataPtr->force;
-      measuredTorque = this->dataPtr->torque;
-    }
-    else
-    {
-      measuredForce = -1*this->dataPtr->force;
-      measuredTorque = -1*this->dataPtr->torque;
-    }
+    measuredForce =
+        this->dataPtr->rotationParentInSensor.Inverse() * this->dataPtr->force;
+    measuredTorque =
+        this->dataPtr->rotationParentInSensor.Inverse() * this->dataPtr->torque;
+
   }
   else if (this->dataPtr->measureFrame == sdf::ForceTorqueFrame::CHILD)
   {
-    if (this->dataPtr->measureDirection == sdf::ForceTorqueMeasureDirection::CHILD_TO_PARENT)
+    measuredForce =
+        this->dataPtr->rotationChildInSensor.Inverse() * this->dataPtr->force;
+    measuredTorque =
+        this->dataPtr->rotationChildInSensor.Inverse() * this->dataPtr->torque;
+
+    if (this->dataPtr->measureDirection ==
+        sdf::ForceTorqueMeasureDirection::CHILD_TO_PARENT)
     {
-      measuredForce = this->dataPtr->force;
-      measuredTorque = this->dataPtr->torque;
-      ignerr << "Warning: ForceTorqueSensor::Update() " << std::endl;
+      measuredForce *= -1;
+      measuredTorque *= -1;
     }
-    else
+  }
+  else if (this->dataPtr->measureFrame == sdf::ForceTorqueFrame::SENSOR)
+  {
+    measuredForce = this->dataPtr->force;
+    measuredTorque = this->dataPtr->torque;
+
+    if (this->dataPtr->measureDirection ==
+        sdf::ForceTorqueMeasureDirection::CHILD_TO_PARENT)
     {
-      measuredForce = -1*this->dataPtr->force;
-      measuredTorque = -1*this->dataPtr->torque;
+      measuredForce *= -1;
+      measuredTorque *= -1;
     }
   }
   else
   {
     ignerr << "measureFrame must be PARENT_LINK, CHILD_LINK or SENSOR\n";
-
-    if (this->dataPtr->measureDirection == sdf::ForceTorqueMeasureDirection::CHILD_TO_PARENT)
-    {
-      measuredForce = this->dataPtr->rotationSensorChild *
-        this->dataPtr->force;
-      measuredTorque = this->dataPtr->rotationSensorChild *
-        this->dataPtr->torque;
-    }
-    else
-    {
-      measuredForce = this->dataPtr->rotationSensorChild *
-        (-1*this->dataPtr->force);
-      measuredTorque = this->dataPtr->rotationSensorChild *
-        (-1*this->dataPtr->torque);
-    }
   }
+
+  if (this->dataPtr->measureDirection ==
+      sdf::ForceTorqueMeasureDirection::CHILD_TO_PARENT)
+  {
+    measuredForce *= -1;
+    measuredTorque *= -1;
+  }
+
+  // Convenience method to apply noise to a channel, if present.
+  auto applyNoise = [&](SensorNoiseType noiseType, double &value)
+  {
+    if (this->dataPtr->noises.find(noiseType) != this->dataPtr->noises.end())
+    {
+      value = this->dataPtr->noises[noiseType]->Apply(value, dt);
+    }
+  };
+
+  applyNoise(FORCE_X_NOISE_N, measuredForce.X());
+  applyNoise(FORCE_Y_NOISE_N, measuredForce.Y());
+  applyNoise(FORCE_Z_NOISE_N, measuredForce.Z());
+  applyNoise(TORQUE_X_NOISE_N_M, measuredTorque.X());
+  applyNoise(TORQUE_Y_NOISE_N_M, measuredTorque.Y());
+  applyNoise(TORQUE_Z_NOISE_N_M, measuredTorque.Z());
+
+  msgs::Wrench msg;
+  *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+  auto frame = msg.mutable_header()->add_data();
+  frame->set_key("frame_id");
+  frame->add_value(this->Name());
 
   msgs::Set(msg.mutable_force(), measuredForce);
   msgs::Set(msg.mutable_torque(), measuredTorque);
@@ -300,5 +302,28 @@ void ForceTorqueSensor::SetTorque(const math::Vector3d &_torque)
   this->dataPtr->torque = _torque;
 }
 
+//////////////////////////////////////////////////
+math::Quaterniond ForceTorqueSensor::RotationParentInSensor() const
+{
+  return math::Quaterniond(this->dataPtr->rotationParentInSensor);
+}
 
-IGN_SENSORS_REGISTER_SENSOR(ForceTorqueSensor)
+//////////////////////////////////////////////////
+void ForceTorqueSensor::SetRotationParentInSensor(
+    const math::Quaterniond &_rotParentInSensor)
+{
+  this->dataPtr->rotationParentInSensor = _rotParentInSensor;
+}
+
+//////////////////////////////////////////////////
+void ForceTorqueSensor::SetRotationChildInSensor(
+    const math::Quaterniond &_rotChildInSensor)
+{
+  this->dataPtr->rotationChildInSensor = _rotChildInSensor;
+}
+
+//////////////////////////////////////////////////
+math::Quaterniond ForceTorqueSensor::RotationChildInSensor() const
+{
+  return math::Quaterniond(this->dataPtr->rotationChildInSensor);
+}

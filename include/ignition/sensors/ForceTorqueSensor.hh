@@ -45,8 +45,8 @@ namespace ignition
     /// \brief Force Torque Sensor Class
     ///
     /// A force-torque Sensor that reports force and torque applied on a joint.
-
-    class IGNITION_SENSORS_FORCE_TORQUE_VISIBLE ForceTorqueSensor : public Sensor
+    class IGNITION_SENSORS_FORCE_TORQUE_VISIBLE ForceTorqueSensor
+        : public Sensor
     {
       /// \brief constructor
       public: ForceTorqueSensor();
@@ -68,37 +68,51 @@ namespace ignition
       /// \return True on success
       public: virtual bool Init() override;
 
-      // /// \brief Update the sensor and generate data
-      // /// \param[in] _now The current time
-      // /// \return true if the update was successfull
-      // public: virtual bool IGN_DEPRECATED(4) Update(
-      //   const ignition::common::Time &_now) override;
-
       /// \brief Update the sensor and generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       public: virtual bool Update(
         const std::chrono::steady_clock::duration &_now) override;
 
-      public: bool Update(
-         const ignition::common::Time &_now);
-
       /// \brief Get the current joint force.
-      /// \return The latested measured force.
+      /// \return The latest measured force.
       public: math::Vector3d Force() const;
 
-      /// \brief Set the force vector.
+      /// \brief Set the force vector in sensor frame and where the force is
+      /// applied on the child (parent-to-child)
       /// \param[in] _force force vector in newton.
       public: void SetForce(const math::Vector3d &_force);
 
       /// \brief Get the current joint torque.
-      /// \return The latested measured torque.
+      /// \return The latest measured torque.
       public: math::Vector3d Torque() const;
 
-      /// \brief Set the torque vector.
+      /// \brief Set the torque vector in sensor frame and where the torque is 
+      /// applied on the child (parent-to-child)
       /// \param[in] _torque torque vector in newton.
       public: void SetTorque(const math::Vector3d &_torque);
-    
+
+      /// \brief Set the rotation of the joint parent relative to the sensor
+      /// frame.
+      /// \return The current rotation the parent in the sensor frame.
+      public: math::Quaterniond RotationParentInSensor() const;
+
+      /// \brief Set the rotation of the joint parent relative to the sensor
+      /// frame.
+      /// \param[in] _rotParentInSensorRotation of parent in sensor frame.
+      public: void SetRotationParentInSensor(
+                  const math::Quaterniond &_rotParentInSensor);
+
+      /// \brief Set the rotation of the joint parent relative to the sensor
+      /// frame.
+      /// \return The current rotation the child in the sensor frame.
+      public: math::Quaterniond RotationChildInSensor() const;
+
+      /// \brief Set the rotation of the joint child relative to the sensor
+      /// frame.
+      /// \param[in] _rotChildInSensor Rotation of child in sensor frame.
+      public: void SetRotationChildInSensor(
+                  const math::Quaterniond &_rotChildInSensor);
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

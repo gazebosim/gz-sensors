@@ -11,10 +11,10 @@ set(dri_tests
 set(tests
   air_pressure.cc
   altimeter.cc
+  force_torque.cc
   logical_camera.cc
   magnetometer.cc
   imu.cc
-  force_torque_plugin.cc
 )
 
 link_directories(${PROJECT_BINARY_DIR}/test)
