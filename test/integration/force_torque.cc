@@ -32,6 +32,8 @@ void CreateForceTorqueToSdf(const std::string &_name,
                             const ignition::math::Pose3d &_pose,
                             const double _updateRate, const std::string &_topic,
                             const bool _alwaysOn, const bool _visualize,
+                            const std::string &_frame,
+                            const std::string &_measureDir,
                             const ignition::math::Vector3d &_forceNoiseMean,
                             const ignition::math::Vector3d &_forceNoiseStddev,
                             const ignition::math::Vector3d &_torqueNoiseMean,
@@ -55,8 +57,8 @@ void CreateForceTorqueToSdf(const std::string &_name,
     << "        <alwaysOn>" << _alwaysOn <<"</alwaysOn>"
     << "        <visualize>" << _visualize << "</visualize>"
     << "        <force_torque>"
-    << "          <frame>child</frame>"
-    << "          <measure_direction>parent_to_child</measure_direction>"
+    << "          <frame>" << _frame << "</frame>"
+    << "          <measure_direction>" << _measureDir << "</measure_direction>"
     << "          <force>"
     << "            <x>"
     << "              <noise type='gaussian'>"
@@ -122,7 +124,8 @@ void CreateForceTorqueToSdf(const std::string &_name,
 }
 
 /// \brief Test force torque sensor
-class ForceTorqueSensorTest: public testing::Test
+class ForceTorqueSensorTest
+    : public testing::TestWithParam<std::tuple<const char *, const char *>>
 {
   // Documentation inherited
   protected: void SetUp() override
@@ -147,7 +150,8 @@ TEST_F(ForceTorqueSensorTest, CreateForceTorqueSensor)
       ignition::math::Quaterniond::Identity);
   sdf::ElementPtr forcetorqueSdf;
   CreateForceTorqueToSdf(name, sensorPose, updateRate, topic, alwaysOn,
-                         visualize, {}, {}, {}, {}, forcetorqueSdf);
+                         visualize, "child", "child_to_parent", {}, {}, {}, {},
+                         forcetorqueSdf);
 
   ASSERT_NE(nullptr, forcetorqueSdf);
 
@@ -163,9 +167,12 @@ TEST_F(ForceTorqueSensorTest, CreateForceTorqueSensor)
 }
 
 /////////////////////////////////////////////////
-TEST_F(ForceTorqueSensorTest, SensorReadings)
+TEST_P(ForceTorqueSensorTest, SensorReadings)
 {
   namespace math = ignition::math;
+
+  std::string frame, measureDirection;
+  std::tie(frame, measureDirection) = GetParam();
 
   // Create SDF describing a a force torque sensor
   const std::string name = "TestForceTorqueSensor";
@@ -186,9 +193,11 @@ TEST_F(ForceTorqueSensorTest, SensorReadings)
   math::Pose3d sensorPose{math::Vector3d(0.25, 0.0, 0.5),
                           math::Quaterniond::Identity};
   sdf::ElementPtr forcetorqueSdf;
+
   CreateForceTorqueToSdf(name, sensorPose, updateRate, topic, alwaysOn,
-                         visualize, forceNoiseMean, forceNoiseStddev,
-                         torqueNoiseMean, torqueNoiseStddev, forcetorqueSdf);
+                         visualize, frame, measureDirection, forceNoiseMean,
+                         forceNoiseStddev, torqueNoiseMean, torqueNoiseStddev,
+                         forcetorqueSdf);
 
   ASSERT_NE(nullptr, forcetorqueSdf);
 
@@ -218,63 +227,81 @@ TEST_F(ForceTorqueSensorTest, SensorReadings)
   // verify msg received on the topic
   WaitForMessageTestHelper<ignition::msgs::Wrench> msgHelper(topic);
   auto dt = std::chrono::steady_clock::duration(std::chrono::seconds(1));
-  {
-    sensor->Update(dt);
-    EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
-    auto msg = msgHelper.Message();
-    EXPECT_EQ(1, msg.header().stamp().sec());
-    EXPECT_EQ(0, msg.header().stamp().nsec());
-
-    EXPECT_EQ(force + forceNoiseMean, ignition::msgs::Convert(msg.force()));
-    EXPECT_EQ(torque + torqueNoiseMean, ignition::msgs::Convert(msg.torque()));
-
-    // The Force() and Torque() functions return the noise-free forces and
-    // torques in the sensor frame
-    EXPECT_EQ(force, sensor->Force());
-    EXPECT_EQ(torque, sensor->Torque());
-  }
 
   // Set rotation of child
   const math::Quaterniond rotChildInSensor{
       math::Vector3d{IGN_PI_4, IGN_PI_2, 0}};
+  const math::Quaterniond rotParentInSensor{
+      math::Vector3d{0, IGN_PI_4, IGN_PI_4}};
+
   sensor->SetRotationChildInSensor(rotChildInSensor);
   EXPECT_EQ(rotChildInSensor, sensor->RotationChildInSensor());
-  {
-    sensor->Update(dt);
-    EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
-    auto msg = msgHelper.Message();
-
-    EXPECT_EQ((rotChildInSensor.Inverse() * force) + forceNoiseMean,
-              ignition::msgs::Convert(msg.force()));
-    EXPECT_EQ((rotChildInSensor.Inverse() * torque) + torqueNoiseMean,
-              ignition::msgs::Convert(msg.torque()));
-    // The Force() and Torque() functions return the noise-free forces and
-    // torques in the sensor frame
-    EXPECT_EQ(force, sensor->Force());
-    EXPECT_EQ(torque, sensor->Torque());
-  }
-
-  // Set rotation of parent. This should not affect the output because the
-  // measurement frame is "child".
-  const math::Quaterniond rotParentInSensor{math::Vector3d{0.1, 0.2, 0.3}};
   sensor->SetRotationParentInSensor(rotParentInSensor);
   EXPECT_EQ(rotParentInSensor, sensor->RotationParentInSensor());
-  {
-    sensor->Update(dt);
-    EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
-    auto msg = msgHelper.Message();
 
-    // Using rotChildInSensor since the measurement frame is still "child"
-    EXPECT_EQ((rotChildInSensor.Inverse() * force) + forceNoiseMean,
-              ignition::msgs::Convert(msg.force()));
-    EXPECT_EQ((rotChildInSensor.Inverse() * torque) + torqueNoiseMean,
-              ignition::msgs::Convert(msg.torque()));
-    // The Force() and Torque() functions return the noise-free forces and
-    // torques in the sensor frame
-    EXPECT_EQ(force, sensor->Force());
-    EXPECT_EQ(torque, sensor->Torque());
+  sensor->Update(dt);
+  EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
+  auto msg = msgHelper.Message();
+  EXPECT_EQ(1, msg.header().stamp().sec());
+  EXPECT_EQ(0, msg.header().stamp().nsec());
+
+  if (measureDirection == "parent_to_child")
+  {
+    if (frame == "child")
+    {
+      EXPECT_EQ((rotChildInSensor.Inverse() * force) + forceNoiseMean,
+                ignition::msgs::Convert(msg.force()));
+      EXPECT_EQ((rotChildInSensor.Inverse() * torque) + torqueNoiseMean,
+                ignition::msgs::Convert(msg.torque()));
+    }
+    else if (frame == "parent")
+    {
+      EXPECT_EQ((rotParentInSensor.Inverse() * force) + forceNoiseMean,
+                ignition::msgs::Convert(msg.force()));
+      EXPECT_EQ((rotParentInSensor.Inverse() * torque) + torqueNoiseMean,
+                ignition::msgs::Convert(msg.torque()));
+    }
+    else
+    {
+      EXPECT_EQ(force + forceNoiseMean, ignition::msgs::Convert(msg.force()));
+      EXPECT_EQ(torque + torqueNoiseMean,
+                ignition::msgs::Convert(msg.torque()));
+    }
   }
+  else
+  {
+    if (frame == "child")
+    {
+      EXPECT_EQ(-(rotChildInSensor.Inverse() * force) + forceNoiseMean,
+                ignition::msgs::Convert(msg.force()));
+      EXPECT_EQ(-(rotChildInSensor.Inverse() * torque) + torqueNoiseMean,
+                ignition::msgs::Convert(msg.torque()));
+    }
+    else if (frame == "parent")
+    {
+      EXPECT_EQ(-(rotParentInSensor.Inverse() * force) + forceNoiseMean,
+                ignition::msgs::Convert(msg.force()));
+      EXPECT_EQ(-(rotParentInSensor.Inverse() * torque) + torqueNoiseMean,
+                ignition::msgs::Convert(msg.torque()));
+    }
+    else
+    {
+      EXPECT_EQ(-force + forceNoiseMean, ignition::msgs::Convert(msg.force()));
+      EXPECT_EQ(-torque + torqueNoiseMean,
+                ignition::msgs::Convert(msg.torque()));
+    }
+  }
+  // The Force() and Torque() functions return the noise-free forces and
+  // torques in the sensor frame
+  EXPECT_EQ(force, sensor->Force());
+  EXPECT_EQ(torque, sensor->Torque());
 }
+
+INSTANTIATE_TEST_CASE_P(
+    FrameAndDirection, ForceTorqueSensorTest,
+    ::testing::Combine(::testing::Values("child", "parent", "sensor"),
+                       ::testing::Values("parent_to_child",
+                                         "child_to_parent")),);
 
 int main(int argc, char **argv)
 {
