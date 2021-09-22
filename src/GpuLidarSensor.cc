@@ -146,6 +146,9 @@ bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
+  igndbg << "Lidar points for [" << this->Name() << "] advertised on ["
+         << this->Topic() << "]" << std::endl;
+
   this->initialized = true;
 
   return true;

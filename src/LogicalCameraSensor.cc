@@ -115,6 +115,9 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
     return false;
   }
 
+  igndbg << "Logical images for [" << this->Name() << "] advertised on ["
+         << this->Topic() << "]" << std::endl;
+
   this->dataPtr->initialized = true;
   return true;
 }

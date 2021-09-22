@@ -14,9 +14,24 @@
  * limitations under the License.
  *
 */
+
+#include <atomic>
+#include <memory>
+
 #include <gtest/gtest.h>
 
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
+#include <ignition/msgs/performance_sensor_metrics.pb.h>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
 #include <ignition/common/Console.hh>
+#include <ignition/common/Time.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Sensor.hh>
 #include <ignition/transport/Node.hh>
@@ -123,6 +138,76 @@ TEST(Sensor_TEST, Topic)
   EXPECT_EQ("/topic_with_spaces/characters", sensor.Topic());
 
   EXPECT_FALSE(sensor.SetTopic(""));
+}
+
+class SensorUpdate : public ::testing::Test
+{
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    ignition::common::Console::SetVerbosity(4);
+    node.Subscribe(kPerformanceMetricTopic,
+      &SensorUpdate::OnPerformanceMetric, this);
+  }
+
+  // Callback function for the performance metric topic.
+  protected: void OnPerformanceMetric(
+    const ignition::msgs::PerformanceSensorMetrics &_msg)
+  {
+    EXPECT_EQ(kSensorName, _msg.name());
+    performanceMetricsMsgsCount++;
+  }
+
+  // Sensor name.
+  protected: const std::string kSensorName{"sensor_test"};
+  // Sensor topic.
+  protected: const std::string kSensorTopic{"/sensor_test"};
+  // Enable metrics flag.
+  protected: const bool kEnableMetrics{true};
+  // Topic where performance metrics are published.
+  protected: const std::string kPerformanceMetricTopic{
+    kSensorTopic + "/performance_metrics"};
+  // Number of messages to be published.
+  protected: const unsigned int kNumberOfMessages{10};
+  // Counter for performance metrics messages published.
+  protected: std::atomic<unsigned int> performanceMetricsMsgsCount{0};
+  // Transport node.
+  protected: transport::Node node;
+};
+
+//////////////////////////////////////////////////
+TEST_F(SensorUpdate, Update)
+{
+  // Create sensor.
+  sdf::Sensor sdfSensor;
+  sdfSensor.SetName(kSensorName);
+  sdfSensor.SetTopic(kSensorTopic);
+  sdfSensor.SetEnableMetrics(kEnableMetrics);
+  std::unique_ptr<Sensor> sensor = std::make_unique<TestSensor>();
+  sensor->Load(sdfSensor);
+  ASSERT_EQ(kSensorTopic, sensor->Topic());
+  ASSERT_EQ(kEnableMetrics, sensor->EnableMetrics());
+
+  // Call Update() method kNumberOfMessages times.
+  // For each call there is also a call to Sensor::PublishMetrics() that
+  // publishes metrics in the correspondant topic.
+  for (int sec = 0 ; sec < static_cast<int>(kNumberOfMessages) ; ++sec)
+  {
+    std::chrono::steady_clock::duration now = std::chrono::seconds(sec);
+    sensor->Update(now, true);
+  }
+
+  int sleep = 0;
+  const int maxSleep = 30;
+  while (performanceMetricsMsgsCount < kNumberOfMessages && sleep < maxSleep)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    sleep++;
+  }
+  ASSERT_EQ(kNumberOfMessages, performanceMetricsMsgsCount);
+
+  auto testSensor = dynamic_cast<TestSensor*>(sensor.get());
+  EXPECT_EQ(testSensor->updateCount, performanceMetricsMsgsCount);
 }
 
 //////////////////////////////////////////////////
