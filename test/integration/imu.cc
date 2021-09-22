@@ -111,7 +111,6 @@ TEST_F(ImuSensorTest, SensorReadings)
         updateRate, topic, alwaysOn, visualize);
 
   // create the sensor using sensor factory
-  // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
   auto sensor = sf.CreateSensor<ignition::sensors::ImuSensor>(imuSdf);
   ASSERT_NE(nullptr, sensor);

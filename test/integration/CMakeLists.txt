@@ -12,6 +12,7 @@ set(dri_tests
 set(tests
   air_pressure.cc
   altimeter.cc
+  force_torque.cc
   logical_camera.cc
   magnetometer.cc
   imu.cc
@@ -53,5 +54,6 @@ ign_build_tests(TYPE INTEGRATION
     ${PROJECT_LIBRARY_TARGET_NAME}-logical_camera
     ${PROJECT_LIBRARY_TARGET_NAME}-magnetometer
     ${PROJECT_LIBRARY_TARGET_NAME}-imu
+    ${PROJECT_LIBRARY_TARGET_NAME}-force_torque
 )
 
