@@ -80,12 +80,12 @@ void OnNewSegmentationFrame(const msgs::Image &_msg)
 }
 
 /// \brief wait till you read the published frame
-void WaitForNewFrame(ignition::sensors::Manager &mgr)
+void WaitForNewFrame(ignition::sensors::Manager &_mgr)
 {
   g_counter = 0;
 
   // wait for a few segmentation camera frames
-  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+  _mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
 
   auto waitTime = std::chrono::duration_cast< std::chrono::milliseconds >(
     std::chrono::duration< double >(0.001));
@@ -100,26 +100,28 @@ void WaitForNewFrame(ignition::sensors::Manager &mgr)
     std::this_thread::sleep_for(waitTime);
   }
   EXPECT_GT(counter, 0u);
+  ASSERT_NE(nullptr, g_buffer);
 }
 
 /// \brief Build the scene with 3 boxes besides each other
 /// the 2 outer boxes have the same label & the middle is different.
 /// There is also another box with a unique label that is hidden
 /// behind the middle box
-void BuildScene(rendering::ScenePtr scene)
+void BuildScene(rendering::ScenePtr _scene)
 {
-  const math::Vector3d leftPosition(3, -1.5, 0);
-  const math::Vector3d rightPosition(3, 1.5, 0);
+  const math::Vector3d leftPosition(3, 1.5, 0);
+  const math::Vector3d rightPosition(3, -1.5, 0);
   const math::Vector3d middlePosition(3, 0, 0);
   const math::Vector3d hiddenPosition(8, 0, 0);
 
-  rendering::VisualPtr root = scene->RootVisual();
+  rendering::VisualPtr root = _scene->RootVisual();
 
   const double unitBoxSize = 1.0;
 
   // create box visual
-  rendering::VisualPtr box = scene->CreateVisual();
-  box->AddGeometry(scene->CreateBox());
+  rendering::VisualPtr box = _scene->CreateVisual("box_left");
+  ASSERT_NE(nullptr, box);
+  box->AddGeometry(_scene->CreateBox());
   box->SetOrigin(0.0, 0.0, 0.0);
   box->SetLocalPosition(leftPosition);
   box->SetLocalRotation(0, 0, 0);
@@ -128,8 +130,9 @@ void BuildScene(rendering::ScenePtr scene)
   root->AddChild(box);
 
   // create box visual of same label
-  rendering::VisualPtr box1 = scene->CreateVisual();
-  box1->AddGeometry(scene->CreateBox());
+  rendering::VisualPtr box1 = _scene->CreateVisual("box_right");
+  ASSERT_NE(nullptr, box1);
+  box1->AddGeometry(_scene->CreateBox());
   box1->SetOrigin(0.0, 0.0, 0.0);
   box1->SetLocalPosition(rightPosition);
   box1->SetLocalRotation(0, 0, 0);
@@ -138,8 +141,9 @@ void BuildScene(rendering::ScenePtr scene)
   root->AddChild(box1);
 
   // create box visual of different label
-  ignition::rendering::VisualPtr box2 = scene->CreateVisual();
-  box2->AddGeometry(scene->CreateBox());
+  ignition::rendering::VisualPtr box2 = _scene->CreateVisual("box_mid");
+  ASSERT_NE(nullptr, box2);
+  box2->AddGeometry(_scene->CreateBox());
   box2->SetOrigin(0.0, 0.0, 0.0);
   box2->SetLocalPosition(middlePosition);
   box2->SetLocalRotation(0, 0, 0);
@@ -148,8 +152,9 @@ void BuildScene(rendering::ScenePtr scene)
   root->AddChild(box2);
 
   // create box visual of the hidden box
-  ignition::rendering::VisualPtr hiddenBox = scene->CreateVisual();
-  hiddenBox->AddGeometry(scene->CreateBox());
+  ignition::rendering::VisualPtr hiddenBox = _scene->CreateVisual("box_hidden");
+  ASSERT_NE(nullptr, hiddenBox);
+  hiddenBox->AddGeometry(_scene->CreateBox());
   hiddenBox->SetOrigin(0.0, 0.0, 0.0);
   hiddenBox->SetLocalPosition(hiddenPosition);
   hiddenBox->SetLocalRotation(0, 0, 0);
@@ -207,6 +212,7 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   }
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  ASSERT_NE(nullptr, scene);
   BuildScene(scene);
 
   ignition::sensors::Manager mgr;
@@ -229,19 +235,21 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   auto camera = sensor->SegmentationCamera();
   ASSERT_NE(camera, nullptr);
 
-  // 23 is a random number that is not used for boxes
-  uint32_t backgroundLabel = 23;
   camera->SetSegmentationType(rendering::SegmentationType::ST_SEMANTIC);
   camera->EnableColoredMap(true);
-  camera->SetBackgroundLabel(backgroundLabel);
   camera->SetLocalPosition(0.0, 0.0, 0.0);
   camera->SetLocalRotation(0.0, 0.0, 0.0);
+
+  // 23 is a random number that is not used for boxes
+  uint32_t backgroundLabel = 23;
+  camera->SetBackgroundLabel(backgroundLabel);
 
   // Topic
   std::string topic =
     "/test/integration/SegmentationCameraPlugin_imagesWithBuiltinSDF";
   std::string infoTopic = topic + "/camera_info";
   // Get the topic of the labels map
+  // TODO(anyone) add test coverage for the colored map topic and its data
   topic += "/labels_map";
 
   WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
@@ -295,9 +303,9 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_EQ(belowBoxes, backgroundLabel);
 
   // search for the hidden box label in all pixels
-  for (int i = 0; i < height; i++)
+  for (int i = 0; i < height; ++i)
   {
-    for (int j = 0; j < width; j++)
+    for (int j = 0; j < width; ++j)
     {
       uint32_t index = (i * width + j) * channels;
       uint8_t label = g_buffer[index];
@@ -330,6 +338,17 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_EQ(middleCount, 1);
   EXPECT_EQ(rightCount, 1);
   EXPECT_EQ(leftCount, 2);
+
+  // search for the hidden box label in all pixels
+  for (int i = 0; i < height; ++i)
+  {
+    for (int j = 0; j < width; ++j)
+    {
+      uint32_t index = (i * width + j) * channels;
+      uint8_t label = g_buffer[index];
+      EXPECT_NE(label, hiddenLabel);
+    }
+  }
 
   // Clean up
   engine->DestroyScene(scene);

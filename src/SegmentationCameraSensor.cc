@@ -329,8 +329,10 @@ bool SegmentationCameraSensor::CreateCamera()
       this->Name());
 
     if (this->dataPtr->saveSamples)
+    {
       this->dataPtr->rgbCamera = this->Scene()->CreateCamera(
         this->Name() + "_rgbCamera");
+    }
   }
 
   // Segmentation properties
