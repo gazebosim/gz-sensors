@@ -25,9 +25,9 @@ implement proprietary sensors that can't be shared publicly.
 A simulated sensor consists of code that can be used to extract specific data
 from a running simulation. A camera extracts pixels, an IMU extracts
 accelerations, etc. This doesn't necessarily need to be done though Ignition
-Sensors. On Ignition Gazebo, for example, it's implement functionality similar
-to a sensor just using a system plugin without any connection to Ignition
-Sensors.
+Sensors. On Ignition Gazebo, for example, it's possible to implement
+functionality similar to a sensor just using a system plugin without any
+connection to Ignition Sensors.
 
 With that in mind, it's worth going over some of the features that Ignition
 Sensors provides that make it easier to implement sensors, instead of writing
