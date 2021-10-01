@@ -31,7 +31,7 @@ On macOS, add OSRF packages:
   brew tap osrf/simulation
   ```
 
-Install Ignition GUI:
+Install Ignition Sensors:
   ```
   brew install ignition-sensors<#>
   ```
