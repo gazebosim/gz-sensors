@@ -2,7 +2,10 @@
 
 ### Ignition Sensors 6.X.X
 
-### Ignition Sensors 6.0.0 (2021-09-22)
+### Ignition Sensors 6.0.0 (2021-09-30)
+
+1. Trivial tutorial typo correction in Custom Sensors tutorial
+    * [Pull request #160](https://github.com/ignitionrobotics/ign-sensors/pull/160)
 
 1. Bumps in fortress: ign-sensors6
     * [Pull request #120](https://github.com/ignitionrobotics/ign-sensors/pull/120)
