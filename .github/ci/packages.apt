@@ -2,8 +2,8 @@ libignition-cmake2-dev
 libignition-common4-dev
 libignition-math6-dev
 libignition-msgs8-dev
-libignition-rendering6-dev
+libignition-rendering7-dev
 libignition-tools-dev
 libignition-transport11-dev
-libsdformat12-dev
+libsdformat13-dev
 xvfb

@@ -60,8 +60,8 @@ set(IGN_TRANSPORT_VER ${ignition-transport11_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-rendering
-ign_find_package(ignition-rendering6 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
-set(IGN_RENDERING_VER ${ignition-rendering6_VERSION_MAJOR})
+ign_find_package(ignition-rendering7 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
+set(IGN_RENDERING_VER ${ignition-rendering7_VERSION_MAJOR})
 
 if (TARGET ignition-rendering${IGN_RENDERING_VER}::ogre)
   set(HAVE_OGRE TRUE)
@@ -81,7 +81,7 @@ set(IGN_MSGS_VER ${ignition-msgs8_VERSION_MAJOR})
 #--------------------------------------
 # Find SDFormat
 ign_find_package(sdformat13 REQUIRED)
-set(SDF_VER ${sdformat12_VERSION_MAJOR})
+set(SDF_VER ${sdformat13_VERSION_MAJOR})
 
 set(IGN_SENSORS_PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 
