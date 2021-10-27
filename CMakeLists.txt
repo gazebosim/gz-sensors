@@ -55,7 +55,7 @@ set(IGN_COMMON_VER ${ignition-common3_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-transport
-ign_find_package(ignition-transport8 REQUIRED)
+ign_find_package(ignition-transport8 REQUIRED VERSION 8.2)
 set(IGN_TRANSPORT_VER ${ignition-transport8_VERSION_MAJOR})
 
 #--------------------------------------
