@@ -97,10 +97,9 @@ namespace ignition
       public: virtual bool Update(
         const std::chrono::steady_clock::duration &_now) override;
 
-      /// \brief Force the sensor to generate data
-      /// \param[in] _now The current time
-      /// \return true if the update was successfull
-      public: virtual rendering::DepthCameraPtr DepthCamera();
+      /// \brief Get a pointer to the rendering depth camera
+      /// \return Rendering depth camera
+      public: virtual rendering::DepthCameraPtr DepthCamera() const;
 
       /// \brief Depth data callback used to get the data from the sensor
       /// \param[in] _scan pointer to the data from the sensor

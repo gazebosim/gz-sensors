@@ -377,7 +377,7 @@ void ThermalCameraSensor::OnNewThermalFrame(const uint16_t *_scan,
 }
 
 /////////////////////////////////////////////////
-rendering::ThermalCameraPtr ThermalCameraSensor::ThermalCamera()
+rendering::ThermalCameraPtr ThermalCameraSensor::ThermalCamera() const
 {
   return this->dataPtr->thermalCamera;
 }

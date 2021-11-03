@@ -482,7 +482,7 @@ void DepthCameraSensor::OnNewRgbPointCloud(const float *_scan,
 }
 
 /////////////////////////////////////////////////
-ignition::rendering::DepthCameraPtr DepthCameraSensor::DepthCamera()
+ignition::rendering::DepthCameraPtr DepthCameraSensor::DepthCamera() const
 {
   return this->dataPtr->depthCamera;
 }

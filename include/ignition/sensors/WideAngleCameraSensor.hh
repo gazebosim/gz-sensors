@@ -97,10 +97,9 @@ namespace ignition
       public: virtual bool Update(
         const std::chrono::steady_clock::duration &_now) override;
 
-      /// \brief Force the sensor to generate data
-      /// \param[in] _now The current time
-      /// \return true if the update was successfull
-      public: virtual rendering::WideAngleCameraPtr WideAngleCamera();
+      /// \brief Get a pointer to the rendering wide angle camera
+      /// \return Wide angle camera
+      public: virtual rendering::WideAngleCameraPtr WideAngleCamera() const;
 
       /// \brief Image data callback used to get the data from the sensor
       /// \param[in] _data pointer to the data from the sensor

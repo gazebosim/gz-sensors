@@ -18,4 +18,4 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   odometer
 
   # Link to built-in sensors
-  ignition-sensors6::altimeter)
+  ignition-sensors7::altimeter)

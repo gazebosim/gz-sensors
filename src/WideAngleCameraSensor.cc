@@ -119,6 +119,96 @@ class ignition::sensors::WideAngleCameraSensorPrivate
 };
 
 //////////////////////////////////////////////////
+WideAngleCameraSensor::WideAngleCameraSensor()
+  : dataPtr(new WideAngleCameraSensorPrivate())
+{
+}
+
+//////////////////////////////////////////////////
+WideAngleCameraSensor::~WideAngleCameraSensor()
+{
+  this->dataPtr->imageConnection.reset();
+  if (this->dataPtr->imageBuffer)
+  {
+    delete [] this->dataPtr->imageBuffer;
+    this->dataPtr->imageBuffer = nullptr;
+  }
+}
+
+//////////////////////////////////////////////////
+bool WideAngleCameraSensor::Init()
+{
+  return this->CameraSensor::Init();
+}
+
+//////////////////////////////////////////////////
+bool WideAngleCameraSensor::Load(sdf::ElementPtr _sdf)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(_sdf);
+  return this->Load(sdfSensor);
+}
+
+
+//////////////////////////////////////////////////
+bool WideAngleCameraSensor::Load(const sdf::Sensor &_sdf)
+{
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+
+  if (!Sensor::Load(_sdf))
+  {
+    return false;
+  }
+
+  // Check if this is the right type
+  if (_sdf.Type() != sdf::SensorType::WIDE_ANGLE_CAMERA)
+  {
+    ignerr << "Attempting to a load a Wide Angle Camera sensor, but received "
+      << "a " << _sdf.TypeStr() << std::endl;
+  }
+
+  if (_sdf.CameraSensor() == nullptr)
+  {
+    ignerr << "Attempting to a load a Wide Angle Camera sensor, but received "
+      << "a null sensor." << std::endl;
+    return false;
+  }
+
+  this->dataPtr->sdfSensor = _sdf;
+
+  // Create the image publisher
+  this->dataPtr->pub =
+      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+          this->Topic());
+
+  if (!this->dataPtr->pub)
+  {
+    ignerr << "Unable to create publisher on topic["
+      << this->Topic() << "].\n";
+    return false;
+  }
+
+  igndbg << "Wide angle camera images for [" << this->Name()
+         << "] advertised on [" << this->Topic() << "]" << std::endl;
+
+  if (!this->AdvertiseInfo())
+    return false;
+
+  if (this->Scene())
+  {
+    this->CreateCamera();
+  }
+
+  this->dataPtr->sceneChangeConnection =
+      RenderingEvents::ConnectSceneChangeCallback(
+      std::bind(&WideAngleCameraSensor::SetScene, this, std::placeholders::_1));
+
+  this->dataPtr->initialized = true;
+
+  return true;
+}
+
+//////////////////////////////////////////////////
 bool WideAngleCameraSensor::CreateCamera()
 {
   const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
@@ -267,101 +357,17 @@ void WideAngleCameraSensor::OnNewWideAngleFrame(
   memcpy(this->dataPtr->imageBuffer, _data, bufferSize);
 }
 
-//////////////////////////////////////////////////
-WideAngleCameraSensor::WideAngleCameraSensor()
-  : dataPtr(new WideAngleCameraSensorPrivate())
-{
-}
-
-//////////////////////////////////////////////////
-WideAngleCameraSensor::~WideAngleCameraSensor()
-{
-  this->dataPtr->imageConnection.reset();
-  if (this->dataPtr->imageBuffer)
-  {
-    delete [] this->dataPtr->imageBuffer;
-    this->dataPtr->imageBuffer = nullptr;
-  }
-}
-
-//////////////////////////////////////////////////
-bool WideAngleCameraSensor::Init()
-{
-  return this->CameraSensor::Init();
-}
-
-//////////////////////////////////////////////////
-bool WideAngleCameraSensor::Load(sdf::ElementPtr _sdf)
-{
-  sdf::Sensor sdfSensor;
-  sdfSensor.Load(_sdf);
-  return this->Load(sdfSensor);
-}
-
-
-//////////////////////////////////////////////////
-bool WideAngleCameraSensor::Load(const sdf::Sensor &_sdf)
-{
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-
-  if (!Sensor::Load(_sdf))
-  {
-    return false;
-  }
-
-  // Check if this is the right type
-  if (_sdf.Type() != sdf::SensorType::WIDE_ANGLE_CAMERA)
-  {
-    ignerr << "Attempting to a load a Wide Angle Camera sensor, but received "
-      << "a " << _sdf.TypeStr() << std::endl;
-  }
-
-  if (_sdf.CameraSensor() == nullptr)
-  {
-    ignerr << "Attempting to a load a Wide Angle Camera sensor, but received "
-      << "a null sensor." << std::endl;
-    return false;
-  }
-
-  this->dataPtr->sdfSensor = _sdf;
-
-  // Create the image publisher
-  this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::Image>(
-          this->Topic());
-
-  if (!this->dataPtr->pub)
-  {
-    ignerr << "Unable to create publisher on topic["
-      << this->Topic() << "].\n";
-    return false;
-  }
-
-  igndbg << "Wide angle camera images for [" << this->Name()
-         << "] advertised on [" << this->Topic() << "]" << std::endl;
-
-  if (!this->AdvertiseInfo())
-    return false;
-
-  if (this->Scene())
-  {
-    this->CreateCamera();
-  }
-
-  this->dataPtr->sceneChangeConnection =
-      RenderingEvents::ConnectSceneChangeCallback(
-      std::bind(&WideAngleCameraSensor::SetScene, this, std::placeholders::_1));
-
-  this->dataPtr->initialized = true;
-
-  return true;
-}
-
 /////////////////////////////////////////////////
 ignition::common::ConnectionPtr WideAngleCameraSensor::ConnectImageCallback(
     std::function<void(const ignition::msgs::Image &)> _callback)
 {
   return this->dataPtr->imageEvent.Connect(_callback);
+}
+
+/////////////////////////////////////////////////
+rendering::WideAngleCameraPtr WideAngleCameraSensor::WideAngleCamera() const
+{
+  return this->dataPtr->camera;
 }
 
 /////////////////////////////////////////////////
@@ -395,8 +401,6 @@ bool WideAngleCameraSensor::Update(
     ignerr << "WideAngleCamera doesn't exist.\n";
     return false;
   }
-
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   // move the camera to the current pose
   this->dataPtr->camera->SetLocalPose(this->Pose());
@@ -452,6 +456,8 @@ bool WideAngleCameraSensor::Update(
         << this->dataPtr->camera->ImageFormat() << "]\n";
       break;
   }
+
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   // create message
   ignition::msgs::Image msg;
