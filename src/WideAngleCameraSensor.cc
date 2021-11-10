@@ -224,6 +224,12 @@ bool WideAngleCameraSensor::CreateCamera()
   unsigned int height = cameraSdf->ImageHeight();
 
   this->dataPtr->camera = this->Scene()->CreateWideAngleCamera(this->Name());
+
+  if (!this->dataPtr->camera)
+  {
+    ignerr << "Failed to create wide angle camera" << std::endl;
+    return false;
+  }
   this->dataPtr->camera->SetImageWidth(width);
   this->dataPtr->camera->SetImageHeight(height);
   this->dataPtr->camera->SetNearClipPlane(cameraSdf->NearClip());
