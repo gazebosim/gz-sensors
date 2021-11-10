@@ -136,6 +136,9 @@ namespace ignition
       /// \return height of the image
       public: virtual unsigned int ImageHeight() const override;
 
+      // Documentation inherited.
+      public: rendering::CameraPtr RenderingCamera() const override;
+
       /// \brief Create a camera in a scene
       /// \return True on success.
       private: bool CreateCamera();

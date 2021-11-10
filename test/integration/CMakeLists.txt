@@ -7,6 +7,7 @@ set(dri_tests
   rgbd_camera.cc
   thermal_camera.cc
   segmentation_camera.cc
+  wide_angle_camera.cc
 )
 
 set(tests
@@ -42,6 +43,7 @@ if (DRI_TESTS)
       ${PROJECT_LIBRARY_TARGET_NAME}-rgbd_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-thermal_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-segmentation_camera
+      ${PROJECT_LIBRARY_TARGET_NAME}-wide_angle_camera
   )
 endif()
 

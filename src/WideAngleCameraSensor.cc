@@ -548,3 +548,9 @@ unsigned int WideAngleCameraSensor::ImageHeight() const
     return this->dataPtr->camera->ImageHeight();
   return 0;
 }
+
+//////////////////////////////////////////////////
+rendering::CameraPtr WideAngleCameraSensor::RenderingCamera() const
+{
+  return this->dataPtr->camera;
+}

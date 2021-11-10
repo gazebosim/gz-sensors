@@ -123,7 +123,7 @@ namespace ignition
 
       /// \brief Get pointer to rendering camera object.
       /// \return Camera in Ignition Rendering.
-      public: rendering::CameraPtr RenderingCamera() const;
+      public: virtual rendering::CameraPtr RenderingCamera() const;
 
       /// \brief Topic where camera info is published.
       /// \return Camera info topic.
