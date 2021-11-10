@@ -5,5 +5,5 @@ libignition-msgs8-dev
 libignition-rendering7-dev
 libignition-tools-dev
 libignition-transport11-dev
-libsdformat13-dev
+libsdformat12-dev
 xvfb

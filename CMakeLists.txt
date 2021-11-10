@@ -80,8 +80,8 @@ set(IGN_MSGS_VER ${ignition-msgs8_VERSION_MAJOR})
 
 #--------------------------------------
 # Find SDFormat
-ign_find_package(sdformat13 REQUIRED)
-set(SDF_VER ${sdformat13_VERSION_MAJOR})
+ign_find_package(sdformat12 REQUIRED)
+set(SDF_VER ${sdformat12_VERSION_MAJOR})
 
 set(IGN_SENSORS_PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 
