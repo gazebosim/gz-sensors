@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
 #============================================================================
 # Initialize the project
 #============================================================================
-project(ignition-sensors6 VERSION 6.0.0)
+project(ignition-sensors6 VERSION 6.0.1)
 
 #============================================================================
 # Find ignition-cmake
