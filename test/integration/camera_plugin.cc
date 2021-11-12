@@ -167,6 +167,18 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
     EXPECT_DOUBLE_EQ(0.0, projection.p(11));
   }
 
+  // test removing sensor
+  // first make sure the sensor objects do exist
+  auto sensorId = sensor->Id();
+  auto cameraId = sensor->RenderingCamera()->Id();
+  EXPECT_EQ(sensor, mgr.Sensor(sensorId));
+  EXPECT_EQ(sensor->RenderingCamera(), scene->SensorById(cameraId));
+  // remove and check sensor objects no longer exist in both sensors and
+  // rendering
+  EXPECT_TRUE(mgr.Remove(sensorId));
+  EXPECT_EQ(nullptr, mgr.Sensor(sensorId));
+  EXPECT_EQ(nullptr, scene->SensorById(cameraId));
+
   // Clean up
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
