@@ -1,6 +1,8 @@
 ## Ignition Sensors 6
 
-### Ignition Sensors 6.1.0
+### Ignition Sensors 6.x.x (202x-xx-xx)
+
+### Ignition Sensors 6.0.1 (2021-11-12)
 
 1. Disable GPU lidar tests on macOS
     * [Pull request #163](https://github.com/ignitionrobotics/ign-sensors/pull/163)
