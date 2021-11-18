@@ -23,6 +23,22 @@ sudo apt-get update
 sudo apt install libignition-sensors<#>-dev
 ```
 
+### macOS
+
+On macOS, add OSRF packages:
+  ```
+  ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  brew tap osrf/simulation
+  ```
+
+Install Ignition Sensors:
+  ```
+  brew install ignition-sensors<#>
+  ```
+
+Be sure to replace `<#>` with a number value, such as 5 or 6, depending on
+which version you need.
+
 ### Windows
 
 Binary install is pending `ignition-rendering` and `ignition-sensors` being added to conda-forge.
@@ -68,6 +84,36 @@ Ignition Sensors requires:
   ```
 
 6. Optionally, install the library
+  ```
+  sudo make install
+  ```
+
+### macOS
+
+1. Clone the repository
+  ```
+  git clone https://github.com/ignitionrobotics/ign-sensors -b ign-sensors<#>
+  ```
+  Be sure to replace `<#>` with a number value, such as 5 or 6, depending on
+  which version you need.
+
+2. Install dependencies
+  ```
+  brew install --only-dependencies ignition-sensors<#>
+  ```
+  Be sure to replace `<#>` with a number value, such as 5 or 6, depending on
+  which version you need.
+
+3. Configure and build
+  ```
+  cd ign-sensors
+  mkdir build
+  cd build
+  cmake ..
+  make
+  ```
+
+4. Optionally, install
   ```
   sudo make install
   ```
@@ -165,4 +211,3 @@ Follow these steps to run tests and static code analysis in your clone of this r
   ```
   make codecheck
   ```
-
