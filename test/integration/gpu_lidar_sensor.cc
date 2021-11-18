@@ -901,31 +901,51 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
 }
 
 /////////////////////////////////////////////////
+#ifdef __APPLE__
+TEST_P(GpuLidarSensorTest, DISABLED_CreateGpuLidar)
+#else
 TEST_P(GpuLidarSensorTest, CreateGpuLidar)
+#endif
 {
   CreateGpuLidar(GetParam());
 }
 
 /////////////////////////////////////////////////
+#ifdef __APPLE__
+TEST_P(GpuLidarSensorTest, DISABLED_DetectBox)
+#else
 TEST_P(GpuLidarSensorTest, DetectBox)
+#endif
 {
   DetectBox(GetParam());
 }
 
 /////////////////////////////////////////////////
+#ifdef __APPLE__
+TEST_P(GpuLidarSensorTest, DISABLED_TestThreeBoxes)
+#else
 TEST_P(GpuLidarSensorTest, TestThreeBoxes)
+#endif
 {
   TestThreeBoxes(GetParam());
 }
 
 /////////////////////////////////////////////////
+#ifdef __APPLE__
+TEST_P(GpuLidarSensorTest, DISABLED_VerticalLidar)
+#else
 TEST_P(GpuLidarSensorTest, VerticalLidar)
+#endif
 {
   VerticalLidar(GetParam());
 }
 
 /////////////////////////////////////////////////
+#ifdef __APPLE__
+TEST_P(GpuLidarSensorTest, DISABLED_ManualUpdate)
+#else
 TEST_P(GpuLidarSensorTest, ManualUpdate)
+#endif
 {
   ManualUpdate(GetParam());
 }
