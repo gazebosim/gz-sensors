@@ -292,7 +292,7 @@ bool WideAngleCameraSensor::CreateCamera()
     if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
     {
       this->dataPtr->noises[noiseType] =
-        ImageNoiseFactory::NewNoiseModel(noiseSdf, "camera");
+        ImageNoiseFactory::NewNoiseModel(noiseSdf, "wide_angle_camera");
 
       std::dynamic_pointer_cast<ImageGaussianNoiseModel>(
            this->dataPtr->noises[noiseType])->SetCamera(
