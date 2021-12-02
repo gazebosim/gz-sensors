@@ -1,3 +1,9 @@
+## Ignition Sensors 7
+
+### Ignition Sensors 7.X.X
+
+### Ignition Sensors 7.0.0 (202X-XX-XX)
+
 ## Ignition Sensors 6
 
 ### Ignition Sensors 7.X.X
@@ -5,6 +11,17 @@
 ### Ignition Sensors 7.0.0 (202X-XX-XX)
 
 ### Ignition Sensors 6.X.X
+
+### Ignition Sensors 6.0.1 (2021-11-12)
+
+1. Disable GPU lidar tests on macOS
+    * [Pull request #163](https://github.com/ignitionrobotics/ign-sensors/pull/163)
+
+1. Added macOS install instructions.
+    * [Pull request #162](https://github.com/ignitionrobotics/ign-sensors/pull/162)
+
+1. Destroy rendering sensors when sensor is removed.
+    * [Pull request #169](https://github.com/ignitionrobotics/ign-sensors/pull/169)
 
 ### Ignition Sensors 6.0.0 (2021-09-30)
 
