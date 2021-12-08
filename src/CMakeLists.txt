@@ -149,6 +149,15 @@ target_link_libraries(${segmentation_camera_target}
     ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
 )
 
+set(wide_angle_camera_sources WideAngleCameraSensor.cc)
+ign_add_component(wide_angle_camera SOURCES ${wide_angle_camera_sources} GET_TARGET_NAME wide_angle_camera_target)
+target_link_libraries(${wide_angle_camera_target}
+  PRIVATE
+    ${camera_target}
+    ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+    ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+)
+
 # Build the unit tests.
 ign_build_tests(TYPE UNIT SOURCES ${gtest_sources} LIB_DEPS ${rendering_target})
 

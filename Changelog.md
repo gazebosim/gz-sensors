@@ -6,6 +6,10 @@
 
 ## Ignition Sensors 6
 
+### Ignition Sensors 7.X.X
+
+### Ignition Sensors 7.0.0 (202X-XX-XX)
+
 ### Ignition Sensors 6.X.X
 
 ### Ignition Sensors 6.0.1 (2021-11-12)

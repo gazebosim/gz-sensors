@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Open Source Robotics Foundation
+ * Copyright (C) 2021 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_DEPTHCAMERASENSOR_HH_
-#define IGNITION_SENSORS_DEPTHCAMERASENSOR_HH_
+#ifndef IGNITION_SENSORS_WIDEANGLECAMERASENSOR_HH_
+#define IGNITION_SENSORS_WIDEANGLECAMERASENSOR_HH_
 
 #include <memory>
 #include <cstdint>
@@ -42,12 +42,12 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/DepthCamera.hh>
+#include <ignition/rendering/WideAngleCamera.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include "ignition/sensors/depth_camera/Export.hh"
+#include "ignition/sensors/wide_angle_camera/Export.hh"
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/Export.hh"
 #include "ignition/sensors/Sensor.hh"
@@ -59,23 +59,23 @@ namespace ignition
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     // forward declarations
-    class DepthCameraSensorPrivate;
+    class WideAngleCameraSensorPrivate;
 
-    /// \brief Depth camera sensor class.
+    /// \brief Wide Angle camera sensor class.
     ///
-    /// This class creates depth image from an ignition rendering scene.
-    /// The scene  must be created in advance and given to Manager::Init().
+    /// This class creates wide angle camera image from an ignition rendering
+    /// scene. The scene must be created in advance and given to Manager::Init()
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-    class IGNITION_SENSORS_DEPTH_CAMERA_VISIBLE DepthCameraSensor
+    class IGNITION_SENSORS_WIDE_ANGLE_CAMERA_VISIBLE WideAngleCameraSensor
       : public CameraSensor
     {
       /// \brief constructor
-      public: DepthCameraSensor();
+      public: WideAngleCameraSensor();
 
       /// \brief destructor
-      public: virtual ~DepthCameraSensor();
+      public: virtual ~WideAngleCameraSensor();
 
       /// \brief Load the sensor based on data from an sdf::Sensor object.
       /// \param[in] _sdf SDF Sensor parameters.
@@ -97,31 +97,20 @@ namespace ignition
       public: virtual bool Update(
         const std::chrono::steady_clock::duration &_now) override;
 
-      /// \brief Get a pointer to the rendering depth camera
-      /// \return Rendering depth camera
-      public: virtual rendering::DepthCameraPtr DepthCamera() const;
+      /// \brief Get a pointer to the rendering wide angle camera
+      /// \return Wide angle camera
+      public: virtual rendering::WideAngleCameraPtr WideAngleCamera() const;
 
-      /// \brief Depth data callback used to get the data from the sensor
-      /// \param[in] _scan pointer to the data from the sensor
-      /// \param[in] _width width of the depth image
-      /// \param[in] _height height of the depth image
-      /// \param[in] _channel bytes used for the depth data
-      /// \param[in] _format string with the format
-      public: void OnNewDepthFrame(const float *_scan,
-                    unsigned int _width, unsigned int _height,
-                    unsigned int /*_channels*/,
-                    const std::string &/*_format*/);
-
-      /// \brief Point cloud data callback used to get the data from the sensor
+      /// \brief Image data callback used to get the data from the sensor
       /// \param[in] _data pointer to the data from the sensor
-      /// \param[in] _width width of the point cloud image
-      /// \param[in] _height height of the point cloud image
-      /// \param[in] _channel bytes used for the point cloud data
+      /// \param[in] _width width of the image
+      /// \param[in] _height height of the image
+      /// \param[in] _channel bytes used for the image data
       /// \param[in] _format string with the format
-      public: void OnNewRgbPointCloud(const float *_data,
+      public: void OnNewWideAngleFrame(const unsigned char *_data,
                     unsigned int _width, unsigned int _height,
-                    unsigned int /*_channels*/,
-                    const std::string &/*_format*/);
+                    unsigned int _channels,
+                    const std::string &_format);
 
       /// \brief Set a callback to be called when image frame data is
       /// generated.
@@ -131,9 +120,8 @@ namespace ignition
       /// \remark Do not block inside of the callback.
       /// \return A connection pointer that must remain in scope. When the
       /// connection pointer falls out of scope, the connection is broken.
-      public: ignition::common::ConnectionPtr ConnectImageCallback(
-                  std::function<
-                  void(const ignition::msgs::Image &)> _callback);
+      public: common::ConnectionPtr ConnectImageCallback(
+                  std::function<void(const msgs::Image &)> _callback);
 
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
@@ -148,13 +136,8 @@ namespace ignition
       /// \return height of the image
       public: virtual unsigned int ImageHeight() const override;
 
-      /// \brief Get image width.
-      /// \return width of the image
-      public: virtual double FarClip() const;
-
-      /// \brief Get image height.
-      /// \return height of the image
-      public: virtual double NearClip() const;
+      // Documentation inherited.
+      public: rendering::CameraPtr RenderingCamera() const override;
 
       /// \brief Create a camera in a scene
       /// \return True on success.
@@ -169,7 +152,7 @@ namespace ignition
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
-      private: std::unique_ptr<DepthCameraSensorPrivate> dataPtr;
+      private: std::unique_ptr<WideAngleCameraSensorPrivate> dataPtr;
       IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
