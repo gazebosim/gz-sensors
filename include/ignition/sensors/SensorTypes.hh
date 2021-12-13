@@ -149,21 +149,21 @@ namespace ignition
       /// \sa Lidar
       LIDAR_NOISE = 14,
 
-      /// \brief Noise streams for the Gps position sensor
-      /// \sa Gps
-      GPS_HORIZONTAL_POSITION_NOISE = 15,
+      /// \brief Noise streams for the NavSat position sensor
+      /// \sa NavSat
+      NAVSAT_HORIZONTAL_POSITION_NOISE = 15,
 
-      /// \brief Noise streams for the Gps position sensor
-      /// \sa Gps
-      GPS_VERTICAL_POSITION_NOISE = 16,
+      /// \brief Noise streams for the NavSat position sensor
+      /// \sa NavSat
+      NAVSAT_VERTICAL_POSITION_NOISE = 16,
 
-      /// \brief Noise streams for the Gps velocity sensor
-      /// \sa Gps
-      GPS_HORIZONTAL_VELOCITY_NOISE = 17,
+      /// \brief Noise streams for the NavSat velocity sensor
+      /// \sa NavSat
+      NAVSAT_HORIZONTAL_VELOCITY_NOISE = 17,
 
-      /// \brief Noise streams for the Gps velocity sensor
-      /// \sa Gps
-      GPS_VERTICAL_VELOCITY_NOISE = 18,
+      /// \brief Noise streams for the NavSat velocity sensor
+      /// \sa NavSat
+      NAVSAT_VERTICAL_VELOCITY_NOISE = 18,
 
       /// \brief Force body-frame X axis noise in N
       /// \sa ForceTorqueSensor
