@@ -116,6 +116,16 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
+  // Set orientation reference frame
+  // TODO : Add support for named frames like ENU using ign-gazebo
+  if (_sdf.ImuSensor()->Localization() == "CUSTOM") {
+    if (_sdf.ImuSensor()->CustomRpyParentFrame() == "") {
+      this->SetOrientationReference(ignition::math::Quaterniond(_sdf.ImuSensor()->CustomRpy()));
+    }
+  } else {
+    ignerr << "This tag is not yet supported" << std::endl;
+  }
+
   if (this->Topic().empty())
     this->SetTopic("/imu");
 
