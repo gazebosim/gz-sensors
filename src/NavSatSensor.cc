@@ -143,12 +143,6 @@ bool NavSatSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool NavSatSensor::Update(const common::Time &_now)
-{
-  return this->Update(math::secNsecToDuration(_now.sec, _now.nsec));
-}
-
-//////////////////////////////////////////////////
 bool NavSatSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("NavSatSensor::Update");
