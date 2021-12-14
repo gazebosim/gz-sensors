@@ -422,9 +422,12 @@ TEST(ImuSensor_TEST, OrientationReference)
 
   sdf::SDFPtr sdfParsed(new sdf::SDF());
   sdf::init(sdfParsed);
-
-  imuSDF = sdfParsed->Root()->GetElement("model")->GetElement("link")
-    ->GetElement("sensor");
+  if (!sdf::readString(stream.str(), sdfParsed)) {
+    imuSDF = sdf::ElementPtr();
+  } else {
+    imuSDF = sdfParsed->Root()->GetElement("model")->GetElement("link")
+      ->GetElement("sensor");
+  }
 
   // Create an ImuSensor
   auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(
