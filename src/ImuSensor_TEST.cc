@@ -422,9 +422,6 @@ TEST(ImuSensor_TEST, OrientationReference)
 
   sdf::SDFPtr sdfParsed(new sdf::SDF());
   sdf::init(sdfParsed);
-  if (!sdf::readString(stream.str(), sdfParsed)) {
-    std::cout << "Debug 1" << std::endl;
-  }
 
   imuSDF = sdfParsed->Root()->GetElement("model")->GetElement("link")
     ->GetElement("sensor");
