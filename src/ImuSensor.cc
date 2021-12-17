@@ -128,9 +128,9 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     }
     else
     {
-      ignerr << "custom_rpy parent frame must be set to empty "
-	      "string. Setting it to any other frame is not "
-	      "supported yet." << std::endl;
+      ignwarn << "custom_rpy parent frame must be set to empty "
+		"string. Setting it to any other frame is not "
+		"supported yet." << std::endl;
     }
   }
 
