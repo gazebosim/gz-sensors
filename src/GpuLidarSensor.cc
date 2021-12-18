@@ -256,7 +256,6 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
     // Set the time stamp
     *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
       msgs::Convert(_now);
-    this->dataPtr->pointMsg.set_is_dense(true);
 
     this->dataPtr->FillPointCloudMsg(this->laserBuffer);
 
@@ -326,7 +325,8 @@ void GpuLidarSensorPrivate::FillPointCloudMsg(const float *_laserBuffer)
   msgBuffer->resize(this->pointMsg.row_step() *
       this->pointMsg.height());
   char *msgBufferIndex = msgBuffer->data();
-
+  // Set Pointcloud as dense. Change if invalid points are found.
+  bool isDense { true };
   // Iterate over scan and populate point cloud
   for (uint32_t j = 0; j < height; ++j)
   {
@@ -337,6 +337,10 @@ void GpuLidarSensorPrivate::FillPointCloudMsg(const float *_laserBuffer)
       // Index of current point, and the depth value at that point
       auto index = j * width * channels + i * channels;
       float depth = _laserBuffer[index];
+      // Validate Depth/Radius and update pointcloud density flag      
+      if(isDense) 
+        isDense = !(ignition::math::isnan(depth) || std::isinf(depth));
+      //
       float intensity = _laserBuffer[index + 1];
       uint16_t ring = j;
 
@@ -371,5 +375,6 @@ void GpuLidarSensorPrivate::FillPointCloudMsg(const float *_laserBuffer)
     }
     inclination += verticleAngleStep;
   }
+  this->pointMsg.set_is_dense(isDense);
 }
 
