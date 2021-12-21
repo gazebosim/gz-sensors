@@ -338,7 +338,7 @@ void GpuLidarSensorPrivate::FillPointCloudMsg(const float *_laserBuffer)
       auto index = j * width * channels + i * channels;
       float depth = _laserBuffer[index];
       // Validate Depth/Radius and update pointcloud density flag
-      if(isDense)
+      if (isDense)
         isDense = !(ignition::math::isnan(depth) || std::isinf(depth));
 
       float intensity = _laserBuffer[index + 1];
