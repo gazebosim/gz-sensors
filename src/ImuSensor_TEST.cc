@@ -28,6 +28,7 @@
 #pragma warning(pop)
 #endif
 
+#include <ignition/common/Console.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/ImuSensor.hh>
 #include <ignition/sensors/Manager.hh>
@@ -187,7 +188,7 @@ class ImuSensor_TEST : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    ignition::common::Console::SetVerbosity(3);
   }
 };
 
