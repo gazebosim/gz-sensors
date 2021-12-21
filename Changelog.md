@@ -1,6 +1,18 @@
 ## Ignition Sensors 4
 
-### Ignition Sensors 4.X.X
+### Ignition Sensors 4.3.0 (2021-12-20)
+
+1. 👩‍🌾 Print debug messages when sensors advertise topics
+    * [Pull request #151](https://github.com/ignitionrobotics/ign-sensors/pull/151)
+
+1. 👩‍🌾 Remove bitbucket-pipelines.yml
+    * [Pull request #150](https://github.com/ignitionrobotics/ign-sensors/pull/150)
+
+1. Publish performance sensor metrics.
+    * [Pull request #146](https://github.com/ignitionrobotics/ign-sensors/pull/146)
+
+1. Bump required SDF version to 10.6 (#153)
+    * [Pull request #153](https://github.com/ignitionrobotics/ign-sensors/pull/153)
 
 ### Ignition Sensors 4.2.0 (2021-07-12)
 
