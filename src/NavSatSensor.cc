@@ -200,8 +200,8 @@ bool NavSatSensor::Update(const std::chrono::steady_clock::duration &_now)
   msg.set_longitude_deg(this->dataPtr->longitude.Degree());
   msg.set_altitude(this->dataPtr->altitude);
   msg.set_velocity_east(this->dataPtr->velocity.X());
-  msg.set_velocity_north(this->dataPtr->velocity.X());
-  msg.set_velocity_up(this->dataPtr->velocity.X());
+  msg.set_velocity_north(this->dataPtr->velocity.Y());
+  msg.set_velocity_up(this->dataPtr->velocity.Z());
 
   // publish
   this->AddSequence(msg.mutable_header());
