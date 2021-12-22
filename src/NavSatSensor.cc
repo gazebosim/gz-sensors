@@ -63,6 +63,9 @@ NavSatSensor::NavSatSensor()
 }
 
 //////////////////////////////////////////////////
+NavSatSensor::~NavSatSensor() = default;
+
+//////////////////////////////////////////////////
 bool NavSatSensor::Init()
 {
   return this->Sensor::Init();
@@ -264,4 +267,3 @@ void NavSatSensor::SetPosition(const math::Angle &_latitude,
   this->SetAltitude(_altitude);
 }
 
-IGN_SENSORS_REGISTER_SENSOR(NavSatSensor)

@@ -53,7 +53,7 @@ namespace ignition
       public: NavSatSensor();
 
       /// \brief Destructor
-      public: virtual ~NavSatSensor() = default;
+      public: virtual ~NavSatSensor();
 
       /// \brief Load the sensor based on data from an sdf::Sensor object.
       /// \param[in] _sdf SDF Sensor parameters.
