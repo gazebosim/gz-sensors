@@ -28,6 +28,7 @@
 #pragma warning(pop)
 #endif
 
+#include <ignition/common/Console.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/ImuSensor.hh>
 #include <ignition/sensors/Manager.hh>
@@ -187,7 +188,7 @@ class ImuSensor_TEST : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    ignition::common::Console::SetVerbosity(3);
   }
 };
 
@@ -388,6 +389,126 @@ TEST(ImuSensor_TEST, Orientation)
   // updated.
   EXPECT_EQ(newOrientValue, sensor->Orientation());
 
+}
+
+//////////////////////////////////////////////////
+TEST(ImuSensor_TEST, OrientationReference)
+{
+  // Create a sensor manager
+  ignition::sensors::Manager mgr;
+
+  sdf::ElementPtr imuSDF;
+
+  std::ostringstream stream;
+  stream
+    << "<?xml version='1.0'?>"
+    << "<sdf version='1.6'>"
+    << " <model name='m1'>"
+    << "  <link name='link1'>"
+    << "    <sensor name='imu_sensor' type='imu'>"
+    << "      <topic>imu_test</topic>"
+    << "      <update_rate>1</update_rate>"
+    << "      <imu>"
+    << "      <orientation_reference_frame>"
+    << "      <localization>CUSTOM</localization>"
+    << "      <custom_rpy>1.570795 0 0</custom_rpy>"
+    << "      </orientation_reference_frame>"
+    << "      </imu>"
+    << "      <always_on>1</always_on>"
+    << "      <visualize>true</visualize>"
+    << "    </sensor>"
+    << "  </link>"
+    << " </model>"
+    << "</sdf>";
+
+  sdf::SDFPtr sdfParsed(new sdf::SDF());
+  sdf::init(sdfParsed);
+  if (!sdf::readString(stream.str(), sdfParsed))
+  {
+    imuSDF = sdf::ElementPtr();
+  }
+  else
+  {
+    imuSDF = sdfParsed->Root()->GetElement("model")->GetElement("link")
+      ->GetElement("sensor");
+  }
+
+  // Create an ImuSensor
+  auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+      imuSDF);
+
+  // Make sure the above dynamic cast worked.
+  ASSERT_NE(nullptr, sensor);
+
+  sensor->Update(std::chrono::steady_clock::duration(
+    std::chrono::nanoseconds(10000000)));
+
+  math::Quaterniond orientValue(math::Vector3d(-1.570795, 0, 0));
+  EXPECT_EQ(orientValue, sensor->Orientation());
+
+}
+
+//////////////////////////////////////////////////
+TEST(ImuSensor_TEST, CustomRpyParentFrame)
+{
+  // Create a sensor manager
+  ignition::sensors::Manager mgr;
+
+  sdf::ElementPtr imuSDF;
+
+  std::ostringstream stream;
+  stream
+    << "<?xml version='1.0'?>"
+    << "<sdf version='1.6'>"
+    << " <model name='m1'>"
+    << "  <link name='link1'>"
+    << "    <sensor name='imu_sensor' type='imu'>"
+    << "      <topic>imu_test</topic>"
+    << "      <update_rate>1</update_rate>"
+    << "      <imu>"
+    << "      <orientation_reference_frame>"
+    << "      <localization>CUSTOM</localization>"
+    << "      <custom_rpy parent_frame='some_frame'>"
+    << "      1.570795 0 0"
+    << "      </custom_rpy>"
+    << "      </orientation_reference_frame>"
+    << "      </imu>"
+    << "      <always_on>1</always_on>"
+    << "      <visualize>true</visualize>"
+    << "    </sensor>"
+    << "  </link>"
+    << " </model>"
+    << "</sdf>";
+
+  sdf::SDFPtr sdfParsed(new sdf::SDF());
+  sdf::init(sdfParsed);
+  if (!sdf::readString(stream.str(), sdfParsed))
+  {
+    imuSDF = sdf::ElementPtr();
+  }
+  else
+  {
+    imuSDF = sdfParsed->Root()->GetElement("model")->GetElement("link")
+      ->GetElement("sensor");
+  }
+
+  // Create an ImuSensor
+  auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+      imuSDF);
+
+  // Make sure the above dynamic cast worked.
+  ASSERT_NE(nullptr, sensor);
+
+  sensor->Update(std::chrono::steady_clock::duration(
+    std::chrono::nanoseconds(10000000)));
+
+  // Since parent_frame is not set to empty in the sdf,
+  // custom_rpy will be rejected and reference orientation will
+  // not be set.
+  math::Quaterniond orientValue(math::Vector3d(-1.570795, 0, 0));
+  math::Quaterniond defultOrientValue(math::Vector3d(0, 0, 0));
+  ASSERT_NE(orientValue, sensor->Orientation());
+  EXPECT_EQ(defultOrientValue, sensor->Orientation());
 }
 
 //////////////////////////////////////////////////
