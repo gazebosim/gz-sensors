@@ -16,9 +16,9 @@
 */
 
 #include <ignition/common/Profiler.hh>
-#include <ignition/transport/Node.hh>
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Vector3.hh>
+#include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/NavSatSensor.hh"
 #include "ignition/sensors/Noise.hh"

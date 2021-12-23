@@ -19,12 +19,11 @@
 
 #include <memory>
 
+#include <ignition/common/SuppressWarning.hh>
 #include <sdf/Sensor.hh>
 
-#include <ignition/common/SuppressWarning.hh>
-
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/navsat/Export.hh>
+#include "ignition/sensors/config.hh"
+#include "ignition/sensors/navsat/Export.hh"
 
 #include "ignition/sensors/Sensor.hh"
 
@@ -79,7 +78,7 @@ namespace ignition
       /// \param[in] _latitude Latitude of NavSat
       public: void SetLatitude(const math::Angle &_latitude);
 
-      /// \brief Get the latitude of the NavSat, wraped between +/- 180 degrees.
+      /// \brief Get the latitude of the NavSat, wrapped between +/- 180 degrees.
       /// \return Latitude angle.
       public: const math::Angle &Latitude() const;
 
@@ -87,7 +86,7 @@ namespace ignition
       /// \param[in] _longitude Longitude of NavSat
       public: void SetLongitude(const math::Angle &_longitude);
 
-      /// \brief Get the longitude of the NavSat, wraped between +/- 180 degrees.
+      /// \brief Get the longitude of the NavSat, wrapped between +/- 180 degrees.
       /// \return Longitude angle.
       public: const math::Angle &Longitude() const;
 
@@ -95,7 +94,7 @@ namespace ignition
       /// \param[in] _altitude altitude of NavSat in meters
       public: void SetAltitude(double _altitude);
 
-      /// \brief NavSat altitude above sea level
+      /// \brief Get NavSat altitude above sea level
       /// \return Altitude in meters
       public: double Altitude() const;
 
@@ -110,7 +109,7 @@ namespace ignition
       /// \brief Easy short hand for setting the position of the sensor.
       /// \param[in] _latitude Latitude angle.
       /// \param[in] _longitude Longitude angle.
-      /// \param[in] _altitude Altitude in meters, defaults to zero.
+      /// \param[in] _altitude Altitude in meters; defaults to zero.
       public: void SetPosition(const math::Angle &_latitude,
           const math::Angle &_longitude, double _altitude = 0.0);
 
