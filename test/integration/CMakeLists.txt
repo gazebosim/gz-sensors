@@ -15,6 +15,7 @@ set(tests
   force_torque.cc
   logical_camera.cc
   magnetometer.cc
+  navsat.cc
   imu.cc
 )
 
@@ -55,5 +56,6 @@ ign_build_tests(TYPE INTEGRATION
     ${PROJECT_LIBRARY_TARGET_NAME}-magnetometer
     ${PROJECT_LIBRARY_TARGET_NAME}-imu
     ${PROJECT_LIBRARY_TARGET_NAME}-force_torque
+    ${PROJECT_LIBRARY_TARGET_NAME}-navsat
 )
 

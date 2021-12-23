@@ -149,22 +149,6 @@ namespace ignition
       /// \sa Lidar
       LIDAR_NOISE = 14,
 
-      /// \brief Noise streams for the NavSat position sensor
-      /// \sa NavSat
-      NAVSAT_HORIZONTAL_POSITION_NOISE = 15,
-
-      /// \brief Noise streams for the NavSat position sensor
-      /// \sa NavSat
-      NAVSAT_VERTICAL_POSITION_NOISE = 16,
-
-      /// \brief Noise streams for the NavSat velocity sensor
-      /// \sa NavSat
-      NAVSAT_HORIZONTAL_VELOCITY_NOISE = 17,
-
-      /// \brief Noise streams for the NavSat velocity sensor
-      /// \sa NavSat
-      NAVSAT_VERTICAL_VELOCITY_NOISE = 18,
-
       /// \brief Force body-frame X axis noise in N
       /// \sa ForceTorqueSensor
       FORCE_X_NOISE_N = 15,
@@ -188,6 +172,22 @@ namespace ignition
       /// \brief Torque body-frame Z axis noise in Nm
       /// \sa ForceTorqueSensor
       TORQUE_Z_NOISE_N_M = 20,
+
+      /// \brief Noise streams for the NavSat position sensor
+      /// \sa NavSat
+      NAVSAT_HORIZONTAL_POSITION_NOISE = 21,
+
+      /// \brief Noise streams for the NavSat position sensor
+      /// \sa NavSat
+      NAVSAT_VERTICAL_POSITION_NOISE = 22,
+
+      /// \brief Noise streams for the NavSat velocity sensor
+      /// \sa NavSat
+      NAVSAT_HORIZONTAL_VELOCITY_NOISE = 23,
+
+      /// \brief Noise streams for the NavSat velocity sensor
+      /// \sa NavSat
+      NAVSAT_VERTICAL_VELOCITY_NOISE = 24,
 
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not

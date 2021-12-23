@@ -159,7 +159,7 @@ bool NavSatSensor::Update(const std::chrono::steady_clock::duration &_now)
   *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
   msg.set_frame_id(this->Name());
 
-  // Apply horizontal position noise
+  // Apply noise
   if (this->dataPtr->noises.find(NAVSAT_HORIZONTAL_POSITION_NOISE) !=
       this->dataPtr->noises.end())
   {
@@ -180,7 +180,6 @@ bool NavSatSensor::Update(const std::chrono::steady_clock::duration &_now)
         this->Altitude()));
   }
 
-  // taken from ImuSensor.cc - convenience method
   auto applyNoise = [&](SensorNoiseType noiseType, double &value)
   {
     if (this->dataPtr->noises.find(noiseType) != this->dataPtr->noises.end()){
@@ -262,8 +261,8 @@ const math::Vector3d &NavSatSensor::Velocity() const
 void NavSatSensor::SetPosition(const math::Angle &_latitude,
     const math::Angle &_longitude, double _altitude)
 {
-  this->SetLongitude(_longitude);
   this->SetLatitude(_latitude);
+  this->SetLongitude(_longitude);
   this->SetAltitude(_altitude);
 }
 
