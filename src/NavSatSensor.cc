@@ -38,7 +38,7 @@ class ignition::sensors::NavSatPrivate
   public: transport::Node::Publisher pub;
 
   /// \brief True if Load() has been called and was successful
-  public: bool initialized = false;
+  public: bool loaded = false;
 
   /// \brief Latitude angle
   public: math::Angle latitude;
@@ -53,7 +53,7 @@ class ignition::sensors::NavSatPrivate
   public: math::Vector3d velocity;
 
   /// \brief Noise added to sensor data
-  public: std::map<SensorNoiseType, NoisePtr> noises;
+  public: std::unordered_map<SensorNoiseType, NoisePtr> noises;
 };
 
 //////////////////////////////////////////////////
@@ -133,7 +133,7 @@ bool NavSatSensor::Load(const sdf::Sensor &_sdf)
         _sdf.NavSatSensor()->VerticalVelocityNoise());
   }
 
-  this->dataPtr->initialized = true;
+  this->dataPtr->loaded = true;
   return true;
 }
 
@@ -149,9 +149,9 @@ bool NavSatSensor::Load(sdf::ElementPtr _sdf)
 bool NavSatSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
   IGN_PROFILE("NavSatSensor::Update");
-  if (!this->dataPtr->initialized)
+  if (!this->dataPtr->loaded)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    ignerr << "Not loaded, update ignored.\n";
     return false;
   }
 
@@ -160,36 +160,29 @@ bool NavSatSensor::Update(const std::chrono::steady_clock::duration &_now)
   msg.set_frame_id(this->Name());
 
   // Apply noise
-  if (this->dataPtr->noises.find(NAVSAT_HORIZONTAL_POSITION_NOISE) !=
-      this->dataPtr->noises.end())
+  auto iter = this->dataPtr->noises.find(NAVSAT_HORIZONTAL_POSITION_NOISE);
+  if (iter != this->dataPtr->noises.end())
   {
-    this->SetLatitude(IGN_DTOR(
-      this->dataPtr->noises[NAVSAT_HORIZONTAL_POSITION_NOISE]->Apply(
-        this->Latitude().Degree())));
-
-    this->SetLongitude(IGN_DTOR(
-      this->dataPtr->noises[NAVSAT_HORIZONTAL_POSITION_NOISE]->Apply(
+    this->SetLatitude(IGN_DTOR(iter->second->Apply(this->Latitude().Degree())));
+    this->SetLongitude(IGN_DTOR(iter->second->Apply(
         this->Longitude().Degree())));
   }
-
-  if (this->dataPtr->noises.find(NAVSAT_VERTICAL_POSITION_NOISE) !=
-      this->dataPtr->noises.end())
+  iter = this->dataPtr->noises.find(NAVSAT_VERTICAL_POSITION_NOISE);
+  if (iter != this->dataPtr->noises.end())
   {
-    this->SetAltitude(
-      this->dataPtr->noises[NAVSAT_VERTICAL_POSITION_NOISE]->Apply(
-        this->Altitude()));
+    this->SetAltitude(iter->second->Apply(this->Altitude()));
   }
-
-  auto applyNoise = [&](SensorNoiseType noiseType, double &value)
+  iter = this->dataPtr->noises.find(NAVSAT_HORIZONTAL_VELOCITY_NOISE);
+  if (iter != this->dataPtr->noises.end())
   {
-    if (this->dataPtr->noises.find(noiseType) != this->dataPtr->noises.end()){
-      value = this->dataPtr->noises[noiseType]->Apply(value);
-    }
-  };
-
-  applyNoise(NAVSAT_HORIZONTAL_VELOCITY_NOISE, this->dataPtr->velocity.X());
-  applyNoise(NAVSAT_HORIZONTAL_VELOCITY_NOISE, this->dataPtr->velocity.Y());
-  applyNoise(NAVSAT_VERTICAL_VELOCITY_NOISE, this->dataPtr->velocity.Z());
+    this->dataPtr->velocity.X(iter->second->Apply(this->dataPtr->velocity.X()));
+    this->dataPtr->velocity.Y(iter->second->Apply(this->dataPtr->velocity.Y()));
+  }
+  iter = this->dataPtr->noises.find(NAVSAT_VERTICAL_VELOCITY_NOISE);
+  if (iter != this->dataPtr->noises.end())
+  {
+    this->dataPtr->velocity.Z(iter->second->Apply(this->dataPtr->velocity.Z()));
+  }
 
   // normalise so that it is within +/- 180
   this->dataPtr->latitude.Normalize();

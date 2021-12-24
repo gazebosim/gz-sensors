@@ -30,7 +30,7 @@ using namespace ignition;
 using namespace sensors;
 using namespace std::chrono_literals;
 
-/// \brief Helper function to create an navsat sdf element
+/// \brief Helper function to create a navsat sdf element
 sdf::ElementPtr NavSatToSdf(const std::string &_name,
     const math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
@@ -62,7 +62,7 @@ sdf::ElementPtr NavSatToSdf(const std::string &_name,
     ->GetElement("sensor");
 }
 
-/// \brief Helper function to create an navsat sdf element with noise
+/// \brief Helper function to create a navsat sdf element with noise
 sdf::ElementPtr NavSatToSdfWithNoise(const std::string &_name,
     const math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
@@ -141,7 +141,7 @@ class NavSatSensorTest: public testing::Test
 /////////////////////////////////////////////////
 TEST_F(NavSatSensorTest, CreateNavSat)
 {
-  // Create SDF describing an navsat sensor
+  // Create SDF describing a navsat sensor
   const std::string name = "TestNavSat";
   const std::string topic = "/ignition/sensors/test/navsat";
   const std::string topicNoise = "/ignition/sensors/test/navsat_noise";
@@ -178,13 +178,13 @@ TEST_F(NavSatSensorTest, CreateNavSat)
 /////////////////////////////////////////////////
 TEST_F(NavSatSensorTest, SensorReadings)
 {
-  // Create SDF describing an navsat sensor
-  const std::string name = "TestNavSat";
-  const std::string topic = "/ignition/sensors/test/navsat";
-  const std::string topicNoise = "/ignition/sensors/test/navsat_noise";
-  const double updateRate = 30;
-  const bool alwaysOn = 1;
-  const bool visualize = 1;
+  // Create SDF describing a navsat sensor
+  const std::string name{"TestNavSat"};
+  const std::string topic{"/ignition/sensors/test/navsat"};
+  const std::string topicNoise{"/ignition/sensors/test/navsat_noise"};
+  const double updateRate{30.0};
+  const bool alwaysOn{true};
+  const bool visualize{true};
 
   // Create sensor SDF
   math::Pose3d sensorPose(math::Vector3d(0.25, 0.0, 0.5),
@@ -210,6 +210,13 @@ TEST_F(NavSatSensorTest, SensorReadings)
   EXPECT_DOUBLE_EQ(0.0, sensor->Velocity().X());
   EXPECT_DOUBLE_EQ(0.0, sensor->Velocity().Y());
   EXPECT_DOUBLE_EQ(0.0, sensor->Velocity().Z());
+
+  EXPECT_DOUBLE_EQ(0.0, sensorNoise->Latitude().Degree());
+  EXPECT_DOUBLE_EQ(0.0, sensorNoise->Longitude().Degree());
+  EXPECT_DOUBLE_EQ(0.0, sensorNoise->Altitude());
+  EXPECT_DOUBLE_EQ(0.0, sensorNoise->Velocity().X());
+  EXPECT_DOUBLE_EQ(0.0, sensorNoise->Velocity().Y());
+  EXPECT_DOUBLE_EQ(0.0, sensorNoise->Velocity().Z());
 
   // set state and verify readings
   math::Angle lat{IGN_DTOR(20)};
@@ -280,10 +287,10 @@ TEST_F(NavSatSensorTest, SensorReadings)
 /////////////////////////////////////////////////
 TEST_F(NavSatSensorTest, Topic)
 {
-  const std::string name = "TestNavSat";
-  const double updateRate = 30;
-  const bool alwaysOn = 1;
-  const bool visualize = 1;
+  const std::string name{"TestNavSat"};
+  const double updateRate{30.0};
+  const bool alwaysOn{true};
+  const bool visualize{true};
   auto sensorPose = math::Pose3d();
 
   // Factory
