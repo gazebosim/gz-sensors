@@ -8,6 +8,10 @@ release will remove the deprecated code.
 
 ## Ignition Sensors 3.X to 4.X
 
+### Modifications
+
+1. Depend on libsdformat10
+
 1. **include/sensors/Sensor.hh**
    + ***Deprecation*** virtual bool Update(const ignition::common::Time &)
    + ***Replacement*** virtual bool Update(const std::chrono::steady_clock::duration &)
