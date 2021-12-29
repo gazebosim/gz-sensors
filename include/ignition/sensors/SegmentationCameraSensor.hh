@@ -24,7 +24,6 @@
 #include <ignition/common/Event.hh>
 #include <ignition/common/PluginMacros.hh>
 #include <ignition/common/SuppressWarning.hh>
-#include <ignition/common/Time.hh>
 #include <ignition/msgs.hh>
 #include <ignition/transport/Node.hh>
 #include <ignition/transport/Publisher.hh>

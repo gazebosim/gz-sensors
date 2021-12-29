@@ -31,7 +31,6 @@
 #endif
 
 #include <ignition/common/Console.hh>
-#include <ignition/common/Time.hh>
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Sensor.hh>
 #include <ignition/transport/Node.hh>
