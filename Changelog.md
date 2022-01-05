@@ -5,7 +5,7 @@
 1. Add NavSat (GPS) sensor
     * [Pull request #177](https://github.com/ignitionrobotics/ign-sensors/pull/177)
 
-1. Added Logic to flag pointcloud as not dense if invalid point is Detected
+1. Added Logic to flag pointcloud as not dense if invalid point is detected
     * [Pull request #180](https://github.com/ignitionrobotics/ign-sensors/pull/180)
 
 1. IMU ``custom_rpy``  tag parsing added
