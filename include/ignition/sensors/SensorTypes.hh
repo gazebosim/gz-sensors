@@ -173,6 +173,22 @@ namespace ignition
       /// \sa ForceTorqueSensor
       TORQUE_Z_NOISE_N_M = 20,
 
+      /// \brief Noise streams for the NavSat position sensor
+      /// \sa NavSat
+      NAVSAT_HORIZONTAL_POSITION_NOISE = 21,
+
+      /// \brief Noise streams for the NavSat position sensor
+      /// \sa NavSat
+      NAVSAT_VERTICAL_POSITION_NOISE = 22,
+
+      /// \brief Noise streams for the NavSat velocity sensor
+      /// \sa NavSat
+      NAVSAT_HORIZONTAL_VELOCITY_NOISE = 23,
+
+      /// \brief Noise streams for the NavSat velocity sensor
+      /// \sa NavSat
+      NAVSAT_VERTICAL_VELOCITY_NOISE = 24,
+
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not
       /// use this.
