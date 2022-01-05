@@ -1,6 +1,15 @@
 ## Ignition Sensors 6
 
-### Ignition Sensors 6.x.x (202x-xx-xx)
+### Ignition Sensors 6.1.0 (2022-01-04)
+
+1. Add NavSat (GPS) sensor
+    * [Pull request #177](https://github.com/ignitionrobotics/ign-sensors/pull/177)
+
+1. Added Logic to flag pointcloud as not dense if invalid point is detected
+    * [Pull request #180](https://github.com/ignitionrobotics/ign-sensors/pull/180)
+
+1. IMU ``custom_rpy``  tag parsing added
+    * [Pull request #178](https://github.com/ignitionrobotics/ign-sensors/pull/178)
 
 ### Ignition Sensors 6.0.1 (2021-11-12)
 
@@ -21,25 +30,25 @@
 1. Bumps in fortress: ign-sensors6
     * [Pull request #120](https://github.com/ignitionrobotics/ign-sensors/pull/120)
 
-1. Port codecov to new configuration 
+1. Port codecov to new configuration
     * [Pull request #129](https://github.com/ignitionrobotics/ign-sensors/pull/129)
 
-1. Remove deprecations: tock 
+1. Remove deprecations: tock
     * [Pull request #141](https://github.com/ignitionrobotics/ign-sensors/pull/141)
 
-1. Make Sensors aware of CameraPassCountPerGpuFlush & Scene::PostFrame 
+1. Make Sensors aware of CameraPassCountPerGpuFlush & Scene::PostFrame
     * [Pull request #145](https://github.com/ignitionrobotics/ign-sensors/pull/145)
 
 1. Remove plugin interface and support custom sensors
     * [Pull request #90](https://github.com/ignitionrobotics/ign-sensors/pull/90)
 
-1. Run ogre 1.x tests on macos 
+1. Run ogre 1.x tests on macos
     * [Pull request #156](https://github.com/ignitionrobotics/ign-sensors/pull/156)
 
-1. Segmentation sensor 
+1. Segmentation sensor
     * [Pull request #133](https://github.com/ignitionrobotics/ign-sensors/pull/133)
 
-1. Joint Force-Torque Sensor 
+1. Joint Force-Torque Sensor
     * [Pull request #144](https://github.com/ignitionrobotics/ign-sensors/pull/144)
 
 ## Ignition Sensors 5
