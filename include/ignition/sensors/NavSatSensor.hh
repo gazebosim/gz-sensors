@@ -78,7 +78,8 @@ namespace ignition
       /// \param[in] _latitude Latitude of NavSat
       public: void SetLatitude(const math::Angle &_latitude);
 
-      /// \brief Get the latitude of the NavSat, wrapped between +/- 180 degrees.
+      /// \brief Get the latitude of the NavSat, wrapped between +/- 180
+      /// degrees.
       /// \return Latitude angle.
       public: const math::Angle &Latitude() const;
 
@@ -86,7 +87,8 @@ namespace ignition
       /// \param[in] _longitude Longitude of NavSat
       public: void SetLongitude(const math::Angle &_longitude);
 
-      /// \brief Get the longitude of the NavSat, wrapped between +/- 180 degrees.
+      /// \brief Get the longitude of the NavSat, wrapped between +/- 180
+      /// degrees.
       /// \return Longitude angle.
       public: const math::Angle &Longitude() const;
 

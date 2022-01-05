@@ -99,7 +99,8 @@ bool NavSatSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic [" << this->Topic() << "].\n";
+    ignerr << "Unable to create publisher on topic [" << this->Topic()
+           << "]." << std::endl;
     return false;
   }
 
