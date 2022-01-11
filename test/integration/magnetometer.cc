@@ -241,7 +241,7 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   EXPECT_EQ(worldField, sensor->MagneticField());
 
   EXPECT_TRUE(sensorNoise->Update(std::chrono::steady_clock::duration(
-    std::chrono::seconds(1))));
+    std::chrono::seconds(1))), false);
   EXPECT_EQ(poseNoise, sensorNoise->WorldPose());
   EXPECT_EQ(worldFieldNoise, sensorNoise->WorldMagneticField());
   // There should be noise in the MagneticField

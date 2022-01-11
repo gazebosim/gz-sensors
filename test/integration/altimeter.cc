@@ -235,7 +235,7 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   WaitForMessageTestHelper<ignition::msgs::Altimeter>
     msgHelperNoise(topicNoise);
   sensorNoise->Update(std::chrono::steady_clock::duration(
-    std::chrono::seconds(1)));
+    std::chrono::seconds(1)), false);
   EXPECT_TRUE(msgHelperNoise.WaitForMessage()) << msgHelperNoise;
   auto msgNoise = msgHelperNoise.Message();
   EXPECT_EQ(1, msg.header().stamp().sec());

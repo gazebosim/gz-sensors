@@ -192,7 +192,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   sensor->SetModelPoses(std::move(modelPoses2));
 
   // update
-  sensor->Update(std::chrono::steady_clock::duration::zero());
+  sensor->Update(std::chrono::steady_clock::duration::zero(), false);
 
   // verify box is not in the image
   img = sensor->Image();
