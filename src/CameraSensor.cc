@@ -36,6 +36,7 @@
 #include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/CameraSensor.hh"
+#include "ignition/sensors/ImageBrownDistortionModel.hh"
 #include "ignition/sensors/ImageGaussianNoiseModel.hh"
 #include "ignition/sensors/ImageNoise.hh"
 #include "ignition/sensors/Manager.hh"

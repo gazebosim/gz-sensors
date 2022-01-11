@@ -42,6 +42,9 @@ namespace ignition
     class GaussianNoiseModel;
     class ImageGaussianNoiseModel;
     class Noise;
+    class Distortion;
+    class BrownDistortionModel;
+    class ImageBrownDistortionModel;
     class Sensor;
 
     /// \def SensorPtr
@@ -67,6 +70,19 @@ namespace ignition
     /// \brief Shared pointer to Noise
     typedef std::shared_ptr<ImageGaussianNoiseModel>
         ImageGaussianNoiseModelPtr;
+
+    /// \def DistortionPtr
+    /// \brief Shared pointer to Distortion
+    typedef std::shared_ptr<Distortion> DistortionPtr;
+
+    /// \def DistortionPtr
+    /// \brief Shared pointer to Distortion
+    typedef std::shared_ptr<BrownDistortionModel> BrownDistortionModelPtr;
+
+    /// \def DistortionPtr
+    /// \brief Shared pointer to Distortion
+    typedef std::shared_ptr<ImageBrownDistortionModel>
+        ImageBrownDistortionModelPtr;
 
     /// \def Sensor_V
     /// \brief Vector of Sensor shared pointers
