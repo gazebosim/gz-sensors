@@ -147,46 +147,22 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
       {"ENU",
         {
 	  {"ENU", ignition::math::Quaterniond(0, 0, 0)},
-	  {"NED", ignition::math::Quaterniond(0, 0, 0)},  
-          {"NWU", ignition::math::Quaterniond(0, 0, 0)},  
-          {"GRAV_UP", ignition::math::Quaterniond(0, 0, 0)},  
-	  {"GRAV_DOWN", ignition::math::Quaterniond(0, 0, 0)}  
+	  {"NED", ignition::math::Quaterniond(1/std::sqrt(2), 1/std::sqrt(2), 0, 0)},  
+          {"NWU", ignition::math::Quaterniond(0, 0, IGN_PI/2)},  
 	}
       },
       {"NED",
         {
-	  {"ENU", ignition::math::Quaterniond(0, 0, 0)},
+	  {"ENU", ignition::math::Quaterniond(1/std::sqrt(2), 1/std::sqrt(2), 0, 0).Inverse()},
 	  {"NED", ignition::math::Quaterniond(0, 0, 0)},  
-          {"NWU", ignition::math::Quaterniond(0, 0, 0)},  
-          {"GRAV_UP", ignition::math::Quaterniond(0, 0, 0)},  
-	  {"GRAV_DOWN", ignition::math::Quaterniond(0, 0, 0)}  
+          {"NWU", ignition::math::Quaterniond(IGN_PI, 0, 0)},  
 	}
       },
       {"NWU",
         {
-	  {"ENU", ignition::math::Quaterniond(0, 0, 0)},
-	  {"NED", ignition::math::Quaterniond(0, 0, 0)},  
+	  {"ENU", ignition::math::Quaterniond(0, 0, -IGN_PI/2)},
+	  {"NED", ignition::math::Quaterniond(-IGN_PI, 0, 0)},  
           {"NWU", ignition::math::Quaterniond(0, 0, 0)},  
-          {"GRAV_UP", ignition::math::Quaterniond(0, 0, 0)},  
-	  {"GRAV_DOWN", ignition::math::Quaterniond(0, 0, 0)}  
-	}
-      },
-      {"GRAV_UP",
-        {
-	  {"ENU", ignition::math::Quaterniond(0, 0, 0)},
-	  {"NED", ignition::math::Quaterniond(0, 0, 0)},  
-          {"NWU", ignition::math::Quaterniond(0, 0, 0)},  
-          {"GRAV_UP", ignition::math::Quaterniond(0, 0, 0)},  
-	  {"GRAV_DOWN", ignition::math::Quaterniond(0, 0, 0)}  
-	}
-      },
-      {"GRAV_DOWN",
-        {
-	  {"ENU", ignition::math::Quaterniond(0, 0, 0)},
-	  {"NED", ignition::math::Quaterniond(0, 0, 0)},  
-          {"NWU", ignition::math::Quaterniond(0, 0, 0)},  
-          {"GRAV_UP", ignition::math::Quaterniond(0, 0, 0)},  
-	  {"GRAV_DOWN", ignition::math::Quaterniond(0, 0, 0)}  
 	}
       }
     };
