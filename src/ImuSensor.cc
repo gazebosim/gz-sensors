@@ -70,6 +70,12 @@ class ignition::sensors::ImuSensorPrivate
 
   /// \brief Flag for if time has been initialized
   public: bool timeInitialized = false;
+  
+  /// \brief Store world heading offset
+  public: Quaterniond headingOffset;
+
+  /// \brief Store world orientation
+  public: std::string worldFrameType = "ENU";
 
   /// \brief Previous update time step.
   public: std::chrono::steady_clock::duration prevStep
@@ -119,7 +125,8 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
   // Set orientation reference frame
   // TODO(adityapande-1995) : Add support for named frames like
   // ENU using ign-gazebo
-  if (_sdf.ImuSensor()->Localization() == "CUSTOM")
+  std::string localization = _sdf.ImuSensor()->Localization();
+  if (localization == "CUSTOM")
   {
     if (_sdf.ImuSensor()->CustomRpyParentFrame() == "")
     {
@@ -132,6 +139,60 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
                 "string. Setting it to any other frame is not "
                 "supported yet." << std::endl;
     }
+  }
+
+  // Table to hold frame transformations
+  std::map<std::string, std::map<std::string, Quaterniond>> transformTable =
+    {
+      "ENU":
+        {
+	  "ENU": Quaterniond(0, 0, 0),
+	  "NED": Quaterniond(0, 0, 0),  
+	  "NWU": Quaterniond(0, 0, 0),  
+	  "GRAV_UP": Quaterniond(0, 0, 0),  
+	  "GRAV_DOWN": Quaterniond(0, 0, 0)  
+	},
+      "NED":
+        {
+	  "ENU": Quaterniond(0, 0, 0),
+	  "NED": Quaterniond(0, 0, 0),  
+	  "NWU": Quaterniond(0, 0, 0),  
+	  "GRAV_UP": Quaterniond(0, 0, 0),  
+	  "GRAV_DOWN": Quaterniond(0, 0, 0)  
+	},
+      "NWU":
+        {
+	  "ENU": Quaterniond(0, 0, 0),
+	  "NED": Quaterniond(0, 0, 0),  
+	  "NWU": Quaterniond(0, 0, 0),  
+	  "GRAV_UP": Quaterniond(0, 0, 0),  
+	  "GRAV_DOWN": Quaterniond(0, 0, 0)  
+	},
+      "GRAV_UP":
+        {
+	  "ENU": Quaterniond(0, 0, 0),
+	  "NED": Quaterniond(0, 0, 0),  
+	  "NWU": Quaterniond(0, 0, 0),  
+	  "GRAV_UP": Quaterniond(0, 0, 0),  
+	  "GRAV_DOWN": Quaterniond(0, 0, 0)  
+	},
+      "GRAV_DOWN":
+        {
+	  "ENU": Quaterniond(0, 0, 0),
+	  "NED": Quaterniond(0, 0, 0),  
+	  "NWU": Quaterniond(0, 0, 0),  
+	  "GRAV_UP": Quaterniond(0, 0, 0),  
+	  "GRAV_DOWN": Quaterniond(0, 0, 0)  
+	},
+    };
+
+  if (transformTable.count(localization) != 0)
+  {
+    // A valid localization tag is supplied in the sdf
+    auto tranformation = transformTable[this->dataPtr->worldFrameType][localization];
+    this->SetOrientationReference(this->dataPtr->headingOffset * tranformation);
+  } else {
+    ignwarn << "This localization tag is not supported: " << localization << std::endl;
   }
 
   if (this->Topic().empty())
@@ -290,6 +351,13 @@ void ImuSensor::SetWorldPose(const math::Pose3d _pose)
 math::Pose3d ImuSensor::WorldPose() const
 {
   return this->dataPtr->worldPose;
+}
+
+//////////////////////////////////////////////////
+void ImuSensor::SetWorldFrameOrientation(const Quaterniond &_rot, std::string _relativeTo) const
+{
+  this->dataPtr->headingOffset = _rot;
+  this->dataPtr->worldFrameType = _relativeTo;
 }
 
 //////////////////////////////////////////////////
