@@ -135,6 +135,12 @@ namespace ignition
       /// \brief Get the gravity vector
       /// \return Gravity vectory in meters per second squared.
       public: math::Vector3d Gravity() const;
+      
+      /// \brief Convey worl frame's orientation and heading offset
+      /// \param[in] _rot heading offset
+      /// \param[in] _relativeTo world frame orintation, "ENU" by default
+      public: void SetWorldFrameOrientation(
+        const math::Quaterniond &_rot, std::string _relativeTo);
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

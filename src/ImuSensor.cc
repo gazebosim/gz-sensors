@@ -72,7 +72,7 @@ class ignition::sensors::ImuSensorPrivate
   public: bool timeInitialized = false;
   
   /// \brief Store world heading offset
-  public: Quaterniond headingOffset;
+  public: ignition::math::Quaterniond headingOffset;
 
   /// \brief Store world orientation
   public: std::string worldFrameType = "ENU";
@@ -142,48 +142,53 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
   }
 
   // Table to hold frame transformations
-  std::map<std::string, std::map<std::string, Quaterniond>> transformTable =
+  std::map<std::string, std::map<std::string, ignition::math::Quaterniond>> transformTable =
     {
-      "ENU":
+      {"ENU",
         {
-	  "ENU": Quaterniond(0, 0, 0),
-	  "NED": Quaterniond(0, 0, 0),  
-	  "NWU": Quaterniond(0, 0, 0),  
-	  "GRAV_UP": Quaterniond(0, 0, 0),  
-	  "GRAV_DOWN": Quaterniond(0, 0, 0)  
-	},
-      "NED":
+	  {"ENU", ignition::math::Quaterniond(0, 0, 0)},
+	  {"NED", ignition::math::Quaterniond(0, 0, 0)},  
+          {"NWU", ignition::math::Quaterniond(0, 0, 0)},  
+          {"GRAV_UP", ignition::math::Quaterniond(0, 0, 0)},  
+	  {"GRAV_DOWN", ignition::math::Quaterniond(0, 0, 0)}  
+	}
+      },
+      {"NED",
         {
-	  "ENU": Quaterniond(0, 0, 0),
-	  "NED": Quaterniond(0, 0, 0),  
-	  "NWU": Quaterniond(0, 0, 0),  
-	  "GRAV_UP": Quaterniond(0, 0, 0),  
-	  "GRAV_DOWN": Quaterniond(0, 0, 0)  
-	},
-      "NWU":
+	  {"ENU", ignition::math::Quaterniond(0, 0, 0)},
+	  {"NED", ignition::math::Quaterniond(0, 0, 0)},  
+          {"NWU", ignition::math::Quaterniond(0, 0, 0)},  
+          {"GRAV_UP", ignition::math::Quaterniond(0, 0, 0)},  
+	  {"GRAV_DOWN", ignition::math::Quaterniond(0, 0, 0)}  
+	}
+      },
+      {"NWU",
         {
-	  "ENU": Quaterniond(0, 0, 0),
-	  "NED": Quaterniond(0, 0, 0),  
-	  "NWU": Quaterniond(0, 0, 0),  
-	  "GRAV_UP": Quaterniond(0, 0, 0),  
-	  "GRAV_DOWN": Quaterniond(0, 0, 0)  
-	},
-      "GRAV_UP":
+	  {"ENU", ignition::math::Quaterniond(0, 0, 0)},
+	  {"NED", ignition::math::Quaterniond(0, 0, 0)},  
+          {"NWU", ignition::math::Quaterniond(0, 0, 0)},  
+          {"GRAV_UP", ignition::math::Quaterniond(0, 0, 0)},  
+	  {"GRAV_DOWN", ignition::math::Quaterniond(0, 0, 0)}  
+	}
+      },
+      {"GRAV_UP",
         {
-	  "ENU": Quaterniond(0, 0, 0),
-	  "NED": Quaterniond(0, 0, 0),  
-	  "NWU": Quaterniond(0, 0, 0),  
-	  "GRAV_UP": Quaterniond(0, 0, 0),  
-	  "GRAV_DOWN": Quaterniond(0, 0, 0)  
-	},
-      "GRAV_DOWN":
+	  {"ENU", ignition::math::Quaterniond(0, 0, 0)},
+	  {"NED", ignition::math::Quaterniond(0, 0, 0)},  
+          {"NWU", ignition::math::Quaterniond(0, 0, 0)},  
+          {"GRAV_UP", ignition::math::Quaterniond(0, 0, 0)},  
+	  {"GRAV_DOWN", ignition::math::Quaterniond(0, 0, 0)}  
+	}
+      },
+      {"GRAV_DOWN",
         {
-	  "ENU": Quaterniond(0, 0, 0),
-	  "NED": Quaterniond(0, 0, 0),  
-	  "NWU": Quaterniond(0, 0, 0),  
-	  "GRAV_UP": Quaterniond(0, 0, 0),  
-	  "GRAV_DOWN": Quaterniond(0, 0, 0)  
-	},
+	  {"ENU", ignition::math::Quaterniond(0, 0, 0)},
+	  {"NED", ignition::math::Quaterniond(0, 0, 0)},  
+          {"NWU", ignition::math::Quaterniond(0, 0, 0)},  
+          {"GRAV_UP", ignition::math::Quaterniond(0, 0, 0)},  
+	  {"GRAV_DOWN", ignition::math::Quaterniond(0, 0, 0)}  
+	}
+      }
     };
 
   if (transformTable.count(localization) != 0)
@@ -354,7 +359,7 @@ math::Pose3d ImuSensor::WorldPose() const
 }
 
 //////////////////////////////////////////////////
-void ImuSensor::SetWorldFrameOrientation(const Quaterniond &_rot, std::string _relativeTo) const
+void ImuSensor::SetWorldFrameOrientation(const math::Quaterniond &_rot, std::string _relativeTo)
 {
   this->dataPtr->headingOffset = _rot;
   this->dataPtr->worldFrameType = _relativeTo;
