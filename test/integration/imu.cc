@@ -196,7 +196,7 @@ TEST_F(ImuSensorTest, SensorReadings)
 
   // update sensor and verify new readings
   EXPECT_TRUE(sensor->Update(std::chrono::steady_clock::duration(
-    std::chrono::seconds(2))));
+    std::chrono::seconds(2)), false));
   EXPECT_EQ(orientRef, sensor->OrientationReference());
   EXPECT_EQ(gravity, sensor->Gravity());
   EXPECT_EQ(angularVel, sensor->AngularVelocity());

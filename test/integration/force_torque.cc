@@ -238,7 +238,7 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
   sensor->SetRotationParentInSensor(rotParentInSensor);
   EXPECT_EQ(rotParentInSensor, sensor->RotationParentInSensor());
 
-  sensor->Update(dt);
+  sensor->Update(dt, false);
   EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
   auto msg = msgHelper.Message();
   EXPECT_EQ(1, msg.header().stamp().sec());
