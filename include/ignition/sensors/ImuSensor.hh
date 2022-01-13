@@ -36,6 +36,16 @@ namespace ignition
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     //
+    // \brief Reference frames enum
+    enum class IGNITION_SENSORS_VISIBLE WorldFrameEnumType
+    {
+      NONE = 0,
+      ENU = 1,
+      NED = 2,
+      NWU = 3
+    };
+
+    //
     /// \brief forward declarations
     class ImuSensorPrivate;
 
@@ -136,11 +146,12 @@ namespace ignition
       /// \return Gravity vectory in meters per second squared.
       public: math::Vector3d Gravity() const;
       
-      /// \brief Convey worl frame's orientation and heading offset
-      /// \param[in] _rot heading offset
-      /// \param[in] _relativeTo world frame orintation, "ENU" by default
+      /// \brief Specify the rotation offset of the coordinates of the World
+      //  frame relative to a geo-referenced frame
+      /// \param[in] _rot rotation offset
+      /// \param[in] _relativeTo world frame orintation, ENU by default
       public: void SetWorldFrameOrientation(
-        const math::Quaterniond &_rot, std::string _relativeTo);
+        const math::Quaterniond &_rot, WorldFrameEnumType _relativeTo);
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
