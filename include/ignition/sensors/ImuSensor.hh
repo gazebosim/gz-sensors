@@ -145,7 +145,7 @@ namespace ignition
       /// \brief Get the gravity vector
       /// \return Gravity vectory in meters per second squared.
       public: math::Vector3d Gravity() const;
-      
+
       /// \brief Specify the rotation offset of the coordinates of the World
       //  frame relative to a geo-referenced frame
       /// \param[in] _rot rotation offset

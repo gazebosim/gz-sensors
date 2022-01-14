@@ -70,7 +70,7 @@ class ignition::sensors::ImuSensorPrivate
 
   /// \brief Flag for if time has been initialized
   public: bool timeInitialized = false;
-  
+
   /// \brief Store world heading offset
   public: ignition::math::Quaterniond headingOffset;
 
@@ -143,28 +143,34 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
 
   // Table to hold frame transformations
   std::map<WorldFrameEnumType,
-	  std::map<WorldFrameEnumType, ignition::math::Quaterniond>> transformTable =
+    std::map<WorldFrameEnumType, ignition::math::Quaterniond>>
+      transformTable =
     {
       {WorldFrameEnumType::ENU,
         {
-	  {WorldFrameEnumType::ENU, ignition::math::Quaterniond(0, 0, 0)},
-	  {WorldFrameEnumType::NED, ignition::math::Quaterniond(1/std::sqrt(2), 1/std::sqrt(2), 0, 0)},
-          {WorldFrameEnumType::NWU, ignition::math::Quaterniond(0, 0, IGN_PI/2)},
-	}
+          {WorldFrameEnumType::ENU, ignition::math::Quaterniond(0, 0, 0)},
+          {WorldFrameEnumType::NED, ignition::math::Quaterniond(
+            1/std::sqrt(2), 1/std::sqrt(2), 0, 0)},
+          {WorldFrameEnumType::NWU, ignition::math::Quaterniond(
+            0, 0, IGN_PI/2)},
+        }
       },
       {WorldFrameEnumType::NED,
         {
-	  {WorldFrameEnumType::ENU, ignition::math::Quaterniond(1/std::sqrt(2), 1/std::sqrt(2), 0, 0).Inverse()},
-	  {WorldFrameEnumType::NED, ignition::math::Quaterniond(0, 0, 0)},
-          {WorldFrameEnumType::NWU, ignition::math::Quaterniond(IGN_PI, 0, 0)},
-	}
+          {WorldFrameEnumType::ENU, ignition::math::Quaterniond(
+            1/std::sqrt(2), 1/std::sqrt(2), 0, 0).Inverse()},
+          {WorldFrameEnumType::NED, ignition::math::Quaterniond(0, 0, 0)},
+          {WorldFrameEnumType::NWU, ignition::math::Quaterniond(
+            IGN_PI, 0, 0)},
+        }
       },
       {WorldFrameEnumType::NWU,
         {
-	  {WorldFrameEnumType::ENU, ignition::math::Quaterniond(0, 0, -IGN_PI/2)},
-	  {WorldFrameEnumType::NED, ignition::math::Quaterniond(-IGN_PI, 0, 0)},
+          {WorldFrameEnumType::ENU, ignition::math::Quaterniond(
+            0, 0, -IGN_PI/2)},
+          {WorldFrameEnumType::NED, ignition::math::Quaterniond(-IGN_PI, 0, 0)},
           {WorldFrameEnumType::NWU, ignition::math::Quaterniond(0, 0, 0)},
-	}
+        }
       }
     };
 
@@ -184,10 +190,12 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
   if (localizationEnum != WorldFrameEnumType::NONE)
   {
     // A valid localization tag is supplied in the sdf
-    auto tranformation = transformTable[this->dataPtr->worldFrameType][localizationEnum];
+    auto tranformation =
+      transformTable[this->dataPtr->worldFrameType][localizationEnum];
     this->SetOrientationReference(this->dataPtr->headingOffset * tranformation);
   } else {
-    ignwarn << "This localization tag is not supported: " << localization << std::endl;
+    ignwarn << "This localization tag is not supported: " << localization
+      << std::endl;
   }
 
   if (this->Topic().empty())
@@ -349,7 +357,8 @@ math::Pose3d ImuSensor::WorldPose() const
 }
 
 //////////////////////////////////////////////////
-void ImuSensor::SetWorldFrameOrientation(const math::Quaterniond &_rot, WorldFrameEnumType _relativeTo)
+void ImuSensor::SetWorldFrameOrientation(
+  const math::Quaterniond &_rot, WorldFrameEnumType _relativeTo)
 {
   this->dataPtr->headingOffset = _rot;
   this->dataPtr->worldFrameType = _relativeTo;
