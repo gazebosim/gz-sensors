@@ -76,7 +76,7 @@ class ignition::sensors::ImuSensorPrivate
 
   /// \brief Store world orientation
   public: WorldFrameEnumType worldFrameType = WorldFrameEnumType::ENU;
-  
+
   /// \brief Store localization orientation
   public: WorldFrameEnumType localizationEnum = WorldFrameEnumType::NONE;
 
@@ -322,7 +322,7 @@ void ImuSensor::SetWorldFrameOrientation(
 {
   this->dataPtr->headingOffset = _rot;
   this->dataPtr->worldFrameType = _relativeTo;
-  
+
   // Table to hold frame transformations
   std::map<WorldFrameEnumType,
     std::map<WorldFrameEnumType, ignition::math::Quaterniond>>
@@ -361,7 +361,8 @@ void ImuSensor::SetWorldFrameOrientation(
   {
     // A valid named localization tag is supplied in the sdf
     auto tranformation =
-      transformTable[this->dataPtr->worldFrameType][this->dataPtr->localizationEnum];
+      transformTable[this->dataPtr->worldFrameType][
+      this->dataPtr->localizationEnum];
     this->SetOrientationReference(this->dataPtr->headingOffset * tranformation);
   }
 }
