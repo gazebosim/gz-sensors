@@ -55,6 +55,35 @@
 
 ### Ignition Sensors 5.X.X
 
+### Ignition Sensors 5.1.0 (2021-10-15)
+
+1. Depend on ign-msgs 7.2 and libSDFormat 11.3
+    * [Pull request #154](https://github.com/ignitionrobotics/ign-sensors/pull/154)
+
+1. 👩‍🌾 Print debug messages when sensors advertise topics
+    * [Pull request #151](https://github.com/ignitionrobotics/ign-sensors/pull/151)
+
+1. Infrastructure
+    * [Pull request #150](https://github.com/ignitionrobotics/ign-sensors/pull/150)
+    * [Pull request #130](https://github.com/ignitionrobotics/ign-sensors/pull/130)
+    * [Pull request #126](https://github.com/ignitionrobotics/ign-sensors/pull/126)
+    * [Pull request #124](https://github.com/ignitionrobotics/ign-sensors/pull/124)
+
+1. Publish performance sensor metrics.
+    * [Pull request #146](https://github.com/ignitionrobotics/ign-sensors/pull/146)
+
+1. Add API for enabling / disabling IMU orientation
+    * [Pull request #142](https://github.com/ignitionrobotics/ign-sensors/pull/142)
+
+1. Init will now set the nextUpdateTime to zero
+    * [Pull request #137](https://github.com/ignitionrobotics/ign-sensors/pull/137)
+
+1. Remove clamping from lidar noise
+    * [Pull request #132](https://github.com/ignitionrobotics/ign-sensors/pull/132)
+
+1. 👩‍🌾 Disable tests that consistently fail on macOS
+    * [Pull request #121](https://github.com/ignitionrobotics/ign-sensors/pull/121)
+
 ### Ignition Sensors 5.0.0 (2021-03-30)
 
 1. Bump in edifice: ign-common4
