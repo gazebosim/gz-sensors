@@ -42,7 +42,8 @@ namespace ignition
       NONE = 0,
       ENU = 1,
       NED = 2,
-      NWU = 3
+      NWU = 3,
+      CUSTOM = 4
     };
 
     //

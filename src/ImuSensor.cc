@@ -76,6 +76,9 @@ class ignition::sensors::ImuSensorPrivate
 
   /// \brief Store world orientation
   public: WorldFrameEnumType worldFrameType = WorldFrameEnumType::ENU;
+  
+  /// \brief Store localization orientation
+  public: WorldFrameEnumType localizationEnum = WorldFrameEnumType::NONE;
 
   /// \brief Previous update time step.
   public: std::chrono::steady_clock::duration prevStep
@@ -126,7 +129,21 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
   // TODO(adityapande-1995) : Add support for named frames like
   // ENU using ign-gazebo
   std::string localization = _sdf.ImuSensor()->Localization();
-  if (localization == "CUSTOM")
+
+  if (localization == "ENU")
+  {
+    this->dataPtr->localizationEnum = WorldFrameEnumType::ENU;
+  } else if (localization == "NED") {
+    this->dataPtr->localizationEnum = WorldFrameEnumType::NED;
+  } else if (localization == "NWU") {
+    this->dataPtr->localizationEnum = WorldFrameEnumType::NWU;
+  } else if (localization == "CUSTOM") {
+    this->dataPtr->localizationEnum = WorldFrameEnumType::CUSTOM;
+  } else {
+    this->dataPtr->localizationEnum = WorldFrameEnumType::NONE;
+  }
+
+  if (this->dataPtr->localizationEnum == WorldFrameEnumType::CUSTOM)
   {
     if (_sdf.ImuSensor()->CustomRpyParentFrame() == "")
     {
@@ -139,63 +156,6 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
                 "string. Setting it to any other frame is not "
                 "supported yet." << std::endl;
     }
-  }
-
-  // Table to hold frame transformations
-  std::map<WorldFrameEnumType,
-    std::map<WorldFrameEnumType, ignition::math::Quaterniond>>
-      transformTable =
-    {
-      {WorldFrameEnumType::ENU,
-        {
-          {WorldFrameEnumType::ENU, ignition::math::Quaterniond(0, 0, 0)},
-          {WorldFrameEnumType::NED, ignition::math::Quaterniond(
-            1/std::sqrt(2), 1/std::sqrt(2), 0, 0)},
-          {WorldFrameEnumType::NWU, ignition::math::Quaterniond(
-            0, 0, IGN_PI/2)},
-        }
-      },
-      {WorldFrameEnumType::NED,
-        {
-          {WorldFrameEnumType::ENU, ignition::math::Quaterniond(
-            1/std::sqrt(2), 1/std::sqrt(2), 0, 0).Inverse()},
-          {WorldFrameEnumType::NED, ignition::math::Quaterniond(0, 0, 0)},
-          {WorldFrameEnumType::NWU, ignition::math::Quaterniond(
-            IGN_PI, 0, 0)},
-        }
-      },
-      {WorldFrameEnumType::NWU,
-        {
-          {WorldFrameEnumType::ENU, ignition::math::Quaterniond(
-            0, 0, -IGN_PI/2)},
-          {WorldFrameEnumType::NED, ignition::math::Quaterniond(-IGN_PI, 0, 0)},
-          {WorldFrameEnumType::NWU, ignition::math::Quaterniond(0, 0, 0)},
-        }
-      }
-    };
-
-  WorldFrameEnumType localizationEnum;
-
-  if (localization == "ENU")
-  {
-    localizationEnum = WorldFrameEnumType::ENU;
-  } else if (localization == "NED") {
-    localizationEnum = WorldFrameEnumType::NED;
-  } else if (localization == "NWU") {
-    localizationEnum = WorldFrameEnumType::NWU;
-  } else {
-    localizationEnum = WorldFrameEnumType::NONE;
-  }
-
-  if (localizationEnum != WorldFrameEnumType::NONE)
-  {
-    // A valid localization tag is supplied in the sdf
-    auto tranformation =
-      transformTable[this->dataPtr->worldFrameType][localizationEnum];
-    this->SetOrientationReference(this->dataPtr->headingOffset * tranformation);
-  } else {
-    ignwarn << "This localization tag is not supported: " << localization
-      << std::endl;
   }
 
   if (this->Topic().empty())
@@ -362,6 +322,48 @@ void ImuSensor::SetWorldFrameOrientation(
 {
   this->dataPtr->headingOffset = _rot;
   this->dataPtr->worldFrameType = _relativeTo;
+  
+  // Table to hold frame transformations
+  std::map<WorldFrameEnumType,
+    std::map<WorldFrameEnumType, ignition::math::Quaterniond>>
+      transformTable =
+    {
+      {WorldFrameEnumType::ENU,
+        {
+          {WorldFrameEnumType::ENU, ignition::math::Quaterniond(0, 0, 0)},
+          {WorldFrameEnumType::NED, ignition::math::Quaterniond(
+            IGN_PI, 0, IGN_PI/2)},
+          {WorldFrameEnumType::NWU, ignition::math::Quaterniond(
+            0, 0, IGN_PI/2)},
+        }
+      },
+      {WorldFrameEnumType::NED,
+        {
+          {WorldFrameEnumType::ENU, ignition::math::Quaterniond(
+            IGN_PI, 0, IGN_PI/2).Inverse()},
+          {WorldFrameEnumType::NED, ignition::math::Quaterniond(0, 0, 0)},
+          {WorldFrameEnumType::NWU, ignition::math::Quaterniond(
+            -IGN_PI, 0, 0)},
+        }
+      },
+      {WorldFrameEnumType::NWU,
+        {
+          {WorldFrameEnumType::ENU, ignition::math::Quaterniond(
+            0, 0, -IGN_PI/2)},
+          {WorldFrameEnumType::NED, ignition::math::Quaterniond(IGN_PI, 0, 0)},
+          {WorldFrameEnumType::NWU, ignition::math::Quaterniond(0, 0, 0)},
+        }
+      }
+    };
+
+  if (this->dataPtr->localizationEnum != WorldFrameEnumType::NONE &&
+      this->dataPtr->localizationEnum != WorldFrameEnumType::CUSTOM)
+  {
+    // A valid named localization tag is supplied in the sdf
+    auto tranformation =
+      transformTable[this->dataPtr->worldFrameType][this->dataPtr->localizationEnum];
+    this->SetOrientationReference(this->dataPtr->headingOffset * tranformation);
+  }
 }
 
 //////////////////////////////////////////////////
