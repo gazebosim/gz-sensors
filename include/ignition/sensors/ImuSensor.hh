@@ -154,6 +154,14 @@ namespace ignition
       public: void SetWorldFrameOrientation(
         const math::Quaterniond &_rot, WorldFrameEnumType _relativeTo);
 
+      // \brief Read the localization sdf tag
+      // \param[in] _sdf Imu sdf data as sdf::Sensor
+      public: void ReadLocalizationTag(const sdf::Sensor &_sdf);
+
+      // \brief Read the localization sdf tag
+      // \param[in] _sdf Imu sdf data as sdf:;ElementPtr
+      public: void ReadLocalizationTag(sdf::ElementPtr _sdf);
+
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal

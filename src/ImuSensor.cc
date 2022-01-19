@@ -125,38 +125,6 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  // Set orientation reference frame
-  // TODO(adityapande-1995) : Add support for named frames like
-  // ENU using ign-gazebo
-  std::string localization = _sdf.ImuSensor()->Localization();
-
-  if (localization == "ENU")
-  {
-    this->dataPtr->localizationEnum = WorldFrameEnumType::ENU;
-  } else if (localization == "NED") {
-    this->dataPtr->localizationEnum = WorldFrameEnumType::NED;
-  } else if (localization == "NWU") {
-    this->dataPtr->localizationEnum = WorldFrameEnumType::NWU;
-  } else if (localization == "CUSTOM") {
-    this->dataPtr->localizationEnum = WorldFrameEnumType::CUSTOM;
-  } else {
-    this->dataPtr->localizationEnum = WorldFrameEnumType::NONE;
-  }
-
-  if (this->dataPtr->localizationEnum == WorldFrameEnumType::CUSTOM)
-  {
-    if (_sdf.ImuSensor()->CustomRpyParentFrame() == "")
-    {
-      this->SetOrientationReference(ignition::math::Quaterniond(
-        _sdf.ImuSensor()->CustomRpy()));
-    }
-    else
-    {
-      ignwarn << "custom_rpy parent frame must be set to empty "
-                "string. Setting it to any other frame is not "
-                "supported yet." << std::endl;
-    }
-  }
 
   if (this->Topic().empty())
     this->SetTopic("/imu");
@@ -314,6 +282,50 @@ void ImuSensor::SetWorldPose(const math::Pose3d _pose)
 math::Pose3d ImuSensor::WorldPose() const
 {
   return this->dataPtr->worldPose;
+}
+
+//////////////////////////////////////////////////
+void ImuSensor::ReadLocalizationTag(const sdf::Sensor &_sdf)
+{
+  std::string localization = _sdf.ImuSensor()->Localization();
+
+  if (localization == "ENU")
+  {
+    this->dataPtr->localizationEnum = WorldFrameEnumType::ENU;
+  } else if (localization == "NED") {
+    this->dataPtr->localizationEnum = WorldFrameEnumType::NED;
+  } else if (localization == "NWU") {
+    this->dataPtr->localizationEnum = WorldFrameEnumType::NWU;
+  } else if (localization == "CUSTOM") {
+    this->dataPtr->localizationEnum = WorldFrameEnumType::CUSTOM;
+  } else {
+    this->dataPtr->localizationEnum = WorldFrameEnumType::NONE;
+  }
+
+  // Set orientation reference frame if custom_rpy was supplied
+  if (this->dataPtr->localizationEnum == WorldFrameEnumType::CUSTOM)
+  {
+    if (_sdf.ImuSensor()->CustomRpyParentFrame() == "")
+    {
+      this->SetOrientationReference(ignition::math::Quaterniond(
+        _sdf.ImuSensor()->CustomRpy()));
+    }
+    else
+    {
+      ignwarn << "custom_rpy parent frame must be set to empty "
+                "string. Setting it to any other frame is not "
+                "supported yet." << std::endl;
+    }
+  }
+}
+
+
+//////////////////////////////////////////////////
+void ImuSensor::ReadLocalizationTag(sdf::ElementPtr _sdf)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(_sdf);
+  return this->ReadLocalizationTag(sdfSensor);
 }
 
 //////////////////////////////////////////////////
