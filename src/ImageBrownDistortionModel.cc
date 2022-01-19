@@ -20,16 +20,28 @@
   #include <Winsock2.h>
 #endif
 
-#include "ignition/sensors/BrownDistortionModel.hh"
-#include <ignition/math/Helpers.hh>
-#include <ignition/math/Rand.hh>
+#include <ignition/common/Console.hh>
 
-#include "ignition/common/Console.hh"
+// TODO Remove these pragmas once ign-rendering is disabling the
+// warnings
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
+#include <ignition/rendering/DistortionPass.hh>
+#include <ignition/rendering/RenderPass.hh>
+#include <ignition/rendering/RenderEngine.hh>
+#include <ignition/rendering/RenderPassSystem.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
+#include "ignition/sensors/ImageBrownDistortionModel.hh"
 
 using namespace ignition;
 using namespace sensors;
 
-class ignition::sensors::BrownDistortionModelPrivate
+class ignition::sensors::ImageBrownDistortionModelPrivate
 {
   /// \brief If type starts with BROWN, the mean of the distribution
   /// from which we sample when adding noise.
@@ -53,79 +65,61 @@ class ignition::sensors::BrownDistortionModelPrivate
   /// \brief If type==BROWN_QUANTIZED, the precision to which
   /// the output signal is rounded.
   public: math::Vector2d lensCenter = {0.5, 0.5};
+
+  /// \brief Gaussian noise pass.
+  public: rendering::DistortionPassPtr distortionPass;
 };
 
 //////////////////////////////////////////////////
-BrownDistortionModel::BrownDistortionModel()
-  : Distortion(DistortionType::BROWN), dataPtr(new BrownDistortionModelPrivate())
+ImageBrownDistortionModel::ImageBrownDistortionModel()
+  : BrownDistortionModel(), dataPtr(new ImageBrownDistortionModelPrivate())
 {
 }
 
 //////////////////////////////////////////////////
-BrownDistortionModel::~BrownDistortionModel()
+ImageBrownDistortionModel::~ImageBrownDistortionModel()
 {
   delete this->dataPtr;
   this->dataPtr = nullptr;
 }
 
 //////////////////////////////////////////////////
-void BrownDistortionModel::Load(const sdf::Camera &_sdf)
+void ImageBrownDistortionModel::Load(const sdf::Noise &_sdf)
 {
-  Distortion::Load(_sdf);
-  std::ostringstream out;
+  Noise::Load(_sdf);
 
-  this->dataPtr->k1 = _sdf.DistortionK1();
-  this->dataPtr->k2 = _sdf.DistortionK2();
-  this->dataPtr->k3 = _sdf.DistortionK3();
-  this->dataPtr->p1 = _sdf.DistortionP1();
-  this->dataPtr->p2 = _sdf.DistortionP2();
-  this->dataPtr->lensCenter = _sdf.DistortionCenter();
-
-  this->Print(out);
+  this->dataPtr->mean = _sdf.Mean();
+  this->dataPtr->stdDev = _sdf.StdDev();
 }
 
 //////////////////////////////////////////////////
-double BrownDistortionModel::K1() const
+void ImageBrownDistortionModel::SetCamera(rendering::CameraPtr _camera)
 {
-  return this->dataPtr->k1;
+  if (!_camera)
+  {
+    ignerr << "Unable to apply gaussian noise, camera is null\n";
+    return;
+  }
+
+  rendering::RenderEngine *engine = _camera->Scene()->Engine();
+  rendering::RenderPassSystemPtr rpSystem = engine->RenderPassSystem();
+  if (rpSystem)
+  {
+    // add gaussian noise pass
+    rendering::RenderPassPtr noisePass =
+      rpSystem->Create<rendering::BrownDistortionPass>();
+    this->dataPtr->gaussianNoisePass =
+        std::dynamic_pointer_cast<rendering::BrownDistortionPass>(noisePass);
+    this->dataPtr->gaussianNoisePass->SetMean(this->dataPtr->mean);
+    this->dataPtr->gaussianNoisePass->SetStdDev(this->dataPtr->stdDev);
+    this->dataPtr->gaussianNoisePass->SetEnabled(true);
+    _camera->AddRenderPass(this->dataPtr->gaussianNoisePass);
+  }
 }
 
 //////////////////////////////////////////////////
-double BrownDistortionModel::K2() const
+void ImageBrownDistortionModel::Print(std::ostream &_out) const
 {
-  return this->dataPtr->k2;
-}
-
-//////////////////////////////////////////////////
-double BrownDistortionModel::K3() const
-{
-  return this->dataPtr->k3;
-}
-
-//////////////////////////////////////////////////
-double BrownDistortionModel::P1() const
-{
-  return this->dataPtr->p1;
-}
-
-//////////////////////////////////////////////////
-double BrownDistortionModel::P2() const
-{
-  return this->dataPtr->p2;
-}
-
-//////////////////////////////////////////////////
-math::Vector2d BrownDistortionModel::Center() const
-{
-  return this->dataPtr->lensCenter;
-}
-
-//////////////////////////////////////////////////
-void BrownDistortionModel::Print(std::ostream &_out) const
-{
-  // _out << "Gaussian noise, mean[" << this->dataPtr->mean << "], "
-  //   << "stdDev[" << this->dataPtr->stdDev << "] "
-  //   << "bias[" << this->dataPtr->bias << "] "
-  //   << "precision[" << this->dataPtr->precision << "] "
-  //   << "quantized[" << this->dataPtr->quantized << "]";
+  _out << "Image Gaussian noise, mean[" << this->dataPtr->mean << "], "
+    << "stdDev[" << this->dataPtr->stdDev << "] ";
 }

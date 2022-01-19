@@ -16,6 +16,7 @@ set(rendering_sources
   RenderingEvents.cc
   ImageGaussianNoiseModel.cc
   ImageNoise.cc
+  ImageBrownDistortionModel.cc
   ImageDistortion.cc
 )
 
