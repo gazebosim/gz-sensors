@@ -124,6 +124,9 @@ ign_add_component(altimeter SOURCES ${altimeter_sources} GET_TARGET_NAME altimet
 set(air_pressure_sources AirPressureSensor.cc)
 ign_add_component(air_pressure SOURCES ${air_pressure_sources} GET_TARGET_NAME air_pressure_target)
 
+set(navsat_sources NavSatSensor.cc)
+ign_add_component(navsat SOURCES ${navsat_sources} GET_TARGET_NAME navsat_target)
+
 set(rgbd_camera_sources RgbdCameraSensor.cc)
 ign_add_component(rgbd_camera SOURCES ${rgbd_camera_sources} GET_TARGET_NAME rgbd_camera_target)
 target_compile_definitions(${rgbd_camera_target} PUBLIC RgbdCameraSensor_EXPORTS)
