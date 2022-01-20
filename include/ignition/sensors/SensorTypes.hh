@@ -229,7 +229,7 @@ namespace ignition
       /// \brief Noise streams for the Camera sensor
       /// \sa CameraSensor
       CAMERA_DISTORTION = 1,
-      
+
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not
       /// use this.

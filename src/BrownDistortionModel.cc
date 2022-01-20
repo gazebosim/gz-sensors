@@ -31,33 +31,29 @@ using namespace sensors;
 
 class ignition::sensors::BrownDistortionModelPrivate
 {
-  /// \brief If type starts with BROWN, the mean of the distribution
-  /// from which we sample when adding noise.
+  /// \brief The radial distortion coefficient k1.
   public: double k1 = 0.0;
 
-  /// \brief If type starts with BROWN, the standard deviation of the
-  /// distribution from which we sample when adding noise.
+  /// \brief The radial distortion coefficient k2.
   public: double k2 = 0.0;
 
-  /// \brief If type starts with BROWN, the bias we'll add.
+  /// \brief The radial distortion coefficient k3.
   public: double k3 = 0.0;
 
-  /// \brief If type starts with BROWN, the standard deviation of the
-  /// distribution from which the dynamic bias will be driven.
+  /// \brief The radial distortion coefficient p1.
   public: double p1 = 0.0;
 
-  /// \brief If type starts with BROWN, the correlation time of the
-  /// process from which the dynamic bias will be driven.
+  /// \brief The radial distortion coefficient p2.
   public: double p2 = 0.0;
 
-  /// \brief If type==BROWN_QUANTIZED, the precision to which
-  /// the output signal is rounded.
+  /// \brief The distortion center.
   public: math::Vector2d lensCenter = {0.5, 0.5};
 };
 
 //////////////////////////////////////////////////
 BrownDistortionModel::BrownDistortionModel()
-  : Distortion(DistortionType::BROWN), dataPtr(new BrownDistortionModelPrivate())
+  : Distortion(DistortionType::BROWN),
+    dataPtr(new BrownDistortionModelPrivate())
 {
 }
 
@@ -120,9 +116,10 @@ math::Vector2d BrownDistortionModel::Center() const
 //////////////////////////////////////////////////
 void BrownDistortionModel::Print(std::ostream &_out) const
 {
-  // _out << "Gaussian noise, mean[" << this->dataPtr->mean << "], "
-  //   << "stdDev[" << this->dataPtr->stdDev << "] "
-  //   << "bias[" << this->dataPtr->bias << "] "
-  //   << "precision[" << this->dataPtr->precision << "] "
-  //   << "quantized[" << this->dataPtr->quantized << "]";
+  _out << "Distortion, k1[" << this->dataPtr->k1 << "], "
+    << "k2[" << this->dataPtr->k2 << "] "
+    << "k3[" << this->dataPtr->k2 << "] "
+    << "p1[" << this->dataPtr->p1 << "] "
+    << "p2[" << this->dataPtr->p2 << "] "
+    << "lensCenter[" << this->dataPtr->lensCenter << "]";
 }

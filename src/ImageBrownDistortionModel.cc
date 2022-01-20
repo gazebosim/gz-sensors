@@ -22,7 +22,7 @@
 
 #include <ignition/common/Console.hh>
 
-// TODO Remove these pragmas once ign-rendering is disabling the
+// TODO(WilliamLewww): Remove these pragmas once ign-rendering is disabling the
 // warnings
 #ifdef _WIN32
 #pragma warning(push)
@@ -43,30 +43,25 @@ using namespace sensors;
 
 class ignition::sensors::ImageBrownDistortionModelPrivate
 {
-  /// \brief If type starts with BROWN, the mean of the distribution
-  /// from which we sample when adding noise.
+  /// \brief The radial distortion coefficient k1.
   public: double k1 = 0.0;
 
-  /// \brief If type starts with BROWN, the standard deviation of the
-  /// distribution from which we sample when adding noise.
+  /// \brief The radial distortion coefficient k2.
   public: double k2 = 0.0;
 
-  /// \brief If type starts with BROWN, the bias we'll add.
+  /// \brief The radial distortion coefficient k3.
   public: double k3 = 0.0;
 
-  /// \brief If type starts with BROWN, the standard deviation of the
-  /// distribution from which the dynamic bias will be driven.
+  /// \brief The radial distortion coefficient p1.
   public: double p1 = 0.0;
 
-  /// \brief If type starts with BROWN, the correlation time of the
-  /// process from which the dynamic bias will be driven.
+  /// \brief The radial distortion coefficient p2.
   public: double p2 = 0.0;
 
-  /// \brief If type==BROWN_QUANTIZED, the precision to which
-  /// the output signal is rounded.
+  /// \brief The distortion center.
   public: math::Vector2d lensCenter = {0.5, 0.5};
 
-  /// \brief Gaussian noise pass.
+  /// \brief The distortion pass.
   public: rendering::DistortionPassPtr distortionPass;
 };
 
@@ -101,7 +96,7 @@ void ImageBrownDistortionModel::SetCamera(rendering::CameraPtr _camera)
 {
   if (!_camera)
   {
-    ignerr << "Unable to apply gaussian noise, camera is null\n";
+    ignerr << "Unable to apply distortion, camera is null\n";
     return;
   }
 
@@ -109,7 +104,7 @@ void ImageBrownDistortionModel::SetCamera(rendering::CameraPtr _camera)
   rendering::RenderPassSystemPtr rpSystem = engine->RenderPassSystem();
   if (rpSystem)
   {
-    // add gaussian noise pass
+    // add distortion pass
     rendering::RenderPassPtr distortionPass =
       rpSystem->Create<rendering::DistortionPass>();
     this->dataPtr->distortionPass =
@@ -128,6 +123,10 @@ void ImageBrownDistortionModel::SetCamera(rendering::CameraPtr _camera)
 //////////////////////////////////////////////////
 void ImageBrownDistortionModel::Print(std::ostream &_out) const
 {
-  // _out << "Image Gaussian noise, mean[" << this->dataPtr->mean << "], "
-  //   << "stdDev[" << this->dataPtr->stdDev << "] ";
+  _out << "Image distortion, k1[" << this->dataPtr->k1 << "], "
+    << "k2[" << this->dataPtr->k2 << "] "
+    << "k3[" << this->dataPtr->k2 << "] "
+    << "p1[" << this->dataPtr->p1 << "] "
+    << "p2[" << this->dataPtr->p2 << "] "
+    << "lensCenter[" << this->dataPtr->lensCenter << "]";
 }

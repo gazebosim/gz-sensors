@@ -20,7 +20,7 @@
 
 #include <sdf/sdf.hh>
 
-// TODO Remove these pragmas once ign-rendering is disabling the
+// TODO(WilliamLewww): Remove these pragmas once ign-rendering is disabling the
 // warnings
 #ifdef _WIN32
 #pragma warning(push)

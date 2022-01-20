@@ -44,7 +44,7 @@ class ignition::sensors::DistortionPrivate
 DistortionPtr DistortionFactory::NewDistortionModel(const sdf::Camera &_sdf,
     const std::string &_sensorType)
 {
-  // TODO support different distortion models
+  // TODO(WilliamLewww): support different distortion models
   DistortionType distortionType = DistortionType::BROWN;
 
   DistortionPtr distortion;
@@ -90,7 +90,8 @@ DistortionPtr DistortionFactory::NewDistortionModel(const sdf::Camera &_sdf,
 DistortionPtr DistortionFactory::NewDistortionModel(sdf::ElementPtr _sdf,
     const std::string &_sensorType)
 {
-  // TODO create a distortion SDF to support different distortion models
+  // TODO(WilliamLewww): create a distortion SDF to support different
+  // distortion models
   IGN_ASSERT(_sdf != nullptr, "camera sdf is null");
   IGN_ASSERT(_sdf->GetName() == "camera", "Not a camera SDF element");
   sdf::Camera cameraDom;
