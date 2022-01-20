@@ -212,6 +212,31 @@ namespace ignition
     };
     /// \}
 
+
+    /// \def SensorDistortionType
+    /// \brief Eumeration of all sensor noise types
+    enum SensorDistortionType
+    {
+      /// \internal
+      /// \brief Indicator used to create an iterator over the enum. Do not
+      /// use this.
+      SENSOR_DISTORTION_TYPE_BEGIN = 0,
+
+      /// \brief Noise streams for the Camera sensor
+      /// \sa CameraSensor
+      NO_DISTORTION = SENSOR_DISTORTION_TYPE_BEGIN,
+
+      /// \brief Noise streams for the Camera sensor
+      /// \sa CameraSensor
+      CAMERA_DISTORTION = 1,
+      
+      /// \internal
+      /// \brief Indicator used to create an iterator over the enum. Do not
+      /// use this.
+      SENSOR_DISTORTION_TYPE_END
+    };
+    /// \}
+
     /// \brief SensorCategory is used to categorize sensors. This is used to
     /// put sensors into different threads.
     enum SensorCategory

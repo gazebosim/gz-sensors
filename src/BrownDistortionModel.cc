@@ -72,7 +72,6 @@ BrownDistortionModel::~BrownDistortionModel()
 void BrownDistortionModel::Load(const sdf::Camera &_sdf)
 {
   Distortion::Load(_sdf);
-  std::ostringstream out;
 
   this->dataPtr->k1 = _sdf.DistortionK1();
   this->dataPtr->k2 = _sdf.DistortionK2();
@@ -80,8 +79,6 @@ void BrownDistortionModel::Load(const sdf::Camera &_sdf)
   this->dataPtr->p1 = _sdf.DistortionP1();
   this->dataPtr->p2 = _sdf.DistortionP2();
   this->dataPtr->lensCenter = _sdf.DistortionCenter();
-
-  this->Print(out);
 }
 
 //////////////////////////////////////////////////

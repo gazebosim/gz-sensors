@@ -37,6 +37,7 @@
 
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/ImageBrownDistortionModel.hh"
+#include "ignition/sensors/ImageDistortion.hh"
 #include "ignition/sensors/ImageGaussianNoiseModel.hh"
 #include "ignition/sensors/ImageNoise.hh"
 #include "ignition/sensors/Manager.hh"
@@ -82,6 +83,9 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
+
+  /// \brief Distortion added to sensor data
+  public: DistortionPtr distortion;
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
@@ -182,9 +186,14 @@ bool CameraSensor::CreateCamera()
   this->dataPtr->camera->SetAspectRatio(static_cast<double>(width)/height);
   this->dataPtr->camera->SetHFOV(angle);
 
-  // \todo(nkoenig) Port Distortion class
-  // This->dataPtr->distortion.reset(new Distortion());
-  // This->dataPtr->distortion->Load(this->sdf->GetElement("distortion"));
+  if (cameraSdf->Element()->HasElement("distortion")) {
+    this->dataPtr->distortion =
+        ImageDistortionFactory::NewDistortionModel(*cameraSdf, "camera");
+    this->dataPtr->distortion->Load(*cameraSdf);
+
+    std::dynamic_pointer_cast<ImageBrownDistortionModel>(
+        this->dataPtr->distortion)->SetCamera(this->dataPtr->camera);
+  }
 
   sdf::PixelFormatType pixelFormat = cameraSdf->PixelFormat();
   switch (pixelFormat)

@@ -84,12 +84,16 @@ ImageBrownDistortionModel::~ImageBrownDistortionModel()
 }
 
 //////////////////////////////////////////////////
-void ImageBrownDistortionModel::Load(const sdf::Noise &_sdf)
+void ImageBrownDistortionModel::Load(const sdf::Camera &_sdf)
 {
-  Noise::Load(_sdf);
+  Distortion::Load(_sdf);
 
-  this->dataPtr->mean = _sdf.Mean();
-  this->dataPtr->stdDev = _sdf.StdDev();
+  this->dataPtr->k1 = _sdf.DistortionK1();
+  this->dataPtr->k2 = _sdf.DistortionK2();
+  this->dataPtr->k3 = _sdf.DistortionK3();
+  this->dataPtr->p1 = _sdf.DistortionP1();
+  this->dataPtr->p2 = _sdf.DistortionP2();
+  this->dataPtr->lensCenter = _sdf.DistortionCenter();
 }
 
 //////////////////////////////////////////////////
@@ -106,20 +110,24 @@ void ImageBrownDistortionModel::SetCamera(rendering::CameraPtr _camera)
   if (rpSystem)
   {
     // add gaussian noise pass
-    rendering::RenderPassPtr noisePass =
-      rpSystem->Create<rendering::BrownDistortionPass>();
-    this->dataPtr->gaussianNoisePass =
-        std::dynamic_pointer_cast<rendering::BrownDistortionPass>(noisePass);
-    this->dataPtr->gaussianNoisePass->SetMean(this->dataPtr->mean);
-    this->dataPtr->gaussianNoisePass->SetStdDev(this->dataPtr->stdDev);
-    this->dataPtr->gaussianNoisePass->SetEnabled(true);
-    _camera->AddRenderPass(this->dataPtr->gaussianNoisePass);
+    rendering::RenderPassPtr distortionPass =
+      rpSystem->Create<rendering::DistortionPass>();
+    this->dataPtr->distortionPass =
+        std::dynamic_pointer_cast<rendering::DistortionPass>(distortionPass);
+    this->dataPtr->distortionPass->SetK1(this->dataPtr->k1);
+    this->dataPtr->distortionPass->SetK2(this->dataPtr->k2);
+    this->dataPtr->distortionPass->SetK3(this->dataPtr->k3);
+    this->dataPtr->distortionPass->SetP1(this->dataPtr->p1);
+    this->dataPtr->distortionPass->SetP2(this->dataPtr->p2);
+    this->dataPtr->distortionPass->SetCenter(this->dataPtr->lensCenter);
+    this->dataPtr->distortionPass->SetEnabled(true);
+    _camera->AddRenderPass(this->dataPtr->distortionPass);
   }
 }
 
 //////////////////////////////////////////////////
 void ImageBrownDistortionModel::Print(std::ostream &_out) const
 {
-  _out << "Image Gaussian noise, mean[" << this->dataPtr->mean << "], "
-    << "stdDev[" << this->dataPtr->stdDev << "] ";
+  // _out << "Image Gaussian noise, mean[" << this->dataPtr->mean << "], "
+  //   << "stdDev[" << this->dataPtr->stdDev << "] ";
 }
