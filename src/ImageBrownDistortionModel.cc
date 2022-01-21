@@ -29,8 +29,8 @@
 #pragma warning(disable: 4251)
 #endif
 #include <ignition/rendering/DistortionPass.hh>
-#include <ignition/rendering/RenderPass.hh>
 #include <ignition/rendering/RenderEngine.hh>
+#include <ignition/rendering/RenderPass.hh>
 #include <ignition/rendering/RenderPassSystem.hh>
 #ifdef _WIN32
 #pragma warning(pop)
@@ -124,9 +124,9 @@ void ImageBrownDistortionModel::SetCamera(rendering::CameraPtr _camera)
 void ImageBrownDistortionModel::Print(std::ostream &_out) const
 {
   _out << "Image distortion, k1[" << this->dataPtr->k1 << "], "
-    << "k2[" << this->dataPtr->k2 << "] "
-    << "k3[" << this->dataPtr->k2 << "] "
-    << "p1[" << this->dataPtr->p1 << "] "
-    << "p2[" << this->dataPtr->p2 << "] "
-    << "lensCenter[" << this->dataPtr->lensCenter << "]";
+      << "k2[" << this->dataPtr->k2 << "] "
+      << "k3[" << this->dataPtr->k2 << "] "
+      << "p1[" << this->dataPtr->p1 << "] "
+      << "p2[" << this->dataPtr->p2 << "] "
+      << "lensCenter[" << this->dataPtr->lensCenter << "]";
 }

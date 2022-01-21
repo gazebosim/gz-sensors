@@ -21,15 +21,15 @@
 #endif
 
 #include "ignition/sensors/BrownDistortionModel.hh"
+
+#include <ignition/common/Console.hh>
 #include <ignition/math/Helpers.hh>
 #include <ignition/math/Rand.hh>
-
-#include "ignition/common/Console.hh"
 
 using namespace ignition;
 using namespace sensors;
 
-class ignition::sensors::BrownDistortionModelPrivate
+class ignition::sensors::BrownDistortionModel::Implementation
 {
   /// \brief The radial distortion coefficient k1.
   public: double k1 = 0.0;
@@ -53,15 +53,13 @@ class ignition::sensors::BrownDistortionModelPrivate
 //////////////////////////////////////////////////
 BrownDistortionModel::BrownDistortionModel()
   : Distortion(DistortionType::BROWN),
-    dataPtr(new BrownDistortionModelPrivate())
+    dataPtr(utils::MakeImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
 BrownDistortionModel::~BrownDistortionModel()
 {
-  delete this->dataPtr;
-  this->dataPtr = nullptr;
 }
 
 //////////////////////////////////////////////////
@@ -117,9 +115,9 @@ math::Vector2d BrownDistortionModel::Center() const
 void BrownDistortionModel::Print(std::ostream &_out) const
 {
   _out << "Distortion, k1[" << this->dataPtr->k1 << "], "
-    << "k2[" << this->dataPtr->k2 << "] "
-    << "k3[" << this->dataPtr->k2 << "] "
-    << "p1[" << this->dataPtr->p1 << "] "
-    << "p2[" << this->dataPtr->p2 << "] "
-    << "lensCenter[" << this->dataPtr->lensCenter << "]";
+      << "k2[" << this->dataPtr->k2 << "] "
+      << "k3[" << this->dataPtr->k2 << "] "
+      << "p1[" << this->dataPtr->p1 << "] "
+      << "p2[" << this->dataPtr->p2 << "] "
+      << "lensCenter[" << this->dataPtr->lensCenter << "]";
 }

@@ -20,9 +20,10 @@
 
 #include <sdf/sdf.hh>
 
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/Export.hh"
 #include "ignition/sensors/Distortion.hh"
+#include "ignition/sensors/Export.hh"
+#include "ignition/sensors/config.hh"
+#include "ignition/utils/ImplPtr.hh"
 
 namespace ignition
 {
@@ -77,7 +78,7 @@ namespace ignition
       public: virtual void Print(std::ostream &_out) const override;
 
       /// \brief Private data pointer.
-      private: BrownDistortionModelPrivate *dataPtr = nullptr;
+      IGN_UTILS_IMPL_PTR(dataPtr)
     };
   }
   }

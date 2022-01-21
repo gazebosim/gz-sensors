@@ -31,7 +31,7 @@
 using namespace ignition;
 using namespace sensors;
 
-class ignition::sensors::DistortionPrivate
+class ignition::sensors::Distortion::Implementation
 {
   /// \brief Which type of distortion we're applying
   public: DistortionType type = DistortionType::NONE;
@@ -102,7 +102,7 @@ DistortionPtr DistortionFactory::NewDistortionModel(sdf::ElementPtr _sdf,
 
 //////////////////////////////////////////////////
 Distortion::Distortion(DistortionType _type)
-  : dataPtr(new DistortionPrivate())
+  : dataPtr(utils::MakeImpl<Implementation>())
 {
   this->dataPtr->type = _type;
 }
@@ -110,8 +110,6 @@ Distortion::Distortion(DistortionType _type)
 //////////////////////////////////////////////////
 Distortion::~Distortion()
 {
-  delete this->dataPtr;
-  this->dataPtr = nullptr;
 }
 
 //////////////////////////////////////////////////
@@ -130,7 +128,7 @@ DistortionType Distortion::Type() const
 void Distortion::Print(std::ostream &_out) const
 {
   _out << "Distortion with type[" << static_cast<int>(this->dataPtr->type)
-    << "] "
-    << "does not have an overloaded Print function. "
-    << "No more information is available.";
+      << "] "
+      << "does not have an overloaded Print function. "
+      << "No more information is available.";
 }

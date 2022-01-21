@@ -22,9 +22,10 @@
 #include <string>
 #include <vector>
 
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/SensorTypes.hh>
 #include <ignition/sensors/Export.hh>
+#include <ignition/sensors/SensorTypes.hh>
+#include <ignition/sensors/config.hh>
+#include <ignition/utils/ImplPtr.hh>
 
 #include <sdf/sdf.hh>
 
@@ -99,7 +100,7 @@ namespace ignition
       public: virtual void Print(std::ostream &_out) const;
 
       /// \brief Private data pointer
-      private: DistortionPrivate *dataPtr = nullptr;
+      IGN_UTILS_IMPL_PTR(dataPtr)
     };
     }
   }
