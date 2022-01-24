@@ -337,7 +337,7 @@ void ImuSensor::SetWorldFrameOrientation(
   this->dataPtr->worldFrameRelativeTo = _relativeTo;
 
   // Table to hold frame transformations
-  std::map<WorldFrameEnumType,
+  static const std::map<WorldFrameEnumType,
     std::map<WorldFrameEnumType, ignition::math::Quaterniond>>
       transformTable =
     {
@@ -374,8 +374,8 @@ void ImuSensor::SetWorldFrameOrientation(
   {
     // A valid named localization tag is supplied in the sdf
     auto tranformation =
-      transformTable[this->dataPtr->worldFrameRelativeTo][
-      this->dataPtr->sensorOrientationRelativeTo];
+      transformTable.at(this->dataPtr->worldFrameRelativeTo).at
+      (this->dataPtr->sensorOrientationRelativeTo);
     this->SetOrientationReference(this->dataPtr->worldRelativeOrientation *
       tranformation);
   }
