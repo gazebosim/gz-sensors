@@ -35,8 +35,14 @@ namespace ignition
   {
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
-    //
+
     // \brief Reference frames enum
+    // NONE : To be used only when <localization>
+    // reference orintation tag is empty.
+    // ENU (East-North-Up): x - East, y - North, z - Up.
+    // NED (North-East-Down): x - North, y - East, z - Down.
+    // NWU (North-West-Up): x - North, y - West, z - Up.
+    // CUSTOM : The frame is described using custom_rpy tag.
     enum class IGNITION_SENSORS_VISIBLE WorldFrameEnumType
     {
       NONE = 0,
