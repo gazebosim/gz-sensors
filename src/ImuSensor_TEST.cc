@@ -436,11 +436,11 @@ TEST(ImuSensor_TEST, OrientationReference)
   // Create an ImuSensor
   auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(
       imuSDF);
+  sensor->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
+    sensors::WorldFrameEnumType::ENU);
 
   // Make sure the above dynamic cast worked.
   ASSERT_NE(nullptr, sensor);
-
-  sensor->ReadLocalizationTag(imuSDF);
 
   sensor->Update(std::chrono::steady_clock::duration(
     std::chrono::nanoseconds(10000000)));
@@ -497,11 +497,12 @@ TEST(ImuSensor_TEST, CustomRpyParentFrame)
   // Create an ImuSensor
   auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(
       imuSDF);
+  
+  sensor->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
+    sensors::WorldFrameEnumType::ENU);
 
   // Make sure the above dynamic cast worked.
   ASSERT_NE(nullptr, sensor);
-
-  sensor->ReadLocalizationTag(imuSDF);
 
   sensor->Update(std::chrono::steady_clock::duration(
     std::chrono::nanoseconds(10000000)));
@@ -564,7 +565,6 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
   auto sensorENU = mgr.CreateSensor<ignition::sensors::ImuSensor>(
       generateSensor("ENU"));
   ASSERT_NE(nullptr, sensorENU);
-  sensorENU->ReadLocalizationTag(generateSensor("ENU"));
 
   // Case A.1 : Localization ref: ENU, World : ENU
   // Sensor aligns with ENU, we're measuring wrt ENU
@@ -606,7 +606,6 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
   auto sensorNWU = mgr.CreateSensor<ignition::sensors::ImuSensor>(
       generateSensor("NWU"));
   ASSERT_NE(nullptr, sensorNWU);
-  sensorNWU->ReadLocalizationTag(generateSensor("NWU"));
 
   // Case B.1 : Localization ref: NWU, World : NWU
   // Sensor aligns with NWU, we're measuring wrt NWU
@@ -648,7 +647,6 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
   auto sensorNED = mgr.CreateSensor<ignition::sensors::ImuSensor>(
       generateSensor("NED"));
   ASSERT_NE(nullptr, sensorNED);
-  sensorNED->ReadLocalizationTag(generateSensor("NED"));
 
   // Case C.1 : Localization ref: NED, World : NED
   // Sensor aligns with NED, we're measuring wrt NED

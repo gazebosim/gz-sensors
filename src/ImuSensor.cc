@@ -79,8 +79,13 @@ class ignition::sensors::ImuSensorPrivate
   public: WorldFrameEnumType worldFrameRelativeTo = WorldFrameEnumType::ENU;
 
   /// \brief Frame relative-to which the sensor orientation is reported
-  public: WorldFrameEnumType sensorOrientationRelativeTo
-           = WorldFrameEnumType::NONE;
+  public: WorldFrameEnumType sensorOrientationRelativeTo;
+
+  /// \brief Frame realtive to which custom_rpy is specified
+  public: std::string CustomRpyParentFrame;
+
+  /// \brief Quaternion for to store custom_rpy
+  public: ignition::math::Quaterniond CustomRpyQuaternion;
 
   /// \brief Previous update time step.
   public: std::chrono::steady_clock::duration prevStep
@@ -158,6 +163,26 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
       this->dataPtr->noises[noiseType] = NoiseFactory::NewNoiseModel(noiseSdf);
     }
   }
+
+  std::string localization = _sdf.ImuSensor()->Localization();
+
+  if (localization == "ENU")
+  {
+    this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::ENU;
+  } else if (localization == "NED") {
+    this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::NED;
+    std::cout << "add: " << &(this->dataPtr->sensorOrientationRelativeTo) << std::endl;
+  } else if (localization == "NWU") {
+    this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::NWU;
+  } else if (localization == "CUSTOM") {
+    this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::CUSTOM;
+  } else {
+    this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::NONE;
+  }
+
+  this->dataPtr->CustomRpyParentFrame = _sdf.ImuSensor()->CustomRpyParentFrame();
+  this->dataPtr->CustomRpyQuaternion = ignition::math::Quaterniond(
+		                         _sdf.ImuSensor()->CustomRpy());
 
   this->dataPtr->initialized = true;
   return true;
@@ -286,30 +311,17 @@ math::Pose3d ImuSensor::WorldPose() const
 }
 
 //////////////////////////////////////////////////
-void ImuSensor::ReadLocalizationTag(const sdf::Sensor &_sdf)
+void ImuSensor::SetWorldFrameOrientation(
+  const math::Quaterniond &_rot, WorldFrameEnumType _relativeTo)
 {
-  std::string localization = _sdf.ImuSensor()->Localization();
-
-  if (localization == "ENU")
-  {
-    this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::ENU;
-  } else if (localization == "NED") {
-    this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::NED;
-  } else if (localization == "NWU") {
-    this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::NWU;
-  } else if (localization == "CUSTOM") {
-    this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::CUSTOM;
-  } else {
-    this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::NONE;
-  }
-
+  std::cout << "Debug 1" << std::endl;
+  std::cout << "add: " << &(this->dataPtr->sensorOrientationRelativeTo) << std::endl;
   // Set orientation reference frame if custom_rpy was supplied
   if (this->dataPtr->sensorOrientationRelativeTo == WorldFrameEnumType::CUSTOM)
   {
-    if (_sdf.ImuSensor()->CustomRpyParentFrame() == "")
+    if (this->dataPtr->CustomRpyParentFrame == "")
     {
-      this->SetOrientationReference(ignition::math::Quaterniond(
-        _sdf.ImuSensor()->CustomRpy()));
+      this->SetOrientationReference(this->dataPtr->CustomRpyQuaternion);
     }
     else
     {
@@ -317,22 +329,9 @@ void ImuSensor::ReadLocalizationTag(const sdf::Sensor &_sdf)
                 "string. Setting it to any other frame is not "
                 "supported yet." << std::endl;
     }
+    return;
   }
-}
-
-
-//////////////////////////////////////////////////
-void ImuSensor::ReadLocalizationTag(sdf::ElementPtr _sdf)
-{
-  sdf::Sensor sdfSensor;
-  sdfSensor.Load(_sdf);
-  return this->ReadLocalizationTag(sdfSensor);
-}
-
-//////////////////////////////////////////////////
-void ImuSensor::SetWorldFrameOrientation(
-  const math::Quaterniond &_rot, WorldFrameEnumType _relativeTo)
-{
+  
   this->dataPtr->worldRelativeOrientation = _rot;
   this->dataPtr->worldFrameRelativeTo = _relativeTo;
 
