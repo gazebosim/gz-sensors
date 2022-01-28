@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Open Source Robotics Foundation
+ * Copyright (C) 2022 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,8 @@ class DistortionCameraSensorTest: public testing::Test,
   public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
 };
 
-void DistortionCameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
+void DistortionCameraSensorTest::ImagesWithBuiltinSDF(
+    const std::string &_renderEngine)
 {
   // get the darn test data
   std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
