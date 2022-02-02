@@ -79,7 +79,8 @@ class ignition::sensors::ImuSensorPrivate
   public: WorldFrameEnumType worldFrameRelativeTo = WorldFrameEnumType::ENU;
 
   /// \brief Frame relative-to which the sensor orientation is reported
-  public: WorldFrameEnumType sensorOrientationRelativeTo;
+  public: WorldFrameEnumType sensorOrientationRelativeTo
+	  = WorldFrameEnumType::NONE;
 
   /// \brief Frame realtive to which custom_rpy is specified
   public: std::string CustomRpyParentFrame;
