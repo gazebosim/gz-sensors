@@ -171,7 +171,6 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::ENU;
   } else if (localization == "NED") {
     this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::NED;
-    std::cout << "add: " << &(this->dataPtr->sensorOrientationRelativeTo) << std::endl;
   } else if (localization == "NWU") {
     this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::NWU;
   } else if (localization == "CUSTOM") {
@@ -314,8 +313,6 @@ math::Pose3d ImuSensor::WorldPose() const
 void ImuSensor::SetWorldFrameOrientation(
   const math::Quaterniond &_rot, WorldFrameEnumType _relativeTo)
 {
-  std::cout << "Debug 1" << std::endl;
-  std::cout << "add: " << &(this->dataPtr->sensorOrientationRelativeTo) << std::endl;
   // Set orientation reference frame if custom_rpy was supplied
   if (this->dataPtr->sensorOrientationRelativeTo == WorldFrameEnumType::CUSTOM)
   {
