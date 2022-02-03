@@ -37,18 +37,22 @@ namespace ignition
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
 
     // \brief Reference frames enum
-    // NONE : To be used only when <localization>
-    // reference orintation tag is empty.
-    // ENU (East-North-Up): x - East, y - North, z - Up.
-    // NED (North-East-Down): x - North, y - East, z - Down.
-    // NWU (North-West-Up): x - North, y - West, z - Up.
-    // CUSTOM : The frame is described using custom_rpy tag.
     enum class IGNITION_SENSORS_VISIBLE WorldFrameEnumType
     {
+      // \brief NONE : To be used only when <localization>
+      // reference orintation tag is empty.
       NONE = 0,
+
+      // \brief ENU (East-North-Up): x - East, y - North, z - Up.
       ENU = 1,
+
+      // \brief NED (North-East-Down): x - North, y - East, z - Down.
       NED = 2,
+
+      // \brief NWU (North-West-Up): x - North, y - West, z - Up.
       NWU = 3,
+
+      // \brief CUSTOM : The frame is described using custom_rpy tag.
       CUSTOM = 4
     };
 
