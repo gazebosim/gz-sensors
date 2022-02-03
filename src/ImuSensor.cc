@@ -80,7 +80,7 @@ class ignition::sensors::ImuSensorPrivate
 
   /// \brief Frame relative-to which the sensor orientation is reported
   public: WorldFrameEnumType sensorOrientationRelativeTo
-	  = WorldFrameEnumType::NONE;
+         = WorldFrameEnumType::NONE;
 
   /// \brief Frame realtive to which custom_rpy is specified
   public: std::string CustomRpyParentFrame;
@@ -180,9 +180,10 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::NONE;
   }
 
-  this->dataPtr->CustomRpyParentFrame = _sdf.ImuSensor()->CustomRpyParentFrame();
+  this->dataPtr->CustomRpyParentFrame =
+      _sdf.ImuSensor()->CustomRpyParentFrame();
   this->dataPtr->CustomRpyQuaternion = ignition::math::Quaterniond(
-		                         _sdf.ImuSensor()->CustomRpy());
+      _sdf.ImuSensor()->CustomRpy());
 
   this->dataPtr->initialized = true;
   return true;
@@ -329,7 +330,7 @@ void ImuSensor::SetWorldFrameOrientation(
     }
     return;
   }
-  
+
   this->dataPtr->worldRelativeOrientation = _rot;
   this->dataPtr->worldFrameRelativeTo = _relativeTo;
 

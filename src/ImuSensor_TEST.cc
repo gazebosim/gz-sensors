@@ -497,7 +497,7 @@ TEST(ImuSensor_TEST, CustomRpyParentFrame)
   // Create an ImuSensor
   auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(
       imuSDF);
-  
+
   sensor->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
     sensors::WorldFrameEnumType::ENU);
 
