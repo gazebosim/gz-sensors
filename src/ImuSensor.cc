@@ -315,12 +315,16 @@ math::Pose3d ImuSensor::WorldPose() const
 void ImuSensor::SetWorldFrameOrientation(
   const math::Quaterniond &_rot, WorldFrameEnumType _relativeTo)
 {
+  this->dataPtr->worldRelativeOrientation = _rot;
+  this->dataPtr->worldFrameRelativeTo = _relativeTo;
+
   // Set orientation reference frame if custom_rpy was supplied
   if (this->dataPtr->sensorOrientationRelativeTo == WorldFrameEnumType::CUSTOM)
   {
     if (this->dataPtr->CustomRpyParentFrame == "")
     {
-      this->SetOrientationReference(this->dataPtr->CustomRpyQuaternion);
+      this->SetOrientationReference(this->dataPtr->worldRelativeOrientation *
+        this->dataPtr->CustomRpyQuaternion);
     }
     else
     {
@@ -330,9 +334,6 @@ void ImuSensor::SetWorldFrameOrientation(
     }
     return;
   }
-
-  this->dataPtr->worldRelativeOrientation = _rot;
-  this->dataPtr->worldFrameRelativeTo = _relativeTo;
 
   // Table to hold frame transformations
   static const std::map<WorldFrameEnumType,
