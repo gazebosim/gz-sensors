@@ -19,7 +19,7 @@
 #define IGNITION_SENSORS_RENDERINGEVENTS_HH_
 
 #include <ignition/common/Event.hh>
-#include <ignition/common/SuppressWarning.hh>
+#include <ignition/utils/SuppressWarning.hh>
 
 // TODO(louise) Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -55,12 +55,12 @@ namespace ignition
                   std::function<void(const ignition::rendering::ScenePtr &)>
                   _callback);
 
-      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
+      IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Event that is used to trigger callbacks when the scene
       /// is changed
       public: static ignition::common::EventT<
               void(const ignition::rendering::ScenePtr &)> sceneEvent;
-      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
+      IGN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

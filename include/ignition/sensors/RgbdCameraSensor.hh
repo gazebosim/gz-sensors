@@ -21,7 +21,7 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/SuppressWarning.hh>
+#include <ignition/utils/SuppressWarning.hh>
 
 #include "ignition/sensors/CameraSensor.hh"
 #include "ignition/sensors/config.hh"
@@ -94,11 +94,11 @@ namespace ignition
       /// \return True on success.
       private: bool CreateCameras();
 
-      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
+      IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<RgbdCameraSensorPrivate> dataPtr;
-      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
+      IGN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }
