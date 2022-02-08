@@ -21,7 +21,7 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/SuppressWarning.hh>
+#include <ignition/utils/SuppressWarning.hh>
 #include <ignition/math/Pose3.hh>
 
 #include <ignition/sensors/config.hh>
@@ -138,11 +138,11 @@ namespace ignition
       /// \return Gravity vectory in meters per second squared.
       public: math::Vector3d Gravity() const;
 
-      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
+      IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<ImuSensorPrivate> dataPtr;
-      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
+      IGN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

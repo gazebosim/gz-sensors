@@ -23,7 +23,7 @@
 
 #include <ignition/common/Event.hh>
 #include <ignition/common/PluginMacros.hh>
-#include <ignition/common/SuppressWarning.hh>
+#include <ignition/utils/SuppressWarning.hh>
 #include <ignition/msgs.hh>
 #include <ignition/transport/Node.hh>
 #include <ignition/transport/Publisher.hh>
@@ -122,11 +122,11 @@ namespace ignition
       /// \return True on success.
       private: bool CreateCamera();
 
-      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
+      IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<SegmentationCameraSensorPrivate> dataPtr;
-      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
+      IGN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

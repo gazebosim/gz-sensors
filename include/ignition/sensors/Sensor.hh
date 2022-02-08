@@ -31,7 +31,7 @@
 #include <memory>
 #include <string>
 
-#include <ignition/common/SuppressWarning.hh>
+#include <ignition/utils/SuppressWarning.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
@@ -199,11 +199,11 @@ namespace ignition
       public: void PublishMetrics(
         const std::chrono::duration<double> &_now);
 
-      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
+      IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal
       /// \brief Data pointer for private data
       private: std::unique_ptr<SensorPrivate> dataPtr;
-      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
+      IGN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

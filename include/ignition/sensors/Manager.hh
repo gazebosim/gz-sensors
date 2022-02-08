@@ -23,7 +23,7 @@
 #include <type_traits>
 #include <vector>
 #include <sdf/sdf.hh>
-#include <ignition/common/SuppressWarning.hh>
+#include <ignition/utils/SuppressWarning.hh>
 #include <ignition/common/Console.hh>
 #include <ignition/sensors/config.hh>
 #include <ignition/sensors/Export.hh>
@@ -139,10 +139,10 @@ namespace ignition
       /// \brief Adds colon delimited paths sensor plugins may be
       public: void IGN_DEPRECATED(6) AddPluginPaths(const std::string &_path);
 
-      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
+      IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief private data pointer
       private: std::unique_ptr<ManagerPrivate> dataPtr;
-      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
+      IGN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

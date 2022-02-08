@@ -19,7 +19,7 @@
 
 #include <memory>
 
-#include <ignition/common/SuppressWarning.hh>
+#include <ignition/utils/SuppressWarning.hh>
 #include <sdf/Sensor.hh>
 
 #include "ignition/sensors/config.hh"
@@ -115,11 +115,11 @@ namespace ignition
       public: void SetPosition(const math::Angle &_latitude,
           const math::Angle &_longitude, double _altitude = 0.0);
 
-      IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
+      IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<NavSatPrivate> dataPtr;
-      IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
+      IGN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }
