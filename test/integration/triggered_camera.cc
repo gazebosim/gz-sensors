@@ -19,8 +19,8 @@
 
 #include <ignition/common/Console.hh>
 #include <ignition/common/Filesystem.hh>
-#include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/CameraSensor.hh>
+#include <ignition/sensors/Manager.hh>
 
 // TODO(louise) Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -105,6 +105,15 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   EXPECT_NE(sensor->Id(), sensor->RenderingCamera()->Id());
   EXPECT_EQ(256u, sensor->ImageWidth());
   EXPECT_EQ(257u, sensor->ImageHeight());
+
+  ignition::transport::Node node;
+  std::string topic2 =
+      "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF/trigger";
+
+  auto pub = node.Advertise<ignition::msgs::Boolean>(topic2);
+  ignition::msgs::Boolean msg;
+  msg.set_data(true);
+  pub.Publish(msg);
 
   std::string topic =
       "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF";
