@@ -49,6 +49,10 @@ using namespace sensors;
 /// \brief Private data for CameraSensor
 class ignition::sensors::CameraSensorPrivate
 {
+  /// \brief Callback for triggered subscription
+  /// \param[in] _msg Boolean message
+  public: void OnTriggered(const ignition::msgs::Boolean &_msg);
+
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
   /// \param[in] _width width of image in pixels
@@ -92,6 +96,9 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
+
+  /// \brief True if camera is triggered by a topic
+  public: bool isTriggered = false;
 
   /// \brief True to save images
   public: bool saveImage = false;
@@ -271,6 +278,14 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
   igndbg << "Camera images for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
+  if (_sdf.CameraSensor()->Triggered() == true)
+  {
+    this->dataPtr->node.Subscribe(this->Topic(),
+        &CameraSensorPrivate::OnTriggered, this->dataPtr.get());
+
+    this->dataPtr->isTriggered = true;
+  }
+
   if (!this->AdvertiseInfo())
     return false;
 
@@ -434,6 +449,12 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   }
 
   return true;
+}
+
+//////////////////////////////////////////////////
+void CameraSensorPrivate::OnTriggered(const ignition::msgs::Boolean &_msg) {
+  std::lock_guard<std::mutex> lock(this->mutex);
+  std::cout << "Hello World!" << std::endl;
 }
 
 //////////////////////////////////////////////////
