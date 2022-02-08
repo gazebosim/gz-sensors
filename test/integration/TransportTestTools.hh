@@ -63,6 +63,20 @@ class WaitForMessageTestHelper
     return success;
   }
 
+  public: bool WaitForMessage(const std::chrono::duration<int> relTime)
+  {
+    std::unique_lock<std::mutex> lock(this->mtx);
+    if (this->subscriptionCreated)
+    {
+      this->conditionVariable.wait_for(lock, relTime,
+          [this]{return this->gotMessage;});
+    }
+    bool success = this->gotMessage;
+    this->gotMessage = false;
+    return success;
+
+  }
+
   /// \brief Get the last msg received.
   /// \return last msg received.
   public: M Message()

@@ -48,6 +48,8 @@
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
+using namespace std::chrono_literals;
+
 class CameraSensorTest: public testing::Test,
   public testing::WithParamInterface<const char *>
 {
@@ -63,7 +65,6 @@ class CameraSensorTest: public testing::Test,
 
 void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 {
-  // get the darn test data
   std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "triggered_camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
@@ -88,7 +89,6 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
 
-  // do the test
   ignition::sensors::Manager mgr;
 
   ignition::sensors::CameraSensor *sensor =
@@ -98,7 +98,6 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 
   sdf::Sensor sdfSensor;
   sdfSensor.Load(sensorPtr);
-
   EXPECT_EQ(true, sdfSensor.CameraSensor()->Triggered());
 
   ASSERT_NE(sensor->RenderingCamera(), nullptr);
@@ -106,23 +105,33 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   EXPECT_EQ(256u, sensor->ImageWidth());
   EXPECT_EQ(257u, sensor->ImageHeight());
 
-  ignition::transport::Node node;
-  std::string topic2 =
+  // check camera image before trigger
+  {
+    std::string imageTopic =
+        "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF";
+    WaitForMessageTestHelper<ignition::msgs::Image> helper(imageTopic);
+    mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+    EXPECT_FALSE(helper.WaitForMessage(3s)) << helper;
+  }
+
+  // trigger camera through topic
+  ignition::transport::Node triggerNode;
+  std::string triggerTopic =
       "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF/trigger";
 
-  auto pub = node.Advertise<ignition::msgs::Boolean>(topic2);
+  auto pub = triggerNode.Advertise<ignition::msgs::Boolean>(triggerTopic);
   ignition::msgs::Boolean msg;
   msg.set_data(true);
   pub.Publish(msg);
 
-  std::string topic =
-      "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF";
-  WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
-
-  // Update once to create image
-  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
-
-  EXPECT_TRUE(helper.WaitForMessage()) << helper;
+  // check camera image after trigger
+  {
+    std::string imageTopic =
+        "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF";
+    WaitForMessageTestHelper<ignition::msgs::Image> helper(imageTopic);
+    mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+    EXPECT_TRUE(helper.WaitForMessage(3s)) << helper;
+  }
 
   // test removing sensor
   // first make sure the sensor objects do exist
