@@ -283,7 +283,7 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
 
   if (_sdf.CameraSensor()->Triggered() == true)
   {
-    this->dataPtr->node.Subscribe(this->Topic() + "/trigger",
+    this->dataPtr->node.Subscribe(this->Topic() + "/image_trigger",
         &CameraSensorPrivate::OnTrigger, this->dataPtr.get());
 
     this->dataPtr->isTriggeredCamera = true;
