@@ -569,38 +569,62 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
 
   // Case A.1 : Localization ref: ENU, World : ENU
   // Sensor aligns with ENU, we're measuring wrt ENU
-  sensorENU->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
-    sensors::WorldFrameEnumType::ENU);
-  sensorENU->Update(std::chrono::steady_clock::duration(
-    std::chrono::nanoseconds(10000000)));
-  orientValue = math::Quaterniond(math::Vector3d(0, 0, 0));
-  EXPECT_EQ(orientValue, sensorENU->Orientation());
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::ENU;
+    const math::Quaterniond expectedSensorOrientation(0, 0, 0);
+
+    sensorENU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorENU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorENU->Orientation());
+  }
 
   // Case A.2 Localization ref: ENU, World : ENU + rotation offset
-  sensorENU->SetWorldFrameOrientation(math::Quaterniond(0, 0, IGN_PI/4),
-    sensors::WorldFrameEnumType::ENU);
-  sensorENU->Update(std::chrono::steady_clock::duration(
-    std::chrono::nanoseconds(10000000)));
-  orientValue = math::Quaterniond(math::Vector3d(0, 0, -IGN_PI/4));
-  EXPECT_EQ(orientValue, sensorENU->Orientation());
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, IGN_PI/4);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::ENU;
+    const math::Quaterniond expectedSensorOrientation(0, 0, -IGN_PI/4);
+
+    sensorENU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorENU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorENU->Orientation());
+  }
 
   // Case A.3 Localization ref: ENU, World : NWU
   // Sensor aligns with NWU, we're measuring wrt ENU
-  sensorENU->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
-    sensors::WorldFrameEnumType::NWU);
-  sensorENU->Update(std::chrono::steady_clock::duration(
-    std::chrono::nanoseconds(10000000)));
-  orientValue = math::Quaterniond(math::Vector3d(0, 0, IGN_PI/2));
-  EXPECT_EQ(orientValue, sensorENU->Orientation());
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NWU;
+    const math::Quaterniond expectedSensorOrientation(0, 0, IGN_PI/2);
+
+    sensorENU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorENU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorENU->Orientation());
+  }
 
   // Case A.4 Localization ref: ENU, World : NED
   // Sensor aligns with NED, we're measuring wrt ENU
-  sensorENU->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
-    sensors::WorldFrameEnumType::NED);
-  sensorENU->Update(std::chrono::steady_clock::duration(
-    std::chrono::nanoseconds(10000000)));
-  orientValue = math::Quaterniond(math::Vector3d(IGN_PI, 0, IGN_PI/2));
-  EXPECT_EQ(orientValue, sensorENU->Orientation());
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NED;
+    const math::Quaterniond expectedSensorOrientation(IGN_PI, 0, IGN_PI/2);
+
+    sensorENU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorENU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorENU->Orientation());
+  }
 
   // B. Localization tag is set to NWU
   // ---------------------------------
@@ -610,38 +634,62 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
 
   // Case B.1 : Localization ref: NWU, World : NWU
   // Sensor aligns with NWU, we're measuring wrt NWU
-  sensorNWU->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
-    sensors::WorldFrameEnumType::NWU);
-  sensorNWU->Update(std::chrono::steady_clock::duration(
-    std::chrono::nanoseconds(10000000)));
-  orientValue = math::Quaterniond(math::Vector3d(0, 0, 0));
-  EXPECT_EQ(orientValue, sensorNWU->Orientation());
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NWU;
+    const math::Quaterniond expectedSensorOrientation(0, 0, 0);
+
+    sensorNWU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNWU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNWU->Orientation());
+  }
 
   // Case B.2 : Localization ref: NWU, World : NWU + rotation offset
-  sensorNWU->SetWorldFrameOrientation(math::Quaterniond(0, 0, IGN_PI/4),
-    sensors::WorldFrameEnumType::NWU);
-  sensorNWU->Update(std::chrono::steady_clock::duration(
-    std::chrono::nanoseconds(10000000)));
-  orientValue = math::Quaterniond(math::Vector3d(0, 0, -IGN_PI/4));
-  EXPECT_EQ(orientValue, sensorNWU->Orientation());
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, IGN_PI/4);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NWU;
+    const math::Quaterniond expectedSensorOrientation(0, 0, -IGN_PI/4);
+
+    sensorNWU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNWU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNWU->Orientation());
+  }
 
   // Case B.3 : Localization ref: NWU, World : ENU
   // Sensor aligns with ENU, we're measuring wrt NWU
-  sensorNWU->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
-    sensors::WorldFrameEnumType::ENU);
-  sensorNWU->Update(std::chrono::steady_clock::duration(
-    std::chrono::nanoseconds(10000000)));
-  orientValue = math::Quaterniond(math::Vector3d(0, 0, -IGN_PI/2));
-  EXPECT_EQ(orientValue, sensorNWU->Orientation());
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::ENU;
+    const math::Quaterniond expectedSensorOrientation(0, 0, -IGN_PI/2);
+
+    sensorNWU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNWU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNWU->Orientation());
+  }
 
   // Case B.4 : Localization ref: NWU, World : NED
   // Sensor aligns with NED, we're measuring wrt NWU
-  sensorNWU->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
-    sensors::WorldFrameEnumType::NED);
-  sensorNWU->Update(std::chrono::steady_clock::duration(
-    std::chrono::nanoseconds(10000000)));
-  orientValue = math::Quaterniond(math::Vector3d(IGN_PI, 0, 0));
-  EXPECT_EQ(orientValue, sensorNWU->Orientation());
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NED;
+    const math::Quaterniond expectedSensorOrientation(IGN_PI, 0, 0);
+
+    sensorNWU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNWU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNWU->Orientation());
+  }
 
   // C. Localization tag is set to NED
   // ---------------------------------
@@ -651,38 +699,62 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
 
   // Case C.1 : Localization ref: NED, World : NED
   // Sensor aligns with NED, we're measuring wrt NED
-  sensorNED->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
-    sensors::WorldFrameEnumType::NED);
-  sensorNED->Update(std::chrono::steady_clock::duration(
-    std::chrono::nanoseconds(10000000)));
-  orientValue = math::Quaterniond(math::Vector3d(0, 0, 0));
-  EXPECT_EQ(orientValue, sensorNED->Orientation());
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NED;
+    const math::Quaterniond expectedSensorOrientation(0, 0, 0);
+
+    sensorNED->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNED->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNED->Orientation());
+  }
 
   // Case C.2 : Localization ref: NED, World : NED + rotation offset
-  sensorNED->SetWorldFrameOrientation(math::Quaterniond(0, 0, IGN_PI/4),
-    sensors::WorldFrameEnumType::NED);
-  sensorNED->Update(std::chrono::steady_clock::duration(
-    std::chrono::nanoseconds(10000000)));
-  orientValue = math::Quaterniond(math::Vector3d(0, 0, -IGN_PI/4));
-  EXPECT_EQ(orientValue, sensorNED->Orientation());
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, IGN_PI/4);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NED;
+    const math::Quaterniond expectedSensorOrientation(0, 0, -IGN_PI/4);
+
+    sensorNED->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNED->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNED->Orientation());
+  }
 
   // Case C.3 : Localization ref: NED, World : NWU
   // Sensor aligns with NWU, we're measuring wrt NED
-  sensorNED->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
-    sensors::WorldFrameEnumType::NWU);
-  sensorNED->Update(std::chrono::steady_clock::duration(
-    std::chrono::nanoseconds(10000000)));
-  orientValue = math::Quaterniond(math::Vector3d(-IGN_PI, 0, 0));
-  EXPECT_EQ(orientValue, sensorNED->Orientation());
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NWU;
+    const math::Quaterniond expectedSensorOrientation(-IGN_PI, 0, 0);
+
+    sensorNED->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNED->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNED->Orientation());
+  }
 
   // Case C.4 : Localization ref: NED, World : ENU
   // Sensor aligns with ENU, we're measuring wrt NED
-  sensorNED->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
-    sensors::WorldFrameEnumType::ENU);
-  sensorNED->Update(std::chrono::steady_clock::duration(
-    std::chrono::nanoseconds(10000000)));
-  orientValue = math::Quaterniond(math::Vector3d(-IGN_PI, 0, IGN_PI/2));
-  EXPECT_EQ(orientValue, sensorNED->Orientation());
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::ENU;
+    const math::Quaterniond expectedSensorOrientation(-IGN_PI, 0, IGN_PI/2);
+
+    sensorNED->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNED->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNED->Orientation());
+  }
 }
 
 //////////////////////////////////////////////////
