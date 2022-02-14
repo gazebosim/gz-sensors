@@ -516,7 +516,8 @@ TEST(ImuSensor_TEST, CustomRpyParentFrame)
   EXPECT_EQ(defultOrientValue, sensor->Orientation());
 }
 
-sdf::ElementPtr generateSensor(std::string namedFrame)
+sdf::ElementPtr sensorWithLocalization(
+  std::string _orientationLocalization)
 {
   std::ostringstream stream;
   stream
@@ -529,7 +530,7 @@ sdf::ElementPtr generateSensor(std::string namedFrame)
     << "      <update_rate>1</update_rate>"
     << "      <imu>"
     << "      <orientation_reference_frame>"
-    << "      <localization>"+namedFrame+"</localization>"
+    << "      <localization>"+_orientationLocalization+"</localization>"
     << "      </orientation_reference_frame>"
     << "      </imu>"
     << "      <always_on>1</always_on>"
@@ -563,7 +564,7 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
   // A. Localization tag is set to ENU
   // ---------------------------------
   auto sensorENU = mgr.CreateSensor<ignition::sensors::ImuSensor>(
-      generateSensor("ENU"));
+      sensorWithLocalization("ENU"));
   ASSERT_NE(nullptr, sensorENU);
 
   // Case A.1 : Localization ref: ENU, World : ENU
@@ -604,7 +605,7 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
   // B. Localization tag is set to NWU
   // ---------------------------------
   auto sensorNWU = mgr.CreateSensor<ignition::sensors::ImuSensor>(
-      generateSensor("NWU"));
+      sensorWithLocalization("NWU"));
   ASSERT_NE(nullptr, sensorNWU);
 
   // Case B.1 : Localization ref: NWU, World : NWU
@@ -645,7 +646,7 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
   // C. Localization tag is set to NED
   // ---------------------------------
   auto sensorNED = mgr.CreateSensor<ignition::sensors::ImuSensor>(
-      generateSensor("NED"));
+      sensorWithLocalization("NED"));
   ASSERT_NE(nullptr, sensorNED);
 
   // Case C.1 : Localization ref: NED, World : NED
