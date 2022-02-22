@@ -99,6 +99,13 @@ namespace ignition
       /// \brief Return the next time the sensor will generate data
       public: std::chrono::steady_clock::duration NextDataUpdateTime() const;
 
+      /// \brief Manually set the next time the sensor will generate data
+      /// Useful for accomodating jumps backwards in time as well
+      /// as specifying updates for non-uniformly updating sensors
+      /// \param[in] _time The next update time
+      public: void SetNextDataUpdateTime(
+                  const std::chrono::steady_clock::duration &_time);
+
       /// \brief Update the sensor.
       ///
       ///   This is called by the manager, and is responsible for determining

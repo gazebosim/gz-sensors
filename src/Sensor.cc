@@ -433,7 +433,14 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
     // Update the time the plugin should be loaded
     auto delta = std::chrono::duration_cast< std::chrono::milliseconds>
       (std::chrono::duration< double >(1.0 / this->dataPtr->updateRate));
+
     this->dataPtr->nextUpdateTime += delta;
+
+    // Catch up to "now", if necessary.
+    while (this->dataPtr->nextUpdateTime <= _now)
+    {
+      this->dataPtr->nextUpdateTime += delta;
+    }
   }
 
   return result;
@@ -443,6 +450,13 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
 std::chrono::steady_clock::duration Sensor::NextDataUpdateTime() const
 {
   return this->dataPtr->nextUpdateTime;
+}
+
+//////////////////////////////////////////////////
+void Sensor::SetNextDataUpdateTime(
+    const std::chrono::steady_clock::duration &_time)
+{
+  this->dataPtr->nextUpdateTime = _time;
 }
 
 /////////////////////////////////////////////////
