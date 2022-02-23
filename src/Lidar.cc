@@ -170,7 +170,6 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
   }
 
   sdf::ElementPtr element = _sdf.Element();
-  // Get the background color, if specified.
   if (element->HasElement("frame_id"))
   {
     this->dataPtr->frame_id = element->Get<std::string>("frame_id");
