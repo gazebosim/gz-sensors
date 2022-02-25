@@ -401,9 +401,9 @@ TEST_F(SensorUpdate, NextDataUpdateTime)
     sensor->SetNextDataUpdateTime(next);
     EXPECT_TRUE(sensor->Update(now, false));
 
-    // The next update should the the first dt past the current time
-    std::chrono::steady_clock::duration new_next = std::chrono::seconds(6);
-    EXPECT_EQ(new_next.count(), sensor->NextDataUpdateTime().count());
+    // The next update should be the first dt past the current time
+    std::chrono::steady_clock::duration newNext = std::chrono::seconds(6);
+    EXPECT_EQ(newNext.count(), sensor->NextDataUpdateTime().count());
   }
 }
 
