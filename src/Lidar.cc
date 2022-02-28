@@ -232,7 +232,8 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
   auto frame = this->dataPtr->laserMsg.mutable_header()->add_data();
   frame->set_key("frame_id");
   // keeping here the sensor name instead of frame_id because the visualizeLidar
-  // plugin relies on this value to get the position of the lidar
+  // plugin relies on this value to get the position of the lidar.
+  // the ros_ign plugin is using the laserscan.proto 'frame' field
   frame->add_value(this->Name());
   this->dataPtr->laserMsg.set_frame(this->FrameID());
 
