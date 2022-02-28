@@ -103,6 +103,9 @@ class ignition::sensors::CameraSensorPrivate
   /// \brief True if camera has been triggered by a topic
   public: bool isTriggered = false;
 
+  /// \brief Topic for camera trigger
+  public: std::string triggerTopic = "";
+
   /// \brief True to save images
   public: bool saveImage = false;
 
@@ -283,7 +286,16 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
 
   if (_sdf.CameraSensor()->Triggered() == true)
   {
-    this->dataPtr->node.Subscribe(this->Topic() + "/image_trigger",
+    if (!_sdf.CameraSensor()->TriggerTopic().empty())
+    {
+      this->dataPtr->triggerTopic = _sdf.CameraSensor()->TriggerTopic();
+    }
+    else
+    {
+      this->dataPtr->triggerTopic = this->Topic() + "/image_trigger";
+    }
+
+    this->dataPtr->node.Subscribe(this->dataPtr->triggerTopic,
         &CameraSensorPrivate::OnTrigger, this->dataPtr.get());
 
     this->dataPtr->isTriggeredCamera = true;
