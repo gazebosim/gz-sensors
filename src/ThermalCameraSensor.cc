@@ -414,7 +414,7 @@ bool ThermalCameraSensor::Update(const ignition::common::Time &_now)
   stamp->set_nsec(_now.nsec);
   auto frame = this->dataPtr->thermalMsg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->Name());
+  frame->add_value(this->FrameID());
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   this->dataPtr->thermalMsg.set_data(this->dataPtr->thermalBuffer,

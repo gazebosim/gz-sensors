@@ -216,7 +216,7 @@ bool ImuSensor::Update(const ignition::common::Time &_now)
   msg.set_entity_name(this->Name());
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->Name());
+  frame->add_value(this->FrameID());
 
   msgs::Set(msg.mutable_orientation(), this->dataPtr->orientation);
   msgs::Set(msg.mutable_angular_velocity(), this->dataPtr->angularVel);

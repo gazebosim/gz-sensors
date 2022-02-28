@@ -400,7 +400,7 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
     msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
     auto frame = msg.mutable_header()->add_data();
     frame->set_key("frame_id");
-    frame->add_value(this->Name());
+    frame->add_value(this->FrameID());
     msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
   }
 
@@ -606,7 +606,7 @@ void CameraSensor::PopulateInfo(const sdf::Camera *_cameraSdf)
   // can populate it with arbitrary frames.
   auto infoFrame = this->dataPtr->infoMsg.mutable_header()->add_data();
   infoFrame->set_key("frame_id");
-  infoFrame->add_value(this->Name());
+  infoFrame->add_value(this->FrameID());
 
   this->dataPtr->infoMsg.set_width(width);
   this->dataPtr->infoMsg.set_height(height);

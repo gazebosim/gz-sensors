@@ -166,7 +166,7 @@ bool LogicalCameraSensor::Update(const ignition::common::Time &_now)
   this->dataPtr->msg.mutable_header()->clear_data();
   auto frame = this->dataPtr->msg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->Name());
+  frame->add_value(this->FrameID());
 
   // publish
   this->AddSequence(this->dataPtr->msg.mutable_header());

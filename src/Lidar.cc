@@ -45,9 +45,6 @@ class ignition::sensors::LidarPrivate
 
   /// \brief Sdf sensor.
   public: sdf::Lidar sdfLidar;
-
-  /// \brief frame id
-  public: std::string frame_id;
 };
 
 //////////////////////////////////////////////////
@@ -169,16 +166,6 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
     }
   }
 
-  sdf::ElementPtr element = _sdf.Element();
-  if (element->HasElement("frame_id"))
-  {
-    this->dataPtr->frame_id = element->Get<std::string>("frame_id");
-  }
-  else
-  {
-    this->dataPtr->frame_id = this->Name();
-  }
-
   this->initialized = true;
   return true;
 }
@@ -244,8 +231,10 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
   this->dataPtr->laserMsg.mutable_header()->clear_data();
   auto frame = this->dataPtr->laserMsg.mutable_header()->add_data();
   frame->set_key("frame_id");
+  // keeping here the sensor name instead of frame_id because the visualizeLidar
+  // plugin relies on this value to get the position of the lidar
   frame->add_value(this->Name());
-  this->dataPtr->laserMsg.set_frame(this->dataPtr->frame_id);
+  this->dataPtr->laserMsg.set_frame(this->FrameID());
 
   // Store the latest laser scans into laserMsg
   msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
