@@ -478,7 +478,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 }
 
 //////////////////////////////////////////////////
-void CameraSensorPrivate::OnTrigger(const ignition::msgs::Boolean &_msg) {
+void CameraSensorPrivate::OnTrigger(const ignition::msgs::Boolean &/*_msg*/) {
   std::lock_guard<std::mutex> lock(this->mutex);
 
   this->isTriggered = true;
