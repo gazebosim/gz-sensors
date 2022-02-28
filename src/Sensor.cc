@@ -125,13 +125,16 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
   }
 
   sdf::ElementPtr element = _sdf.Element();
-  if (element->HasElement("ignition:frame_id"))
+  if (element)
   {
-    this->frame_id = element->Get<std::string>("ignition:frame_id");
-  }
-  else
-  {
-    this->frame_id = this->name;
+    if (element->HasElement("ignition:frame_id"))
+    {
+      this->frame_id = element->Get<std::string>("ignition:frame_id");
+    }
+    else
+    {
+      this->frame_id = this->name;
+    }
   }
 
   // Try resolving the pose first, and only use the raw pose if that fails
