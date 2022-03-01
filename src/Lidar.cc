@@ -235,7 +235,7 @@ bool Lidar::PublishLidarScan(const ignition::common::Time &_now)
   // plugin relies on this value to get the position of the lidar.
   // the ros_ign plugin is using the laserscan.proto 'frame' field
   frame->add_value(this->Name());
-  this->dataPtr->laserMsg.set_frame(this->FrameID());
+  this->dataPtr->laserMsg.set_frame(this->FrameId());
 
   // Store the latest laser scans into laserMsg
   msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),

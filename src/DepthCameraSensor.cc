@@ -543,7 +543,7 @@ bool DepthCameraSensor::Update(const ignition::common::Time &_now)
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->FrameID());
+  frame->add_value(this->FrameId());
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   msg.set_data(this->dataPtr->depthBuffer,

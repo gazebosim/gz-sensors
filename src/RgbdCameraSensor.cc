@@ -468,7 +468,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
     msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
     auto frame = msg.mutable_header()->add_data();
     frame->set_key("frame_id");
-    frame->add_value(this->FrameID());
+    frame->add_value(this->FrameId());
 
     std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
@@ -583,7 +583,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
       msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
       auto frame = msg.mutable_header()->add_data();
       frame->set_key("frame_id");
-      frame->add_value(this->FrameID());
+      frame->add_value(this->FrameId());
       msg.set_data(data, rendering::PixelUtil::MemorySize(rendering::PF_R8G8B8,
         width, height));
 
