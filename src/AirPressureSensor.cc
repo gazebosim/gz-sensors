@@ -159,7 +159,7 @@ bool AirPressureSensor::Update(const ignition::common::Time &_now)
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->Name());
+  frame->add_value(this->FrameId());
 
   // This block of code comes from RotorS:
   // https://github.com/ethz-asl/rotors_simulator/blob/master/rotors_gazebo_plugins/src/gazebo_pressure_plugin.cpp

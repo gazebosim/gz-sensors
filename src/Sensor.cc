@@ -91,6 +91,9 @@ class ignition::sensors::SensorPrivate
   /// A map is used so that a single sensor can have multiple sensor
   /// streams each with a sequence counter.
   public: std::map<std::string, uint64_t> sequences;
+
+  /// \brief frame id
+  public: std::string frame_id;
 };
 
 SensorId SensorPrivate::idCounter = 0;
@@ -119,6 +122,19 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
   {
     if (!this->SetTopic(_sdf.Topic()))
       return false;
+  }
+
+  sdf::ElementPtr element = _sdf.Element();
+  if (element)
+  {
+    if (element->HasElement("ignition_frame_id"))
+    {
+      this->frame_id = element->Get<std::string>("ignition_frame_id");
+    }
+    else
+    {
+      this->frame_id = this->name;
+    }
   }
 
   // Try resolving the pose first, and only use the raw pose if that fails
@@ -190,6 +206,18 @@ SensorId Sensor::Id() const
 std::string Sensor::Name() const
 {
   return this->dataPtr->name;
+}
+
+//////////////////////////////////////////////////
+std::string Sensor::FrameId() const
+{
+  return this->dataPtr->frame_id;
+}
+
+//////////////////////////////////////////////////
+void Sensor::SetFrameId(const std::string &_frameId)
+{
+  this->dataPtr->frame_id = _frameId;
 }
 
 //////////////////////////////////////////////////

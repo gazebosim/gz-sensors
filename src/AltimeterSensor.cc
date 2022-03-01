@@ -147,7 +147,7 @@ bool AltimeterSensor::Update(const ignition::common::Time &_now)
   msg.mutable_header()->mutable_stamp()->set_nsec(_now.nsec);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->Name());
+  frame->add_value(this->FrameId());
 
   // Apply altimeter vertical position noise
   if (this->dataPtr->noises.find(ALTIMETER_VERTICAL_POSITION_NOISE_METERS) !=
