@@ -758,6 +758,63 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
 }
 
 //////////////////////////////////////////////////
+TEST(ImuSensor_TEST, LocalizationTagEmpty)
+{
+  // Create a sensor manager
+  ignition::sensors::Manager mgr;
+
+  sdf::ElementPtr imuSDF;
+
+  std::ostringstream stream;
+  stream
+    << "<?xml version='1.0'?>"
+    << "<sdf version='1.6'>"
+    << " <model name='m1'>"
+    << "  <link name='link1'>"
+    << "    <sensor name='imu_sensor' type='imu'>"
+    << "      <topic>imu_test</topic>"
+    << "      <update_rate>1</update_rate>"
+    << "      <imu>"
+    << "      <orientation_reference_frame>"
+    << "      </orientation_reference_frame>"
+    << "      </imu>"
+    << "      <always_on>1</always_on>"
+    << "      <visualize>true</visualize>"
+    << "    </sensor>"
+    << "  </link>"
+    << " </model>"
+    << "</sdf>";
+
+  sdf::SDFPtr sdfParsed(new sdf::SDF());
+  sdf::init(sdfParsed);
+  if (!sdf::readString(stream.str(), sdfParsed))
+  {
+    imuSDF = sdf::ElementPtr();
+  }
+  else
+  {
+    imuSDF = sdfParsed->Root()->GetElement("model")->GetElement("link")
+      ->GetElement("sensor");
+  }
+
+  // Create an ImuSensor
+  auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+      imuSDF);
+  sensor->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
+    sensors::WorldFrameEnumType::ENU);
+
+  // Make sure the above dynamic cast worked.
+  ASSERT_NE(nullptr, sensor);
+
+  sensor->Update(std::chrono::steady_clock::duration(
+    std::chrono::nanoseconds(10000000)));
+
+  math::Quaterniond orientValue(math::Vector3d(0, 0, 0));
+  EXPECT_EQ(orientValue, sensor->Orientation());
+
+}
+
+//////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
