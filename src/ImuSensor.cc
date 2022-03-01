@@ -233,7 +233,7 @@ bool ImuSensor::Update(const std::chrono::steady_clock::duration &_now)
   msg.set_entity_name(this->Name());
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->Name());
+  frame->add_value(this->FrameId());
 
   if (this->dataPtr->orientationEnabled)
   {
