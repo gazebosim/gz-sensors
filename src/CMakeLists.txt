@@ -27,6 +27,7 @@ if (MSVC)
   # TODO(louise) Remove this once warnings are suppressed in ign-rendering
   set_source_files_properties(
       ${rendering_sources}
+      SegmentationCameraSensor.cc
     COMPILE_FLAGS "/wd4251"
   )
 endif()
