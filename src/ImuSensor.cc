@@ -83,10 +83,10 @@ class ignition::sensors::ImuSensorPrivate
          = WorldFrameEnumType::NONE;
 
   /// \brief Frame realtive to which custom_rpy is specified
-  public: std::string CustomRpyParentFrame;
+  public: std::string customRpyParentFrame;
 
   /// \brief Quaternion for to store custom_rpy
-  public: ignition::math::Quaterniond CustomRpyQuaternion;
+  public: ignition::math::Quaterniond customRpyQuaternion;
 
   /// \brief Previous update time step.
   public: std::chrono::steady_clock::duration prevStep
@@ -180,9 +180,9 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::NONE;
   }
 
-  this->dataPtr->CustomRpyParentFrame =
+  this->dataPtr->customRpyParentFrame =
       _sdf.ImuSensor()->CustomRpyParentFrame();
-  this->dataPtr->CustomRpyQuaternion = ignition::math::Quaterniond(
+  this->dataPtr->customRpyQuaternion = ignition::math::Quaterniond(
       _sdf.ImuSensor()->CustomRpy());
 
   this->dataPtr->initialized = true;
@@ -321,10 +321,10 @@ void ImuSensor::SetWorldFrameOrientation(
   // Set orientation reference frame if custom_rpy was supplied
   if (this->dataPtr->sensorOrientationRelativeTo == WorldFrameEnumType::CUSTOM)
   {
-    if (this->dataPtr->CustomRpyParentFrame == "")
+    if (this->dataPtr->customRpyParentFrame == "")
     {
       this->SetOrientationReference(this->dataPtr->worldRelativeOrientation *
-        this->dataPtr->CustomRpyQuaternion);
+        this->dataPtr->customRpyQuaternion);
     }
     else
     {
