@@ -758,7 +758,7 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
 }
 
 //////////////////////////////////////////////////
-TEST(ImuSensor_TEST, LocalizationTagEmpty)
+TEST(ImuSensor_TEST, LocalizationTagInvalid)
 {
   // Create a sensor manager
   ignition::sensors::Manager mgr;
@@ -776,6 +776,7 @@ TEST(ImuSensor_TEST, LocalizationTagEmpty)
     << "      <update_rate>1</update_rate>"
     << "      <imu>"
     << "      <orientation_reference_frame>"
+    << "      <localization>UNRECOGNIZED</localization>"
     << "      </orientation_reference_frame>"
     << "      </imu>"
     << "      <always_on>1</always_on>"
@@ -811,7 +812,6 @@ TEST(ImuSensor_TEST, LocalizationTagEmpty)
 
   math::Quaterniond orientValue(math::Vector3d(0, 0, 0));
   EXPECT_EQ(orientValue, sensor->Orientation());
-
 }
 
 //////////////////////////////////////////////////
