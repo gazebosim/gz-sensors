@@ -95,6 +95,8 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   EXPECT_EQ(256u, sensor->ImageWidth());
   EXPECT_EQ(257u, sensor->ImageHeight());
 
+  EXPECT_EQ(std::string("base_camera"), sensor->FrameId());
+
   std::string topic = "/test/integration/CameraPlugin_imagesWithBuiltinSDF";
   WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
 

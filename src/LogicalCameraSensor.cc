@@ -172,7 +172,7 @@ bool LogicalCameraSensor::Update(
   this->dataPtr->msg.mutable_header()->clear_data();
   auto frame = this->dataPtr->msg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->Name());
+  frame->add_value(this->FrameId());
 
   // publish
   this->AddSequence(this->dataPtr->msg.mutable_header());
