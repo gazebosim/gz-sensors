@@ -175,7 +175,7 @@ bool MagnetometerSensor::Update(
   *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->Name());
+  frame->add_value(this->FrameId());
 
   // Apply magnetometer noise after converting to body frame
   if (this->dataPtr->noises.find(MAGNETOMETER_X_NOISE_TESLA) !=
