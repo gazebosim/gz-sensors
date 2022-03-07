@@ -142,6 +142,14 @@ namespace ignition
       /// \return Name of sensor.
       public: std::string Name() const;
 
+      /// \brief FrameId.
+      /// \return FrameId of sensor.
+      public: std::string FrameId() const;
+
+      /// \brief Set Frame ID of the sensor
+      /// \param[in] _frameId Frame ID of the sensor
+      public: void SetFrameId(const std::string &_frameId);
+
       /// \brief Get topic where sensor data is published.
       /// \return Topic sensor publishes data to
       public: std::string Topic() const;
