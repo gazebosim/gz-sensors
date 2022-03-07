@@ -88,6 +88,10 @@ TEST(Sensor_TEST, Sensor)
   EXPECT_EQ(1u, sensor.Id());
 
   EXPECT_EQ(nullptr, sensor.SDF());
+
+  EXPECT_EQ(sensor.Name(), sensor.FrameId());
+  sensor.SetFrameId("frame_id_12");
+  EXPECT_EQ(std::string("frame_id_12"), sensor.FrameId());
 }
 
 //////////////////////////////////////////////////
