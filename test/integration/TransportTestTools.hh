@@ -65,8 +65,10 @@ class WaitForMessageTestHelper
 
   /// \brief waits for a message to be received with a timeout
   /// \return true if a message was received
+  /// \param[in] _timeout Time to wait for a message.
   /// \remarks Set CTest timeout property for control over time
-  public: bool WaitForMessage(const std::chrono::steady_clock::duration _timeout)
+  public: bool WaitForMessage(
+      const std::chrono::steady_clock::duration &_timeout)
   {
     std::unique_lock<std::mutex> lock(this->mtx);
     if (this->subscriptionCreated)

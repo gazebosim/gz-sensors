@@ -213,7 +213,8 @@ namespace ignition
       public: bool IsActive() const;
 
       /// \brief Enable or disable the sensor. Disabled sensors will not
-      /// generate or publish data.
+      /// generate or publish data unless Update is called with the
+      /// '_force' argument set to true.
       /// \param[in] _active True to set the sensor to be active,
       /// false to disable the sensor.
       /// \sa IsActive
