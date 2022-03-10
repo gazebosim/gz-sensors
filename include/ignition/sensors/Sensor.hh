@@ -207,6 +207,18 @@ namespace ignition
       public: void PublishMetrics(
         const std::chrono::duration<double> &_now);
 
+      /// \brief Get whether the sensor is enabled or not
+      /// \return True if the sensor is active, false otherwise.
+      /// \sa SetActive
+      public: bool IsActive() const;
+
+      /// \brief Enable or disable the sensor. Disabled sensors will not
+      /// generate or publish data.
+      /// \param[in] _active True to set the sensor to be active,
+      /// false to disable the sensor.
+      /// \sa IsActive
+      public: void SetActive(bool _active);
+
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal
       /// \brief Data pointer for private data
