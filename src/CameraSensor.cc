@@ -284,7 +284,7 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
   igndbg << "Camera images for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
-  if (_sdf.CameraSensor()->Triggered() == true)
+  if (_sdf.CameraSensor()->Triggered())
   {
     if (!_sdf.CameraSensor()->TriggerTopic().empty())
     {
@@ -292,7 +292,13 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
     }
     else
     {
-      this->dataPtr->triggerTopic = this->Topic() + "/image_trigger";
+      this->dataPtr->triggerTopic =
+          transport::TopicUtils::AsValidTopic(this->dataPtr->triggerTopic);
+
+      if (this->dataPtr->triggerTopic.empty())
+      {
+        ignerr << "Invalid trigger topic name" << std::endl;
+      }
     }
 
     this->dataPtr->node.Subscribe(this->dataPtr->triggerTopic,

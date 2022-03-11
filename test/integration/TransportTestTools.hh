@@ -63,12 +63,15 @@ class WaitForMessageTestHelper
     return success;
   }
 
-  public: bool WaitForMessage(const std::chrono::duration<int> relTime)
+  /// \brief Waits for a message to be received.
+  /// \param[in] _relTime The amount of time to wait.
+  /// \return True if a message was received.
+  public: bool WaitForMessage(const std::chrono::duration<int> _relTime)
   {
     std::unique_lock<std::mutex> lock(this->mtx);
     if (this->subscriptionCreated)
     {
-      this->conditionVariable.wait_for(lock, relTime,
+      this->conditionVariable.wait_for(lock, _relTime,
           [this]{return this->gotMessage;});
     }
     bool success = this->gotMessage;
