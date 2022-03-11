@@ -298,6 +298,7 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
       if (this->dataPtr->triggerTopic.empty())
       {
         ignerr << "Invalid trigger topic name" << std::endl;
+        return false;
       }
     }
 
