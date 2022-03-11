@@ -92,6 +92,10 @@ TEST(Sensor_TEST, Sensor)
   EXPECT_EQ(sensor.Name(), sensor.FrameId());
   sensor.SetFrameId("frame_id_12");
   EXPECT_EQ(std::string("frame_id_12"), sensor.FrameId());
+
+  EXPECT_TRUE(sensor.IsActive());
+  sensor.SetActive(false);
+  EXPECT_FALSE(sensor.IsActive());
 }
 
 //////////////////////////////////////////////////
