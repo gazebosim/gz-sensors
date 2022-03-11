@@ -63,27 +63,21 @@ Ignition Sensors requires:
 
 ### Ubuntu
 
-1. Make sure you are running [Ubuntu Bionic](http://releases.ubuntu.com/18.04/) or above.
+1. Make sure you are running [Ubuntu Focal](http://releases.ubuntu.com/20.04/) or above.
 
 2. Install the Prerequisites.
 
-3. Configure to use gcc8 if that is not the default compiler
-```{.sh}
-  sudo apt-get install g++-8
-  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8 --slave /usr/bin/gcov gcov /usr/bin/gcov-8
-  ```
-
-4. Clone the repository
+3. Clone the repository
 ```{.sh}
   git clone https://github.com/ignitionrobotics/ign-sensors
   ```
 
-5. Configure and build
+4. Configure and build
   ```
   cd ign-sensors; mkdir build; cd build; cmake ..;  make
   ```
 
-6. Optionally, install the library
+5. Optionally, install the library
   ```
   sudo make install
   ```
