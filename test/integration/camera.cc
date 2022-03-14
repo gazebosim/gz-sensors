@@ -101,6 +101,8 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   EXPECT_EQ(256u, sensor->ImageWidth());
   EXPECT_EQ(257u, sensor->ImageHeight());
 
+  EXPECT_EQ(std::string("base_camera"), sensor->FrameId());
+
   std::string topic = "/test/integration/CameraPlugin_imagesWithBuiltinSDF";
   WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
 
@@ -108,6 +110,22 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   mgr.RunOnce(std::chrono::steady_clock::duration::zero());
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
+
+  // verify sensor does not update / publish data when not active
+  sensor->SetActive(false);
+  EXPECT_FALSE(sensor->IsActive());
+  mgr.RunOnce(std::chrono::seconds(1));
+  EXPECT_FALSE(helper.WaitForMessage(std::chrono::seconds(3))) << helper;
+
+  // sensor should update when forced even if it is not active
+  mgr.RunOnce(std::chrono::seconds(1), true);
+  EXPECT_TRUE(helper.WaitForMessage(std::chrono::seconds(3))) << helper;
+
+  // make the sensor active again and verify data is published
+  sensor->SetActive(true);
+  EXPECT_TRUE(sensor->IsActive());
+  mgr.RunOnce(std::chrono::seconds(2));
+  EXPECT_TRUE(helper.WaitForMessage(std::chrono::seconds(3))) << helper;
 
   // test removing sensor
   // first make sure the sensor objects do exist
