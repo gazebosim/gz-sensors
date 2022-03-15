@@ -477,7 +477,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
     auto frame = msg.mutable_header()->add_data();
     frame->set_key("frame_id");
-    frame->add_value(this->Name());
+    frame->add_value(this->FrameId());
 
     std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
@@ -589,7 +589,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
       auto frame = msg.mutable_header()->add_data();
       frame->set_key("frame_id");
-      frame->add_value(this->Name());
+      frame->add_value(this->FrameId());
       msg.set_data(data, rendering::PixelUtil::MemorySize(rendering::PF_R8G8B8,
         width, height));
 
