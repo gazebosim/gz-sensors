@@ -1,5 +1,28 @@
 ## Ignition Sensors 6
 
+### Ignition Sensors 6.2.0 (2022-03-24)
+
+1. Add Ubuntu Jammy CI
+    * [Pull request #206](https://github.com/ignitionrobotics/ign-sensors/pull/206)
+
+1. Add function for enabling / disabling a sensor
+    * [Pull request #204](https://github.com/ignitionrobotics/ign-sensors/pull/204)
+
+1. IMU sensor API to get world ref frame and heading offset
+    * [Pull request #186](https://github.com/ignitionrobotics/ign-sensors/pull/186)
+
+1. Use pose multiplication instead of addition
+    * [Pull request #199](https://github.com/ignitionrobotics/ign-sensors/pull/199)
+
+1. Enable cpplint check in github actions CI
+    * [Pull request #198](https://github.com/ignitionrobotics/ign-sensors/pull/198)
+
+1. Conform to ros format for header field frame_id of sensor msgs
+    * [Pull request #195](https://github.com/ignitionrobotics/ign-sensors/pull/195)
+
+1. Fix compiler warnings (CMP0072 and copy elision)
+    * [Pull request #188](https://github.com/ignitionrobotics/ign-sensors/pull/188)
+
 ### Ignition Sensors 6.1.0 (2022-01-04)
 
 1. Add NavSat (GPS) sensor
