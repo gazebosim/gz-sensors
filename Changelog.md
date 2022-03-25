@@ -1,6 +1,12 @@
 ## Ignition Sensors 5
 
-### Ignition Sensors 5.X.X
+### Ignition Sensors 5.1.1 (2022-03-25)
+
+1. Conform to ROS format for header field `frame_id` of sensor msgs
+    * [Pull request #195](https://github.com/ignitionrobotics/ign-sensors/pull/195)
+
+1. Fix compiler warnings (CMP0072 and copy elision)
+    * [Pull request #188](https://github.com/ignitionrobotics/ign-sensors/pull/188)
 
 ### Ignition Sensors 5.1.0 (2021-10-15)
 
