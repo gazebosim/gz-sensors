@@ -8,9 +8,6 @@
 1. Fix compiler warnings (CMP0072 and copy elision)
     * [Pull request #188](https://github.com/ignitionrobotics/ign-sensors/pull/188)
 
-1. Require ign-transport >= 8.2
-    * [Pull request #167](https://github.com/ignitionrobotics/ign-sensors/pull/167)
-
 ### Ignition Sensors 5.1.0 (2021-10-15)
 
 1. Depend on ign-msgs 7.2 and libSDFormat 11.3
