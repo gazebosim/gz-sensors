@@ -436,6 +436,8 @@ TEST(ImuSensor_TEST, OrientationReference)
   // Create an ImuSensor
   auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(
       imuSDF);
+  sensor->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
+    sensors::WorldFrameEnumType::ENU);
 
   // Make sure the above dynamic cast worked.
   ASSERT_NE(nullptr, sensor);
@@ -496,6 +498,9 @@ TEST(ImuSensor_TEST, CustomRpyParentFrame)
   auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(
       imuSDF);
 
+  sensor->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
+    sensors::WorldFrameEnumType::ENU);
+
   // Make sure the above dynamic cast worked.
   ASSERT_NE(nullptr, sensor);
 
@@ -509,6 +514,304 @@ TEST(ImuSensor_TEST, CustomRpyParentFrame)
   math::Quaterniond defultOrientValue(math::Vector3d(0, 0, 0));
   ASSERT_NE(orientValue, sensor->Orientation());
   EXPECT_EQ(defultOrientValue, sensor->Orientation());
+}
+
+sdf::ElementPtr sensorWithLocalization(
+  std::string _orientationLocalization)
+{
+  std::ostringstream stream;
+  stream
+    << "<?xml version='1.0'?>"
+    << "<sdf version='1.6'>"
+    << " <model name='m1'>"
+    << "  <link name='link1'>"
+    << "    <sensor name='imu_sensor' type='imu'>"
+    << "      <topic>imu_test</topic>"
+    << "      <update_rate>1</update_rate>"
+    << "      <imu>"
+    << "      <orientation_reference_frame>"
+    << "      <localization>"+_orientationLocalization+"</localization>"
+    << "      </orientation_reference_frame>"
+    << "      </imu>"
+    << "      <always_on>1</always_on>"
+    << "      <visualize>true</visualize>"
+    << "    </sensor>"
+    << "  </link>"
+    << " </model>"
+    << "</sdf>";
+
+  sdf::SDFPtr sdfParsed(new sdf::SDF());
+  sdf::init(sdfParsed);
+  if (!sdf::readString(stream.str(), sdfParsed))
+  {
+    return sdf::ElementPtr();
+  }
+  else
+  {
+    return sdfParsed->Root()->GetElement("model")->GetElement("link")
+      ->GetElement("sensor");
+  }
+}
+
+//////////////////////////////////////////////////
+TEST(ImuSensor_TEST, NamedFrameOrientationReference)
+{
+  // Create a sensor manager
+  ignition::sensors::Manager mgr;
+
+  math::Quaterniond orientValue;
+
+  // A. Localization tag is set to ENU
+  // ---------------------------------
+  auto sensorENU = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+      sensorWithLocalization("ENU"));
+  ASSERT_NE(nullptr, sensorENU);
+
+  // Case A.1 : Localization ref: ENU, World : ENU
+  // Sensor aligns with ENU, we're measuring wrt ENU
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::ENU;
+    const math::Quaterniond expectedSensorOrientation(0, 0, 0);
+
+    sensorENU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorENU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorENU->Orientation());
+  }
+
+  // Case A.2 Localization ref: ENU, World : ENU + rotation offset
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, IGN_PI/4);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::ENU;
+    const math::Quaterniond expectedSensorOrientation(0, 0, -IGN_PI/4);
+
+    sensorENU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorENU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorENU->Orientation());
+  }
+
+  // Case A.3 Localization ref: ENU, World : NWU
+  // Sensor aligns with NWU, we're measuring wrt ENU
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NWU;
+    const math::Quaterniond expectedSensorOrientation(0, 0, IGN_PI/2);
+
+    sensorENU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorENU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorENU->Orientation());
+  }
+
+  // Case A.4 Localization ref: ENU, World : NED
+  // Sensor aligns with NED, we're measuring wrt ENU
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NED;
+    const math::Quaterniond expectedSensorOrientation(IGN_PI, 0, IGN_PI/2);
+
+    sensorENU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorENU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorENU->Orientation());
+  }
+
+  // B. Localization tag is set to NWU
+  // ---------------------------------
+  auto sensorNWU = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+      sensorWithLocalization("NWU"));
+  ASSERT_NE(nullptr, sensorNWU);
+
+  // Case B.1 : Localization ref: NWU, World : NWU
+  // Sensor aligns with NWU, we're measuring wrt NWU
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NWU;
+    const math::Quaterniond expectedSensorOrientation(0, 0, 0);
+
+    sensorNWU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNWU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNWU->Orientation());
+  }
+
+  // Case B.2 : Localization ref: NWU, World : NWU + rotation offset
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, IGN_PI/4);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NWU;
+    const math::Quaterniond expectedSensorOrientation(0, 0, -IGN_PI/4);
+
+    sensorNWU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNWU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNWU->Orientation());
+  }
+
+  // Case B.3 : Localization ref: NWU, World : ENU
+  // Sensor aligns with ENU, we're measuring wrt NWU
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::ENU;
+    const math::Quaterniond expectedSensorOrientation(0, 0, -IGN_PI/2);
+
+    sensorNWU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNWU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNWU->Orientation());
+  }
+
+  // Case B.4 : Localization ref: NWU, World : NED
+  // Sensor aligns with NED, we're measuring wrt NWU
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NED;
+    const math::Quaterniond expectedSensorOrientation(IGN_PI, 0, 0);
+
+    sensorNWU->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNWU->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNWU->Orientation());
+  }
+
+  // C. Localization tag is set to NED
+  // ---------------------------------
+  auto sensorNED = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+      sensorWithLocalization("NED"));
+  ASSERT_NE(nullptr, sensorNED);
+
+  // Case C.1 : Localization ref: NED, World : NED
+  // Sensor aligns with NED, we're measuring wrt NED
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NED;
+    const math::Quaterniond expectedSensorOrientation(0, 0, 0);
+
+    sensorNED->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNED->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNED->Orientation());
+  }
+
+  // Case C.2 : Localization ref: NED, World : NED + rotation offset
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, IGN_PI/4);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NED;
+    const math::Quaterniond expectedSensorOrientation(0, 0, -IGN_PI/4);
+
+    sensorNED->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNED->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNED->Orientation());
+  }
+
+  // Case C.3 : Localization ref: NED, World : NWU
+  // Sensor aligns with NWU, we're measuring wrt NED
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::NWU;
+    const math::Quaterniond expectedSensorOrientation(-IGN_PI, 0, 0);
+
+    sensorNED->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNED->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNED->Orientation());
+  }
+
+  // Case C.4 : Localization ref: NED, World : ENU
+  // Sensor aligns with ENU, we're measuring wrt NED
+  {
+    const math::Quaterniond worldFrameOrientation(0, 0, 0);
+    const sensors::WorldFrameEnumType worldRelativeTo =
+      sensors::WorldFrameEnumType::ENU;
+    const math::Quaterniond expectedSensorOrientation(-IGN_PI, 0, IGN_PI/2);
+
+    sensorNED->SetWorldFrameOrientation(worldFrameOrientation,
+      worldRelativeTo);
+    sensorNED->Update(std::chrono::steady_clock::duration(
+      std::chrono::nanoseconds(10000000)));
+    EXPECT_EQ(expectedSensorOrientation, sensorNED->Orientation());
+  }
+}
+
+//////////////////////////////////////////////////
+TEST(ImuSensor_TEST, LocalizationTagInvalid)
+{
+  // Create a sensor manager
+  ignition::sensors::Manager mgr;
+
+  sdf::ElementPtr imuSDF;
+
+  std::ostringstream stream;
+  stream
+    << "<?xml version='1.0'?>"
+    << "<sdf version='1.6'>"
+    << " <model name='m1'>"
+    << "  <link name='link1'>"
+    << "    <sensor name='imu_sensor' type='imu'>"
+    << "      <topic>imu_test</topic>"
+    << "      <update_rate>1</update_rate>"
+    << "      <imu>"
+    << "      <orientation_reference_frame>"
+    << "      <localization>UNRECOGNIZED</localization>"
+    << "      </orientation_reference_frame>"
+    << "      </imu>"
+    << "      <always_on>1</always_on>"
+    << "      <visualize>true</visualize>"
+    << "    </sensor>"
+    << "  </link>"
+    << " </model>"
+    << "</sdf>";
+
+  sdf::SDFPtr sdfParsed(new sdf::SDF());
+  sdf::init(sdfParsed);
+  if (!sdf::readString(stream.str(), sdfParsed))
+  {
+    imuSDF = sdf::ElementPtr();
+  }
+  else
+  {
+    imuSDF = sdfParsed->Root()->GetElement("model")->GetElement("link")
+      ->GetElement("sensor");
+  }
+
+  // Create an ImuSensor
+  auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+      imuSDF);
+  sensor->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
+    sensors::WorldFrameEnumType::ENU);
+
+  // Make sure the above dynamic cast worked.
+  ASSERT_NE(nullptr, sensor);
+
+  sensor->Update(std::chrono::steady_clock::duration(
+    std::chrono::nanoseconds(10000000)));
+
+  math::Quaterniond orientValue(math::Vector3d(0, 0, 0));
+  EXPECT_EQ(orientValue, sensor->Orientation());
 }
 
 //////////////////////////////////////////////////
