@@ -52,9 +52,7 @@ DistortionPtr DistortionFactory::NewDistortionModel(const sdf::Camera &_sdf,
   // Check for 'brown' distortion.
   if (distortionType == DistortionType::BROWN)
   {
-    if (_sensorType == "camera" || _sensorType == "depth" ||
-        _sensorType == "multicamera" || _sensorType == "wideanglecamera" ||
-        _sensorType == "thermal_camera" || _sensorType == "rgbd_camera")
+    if (_sensorType == "camera")
     {
       ignerr << "Image distortion requested. "
              << "Please use ImageDistortionFactory::DistortionModel instead"

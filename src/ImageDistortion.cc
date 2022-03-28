@@ -41,9 +41,7 @@ DistortionPtr ImageDistortionFactory::NewDistortionModel(
   // Check for 'brown' distortion.
   if (distortionType == DistortionType::BROWN)
   {
-    if (_sensorType == "camera" || _sensorType == "depth" ||
-        _sensorType == "multicamera" || _sensorType == "wideanglecamera" ||
-        _sensorType == "thermal_camera" ||  _sensorType == "rgbd_camera")
+    if (_sensorType == "camera")
     {
       distortion.reset(new ImageBrownDistortionModel());
     }
