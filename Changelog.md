@@ -1,6 +1,9 @@
 ## Ignition Sensors 6
 
-### Ignition Sensors 6.2.0 (2022-03-24)
+### Ignition Sensors 6.2.0 (2022-03-29)
+
+1. Distortion Camera Sensor
+    * [Pull request #192](https://github.com/ignitionrobotics/ign-sensors/pull/192)
 
 1. Add Ubuntu Jammy CI
     * [Pull request #206](https://github.com/ignitionrobotics/ign-sensors/pull/206)
