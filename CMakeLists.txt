@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
 #============================================================================
 # Initialize the project
 #============================================================================
-project(ignition-sensors6 VERSION 6.1.0)
+project(ignition-sensors6 VERSION 6.2.0)
 
 #============================================================================
 # Find ignition-cmake
@@ -66,7 +66,7 @@ if ((NOT ${CMAKE_VERSION} VERSION_LESS 3.11) AND (NOT OpenGL_GL_PREFERENCE))
   set(OpenGL_GL_PREFERENCE "GLVND")
 endif()
 
-ign_find_package(ignition-rendering6 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
+ign_find_package(ignition-rendering6 REQUIRED VERSION 6.2 OPTIONAL_COMPONENTS ogre ogre2)
 set(IGN_RENDERING_VER ${ignition-rendering6_VERSION_MAJOR})
 
 if (TARGET ignition-rendering${IGN_RENDERING_VER}::ogre)

@@ -3,6 +3,8 @@ set (sources
   Sensor.cc
   Noise.cc
   GaussianNoiseModel.cc
+  Distortion.cc
+  BrownDistortionModel.cc
   PointCloudUtil.cc
   SensorFactory.cc
   SensorTypes.cc
@@ -14,6 +16,8 @@ set(rendering_sources
   RenderingEvents.cc
   ImageGaussianNoiseModel.cc
   ImageNoise.cc
+  ImageBrownDistortionModel.cc
+  ImageDistortion.cc
 )
 
 set (gtest_sources
