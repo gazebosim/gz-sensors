@@ -78,6 +78,14 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   ASSERT_TRUE(linkPtr->HasElement("sensor"));
   auto sensorPtr = linkPtr->GetElement("sensor");
 
+  // If ogre is not the engine, don't run the test
+  if (_renderEngine.compare("ogre") != 0)
+  {
+    igndbg << "Engine '" << _renderEngine
+      << "' doesn't support segmentation cameras" << std::endl;
+    return;
+  }
+
   // Setup ign-rendering with an empty scene
   auto *engine = ignition::rendering::engine(_renderEngine);
   if (!engine)
