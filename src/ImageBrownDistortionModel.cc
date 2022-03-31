@@ -107,6 +107,12 @@ void ImageBrownDistortionModel::SetCamera(rendering::CameraPtr _camera)
     // add distortion pass
     rendering::RenderPassPtr distortionPass =
       rpSystem->Create<rendering::DistortionPass>();
+    if (!distortionPass)
+    {
+      ignwarn << "ImageBrownDistortionModel is not supported in "
+              << engine->Name() << std::endl;
+      return;
+    }
     this->dataPtr->distortionPass =
         std::dynamic_pointer_cast<rendering::DistortionPass>(distortionPass);
     this->dataPtr->distortionPass->SetK1(this->dataPtr->k1);
