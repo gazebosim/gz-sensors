@@ -6,8 +6,9 @@ set(dri_tests
   distortion_camera.cc
   gpu_lidar_sensor.cc
   rgbd_camera.cc
-  thermal_camera.cc
   segmentation_camera.cc
+  thermal_camera.cc
+  triggered_camera.cc
 )
 
 set(tests

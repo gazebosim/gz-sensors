@@ -51,6 +51,10 @@ using namespace sensors;
 /// \brief Private data for CameraSensor
 class ignition::sensors::CameraSensorPrivate
 {
+  /// \brief Callback for triggered subscription
+  /// \param[in] _msg Boolean message
+  public: void OnTrigger(const ignition::msgs::Boolean &_msg);
+
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
   /// \param[in] _width width of image in pixels
@@ -97,6 +101,15 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
+
+  /// \brief True if camera is triggered by a topic
+  public: bool isTriggeredCamera = false;
+
+  /// \brief True if camera has been triggered by a topic
+  public: bool isTriggered = false;
+
+  /// \brief Topic for camera trigger
+  public: std::string triggerTopic = "";
 
   /// \brief True to save images
   public: bool saveImage = false;
@@ -281,6 +294,30 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
   igndbg << "Camera images for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
+  if (_sdf.CameraSensor()->Triggered())
+  {
+    if (!_sdf.CameraSensor()->TriggerTopic().empty())
+    {
+      this->dataPtr->triggerTopic = _sdf.CameraSensor()->TriggerTopic();
+    }
+    else
+    {
+      this->dataPtr->triggerTopic =
+          transport::TopicUtils::AsValidTopic(this->dataPtr->triggerTopic);
+
+      if (this->dataPtr->triggerTopic.empty())
+      {
+        ignerr << "Invalid trigger topic name" << std::endl;
+        return false;
+      }
+    }
+
+    this->dataPtr->node.Subscribe(this->dataPtr->triggerTopic,
+        &CameraSensorPrivate::OnTrigger, this->dataPtr.get());
+
+    this->dataPtr->isTriggeredCamera = true;
+  }
+
   if (!this->AdvertiseInfo())
     return false;
 
@@ -347,6 +384,12 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   this->dataPtr->camera->SetLocalPose(this->Pose());
 
   // render only if necessary
+  if (this->dataPtr->isTriggeredCamera &&
+      !this->dataPtr->isTriggered)
+  {
+    return true;
+  }
+
   if (!this->dataPtr->pub.HasConnections() &&
       this->dataPtr->imageEvent.ConnectionCount() <= 0 &&
       !this->dataPtr->saveImage)
@@ -443,7 +486,19 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     this->dataPtr->SaveImage(data, width, height, format);
   }
 
+  if (this->dataPtr->isTriggeredCamera)
+  {
+    return this->dataPtr->isTriggered = false;
+  }
+
   return true;
+}
+
+//////////////////////////////////////////////////
+void CameraSensorPrivate::OnTrigger(const ignition::msgs::Boolean &/*_msg*/)
+{
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->isTriggered = true;
 }
 
 //////////////////////////////////////////////////
