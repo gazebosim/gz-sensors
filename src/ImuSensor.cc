@@ -321,14 +321,14 @@ void ImuSensor::SetWorldFrameOrientation(
   // Set orientation reference frame if custom_rpy was supplied
   if (this->dataPtr->sensorOrientationRelativeTo == WorldFrameEnumType::CUSTOM)
   {
-    if (this->dataPtr->customRpyParentFrame == "")
+    if (this->dataPtr->customRpyParentFrame == "world")
     {
       this->SetOrientationReference(this->dataPtr->worldRelativeOrientation *
         this->dataPtr->customRpyQuaternion);
     }
     else
     {
-      ignwarn << "custom_rpy parent frame must be set to empty "
+      ignwarn << "custom_rpy parent frame must be set to 'world' "
                 "string. Setting it to any other frame is not "
                 "supported yet." << std::endl;
     }
