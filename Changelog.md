@@ -2,6 +2,17 @@
 
 ### Ignition Sensors 6.2.0 (2022-03-29)
 
+1. IMU custom_rpy parent_frame should be set to 'world'
+    * [Pull request #212](https://github.com/ignitionrobotics/ign-sensors/pull/212)
+
+1. Triggered Camera
+    * [Pull request #194](https://github.com/ignitionrobotics/ign-sensors/pull/194)
+
+1. Check if noise or distortion render pass is null
+    * [Pull request #211](https://github.com/ignitionrobotics/ign-sensors/pull/211)
+
+### Ignition Sensors 6.2.0 (2022-03-29)
+
 1. Distortion Camera Sensor
     * [Pull request #192](https://github.com/ignitionrobotics/ign-sensors/pull/192)
 
