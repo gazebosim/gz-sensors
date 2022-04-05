@@ -1,6 +1,6 @@
 ## Ignition Sensors 6
 
-### Ignition Sensors 6.2.0 (2022-03-29)
+### Ignition Sensors 6.3.0 (2022-04-04)
 
 1. IMU custom_rpy parent_frame should be set to 'world'
     * [Pull request #212](https://github.com/ignitionrobotics/ign-sensors/pull/212)
