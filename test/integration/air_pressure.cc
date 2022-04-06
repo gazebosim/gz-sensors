@@ -192,8 +192,8 @@ TEST_F(AirPressureSensorTest, SensorReadings)
   EXPECT_DOUBLE_EQ(vertRef, sensor->ReferenceAltitude());
   EXPECT_DOUBLE_EQ(vertRef, sensorNoise->ReferenceAltitude());
 
-  sensor->SetPose(sensorNoise->Pose() +
-      ignition::math::Pose3d(0, 0, 1.5, 0, 0, 0));
+  sensor->SetPose(
+      ignition::math::Pose3d(0, 0, 1.5, 0, 0, 0) * sensorNoise->Pose());
 
   // verify msg received on the topic
   WaitForMessageTestHelper<ignition::msgs::FluidPressure> msgHelper(topic);
