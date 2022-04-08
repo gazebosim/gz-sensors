@@ -411,7 +411,7 @@ TEST(ImuSensor_TEST, OrientationReference)
     << "      <imu>"
     << "      <orientation_reference_frame>"
     << "      <localization>CUSTOM</localization>"
-    << "      <custom_rpy>1.570795 0 0</custom_rpy>"
+    << "      <custom_rpy parent_frame='world'>1.570795 0 0</custom_rpy>"
     << "      </orientation_reference_frame>"
     << "      </imu>"
     << "      <always_on>1</always_on>"
@@ -507,7 +507,7 @@ TEST(ImuSensor_TEST, CustomRpyParentFrame)
   sensor->Update(std::chrono::steady_clock::duration(
     std::chrono::nanoseconds(10000000)));
 
-  // Since parent_frame is not set to empty in the sdf,
+  // Since parent_frame is not set to 'world' in the sdf,
   // custom_rpy will be rejected and reference orientation will
   // not be set.
   math::Quaterniond orientValue(math::Vector3d(-1.570795, 0, 0));

@@ -93,6 +93,12 @@ void ImageGaussianNoiseModel::SetCamera(rendering::CameraPtr _camera)
     // add gaussian noise pass
     rendering::RenderPassPtr noisePass =
       rpSystem->Create<rendering::GaussianNoisePass>();
+    if (!noisePass)
+    {
+      ignwarn << "ImageGaussianNoiseModel is not supported in "
+             << engine->Name() << std::endl;
+      return;
+    }
     this->dataPtr->gaussianNoisePass =
         std::dynamic_pointer_cast<rendering::GaussianNoisePass>(noisePass);
     this->dataPtr->gaussianNoisePass->SetMean(this->dataPtr->mean);

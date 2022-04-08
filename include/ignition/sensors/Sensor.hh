@@ -236,5 +236,4 @@ namespace ignition
     }
   }
 }
-
 #endif
