@@ -50,7 +50,7 @@
 
 using namespace std::chrono_literals;
 
-class CameraSensorTest: public testing::Test,
+class TriggeredCameraTest: public testing::Test,
   public testing::WithParamInterface<const char *>
 {
   // Documentation inherited
@@ -63,7 +63,7 @@ class CameraSensorTest: public testing::Test,
   public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
 };
 
-void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
+void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 {
   std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "triggered_camera_sensor_builtin.sdf");
@@ -159,12 +159,12 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 }
 
 //////////////////////////////////////////////////
-TEST_P(CameraSensorTest, ImagesWithBuiltinSDF)
+TEST_P(TriggeredCameraTest, ImagesWithBuiltinSDF)
 {
   ImagesWithBuiltinSDF(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(CameraSensor, CameraSensorTest,
+INSTANTIATE_TEST_CASE_P(CameraSensor, TriggeredCameraTest,
     RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////
