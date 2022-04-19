@@ -487,7 +487,7 @@ bool SegmentationCameraSensor::Update(
   *stamp = msgs::Convert(_now);
   auto frame = this->dataPtr->coloredMapMsg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->Name());
+  frame->add_value(this->FrameId());
 
   this->dataPtr->labelsMapMsg.CopyFrom(this->dataPtr->coloredMapMsg);
 
