@@ -78,14 +78,6 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   ASSERT_TRUE(linkPtr->HasElement("sensor"));
   auto sensorPtr = linkPtr->GetElement("sensor");
 
-  // If ogre is not the engine, don't run the test
-  if (_renderEngine.compare("ogre") != 0)
-  {
-    igndbg << "Engine '" << _renderEngine
-      << "' doesn't support segmentation cameras" << std::endl;
-    return;
-  }
-
   // Setup ign-rendering with an empty scene
   auto *engine = ignition::rendering::engine(_renderEngine);
   if (!engine)
@@ -119,7 +111,7 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
         "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF";
     WaitForMessageTestHelper<ignition::msgs::Image> helper(imageTopic);
     mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
-    EXPECT_FALSE(helper.WaitForMessage(3s)) << helper;
+    EXPECT_FALSE(helper.WaitForMessage(1s)) << helper;
   }
 
   // trigger camera through topic

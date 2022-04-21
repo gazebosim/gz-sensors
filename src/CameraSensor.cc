@@ -315,6 +315,8 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
     this->dataPtr->node.Subscribe(this->dataPtr->triggerTopic,
         &CameraSensorPrivate::OnTrigger, this->dataPtr.get());
 
+    igndbg << "Camera trigger messages for [" << this->Name() << "] subscribed"
+           << " on [" << this->dataPtr->triggerTopic << "]" << std::endl;
     this->dataPtr->isTriggeredCamera = true;
   }
 
