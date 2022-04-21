@@ -3,10 +3,12 @@ set(TEST_TYPE "INTEGRATION")
 set(dri_tests
   camera.cc
   depth_camera.cc
+  distortion_camera.cc
   gpu_lidar_sensor.cc
   rgbd_camera.cc
-  thermal_camera.cc
   segmentation_camera.cc
+  thermal_camera.cc
+  triggered_camera.cc
   wide_angle_camera.cc
 )
 

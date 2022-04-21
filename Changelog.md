@@ -6,11 +6,42 @@
 
 ## Ignition Sensors 6
 
-### Ignition Sensors 7.X.X
+### Ignition Sensors 6.3.0 (2022-04-04)
 
-### Ignition Sensors 7.0.0 (202X-XX-XX)
+1. IMU custom_rpy parent_frame should be set to 'world'
+    * [Pull request #212](https://github.com/ignitionrobotics/ign-sensors/pull/212)
 
-### Ignition Sensors 6.X.X
+1. Triggered Camera
+    * [Pull request #194](https://github.com/ignitionrobotics/ign-sensors/pull/194)
+
+1. Check if noise or distortion render pass is null
+    * [Pull request #211](https://github.com/ignitionrobotics/ign-sensors/pull/211)
+
+### Ignition Sensors 6.2.0 (2022-03-29)
+
+1. Distortion Camera Sensor
+    * [Pull request #192](https://github.com/ignitionrobotics/ign-sensors/pull/192)
+
+1. Add Ubuntu Jammy CI
+    * [Pull request #206](https://github.com/ignitionrobotics/ign-sensors/pull/206)
+
+1. Add function for enabling / disabling a sensor
+    * [Pull request #204](https://github.com/ignitionrobotics/ign-sensors/pull/204)
+
+1. IMU sensor API to get world ref frame and heading offset
+    * [Pull request #186](https://github.com/ignitionrobotics/ign-sensors/pull/186)
+
+1. Use pose multiplication instead of addition
+    * [Pull request #199](https://github.com/ignitionrobotics/ign-sensors/pull/199)
+
+1. Enable cpplint check in github actions CI
+    * [Pull request #198](https://github.com/ignitionrobotics/ign-sensors/pull/198)
+
+1. Conform to ros format for header field frame_id of sensor msgs
+    * [Pull request #195](https://github.com/ignitionrobotics/ign-sensors/pull/195)
+
+1. Fix compiler warnings (CMP0072 and copy elision)
+    * [Pull request #188](https://github.com/ignitionrobotics/ign-sensors/pull/188)
 
 ### Ignition Sensors 6.1.0 (2022-01-04)
 

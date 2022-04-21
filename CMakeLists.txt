@@ -8,7 +8,7 @@ project(ignition-sensors7 VERSION 7.0.0)
 #============================================================================
 # Find ignition-cmake
 #============================================================================
-find_package(ignition-cmake2 2.8.0 REQUIRED)
+find_package(ignition-cmake3 REQUIRED)
 
 #============================================================================
 # Configure the project
