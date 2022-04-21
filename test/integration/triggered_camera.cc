@@ -111,7 +111,7 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
         "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF";
     WaitForMessageTestHelper<ignition::msgs::Image> helper(imageTopic);
     mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
-    EXPECT_FALSE(helper.WaitForMessage(3s)) << helper;
+    EXPECT_FALSE(helper.WaitForMessage(1s)) << helper;
   }
 
   // trigger camera through topic
