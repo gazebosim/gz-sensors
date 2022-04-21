@@ -256,6 +256,19 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
     // Set the time stamp
     *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
       msgs::Convert(_now);
+    // Set frame_id
+    for (auto i = 0;
+         i < this->dataPtr->pointMsg.mutable_header()->data_size();
+         ++i)
+    {
+      if (this->dataPtr->pointMsg.mutable_header()->data(i).key() == "frame_id"
+          && this->dataPtr->pointMsg.mutable_header()->data(i).value_size() > 0)
+      {
+        this->dataPtr->pointMsg.mutable_header()->mutable_data(i)->set_value(
+              0,
+              this->FrameId());
+      }
+    }
 
     this->dataPtr->FillPointCloudMsg(this->laserBuffer);
 
