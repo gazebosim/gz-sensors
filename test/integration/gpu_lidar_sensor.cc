@@ -527,7 +527,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   root->AddChild(visualBox3);
 
   // Update sensors
-  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
 
   int mid = horzSamples / 2;
   int last = (horzSamples - 1);
@@ -644,7 +644,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   sensor->SetScene(scene);
 
   // Update sensor
-  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
 
   unsigned int mid = horzSamples / 2;
   double unitBoxSize = 1.0;
@@ -790,7 +790,7 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   scene->PreRender();
 
   // Render and update
-  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
 
   // manually finish update scene
   scene->PostRender();

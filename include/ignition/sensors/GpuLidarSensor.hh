@@ -121,6 +121,9 @@ namespace ignition
       /// \return Vertical field of view.
       public: ignition::math::Angle VFOV() const;
 
+      // Documentation inherited
+      public: virtual bool HasConnections() const override;
+
       /// \brief Connect function pointer to internal GpuRays callback
       /// \return ignition::common::Connection pointer
       public: virtual ignition::common::ConnectionPtr ConnectNewLidarFrame(

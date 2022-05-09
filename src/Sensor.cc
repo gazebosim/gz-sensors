@@ -453,6 +453,10 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
   if (!this->dataPtr->active && !_force)
     return result;
 
+  // prevent update if no subscribers, unless forced
+  if (!this->HasConnections() && !_force)
+    return result;
+
   // Make the update happen
   result = this->Update(_now);
 
@@ -520,4 +524,12 @@ bool Sensor::IsActive() const
 void Sensor::SetActive(bool _active)
 {
   this->dataPtr->active = _active;
+}
+
+/////////////////////////////////////////////////
+bool Sensor::HasConnections() const
+{
+  // by default assume there is also someone who needs data
+  // override the return value in base class
+  return true;
 }

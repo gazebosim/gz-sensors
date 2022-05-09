@@ -422,3 +422,9 @@ math::Quaterniond ImuSensor::Orientation() const
   return this->dataPtr->orientation;
 }
 
+//////////////////////////////////////////////////
+bool ImuSensor::HasConnections() const
+{
+  return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
+}
+

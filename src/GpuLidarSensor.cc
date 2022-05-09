@@ -315,6 +315,13 @@ ignition::math::Angle GpuLidarSensor::VFOV() const
 }
 
 //////////////////////////////////////////////////
+bool GpuLidarSensor::HasConnections() const
+{
+  return Lidar::HasConnections() ||
+     (this->dataPtr->pointPub && this->dataPtr->pointPub.HasConnections());
+}
+
+//////////////////////////////////////////////////
 void GpuLidarSensorPrivate::FillPointCloudMsg(const float *_laserBuffer)
 {
   IGN_PROFILE("GpuLidarSensorPrivate::FillPointCloudMsg");
@@ -390,4 +397,3 @@ void GpuLidarSensorPrivate::FillPointCloudMsg(const float *_laserBuffer)
   }
   this->pointMsg.set_is_dense(isDense);
 }
-

@@ -455,3 +455,8 @@ bool Lidar::IsActive() const
   return true;
 }
 
+//////////////////////////////////////////////////
+bool Lidar::HasConnections() const
+{
+  return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
+}

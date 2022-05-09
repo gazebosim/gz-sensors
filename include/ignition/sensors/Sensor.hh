@@ -220,6 +220,10 @@ namespace ignition
       /// \sa IsActive
       public: void SetActive(bool _active);
 
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      public: virtual bool HasConnections() const;
+
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal
       /// \brief Data pointer for private data
