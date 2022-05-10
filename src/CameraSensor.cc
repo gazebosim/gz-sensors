@@ -697,3 +697,9 @@ double CameraSensor::Baseline() const
   return this->dataPtr->baseline;
 }
 
+//////////////////////////////////////////////////
+bool CameraSensor::HasConnections() const
+{
+  return (this->dataPtr->pub && this->dataPtr->pub.HasConnections()) ||
+      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+}

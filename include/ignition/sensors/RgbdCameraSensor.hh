@@ -90,6 +90,10 @@ namespace ignition
       /// \return height of the image
       public: virtual unsigned int ImageHeight() const override;
 
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      public: virtual bool HasConnections() const;
+
       /// \brief Create an RGB camera and a depth camera.
       /// \return True on success.
       private: bool CreateCameras();

@@ -427,4 +427,3 @@ bool ImuSensor::HasConnections() const
 {
   return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
 }
-

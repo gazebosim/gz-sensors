@@ -157,8 +157,9 @@ namespace ignition
       /// \return height of the image
       public: virtual double NearClip() const;
 
-      // Documentation inherited
-      public: virtual bool HasConnections() const override;
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      public: virtual bool HasConnections() const;
 
       /// \brief Create a camera in a scene
       /// \return True on success.

@@ -203,3 +203,9 @@ msgs::LogicalCameraImage LogicalCameraSensor::Image() const
   return this->dataPtr->msg;
 }
 
+//////////////////////////////////////////////////
+bool LogicalCameraSensor::HasConnections() const
+{
+  return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
+}
+

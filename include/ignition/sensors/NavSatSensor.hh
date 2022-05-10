@@ -108,6 +108,10 @@ namespace ignition
       /// \return Velocity in meters per second
       public: const math::Vector3d &Velocity() const;
 
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      public: virtual bool HasConnections() const;
+
       /// \brief Easy short hand for setting the position of the sensor.
       /// \param[in] _latitude Latitude angle.
       /// \param[in] _longitude Longitude angle.

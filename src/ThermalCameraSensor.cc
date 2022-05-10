@@ -651,3 +651,11 @@ bool ThermalCameraSensorPrivate::SaveImage(const uint16_t *_data,
   return true;
 }
 
+//////////////////////////////////////////////////
+bool ThermalCameraSensor::HasConnections() const
+{
+  return (this->dataPtr->thermalPub &&
+      this->dataPtr->thermalPub.HasConnections()) ||
+      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+}
+

@@ -119,7 +119,11 @@ namespace ignition
       /// \return height of the image
       public: virtual unsigned int ImageHeight() const override;
 
-     /// \brief Create a camera in a scene
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      public: virtual bool HasConnections() const;
+
+      /// \brief Create a camera in a scene
       /// \return True on success.
       private: bool CreateCamera();
 

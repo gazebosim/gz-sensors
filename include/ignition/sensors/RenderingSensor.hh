@@ -92,6 +92,20 @@ namespace ignition
       private: std::unique_ptr<RenderingSensorPrivate> dataPtr;
       IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
+
+    /// \internal
+    /// \brief Extension class for rendering sensors
+    /// Function are added here to preserve ABI compatibility of rendering
+    /// sensor classes
+    class RenderingSensorExt : public SensorExt
+    {
+      /// \brief Constructor
+      public: RenderingSensorExt(Sensor *_sensor);
+
+      // Documentation inherited
+      public: virtual bool HasConnections() const override;
+    };
+
     }
   }
 }

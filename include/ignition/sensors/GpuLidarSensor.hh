@@ -121,8 +121,9 @@ namespace ignition
       /// \return Vertical field of view.
       public: ignition::math::Angle VFOV() const;
 
-      // Documentation inherited
-      public: virtual bool HasConnections() const override;
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      public: bool HasConnections() const;
 
       /// \brief Connect function pointer to internal GpuRays callback
       /// \return ignition::common::Connection pointer
