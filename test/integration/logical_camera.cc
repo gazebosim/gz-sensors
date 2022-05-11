@@ -161,16 +161,6 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   ASSERT_NE(nullptr, sensor);
   EXPECT_FALSE(sensor->HasConnections());
 
-//  std::cerr << "1 "<< std::endl;
-//  WaitForMessageTestHelper<ignition::msgs::LogicalCameraImage> helper(topic);
-//  std::cerr << "12"<< std::endl;
-//  EXPECT_TRUE(sensor->HasConnections());
-//  std::cerr << "3"<< std::endl;
-//  sensor->Update(std::chrono::steady_clock::duration::zero());
-//  std::cerr << "4"<< std::endl;
-//  EXPECT_TRUE(helper.WaitForMessage()) << helper;
-//  std::cerr << "54"<< std::endl;
-
   // verify initial image
   auto img = sensor->Image();
   EXPECT_EQ(0, img.model().size());

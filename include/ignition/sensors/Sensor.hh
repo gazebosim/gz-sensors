@@ -50,7 +50,6 @@ namespace ignition
 
     /// \brief forward declarations
     class SensorPrivate;
-    class SensorExt;
 
     /// \brief a base sensor class
     ///
@@ -227,39 +226,11 @@ namespace ignition
       /// override this function
       public: bool HasConnections() const;
 
-      /// \internal
-      /// \brief Set sensor extension. The extension class consts of
-      /// functions/features that could not be added to the core Sensor class
-      /// for ABI compatibility reason. For internal use only
-      /// \param[in] _ext Extension class
-      protected: void SetExtension(const std::shared_ptr<SensorExt> &_ext);
-
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal
       /// \brief Data pointer for private data
       private: std::unique_ptr<SensorPrivate> dataPtr;
       IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
-    };
-
-    /// \internal
-    /// \brief Extension class for sensor
-    /// Function are added here to preserve ABI compatibility of the base
-    /// sensor class
-    class SensorExt
-    {
-      /// \brief Constructor
-      /// \param[in] _sensor Pointer to parent sensor
-      public: SensorExt(Sensor *_sensor);
-
-      /// \brief Destructor
-      public: virtual ~SensorExt() = default;
-
-      /// \brief Check if there are any subscribers
-      /// \return True if there are subscribers, false otherwise
-      public: virtual bool HasConnections() const;
-
-      /// \brief Pointer to parent sensor
-      protected: Sensor *sensor = nullptr;
     };
     }
   }

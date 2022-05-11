@@ -527,15 +527,6 @@ bool DepthCameraSensor::Update(
     return false;
   }
 
-
-  // Don't do any work if no one is requesting data
-//  if (!this->dataPtr->pub.HasConnections()
-//      this->dataPtr->imageEvent.ConnectionCount() == 0u &&
-//      !this->dataPtr->pointPub.HasConnections())
-//  {
-//    return false;
-//  }
-
   // generate sensor data
   this->Render();
 
@@ -545,47 +536,38 @@ bool DepthCameraSensor::Update(
   auto msgsFormat = msgs::PixelFormatType::R_FLOAT32;
 
   // create message
+  ignition::msgs::Image msg;
+  msg.set_width(width);
+  msg.set_height(height);
+  msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
+               rendering::PF_FLOAT32_R));
+  msg.set_pixel_format_type(msgsFormat);
+  *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+  auto frame = msg.mutable_header()->add_data();
+  frame->set_key("frame_id");
+  frame->add_value(this->FrameId());
 
-//  if (this->dataPtr->pub.HasConnections() ||
-//      this->dataPtr->imageEvent.ConnectionCount() >  0u)
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  msg.set_data(this->dataPtr->depthBuffer,
+      rendering::PixelUtil::MemorySize(rendering::PF_FLOAT32_R,
+      width, height));
+
+  this->AddSequence(msg.mutable_header(), "default");
+  this->dataPtr->pub.Publish(msg);
+
+  // publish the camera info message
+  this->PublishInfo(_now);
+
+  if (this->dataPtr->imageEvent.ConnectionCount() > 0u)
   {
-    ignition::msgs::Image msg;
-    msg.set_width(width);
-    msg.set_height(height);
-    msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
-                 rendering::PF_FLOAT32_R));
-    msg.set_pixel_format_type(msgsFormat);
-    *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
-    auto frame = msg.mutable_header()->add_data();
-    frame->set_key("frame_id");
-    frame->add_value(this->FrameId());
-
-    std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-    msg.set_data(this->dataPtr->depthBuffer,
-        rendering::PixelUtil::MemorySize(rendering::PF_FLOAT32_R,
-        width, height));
-
-    // publish
-//    if (this->dataPtr->pub.HasConnections())
+    // Trigger callbacks.
+    try
     {
-      this->AddSequence(msg.mutable_header(), "default");
-      this->dataPtr->pub.Publish(msg);
-
-      // publish the camera info message
-      this->PublishInfo(_now);
+      this->dataPtr->imageEvent(msg);
     }
-
-//    if (this->dataPtr->imageEvent.ConnectionCount() > 0u)
+    catch(...)
     {
-      // Trigger callbacks.
-      try
-      {
-        this->dataPtr->imageEvent(msg);
-      }
-      catch(...)
-      {
-        ignerr << "Exception thrown in an image callback.\n";
-      }
+      ignerr << "Exception thrown in an image callback.\n";
     }
   }
 
