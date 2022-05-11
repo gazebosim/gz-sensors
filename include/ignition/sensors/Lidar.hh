@@ -238,7 +238,7 @@ namespace ignition
 
       /// \brief Check if there are any subscribers for sensor data
       /// \return True if there are subscribers, false otherwise
-      public: virtual bool HasConnections() const;
+      public: bool HasConnections() const;
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Just a mutex for thread safety

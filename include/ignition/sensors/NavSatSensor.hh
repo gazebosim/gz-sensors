@@ -110,7 +110,7 @@ namespace ignition
 
       /// \brief Check if there are any subscribers
       /// \return True if there are subscribers, false otherwise
-      public: virtual bool HasConnections() const;
+      public: bool HasConnections() const;
 
       /// \brief Easy short hand for setting the position of the sensor.
       /// \param[in] _latitude Latitude angle.
