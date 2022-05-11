@@ -27,16 +27,6 @@
 #include <ignition/transport/Node.hh>
 #include <ignition/transport/TopicUtils.hh>
 
-// \todo(iche033) Remove these includes when HasConnections() function
-// becomes virtual
-#include "ignition/sensors/AirPressureSensor.hh"
-#include "ignition/sensors/AltimeterSensor.hh"
-#include "ignition/sensors/ForceTorqueSensor.hh"
-#include "ignition/sensors/ImuSensor.hh"
-#include "ignition/sensors/LogicalCameraSensor.hh"
-#include "ignition/sensors/MagnetometerSensor.hh"
-#include "ignition/sensors/NavSatSensor.hh"
-
 using namespace ignition::sensors;
 
 class ignition::sensors::SensorPrivate
@@ -122,10 +112,6 @@ class ignition::sensors::SensorPrivate
 
   /// \brief If sensor is active or not.
   public: bool active = true;
-
-  /// \brief Sensor class extention
-  /// \todo(iche033) remove once HasConnections() becomes virtual
-  public: std::shared_ptr<SensorExt> sensorExt;
 };
 
 SensorId SensorPrivate::idCounter = 0;
@@ -188,8 +174,6 @@ Sensor::Sensor() :
   dataPtr(new SensorPrivate)
 {
   this->dataPtr->id = (++this->dataPtr->idCounter);
-  this->dataPtr->sensorExt = std::make_shared<SensorExt>(this);
-  this->SetExtension(this->dataPtr->sensorExt);
 }
 
 //////////////////////////////////////////////////
@@ -469,10 +453,6 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
   if (!this->dataPtr->active && !_force)
     return result;
 
-  // prevent update if no subscribers, unless forced
-  if (!this->HasConnections() && !_force)
-    return result;
-
   // Make the update happen
   result = this->Update(_now);
 
@@ -540,65 +520,4 @@ bool Sensor::IsActive() const
 void Sensor::SetActive(bool _active)
 {
   this->dataPtr->active = _active;
-}
-
-/////////////////////////////////////////////////
-bool Sensor::HasConnections() const
-{
-  return this->dataPtr->sensorExt->HasConnections();
-}
-
-/////////////////////////////////////////////////
-void Sensor::SetExtension(const std::shared_ptr<SensorExt> &_sensor)
-{
-  this->dataPtr->sensorExt = _sensor;
-}
-
-//////////////////////////////////////////////////
-SensorExt::SensorExt(Sensor *_sensor)
-{
-  this->sensor = _sensor;
-}
-
-/////////////////////////////////////////////////
-bool SensorExt::HasConnections() const
-{
-  // \todo(iche033) Make this function virtual and let derived classes
-  // override this function
-  {
-    auto s = dynamic_cast<const AirPressureSensor *>(this->sensor);
-    if (s)
-      return s->HasConnections();
-  }
-  {
-    auto s = dynamic_cast<const AltimeterSensor *>(this->sensor);
-    if (s)
-      return s->HasConnections();
-  }
-  {
-    auto s = dynamic_cast<const ForceTorqueSensor *>(this->sensor);
-    if (s)
-      return s->HasConnections();
-  }
-  {
-    auto s = dynamic_cast<const ImuSensor *>(this->sensor);
-    if (s)
-      return s->HasConnections();
-  }
-  {
-    auto s = dynamic_cast<const LogicalCameraSensor *>(this->sensor);
-    if (s)
-      return s->HasConnections();
-  }
-  {
-    auto s = dynamic_cast<const MagnetometerSensor *>(this->sensor);
-    if (s)
-      return s->HasConnections();
-  }
-  {
-    auto s = dynamic_cast<const NavSatSensor *>(this->sensor);
-    if (s)
-      return s->HasConnections();
-  }
-  return true;
 }

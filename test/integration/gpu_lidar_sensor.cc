@@ -220,6 +220,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   // Make sure the above dynamic cast worked.
   ASSERT_NE(nullptr, sensor);
   sensor->SetScene(scene);
+  EXPECT_FALSE(sensor->HasConnections());
 
   // Set a callback on the lidar sensor to get a scan
   ignition::common::ConnectionPtr c =
@@ -229,6 +230,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
           std::placeholders::_4, std::placeholders::_5));
 
   EXPECT_TRUE(c != nullptr);
+  EXPECT_TRUE(sensor->HasConnections());
 
   double angleRes = (sensor->AngleMax() - sensor->AngleMin()).Radian() /
                     sensor->RayCount();
@@ -354,7 +356,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
 
   WaitForMessageTestHelper<ignition::msgs::LaserScan> helper(topic);
   // Update sensor
-  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
 
   int mid = horzSamples / 2;
@@ -527,7 +529,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   root->AddChild(visualBox3);
 
   // Update sensors
-  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
 
   int mid = horzSamples / 2;
   int last = (horzSamples - 1);
@@ -644,7 +646,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   sensor->SetScene(scene);
 
   // Update sensor
-  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
 
   unsigned int mid = horzSamples / 2;
   double unitBoxSize = 1.0;
@@ -790,7 +792,7 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   scene->PreRender();
 
   // Render and update
-  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
 
   // manually finish update scene
   scene->PostRender();

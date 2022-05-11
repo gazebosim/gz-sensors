@@ -38,6 +38,7 @@
 #include <ignition/transport/Node.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
+#include "TransportTestTools.hh"
 
 // undefine near and far macros from windows.h
 #ifdef _WIN32
@@ -158,6 +159,17 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   auto sensor = sf.CreateSensor<ignition::sensors::LogicalCameraSensor>(
       logicalCameraSdf);
   ASSERT_NE(nullptr, sensor);
+  EXPECT_FALSE(sensor->HasConnections());
+
+//  std::cerr << "1 "<< std::endl;
+//  WaitForMessageTestHelper<ignition::msgs::LogicalCameraImage> helper(topic);
+//  std::cerr << "12"<< std::endl;
+//  EXPECT_TRUE(sensor->HasConnections());
+//  std::cerr << "3"<< std::endl;
+//  sensor->Update(std::chrono::steady_clock::duration::zero());
+//  std::cerr << "4"<< std::endl;
+//  EXPECT_TRUE(helper.WaitForMessage()) << helper;
+//  std::cerr << "54"<< std::endl;
 
   // verify initial image
   auto img = sensor->Image();
@@ -234,6 +246,12 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   img = sensor->Image();
   EXPECT_EQ(sensorPose4, ignition::msgs::Convert(img.pose()));
   EXPECT_EQ(0, img.model().size());
+
+  // verify connection count and msg published to topic
+  WaitForMessageTestHelper<ignition::msgs::LogicalCameraImage> helper(topic);
+  EXPECT_TRUE(sensor->HasConnections());
+  sensor->Update(std::chrono::steady_clock::duration::zero());
+  EXPECT_TRUE(helper.WaitForMessage()) << helper;
 }
 
 /////////////////////////////////////////////////

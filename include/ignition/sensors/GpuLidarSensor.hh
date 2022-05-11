@@ -132,6 +132,13 @@ namespace ignition
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &/*_format*/)> _subscriber) override;
 
+      /// \brief Connect function pointer to internal GpuRays callback
+      /// \return ignition::common::Connection pointer
+      private: void OnNewLidarFrame(const float *_scan, unsigned int _width,
+                  unsigned int _heighti, unsigned int _channels,
+                  const std::string &_format);
+
+
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal

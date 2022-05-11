@@ -28,14 +28,6 @@
 #pragma warning(pop)
 #endif
 
-// \todo(iche033) Remove these includes when HasConnections() function
-// becomes virtual
-#include "ignition/sensors/CameraSensor.hh"
-#include "ignition/sensors/DepthCameraSensor.hh"
-#include "ignition/sensors/RgbdCameraSensor.hh"
-#include "ignition/sensors/SegmentationCameraSensor.hh"
-#include "ignition/sensors/ThermalCameraSensor.hh"
-
 #include "ignition/sensors/RenderingSensor.hh"
 
 /// \brief Private data class for RenderingSensor
@@ -50,10 +42,6 @@ class ignition::sensors::RenderingSensorPrivate
   /// \brief Pointer to the internal rendering sensors used for generating
   /// sensor data
   public: std::vector<rendering::SensorPtr::weak_type> sensors;
-
-  /// \brief Sensor class extention
-  /// \todo(iche033) remove once HasConnections() becomes virtual
-  public: std::shared_ptr<SensorExt> sensorExt;
 };
 
 using namespace ignition;
@@ -63,8 +51,6 @@ using namespace sensors;
 RenderingSensor::RenderingSensor() :
   dataPtr(new RenderingSensorPrivate)
 {
-  this->dataPtr->sensorExt = std::make_shared<SensorExt>(this);
-  this->SetExtension(this->dataPtr->sensorExt);
 }
 
 //////////////////////////////////////////////////
@@ -142,42 +128,4 @@ void RenderingSensor::Render()
     // called per sensor, so we don't have to do anything here
     this->dataPtr->scene->PostRender();
   }
-}
-
-/////////////////////////////////////////////////
-RenderingSensorExt::RenderingSensorExt(Sensor *_sensor)
-  : SensorExt(_sensor)
-{
-}
-
-/////////////////////////////////////////////////
-bool RenderingSensorExt::HasConnections() const
-{
-  // \todo(iche033) Remove this function when HasConnections() becomes virtual
-  {
-    auto s = dynamic_cast<const CameraSensor *>(this->sensor);
-    if (s)
-      return s->HasConnections();
-  }
-  {
-    auto s = dynamic_cast<const DepthCameraSensor *>(this->sensor);
-    if (s)
-      return s->HasConnections();
-  }
-  {
-    auto s = dynamic_cast<const GpuRaySensorSensor *>(this->sensor);
-    if (s)
-      return s->HasConnections();
-  }
-  {
-    auto s = dynamic_cast<const SegmentationCameraSensor *>(this->sensor);
-    if (s)
-      return s->HasConnections();
-  }
-  {
-    auto s = dynamic_cast<const ThermalCameraSensor *>(this->sensor);
-    if (s)
-      return s->HasConnections();
-  }
-  return true;
 }
