@@ -235,6 +235,7 @@ namespace ignition
 
       // Documentation inherited
       public: virtual bool IsActive() const;
+
       /// \brief Get the visibility mask
       /// \return Visibility mask
       public: uint32_t VisibilityMask() const;
