@@ -25,7 +25,17 @@
 #include <ignition/common/PluginMacros.hh>
 #include <ignition/common/SuppressWarning.hh>
 #include <ignition/common/Time.hh>
+
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
 #include <ignition/msgs.hh>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
 #include <ignition/transport/Node.hh>
 #include <ignition/transport/Publisher.hh>
 #include <sdf/sdf.hh>

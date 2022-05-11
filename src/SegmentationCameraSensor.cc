@@ -22,7 +22,6 @@
 #include <ignition/common/Image.hh>
 #include <ignition/common/Profiler.hh>
 #include <ignition/common/Util.hh>
-#include <ignition/msgs.hh>
 #include <ignition/rendering/SegmentationCamera.hh>
 #include <ignition/transport/Node.hh>
 #include <ignition/transport/Publisher.hh>
