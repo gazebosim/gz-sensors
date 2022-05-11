@@ -220,12 +220,6 @@ namespace ignition
       /// \sa IsActive
       public: void SetActive(bool _active);
 
-      /// \brief Check if there are any subscribers
-      /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) make this virtual class and let all derived sensor classes
-      /// override this function
-      public: bool HasConnections() const;
-
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal
       /// \brief Data pointer for private data

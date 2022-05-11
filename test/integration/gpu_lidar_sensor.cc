@@ -354,9 +354,9 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   node.Subscribe(topic, &::laserCb);
   node.Subscribe(topic + "/points", &::pointCb);
 
-  WaitForMessageTestHelper<ignition::msgs::LaserScan> helper(topic, true);
+  WaitForMessageTestHelper<ignition::msgs::LaserScan> helper(topic);
   // Update sensor
-  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
 
   int mid = horzSamples / 2;
