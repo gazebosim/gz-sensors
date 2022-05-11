@@ -14,16 +14,16 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_UTIL_HH_
-#define IGNITION_SENSORS_UTIL_HH_
+#ifndef GZ_SENSORS_UTIL_HH_
+#define GZ_SENSORS_UTIL_HH_
 
 #include <string>
 
 #include <sdf/Element.hh>
 #include <sdf/Sensor.hh>
 
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/Export.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/Export.hh"
 
 namespace ignition
 {

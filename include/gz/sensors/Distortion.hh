@@ -15,17 +15,17 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_DISTORTION_HH_
-#define IGNITION_SENSORS_DISTORTION_HH_
+#ifndef GZ_SENSORS_DISTORTION_HH_
+#define GZ_SENSORS_DISTORTION_HH_
 
 #include <functional>
 #include <string>
 #include <vector>
 
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/SensorTypes.hh>
-#include <ignition/sensors/config.hh>
-#include <ignition/utils/ImplPtr.hh>
+#include <gz/sensors/Export.hh>
+#include <gz/sensors/SensorTypes.hh>
+#include <gz/sensors/config.hh>
+#include <gz/utils/ImplPtr.hh>
 
 #include <sdf/sdf.hh>
 
@@ -38,7 +38,7 @@ namespace ignition
     // Forward declarations
     class DistortionPrivate;
 
-    /// \class DistortionFactory Distortion.hh ignition/sensors/Distortion.hh
+    /// \class DistortionFactory Distortion.hh gz/sensors/Distortion.hh
     /// \brief Use this distortion manager for creating and loading distortion
     /// models.
     class IGNITION_SENSORS_VISIBLE DistortionFactory
@@ -73,7 +73,7 @@ namespace ignition
       BROWN = 2
     };
 
-    /// \class Distortion Distortion.hh ignition/sensors/Distortion.hh
+    /// \class Distortion Distortion.hh gz/sensors/Distortion.hh
     /// \brief Distortion models for sensor output signals.
     class IGNITION_SENSORS_VISIBLE Distortion
     {

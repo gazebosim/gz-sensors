@@ -14,22 +14,22 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_SENSORTYPES_HH_
-#define IGNITION_SENSORS_SENSORTYPES_HH_
+#ifndef GZ_SENSORS_SENSORTYPES_HH_
+#define GZ_SENSORS_SENSORTYPES_HH_
 
 #include <vector>
 #include <memory>
 
-#include <ignition/common/EnumIface.hh>
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/Export.hh>
+#include <gz/common/EnumIface.hh>
+#include <gz/sensors/config.hh>
+#include <gz/sensors/Export.hh>
 
 /// \file
-/// \ingroup ignition_sensors
+/// \ingroup gz_sensors
 /// \brief Forward declarations and typedefs for sensors
 namespace ignition
 {
-  /// \ingroup ignition_sensors
+  /// \ingroup gz_sensors
   /// \brief Sensors namespace
   namespace sensors
   {

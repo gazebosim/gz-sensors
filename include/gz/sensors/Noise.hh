@@ -15,16 +15,16 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_NOISE_HH_
-#define IGNITION_SENSORS_NOISE_HH_
+#ifndef GZ_SENSORS_NOISE_HH_
+#define GZ_SENSORS_NOISE_HH_
 
 #include <functional>
 #include <string>
 #include <vector>
 
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/SensorTypes.hh>
-#include <ignition/sensors/Export.hh>
+#include <gz/sensors/config.hh>
+#include <gz/sensors/SensorTypes.hh>
+#include <gz/sensors/Export.hh>
 
 #include <sdf/sdf.hh>
 
@@ -37,7 +37,7 @@ namespace ignition
     // Forward declarations
     class NoisePrivate;
 
-    /// \class NoiseFactory Noise.hh ignition/sensors/Noise.hh
+    /// \class NoiseFactory Noise.hh gz/sensors/Noise.hh
     /// \brief Use this noise manager for creating and loading noise models.
     class IGNITION_SENSORS_VISIBLE NoiseFactory
     {
@@ -70,7 +70,7 @@ namespace ignition
       GAUSSIAN = 2
     };
 
-    /// \class Noise Noise.hh ignition/sensors/Noise.hh
+    /// \class Noise Noise.hh gz/sensors/Noise.hh
     /// \brief Noise models for sensor output signals.
     class IGNITION_SENSORS_VISIBLE Noise
     {

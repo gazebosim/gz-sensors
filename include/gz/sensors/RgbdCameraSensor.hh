@@ -14,19 +14,19 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_RGBDCAMERASENSOR_HH_
-#define IGNITION_SENSORS_RGBDCAMERASENSOR_HH_
+#ifndef GZ_SENSORS_RGBDCAMERASENSOR_HH_
+#define GZ_SENSORS_RGBDCAMERASENSOR_HH_
 
 #include <memory>
 
 #include <sdf/sdf.hh>
 
-#include <ignition/utils/SuppressWarning.hh>
+#include <gz/utils/SuppressWarning.hh>
 
-#include "ignition/sensors/CameraSensor.hh"
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/rgbd_camera/Export.hh"
-#include "ignition/sensors/Export.hh"
+#include "gz/sensors/CameraSensor.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/rgbd_camera/Export.hh"
+#include "gz/sensors/Export.hh"
 
 namespace ignition
 {

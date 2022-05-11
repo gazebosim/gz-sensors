@@ -15,15 +15,15 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_BROWNDISTORTIONMODEL_HH_
-#define IGNITION_SENSORS_BROWNDISTORTIONMODEL_HH_
+#ifndef GZ_SENSORS_BROWNDISTORTIONMODEL_HH_
+#define GZ_SENSORS_BROWNDISTORTIONMODEL_HH_
 
 #include <sdf/sdf.hh>
 
-#include "ignition/sensors/Distortion.hh"
-#include "ignition/sensors/Export.hh"
-#include "ignition/sensors/config.hh"
-#include "ignition/utils/ImplPtr.hh"
+#include "gz/sensors/Distortion.hh"
+#include "gz/sensors/Export.hh"
+#include "gz/sensors/config.hh"
+#include "gz/utils/ImplPtr.hh"
 
 namespace ignition
 {
@@ -36,7 +36,7 @@ namespace ignition
     class BrownDistortionModelPrivate;
 
     /** \class BrownDistortionModel BrownDistortionModel.hh \
-    ignition/sensors/BrownDistortionModel.hh
+    gz/sensors/BrownDistortionModel.hh
     **/
     /// \brief Brown Distortion Model class
     class IGNITION_SENSORS_VISIBLE BrownDistortionModel : public Distortion

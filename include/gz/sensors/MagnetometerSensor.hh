@@ -14,20 +14,20 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_MAGNETOMETERSENSOR_HH_
-#define IGNITION_SENSORS_MAGNETOMETERSENSOR_HH_
+#ifndef GZ_SENSORS_MAGNETOMETERSENSOR_HH_
+#define GZ_SENSORS_MAGNETOMETERSENSOR_HH_
 
 #include <memory>
 
 #include <sdf/sdf.hh>
 
-#include <ignition/utils/SuppressWarning.hh>
-#include <ignition/math/Pose3.hh>
+#include <gz/utils/SuppressWarning.hh>
+#include <gz/math/Pose3.hh>
 
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/magnetometer/Export.hh>
+#include <gz/sensors/config.hh>
+#include <gz/sensors/magnetometer/Export.hh>
 
-#include "ignition/sensors/Sensor.hh"
+#include "gz/sensors/Sensor.hh"
 
 namespace ignition
 {

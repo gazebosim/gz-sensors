@@ -14,12 +14,12 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_RENDERINGSENSOR_HH_
-#define IGNITION_SENSORS_RENDERINGSENSOR_HH_
+#ifndef GZ_SENSORS_RENDERINGSENSOR_HH_
+#define GZ_SENSORS_RENDERINGSENSOR_HH_
 
 #include <memory>
 
-#include <ignition/utils/SuppressWarning.hh>
+#include <gz/utils/SuppressWarning.hh>
 
 // TODO(louise) Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -27,13 +27,13 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/RenderTypes.hh>
+#include <gz/rendering/RenderTypes.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include "ignition/sensors/rendering/Export.hh"
-#include "ignition/sensors/Sensor.hh"
+#include "gz/sensors/rendering/Export.hh"
+#include "gz/sensors/Sensor.hh"
 
 namespace ignition
 {
