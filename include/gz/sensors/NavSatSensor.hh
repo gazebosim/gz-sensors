@@ -14,18 +14,18 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_NAVSAT_HH_
-#define IGNITION_SENSORS_NAVSAT_HH_
+#ifndef GZ_SENSORS_NAVSAT_HH_
+#define GZ_SENSORS_NAVSAT_HH_
 
 #include <memory>
 
-#include <ignition/utils/SuppressWarning.hh>
+#include <gz/utils/SuppressWarning.hh>
 #include <sdf/Sensor.hh>
 
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/navsat/Export.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/navsat/Export.hh"
 
-#include "ignition/sensors/Sensor.hh"
+#include "gz/sensors/Sensor.hh"
 
 namespace ignition
 {

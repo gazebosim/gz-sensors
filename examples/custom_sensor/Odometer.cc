@@ -17,11 +17,11 @@
 
 #include <math.h>
 
-#include <ignition/msgs/double.pb.h>
+#include <gz/msgs/double.pb.h>
 
-#include <ignition/common/Console.hh>
-#include <ignition/sensors/Noise.hh>
-#include <ignition/sensors/Util.hh>
+#include <gz/common/Console.hh>
+#include <gz/sensors/Noise.hh>
+#include <gz/sensors/Util.hh>
 
 #include "Odometer.hh"
 

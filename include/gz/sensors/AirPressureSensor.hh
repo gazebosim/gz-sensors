@@ -14,19 +14,19 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_AIRPRESSURESENSOR_HH_
-#define IGNITION_SENSORS_AIRPRESSURESENSOR_HH_
+#ifndef GZ_SENSORS_AIRPRESSURESENSOR_HH_
+#define GZ_SENSORS_AIRPRESSURESENSOR_HH_
 
 #include <memory>
 
 #include <sdf/sdf.hh>
 
-#include <ignition/utils/SuppressWarning.hh>
+#include <gz/utils/SuppressWarning.hh>
 
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/air_pressure/Export.hh>
+#include <gz/sensors/config.hh>
+#include <gz/sensors/air_pressure/Export.hh>
 
-#include "ignition/sensors/Sensor.hh"
+#include "gz/sensors/Sensor.hh"
 
 namespace ignition
 {

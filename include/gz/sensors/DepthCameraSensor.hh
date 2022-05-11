@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_DEPTHCAMERASENSOR_HH_
-#define IGNITION_SENSORS_DEPTHCAMERASENSOR_HH_
+#ifndef GZ_SENSORS_DEPTHCAMERASENSOR_HH_
+#define GZ_SENSORS_DEPTHCAMERASENSOR_HH_
 
 #include <memory>
 #include <cstdint>
@@ -23,15 +23,15 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/Event.hh>
-#include <ignition/utils/SuppressWarning.hh>
+#include <gz/common/Event.hh>
+#include <gz/utils/SuppressWarning.hh>
 
 #ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs.hh>
+#include <gz/msgs.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -42,15 +42,15 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/DepthCamera.hh>
+#include <gz/rendering/DepthCamera.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include "ignition/sensors/depth_camera/Export.hh"
-#include "ignition/sensors/CameraSensor.hh"
-#include "ignition/sensors/Export.hh"
-#include "ignition/sensors/Sensor.hh"
+#include "gz/sensors/depth_camera/Export.hh"
+#include "gz/sensors/CameraSensor.hh"
+#include "gz/sensors/Export.hh"
+#include "gz/sensors/Sensor.hh"
 
 namespace ignition
 {

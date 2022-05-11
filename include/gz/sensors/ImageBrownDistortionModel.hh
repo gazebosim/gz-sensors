@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_IMAGEBROWNDISTORTIONMODEL_HH_
-#define IGNITION_SENSORS_IMAGEBROWNDISTORTIONMODEL_HH_
+#ifndef GZ_SENSORS_IMAGEBROWNDISTORTIONMODEL_HH_
+#define GZ_SENSORS_IMAGEBROWNDISTORTIONMODEL_HH_
 
 #include <sdf/sdf.hh>
 
@@ -26,14 +26,14 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/Camera.hh>
+#include <gz/rendering/Camera.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/BrownDistortionModel.hh"
-#include "ignition/sensors/rendering/Export.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/BrownDistortionModel.hh"
+#include "gz/sensors/rendering/Export.hh"
 
 namespace ignition
 {
@@ -45,7 +45,7 @@ namespace ignition
     class ImageBrownDistortionModelPrivate;
 
     /** \class ImageBrownDistortionModel ImageBrownDistortionModel.hh \
-    ignition/sensors/ImageBrownDistortionModel.hh
+    gz/sensors/ImageBrownDistortionModel.hh
     **/
     /// \brief Distortion Model class for image sensors
     class IGNITION_SENSORS_RENDERING_VISIBLE ImageBrownDistortionModel :

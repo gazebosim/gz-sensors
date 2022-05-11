@@ -14,21 +14,21 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_SENSORFACTORY_HH_
-#define IGNITION_SENSORS_SENSORFACTORY_HH_
+#ifndef GZ_SENSORS_SENSORFACTORY_HH_
+#define GZ_SENSORS_SENSORFACTORY_HH_
 
 #include <memory>
 #include <string>
 #include <type_traits>
 #include <sdf/sdf.hh>
 
-#include <ignition/common/Console.hh>
-#include <ignition/utils/SuppressWarning.hh>
+#include <gz/common/Console.hh>
+#include <gz/utils/SuppressWarning.hh>
 
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/Export.hh>
+#include <gz/sensors/config.hh>
+#include <gz/sensors/Export.hh>
 
-#include "ignition/sensors/Sensor.hh"
+#include "gz/sensors/Sensor.hh"
 
 namespace ignition
 {

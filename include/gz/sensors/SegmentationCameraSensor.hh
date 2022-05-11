@@ -15,25 +15,25 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_SEGMENTATIONCAMERASENSOR_HH_
-#define IGNITION_SENSORS_SEGMENTATIONCAMERASENSOR_HH_
+#ifndef GZ_SENSORS_SEGMENTATIONCAMERASENSOR_HH_
+#define GZ_SENSORS_SEGMENTATIONCAMERASENSOR_HH_
 
 #include <memory>
 #include <string>
 
-#include <ignition/common/Event.hh>
-#include <ignition/common/PluginMacros.hh>
-#include <ignition/utils/SuppressWarning.hh>
-#include <ignition/msgs.hh>
-#include <ignition/transport/Node.hh>
-#include <ignition/transport/Publisher.hh>
+#include <gz/common/Event.hh>
+#include <gz/common/PluginMacros.hh>
+#include <gz/utils/SuppressWarning.hh>
+#include <gz/msgs.hh>
+#include <gz/transport/Node.hh>
+#include <gz/transport/Publisher.hh>
 #include <sdf/sdf.hh>
 
-#include "ignition/sensors/CameraSensor.hh"
-#include "ignition/sensors/Export.hh"
-#include "ignition/sensors/Sensor.hh"
+#include "gz/sensors/CameraSensor.hh"
+#include "gz/sensors/Export.hh"
+#include "gz/sensors/Sensor.hh"
 
-#include "ignition/sensors/segmentation_camera/Export.hh"
+#include "gz/sensors/segmentation_camera/Export.hh"
 
 namespace ignition
 {

@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_CAMERASENSOR_HH_
-#define IGNITION_SENSORS_CAMERASENSOR_HH_
+#ifndef GZ_SENSORS_CAMERASENSOR_HH_
+#define GZ_SENSORS_CAMERASENSOR_HH_
 
 #include <cstdint>
 #include <memory>
@@ -23,14 +23,14 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/utils/SuppressWarning.hh>
+#include <gz/utils/SuppressWarning.hh>
 
 #ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs.hh>
+#include <gz/msgs.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -41,15 +41,15 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/Camera.hh>
+#include <gz/rendering/Camera.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include "ignition/sensors/camera/Export.hh"
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/Export.hh"
-#include "ignition/sensors/RenderingSensor.hh"
+#include "gz/sensors/camera/Export.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/Export.hh"
+#include "gz/sensors/RenderingSensor.hh"
 
 namespace ignition
 {

@@ -14,15 +14,15 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_SENSOR_HH_
-#define IGNITION_SENSORS_SENSOR_HH_
+#ifndef GZ_SENSORS_SENSOR_HH_
+#define GZ_SENSORS_SENSOR_HH_
 
 #ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/header.pb.h>
+#include <gz/msgs/header.pb.h>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -31,10 +31,10 @@
 #include <memory>
 #include <string>
 
-#include <ignition/utils/SuppressWarning.hh>
-#include <ignition/math/Pose3.hh>
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/Export.hh>
+#include <gz/utils/SuppressWarning.hh>
+#include <gz/math/Pose3.hh>
+#include <gz/sensors/config.hh>
+#include <gz/sensors/Export.hh>
 #include <sdf/sdf.hh>
 
 namespace ignition

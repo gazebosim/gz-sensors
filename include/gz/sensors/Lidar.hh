@@ -14,18 +14,18 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_LIDAR_HH_
-#define IGNITION_SENSORS_LIDAR_HH_
+#ifndef GZ_SENSORS_LIDAR_HH_
+#define GZ_SENSORS_LIDAR_HH_
 
 #include <memory>
 #include <string>
 #include <vector>
 
-#include <ignition/utils/SuppressWarning.hh>
-#include <ignition/common/Event.hh>
+#include <gz/utils/SuppressWarning.hh>
+#include <gz/common/Event.hh>
 
-#include "ignition/sensors/lidar/Export.hh"
-#include "ignition/sensors/RenderingSensor.hh"
+#include "gz/sensors/lidar/Export.hh"
+#include "gz/sensors/RenderingSensor.hh"
 
 namespace ignition
 {

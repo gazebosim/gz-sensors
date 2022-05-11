@@ -15,14 +15,14 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_GAUSSIANNOISEMODEL_HH_
-#define IGNITION_SENSORS_GAUSSIANNOISEMODEL_HH_
+#ifndef GZ_SENSORS_GAUSSIANNOISEMODEL_HH_
+#define GZ_SENSORS_GAUSSIANNOISEMODEL_HH_
 
 #include <sdf/sdf.hh>
 
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/Export.hh"
-#include "ignition/sensors/Noise.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/Export.hh"
+#include "gz/sensors/Noise.hh"
 
 namespace ignition
 {
@@ -35,7 +35,7 @@ namespace ignition
     class GaussianNoiseModelPrivate;
 
     /** \class GaussianNoiseModel GaussianNoiseModel.hh \
-    ignition/sensors/GaussianNoiseModel.hh
+    gz/sensors/GaussianNoiseModel.hh
     **/
     /// \brief Gaussian noise class
     class IGNITION_SENSORS_VISIBLE GaussianNoiseModel : public Noise

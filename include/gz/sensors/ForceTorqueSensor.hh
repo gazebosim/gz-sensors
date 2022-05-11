@@ -15,21 +15,21 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_FORCETORQUESENSOR_HH_
-#define IGNITION_SENSORS_FORCETORQUESENSOR_HH_
+#ifndef GZ_SENSORS_FORCETORQUESENSOR_HH_
+#define GZ_SENSORS_FORCETORQUESENSOR_HH_
 
 #include <memory>
 
 #include <sdf/sdf.hh>
 
-#include <ignition/utils/SuppressWarning.hh>
+#include <gz/utils/SuppressWarning.hh>
 
-#include <ignition/math/Pose3.hh>
+#include <gz/math/Pose3.hh>
 
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/force_torque/Export.hh>
+#include <gz/sensors/config.hh>
+#include <gz/sensors/force_torque/Export.hh>
 
-#include "ignition/sensors/Sensor.hh"
+#include "gz/sensors/Sensor.hh"
 
 namespace ignition
 {

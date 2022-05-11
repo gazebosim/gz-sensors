@@ -15,16 +15,16 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_IMAGEDISTORTION_HH_
-#define IGNITION_SENSORS_IMAGEDISTORTION_HH_
+#ifndef GZ_SENSORS_IMAGEDISTORTION_HH_
+#define GZ_SENSORS_IMAGEDISTORTION_HH_
 
 #include <string>
 
 #include <sdf/sdf.hh>
 
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/SensorTypes.hh"
-#include "ignition/sensors/rendering/Export.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/SensorTypes.hh"
+#include "gz/sensors/rendering/Export.hh"
 
 namespace ignition
 {
@@ -36,7 +36,7 @@ namespace ignition
     class DistortionPrivate;
 
     /// \class ImageDistortionFactory ImageDistortion.hh
-    /// ignition/sensors/ImageDistortion.hh
+    /// gz/sensors/ImageDistortion.hh
     /// \brief Use this distortion manager for creating and loading distortion
     /// models.
     class IGNITION_SENSORS_RENDERING_VISIBLE ImageDistortionFactory
