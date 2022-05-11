@@ -201,7 +201,7 @@ bool GpuLidarSensor::CreateLidar()
   this->dataPtr->gpuRays->SetNearClipPlane(this->RangeMin());
   this->dataPtr->gpuRays->SetFarClipPlane(this->RangeMax());
 
-  // Make ranges outside of min/max to +/- inf, as per REP 117
+  // Mask ranges outside of min/max to +/- inf, as per REP 117
   this->dataPtr->gpuRays->SetClamp(false);
 
   this->dataPtr->gpuRays->SetAngleMin(this->AngleMin().Radian());
@@ -258,7 +258,6 @@ void GpuLidarSensor::OnNewLidarFrame(const float *_data,
     this->dataPtr->lidarEvent(_data, _width, _height, _channels, _format);
   }
 }
-
 
 //////////////////////////////////////////////////
 bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)

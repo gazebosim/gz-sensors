@@ -628,4 +628,3 @@ bool RgbdCameraSensor::HasConnections() const
       (this->dataPtr->depthPub && this->dataPtr->depthPub.HasConnections()) ||
       (this->dataPtr->pointPub && this->dataPtr->pointPub.HasConnections());
 }
-

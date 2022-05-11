@@ -658,4 +658,3 @@ bool ThermalCameraSensor::HasConnections() const
       this->dataPtr->thermalPub.HasConnections()) ||
       this->dataPtr->imageEvent.ConnectionCount() > 0u;
 }
-

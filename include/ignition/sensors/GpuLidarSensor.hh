@@ -138,7 +138,6 @@ namespace ignition
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &_format);
 
-
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
