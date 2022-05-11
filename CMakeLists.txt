@@ -13,7 +13,9 @@ find_package(ignition-cmake3 REQUIRED)
 #============================================================================
 # Configure the project
 #============================================================================
-ign_configure_project(VERSION_SUFFIX pre1)
+ign_configure_project(
+  REPLACE_IGNITION_INCLUDE_PATH gz/sensors
+  VERSION_SUFFIX pre1)
 
 #============================================================================
 # Set project-specific options
