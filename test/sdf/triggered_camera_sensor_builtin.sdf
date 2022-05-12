@@ -7,6 +7,7 @@
         <topic>/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF</topic>
         <camera>
           <triggered>true</triggered>
+          <trigger_topic>/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF/trigger</trigger_topic>
           <horizontal_fov>1.05</horizontal_fov>
           <image>
             <width>256</width>
