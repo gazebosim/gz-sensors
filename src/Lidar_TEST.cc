@@ -136,7 +136,8 @@ TEST(Lidar_TEST, CreateLaser)
   sdf::ElementPtr lidarSDF = LidarToSDF(name, update_rate, topic,
     horz_samples, horz_resolution, horz_min_angle, horz_max_angle,
     vert_samples, vert_resolution, vert_min_angle, vert_max_angle,
-    range_resolution, range_min, range_max, visibility_mask, always_on, visualize);
+    range_resolution, range_min, range_max, visibility_mask, always_on,
+    visualize);
 
   // Create a CameraSensor
   ignition::sensors::Lidar *sensor = mgr.CreateSensor<ignition::sensors::Lidar>(
