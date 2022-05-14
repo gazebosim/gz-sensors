@@ -1,5 +1,19 @@
 ## Ignition Sensors 6
 
+### Ignition Sensors 6.4.0 (2022-05-13)
+
+1. Set lidar visibility mask
+    * [Pull request #224](https://github.com/ignitionrobotics/ign-sensors/pull/224)
+
+1. Fix triggered camera test
+    * [Pull request #215](https://github.com/ignitionrobotics/ign-sensors/pull/215)
+
+1. Add support for l8 format
+    * [Pull request #220](https://github.com/ignitionrobotics/ign-sensors/pull/220)
+
+1. Fix `<ignition_frame_id>` not working for GpuLidarSensor
+    * [Pull request #218](https://github.com/ignitionrobotics/ign-sensors/pull/218)
+
 ### Ignition Sensors 6.3.0 (2022-04-04)
 
 1. IMU custom_rpy parent_frame should be set to 'world'
