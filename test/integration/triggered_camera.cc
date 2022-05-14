@@ -50,7 +50,7 @@
 
 using namespace std::chrono_literals;
 
-class CameraSensorTest: public testing::Test,
+class TriggeredCameraTest: public testing::Test,
   public testing::WithParamInterface<const char *>
 {
   // Documentation inherited
@@ -63,7 +63,7 @@ class CameraSensorTest: public testing::Test,
   public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
 };
 
-void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
+void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 {
   std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "triggered_camera_sensor_builtin.sdf");
@@ -77,14 +77,6 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   auto linkPtr = modelPtr->GetElement("link");
   ASSERT_TRUE(linkPtr->HasElement("sensor"));
   auto sensorPtr = linkPtr->GetElement("sensor");
-
-  // If ogre is not the engine, don't run the test
-  if (_renderEngine.compare("ogre") != 0)
-  {
-    igndbg << "Engine '" << _renderEngine
-      << "' doesn't support segmentation cameras" << std::endl;
-    return;
-  }
 
   // Setup ign-rendering with an empty scene
   auto *engine = ignition::rendering::engine(_renderEngine);
@@ -121,7 +113,7 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
     WaitForMessageTestHelper<ignition::msgs::Image> helper(imageTopic);
     EXPECT_TRUE(sensor->HasConnections());
     mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
-    EXPECT_FALSE(helper.WaitForMessage(3s)) << helper;
+    EXPECT_FALSE(helper.WaitForMessage(1s)) << helper;
   }
 
   // trigger camera through topic
@@ -161,12 +153,12 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 }
 
 //////////////////////////////////////////////////
-TEST_P(CameraSensorTest, ImagesWithBuiltinSDF)
+TEST_P(TriggeredCameraTest, ImagesWithBuiltinSDF)
 {
   ImagesWithBuiltinSDF(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(CameraSensor, CameraSensorTest,
+INSTANTIATE_TEST_CASE_P(CameraSensor, TriggeredCameraTest,
     RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////

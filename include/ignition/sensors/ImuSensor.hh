@@ -166,6 +166,7 @@ namespace ignition
 
       /// \brief Check if there are any subscribers
       /// \return True if there are subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Garden
       public: bool HasConnections() const;
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING

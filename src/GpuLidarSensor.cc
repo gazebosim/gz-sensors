@@ -226,6 +226,7 @@ bool GpuLidarSensor::CreateLidar()
   this->dataPtr->pointMsg.set_row_step(
       this->dataPtr->pointMsg.point_step() *
       this->dataPtr->pointMsg.width());
+  this->dataPtr->gpuRays->SetVisibilityMask(this->VisibilityMask());
 
   this->dataPtr->lidarFrameConnection =
       this->dataPtr->gpuRays->ConnectNewGpuRaysFrame(

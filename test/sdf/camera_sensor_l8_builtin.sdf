@@ -4,19 +4,24 @@
     <link name="link1">
       <sensor name="camera1" type="camera">
         <update_rate>10</update_rate>
-        <topic>/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF</topic>
+        <ignition_frame_id>base_camera</ignition_frame_id>
+        <topic>/images_l8</topic>
         <camera>
-          <triggered>true</triggered>
-          <trigger_topic>/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF/trigger</trigger_topic>
           <horizontal_fov>1.05</horizontal_fov>
           <image>
             <width>256</width>
-            <height>257</height>
+            <height>256</height>
+            <format>L8</format>
           </image>
           <clip>
             <near>0.1</near>
             <far>10.0</far>
           </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.007</stddev>
+          </noise>
         </camera>
       </sensor>
     </link>

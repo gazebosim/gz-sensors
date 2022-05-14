@@ -238,7 +238,12 @@ namespace ignition
 
       /// \brief Check if there are any subscribers for sensor data
       /// \return True if there are subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Garden
       public: bool HasConnections() const;
+
+      /// \brief Get the visibility mask
+      /// \return Visibility mask
+      public: uint32_t VisibilityMask() const;
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Just a mutex for thread safety

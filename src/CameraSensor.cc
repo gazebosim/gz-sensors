@@ -214,6 +214,9 @@ bool CameraSensor::CreateCamera()
     case sdf::PixelFormatType::RGB_INT8:
       this->dataPtr->camera->SetImageFormat(ignition::rendering::PF_R8G8B8);
       break;
+    case sdf::PixelFormatType::L_INT8:
+      this->dataPtr->camera->SetImageFormat(ignition::rendering::PF_L8);
+      break;
     default:
       ignerr << "Unsupported pixel format ["
         << static_cast<int>(pixelFormat) << "]\n";
@@ -315,6 +318,8 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
     this->dataPtr->node.Subscribe(this->dataPtr->triggerTopic,
         &CameraSensorPrivate::OnTrigger, this->dataPtr.get());
 
+    igndbg << "Camera trigger messages for [" << this->Name() << "] subscribed"
+           << " on [" << this->dataPtr->triggerTopic << "]" << std::endl;
     this->dataPtr->isTriggeredCamera = true;
   }
 
@@ -434,6 +439,10 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     case ignition::rendering::PF_R8G8B8:
       format = ignition::common::Image::RGB_INT8;
       msgsPixelFormat = msgs::PixelFormatType::RGB_INT8;
+      break;
+    case ignition::rendering::PF_L8:
+      format = ignition::common::Image::L_INT8;
+      msgsPixelFormat = msgs::PixelFormatType::L_INT8;
       break;
     default:
       ignerr << "Unsupported pixel format ["
