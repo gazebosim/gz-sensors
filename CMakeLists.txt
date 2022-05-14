@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
 #============================================================================
 # Initialize the project
 #============================================================================
-project(ignition-sensors6 VERSION 6.3.0)
+project(ignition-sensors6 VERSION 6.4.0)
 
 #============================================================================
 # Find ignition-cmake
@@ -86,7 +86,7 @@ set(IGN_MSGS_VER ${ignition-msgs8_VERSION_MAJOR})
 
 #--------------------------------------
 # Find SDFormat
-ign_find_package(sdformat12 REQUIRED VERSION 12.4.0)
+ign_find_package(sdformat12 REQUIRED VERSION 12.5.0)
 set(SDF_VER ${sdformat12_VERSION_MAJOR})
 
 set(IGN_SENSORS_PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
