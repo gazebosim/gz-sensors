@@ -129,4 +129,3 @@ void RenderingSensor::Render()
     this->dataPtr->scene->PostRender();
   }
 }
-

@@ -552,21 +552,23 @@ bool DepthCameraSensor::Update(
       rendering::PixelUtil::MemorySize(rendering::PF_FLOAT32_R,
       width, height));
 
-  // publish
   this->AddSequence(msg.mutable_header(), "default");
   this->dataPtr->pub.Publish(msg);
 
   // publish the camera info message
   this->PublishInfo(_now);
 
-  // Trigger callbacks.
-  try
+  if (this->dataPtr->imageEvent.ConnectionCount() > 0u)
   {
-    this->dataPtr->imageEvent(msg);
-  }
-  catch(...)
-  {
-    ignerr << "Exception thrown in an image callback.\n";
+    // Trigger callbacks.
+    try
+    {
+      this->dataPtr->imageEvent(msg);
+    }
+    catch(...)
+    {
+      ignerr << "Exception thrown in an image callback.\n";
+    }
   }
 
   if (this->dataPtr->pointPub.HasConnections() &&
@@ -632,3 +634,10 @@ double DepthCameraSensor::NearClip() const
   return this->dataPtr->near;
 }
 
+//////////////////////////////////////////////////
+bool DepthCameraSensor::HasConnections() const
+{
+  return (this->dataPtr->pub && this->dataPtr->pub.HasConnections()) ||
+      (this->dataPtr->pointPub && this->dataPtr->pointPub.HasConnections()) ||
+      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+}

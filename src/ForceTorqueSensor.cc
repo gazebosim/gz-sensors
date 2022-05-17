@@ -312,3 +312,9 @@ math::Quaterniond ForceTorqueSensor::RotationChildInSensor() const
 {
   return math::Quaterniond(this->dataPtr->rotationChildInSensor);
 }
+
+//////////////////////////////////////////////////
+bool ForceTorqueSensor::HasConnections() const
+{
+  return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
+}

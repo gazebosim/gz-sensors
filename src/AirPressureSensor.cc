@@ -220,3 +220,8 @@ double AirPressureSensor::ReferenceAltitude() const
   return this->dataPtr->referenceAltitude;
 }
 
+//////////////////////////////////////////////////
+bool AirPressureSensor::HasConnections() const
+{
+  return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
+}

@@ -114,9 +114,11 @@ TEST_F(ImuSensorTest, SensorReadings)
   ignition::sensors::SensorFactory sf;
   auto sensor = sf.CreateSensor<ignition::sensors::ImuSensor>(imuSdf);
   ASSERT_NE(nullptr, sensor);
+  EXPECT_FALSE(sensor->HasConnections());
 
   // subscribe to the topic
   WaitForMessageTestHelper<ignition::msgs::IMU> msgHelper(topic);
+  EXPECT_TRUE(sensor->HasConnections());
 
   // verify initial readings
   EXPECT_EQ(ignition::math::Pose3d::Zero, sensor->WorldPose());

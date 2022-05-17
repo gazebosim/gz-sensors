@@ -250,6 +250,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   ignition::sensors::RgbdCameraSensor *rgbdSensor =
       mgr.CreateSensor<ignition::sensors::RgbdCameraSensor>(sensorPtr);
   ASSERT_NE(rgbdSensor, nullptr);
+  EXPECT_FALSE(rgbdSensor->HasConnections());
   rgbdSensor->SetScene(scene);
 
   EXPECT_EQ(rgbdSensor->ImageWidth(), static_cast<unsigned int>(imgWidth));
@@ -258,6 +259,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   std::string depthTopic =
     "/test/integration/RgbdCameraPlugin_imagesWithBuiltinSDF/depth_image";
   WaitForMessageTestHelper<ignition::msgs::Image> depthHelper(depthTopic);
+  EXPECT_TRUE(rgbdSensor->HasConnections());
 
   std::string imageTopic =
     "/test/integration/RgbdCameraPlugin_imagesWithBuiltinSDF/image";

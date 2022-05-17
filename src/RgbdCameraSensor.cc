@@ -620,3 +620,11 @@ unsigned int RgbdCameraSensor::ImageHeight() const
   return this->dataPtr->depthCamera->ImageHeight();
 }
 
+//////////////////////////////////////////////////
+bool RgbdCameraSensor::HasConnections() const
+{
+  return (this->dataPtr->imagePub &&
+      this->dataPtr->imagePub.HasConnections()) ||
+      (this->dataPtr->depthPub && this->dataPtr->depthPub.HasConnections()) ||
+      (this->dataPtr->pointPub && this->dataPtr->pointPub.HasConnections());
+}

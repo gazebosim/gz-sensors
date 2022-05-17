@@ -554,6 +554,16 @@ common::ConnectionPtr SegmentationCameraSensor::ConnectImageCallback(
 }
 
 //////////////////////////////////////////////////
+bool SegmentationCameraSensor::HasConnections() const
+{
+  return (this->dataPtr->coloredMapPublisher &&
+      this->dataPtr->coloredMapPublisher.HasConnections()) ||
+      (this->dataPtr->labelsMapPublisher &&
+      this->dataPtr->labelsMapPublisher.HasConnections()) ||
+      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+}
+
+//////////////////////////////////////////////////
 bool SegmentationCameraSensorPrivate::SaveSample()
 {
   // Attempt to create the directories if they don't exist
