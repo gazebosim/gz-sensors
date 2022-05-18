@@ -180,6 +180,7 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   auto sensor =
       sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdf);
   ASSERT_NE(nullptr, sensor);
+  EXPECT_FALSE(sensor->HasConnections());
 
   auto sensorNoise =
       sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdfNoise);
@@ -222,6 +223,7 @@ TEST_F(AltimeterSensorTest, SensorReadings)
 
   // verify msg received on the topic
   WaitForMessageTestHelper<ignition::msgs::Altimeter> msgHelper(topic);
+  EXPECT_TRUE(sensor->HasConnections());
   sensor->Update(std::chrono::steady_clock::duration(std::chrono::seconds(1)));
   EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
   auto msg = msgHelper.Message();

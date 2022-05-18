@@ -446,6 +446,11 @@ int Lidar::Fiducial(const unsigned int /*_index*/) const
   return -1;
 }
 
+//////////////////////////////////////////////////
+uint32_t Lidar::VisibilityMask() const
+{
+  return this->dataPtr->sdfLidar.VisibilityMask();
+}
 
 //////////////////////////////////////////////////
 bool Lidar::IsActive() const
@@ -455,3 +460,8 @@ bool Lidar::IsActive() const
   return true;
 }
 
+//////////////////////////////////////////////////
+bool Lidar::HasConnections() const
+{
+  return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
+}

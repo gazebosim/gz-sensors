@@ -199,6 +199,7 @@ TEST_F(NavSatSensorTest, SensorReadings)
   SensorFactory sf;
   auto sensor = sf.CreateSensor<NavSatSensor>(navsatSdf);
   ASSERT_NE(nullptr, sensor);
+  EXPECT_FALSE(sensor->HasConnections());
 
   auto sensorNoise = sf.CreateSensor<NavSatSensor>(navsatSdfNoise);
   ASSERT_NE(nullptr, sensorNoise);
@@ -257,6 +258,7 @@ TEST_F(NavSatSensorTest, SensorReadings)
 
   // verify msg received on the topic
   WaitForMessageTestHelper<msgs::NavSat> msgHelper(topic);
+  EXPECT_TRUE(sensor->HasConnections());
   sensor->Update(std::chrono::steady_clock::duration(1s));
   EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
   auto msg = msgHelper.Message();

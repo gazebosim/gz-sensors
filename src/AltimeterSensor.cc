@@ -215,3 +215,8 @@ double AltimeterSensor::VerticalVelocity() const
   return this->dataPtr->verticalVelocity;
 }
 
+//////////////////////////////////////////////////
+bool AltimeterSensor::HasConnections() const
+{
+  return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
+}
