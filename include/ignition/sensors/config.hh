@@ -15,4 +15,14 @@
  *
  */
 
+#ifndef IGNITION_SENSORS__CONFIG_HH_
+#define IGNITION_SENSORS__CONFIG_HH_
+
 #include <gz/sensors/config.hh>
+
+namespace [[deprecated("Use gz namespace.")]]  ignition
+{
+  using namespace gz;
+}
+
+#endif
