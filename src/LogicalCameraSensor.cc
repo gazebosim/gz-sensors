@@ -26,11 +26,11 @@
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/LogicalCameraSensor.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for LogicalCameraSensor
-class ignition::sensors::LogicalCameraSensorPrivate
+class gz::sensors::LogicalCameraSensorPrivate
 {
   /// \brief node to create publisher
   public: transport::Node node;
@@ -45,7 +45,7 @@ class ignition::sensors::LogicalCameraSensorPrivate
   public: std::mutex mutex;
 
   /// \brief Camera frustum.
-  public: ignition::math::Frustum frustum;
+  public: gz::math::Frustum frustum;
 
   /// \brief Set world pose.
   public: math::Pose3d worldPose;
@@ -54,7 +54,7 @@ class ignition::sensors::LogicalCameraSensorPrivate
   public: std::map<std::string, math::Pose3d> models;
 
   /// \brief Msg containg info on models detected by logical camera
-  ignition::msgs::LogicalCameraImage msg;
+  gz::msgs::LogicalCameraImage msg;
 };
 
 //////////////////////////////////////////////////
@@ -85,7 +85,7 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
     if (!_sdf->HasElement("logical_camera"))
     {
       ignerr << "<sensor><camera> SDF element not found while attempting to "
-        << "load a ignition::sensors::LogicalCameraSensor\n";
+        << "load a gz::sensors::LogicalCameraSensor\n";
       return false;
     }
     cameraSdf = _sdf->GetElement("logical_camera");
@@ -106,7 +106,7 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
     this->SetTopic("/logical_camera");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::LogicalCameraImage>(
+      this->dataPtr->node.Advertise<gz::msgs::LogicalCameraImage>(
       this->Topic());
 
   if (!this->dataPtr->pub)
@@ -185,7 +185,7 @@ double LogicalCameraSensor::Far() const
 }
 
 //////////////////////////////////////////////////
-ignition::math::Angle LogicalCameraSensor::HorizontalFOV() const
+gz::math::Angle LogicalCameraSensor::HorizontalFOV() const
 {
   return this->dataPtr->frustum.FOV();
 }

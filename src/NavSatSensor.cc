@@ -25,11 +25,11 @@
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/SensorTypes.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for NavSat
-class ignition::sensors::NavSatPrivate
+class gz::sensors::NavSatPrivate
 {
   /// \brief Node to create publisher
   public: transport::Node node;

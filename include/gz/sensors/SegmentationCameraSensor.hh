@@ -34,7 +34,7 @@
 
 #include "gz/sensors/segmentation_camera/Export.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
@@ -101,13 +101,13 @@ namespace ignition
       /// \remark Do not block inside of the callback.
       /// \return A connection pointer that must remain in scope. When the
       /// connection pointer falls out of scope, the connection is broken.
-      public: ignition::common::ConnectionPtr ConnectImageCallback(
-                  std::function<void(const ignition::msgs::Image &)> _callback);
+      public: gz::common::ConnectionPtr ConnectImageCallback(
+                  std::function<void(const gz::msgs::Image &)> _callback);
 
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
       public: virtual void SetScene(
-                  ignition::rendering::ScenePtr _scene) override;
+                  gz::rendering::ScenePtr _scene) override;
 
       /// \brief Get image width.
       /// \return width of the image

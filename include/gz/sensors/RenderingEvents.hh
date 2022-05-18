@@ -35,7 +35,7 @@
 #include <gz/sensors/config.hh>
 #include <gz/sensors/rendering/Export.hh>
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
@@ -51,15 +51,15 @@ namespace ignition
       /// \remark Do not block inside of the callback.
       /// \return A connection pointer that must remain in scope. When the
       /// connection pointer falls out of scope, the connection is broken.
-      public: static ignition::common::ConnectionPtr ConnectSceneChangeCallback(
-                  std::function<void(const ignition::rendering::ScenePtr &)>
+      public: static gz::common::ConnectionPtr ConnectSceneChangeCallback(
+                  std::function<void(const gz::rendering::ScenePtr &)>
                   _callback);
 
       IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Event that is used to trigger callbacks when the scene
       /// is changed
-      public: static ignition::common::EventT<
-              void(const ignition::rendering::ScenePtr &)> sceneEvent;
+      public: static gz::common::EventT<
+              void(const gz::rendering::ScenePtr &)> sceneEvent;
       IGN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }

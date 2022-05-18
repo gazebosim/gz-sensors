@@ -55,7 +55,7 @@
 #include "PointCloudUtil.hh"
 
 /// \brief Private data for RgbdCameraSensor
-class ignition::sensors::RgbdCameraSensorPrivate
+class gz::sensors::RgbdCameraSensorPrivate
 {
   /// \brief Depth data callback used to get the data from the sensor
   /// \param[in] _scan pointer to the data from the sensor
@@ -95,7 +95,7 @@ class ignition::sensors::RgbdCameraSensorPrivate
   public: bool initialized = false;
 
   /// \brief Rendering camera
-  public: ignition::rendering::DepthCameraPtr depthCamera;
+  public: gz::rendering::DepthCameraPtr depthCamera;
 
   /// \brief Depth data buffer.
   public: float *depthBuffer = nullptr;
@@ -120,19 +120,19 @@ class ignition::sensors::RgbdCameraSensorPrivate
   public: unsigned int channels = 4;
 
   /// \brief Pointer to an image to be published
-  public: ignition::rendering::Image image;
+  public: gz::rendering::Image image;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
 
   /// \brief Connection from depth camera with new depth data
-  public: ignition::common::ConnectionPtr depthConnection;
+  public: gz::common::ConnectionPtr depthConnection;
 
   /// \brief Connection from depth camera with new point cloud data
-  public: ignition::common::ConnectionPtr pointCloudConnection;
+  public: gz::common::ConnectionPtr pointCloudConnection;
 
   /// \brief Connection to the Manager's scene change event.
-  public: ignition::common::ConnectionPtr sceneChangeConnection;
+  public: gz::common::ConnectionPtr sceneChangeConnection;
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
@@ -148,7 +148,7 @@ class ignition::sensors::RgbdCameraSensorPrivate
   public: PointCloudUtil pointsUtil;
 };
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////
@@ -210,7 +210,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the 2d image publisher
   this->dataPtr->imagePub =
-      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+      this->dataPtr->node.Advertise<gz::msgs::Image>(
           this->Topic() + "/image");
   if (!this->dataPtr->imagePub)
   {
@@ -224,7 +224,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the depth image publisher
   this->dataPtr->depthPub =
-      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+      this->dataPtr->node.Advertise<gz::msgs::Image>(
           this->Topic() + "/depth_image");
   if (!this->dataPtr->depthPub)
   {
@@ -238,7 +238,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the point cloud publisher
   this->dataPtr->pointPub =
-      this->dataPtr->node.Advertise<ignition::msgs::PointCloudPacked>(
+      this->dataPtr->node.Advertise<gz::msgs::PointCloudPacked>(
           this->Topic() + "/points");
   if (!this->dataPtr->pointPub)
   {
@@ -391,7 +391,7 @@ bool RgbdCameraSensor::CreateCameras()
 }
 
 /////////////////////////////////////////////////
-void RgbdCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
+void RgbdCameraSensor::SetScene(gz::rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
@@ -468,7 +468,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // create and publish the depthmessage
   if (this->dataPtr->depthPub.HasConnections())
   {
-    ignition::msgs::Image msg;
+    gz::msgs::Image msg;
     msg.set_width(width);
     msg.set_height(height);
     msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
@@ -492,12 +492,12 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
         if (this->dataPtr->hasDepthFarClip &&
             (this->dataPtr->depthBuffer[i] > this->dataPtr->depthFarClip))
         {
-          this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
+          this->dataPtr->depthBuffer[i] = gz::math::INF_D;
         }
         if (this->dataPtr->hasDepthNearClip &&
             (this->dataPtr->depthBuffer[i] < this->dataPtr->depthNearClip))
         {
-          this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
+          this->dataPtr->depthBuffer[i] = -gz::math::INF_D;
         }
       }
     }
@@ -580,7 +580,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 
       unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
-      ignition::msgs::Image msg;
+      gz::msgs::Image msg;
       msg.set_width(width);
       msg.set_height(height);
       msg.set_step(width * rendering::PixelUtil::BytesPerPixel(

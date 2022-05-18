@@ -27,7 +27,7 @@
 
 #include "gz/sensors/Sensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
@@ -42,7 +42,7 @@ namespace ignition
     /// A sensor that reports position and velocity readings over
     /// Ignition Transport using spherical coordinates (latitude / longitude).
     ///
-    /// By default, it publishes `ignition::msgs::NavSat` messages on the
+    /// By default, it publishes `gz::msgs::NavSat` messages on the
     /// `/.../navsat` topic.
     ///
     /// This sensor assumes the world is using the East-North-Up (ENU) frame.

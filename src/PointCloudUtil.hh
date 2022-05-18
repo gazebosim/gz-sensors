@@ -42,7 +42,7 @@
 #  endif
 #endif
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {

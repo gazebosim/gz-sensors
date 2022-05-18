@@ -57,7 +57,7 @@ Here's an example of how to attach a thermal camera sensor to a model in a [SDF]
       <topic>thermal_camera_8bit/image</topic>
       <plugin
         filename="ignition-gazebo-thermal-sensor-system"
-        name="ignition::gazebo::systems::ThermalSensor">
+        name="gz::gazebo::systems::ThermalSensor">
         <min_temp>253.15</min_temp>
         <max_temp>673.15</max_temp>
         <resolution>3.0</resolution>
@@ -90,7 +90,7 @@ Let's take a closer look at the portion of the code above that focuses on the th
   <topic>thermal_camera_8bit/image</topic>
   <plugin
     filename="ignition-gazebo-thermal-sensor-system"
-    name="ignition::gazebo::systems::ThermalSensor">
+    name="gz::gazebo::systems::ThermalSensor">
     <min_temp>253.15</min_temp>
     <max_temp>673.15</max_temp>
     <resolution>3.0</resolution>
@@ -191,7 +191,7 @@ Here's an example of a box model that has a uniform temperature assigned to it:
       </material>
       <plugin
         filename="ignition-gazebo-thermal-system"
-        name="ignition::gazebo::systems::Thermal">
+        name="gz::gazebo::systems::Thermal">
         <temperature>285.0</temperature>
       </plugin>
     </visual>
@@ -204,7 +204,7 @@ Most of the code above is for the model - here's the key piece for temperature a
 ```xml
 <plugin
   filename="ignition-gazebo-thermal-system"
-  name="ignition::gazebo::systems::Thermal">
+  name="gz::gazebo::systems::Thermal">
   <temperature>285.0</temperature>
 </plugin>
 ```
@@ -222,7 +222,7 @@ If we take a look at Rescue Randy's `model.sdf`, we can see that it incorporates
 ```xml
 <plugin
   filename="ignition-gazebo-thermal-system"
-  name="ignition::gazebo::systems::Thermal">
+  name="gz::gazebo::systems::Thermal">
   <heat_signature>materials/textures/RescueRandy_Thermal.png</heat_signature>
   <max_temp>310</max_temp>
 </plugin>
@@ -307,7 +307,7 @@ double linearResolution = 0.01;
 
 // a callback function that is triggered whenever the thermal camera
 // topic receives a new image message
-void OnImage(const ignition::msgs::Image &_msg)
+void OnImage(const gz::msgs::Image &_msg)
 {
   // convert the serialized image data to 16-bit temperature values
   unsigned int thermalSamples = _msg.width() * _msg.height();
@@ -335,14 +335,14 @@ void OnImage(const ignition::msgs::Image &_msg)
 
 int main(int argc, char **argv)
 {
-  ignition::transport::Node node;
+  gz::transport::Node node;
   if (!node.Subscribe("/thermal_camera", &OnImage))
   {
     std::cerr << "Error subscribing to the thermal camera topic" << std::endl;
     return -1;
   }
 
-  ignition::transport::waitForShutdown();
+  gz::transport::waitForShutdown();
 }
 ```
 

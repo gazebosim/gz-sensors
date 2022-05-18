@@ -129,21 +129,21 @@ class Camera_TEST : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
 //////////////////////////////////////////////////
 TEST(Camera_TEST, CreateCamera)
 {
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
   sdf::ElementPtr camSdf = CameraToSdf("camera", "my_camera", 60.0, "/cam",
       true, true);
 
   // Create a CameraSensor
-  ignition::sensors::CameraSensor *cam =
-    mgr.CreateSensor<ignition::sensors::CameraSensor>(camSdf);
+  gz::sensors::CameraSensor *cam =
+    mgr.CreateSensor<gz::sensors::CameraSensor>(camSdf);
 
   // Make sure the above dynamic cast worked.
   ASSERT_NE(nullptr, cam);
@@ -162,8 +162,8 @@ TEST(Camera_TEST, CreateCamera)
   sdf::ElementPtr camBadSdf = cameraToBadSdf();
 
   // Create a CameraSensor
-  ignition::sensors::CameraSensor *badCam =
-    mgr.CreateSensor<ignition::sensors::CameraSensor>(camBadSdf);
+  gz::sensors::CameraSensor *badCam =
+    mgr.CreateSensor<gz::sensors::CameraSensor>(camBadSdf);
   EXPECT_TRUE(badCam == nullptr);
 }
 
@@ -177,7 +177,7 @@ TEST(Camera_TEST, Topic)
   const bool visualize = 1;
 
   // Factory
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
   // Default topic
   {
@@ -185,9 +185,9 @@ TEST(Camera_TEST, Topic)
     auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
         visualize);
 
-    auto camera = mgr.CreateSensor<ignition::sensors::CameraSensor>(cameraSdf);
+    auto camera = mgr.CreateSensor<gz::sensors::CameraSensor>(cameraSdf);
     ASSERT_NE(nullptr, camera);
-    EXPECT_NE(ignition::sensors::NO_SENSOR, camera->Id());
+    EXPECT_NE(gz::sensors::NO_SENSOR, camera->Id());
     EXPECT_EQ("/camera", camera->Topic());
   }
 
@@ -197,9 +197,9 @@ TEST(Camera_TEST, Topic)
     auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
         visualize);
 
-    auto camera = mgr.CreateSensor<ignition::sensors::CameraSensor>(cameraSdf);
+    auto camera = mgr.CreateSensor<gz::sensors::CameraSensor>(cameraSdf);
     ASSERT_NE(nullptr, camera);
-    EXPECT_NE(ignition::sensors::NO_SENSOR, camera->Id());
+    EXPECT_NE(gz::sensors::NO_SENSOR, camera->Id());
 
     EXPECT_EQ("/topic_with_spaces/characters", camera->Topic());
   }
@@ -210,7 +210,7 @@ TEST(Camera_TEST, Topic)
     auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
         visualize);
 
-    auto sensor = mgr.CreateSensor<ignition::sensors::CameraSensor>(cameraSdf);
+    auto sensor = mgr.CreateSensor<gz::sensors::CameraSensor>(cameraSdf);
     EXPECT_EQ(nullptr, sensor);
   }
 }

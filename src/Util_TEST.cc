@@ -32,17 +32,17 @@ class Util_TEST : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////
 TEST_F(Util_TEST, customType)
 {
-  auto sdfFile = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  auto sdfFile = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "custom_sensors.sdf");
 
   sdf::Root root;

@@ -26,7 +26,7 @@
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 using namespace std::chrono_literals;
 

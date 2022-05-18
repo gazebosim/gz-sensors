@@ -62,14 +62,14 @@ float *g_depthBuffer = nullptr;
 
 std::mutex g_infoMutex;
 unsigned int g_infoCounter = 0;
-ignition::msgs::CameraInfo g_infoMsg;
+gz::msgs::CameraInfo g_infoMsg;
 
 std::mutex g_pcMutex;
 unsigned int g_pcCounter = 0;
 float *g_pointsXYZBuffer = nullptr;
 unsigned char *g_pointsRGBBuffer = nullptr;
 
-void UnpackPointCloudMsg(const ignition::msgs::PointCloudPacked &_msg,
+void UnpackPointCloudMsg(const gz::msgs::PointCloudPacked &_msg,
   float *_xyzBuffer, unsigned char *_rgbBuffer)
 {
   std::string msgBuffer = _msg.data();
@@ -107,7 +107,7 @@ void UnpackPointCloudMsg(const ignition::msgs::PointCloudPacked &_msg,
   }
 }
 
-void OnCameraInfo(const ignition::msgs::CameraInfo & _msg)
+void OnCameraInfo(const gz::msgs::CameraInfo & _msg)
 {
   g_infoMutex.lock();
   g_infoCounter++;
@@ -115,7 +115,7 @@ void OnCameraInfo(const ignition::msgs::CameraInfo & _msg)
   g_infoMutex.unlock();
 }
 
-void OnImage(const ignition::msgs::Image &_msg)
+void OnImage(const gz::msgs::Image &_msg)
 {
   g_mutex.lock();
   unsigned int depthSamples = _msg.width() * _msg.height();
@@ -127,7 +127,7 @@ void OnImage(const ignition::msgs::Image &_msg)
   g_mutex.unlock();
 }
 
-void OnPointCloud(const ignition::msgs::PointCloudPacked &_msg)
+void OnPointCloud(const gz::msgs::PointCloudPacked &_msg)
 {
   g_pcMutex.lock();
 
@@ -155,7 +155,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
     const std::string &_renderEngine)
 {
   // get the darn test data
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "depth_camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -180,7 +180,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   double near_ = clipPtr->Get<double>("near");
 
   double unitBoxSize = 1.0;
-  ignition::math::Vector3d boxPosition(3.0, 0.0, 0.0);
+  gz::math::Vector3d boxPosition(3.0, 0.0, 0.0);
 
   // If ogre is not the engine, don't run the test
   if ((_renderEngine.compare("ogre") != 0) &&
@@ -192,7 +192,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   }
 
   // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine(_renderEngine);
+  auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
     igndbg << "Engine '" << _renderEngine
@@ -200,14 +200,14 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
     return;
   }
 
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
 
   // Create an scene with a box in it
   scene->SetAmbientLight(0.3, 0.3, 0.3);
-  ignition::rendering::VisualPtr root = scene->RootVisual();
+  gz::rendering::VisualPtr root = scene->RootVisual();
 
   // create blue material
-  ignition::rendering::MaterialPtr blue = scene->CreateMaterial();
+  gz::rendering::MaterialPtr blue = scene->CreateMaterial();
   blue->SetAmbient(0.0, 0.0, 0.3);
   blue->SetDiffuse(0.0, 0.0, 0.8);
   blue->SetSpecular(0.5, 0.5, 0.5);
@@ -215,7 +215,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   blue->SetReflectivity(0);
 
   // create box visual
-  ignition::rendering::VisualPtr box = scene->CreateVisual();
+  gz::rendering::VisualPtr box = scene->CreateVisual();
   box->AddGeometry(scene->CreateBox());
   box->SetOrigin(0.0, 0.0, 0.0);
   box->SetLocalPosition(boxPosition);
@@ -225,10 +225,10 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   root->AddChild(box);
 
   // do the test
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
-  ignition::sensors::DepthCameraSensor *depthSensor =
-      mgr.CreateSensor<ignition::sensors::DepthCameraSensor>(sensorPtr);
+  gz::sensors::DepthCameraSensor *depthSensor =
+      mgr.CreateSensor<gz::sensors::DepthCameraSensor>(sensorPtr);
   ASSERT_NE(depthSensor, nullptr);
   EXPECT_FALSE(depthSensor->HasConnections());
   depthSensor->SetScene(scene);
@@ -240,17 +240,17 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
 
   std::string topic =
     "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/image";
-  WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
+  WaitForMessageTestHelper<gz::msgs::Image> helper(topic);
   EXPECT_TRUE(depthSensor->HasConnections());
 
   std::string pointsTopic =
     "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/image/points";
-  WaitForMessageTestHelper<ignition::msgs::PointCloudPacked>
+  WaitForMessageTestHelper<gz::msgs::PointCloudPacked>
     pointsHelper(pointsTopic);
 
   std::string infoTopic =
     "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/camera_info";
-  WaitForMessageTestHelper<ignition::msgs::CameraInfo> infoHelper(infoTopic);
+  WaitForMessageTestHelper<gz::msgs::CameraInfo> infoHelper(infoTopic);
 
   // Update once to create image
   mgr.RunOnce(std::chrono::steady_clock::duration::zero());
@@ -260,7 +260,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_TRUE(infoHelper.WaitForMessage()) << infoHelper;
 
   // subscribe to the depth camera topic
-  ignition::transport::Node node;
+  gz::transport::Node node;
   node.Subscribe(topic, &OnImage);
 
   // subscribe to the depth camera points topic
@@ -282,7 +282,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   int counter = 0;
   int infoCounter = 0;
   int pcCounter = 0;
-  ignition::msgs::CameraInfo infoMsg;
+  gz::msgs::CameraInfo infoMsg;
   for (int sleep = 0;
        sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
   {
@@ -313,9 +313,9 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
 
   // The left and right side of the depth frame should be inf
   int left = midHeight * depthSensor->ImageWidth();
-  EXPECT_DOUBLE_EQ(g_depthBuffer[left], ignition::math::INF_D);
+  EXPECT_DOUBLE_EQ(g_depthBuffer[left], gz::math::INF_D);
   int right = (midHeight+1) * depthSensor->ImageWidth() - 1;
-  EXPECT_DOUBLE_EQ(g_depthBuffer[right], ignition::math::INF_D);
+  EXPECT_DOUBLE_EQ(g_depthBuffer[right], gz::math::INF_D);
   g_infoMutex.unlock();
   g_mutex.unlock();
 
@@ -326,7 +326,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   ASSERT_EQ(1, infoMsg.header().data(0).value().size());
   EXPECT_EQ("camera1", infoMsg.header().data(0).value(0));
   EXPECT_TRUE(infoMsg.has_distortion());
-  EXPECT_EQ(ignition::msgs::CameraInfo::Distortion::PLUMB_BOB,
+  EXPECT_EQ(gz::msgs::CameraInfo::Distortion::PLUMB_BOB,
       infoMsg.distortion().model());
   EXPECT_EQ(5, infoMsg.distortion().k().size());
   EXPECT_TRUE(infoMsg.has_intrinsics());
@@ -337,7 +337,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
 
   // Check that for a box really close it returns -inf
   root->RemoveChild(box);
-  ignition::math::Vector3d boxPositionNear(
+  gz::math::Vector3d boxPositionNear(
       unitBoxSize * 0.5 + near_ * 0.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionNear);
   root->AddChild(box);
@@ -367,13 +367,13 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   infoCounter = 0;
   pcCounter = 0;
 
-  EXPECT_DOUBLE_EQ(g_depthBuffer[mid], -ignition::math::INF_D);
+  EXPECT_DOUBLE_EQ(g_depthBuffer[mid], -gz::math::INF_D);
   g_infoMutex.unlock();
   g_mutex.unlock();
 
   // Check that for a box really far it returns inf
   root->RemoveChild(box);
-  ignition::math::Vector3d boxPositionFar(
+  gz::math::Vector3d boxPositionFar(
       unitBoxSize * 0.5 + far_ * 1.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionFar);
   root->AddChild(box);
@@ -402,14 +402,14 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   infoCounter = 0;
   pcCounter = 0;
 
-  EXPECT_DOUBLE_EQ(g_depthBuffer[mid], ignition::math::INF_D);
+  EXPECT_DOUBLE_EQ(g_depthBuffer[mid], gz::math::INF_D);
   g_infoMutex.unlock();
   g_mutex.unlock();
 
 
   // Check that the depth values for a box do not warp.
   root->RemoveChild(box);
-  ignition::math::Vector3d boxPositionFillFrame(
+  gz::math::Vector3d boxPositionFillFrame(
       unitBoxSize * 0.5 + 0.2, 0.0, 0.0);
   box->SetLocalPosition(boxPositionFillFrame);
   root->AddChild(box);
@@ -499,7 +499,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
 
   // Clean up
   engine->DestroyScene(scene);
-  ignition::rendering::unloadEngine(engine->Name());
+  gz::rendering::unloadEngine(engine->Name());
 }
 
 //////////////////////////////////////////////////
@@ -509,12 +509,12 @@ TEST_P(DepthCameraSensorTest, ImagesWithBuiltinSDF)
 }
 
 INSTANTIATE_TEST_CASE_P(DepthCameraSensor, DepthCameraSensorTest,
-    RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
+    RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-  ignition::common::Console::SetVerbosity(4);
+  gz::common::Console::SetVerbosity(4);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

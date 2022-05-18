@@ -31,7 +31,7 @@
 
 #include "gz/sensors/Sensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {

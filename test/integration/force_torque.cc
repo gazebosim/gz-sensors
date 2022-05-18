@@ -29,15 +29,15 @@
 
 /// \brief Helper function to create a force torque sensor sdf element.
 void CreateForceTorqueToSdf(const std::string &_name,
-                            const ignition::math::Pose3d &_pose,
+                            const gz::math::Pose3d &_pose,
                             const double _updateRate, const std::string &_topic,
                             const bool _alwaysOn, const bool _visualize,
                             const std::string &_frame,
                             const std::string &_measureDir,
-                            const ignition::math::Vector3d &_forceNoiseMean,
-                            const ignition::math::Vector3d &_forceNoiseStddev,
-                            const ignition::math::Vector3d &_torqueNoiseMean,
-                            const ignition::math::Vector3d &_torqueNoiseStddev,
+                            const gz::math::Vector3d &_forceNoiseMean,
+                            const gz::math::Vector3d &_forceNoiseStddev,
+                            const gz::math::Vector3d &_torqueNoiseMean,
+                            const gz::math::Vector3d &_torqueNoiseStddev,
                             sdf::ElementPtr &_sensorSdf)
 {
   std::ostringstream stream;
@@ -130,7 +130,7 @@ class ForceTorqueSensorTest
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
@@ -146,8 +146,8 @@ TEST_F(ForceTorqueSensorTest, CreateForceTorqueSensor)
   const bool visualize = 1;
 
   // Create sensor SDF
-  ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
-      ignition::math::Quaterniond::Identity);
+  gz::math::Pose3d sensorPose(gz::math::Vector3d(0.25, 0.0, 0.5),
+      gz::math::Quaterniond::Identity);
   sdf::ElementPtr forcetorqueSdf;
   CreateForceTorqueToSdf(name, sensorPose, updateRate, topic, alwaysOn,
                          visualize, "child", "child_to_parent", {}, {}, {}, {},
@@ -156,9 +156,9 @@ TEST_F(ForceTorqueSensorTest, CreateForceTorqueSensor)
   ASSERT_NE(nullptr, forcetorqueSdf);
 
   // create the sensor using sensor factory
-  ignition::sensors::SensorFactory sf;
+  gz::sensors::SensorFactory sf;
   auto sensor =
-      sf.CreateSensor<ignition::sensors::ForceTorqueSensor>(forcetorqueSdf);
+      sf.CreateSensor<gz::sensors::ForceTorqueSensor>(forcetorqueSdf);
   ASSERT_NE(nullptr, sensor);
 
   EXPECT_EQ(name, sensor->Name());
@@ -169,7 +169,7 @@ TEST_F(ForceTorqueSensorTest, CreateForceTorqueSensor)
 /////////////////////////////////////////////////
 TEST_P(ForceTorqueSensorTest, SensorReadings)
 {
-  namespace math = ignition::math;
+  namespace math = gz::math;
 
   std::string frame, measureDirection;
   std::tie(frame, measureDirection) = GetParam();
@@ -202,9 +202,9 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
   ASSERT_NE(nullptr, forcetorqueSdf);
 
   // create the sensor using sensor factory
-  ignition::sensors::SensorFactory sf;
+  gz::sensors::SensorFactory sf;
   auto sensor =
-      sf.CreateSensor<ignition::sensors::ForceTorqueSensor>(forcetorqueSdf);
+      sf.CreateSensor<gz::sensors::ForceTorqueSensor>(forcetorqueSdf);
 
   ASSERT_NE(nullptr, sensor);
   EXPECT_FALSE(sensor->HasConnections());
@@ -225,7 +225,7 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
   EXPECT_EQ(torque, sensor->Torque());
 
   // verify msg received on the topic
-  WaitForMessageTestHelper<ignition::msgs::Wrench> msgHelper(topic);
+  WaitForMessageTestHelper<gz::msgs::Wrench> msgHelper(topic);
   EXPECT_TRUE(sensor->HasConnections());
   auto dt = std::chrono::steady_clock::duration(std::chrono::seconds(1));
 
@@ -251,22 +251,22 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
     if (frame == "child")
     {
       EXPECT_EQ((rotChildInSensor.Inverse() * force) + forceNoiseMean,
-                ignition::msgs::Convert(msg.force()));
+                gz::msgs::Convert(msg.force()));
       EXPECT_EQ((rotChildInSensor.Inverse() * torque) + torqueNoiseMean,
-                ignition::msgs::Convert(msg.torque()));
+                gz::msgs::Convert(msg.torque()));
     }
     else if (frame == "parent")
     {
       EXPECT_EQ((rotParentInSensor.Inverse() * force) + forceNoiseMean,
-                ignition::msgs::Convert(msg.force()));
+                gz::msgs::Convert(msg.force()));
       EXPECT_EQ((rotParentInSensor.Inverse() * torque) + torqueNoiseMean,
-                ignition::msgs::Convert(msg.torque()));
+                gz::msgs::Convert(msg.torque()));
     }
     else
     {
-      EXPECT_EQ(force + forceNoiseMean, ignition::msgs::Convert(msg.force()));
+      EXPECT_EQ(force + forceNoiseMean, gz::msgs::Convert(msg.force()));
       EXPECT_EQ(torque + torqueNoiseMean,
-                ignition::msgs::Convert(msg.torque()));
+                gz::msgs::Convert(msg.torque()));
     }
   }
   else
@@ -274,22 +274,22 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
     if (frame == "child")
     {
       EXPECT_EQ(-(rotChildInSensor.Inverse() * force) + forceNoiseMean,
-                ignition::msgs::Convert(msg.force()));
+                gz::msgs::Convert(msg.force()));
       EXPECT_EQ(-(rotChildInSensor.Inverse() * torque) + torqueNoiseMean,
-                ignition::msgs::Convert(msg.torque()));
+                gz::msgs::Convert(msg.torque()));
     }
     else if (frame == "parent")
     {
       EXPECT_EQ(-(rotParentInSensor.Inverse() * force) + forceNoiseMean,
-                ignition::msgs::Convert(msg.force()));
+                gz::msgs::Convert(msg.force()));
       EXPECT_EQ(-(rotParentInSensor.Inverse() * torque) + torqueNoiseMean,
-                ignition::msgs::Convert(msg.torque()));
+                gz::msgs::Convert(msg.torque()));
     }
     else
     {
-      EXPECT_EQ(-force + forceNoiseMean, ignition::msgs::Convert(msg.force()));
+      EXPECT_EQ(-force + forceNoiseMean, gz::msgs::Convert(msg.force()));
       EXPECT_EQ(-torque + torqueNoiseMean,
-                ignition::msgs::Convert(msg.torque()));
+                gz::msgs::Convert(msg.torque()));
     }
   }
   // The Force() and Torque() functions return the noise-free forces and

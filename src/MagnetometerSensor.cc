@@ -34,11 +34,11 @@
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/SensorTypes.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for MagnetometerSensor
-class ignition::sensors::MagnetometerSensorPrivate
+class gz::sensors::MagnetometerSensorPrivate
 {
   /// \brief node to create publisher
   public: transport::Node node;
@@ -51,14 +51,14 @@ class ignition::sensors::MagnetometerSensorPrivate
 
   /// \brief The latest field reading from the sensor, based on the world
   /// field and the sensor's current pose.
-  public: ignition::math::Vector3d localField;
+  public: gz::math::Vector3d localField;
 
   /// \brief Store world magnetic field vector. We assume it is uniform
   /// everywhere in the world, and that it doesn't change during the simulation.
-  public: ignition::math::Vector3d worldField;
+  public: gz::math::Vector3d worldField;
 
   /// \brief World pose of the magnetometer
-  public: ignition::math::Pose3d worldPose;
+  public: gz::math::Pose3d worldPose;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -105,7 +105,7 @@ bool MagnetometerSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/magnetometer");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::Magnetometer>(
+      this->dataPtr->node.Advertise<gz::msgs::Magnetometer>(
       this->Topic());
 
   if (!this->dataPtr->pub)

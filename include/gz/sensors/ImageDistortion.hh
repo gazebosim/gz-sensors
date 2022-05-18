@@ -26,7 +26,7 @@
 #include "gz/sensors/SensorTypes.hh"
 #include "gz/sensors/rendering/Export.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {

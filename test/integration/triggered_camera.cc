@@ -56,7 +56,7 @@ class TriggeredCameraTest: public testing::Test,
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 
   // Create a Camera sensor from a SDF and gets a image message
@@ -65,7 +65,7 @@ class TriggeredCameraTest: public testing::Test,
 
 void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 {
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "triggered_camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -79,7 +79,7 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   auto sensorPtr = linkPtr->GetElement("sensor");
 
   // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine(_renderEngine);
+  auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
     igndbg << "Engine '" << _renderEngine
@@ -87,12 +87,12 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
     return;
   }
 
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
 
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
-  ignition::sensors::CameraSensor *sensor =
-      mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
+  gz::sensors::CameraSensor *sensor =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtr);
   ASSERT_NE(sensor, nullptr);
   EXPECT_FALSE(sensor->HasConnections());
   sensor->SetScene(scene);
@@ -110,19 +110,19 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   {
     std::string imageTopic =
         "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF";
-    WaitForMessageTestHelper<ignition::msgs::Image> helper(imageTopic);
+    WaitForMessageTestHelper<gz::msgs::Image> helper(imageTopic);
     EXPECT_TRUE(sensor->HasConnections());
     mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
     EXPECT_FALSE(helper.WaitForMessage(1s)) << helper;
   }
 
   // trigger camera through topic
-  ignition::transport::Node triggerNode;
+  gz::transport::Node triggerNode;
   std::string triggerTopic =
       "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF/trigger";
 
-  auto pub = triggerNode.Advertise<ignition::msgs::Boolean>(triggerTopic);
-  ignition::msgs::Boolean msg;
+  auto pub = triggerNode.Advertise<gz::msgs::Boolean>(triggerTopic);
+  gz::msgs::Boolean msg;
   msg.set_data(true);
   pub.Publish(msg);
 
@@ -130,7 +130,7 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   {
     std::string imageTopic =
         "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF";
-    WaitForMessageTestHelper<ignition::msgs::Image> helper(imageTopic);
+    WaitForMessageTestHelper<gz::msgs::Image> helper(imageTopic);
     mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
     EXPECT_TRUE(helper.WaitForMessage(3s)) << helper;
   }
@@ -149,7 +149,7 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 
   // Clean up
   engine->DestroyScene(scene);
-  ignition::rendering::unloadEngine(engine->Name());
+  gz::rendering::unloadEngine(engine->Name());
 }
 
 //////////////////////////////////////////////////
@@ -158,13 +158,13 @@ TEST_P(TriggeredCameraTest, ImagesWithBuiltinSDF)
   ImagesWithBuiltinSDF(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(CameraSensor, TriggeredCameraTest,
-    RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
+INSTANTIATE_TEST_CASE_P(CameraSensor, CameraSensorTest,
+    RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-  ignition::common::Console::SetVerbosity(4);
+  gz::common::Console::SetVerbosity(4);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

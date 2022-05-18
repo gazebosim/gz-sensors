@@ -7,7 +7,7 @@
 
 /// \brief Helper macro to instantiate gtest for different engines
 #define RENDER_ENGINE_VALUES ::testing::ValuesIn(\
-    ignition::rendering::TestValues())
+    gz::rendering::TestValues())
 
 // Configure tests based on installed render engines
 // ogre 1.x and ogre 2.x tests can not be run at the same time
@@ -23,7 +23,7 @@ static const std::vector<const char *> kRenderEngineTestValues{"none"};
 #include <vector>
 #include <ignition/common/Util.hh>
 
-namespace ignition
+namespace gz
 {
   namespace rendering
   {

@@ -44,7 +44,7 @@
 #include "ignition/sensors/SensorFactory.hh"
 
 /// \brief Private data for ThermalCameraSensor
-class ignition::sensors::ThermalCameraSensorPrivate
+class gz::sensors::ThermalCameraSensorPrivate
 {
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
@@ -56,7 +56,7 @@ class ignition::sensors::ThermalCameraSensorPrivate
   /// of the path was not possible.
   /// \sa ImageSaver
   public: bool SaveImage(const uint16_t *_data, unsigned int _width,
-    unsigned int _height, ignition::common::Image::PixelFormatType _format);
+    unsigned int _height, gz::common::Image::PixelFormatType _format);
 
   /// \brief Helper function to convert temperature data to thermal image
   /// \param[in] _data temperature data
@@ -73,7 +73,7 @@ class ignition::sensors::ThermalCameraSensorPrivate
   public: bool initialized = false;
 
   /// \brief Rendering camera
-  public: ignition::rendering::ThermalCameraPtr thermalCamera;
+  public: gz::rendering::ThermalCameraPtr thermalCamera;
 
   /// \brief Thermal data buffer.
   public: uint16_t *thermalBuffer = nullptr;
@@ -89,21 +89,21 @@ class ignition::sensors::ThermalCameraSensorPrivate
       math::Vector2i::Zero;
 
   /// \brief Pointer to an image to be published
-  public: ignition::rendering::Image image;
+  public: gz::rendering::Image image;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
-  public: ignition::common::EventT<
-          void(const ignition::msgs::Image &)> imageEvent;
+  public: gz::common::EventT<
+          void(const gz::msgs::Image &)> imageEvent;
 
   /// \brief Connection from thermal camera with thermal data
-  public: ignition::common::ConnectionPtr thermalConnection;
+  public: gz::common::ConnectionPtr thermalConnection;
 
   /// \brief Connection to the Manager's scene change event.
-  public: ignition::common::ConnectionPtr sceneChangeConnection;
+  public: gz::common::ConnectionPtr sceneChangeConnection;
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
@@ -136,16 +136,16 @@ class ignition::sensors::ThermalCameraSensorPrivate
   public: float ambientRange = 0.0;
 
   /// \brief Min temperature the sensor can detect
-  public: float minTemp = -ignition::math::INF_F;
+  public: float minTemp = -gz::math::INF_F;
 
   /// \brief Max temperature the sensor can detect
-  public: float maxTemp = ignition::math::INF_F;
+  public: float maxTemp = gz::math::INF_F;
 
   /// \brief Linear resolution. Defaults to 10mK
   public: float resolution = 0.01f;
 };
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////
@@ -210,7 +210,7 @@ bool ThermalCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the thermal image publisher
   this->dataPtr->thermalPub =
-      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+      this->dataPtr->node.Advertise<gz::msgs::Image>(
           this->Topic());
 
   if (!this->dataPtr->thermalPub)
@@ -384,13 +384,13 @@ rendering::ThermalCameraPtr ThermalCameraSensor::ThermalCamera() const
 
 /////////////////////////////////////////////////
 common::ConnectionPtr ThermalCameraSensor::ConnectImageCallback(
-    std::function<void(const ignition::msgs::Image &)> _callback)
+    std::function<void(const gz::msgs::Image &)> _callback)
 {
   return this->dataPtr->imageEvent.Connect(_callback);
 }
 
 /////////////////////////////////////////////////
-void ThermalCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
+void ThermalCameraSensor::SetScene(gz::rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
@@ -613,19 +613,19 @@ bool ThermalCameraSensorPrivate::ConvertTemperatureToImage(
 //////////////////////////////////////////////////
 bool ThermalCameraSensorPrivate::SaveImage(const uint16_t *_data,
     unsigned int _width, unsigned int _height,
-    ignition::common::Image::PixelFormatType /*_format*/)
+    gz::common::Image::PixelFormatType /*_format*/)
 {
   // Attempt to create the directory if it doesn't exist
-  if (!ignition::common::isDirectory(this->saveImagePath))
+  if (!gz::common::isDirectory(this->saveImagePath))
   {
-    if (!ignition::common::createDirectories(this->saveImagePath))
+    if (!gz::common::createDirectories(this->saveImagePath))
       return false;
   }
 
   if (_width == 0 || _height == 0)
     return false;
 
-  ignition::common::Image localImage;
+  gz::common::Image localImage;
 
   if (static_cast<int>(_width) != this->imgThermalBufferSize.X() ||
       static_cast<int>(_height) != this->imgThermalBufferSize.Y())
@@ -646,7 +646,7 @@ bool ThermalCameraSensorPrivate::SaveImage(const uint16_t *_data,
   localImage.SetFromData(this->imgThermalBuffer, _width, _height,
       common::Image::RGB_INT8);
   localImage.SavePNG(
-      ignition::common::joinPaths(this->saveImagePath, filename));
+      gz::common::joinPaths(this->saveImagePath, filename));
 
   return true;
 }

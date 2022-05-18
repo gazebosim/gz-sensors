@@ -31,10 +31,10 @@
 #include "ignition/sensors/SegmentationCameraSensor.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
-class ignition::sensors::SegmentationCameraSensorPrivate
+class gz::sensors::SegmentationCameraSensorPrivate
 {
   /// \brief Save a sample for the dataset (image & colored map & labels map)
   /// \return True if the image was saved successfully. False can mean
@@ -123,8 +123,8 @@ class ignition::sensors::SegmentationCameraSensorPrivate
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
-  public: ignition::common::EventT<
-          void(const ignition::msgs::Image &)> imageEvent;
+  public: gz::common::EventT<
+          void(const gz::msgs::Image &)> imageEvent;
 };
 
 //////////////////////////////////////////////////
@@ -192,7 +192,7 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the segmentation colored map image publisher
   this->dataPtr->coloredMapPublisher =
-      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+      this->dataPtr->node.Advertise<gz::msgs::Image>(
           this->Topic() + this->dataPtr->topicColoredMapSuffix);
 
   if (!this->dataPtr->coloredMapPublisher)
@@ -207,7 +207,7 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the segmentation labels map image publisher
   this->dataPtr->labelsMapPublisher =
-      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+      this->dataPtr->node.Advertise<gz::msgs::Image>(
           this->Topic() + this->dataPtr->topicLabelsMapSuffix);
 
   if (!this->dataPtr->labelsMapPublisher)
@@ -246,7 +246,7 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
 
 /////////////////////////////////////////////////
 void SegmentationCameraSensor::SetScene(
-  ignition::rendering::ScenePtr _scene)
+  gz::rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
@@ -311,7 +311,7 @@ bool SegmentationCameraSensor::CreateCamera()
 
     // Set the save counter to be equal number of images in the folder + 1
     // to continue adding to the images in the folder (multi scene datasets)
-    if (ignition::common::isDirectory(this->dataPtr->saveImageFolder))
+    if (gz::common::isDirectory(this->dataPtr->saveImageFolder))
     {
       common::DirIter endIter;
       for (common::DirIter dirIter(this->dataPtr->saveImageFolder);
@@ -567,24 +567,24 @@ bool SegmentationCameraSensor::HasConnections() const
 bool SegmentationCameraSensorPrivate::SaveSample()
 {
   // Attempt to create the directories if they don't exist
-  if (!ignition::common::isDirectory(this->savePath))
+  if (!gz::common::isDirectory(this->savePath))
   {
-    if (!ignition::common::createDirectories(this->savePath))
+    if (!gz::common::createDirectories(this->savePath))
       return false;
   }
-  if (!ignition::common::isDirectory(this->saveImageFolder))
+  if (!gz::common::isDirectory(this->saveImageFolder))
   {
-    if (!ignition::common::createDirectories(this->saveImageFolder))
+    if (!gz::common::createDirectories(this->saveImageFolder))
       return false;
   }
-  if (!ignition::common::isDirectory(this->saveColoredMapsFolder))
+  if (!gz::common::isDirectory(this->saveColoredMapsFolder))
   {
-    if (!ignition::common::createDirectories(this->saveColoredMapsFolder))
+    if (!gz::common::createDirectories(this->saveColoredMapsFolder))
       return false;
   }
-  if (!ignition::common::isDirectory(this->saveLabelsMapsFolder))
+  if (!gz::common::isDirectory(this->saveLabelsMapsFolder))
   {
-    if (!ignition::common::createDirectories(this->saveLabelsMapsFolder))
+    if (!gz::common::createDirectories(this->saveLabelsMapsFolder))
       return false;
   }
 
@@ -602,28 +602,28 @@ bool SegmentationCameraSensorPrivate::SaveSample()
   std::string rgbImageName = "image_" + saveCounterString + ".png";
 
   // Save rgb image
-  ignition::common::Image rgbImage;
+  gz::common::Image rgbImage;
   rgbImage.SetFromData(this->saveImageBuffer,
-    width, height, ignition::common::Image::RGB_INT8);
+    width, height, gz::common::Image::RGB_INT8);
 
   rgbImage.SavePNG(
-      ignition::common::joinPaths(this->saveImageFolder, rgbImageName));
+      gz::common::joinPaths(this->saveImageFolder, rgbImageName));
 
   // Save colored map
-  ignition::common::Image localColoredImage;
+  gz::common::Image localColoredImage;
   localColoredImage.SetFromData(this->segmentationColoredBuffer,
-    width, height, ignition::common::Image::RGB_INT8);
+    width, height, gz::common::Image::RGB_INT8);
 
   localColoredImage.SavePNG(
-      ignition::common::joinPaths(this->saveColoredMapsFolder, coloredName));
+      gz::common::joinPaths(this->saveColoredMapsFolder, coloredName));
 
   // Save labels map
-  ignition::common::Image localLabelsImage;
+  gz::common::Image localLabelsImage;
   localLabelsImage.SetFromData(this->segmentationLabelsBuffer,
-    width, height, ignition::common::Image::RGB_INT8);
+    width, height, gz::common::Image::RGB_INT8);
 
   localLabelsImage.SavePNG(
-      ignition::common::joinPaths(this->saveLabelsMapsFolder, labelsName));
+      gz::common::joinPaths(this->saveLabelsMapsFolder, labelsName));
 
   ++this->saveCounter;
   return true;

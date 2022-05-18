@@ -26,7 +26,7 @@
 #include "ignition/sensors/ImageDistortion.hh"
 #include "ignition/sensors/ImageBrownDistortionModel.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////

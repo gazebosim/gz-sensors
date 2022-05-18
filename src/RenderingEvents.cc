@@ -17,14 +17,14 @@
 
 #include "ignition/sensors/RenderingEvents.hh"
 
-using namespace ignition::sensors;
+using namespace gz::sensors;
 
-ignition::common::EventT<void(const ignition::rendering::ScenePtr &)>
+gz::common::EventT<void(const gz::rendering::ScenePtr &)>
 RenderingEvents::sceneEvent;
 
 /////////////////////////////////////////////////
-ignition::common::ConnectionPtr RenderingEvents::ConnectSceneChangeCallback(
-    std::function<void(const ignition::rendering::ScenePtr &)> _callback)
+gz::common::ConnectionPtr RenderingEvents::ConnectSceneChangeCallback(
+    std::function<void(const gz::rendering::ScenePtr &)> _callback)
 {
   return sceneEvent.Connect(_callback);
 }

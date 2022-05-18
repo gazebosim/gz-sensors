@@ -38,10 +38,10 @@
 
 #include "ignition/sensors/ImageBrownDistortionModel.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
-class ignition::sensors::ImageBrownDistortionModelPrivate
+class gz::sensors::ImageBrownDistortionModelPrivate
 {
   /// \brief The radial distortion coefficient k1.
   public: double k1 = 0.0;

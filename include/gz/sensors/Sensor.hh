@@ -37,7 +37,7 @@
 #include <gz/sensors/Export.hh>
 #include <sdf/sdf.hh>
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
@@ -137,10 +137,10 @@ namespace ignition
 
       /// \brief Get the current pose.
       /// \return Current pose of the sensor.
-      public: ignition::math::Pose3d Pose() const;
+      public: gz::math::Pose3d Pose() const;
 
       /// \brief Update the pose of the sensor
-      public: void SetPose(const ignition::math::Pose3d &_pose);
+      public: void SetPose(const gz::math::Pose3d &_pose);
 
       /// \brief Set the parent of the sensor
       public: virtual void SetParent(const std::string &_parent);
@@ -187,13 +187,13 @@ namespace ignition
       /// information for this sensor.
       public: sdf::ElementPtr SDF() const;
 
-      /// \brief Add a sequence number to an ignition::msgs::Header. This
+      /// \brief Add a sequence number to an gz::msgs::Header. This
       /// function can be called by a sensor that wants to add a sequence
       /// number to a sensor message in order to have improved
       /// accountability for generated sensor data.
       ///
       /// This function will add the following key-value pair to the `data`
-      /// field in the provided ignition::msgs::Header msg.
+      /// field in the provided gz::msgs::Header msg.
       ///
       /// * key: "seq"
       /// * value: `sequence_number`
@@ -205,7 +205,7 @@ namespace ignition
       /// and is incremented by one each time this function is called.
       /// \param[in,out] _msg The header which will receive the sequence.
       /// \param[in] _seqKey Name of the sequence to use.
-      public: void AddSequence(ignition::msgs::Header *_msg,
+      public: void AddSequence(gz::msgs::Header *_msg,
                   const std::string &_seqKey = "default");
 
       /// \brief Publishes information about the performance of the sensor.

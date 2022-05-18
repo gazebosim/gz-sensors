@@ -23,11 +23,11 @@
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/SensorTypes.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for AltimeterSensor
-class ignition::sensors::AltimeterSensorPrivate
+class gz::sensors::AltimeterSensorPrivate
 {
   /// \brief node to create publisher
   public: transport::Node node;
@@ -92,7 +92,7 @@ bool AltimeterSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/altimeter");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::Altimeter>(this->Topic());
+      this->dataPtr->node.Advertise<gz::msgs::Altimeter>(this->Topic());
 
   if (!this->dataPtr->pub)
   {

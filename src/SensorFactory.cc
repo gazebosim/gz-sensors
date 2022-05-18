@@ -20,11 +20,11 @@
 #include "ignition/sensors/SensorFactory.hh"
 
 /// \brief Private data class for SensorFactory
-class ignition::sensors::SensorFactoryPrivate
+class gz::sensors::SensorFactoryPrivate
 {
 };
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////

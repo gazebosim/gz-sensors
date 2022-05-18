@@ -20,7 +20,7 @@
 #include "ignition/sensors/Util.hh"
 
 //////////////////////////////////////////////////
-std::string ignition::sensors::customType(const sdf::Sensor &_sdf)
+std::string gz::sensors::customType(const sdf::Sensor &_sdf)
 {
   if (nullptr == _sdf.Element())
     return std::string();
@@ -29,7 +29,7 @@ std::string ignition::sensors::customType(const sdf::Sensor &_sdf)
 }
 
 //////////////////////////////////////////////////
-std::string ignition::sensors::customType(sdf::ElementPtr _sdf)
+std::string gz::sensors::customType(sdf::ElementPtr _sdf)
 {
   if (_sdf == nullptr)
     return std::string();

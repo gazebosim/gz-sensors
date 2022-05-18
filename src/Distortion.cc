@@ -28,10 +28,10 @@
 #include "ignition/sensors/BrownDistortionModel.hh"
 #include "ignition/sensors/Distortion.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
-class ignition::sensors::Distortion::Implementation
+class gz::sensors::Distortion::Implementation
 {
   /// \brief Which type of distortion we're applying
   public: DistortionType type = DistortionType::NONE;

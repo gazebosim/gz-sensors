@@ -81,7 +81,7 @@ With that in mind, here's what the sensor tag would look like:
 ### Sensor implementation
 
 The sensor consists of a class, `Odometer`, which inherits from
-`ignition::sensors::Sensor`.
+`gz::sensors::Sensor`.
 
 Take a look at
 [ign-sensors/examples/custom_sensor](https://github.com/ignitionrobotics/ign-sensors/tree/main/examples/custom_sensor)
@@ -106,11 +106,11 @@ Take a look at
 [ign-gazebo/examples/plugins/custom_sensor_system](https://github.com/ignitionrobotics/ign-gazebo/tree/main/examples/plugin/custom_sensor_system).
 for the full code. Here are some important pointers:
 
-* Check for new entities that have `ignition::gazebo::components::CustomSensor`
+* Check for new entities that have `gz::gazebo::components::CustomSensor`
   during the `PreUpdate` callback and instantiate new sensors as they appear
   in simulation.
 * Don't assume all `CustomSensors` are of the type you need, be sure to check
-  the type using the `ignition::sensors::customType` function.
+  the type using the `gz::sensors::customType` function.
 * During `PostUpdate`, update all sensors with new data coming from simulation.
 * Also during `PostUpdate`, delete any sensors that have been removed from
   simulation.

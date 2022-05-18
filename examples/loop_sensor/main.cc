@@ -31,7 +31,7 @@ using namespace std::literals::chrono_literals;
 
 int main(int argc,  char **argv)
 {
-  ignition::common::Console::SetVerbosity(4);
+  gz::common::Console::SetVerbosity(4);
 
   if (argc < 2)
   {
@@ -58,10 +58,10 @@ int main(int argc,  char **argv)
   }
 
   // Initiate sensor manager
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
   // Loop thorough SDF file and add all supported sensors to manager
-  std::vector<ignition::sensors::Sensor *> sensors;
+  std::vector<gz::sensors::Sensor *> sensors;
   for (auto m = 0; m < world->ModelCount(); ++m)
   {
     auto model = world->ModelByIndex(m);
@@ -72,10 +72,10 @@ int main(int argc,  char **argv)
       {
         auto sensor = link->SensorByIndex(s);
 
-        ignition::sensors::Sensor *sensorPtr;
+        gz::sensors::Sensor *sensorPtr;
         if (sensor->Type() == sdf::SensorType::ALTIMETER)
         {
-          sensorPtr = mgr.CreateSensor<ignition::sensors::AltimeterSensor>(
+          sensorPtr = mgr.CreateSensor<gz::sensors::AltimeterSensor>(
               *sensor);
         }
         else if (sensor->Type() == sdf::SensorType::CUSTOM)
@@ -111,7 +111,7 @@ int main(int argc,  char **argv)
 
   // Stop when user presses Ctrl+C
   bool signaled{false};
-  ignition::common::SignalHandler sigHandler;
+  gz::common::SignalHandler sigHandler;
   sigHandler.AddCallback([&] (int)
   {
     signaled = true;
@@ -125,7 +125,7 @@ int main(int argc,  char **argv)
     // Update each sensor using their specific APIs
     for (const auto &sensorPtr : sensors)
     {
-      if (auto altimeter = dynamic_cast<ignition::sensors::AltimeterSensor *>(
+      if (auto altimeter = dynamic_cast<gz::sensors::AltimeterSensor *>(
           sensorPtr))
       {
         altimeter->SetVerticalVelocity(altimeter->VerticalVelocity() + 0.1);
@@ -133,7 +133,7 @@ int main(int argc,  char **argv)
       else if (auto odometer = dynamic_cast<custom::Odometer *>(sensorPtr))
       {
         odometer->NewPosition(odometer->Position() +
-            ignition::math::Vector3d(0.1, 0.1, 0.0));
+            gz::math::Vector3d(0.1, 0.1, 0.0));
       }
     }
 
