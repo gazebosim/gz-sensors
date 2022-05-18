@@ -177,6 +177,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   ignition::sensors::ThermalCameraSensor *thermalSensor =
       mgr.CreateSensor<ignition::sensors::ThermalCameraSensor>(sensorPtr);
   ASSERT_NE(thermalSensor, nullptr);
+  EXPECT_FALSE(thermalSensor->HasConnections());
 
   float ambientTemp = 296.0f;
   float ambientTempRange = 4.0f;
@@ -192,6 +193,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   std::string topic =
     "/test/integration/ThermalCameraPlugin_imagesWithBuiltinSDF/image";
   WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
+  EXPECT_TRUE(thermalSensor->HasConnections());
 
   std::string infoTopic =
     "/test/integration/ThermalCameraPlugin_imagesWithBuiltinSDF/camera_info";

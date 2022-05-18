@@ -121,12 +121,23 @@ namespace ignition
       /// \return Vertical field of view.
       public: ignition::math::Angle VFOV() const;
 
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Garden
+      public: bool HasConnections() const;
+
       /// \brief Connect function pointer to internal GpuRays callback
       /// \return ignition::common::Connection pointer
       public: virtual ignition::common::ConnectionPtr ConnectNewLidarFrame(
           std::function<void(const float *_scan, unsigned int _width,
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &/*_format*/)> _subscriber) override;
+
+      /// \brief Connect function pointer to internal GpuRays callback
+      /// \return ignition::common::Connection pointer
+      private: void OnNewLidarFrame(const float *_scan, unsigned int _width,
+                  unsigned int _heighti, unsigned int _channels,
+                  const std::string &_format);
 
       IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

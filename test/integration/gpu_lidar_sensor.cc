@@ -220,6 +220,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   // Make sure the above dynamic cast worked.
   ASSERT_NE(nullptr, sensor);
   sensor->SetScene(scene);
+  EXPECT_FALSE(sensor->HasConnections());
 
   // Set a callback on the lidar sensor to get a scan
   ignition::common::ConnectionPtr c =
@@ -229,6 +230,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
           std::placeholders::_4, std::placeholders::_5));
 
   EXPECT_TRUE(c != nullptr);
+  EXPECT_TRUE(sensor->HasConnections());
 
   double angleRes = (sensor->AngleMax() - sensor->AngleMin()).Radian() /
                     sensor->RayCount();

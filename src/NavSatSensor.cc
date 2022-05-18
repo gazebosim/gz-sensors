@@ -260,3 +260,9 @@ void NavSatSensor::SetPosition(const math::Angle &_latitude,
   this->SetAltitude(_altitude);
 }
 
+//////////////////////////////////////////////////
+bool NavSatSensor::HasConnections() const
+{
+  return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
+}
+

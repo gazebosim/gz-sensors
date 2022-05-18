@@ -487,7 +487,7 @@ bool SegmentationCameraSensor::Update(
   *stamp = msgs::Convert(_now);
   auto frame = this->dataPtr->coloredMapMsg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->Name());
+  frame->add_value(this->FrameId());
 
   this->dataPtr->labelsMapMsg.CopyFrom(this->dataPtr->coloredMapMsg);
 
@@ -551,6 +551,16 @@ common::ConnectionPtr SegmentationCameraSensor::ConnectImageCallback(
     std::function<void(const msgs::Image &)> _callback)
 {
   return this->dataPtr->imageEvent.Connect(_callback);
+}
+
+//////////////////////////////////////////////////
+bool SegmentationCameraSensor::HasConnections() const
+{
+  return (this->dataPtr->coloredMapPublisher &&
+      this->dataPtr->coloredMapPublisher.HasConnections()) ||
+      (this->dataPtr->labelsMapPublisher &&
+      this->dataPtr->labelsMapPublisher.HasConnections()) ||
+      this->dataPtr->imageEvent.ConnectionCount() > 0u;
 }
 
 //////////////////////////////////////////////////
