@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/Lidar.hh>
+#include <ignition/sensors/config.hh>

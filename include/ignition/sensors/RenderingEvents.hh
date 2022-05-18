@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/RenderingEvents.hh>
+#include <ignition/sensors/config.hh>

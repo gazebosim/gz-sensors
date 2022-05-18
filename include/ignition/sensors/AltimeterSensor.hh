@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/AltimeterSensor.hh>
+#include <ignition/sensors/config.hh>
