@@ -20,8 +20,11 @@
 
 #include <gz/sensors/config.hh>
 
-namespace [[deprecated("Use gz namespace.")]]  ignition
+namespace ignition
 {
+  #ifndef SUPPRESS_IGNITION_HEADER_DEPRECATION
+    #pragma message("ignition namespace is deprecated! Use gz instead!")
+  #endif
   using namespace gz;
 }
 
