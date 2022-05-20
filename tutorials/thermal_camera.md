@@ -56,7 +56,7 @@ Here's an example of how to attach a thermal camera sensor to a model in a [SDF]
       <visualize>true</visualize>
       <topic>thermal_camera_8bit/image</topic>
       <plugin
-        filename="gz-sim-thermal-sensor-system"
+        filename="ignition-gazebo-thermal-sensor-system"
         name="gz::sim::systems::ThermalSensor">
         <min_temp>253.15</min_temp>
         <max_temp>673.15</max_temp>
@@ -89,7 +89,7 @@ Let's take a closer look at the portion of the code above that focuses on the th
   <visualize>true</visualize>
   <topic>thermal_camera_8bit/image</topic>
   <plugin
-    filename="gz-sim-thermal-sensor-system"
+    filename="ignition-gazebo-thermal-sensor-system"
     name="gz::sim::systems::ThermalSensor">
     <min_temp>253.15</min_temp>
     <max_temp>673.15</max_temp>
@@ -190,7 +190,7 @@ Here's an example of a box model that has a uniform temperature assigned to it:
         <specular>1 0 0 1</specular>
       </material>
       <plugin
-        filename="gz-sim-thermal-system"
+        filename="ignition-gazebo-thermal-system"
         name="gz::sim::systems::Thermal">
         <temperature>285.0</temperature>
       </plugin>
@@ -203,7 +203,7 @@ Most of the code above is for the model - here's the key piece for temperature a
 
 ```xml
 <plugin
-  filename="gz-sim-thermal-system"
+  filename="ignition-gazebo-thermal-system"
   name="gz::sim::systems::Thermal">
   <temperature>285.0</temperature>
 </plugin>
@@ -221,7 +221,7 @@ If we take a look at Rescue Randy's `model.sdf`, we can see that it incorporates
 
 ```xml
 <plugin
-  filename="gz-sim-thermal-system"
+  filename="ignition-gazebo-thermal-system"
   name="gz::sim::systems::Thermal">
   <heat_signature>materials/textures/RescueRandy_Thermal.png</heat_signature>
   <max_temp>310</max_temp>
