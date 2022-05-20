@@ -30,13 +30,6 @@
 
 #define GZ_SENSORS_VERSION_NAMESPACE v${PROJECT_VERSION_MAJOR}
 
-#define GZ_SENSORS_VERSION_HEADER "Gz Sensors, version ${PROJECT_VERSION_FULL}\nCopyright (C) 2014 Open Source Robotics Foundation.\nReleased under the Apache 2.0 License.\n\n"
-
-#cmakedefine BUILD_TYPE_PROFILE 1
-#cmakedefine BUILD_TYPE_DEBUG 1
-#cmakedefine BUILD_TYPE_RELEASE 1
-
-#define GZ_SENSORS_PLUGIN_PATH "@IGN_SENSORS_PLUGIN_PATH@"
-#define GZ_SENSORS_PLUGIN_NAME(name) std::string("@PROJECT_LIBRARY_TARGET_NAME@-")+name
+#define GZ_SENSORS_VERSION_HEADER "Gazebo Sensors, version ${PROJECT_VERSION_FULL}\nCopyright (C) 2014 Open Source Robotics Foundation.\nReleased under the Apache 2.0 License.\n\n"
 
 #endif
