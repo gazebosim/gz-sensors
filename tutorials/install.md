@@ -16,7 +16,7 @@ wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
 sudo apt-get update
 ```
 
-1. Install Ignition Sensors
+1. Install Gazebo Sensors
 
 ```{.sh}
 # Change <#> to a version number, like 3 or 4
@@ -31,7 +31,7 @@ On macOS, add OSRF packages:
   brew tap osrf/simulation
   ```
 
-Install Ignition Sensors:
+Install Gazebo Sensors:
   ```
   brew install ignition-sensors<#>
   ```
@@ -50,14 +50,14 @@ necessary prerequisites followed by building from source.
 
 ### Prerequisites
 
-Ignition Sensors requires:
+Gazebo Sensors requires:
 
-  * [Ignition CMake](https://ignitionrobotics.org/libs/cmake)
-  * [Ignition Math](https://ignitionrobotics.org/libs/math)
-  * [Ignition Common](https://ignitionrobotics.org/libs/common)
-  * [Ignition Transport](https://ignitionrobotics.org/libs/transport)
-  * [Ignition Rendering](https://ignitionrobotics.org/libs/rendering)
-  * [Ignition Msgs](https://ignitionrobotics.org/libs/msgs)
+  * [Gazebo CMake](https://ignitionrobotics.org/libs/cmake)
+  * [Gazebo Math](https://ignitionrobotics.org/libs/math)
+  * [Gazebo Common](https://ignitionrobotics.org/libs/common)
+  * [Gazebo Transport](https://ignitionrobotics.org/libs/transport)
+  * [Gazebo Rendering](https://ignitionrobotics.org/libs/rendering)
+  * [Gazebo Msgs](https://ignitionrobotics.org/libs/msgs)
   * [SDFormat](https://github.com/osrf/sdformat)
   * [Protobuf3](https://developers.google.com/protocol-buffers/)
 

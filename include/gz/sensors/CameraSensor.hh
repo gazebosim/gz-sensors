@@ -124,7 +124,7 @@ namespace gz
       public: virtual unsigned int ImageHeight() const;
 
       /// \brief Get pointer to rendering camera object.
-      /// \return Camera in Ignition Rendering.
+      /// \return Camera in Gazebo Rendering.
       public: virtual rendering::CameraPtr RenderingCamera() const;
 
       /// \brief Topic where camera info is published.

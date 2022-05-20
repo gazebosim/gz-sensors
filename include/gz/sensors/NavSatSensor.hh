@@ -40,7 +40,7 @@ namespace gz
     /// \brief NavSat Sensor Class
     ///
     /// A sensor that reports position and velocity readings over
-    /// Ignition Transport using spherical coordinates (latitude / longitude).
+    /// Gazebo Transport using spherical coordinates (latitude / longitude).
     ///
     /// By default, it publishes `gz::msgs::NavSat` messages on the
     /// `/.../navsat` topic.

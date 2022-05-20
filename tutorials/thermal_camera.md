@@ -1,15 +1,15 @@
-\page thermalcameraigngazebo Thermal Camera in Ignition Gazebo
+\page thermalcameraigngazebo Thermal Camera in Gazebo
 
-In this tutorial, we will discuss how to use a thermal camera sensor in [Ignition Gazebo](https://ignitionrobotics.org/libs/gazebo).
+In this tutorial, we will discuss how to use a thermal camera sensor in [Gazebo](https://ignitionrobotics.org/libs/gazebo).
 
 There are currently a few limitations with the thermal camera, which will be mentioned at the end of the tutorial.
 
 ## Requirements
 
-Since this tutorial will show how to use a thermal camera sensor in Ignition Gazebo, you'll need to have Ignition Gazebo installed.
+Since this tutorial will show how to use a thermal camera sensor in Gazebo, you'll need to have Gazebo installed.
 We recommend installing all Ignition libraries, using version Citadel or newer (the thermal camera is not available in Ignition versions prior to Citadel).
 
-The following thermal camera capabilities are available starting from Ignition Dome:
+The following thermal camera capabilities are available starting from Gazebo Dome:
 * Heat signature capabilities (supports objects with a variable surface temperature)
 * 8-bit thermal camera image format (the default thermal camera image format is 16-bit)
 
@@ -56,7 +56,7 @@ Here's an example of how to attach a thermal camera sensor to a model in a [SDF]
       <visualize>true</visualize>
       <topic>thermal_camera_8bit/image</topic>
       <plugin
-        filename="ignition-gazebo-thermal-sensor-system"
+        filename="gz-sim-thermal-sensor-system"
         name="gz::sim::systems::ThermalSensor">
         <min_temp>253.15</min_temp>
         <max_temp>673.15</max_temp>
@@ -89,7 +89,7 @@ Let's take a closer look at the portion of the code above that focuses on the th
   <visualize>true</visualize>
   <topic>thermal_camera_8bit/image</topic>
   <plugin
-    filename="ignition-gazebo-thermal-sensor-system"
+    filename="gz-sim-thermal-sensor-system"
     name="gz::sim::systems::ThermalSensor">
     <min_temp>253.15</min_temp>
     <max_temp>673.15</max_temp>
@@ -106,10 +106,10 @@ As we can see, we define a sensor with the following SDF elements:
                     The default thermal camera image format is 16-bit unless otherwise specified.
     - `<clip>`: The near and far clip planes. Objects are only rendered if they're within these planes.
 * `<always_on>`: Whether the sensor will always be updated (indicated by `1`) or not (indicated by `0`).
-                 This is currently unused by Ignition Gazebo.
+                 This is currently unused by Gazebo.
 * `<update_rate>`: The sensor's update rate, in Hz.
 * `<visualize>`: Whether the sensor should be visualized in the GUI (indicated by `true`) or not (indicated by `false`).
-                 This is currently unused by Ignition Gazebo.
+                 This is currently unused by Gazebo.
 * `<topic>`: The name of the topic where sensor data is published. This is needed for visualization.
 
 There's also an optional plugin used here that allows for further configuration of the thermal camera.
@@ -190,7 +190,7 @@ Here's an example of a box model that has a uniform temperature assigned to it:
         <specular>1 0 0 1</specular>
       </material>
       <plugin
-        filename="ignition-gazebo-thermal-system"
+        filename="gz-sim-thermal-system"
         name="gz::sim::systems::Thermal">
         <temperature>285.0</temperature>
       </plugin>
@@ -203,7 +203,7 @@ Most of the code above is for the model - here's the key piece for temperature a
 
 ```xml
 <plugin
-  filename="ignition-gazebo-thermal-system"
+  filename="gz-sim-thermal-system"
   name="gz::sim::systems::Thermal">
   <temperature>285.0</temperature>
 </plugin>
@@ -221,7 +221,7 @@ If we take a look at Rescue Randy's `model.sdf`, we can see that it incorporates
 
 ```xml
 <plugin
-  filename="ignition-gazebo-thermal-system"
+  filename="gz-sim-thermal-system"
   name="gz::sim::systems::Thermal">
   <heat_signature>materials/textures/RescueRandy_Thermal.png</heat_signature>
   <max_temp>310</max_temp>
@@ -231,7 +231,7 @@ If we take a look at Rescue Randy's `model.sdf`, we can see that it incorporates
 There are a few differences to note for objects with a varying surface temperature:
 * `<heat_signature>`: The path to the heat signature texture.
                       In this example, the path is given relative to where the Rescue Randy fuel model is located.
-                      This can either be an [Ignition Fuel](https://ignitionrobotics.org/libs/fuel_tools) URI, or a path to a file that is on your machine locally.
+                      This can either be an [Gazebo Fuel](https://ignitionrobotics.org/libs/fuel_tools) URI, or a path to a file that is on your machine locally.
 * `<min_temp>`: The minimum temperature (in Kelvin) that should be represented by the heat signature.
                 This defaults to the world's ambient temperature if not specified.
 * `<max_temp>`: The maximum temperature (in Kelvin) that should be represented by the heat signature.

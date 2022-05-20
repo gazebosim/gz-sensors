@@ -1,13 +1,13 @@
 \page custom_sensors Custom sensors
 
-Ignition Sensors comes with various built-in sensor types ready to be used.
+Gazebo Sensors comes with various built-in sensor types ready to be used.
 Users aren't limited to those sensor types though. This tutorial will go over
-the process of implementing a custom sensor that leverages Ignition Sensors
-and can be used with downstream applications such as Ignition Gazebo.
+the process of implementing a custom sensor that leverages Gazebo Sensors
+and can be used with downstream applications such as Gazebo.
 
 ## Why custom sensors
 
-The set of built-in sensors provided by Ignition Sensors is tied to the
+The set of built-in sensors provided by Gazebo Sensors is tied to the
 SDFormat specification. SDFormat is meant to be as general-purpose as possible,
 so adding lots of exotic sensors to the specification may become a maintenance
 burden and counter-productive. Therefore, sensors that are very specific to
@@ -20,14 +20,14 @@ versions of sensors which are not generally useful for other projects.
 Finally, another reason to develop custom sensors is for projects that need to
 implement proprietary sensors that can't be shared publicly.
 
-## Do I need to use Ignition Sensors?
+## Do I need to use Gazebo Sensors?
 
 A simulated sensor consists of code that can be used to extract specific data
 from a running simulation. A camera extracts pixels, an IMU extracts
 accelerations, etc. This doesn't necessarily need to be done though Ignition
-Sensors. On Ignition Gazebo, for example, it's possible to implement
+Sensors. On Gazebo, for example, it's possible to implement
 functionality similar to a sensor just using a system plugin without any
-connection to Ignition Sensors.
+connection to Gazebo Sensors.
 
 With that in mind, it's worth going over some of the features that Ignition
 Sensors provides that make it easier to implement sensors, instead of writing
@@ -46,7 +46,7 @@ the total distance travelled by a robot.
 
 This example is located at
 [ign-sensors/examples/custom_sensor](https://github.com/gazebosim/gz-sensors/tree/main/examples/custom_sensor),
-and the integration with Ignition Gazebo is at
+and the integration with Gazebo is at
 [ign-gazebo/examples/plugins/custom_sensor_system](https://github.com/gazebosim/gz-sim/tree/main/examples/plugin/custom_sensor_system).
 
 Wherever "odometer" is used, that can be substituted for any other custom sensor
@@ -87,18 +87,18 @@ Take a look at
 [ign-sensors/examples/custom_sensor](https://github.com/gazebosim/gz-sensors/tree/main/examples/custom_sensor)
 for the full code. Here are some important pointers:
 
-* Be sure to link your sensor to Ignition Sensors
+* Be sure to link your sensor to Gazebo Sensors
 * Implement all pure abstraction functions, like `Update`
 * Be sure to implement at least one of the `Load` functions so the sensor can be initialized
 * Don't forget to call `Sensor::Load` to load common sensor properties
-* It's recommended that the sensor publishes its data using Ignition Transport
+* It's recommended that the sensor publishes its data using Gazebo Transport
 
 You may choose to compile your sensor as a shared library, or to embed it
 directly into other application code.
 
-### Loading into Ignition Gazebo
+### Loading into Gazebo
 
-In order to use the sensor on Ignition Gazebo, one needs to write a system
+In order to use the sensor on Gazebo, one needs to write a system
 plugin that instantiates the sensor and updates it periodically with data from
 simulation.
 

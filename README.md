@@ -1,4 +1,4 @@
-# Ignition Sensors : Sensor models for simulation
+# Gazebo Sensors : Sensor models for simulation
 
 **Maintainer:** ichen AT openrobotics DOT org
 
@@ -14,9 +14,9 @@ Ubuntu Focal | [![Build Status](https://build.osrfoundation.org/buildStatus/icon
 Homebrew      | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-main-homebrew-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-main-homebrew-amd64)
 Windows       | [![Build Status](https://build.osrfoundation.org/job/ign_sensors-ci-win/badge/icon)](https://build.osrfoundation.org/job/ign_sensors-ci-win/)
 
-Ignition Sensors, a component of [Ignition
+Gazebo Sensors, a component of [Ignition
 Robotics](https://ignitionrobotics.org), provides numerous sensor models
-designed to generate realistic data from simulation environments. Ignition Sensors is used in conjunction with [Ignition Libraries](https://ignitionrobotics/libs), and especially relies on the rendering capabilities from [Ignition Rendering](https://ignitionrobotics.org/libs/rendering) and physics simulation from [Ignition Physics](https://ignitionrobotics.org/libs/physics).
+designed to generate realistic data from simulation environments. Gazebo Sensors is used in conjunction with [Gazebo Libraries](https://ignitionrobotics/libs), and especially relies on the rendering capabilities from [Gazebo Rendering](https://ignitionrobotics.org/libs/rendering) and physics simulation from [Gazebo Physics](https://ignitionrobotics.org/libs/physics).
 
 # Table of Contents
 
@@ -46,7 +46,7 @@ designed to generate realistic data from simulation environments. Ignition Senso
 
 # Features
 
-Ignition Sensors provides a set of sensors models that can be
+Gazebo Sensors provides a set of sensors models that can be
 configured at run time to mimic specific real-world sensors. A noise model
 is also provided that can be used to introduce Gaussian or custom noise
 models into sensor streams.
@@ -88,7 +88,7 @@ Please see
 
 # Versioning
 
-This library uses [Semantic Versioning](https://semver.org/). Additionally, this library is part of the [Ignition Robotics project](https://ignitionrobotics.org) which periodically releases a versioned set of compatible and complimentary libraries. See the [Ignition Robotics website](https://ignitionrobotics.org) for version and release information.
+This library uses [Semantic Versioning](https://semver.org/). Additionally, this library is part of the [Gazebo Robotics project](https://ignitionrobotics.org) which periodically releases a versioned set of compatible and complimentary libraries. See the [Gazebo Robotics website](https://ignitionrobotics.org) for version and release information.
 
 # License
 

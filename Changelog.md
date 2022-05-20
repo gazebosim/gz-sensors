@@ -1,12 +1,12 @@
-## Ignition Sensors 7
+## Gazebo Sensors 7
 
-### Ignition Sensors 7.X.X
+### Gazebo Sensors 7.X.X
 
-### Ignition Sensors 7.0.0 (202X-XX-XX)
+### Gazebo Sensors 7.0.0 (202X-XX-XX)
 
-## Ignition Sensors 6
+## Gazebo Sensors 6
 
-### Ignition Sensors 6.4.0 (2022-05-13)
+### Gazebo Sensors 6.4.0 (2022-05-13)
 
 1. Set lidar visibility mask
     * [Pull request #224](https://github.com/gazebosim/gz-sensors/pull/224)
@@ -20,7 +20,7 @@
 1. Fix `<ignition_frame_id>` not working for GpuLidarSensor
     * [Pull request #218](https://github.com/gazebosim/gz-sensors/pull/218)
 
-### Ignition Sensors 6.3.0 (2022-04-04)
+### Gazebo Sensors 6.3.0 (2022-04-04)
 
 1. IMU custom_rpy parent_frame should be set to 'world'
     * [Pull request #212](https://github.com/gazebosim/gz-sensors/pull/212)
@@ -31,7 +31,7 @@
 1. Check if noise or distortion render pass is null
     * [Pull request #211](https://github.com/gazebosim/gz-sensors/pull/211)
 
-### Ignition Sensors 6.2.0 (2022-03-29)
+### Gazebo Sensors 6.2.0 (2022-03-29)
 
 1. Distortion Camera Sensor
     * [Pull request #192](https://github.com/gazebosim/gz-sensors/pull/192)
@@ -57,7 +57,7 @@
 1. Fix compiler warnings (CMP0072 and copy elision)
     * [Pull request #188](https://github.com/gazebosim/gz-sensors/pull/188)
 
-### Ignition Sensors 6.1.0 (2022-01-04)
+### Gazebo Sensors 6.1.0 (2022-01-04)
 
 1. Add NavSat (GPS) sensor
     * [Pull request #177](https://github.com/gazebosim/gz-sensors/pull/177)
@@ -68,7 +68,7 @@
 1. IMU ``custom_rpy``  tag parsing added
     * [Pull request #178](https://github.com/gazebosim/gz-sensors/pull/178)
 
-### Ignition Sensors 6.0.1 (2021-11-12)
+### Gazebo Sensors 6.0.1 (2021-11-12)
 
 1. Disable GPU lidar tests on macOS
     * [Pull request #163](https://github.com/gazebosim/gz-sensors/pull/163)
@@ -79,7 +79,7 @@
 1. Destroy rendering sensors when sensor is removed.
     * [Pull request #169](https://github.com/gazebosim/gz-sensors/pull/169)
 
-### Ignition Sensors 6.0.0 (2021-09-30)
+### Gazebo Sensors 6.0.0 (2021-09-30)
 
 1. Trivial tutorial typo correction in Custom Sensors tutorial
     * [Pull request #160](https://github.com/gazebosim/gz-sensors/pull/160)
@@ -108,11 +108,11 @@
 1. Joint Force-Torque Sensor
     * [Pull request #144](https://github.com/gazebosim/gz-sensors/pull/144)
 
-## Ignition Sensors 5
+## Gazebo Sensors 5
 
-### Ignition Sensors 5.X.X
+### Gazebo Sensors 5.X.X
 
-### Ignition Sensors 5.1.0 (2021-10-15)
+### Gazebo Sensors 5.1.0 (2021-10-15)
 
 1. Depend on ign-msgs 7.2 and libSDFormat 11.3
     * [Pull request #154](https://github.com/gazebosim/gz-sensors/pull/154)
@@ -141,7 +141,7 @@
 1. 👩‍🌾 Disable tests that consistently fail on macOS
     * [Pull request #121](https://github.com/gazebosim/gz-sensors/pull/121)
 
-### Ignition Sensors 5.0.0 (2021-03-30)
+### Gazebo Sensors 5.0.0 (2021-03-30)
 
 1. Bump in edifice: ign-common4
     * [Pull request #85](https://github.com/gazebosim/gz-sensors/pull/85)
@@ -158,11 +158,11 @@
 1. Documentation updates
     * [Pull request #116](https://github.com/gazebosim/gz-sensors/pull/116)
 
-## Ignition Sensors 4
+## Gazebo Sensors 4
 
-### Ignition Sensors 4.X.X
+### Gazebo Sensors 4.X.X
 
-### Ignition Sensors 4.2.0 (2021-07-12)
+### Gazebo Sensors 4.2.0 (2021-07-12)
 
 1. Add API for enabling / disabling IMU orientation
     * [Pull request #142](https://github.com/gazebosim/gz-sensors/pull/142)
@@ -197,7 +197,7 @@
 1. Removed issue & PR templates
     * [Pull request #99](https://github.com/gazebosim/gz-sensors/pull/99)
 
-### Ignition Sensors 4.1.0 (2021-02-10)
+### Gazebo Sensors 4.1.0 (2021-02-10)
 
 1. Added issue and PR templates.
     * [Pull request 91](https://github.com/gazebosim/gz-sensors/pull/91)
@@ -210,7 +210,7 @@
 
 1. All features up to version 3.2.0.
 
-### Ignition Sensors 4.0.0 (2020-09-30)
+### Gazebo Sensors 4.0.0 (2020-09-30)
 
 1. Fix link in README.md
     * [Pull request 51](https://github.com/gazebosim/gz-sensors/pull/51)
@@ -238,11 +238,11 @@
 1. Depend on ign-rendering4
     * [BitBucket pull request 111](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/111)
 
-## Ignition Sensors 3
+## Gazebo Sensors 3
 
-### Ignition Sensors 3.X.X (202X-XX-XX)
+### Gazebo Sensors 3.X.X (202X-XX-XX)
 
-### Ignition Sensors 3.3.0 (2021-08-26)
+### Gazebo Sensors 3.3.0 (2021-08-26)
 
 1. 👩‍🌾 Print debug messages when sensors advertise topics
     * [Pull request #151](https://github.com/gazebosim/gz-sensors/pull/151)
@@ -264,7 +264,7 @@
 1. Fix macOS/windows tests that failed to load library (backport #60)
     * [Pull request #60](https://github.com/gazebosim/gz-sensors/pull/60)
 
-### Ignition Sensors 3.2.0 (2021-02-08)
+### Gazebo Sensors 3.2.0 (2021-02-08)
 
 1. Apply noise to lidar point cloud.
     * [Pull request 86](https://github.com/gazebosim/gz-sensors/pull/86)
@@ -284,7 +284,7 @@
 1. Improve fork experience.
     * [Pull request 54](https://github.com/gazebosim/gz-sensors/pull/54)
 
-### Ignition Sensors 3.1.0 (2020-09-03)
+### Gazebo Sensors 3.1.0 (2020-09-03)
 
 1. Update camera sensor only when needed
     * [Pull request 37](https://github.com/gazebosim/gz-sensors/pull/37)
@@ -304,7 +304,7 @@
     * [Pull request 11](https://github.com/gazebosim/gz-sensors/pull/11)
     * [Pull request 21](https://github.com/gazebosim/gz-sensors/pull/21)
 
-### Ignition Sensors 3.0.0 (2019-12-10)
+### Gazebo Sensors 3.0.0 (2019-12-10)
 
 1. Add support for sdformat frame semantics
     * [BitBucket pull request 104](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/104)
@@ -331,9 +331,9 @@
 1. Depend on ign-rendering3
     * [BitBucket pull request 88](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/88)
 
-## Ignition Sensors 2
+## Gazebo Sensors 2
 
-### Ignition Sensors 2.9.0 (2020-08-07)
+### Gazebo Sensors 2.9.0 (2020-08-07)
 
 1. Add noise to RGBD camera.
     * [Pull Request 35](https://github.com/gazebosim/gz-sensors/pull/35)
@@ -344,32 +344,32 @@
     * [Pull Request 33](https://github.com/gazebosim/gz-sensors/pull/33)
 
 
-### Ignition Sensors 2.8.0 (2020-03-04)
+### Gazebo Sensors 2.8.0 (2020-03-04)
 
 1. Added sequence numbers to sensor data messages.
     * [BitBucket pull request 112](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/112)
 
-### Ignition Sensors 2.7.0 (2019-12-16)
+### Gazebo Sensors 2.7.0 (2019-12-16)
 
 1. Add clipping for depth camera on rgbd camera sensor (requires sdformat 8.7.0)
     * [BitBucket pull request 107](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/107)
 
-### Ignition Sensors 2.6.1 (2019-09-13)
+### Gazebo Sensors 2.6.1 (2019-09-13)
 
 1. Fix IMU noise model dt
     * [BitBucket pull request 94](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/94)
 
-### Ignition Sensors 2.6.0 (2019-08-27)
+### Gazebo Sensors 2.6.0 (2019-08-27)
 
 1. Update depth and rgbd camera sensor to output point cloud data generated by ign-rendering DepthCamera
     * [BitBucket pull request 91](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/91)
 
-### Ignition Sensors 2.5.1 (2019-08-12)
+### Gazebo Sensors 2.5.1 (2019-08-12)
 
 1. Add intensity and ring fields to GpuLidarSensor point cloud msg
     * [BitBucket pull request 89](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/89)
 
-### Ignition Sensors 2.5.0
+### Gazebo Sensors 2.5.0
 
 1. Add `IGN_PROFILER_ENABLE` cmake option for enabling the ign-common profiler.
     * [BitBucket pull request 82](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/82)
@@ -380,18 +380,18 @@
 1. Baseline for stereo cameras
     * [BitBucket pull request 84](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/84)
 
-### Ignition Sensors 2.4.0 (2019-07-17)
+### Gazebo Sensors 2.4.0 (2019-07-17)
 
 1. Support manual scene updates for rendering sensors
     * [BitBucket pull request 81](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/81)
 
-### Ignition Sensors 2.3.0 (2019-07-16)
+### Gazebo Sensors 2.3.0 (2019-07-16)
 
 1. The GpuLidar and Rgbd sensors publish point cloud data using
    `msgs::PointCloudPacked`.
     * [BitBucket pull request 78](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/78)
 
-### Ignition Sensors 2.2.0 (2019-06-27)
+### Gazebo Sensors 2.2.0 (2019-06-27)
 
 1. Update the GPU Lidar to use the sensor's name as the `frame_id`.
     * [BitBucket pull request 74](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/74)
@@ -399,7 +399,7 @@
 1. Fix camera_info topic to be on the same level as image and depth_image for RGBD Camera.
     * [BitBucket pull request 73](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/73)
 
-### Ignition Sensors 2.1.0 (2019-06-18)
+### Gazebo Sensors 2.1.0 (2019-06-18)
 
 1. Adds an RGBD camera sensor that combines a CameraSensor and DepthCameraSensor, and also
    outputs a pointcloud.
@@ -409,7 +409,7 @@
    sensors.
     * [BitBucket pull request 67](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/67)
 
-### Ignition Sensors 2.0.0 (2019-05-21)
+### Gazebo Sensors 2.0.0 (2019-05-21)
 
 1. Zero update rate, virtual SetParent and fix gpu_lidar
     * [BitBucket pull request 66](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/66)
@@ -465,10 +465,10 @@
 1. Upgrade to ignition-msgs4 and ignition-transport7
     * [BitBucket pull request 51](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/51)
 
-### Ignition Sensors 1.X.X (2019-XX-XX)
+### Gazebo Sensors 1.X.X (2019-XX-XX)
 
 1. Fix windows linking
     * [BitBucket pull request 49](https://osrf-migration.github.io/gazebo-gh-pages/#!/osrf/gazebo/pull-requests/49)
     * [Issue 6](https://github.com/osrf/gazebo/issues/6)
 
-### Ignition Sensors 1.0.0 (2019-03-01)
+### Gazebo Sensors 1.0.0 (2019-03-01)

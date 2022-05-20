@@ -30,7 +30,7 @@ using namespace sensors;
 //////////////////////////////////////////////////
 void SensorFactory::AddPluginPaths(const std::string &)
 {
-  ignwarn << "Trying to add plugin paths, but Ignition Sensors doesn't support"
+  ignwarn << "Trying to add plugin paths, but Gazebo Sensors doesn't support"
           << " plugins anymore." << std::endl;
 }
 
