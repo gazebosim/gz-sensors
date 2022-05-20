@@ -20,9 +20,9 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/sensors/Noise.hh>
-#include <ignition/sensors/GaussianNoiseModel.hh>
-#include <ignition/sensors/SensorFactory.hh>
+#include <gz/sensors/Noise.hh>
+#include <gz/sensors/GaussianNoiseModel.hh>
+#include <gz/sensors/SensorFactory.hh>
 
 static constexpr double kSampleFrequency = 100.0;
 // 16-bit ADC

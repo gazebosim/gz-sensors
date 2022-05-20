@@ -19,12 +19,12 @@
 
 #include <sdf/Sensor.hh>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/SignalHandler.hh>
-#include <ignition/sensors/Manager.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/SignalHandler.hh>
+#include <gz/sensors/Manager.hh>
 
 // Include all supported sensors
-#include <ignition/sensors/AltimeterSensor.hh>
+#include <gz/sensors/AltimeterSensor.hh>
 #include "../custom_sensor/Odometer.hh"
 
 using namespace std::literals::chrono_literals;

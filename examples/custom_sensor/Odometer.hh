@@ -17,9 +17,9 @@
 #ifndef ODOMETER_HH_
 #define ODOMETER_HH_
 
-#include <ignition/sensors/Sensor.hh>
-#include <ignition/sensors/SensorTypes.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/sensors/Sensor.hh>
+#include <gz/sensors/SensorTypes.hh>
+#include <gz/transport/Node.hh>
 
 namespace custom
 {

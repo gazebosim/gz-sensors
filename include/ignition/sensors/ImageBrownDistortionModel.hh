@@ -13,64 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
-#ifndef IGNITION_SENSORS_IMAGEBROWNDISTORTIONMODEL_HH_
-#define IGNITION_SENSORS_IMAGEBROWNDISTORTIONMODEL_HH_
-
-#include <sdf/sdf.hh>
-
-// TODO(WilliamLewww): Remove these pragmas once ign-rendering is disabling the
-// warnings
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4251)
-#endif
-#include <ignition/rendering/Camera.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
-
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/BrownDistortionModel.hh"
-#include "ignition/sensors/rendering/Export.hh"
-
-namespace ignition
-{
-  namespace sensors
-  {
-    // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
-    // Forward declarations
-    class ImageBrownDistortionModelPrivate;
-
-    /** \class ImageBrownDistortionModel ImageBrownDistortionModel.hh \
-    ignition/sensors/ImageBrownDistortionModel.hh
-    **/
-    /// \brief Distortion Model class for image sensors
-    class IGNITION_SENSORS_RENDERING_VISIBLE ImageBrownDistortionModel :
-      public BrownDistortionModel
-    {
-      /// \brief Constructor.
-      public: ImageBrownDistortionModel();
-
-      /// \brief Destructor.
-      public: virtual ~ImageBrownDistortionModel();
-
-      // Documentation inherited.
-      public: virtual void Load(const sdf::Camera &_sdf) override;
-
-      // Documentation inherited.
-      public: virtual void SetCamera(rendering::CameraPtr _camera);
-
-      /// Documentation inherited
-      public: virtual void Print(std::ostream &_out) const override;
-
-      /// \brief Private data pointer.
-      private: ImageBrownDistortionModelPrivate *dataPtr = nullptr;
-    };
-  }
-  }
-}
-
-#endif
+#include <gz/sensors/ImageBrownDistortionModel.hh>
