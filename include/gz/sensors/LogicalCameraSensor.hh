@@ -108,6 +108,11 @@ namespace ignition
       /// \return The frustum's aspect ratio.
       public: double AspectRatio() const;
 
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Garden
+      public: bool HasConnections() const;
+
       /// \brief Get the latest image. An image is an instance of
       /// msgs::LogicalCameraImage, which contains a list of detected models.
       /// \return List of detected models.

@@ -185,6 +185,7 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   auto sensor = sf.CreateSensor<ignition::sensors::MagnetometerSensor>(
       magnetometerSdf);
   ASSERT_NE(nullptr, sensor);
+  EXPECT_FALSE(sensor->HasConnections());
 
   auto sensorNoise = sf.CreateSensor<ignition::sensors::MagnetometerSensor>(
       magnetometerSdfNoise);
@@ -192,6 +193,7 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
 
   // subscribe to the topic
   WaitForMessageTestHelper<ignition::msgs::Magnetometer> msgHelper(topic);
+  EXPECT_TRUE(sensor->HasConnections());
 
   // subscribe to the topic
   WaitForMessageTestHelper<ignition::msgs::Magnetometer> msgHelperNoise(

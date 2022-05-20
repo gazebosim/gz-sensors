@@ -227,6 +227,7 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
     mgr.CreateSensor<ignition::sensors::SegmentationCameraSensor>(sdfSensor);
 
   ASSERT_NE(sensor, nullptr);
+  EXPECT_FALSE(sensor->HasConnections());
   sensor->SetScene(scene);
 
   EXPECT_EQ(width, static_cast<int>(sensor->ImageWidth()));
@@ -253,6 +254,7 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   topic += "/labels_map";
 
   WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
+  EXPECT_TRUE(sensor->HasConnections());
   WaitForMessageTestHelper<ignition::msgs::CameraInfo> infoHelper(infoTopic);
 
   // Update once to create image

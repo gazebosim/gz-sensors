@@ -234,3 +234,8 @@ math::Vector3d MagnetometerSensor::MagneticField() const
   return this->dataPtr->localField;
 }
 
+//////////////////////////////////////////////////
+bool MagnetometerSensor::HasConnections() const
+{
+  return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
+}

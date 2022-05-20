@@ -38,7 +38,7 @@ sdf::ElementPtr LidarToSDF(const std::string &name, double update_rate,
     double horz_min_angle, double horz_max_angle, double vert_samples,
     double vert_resolution, double vert_min_angle, double vert_max_angle,
     double range_resolution, double range_min, double range_max,
-    bool always_on, bool visualize)
+    uint32_t visibility_mask, bool always_on, bool visualize)
 {
   std::ostringstream stream;
   stream
@@ -69,6 +69,7 @@ sdf::ElementPtr LidarToSDF(const std::string &name, double update_rate,
     << "          <max>" << range_max << "</max>"
     << "          <resolution>" << range_resolution << "</resolution>"
     << "        </range>"
+    << "        <visibility_mask>" << visibility_mask << "</visibility_mask>"
     << "      </ray>"
     << "      <always_on>"<< always_on <<"</always_on>"
     << "      <visualize>" << visualize << "</visualize>"
@@ -128,13 +129,15 @@ TEST(Lidar_TEST, CreateLaser)
   const double range_resolution = 0.01;
   const double range_min = 0.08;
   const double range_max = 10.0;
+  const uint32_t visibility_mask = 1234u;
   const bool always_on = 1;
   const bool visualize = 1;
 
   sdf::ElementPtr lidarSDF = LidarToSDF(name, update_rate, topic,
     horz_samples, horz_resolution, horz_min_angle, horz_max_angle,
     vert_samples, vert_resolution, vert_min_angle, vert_max_angle,
-    range_resolution, range_min, range_max, always_on, visualize);
+    range_resolution, range_min, range_max, visibility_mask, always_on,
+    visualize);
 
   // Create a CameraSensor
   ignition::sensors::Lidar *sensor = mgr.CreateSensor<ignition::sensors::Lidar>(
@@ -158,6 +161,7 @@ TEST(Lidar_TEST, CreateLaser)
   EXPECT_EQ(sensor->VerticalRangeCount(), 1u);
   EXPECT_DOUBLE_EQ(sensor->VerticalAngleMin().Radian(), 0.0);
   EXPECT_DOUBLE_EQ(sensor->VerticalAngleMax().Radian(), 0.0);
+  EXPECT_EQ(1234u, sensor->VisibilityMask());
 
   EXPECT_TRUE(sensor->IsActive());
 }

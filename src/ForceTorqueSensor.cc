@@ -250,7 +250,7 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
   *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->Name());
+  frame->add_value(this->FrameId());
 
   msgs::Set(msg.mutable_force(), measuredForce);
   msgs::Set(msg.mutable_torque(), measuredTorque);
@@ -311,4 +311,10 @@ void ForceTorqueSensor::SetRotationChildInSensor(
 math::Quaterniond ForceTorqueSensor::RotationChildInSensor() const
 {
   return math::Quaterniond(this->dataPtr->rotationChildInSensor);
+}
+
+//////////////////////////////////////////////////
+bool ForceTorqueSensor::HasConnections() const
+{
+  return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
 }

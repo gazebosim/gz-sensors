@@ -207,6 +207,7 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
       sf.CreateSensor<ignition::sensors::ForceTorqueSensor>(forcetorqueSdf);
 
   ASSERT_NE(nullptr, sensor);
+  EXPECT_FALSE(sensor->HasConnections());
 
   // verify initial readings
   EXPECT_EQ(math::Vector3d::Zero, sensor->Force());
@@ -225,6 +226,7 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
 
   // verify msg received on the topic
   WaitForMessageTestHelper<ignition::msgs::Wrench> msgHelper(topic);
+  EXPECT_TRUE(sensor->HasConnections());
   auto dt = std::chrono::steady_clock::duration(std::chrono::seconds(1));
 
   // Set rotation of child
