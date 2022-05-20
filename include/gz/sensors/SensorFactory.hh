@@ -42,11 +42,11 @@ namespace gz
     /// \brief Base sensor plugin interface
     /// \deprecated Sensor plugins are deprecated. Instantiate sensor objects
     /// instead.
-    class IGNITION_SENSORS_VISIBLE SensorPlugin
+    class GZ_SENSORS_VISIBLE SensorPlugin
     {
       /// \brief Instantiate new sensor
       /// \return New sensor
-      public: virtual Sensor IGN_DEPRECATED(6) * New() = 0;
+      public: virtual Sensor GZ_DEPRECATED(6) * New() = 0;
     };
 
     /// \brief Templated class for instantiating sensors of the specified type
@@ -57,7 +57,7 @@ namespace gz
     class SensorTypePlugin : public SensorPlugin
     {
       // Documentation inherited
-      public: SensorType IGN_DEPRECATED(6) * New() override
+      public: SensorType GZ_DEPRECATED(6) * New() override
               {
                 return new SensorType();
               };
@@ -69,7 +69,7 @@ namespace gz
     // After removing plugin functionality, the sensor factory class doesn't
     // hold any internal state. Consider converting the functionality in this
     // class to helper functions.
-    class IGNITION_SENSORS_VISIBLE SensorFactory
+    class GZ_SENSORS_VISIBLE SensorFactory
     {
       /// \brief Constructor
       public: SensorFactory();
@@ -163,7 +163,7 @@ namespace gz
       /// \deprecated Sensor registration is deprecated, so it's necessary to
       /// provide the specific sensor type to create it. Use the templated
       /// `CreateSensor` function.
-      public: std::unique_ptr<Sensor> IGN_DEPRECATED(6) CreateSensor(
+      public: std::unique_ptr<Sensor> GZ_DEPRECATED(6) CreateSensor(
           sdf::ElementPtr _sdf);
 
       /// \brief Create a sensor from an SDF Sensor DOM object without a known
@@ -182,13 +182,13 @@ namespace gz
       /// \deprecated Sensor registration is deprecated, so it's necessary to
       /// provide the specific sensor type to create it. Use the templated
       /// `CreateSensor` function.
-      public: std::unique_ptr<Sensor> IGN_DEPRECATED(6) CreateSensor(
+      public: std::unique_ptr<Sensor> GZ_DEPRECATED(6) CreateSensor(
           const sdf::Sensor &_sdf);
 
       /// \brief Add additional path to search for sensor plugins
       /// \param[in] _path Search path
       /// \deprecated Sensor plugins aren't supported anymore.
-      public: void IGN_DEPRECATED(6) AddPluginPaths(const std::string &_path);
+      public: void GZ_DEPRECATED(6) AddPluginPaths(const std::string &_path);
 
       IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief private data pointer

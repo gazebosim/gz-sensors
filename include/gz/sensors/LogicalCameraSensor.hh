@@ -57,7 +57,7 @@ namespace gz
     /// A logical camera reports locations of objects. This camera finds models
     /// within the sensor's frustum and publishes information about the models
     /// on the sensor's topic.
-    class IGNITION_SENSORS_LOGICAL_CAMERA_VISIBLE LogicalCameraSensor
+    class GZ_SENSORS_LOGICAL_CAMERA_VISIBLE LogicalCameraSensor
       : public Sensor
     {
       /// \brief constructor

@@ -37,7 +37,7 @@ namespace gz
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
 
     /// \brief Reference frames enum
-    enum class IGNITION_SENSORS_VISIBLE WorldFrameEnumType
+    enum class GZ_SENSORS_VISIBLE WorldFrameEnumType
     {
       /// \brief NONE : To be used only when <localization>
       /// reference orientation tag is empty.
@@ -64,7 +64,7 @@ namespace gz
     ///
     /// An imu sensor that reports linear acceleration, angular velocity, and
     /// orientation
-    class IGNITION_SENSORS_IMU_VISIBLE ImuSensor : public Sensor
+    class GZ_SENSORS_IMU_VISIBLE ImuSensor : public Sensor
     {
       /// \brief constructor
       public: ImuSensor();

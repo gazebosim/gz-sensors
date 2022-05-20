@@ -44,7 +44,7 @@ namespace gz
     /// \brief Force Torque Sensor Class
     ///
     /// A force-torque Sensor that reports force and torque applied on a joint.
-    class IGNITION_SENSORS_FORCE_TORQUE_VISIBLE ForceTorqueSensor
+    class GZ_SENSORS_FORCE_TORQUE_VISIBLE ForceTorqueSensor
         : public Sensor
     {
       /// \brief constructor

@@ -48,7 +48,7 @@ namespace gz
     gz/sensors/ImageBrownDistortionModel.hh
     **/
     /// \brief Distortion Model class for image sensors
-    class IGNITION_SENSORS_RENDERING_VISIBLE ImageBrownDistortionModel :
+    class GZ_SENSORS_RENDERING_VISIBLE ImageBrownDistortionModel :
       public BrownDistortionModel
     {
       /// \brief Constructor.

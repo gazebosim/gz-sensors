@@ -68,7 +68,7 @@ namespace gz
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-    class IGNITION_SENSORS_DEPTH_CAMERA_VISIBLE DepthCameraSensor
+    class GZ_SENSORS_DEPTH_CAMERA_VISIBLE DepthCameraSensor
       : public CameraSensor
     {
       /// \brief constructor

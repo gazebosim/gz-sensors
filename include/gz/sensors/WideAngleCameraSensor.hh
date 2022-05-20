@@ -68,7 +68,7 @@ namespace gz
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-    class IGNITION_SENSORS_WIDE_ANGLE_CAMERA_VISIBLE WideAngleCameraSensor
+    class GZ_SENSORS_WIDE_ANGLE_CAMERA_VISIBLE WideAngleCameraSensor
       : public CameraSensor
     {
       /// \brief constructor

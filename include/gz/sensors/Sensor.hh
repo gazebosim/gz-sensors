@@ -56,7 +56,7 @@ namespace gz
     ///   This class is a base for all sensor classes. It parses some common
     ///   SDF elements in the <sensor> tag and is responsible for making sure
     ///   sensors update at the right time.
-    class IGNITION_SENSORS_VISIBLE Sensor
+    class GZ_SENSORS_VISIBLE Sensor
     {
       /// \brief constructor
       protected: Sensor();

@@ -50,7 +50,7 @@ namespace gz
     ///   be in the <plugin> tag of the sdf::Element. The manager will
     ///   dynamically load the sensor library and update it.
     /// \remarks This class is not thread safe.
-    class IGNITION_SENSORS_VISIBLE Manager
+    class GZ_SENSORS_VISIBLE Manager
     {
       /// \brief constructor
       public: Manager();
@@ -97,7 +97,7 @@ namespace gz
       /// \deprecated Sensor registration is deprecated, so it's necessary to
       /// provide the specific sensor type to create it. Use the templated
       /// `CreateSensor` function.
-      public: gz::sensors::SensorId IGN_DEPRECATED(6) CreateSensor(
+      public: gz::sensors::SensorId GZ_DEPRECATED(6) CreateSensor(
           sdf::ElementPtr _sdf);
 
       /// \brief Create a sensor from SDF without a known sensor type.
@@ -108,7 +108,7 @@ namespace gz
       /// \deprecated Sensor registration is deprecated, so it's necessary to
       /// provide the specific sensor type to create it. Use the templated
       /// `CreateSensor` function.
-      public: gz::sensors::SensorId IGN_DEPRECATED(6) CreateSensor(
+      public: gz::sensors::SensorId GZ_DEPRECATED(6) CreateSensor(
           const sdf::Sensor &_sdf);
 
       /// \brief Add a sensor for this manager to manage.
@@ -137,7 +137,7 @@ namespace gz
                   bool _force = false);
 
       /// \brief Adds colon delimited paths sensor plugins may be
-      public: void IGN_DEPRECATED(6) AddPluginPaths(const std::string &_path);
+      public: void GZ_DEPRECATED(6) AddPluginPaths(const std::string &_path);
 
       IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief private data pointer

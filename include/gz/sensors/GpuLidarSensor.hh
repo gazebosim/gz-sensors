@@ -58,7 +58,7 @@ namespace gz
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-    class IGNITION_SENSORS_GPU_LIDAR_VISIBLE GpuLidarSensor : public Lidar
+    class GZ_SENSORS_GPU_LIDAR_VISIBLE GpuLidarSensor : public Lidar
     {
       /// \brief constructor
       public: GpuLidarSensor();

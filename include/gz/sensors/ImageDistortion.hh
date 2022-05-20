@@ -39,7 +39,7 @@ namespace gz
     /// gz/sensors/ImageDistortion.hh
     /// \brief Use this distortion manager for creating and loading distortion
     /// models.
-    class IGNITION_SENSORS_RENDERING_VISIBLE ImageDistortionFactory
+    class GZ_SENSORS_RENDERING_VISIBLE ImageDistortionFactory
     {
       /// \brief Load a distortion model based on the input sdf parameters and
       /// sensor type.

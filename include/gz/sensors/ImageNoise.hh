@@ -37,7 +37,7 @@ namespace gz
 
     /// \class NoiseFactory Noise.hh gz/sensors/Noise.hh
     /// \brief Use this noise manager for creating and loading noise models.
-    class IGNITION_SENSORS_RENDERING_VISIBLE ImageNoiseFactory
+    class GZ_SENSORS_RENDERING_VISIBLE ImageNoiseFactory
     {
       /// \brief Load a noise model based on the input sdf parameters and
       /// sensor type.

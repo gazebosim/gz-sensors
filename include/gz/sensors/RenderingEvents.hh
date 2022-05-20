@@ -42,7 +42,7 @@ namespace gz
     // Inline bracket to help doxygen filtering.
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
-    class IGNITION_SENSORS_RENDERING_VISIBLE RenderingEvents
+    class GZ_SENSORS_RENDERING_VISIBLE RenderingEvents
     {
       /// \brief Set a callback to be called when the scene is changed.
       ///

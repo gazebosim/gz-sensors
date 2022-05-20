@@ -42,7 +42,7 @@ namespace gz
     /// \brief Magnetometer Sensor Class
     ///
     /// A magnetometer reports the magnetic field vector
-    class IGNITION_SENSORS_MAGNETOMETER_VISIBLE MagnetometerSensor
+    class GZ_SENSORS_MAGNETOMETER_VISIBLE MagnetometerSensor
         : public Sensor
     {
       /// \brief constructor

@@ -42,7 +42,7 @@ namespace gz
     ///
     /// An altimeter sensor that reports vertical position and velocity
     /// readings over ign transport
-    class IGNITION_SENSORS_ALTIMETER_VISIBLE AltimeterSensor : public Sensor
+    class GZ_SENSORS_ALTIMETER_VISIBLE AltimeterSensor : public Sensor
     {
       /// \brief constructor
       public: AltimeterSensor();

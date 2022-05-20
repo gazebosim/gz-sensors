@@ -46,7 +46,7 @@ namespace gz
     /// `/.../navsat` topic.
     ///
     /// This sensor assumes the world is using the East-North-Up (ENU) frame.
-    class IGNITION_SENSORS_NAVSAT_VISIBLE NavSatSensor : public Sensor
+    class GZ_SENSORS_NAVSAT_VISIBLE NavSatSensor : public Sensor
     {
       /// \brief Constructor
       public: NavSatSensor();

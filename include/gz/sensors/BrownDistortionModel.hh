@@ -39,7 +39,7 @@ namespace gz
     gz/sensors/BrownDistortionModel.hh
     **/
     /// \brief Brown Distortion Model class
-    class IGNITION_SENSORS_VISIBLE BrownDistortionModel : public Distortion
+    class GZ_SENSORS_VISIBLE BrownDistortionModel : public Distortion
     {
       /// \brief Constructor.
       public: BrownDistortionModel();

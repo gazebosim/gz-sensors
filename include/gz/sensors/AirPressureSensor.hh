@@ -41,7 +41,7 @@ namespace gz
     /// \brief AirPressure Sensor Class
     ///
     /// A sensor that reports air pressure readings.
-    class IGNITION_SENSORS_AIR_PRESSURE_VISIBLE AirPressureSensor :
+    class GZ_SENSORS_AIR_PRESSURE_VISIBLE AirPressureSensor :
       public Sensor
     {
       /// \brief constructor

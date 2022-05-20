@@ -48,7 +48,7 @@ namespace gz
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-    class IGNITION_SENSORS_RGBD_CAMERA_VISIBLE RgbdCameraSensor
+    class GZ_SENSORS_RGBD_CAMERA_VISIBLE RgbdCameraSensor
       : public CameraSensor
     {
       /// \brief constructor

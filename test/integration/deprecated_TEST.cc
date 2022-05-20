@@ -28,3 +28,5 @@ TEST(Deprecated, IgnitionNamespace)
 {
   ignition::sensors::Lidar lidar;
 }
+
+#undef SUPPRESS_IGNITION_HEADER_DEPRECATION

@@ -49,7 +49,7 @@ namespace gz
     ///
     ///   This class is a base for all rendering sensor classes. It provides
     /// interface to ignition rendering objects
-    class IGNITION_SENSORS_RENDERING_VISIBLE RenderingSensor
+    class GZ_SENSORS_RENDERING_VISIBLE RenderingSensor
         : public Sensor
     {
       /// \brief constructor

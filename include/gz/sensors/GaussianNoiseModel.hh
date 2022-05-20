@@ -38,7 +38,7 @@ namespace gz
     gz/sensors/GaussianNoiseModel.hh
     **/
     /// \brief Gaussian noise class
-    class IGNITION_SENSORS_VISIBLE GaussianNoiseModel : public Noise
+    class GZ_SENSORS_VISIBLE GaussianNoiseModel : public Noise
     {
       /// \brief Constructor.
       public: GaussianNoiseModel();
