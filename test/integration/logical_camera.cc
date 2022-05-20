@@ -238,7 +238,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   EXPECT_EQ(0, img.model().size());
 
   // verify connection count and msg published to topic
-  WaitForMessageTestHelper<ignition::msgs::LogicalCameraImage> helper(topic);
+  WaitForMessageTestHelper<gz::msgs::LogicalCameraImage> helper(topic);
   EXPECT_TRUE(sensor->HasConnections());
   sensor->Update(std::chrono::steady_clock::duration::zero());
   EXPECT_TRUE(helper.WaitForMessage()) << helper;

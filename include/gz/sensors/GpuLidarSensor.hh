@@ -134,7 +134,7 @@ namespace gz
                   const std::string &/*_format*/)> _subscriber) override;
 
       /// \brief Connect function pointer to internal GpuRays callback
-      /// \return ignition::common::Connection pointer
+      /// \return gz::common::Connection pointer
       private: void OnNewLidarFrame(const float *_scan, unsigned int _width,
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &_format);

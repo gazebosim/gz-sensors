@@ -51,10 +51,10 @@
 std::mutex g_mutex;
 unsigned int g_imgCounter = 0;
 
-void OnGrayscaleImage(const ignition::msgs::Image &_msg)
+void OnGrayscaleImage(const gz::msgs::Image &_msg)
 {
   std::lock_guard<std::mutex> lock(g_mutex);
-  EXPECT_EQ(ignition::msgs::PixelFormatType::L_INT8, _msg.pixel_format_type());
+  EXPECT_EQ(gz::msgs::PixelFormatType::L_INT8, _msg.pixel_format_type());
   EXPECT_EQ(256u, _msg.width());
   EXPECT_EQ(256u, _msg.height());
   g_imgCounter++;
@@ -172,7 +172,7 @@ TEST_P(CameraSensorTest, ImagesWithBuiltinSDF)
 void CameraSensorTest::ImageFormatLInt8(const std::string &_renderEngine)
 {
   // get the darn test data
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "camera_sensor_l8_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -186,7 +186,7 @@ void CameraSensorTest::ImageFormatLInt8(const std::string &_renderEngine)
   auto sensorPtr = linkPtr->GetElement("sensor");
 
   // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine(_renderEngine);
+  auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
     igndbg << "Engine '" << _renderEngine
@@ -194,13 +194,13 @@ void CameraSensorTest::ImageFormatLInt8(const std::string &_renderEngine)
     return;
   }
 
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
 
   // do the test
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
-  ignition::sensors::CameraSensor *sensor =
-      mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
+  gz::sensors::CameraSensor *sensor =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtr);
   ASSERT_NE(sensor, nullptr);
   sensor->SetScene(scene);
 
@@ -210,7 +210,7 @@ void CameraSensorTest::ImageFormatLInt8(const std::string &_renderEngine)
   EXPECT_EQ(256u, sensor->ImageHeight());
 
   std::string topic = "/images_l8";
-  WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
+  WaitForMessageTestHelper<gz::msgs::Image> helper(topic);
 
   // Update once to create image
   mgr.RunOnce(std::chrono::steady_clock::duration::zero());
@@ -218,7 +218,7 @@ void CameraSensorTest::ImageFormatLInt8(const std::string &_renderEngine)
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
 
   // subscribe to the camera topic
-  ignition::transport::Node node;
+  gz::transport::Node node;
   node.Subscribe(topic, &OnGrayscaleImage);
 
   // wait for a few camera frames
@@ -249,7 +249,7 @@ void CameraSensorTest::ImageFormatLInt8(const std::string &_renderEngine)
 
   // Clean up
   engine->DestroyScene(scene);
-  ignition::rendering::unloadEngine(engine->Name());
+  gz::rendering::unloadEngine(engine->Name());
 }
 
 //////////////////////////////////////////////////

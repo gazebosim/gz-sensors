@@ -158,7 +158,7 @@ TEST_P(TriggeredCameraTest, ImagesWithBuiltinSDF)
   ImagesWithBuiltinSDF(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(CameraSensor, CameraSensorTest,
+INSTANTIATE_TEST_CASE_P(CameraSensor, TriggeredCameraTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////

@@ -50,7 +50,7 @@ class gz::sensors::GpuLidarSensorPrivate
 
   /// \brief Event that is used to trigger callbacks when a new
   /// lidar frame is available
-  public: ignition::common::EventT<
+  public: gz::common::EventT<
           void(const float *_scan, unsigned int _width,
                unsigned int _height, unsigned int _channels,
                const std::string &_format)> lidarEvent;
@@ -61,7 +61,7 @@ class gz::sensors::GpuLidarSensorPrivate
                const std::string &_format);
 
   /// \brief Connection to gpuRays new lidar frame event
-  public: ignition::common::ConnectionPtr lidarFrameConnection;
+  public: gz::common::ConnectionPtr lidarFrameConnection;
 
   /// \brief The point cloud message.
   public: msgs::PointCloudPacked pointMsg;

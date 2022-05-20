@@ -215,7 +215,7 @@ bool CameraSensor::CreateCamera()
       this->dataPtr->camera->SetImageFormat(gz::rendering::PF_R8G8B8);
       break;
     case sdf::PixelFormatType::L_INT8:
-      this->dataPtr->camera->SetImageFormat(ignition::rendering::PF_L8);
+      this->dataPtr->camera->SetImageFormat(gz::rendering::PF_L8);
       break;
     default:
       ignerr << "Unsupported pixel format ["
@@ -440,8 +440,8 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       format = gz::common::Image::RGB_INT8;
       msgsPixelFormat = msgs::PixelFormatType::RGB_INT8;
       break;
-    case ignition::rendering::PF_L8:
-      format = ignition::common::Image::L_INT8;
+    case gz::rendering::PF_L8:
+      format = gz::common::Image::L_INT8;
       msgsPixelFormat = msgs::PixelFormatType::L_INT8;
       break;
     default:

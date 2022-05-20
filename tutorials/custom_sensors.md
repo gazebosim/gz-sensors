@@ -106,7 +106,7 @@ Take a look at
 [ign-gazebo/examples/plugins/custom_sensor_system](https://github.com/ignitionrobotics/ign-gazebo/tree/main/examples/plugin/custom_sensor_system).
 for the full code. Here are some important pointers:
 
-* Check for new entities that have `gz::gazebo::components::CustomSensor`
+* Check for new entities that have `gz::sim::components::CustomSensor`
   during the `PreUpdate` callback and instantiate new sensors as they appear
   in simulation.
 * Don't assume all `CustomSensors` are of the type you need, be sure to check

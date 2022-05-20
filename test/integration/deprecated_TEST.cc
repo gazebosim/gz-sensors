@@ -26,7 +26,7 @@
 // Make sure the ignition namespace still works
 TEST(Deprecated, IgnitionNamespace)
 {
-  ignition::sensors::Lidar lidar;
+  gz::sensors::Lidar lidar;
 }
 
 #undef SUPPRESS_IGNITION_HEADER_DEPRECATION
