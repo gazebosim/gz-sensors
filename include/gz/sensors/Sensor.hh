@@ -42,7 +42,7 @@ namespace gz
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief A string used to identify a sensor
     using SensorId = std::size_t;

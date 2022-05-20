@@ -57,7 +57,7 @@ namespace gz
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     // forward declarations
     class DepthCameraSensorPrivate;
 
