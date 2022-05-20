@@ -9,6 +9,9 @@ release will remove the deprecated code.
 
 1. The `ignition` namespace is deprecated and will be removed in future versions.  Use `gz` instead.
 
+1. Header files under `ignition/...` are deprecated and will be removed in future versions.
+  Use `gz/...` instead.
+
 ## Ignition Sensors 6.0.1 to 6.1.0
 
 ### Modifications
@@ -119,4 +122,3 @@ ImageNoise.hh.
 1. **include/sensors/Noise.hh**
     + ***Deprecation:*** public: virtual void SetCamera(rendering::CameraPtr)
     + ***Replacement:***  TODO (to be implemented in ImageGaussianNoiseModel)
-
