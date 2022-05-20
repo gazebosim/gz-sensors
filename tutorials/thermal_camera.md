@@ -251,9 +251,9 @@ You should see something similar to this:
 
 @image html files/thermal_camera/thermal_camera_demo.png
 
-Taking a look at the [SDF file](https://github.com/ignitionrobotics/ign-gazebo/blob/e647570f25f962d63af75cf669ff72731d57bd5e/examples/worlds/thermal_camera.sdf) for this example shows that the box was assigned a temperature of 285 Kelvin.
+Taking a look at the [SDF file](https://github.com/gazebosim/gz-sim/blob/e647570f25f962d63af75cf669ff72731d57bd5e/examples/worlds/thermal_camera.sdf) for this example shows that the box was assigned a temperature of 285 Kelvin.
 
-If we take a look at the Rescue Randy and Samsung J8 [fuel models](https://app.ignitionrobotics.org/dashboard), we see that they have the following temperature range (the SDF file we are using with these models has an [ambient temperature of 300 Kelvin](https://github.com/ignitionrobotics/ign-gazebo/blob/e647570f25f962d63af75cf669ff72731d57bd5e/examples/worlds/thermal_camera.sdf#L135-L144)):
+If we take a look at the Rescue Randy and Samsung J8 [fuel models](https://app.ignitionrobotics.org/dashboard), we see that they have the following temperature range (the SDF file we are using with these models has an [ambient temperature of 300 Kelvin](https://github.com/gazebosim/gz-sim/blob/e647570f25f962d63af75cf669ff72731d57bd5e/examples/worlds/thermal_camera.sdf#L135-L144)):
 * Rescue Randy: 300 Kelvin to 310 Kelvin
 * Samsung J8: 298.75 Kelvin to 300 Kelvin
 
@@ -275,7 +275,7 @@ Since Rescue Randy's maximum temperature (500 Kelvin) is significantly larger (~
 
 ## Processing the thermal camera's output
 
-In the example above, the thermal cameras publish an [image message](https://github.com/ignitionrobotics/ign-msgs/blob/46a08597e6b6037adc98025cdc09dfbf0f4467a6/proto/ignition/msgs/image.proto) to the following topics whenever the camera has a new image:
+In the example above, the thermal cameras publish an [image message](https://github.com/gazebosim/gz-msgs/blob/46a08597e6b6037adc98025cdc09dfbf0f4467a6/proto/ignition/msgs/image.proto) to the following topics whenever the camera has a new image:
 * 8-bit thermal camera: `/thermal_camera_8bit/image`
 * 16-bit thermal camera: `/thermal_camera`
 
@@ -359,7 +359,7 @@ The thermal camera has a few limitations:
   A more realistic implementation would have the camera display temperature fluctuations in the closer object if the temperature difference between the two objects is large enough, and if the closer object isn't too thick.
     - More information about thermal camera behavior can be found [here](https://www.flir.com/discover/cores-components/can-thermal-imaging-see-through-walls/).
 * There's a precision loss when the thermal camera converts temperature readings to gray scale output.
-To help quantify the magnitude of this precision loss, running the conversion code above on [this SDF file](https://github.com/ignitionrobotics/ign-gazebo/blob/990e4f240bbb3246a0e1d0c89b74e0ef8f109b4b/examples/worlds/thermal_camera.sdf) results in the following processed temperatures for each object in the camera's image:
+To help quantify the magnitude of this precision loss, running the conversion code above on [this SDF file](https://github.com/gazebosim/gz-sim/blob/990e4f240bbb3246a0e1d0c89b74e0ef8f109b4b/examples/worlds/thermal_camera.sdf) results in the following processed temperatures for each object in the camera's image:
     - sphere: listed in the SDF file as 600 Kelvin, processed from the thermal camera image topic as 598.81 Kelvin
     - box: listed in the SDF file as 200 Kelvin, processed from the thermal camera image topic as 200.46 Kelvin
     - cylinder: listed in the SDF file as 400 Kelvin, processed from the thermal camera image topic as 400.92 Kelvin

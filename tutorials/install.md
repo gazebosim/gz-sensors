@@ -69,7 +69,7 @@ Ignition Sensors requires:
 
 3. Clone the repository
 ```{.sh}
-  git clone https://github.com/ignitionrobotics/ign-sensors
+  git clone https://github.com/gazebosim/gz-sensors
   ```
 
 4. Configure and build
@@ -86,7 +86,7 @@ Ignition Sensors requires:
 
 1. Clone the repository
   ```
-  git clone https://github.com/ignitionrobotics/ign-sensors -b ign-sensors<#>
+  git clone https://github.com/gazebosim/gz-sensors -b ign-sensors<#>
   ```
   Be sure to replace `<#>` with a number value, such as 5 or 6, depending on
   which version you need.
@@ -116,7 +116,7 @@ Ignition Sensors requires:
 
 #### Install Prerequisites
 
-First, follow the [ign-cmake](https://github.com/ignitionrobotics/ign-cmake) tutorial for installing Conda, Visual Studio, CMake, etc., prerequisites, and creating a Conda environment.
+First, follow the [ign-cmake](https://github.com/gazebosim/gz-cmake) tutorial for installing Conda, Visual Studio, CMake, etc., prerequisites, and creating a Conda environment.
 
 Navigate to `condabin` if necessary to use the `conda` command (i.e., if Conda is not in your `PATH` environment variable. You can find the location of `condabin` in Anaconda Prompt, `where conda`).
 
@@ -133,7 +133,7 @@ Install Ignition dependencies, replacing `<#>` with the desired versions:
 conda install libignition-cmake<#> libignition-common<#> libignition-math<#> libignition-transport<#> libignition-msgs<#> --channel conda-forge
 ```
 
-Before [ign-rendering](https://github.com/ignitionrobotics/ign-rendering) becomes available on conda-forge, follow its tutorial to build it from source.
+Before [ign-rendering](https://github.com/gazebosim/gz-rendering) becomes available on conda-forge, follow its tutorial to build it from source.
 
 #### Build from source
 
@@ -145,7 +145,7 @@ Before [ign-rendering](https://github.com/ignitionrobotics/ign-rendering) become
 1. Navigate to where you would like to build the library, and clone the repository.
   ```
   # Optionally, append `-b ign-sensors#` (replace # with a number) to check out a specific version
-  git clone https://github.com/ignitionrobotics/ign-sensors.git
+  git clone https://github.com/gazebosim/gz-sensors.git
   ```
 
 1. Configure and build
@@ -179,7 +179,7 @@ You can also generate the documentation from a clone of this repository by follo
 
 2. Clone the repository
   ```
-  git clone https://github.com/ignitionrobotics/ign-sensors
+  git clone https://github.com/gazebosim/gz-sensors
   ```
 
 3. Configure and build the documentation.

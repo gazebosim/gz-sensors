@@ -539,13 +539,13 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
 
   // Sensor 1 should see box01 and box02
   // ign-rendering uses lower resolution textures for lidars with low sample
-  // count after: https://github.com/ignitionrobotics/ign-rendering/pull/296
+  // count after: https://github.com/gazebosim/gz-rendering/pull/296
   // Side effect is the loss of precision in the depth buffer data so we relax
   // tolerance for this check in order for test to pass.
   EXPECT_NEAR(sensor1->Range(0), expectedRangeAtMidPointBox2, LASER_TOL + 1e-5);
   EXPECT_NEAR(sensor1->Range(mid), expectedRangeAtMidPointBox1, LASER_TOL);
 #ifndef __APPLE__
-  // See https://github.com/ignitionrobotics/ign-sensors/issues/66
+  // See https://github.com/gazebosim/gz-sensors/issues/66
   EXPECT_DOUBLE_EQ(sensor1->Range(last), gz::math::INF_D);
 #endif
 
@@ -662,7 +662,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
     double expectedRange = expectedRangeAtMidPoint / cos(angleStep);
 
 #ifndef __APPLE__
-    // See https://github.com/ignitionrobotics/ign-sensors/issues/66
+    // See https://github.com/gazebosim/gz-sensors/issues/66
     EXPECT_NEAR(sensor->Range(i * horzSamples + mid),
         expectedRange, VERTICAL_LASER_TOL);
 #endif
@@ -807,7 +807,7 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   EXPECT_DOUBLE_EQ(sensor1->Range(0), gz::math::INF_D);
   EXPECT_NEAR(sensor1->Range(mid), expectedRangeAtMidPointBox1, LASER_TOL);
 #ifndef __APPLE__
-  // See https://github.com/ignitionrobotics/ign-sensors/issues/66
+  // See https://github.com/gazebosim/gz-sensors/issues/66
   EXPECT_DOUBLE_EQ(sensor1->Range(last), gz::math::INF_D);
 #endif
 
@@ -815,7 +815,7 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   EXPECT_NEAR(sensor2->Range(0), expectedRangeAtMidPointBox1, LASER_TOL);
   EXPECT_DOUBLE_EQ(sensor2->Range(mid), gz::math::INF_D);
 #ifndef __APPLE__
-  // See https://github.com/ignitionrobotics/ign-sensors/issues/66
+  // See https://github.com/gazebosim/gz-sensors/issues/66
   EXPECT_DOUBLE_EQ(sensor2->Range(last), gz::math::INF_D);
 #endif
 

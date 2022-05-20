@@ -377,7 +377,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     EXPECT_EQ(0u, mr);
     EXPECT_EQ(0u, mg);
 #ifndef __APPLE__
-    // See https://github.com/ignitionrobotics/ign-sensors/issues/66
+    // See https://github.com/gazebosim/gz-sensors/issues/66
     EXPECT_GT(mb, 0u);
 #endif
 
@@ -443,7 +443,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     EXPECT_EQ(0u, mr);
     EXPECT_EQ(0u, mg);
 #ifndef __APPLE__
-    // See https://github.com/ignitionrobotics/ign-sensors/issues/66
+    // See https://github.com/gazebosim/gz-sensors/issues/66
     EXPECT_GT(mb, 0u);
 #endif
 

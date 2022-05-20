@@ -32,7 +32,7 @@ instructions.
 ### With Ignition Gazebo
 
 The
-[custom_sensor_system](https://github.com/ignitionrobotics/ign-gazebo/tree/main/examples/plugin/custom_sensor_system)
+[custom_sensor_system](https://github.com/gazebosim/gz-sim/tree/main/examples/plugin/custom_sensor_system)
 example can be used to load this sensor into Gazebo and update it during the
 simulation.
 

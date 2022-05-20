@@ -45,9 +45,9 @@ Let's go over the creation of a custom
 the total distance travelled by a robot.
 
 This example is located at
-[ign-sensors/examples/custom_sensor](https://github.com/ignitionrobotics/ign-sensors/tree/main/examples/custom_sensor),
+[ign-sensors/examples/custom_sensor](https://github.com/gazebosim/gz-sensors/tree/main/examples/custom_sensor),
 and the integration with Ignition Gazebo is at
-[ign-gazebo/examples/plugins/custom_sensor_system](https://github.com/ignitionrobotics/ign-gazebo/tree/main/examples/plugin/custom_sensor_system).
+[ign-gazebo/examples/plugins/custom_sensor_system](https://github.com/gazebosim/gz-sim/tree/main/examples/plugin/custom_sensor_system).
 
 Wherever "odometer" is used, that can be substituted for any other custom sensor
 type. Seismometer? Breathalyzer? Just adapt the logic to your needs.
@@ -84,7 +84,7 @@ The sensor consists of a class, `Odometer`, which inherits from
 `gz::sensors::Sensor`.
 
 Take a look at
-[ign-sensors/examples/custom_sensor](https://github.com/ignitionrobotics/ign-sensors/tree/main/examples/custom_sensor)
+[ign-sensors/examples/custom_sensor](https://github.com/gazebosim/gz-sensors/tree/main/examples/custom_sensor)
 for the full code. Here are some important pointers:
 
 * Be sure to link your sensor to Ignition Sensors
@@ -103,7 +103,7 @@ plugin that instantiates the sensor and updates it periodically with data from
 simulation.
 
 Take a look at
-[ign-gazebo/examples/plugins/custom_sensor_system](https://github.com/ignitionrobotics/ign-gazebo/tree/main/examples/plugin/custom_sensor_system).
+[ign-gazebo/examples/plugins/custom_sensor_system](https://github.com/gazebosim/gz-sim/tree/main/examples/plugin/custom_sensor_system).
 for the full code. Here are some important pointers:
 
 * Check for new entities that have `gz::sim::components::CustomSensor`
