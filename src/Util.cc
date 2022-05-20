@@ -15,9 +15,9 @@
  *
 */
 
-#include <ignition/common/Console.hh>
+#include <gz/common/Console.hh>
 
-#include "ignition/sensors/Util.hh"
+#include "gz/sensors/Util.hh"
 
 //////////////////////////////////////////////////
 std::string gz::sensors::customType(const sdf::Sensor &_sdf)

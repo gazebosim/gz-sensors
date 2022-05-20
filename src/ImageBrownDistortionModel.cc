@@ -20,7 +20,7 @@
   #include <Winsock2.h>
 #endif
 
-#include <ignition/common/Console.hh>
+#include <gz/common/Console.hh>
 
 // TODO(WilliamLewww): Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -28,15 +28,15 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/DistortionPass.hh>
-#include <ignition/rendering/RenderEngine.hh>
-#include <ignition/rendering/RenderPass.hh>
-#include <ignition/rendering/RenderPassSystem.hh>
+#include <gz/rendering/DistortionPass.hh>
+#include <gz/rendering/RenderEngine.hh>
+#include <gz/rendering/RenderPass.hh>
+#include <gz/rendering/RenderPassSystem.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include "ignition/sensors/ImageBrownDistortionModel.hh"
+#include "gz/sensors/ImageBrownDistortionModel.hh"
 
 using namespace gz;
 using namespace sensors;

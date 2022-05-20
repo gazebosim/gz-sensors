@@ -19,10 +19,10 @@
 
 #include <sdf/ForceTorque.hh>
 
-#include <ignition/math/Helpers.hh>
+#include <gz/math/Helpers.hh>
 
-#include <ignition/sensors/ForceTorqueSensor.hh>
-#include <ignition/sensors/SensorFactory.hh>
+#include <gz/sensors/ForceTorqueSensor.hh>
+#include <gz/sensors/SensorFactory.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"

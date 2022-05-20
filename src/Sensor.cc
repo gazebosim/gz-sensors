@@ -15,17 +15,17 @@
  *
 */
 
-#include "ignition/sensors/Sensor.hh"
+#include "gz/sensors/Sensor.hh"
 
 #include <chrono>
 #include <map>
 #include <vector>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/msgs/double.pb.h>
-#include <ignition/transport/Node.hh>
-#include <ignition/transport/TopicUtils.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/msgs/double.pb.h>
+#include <gz/transport/Node.hh>
+#include <gz/transport/TopicUtils.hh>
 
 using namespace gz::sensors;
 

@@ -389,9 +389,9 @@ We can write some c++ code that subscribes to these topics:
 ```cpp
 #include <cstdint>
 
-#include <ignition/msgs.hh>
-#include <ignition/rendering.hh>
-#include <ignition/transport.hh>
+#include <gz/msgs.hh>
+#include <gz/rendering.hh>
+#include <gz/transport.hh>
 
 void OnNewLabelMap(const gz::msgs::Image &_msg)
 {

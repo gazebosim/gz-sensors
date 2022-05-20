@@ -21,10 +21,10 @@
   #include <Winsock2.h>
 #endif
 
-#include "ignition/common/Console.hh"
+#include "gz/common/Console.hh"
 
-#include "ignition/sensors/ImageDistortion.hh"
-#include "ignition/sensors/ImageBrownDistortionModel.hh"
+#include "gz/sensors/ImageDistortion.hh"
+#include "gz/sensors/ImageBrownDistortionModel.hh"
 
 using namespace gz;
 using namespace sensors;

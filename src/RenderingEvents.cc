@@ -15,7 +15,7 @@
  *
 */
 
-#include "ignition/sensors/RenderingEvents.hh"
+#include "gz/sensors/RenderingEvents.hh"
 
 using namespace gz::sensors;
 

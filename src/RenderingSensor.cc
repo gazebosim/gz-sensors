@@ -15,7 +15,7 @@
  *
 */
 
-#include <ignition/common/Profiler.hh>
+#include <gz/common/Profiler.hh>
 
 // TODO(louise) Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -23,12 +23,12 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/Camera.hh>
+#include <gz/rendering/Camera.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include "ignition/sensors/RenderingSensor.hh"
+#include "gz/sensors/RenderingSensor.hh"
 
 /// \brief Private data class for RenderingSensor
 class gz::sensors::RenderingSensorPrivate

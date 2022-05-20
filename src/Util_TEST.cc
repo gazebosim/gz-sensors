@@ -16,15 +16,15 @@
 */
 
 #include <gtest/gtest.h>
-#include <ignition/common/Console.hh>
-#include <ignition/common/Filesystem.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Filesystem.hh>
 #include <sdf/Root.hh>
 #include <sdf/Link.hh>
 #include <sdf/Model.hh>
 #include <sdf/World.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
-#include "ignition/sensors/Util.hh"
+#include "gz/sensors/Util.hh"
 
 /// \brief Test Util functions
 class Util_TEST : public ::testing::Test

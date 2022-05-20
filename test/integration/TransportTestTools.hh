@@ -22,7 +22,7 @@
 #include <mutex>
 #include <string>
 
-#include <ignition/transport.hh>
+#include <gz/transport.hh>
 
 /// \brief class which simplifies waiting for a message to be received
 template <typename M>

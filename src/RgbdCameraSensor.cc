@@ -20,15 +20,15 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/image.pb.h>
-#include <ignition/msgs/pointcloud_packed.pb.h>
+#include <gz/msgs/image.pb.h>
+#include <gz/msgs/pointcloud_packed.pb.h>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include <ignition/common/Image.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/math/Helpers.hh>
+#include <gz/common/Image.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/math/Helpers.hh>
 
 // TODO(louise) Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -36,21 +36,21 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/Camera.hh>
-#include <ignition/rendering/DepthCamera.hh>
+#include <gz/rendering/Camera.hh>
+#include <gz/rendering/DepthCamera.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include <ignition/transport/Node.hh>
+#include <gz/transport/Node.hh>
 
 #include <sdf/Sensor.hh>
 
-#include "ignition/sensors/ImageGaussianNoiseModel.hh"
-#include "ignition/sensors/ImageNoise.hh"
-#include "ignition/sensors/RgbdCameraSensor.hh"
-#include "ignition/sensors/RenderingEvents.hh"
-#include "ignition/sensors/SensorFactory.hh"
+#include "gz/sensors/ImageGaussianNoiseModel.hh"
+#include "gz/sensors/ImageNoise.hh"
+#include "gz/sensors/RgbdCameraSensor.hh"
+#include "gz/sensors/RenderingEvents.hh"
+#include "gz/sensors/SensorFactory.hh"
 
 #include "PointCloudUtil.hh"
 

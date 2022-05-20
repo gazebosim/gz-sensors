@@ -23,14 +23,14 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/pointcloud_packed.pb.h>
+#include <gz/msgs/pointcloud_packed.pb.h>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
-#include <ignition/math/Angle.hh>
+#include <gz/math/Angle.hh>
 
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/Export.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/Export.hh"
 
 #ifndef _WIN32
 #  define PointCloudUtil_EXPORTS_API
@@ -47,7 +47,7 @@ namespace gz
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief Helper class that fills a msgs::PointCloudPacked message using
     /// image and depth data. The RgbdCameraSensor and DepthCameraSensor

@@ -23,10 +23,10 @@
 
 #include <functional>
 
-#include <ignition/common/Console.hh>
+#include <gz/common/Console.hh>
 
-#include "ignition/sensors/BrownDistortionModel.hh"
-#include "ignition/sensors/Distortion.hh"
+#include "gz/sensors/BrownDistortionModel.hh"
+#include "gz/sensors/Distortion.hh"
 
 using namespace gz;
 using namespace sensors;

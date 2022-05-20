@@ -20,7 +20,7 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/image.pb.h>
+#include <gz/msgs/image.pb.h>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -28,20 +28,20 @@
 #include <algorithm>
 #include <mutex>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Image.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/common/SystemPaths.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Image.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/common/SystemPaths.hh>
 
-#include <ignition/math/Angle.hh>
-#include <ignition/math/Helpers.hh>
+#include <gz/math/Angle.hh>
+#include <gz/math/Helpers.hh>
 
-#include <ignition/transport/Node.hh>
+#include <gz/transport/Node.hh>
 
-#include "ignition/sensors/ThermalCameraSensor.hh"
-#include "ignition/sensors/ImageGaussianNoiseModel.hh"
-#include "ignition/sensors/RenderingEvents.hh"
-#include "ignition/sensors/SensorFactory.hh"
+#include "gz/sensors/ThermalCameraSensor.hh"
+#include "gz/sensors/ImageGaussianNoiseModel.hh"
+#include "gz/sensors/RenderingEvents.hh"
+#include "gz/sensors/SensorFactory.hh"
 
 /// \brief Private data for ThermalCameraSensor
 class gz::sensors::ThermalCameraSensorPrivate

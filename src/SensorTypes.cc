@@ -15,7 +15,7 @@
  *
 */
 
-#include "ignition/sensors/SensorTypes.hh"
+#include "gz/sensors/SensorTypes.hh"
 
 using namespace gz;
 using namespace sensors;

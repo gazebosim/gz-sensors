@@ -18,18 +18,18 @@
 #include <memory>
 #include <mutex>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Image.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/common/Util.hh>
-#include <ignition/msgs.hh>
-#include <ignition/rendering/SegmentationCamera.hh>
-#include <ignition/transport/Node.hh>
-#include <ignition/transport/Publisher.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Image.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/common/Util.hh>
+#include <gz/msgs.hh>
+#include <gz/rendering/SegmentationCamera.hh>
+#include <gz/transport/Node.hh>
+#include <gz/transport/Publisher.hh>
 
-#include "ignition/sensors/RenderingEvents.hh"
-#include "ignition/sensors/SegmentationCameraSensor.hh"
-#include "ignition/sensors/SensorFactory.hh"
+#include "gz/sensors/RenderingEvents.hh"
+#include "gz/sensors/SegmentationCameraSensor.hh"
+#include "gz/sensors/SensorFactory.hh"
 
 using namespace gz;
 using namespace sensors;

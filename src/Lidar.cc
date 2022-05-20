@@ -14,17 +14,17 @@
  * limitations under the License.
  *
 */
-#include <ignition/common/Console.hh>
-#include <ignition/common/Event.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Event.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/transport/Node.hh>
 #include <sdf/Lidar.hh>
 
-#include "ignition/sensors/GaussianNoiseModel.hh"
-#include "ignition/sensors/Lidar.hh"
-#include "ignition/sensors/Noise.hh"
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/SensorTypes.hh"
+#include "gz/sensors/GaussianNoiseModel.hh"
+#include "gz/sensors/Lidar.hh"
+#include "gz/sensors/Noise.hh"
+#include "gz/sensors/SensorFactory.hh"
+#include "gz/sensors/SensorTypes.hh"
 
 using namespace gz::sensors;
 

@@ -20,18 +20,18 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/wrench.pb.h>
+#include <gz/msgs/wrench.pb.h>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include <ignition/common/Profiler.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/transport/Node.hh>
 
-#include "ignition/sensors/ForceTorqueSensor.hh"
-#include "ignition/sensors/Noise.hh"
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/SensorTypes.hh"
+#include "gz/sensors/ForceTorqueSensor.hh"
+#include "gz/sensors/Noise.hh"
+#include "gz/sensors/SensorFactory.hh"
+#include "gz/sensors/SensorTypes.hh"
 
 using namespace gz;
 using namespace sensors;

@@ -15,9 +15,9 @@
  *
 */
 
-#include <ignition/common/Console.hh>
+#include <gz/common/Console.hh>
 
-#include "ignition/sensors/SensorFactory.hh"
+#include "gz/sensors/SensorFactory.hh"
 
 /// \brief Private data class for SensorFactory
 class gz::sensors::SensorFactoryPrivate

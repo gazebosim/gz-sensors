@@ -17,18 +17,18 @@
 
 #include <gtest/gtest.h>
 
-#include <ignition/common/Filesystem.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/SegmentationCameraSensor.hh>
+#include <gz/common/Filesystem.hh>
+#include <gz/sensors/Manager.hh>
+#include <gz/sensors/SegmentationCameraSensor.hh>
 
 #ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/RenderEngine.hh>
-#include <ignition/rendering/RenderingIface.hh>
-#include <ignition/rendering/Scene.hh>
-#include <ignition/rendering/SegmentationCamera.hh>
+#include <gz/rendering/RenderEngine.hh>
+#include <gz/rendering/RenderingIface.hh>
+#include <gz/rendering/Scene.hh>
+#include <gz/rendering/SegmentationCamera.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -38,7 +38,7 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs.hh>
+#include <gz/msgs.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
