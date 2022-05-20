@@ -82,7 +82,7 @@ void ImageGaussianNoiseModel::SetCamera(rendering::CameraPtr _camera)
 {
   if (!_camera)
   {
-    ignerr << "Unable to apply gaussian noise, camera is null\n";
+    gzerr << "Unable to apply gaussian noise, camera is null\n";
     return;
   }
 
@@ -95,7 +95,7 @@ void ImageGaussianNoiseModel::SetCamera(rendering::CameraPtr _camera)
       rpSystem->Create<rendering::GaussianNoisePass>();
     if (!noisePass)
     {
-      ignwarn << "ImageGaussianNoiseModel is not supported in "
+      gzwarn << "ImageGaussianNoiseModel is not supported in "
              << engine->Name() << std::endl;
       return;
     }

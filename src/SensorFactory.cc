@@ -30,7 +30,7 @@ using namespace sensors;
 //////////////////////////////////////////////////
 void SensorFactory::AddPluginPaths(const std::string &)
 {
-  ignwarn << "Trying to add plugin paths, but Gazebo Sensors doesn't support"
+  gzwarn << "Trying to add plugin paths, but Gazebo Sensors doesn't support"
           << " plugins anymore." << std::endl;
 }
 
@@ -47,7 +47,7 @@ SensorFactory::~SensorFactory()
 /////////////////////////////////////////////////
 std::unique_ptr<Sensor> SensorFactory::CreateSensor(const sdf::Sensor &)
 {
-  ignwarn << "Trying to create sensor without providing sensor type. Ignition"
+  gzwarn << "Trying to create sensor without providing sensor type. Ignition"
           << " Sensor doesn't support sensor registration anymore. Use the"
           << " templated `CreateSensor` function instead." << std::endl;
   return nullptr;
@@ -56,7 +56,7 @@ std::unique_ptr<Sensor> SensorFactory::CreateSensor(const sdf::Sensor &)
 /////////////////////////////////////////////////
 std::unique_ptr<Sensor> SensorFactory::CreateSensor(sdf::ElementPtr)
 {
-  ignwarn << "Trying to create sensor without providing sensor type. Ignition"
+  gzwarn << "Trying to create sensor without providing sensor type. Ignition"
           << " Sensor doesn't support sensor registration anymore. Use the"
           << " templated `CreateSensor` function instead." << std::endl;
   return nullptr;

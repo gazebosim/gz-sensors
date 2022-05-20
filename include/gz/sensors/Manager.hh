@@ -77,13 +77,13 @@ namespace gz
                 auto sensor = sensorFactory.CreateSensor<SensorType>(_sdf);
                 if (nullptr == sensor)
                 {
-                  ignerr << "Failed to create sensor." << std::endl;
+                  gzerr << "Failed to create sensor." << std::endl;
                   return nullptr;
                 }
                 auto result = sensor.get();
                 if (NO_SENSOR == this->AddSensor(std::move(sensor)))
                 {
-                  ignerr << "Failed to add sensor." << std::endl;
+                  gzerr << "Failed to add sensor." << std::endl;
                   return nullptr;
                 }
                 return result;

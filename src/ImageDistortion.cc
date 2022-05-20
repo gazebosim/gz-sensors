@@ -62,7 +62,7 @@ DistortionPtr ImageDistortionFactory::NewDistortionModel(
   }
   else
   {
-    ignerr << "Unrecognized distortion type" << std::endl;
+    gzerr << "Unrecognized distortion type" << std::endl;
     return DistortionPtr();
   }
   distortion->Load(_sdf);

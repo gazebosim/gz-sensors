@@ -122,13 +122,13 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
   // Check if this is the right type
   if (_sdf.Type() != sdf::SensorType::IMU)
   {
-    ignerr << "Attempting to a load an IMU sensor, but received "
+    gzerr << "Attempting to a load an IMU sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
   }
 
   if (_sdf.ImuSensor() == nullptr)
   {
-    ignerr << "Attempting to a load an IMU sensor, but received "
+    gzerr << "Attempting to a load an IMU sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -141,7 +141,7 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
+    gzerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
     return false;
   }
 
@@ -203,7 +203,7 @@ bool ImuSensor::Update(const std::chrono::steady_clock::duration &_now)
   IGN_PROFILE("ImuSensor::Update");
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
@@ -328,7 +328,7 @@ void ImuSensor::SetWorldFrameOrientation(
     }
     else
     {
-      ignwarn << "custom_rpy parent frame must be set to 'world' "
+      gzwarn << "custom_rpy parent frame must be set to 'world' "
                 "string. Setting it to any other frame is not "
                 "supported yet." << std::endl;
     }

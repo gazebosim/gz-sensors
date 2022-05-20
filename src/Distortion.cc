@@ -54,7 +54,7 @@ DistortionPtr DistortionFactory::NewDistortionModel(const sdf::Camera &_sdf,
   {
     if (_sensorType == "camera")
     {
-      ignerr << "Image distortion requested. "
+      gzerr << "Image distortion requested. "
              << "Please use ImageDistortionFactory::DistortionModel instead"
              << std::endl;
       return distortion;
@@ -76,7 +76,7 @@ DistortionPtr DistortionFactory::NewDistortionModel(const sdf::Camera &_sdf,
   }
   else
   {
-    ignerr << "Unrecognized distortion type" << std::endl;
+    gzerr << "Unrecognized distortion type" << std::endl;
     return DistortionPtr();
   }
   distortion->Load(_sdf);

@@ -96,7 +96,7 @@ void ImageBrownDistortionModel::SetCamera(rendering::CameraPtr _camera)
 {
   if (!_camera)
   {
-    ignerr << "Unable to apply distortion, camera is null\n";
+    gzerr << "Unable to apply distortion, camera is null\n";
     return;
   }
 
@@ -109,7 +109,7 @@ void ImageBrownDistortionModel::SetCamera(rendering::CameraPtr _camera)
       rpSystem->Create<rendering::DistortionPass>();
     if (!distortionPass)
     {
-      ignwarn << "ImageBrownDistortionModel is not supported in "
+      gzwarn << "ImageBrownDistortionModel is not supported in "
               << engine->Name() << std::endl;
       return;
     }

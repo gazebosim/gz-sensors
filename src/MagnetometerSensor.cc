@@ -89,14 +89,14 @@ bool MagnetometerSensor::Load(const sdf::Sensor &_sdf)
 
   if (_sdf.Type() != sdf::SensorType::MAGNETOMETER)
   {
-    ignerr << "Attempting to a load a Magnetometer sensor, but received "
+    gzerr << "Attempting to a load a Magnetometer sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
     return false;
   }
 
   if (_sdf.MagnetometerSensor() == nullptr)
   {
-    ignerr << "Attempting to a load a Magnetometer sensor, but received "
+    gzerr << "Attempting to a load a Magnetometer sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -110,7 +110,7 @@ bool MagnetometerSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
+    gzerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
     return false;
   }
 
@@ -155,7 +155,7 @@ bool MagnetometerSensor::Update(
   IGN_PROFILE("MagnetometerSensor::Update");
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 

@@ -36,20 +36,20 @@ std::string gz::sensors::customType(sdf::ElementPtr _sdf)
 
   if (!_sdf->HasAttribute("type"))
   {
-    ignerr << "Sensor missing `type` attribute." << std::endl;
+    gzerr << "Sensor missing `type` attribute." << std::endl;
     return std::string();
   }
   auto type = _sdf->Get<std::string>("type");
   if ("custom" != type)
   {
-    ignerr << "Sensor `type` is not [custom]; it's [" << type << "]."
+    gzerr << "Sensor `type` is not [custom]; it's [" << type << "]."
            << std::endl;
     return std::string();
   }
 
   if (!_sdf->HasAttribute("ignition:type"))
   {
-    ignerr << "Custom sensor missing `ignition:type` attribute." << std::endl;
+    gzerr << "Custom sensor missing `ignition:type` attribute." << std::endl;
     return std::string();
   }
 

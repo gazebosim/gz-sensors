@@ -95,7 +95,7 @@ void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
 {
   if (_renderEngine != "ogre")
   {
-    ignwarn << "Wide angle cameras are not supported in " << _renderEngine
+    gzwarn << "Wide angle cameras are not supported in " << _renderEngine
             << std::endl;
     return;
   }

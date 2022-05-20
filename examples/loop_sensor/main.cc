@@ -35,7 +35,7 @@ int main(int argc,  char **argv)
 
   if (argc < 2)
   {
-    ignerr << "Missing path to SDF file" << std::endl;
+    gzerr << "Missing path to SDF file" << std::endl;
     return 1;
   }
 
@@ -47,13 +47,13 @@ int main(int argc,  char **argv)
 
   for (const auto &error : errors)
   {
-    ignerr << error << std::endl;
+    gzerr << error << std::endl;
   }
 
   auto world = root.WorldByIndex(0);
   if (nullptr == world)
   {
-    ignerr << "Failed to load world from [" << sdfFile << "]" << std::endl;
+    gzerr << "Failed to load world from [" << sdfFile << "]" << std::endl;
     return 1;
   }
 
@@ -84,20 +84,20 @@ int main(int argc,  char **argv)
         }
         else
         {
-          ignerr << "Sensor type [" << static_cast<int>(sensor->Type())
+          gzerr << "Sensor type [" << static_cast<int>(sensor->Type())
                  << "] not supported." << std::endl;
         }
 
         if (nullptr == sensorPtr)
         {
-          ignerr << "Failed to create sensor [" << sensor->Name() << "]"
+          gzerr << "Failed to create sensor [" << sensor->Name() << "]"
                  << std::endl;
           continue;
         }
 
         sensors.push_back(sensorPtr);
 
-        ignmsg << "Added sensor [" << sensor->Name() << "] to manager."
+        gzmsg << "Added sensor [" << sensor->Name() << "] to manager."
                << std::endl;
       }
     }
@@ -105,7 +105,7 @@ int main(int argc,  char **argv)
 
   if (sensors.empty())
   {
-    ignerr << "No sensors have been added to the manager." << std::endl;
+    gzerr << "No sensors have been added to the manager." << std::endl;
     return 1;
   }
 
@@ -117,7 +117,7 @@ int main(int argc,  char **argv)
     signaled = true;
   });
 
-  ignmsg << "Looping sensor manager. Press Ctrl + C to stop." << std::endl;
+  gzmsg << "Looping sensor manager. Press Ctrl + C to stop." << std::endl;
 
   auto time = 0s;
   while (!signaled)

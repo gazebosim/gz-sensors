@@ -163,13 +163,13 @@ bool WideAngleCameraSensor::Load(const sdf::Sensor &_sdf)
   // Check if this is the right type
   if (_sdf.Type() != sdf::SensorType::WIDE_ANGLE_CAMERA)
   {
-    ignerr << "Attempting to a load a Wide Angle Camera sensor, but received "
+    gzerr << "Attempting to a load a Wide Angle Camera sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
   }
 
   if (_sdf.CameraSensor() == nullptr)
   {
-    ignerr << "Attempting to a load a Wide Angle Camera sensor, but received "
+    gzerr << "Attempting to a load a Wide Angle Camera sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -183,7 +183,7 @@ bool WideAngleCameraSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic["
+    gzerr << "Unable to create publisher on topic["
       << this->Topic() << "].\n";
     return false;
   }
@@ -214,7 +214,7 @@ bool WideAngleCameraSensor::CreateCamera()
   const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
   if (!cameraSdf)
   {
-    ignerr << "Unable to access camera SDF element.\n";
+    gzerr << "Unable to access camera SDF element.\n";
     return false;
   }
 
@@ -227,7 +227,7 @@ bool WideAngleCameraSensor::CreateCamera()
 
   if (!this->dataPtr->camera)
   {
-    ignerr << "Failed to create wide angle camera" << std::endl;
+    gzerr << "Failed to create wide angle camera" << std::endl;
     return false;
   }
   this->dataPtr->camera->SetImageWidth(width);
@@ -300,7 +300,7 @@ bool WideAngleCameraSensor::CreateCamera()
     }
     else if (noiseSdf.Type() != sdf::NoiseType::NONE)
     {
-      ignwarn << "The camera sensor only supports Gaussian noise. "
+      gzwarn << "The camera sensor only supports Gaussian noise. "
        << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
        << "] is not supported." << std::endl;
     }
@@ -321,7 +321,7 @@ bool WideAngleCameraSensor::CreateCamera()
       this->dataPtr->camera->SetImageFormat(gz::rendering::PF_R8G8B8);
       break;
     default:
-      ignerr << "Unsupported pixel format ["
+      gzerr << "Unsupported pixel format ["
         << static_cast<int>(pixelFormat) << "]\n";
       break;
   }
@@ -398,13 +398,13 @@ bool WideAngleCameraSensor::Update(
   IGN_PROFILE("WideAngleCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
   if (!this->dataPtr->camera)
   {
-    ignerr << "WideAngleCamera doesn't exist.\n";
+    gzerr << "WideAngleCamera doesn't exist.\n";
     return false;
   }
 
@@ -458,7 +458,7 @@ bool WideAngleCameraSensor::Update(
       msgsPixelFormat = msgs::PixelFormatType::RGB_INT8;
       break;
     default:
-      ignerr << "Unsupported pixel format ["
+      gzerr << "Unsupported pixel format ["
         << this->dataPtr->camera->ImageFormat() << "]\n";
       break;
   }
@@ -502,7 +502,7 @@ bool WideAngleCameraSensor::Update(
     }
     catch(...)
     {
-      ignerr << "Exception thrown in an image callback.\n";
+      gzerr << "Exception thrown in an image callback.\n";
     }
   }
 

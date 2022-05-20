@@ -195,13 +195,13 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
   // Check if this is the right type
   if (_sdf.Type() != sdf::SensorType::RGBD_CAMERA)
   {
-    ignerr << "Attempting to a load a RGBD Camera sensor, but received "
+    gzerr << "Attempting to a load a RGBD Camera sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
   }
 
   if (_sdf.CameraSensor() == nullptr)
   {
-    ignerr << "Attempting to a load an RGBD Camera sensor, but received "
+    gzerr << "Attempting to a load an RGBD Camera sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -214,7 +214,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
           this->Topic() + "/image");
   if (!this->dataPtr->imagePub)
   {
-    ignerr << "Unable to create publisher on topic["
+    gzerr << "Unable to create publisher on topic["
       << this->Topic() + "/image" << "].\n";
     return false;
   }
@@ -228,7 +228,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
           this->Topic() + "/depth_image");
   if (!this->dataPtr->depthPub)
   {
-    ignerr << "Unable to create publisher on topic["
+    gzerr << "Unable to create publisher on topic["
       << this->Topic() + "/depth_image" << "].\n";
     return false;
   }
@@ -242,7 +242,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
           this->Topic() + "/points");
   if (!this->dataPtr->pointPub)
   {
-    ignerr << "Unable to create publisher on topic["
+    gzerr << "Unable to create publisher on topic["
       << this->Topic() + "/points" << "].\n";
     return false;
   }
@@ -283,7 +283,7 @@ bool RgbdCameraSensor::CreateCameras()
 
   if (!cameraSdf)
   {
-    ignerr << "Unable to access camera SDF element\n";
+    gzerr << "Unable to access camera SDF element\n";
     return false;
   }
 
@@ -337,7 +337,7 @@ bool RgbdCameraSensor::CreateCameras()
     }
     else if (noiseSdf.Type() != sdf::NoiseType::NONE)
     {
-      ignwarn << "The depth camera sensor only supports Gaussian noise. "
+      gzwarn << "The depth camera sensor only supports Gaussian noise. "
        << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
        << "] is not supported." << std::endl;
     }
@@ -350,7 +350,7 @@ bool RgbdCameraSensor::CreateCameras()
   // todo(anyone) verify that rgb pixels align with d for angles >90 degrees.
   if (angle < 0.01 || angle > IGN_PI * 2)
   {
-    ignerr << "Invalid horizontal field of view [" << angle << "]\n";
+    gzerr << "Invalid horizontal field of view [" << angle << "]\n";
 
     return false;
   }
@@ -448,13 +448,13 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   IGN_PROFILE("RgbdCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
   if (!this->dataPtr->depthCamera)
   {
-    ignerr << "Depth or image cameras don't exist.\n";
+    gzerr << "Depth or image cameras don't exist.\n";
     return false;
   }
 

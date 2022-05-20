@@ -118,7 +118,7 @@ int main()
 
   if (!cameraSensor)
   {
-    ignerr << "Unable to load camera sensor\n";
+    gzerr << "Unable to load camera sensor\n";
     return 1;
   }
   cameraSensor->SetScene(scene);

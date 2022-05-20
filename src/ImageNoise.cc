@@ -65,7 +65,7 @@ NoisePtr ImageNoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
   }
   else
   {
-    ignerr << "Unrecognized noise type" << std::endl;
+    gzerr << "Unrecognized noise type" << std::endl;
     return NoisePtr();
   }
   noise->Load(_sdf);

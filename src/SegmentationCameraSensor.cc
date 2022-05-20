@@ -176,14 +176,14 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
   // Check if this is the right type
   if (_sdf.Type() != sdf::SensorType::SEGMENTATION_CAMERA)
   {
-    ignerr << "Attempting to a load a Segmentation Camera sensor, but received "
+    gzerr << "Attempting to a load a Segmentation Camera sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
     return false;
   }
 
   if (_sdf.CameraSensor() == nullptr)
   {
-    ignerr << "Attempting to a load a Segmentation Camera sensor, but received "
+    gzerr << "Attempting to a load a Segmentation Camera sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -197,7 +197,7 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->coloredMapPublisher)
   {
-    ignerr << "Unable to create publisher on topic ["
+    gzerr << "Unable to create publisher on topic ["
       << this->Topic() << this->dataPtr->topicColoredMapSuffix << "].\n";
     return false;
   }
@@ -212,7 +212,7 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->labelsMapPublisher)
   {
-    ignerr << "Unable to create publisher on topic ["
+    gzerr << "Unable to create publisher on topic ["
       << this->Topic() << this->dataPtr->topicLabelsMapSuffix << "].\n";
     return false;
   }
@@ -229,7 +229,7 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
   {
     if (!this->CreateCamera())
     {
-      ignerr << "Unable to create segmentation camera sensor\n";
+      gzerr << "Unable to create segmentation camera sensor\n";
       return false;
     }
   }
@@ -265,7 +265,7 @@ bool SegmentationCameraSensor::CreateCamera()
   const auto sdfCamera = this->dataPtr->sdfSensor.CameraSensor();
   if (!sdfCamera)
   {
-    ignerr << "Unable to access camera SDF element\n";
+    gzerr << "Unable to access camera SDF element\n";
     return false;
   }
 
@@ -346,7 +346,7 @@ bool SegmentationCameraSensor::CreateCamera()
   math::Angle angle = sdfCamera->HorizontalFov();
   if (angle < 0.01 || angle > IGN_PI*2)
   {
-    ignerr << "Invalid horizontal field of view [" << angle << "]\n";
+    gzerr << "Invalid horizontal field of view [" << angle << "]\n";
     return false;
   }
   double aspectRatio = static_cast<double>(width)/height;
@@ -431,13 +431,13 @@ bool SegmentationCameraSensor::Update(
   IGN_PROFILE("SegmentationCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
   if (!this->dataPtr->camera)
   {
-    ignerr << "Camera doesn't exist.\n";
+    gzerr << "Camera doesn't exist.\n";
     return false;
   }
 
@@ -519,7 +519,7 @@ bool SegmentationCameraSensor::Update(
     }
     catch(...)
     {
-      ignerr << "Exception thrown in an image callback.\n";
+      gzerr << "Exception thrown in an image callback.\n";
     }
   }
 

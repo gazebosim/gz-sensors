@@ -156,7 +156,7 @@ bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->pointPub)
   {
-    ignerr << "Unable to create publisher on topic["
+    gzerr << "Unable to create publisher on topic["
       << this->Topic() << "].\n";
     return false;
   }
@@ -191,7 +191,7 @@ bool GpuLidarSensor::CreateLidar()
 
   if (!this->dataPtr->gpuRays)
   {
-    ignerr << "Unable to create gpu laser sensor\n";
+    gzerr << "Unable to create gpu laser sensor\n";
     return false;
   }
 
@@ -266,13 +266,13 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
   IGN_PROFILE("GpuLidarSensor::Update");
   if (!this->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
   if (!this->dataPtr->gpuRays)
   {
-    ignerr << "GpuRays doesn't exist.\n";
+    gzerr << "GpuRays doesn't exist.\n";
     return false;
   }
 

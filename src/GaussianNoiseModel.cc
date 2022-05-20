@@ -99,7 +99,7 @@ void GaussianNoiseModel::Load(const sdf::Noise &_sdf)
 
   this->dataPtr->precision = _sdf.Precision();
   if (this->dataPtr->precision < 0)
-    ignerr << "Noise precision cannot be less than 0" << std::endl;
+    gzerr << "Noise precision cannot be less than 0" << std::endl;
   else if (!gz::math::equal(this->dataPtr->precision, 0.0, 1e-6))
     this->dataPtr->quantized = true;
 }

@@ -89,21 +89,21 @@ namespace gz
 
                 if (nullptr == sensor)
                 {
-                  ignerr << "Failed to create sensor [" << _sdf.Name()
+                  gzerr << "Failed to create sensor [" << _sdf.Name()
                          << "] of type[" << _sdf.TypeStr() << "]" << std::endl;
                   return nullptr;
                 }
 
                 if (!sensor->Load(_sdf))
                 {
-                  ignerr << "Failed to load sensor [" << _sdf.Name()
+                  gzerr << "Failed to load sensor [" << _sdf.Name()
                          << "] of type[" << _sdf.TypeStr() << "]" << std::endl;
                   return nullptr;
                 }
 
                 if (!sensor->Init())
                 {
-                  ignerr << "Failed to initialize sensor [" << _sdf.Name()
+                  gzerr << "Failed to initialize sensor [" << _sdf.Name()
                          << "] of type[" << _sdf.TypeStr() << "]" << std::endl;
                   return nullptr;
                 }
@@ -122,7 +122,7 @@ namespace gz
               {
                 if (nullptr == _sdf)
                 {
-                  ignerr << "Failed to create sensor, received null SDF "
+                  gzerr << "Failed to create sensor, received null SDF "
                          << "pointer." << std::endl;
                   return nullptr;
                 }
@@ -134,21 +134,21 @@ namespace gz
 
                 if (nullptr == sensor)
                 {
-                  ignerr << "Failed to create sensor [" << name
+                  gzerr << "Failed to create sensor [" << name
                          << "] of type[" << type << "]" << std::endl;
                   return nullptr;
                 }
 
                 if (!sensor->Load(_sdf))
                 {
-                  ignerr << "Failed to load sensor [" << name
+                  gzerr << "Failed to load sensor [" << name
                          << "] of type[" << type << "]" << std::endl;
                   return nullptr;
                 }
 
                 if (!sensor->Init())
                 {
-                  ignerr << "Failed to initialize sensor [" << name
+                  gzerr << "Failed to initialize sensor [" << name
                          << "] of type[" << type << "]" << std::endl;
                   return nullptr;
                 }

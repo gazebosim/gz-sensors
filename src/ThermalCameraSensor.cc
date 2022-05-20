@@ -195,13 +195,13 @@ bool ThermalCameraSensor::Load(const sdf::Sensor &_sdf)
   // Check if this is the right type
   if (_sdf.Type() != sdf::SensorType::THERMAL_CAMERA)
   {
-    ignerr << "Attempting to a load a Thermal Camera sensor, but received "
+    gzerr << "Attempting to a load a Thermal Camera sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
   }
 
   if (_sdf.CameraSensor() == nullptr)
   {
-    ignerr << "Attempting to a load a Thermal Camera sensor, but received "
+    gzerr << "Attempting to a load a Thermal Camera sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -215,7 +215,7 @@ bool ThermalCameraSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->thermalPub)
   {
-    ignerr << "Unable to create publisher on topic["
+    gzerr << "Unable to create publisher on topic["
       << this->Topic() << "].\n";
     return false;
   }
@@ -247,7 +247,7 @@ bool ThermalCameraSensor::CreateCamera()
 
   if (!cameraSdf)
   {
-    ignerr << "Unable to access camera SDF element\n";
+    gzerr << "Unable to access camera SDF element\n";
     return false;
   }
 
@@ -275,7 +275,7 @@ bool ThermalCameraSensor::CreateCamera()
       // 0 to 2.55 degrees Kelvin ((2^8-1) * 0.01 = 2.55).
       if (this->dataPtr->resolution < 1.0)
       {
-        ignwarn << "8 bit thermal camera image format selected. "
+        gzwarn << "8 bit thermal camera image format selected. "
                 << "The temperature linear resolution needs to be higher "
                 << "than 1.0. Defaulting to 3.0, output range = [0, 255*3] K"
                 << std::endl;
@@ -319,7 +319,7 @@ bool ThermalCameraSensor::CreateCamera()
     }
     else if (noiseSdf.Type() != sdf::NoiseType::NONE)
     {
-      ignwarn << "The thermal camera sensor only supports Gaussian noise. "
+      gzwarn << "The thermal camera sensor only supports Gaussian noise. "
        << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
        << "] is not supported." << std::endl;
     }
@@ -328,7 +328,7 @@ bool ThermalCameraSensor::CreateCamera()
   math::Angle angle = cameraSdf->HorizontalFov();
   if (angle < 0.01 || angle > IGN_PI*2)
   {
-    ignerr << "Invalid horizontal field of view [" << angle << "]\n";
+    gzerr << "Invalid horizontal field of view [" << angle << "]\n";
 
     return false;
   }
@@ -412,13 +412,13 @@ bool ThermalCameraSensor::Update(
   IGN_PROFILE("ThermalCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
   if (!this->dataPtr->thermalCamera)
   {
-    ignerr << "Camera doesn't exist.\n";
+    gzerr << "Camera doesn't exist.\n";
     return false;
   }
 
@@ -496,7 +496,7 @@ bool ThermalCameraSensor::Update(
   }
   catch(...)
   {
-    ignerr << "Exception thrown in an image callback.\n";
+    gzerr << "Exception thrown in an image callback.\n";
   }
 
   // Save image

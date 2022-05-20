@@ -33,7 +33,7 @@ bool Odometer::Load(const sdf::Sensor &_sdf)
   auto type = gz::sensors::customType(_sdf);
   if ("odometer" != type)
   {
-    ignerr << "Trying to load [odometer] sensor, but got type ["
+    gzerr << "Trying to load [odometer] sensor, but got type ["
            << type << "] instead." << std::endl;
     return false;
   }
@@ -65,7 +65,7 @@ bool Odometer::Load(const sdf::Sensor &_sdf)
   this->noise = gz::sensors::NoiseFactory::NewNoiseModel(noiseSdf);
   if (nullptr == this->noise)
   {
-    ignerr << "Failed to load noise." << std::endl;
+    gzerr << "Failed to load noise." << std::endl;
     return false;
   }
 

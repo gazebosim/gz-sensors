@@ -204,7 +204,7 @@ bool Sensor::Load(const sdf::Sensor &_sdf)
   if (!this->dataPtr->node.Advertise(rateTopic,
     &SensorPrivate::SetRate, this->dataPtr.get()))
   {
-    ignerr << "Unable to create service server on topic["
+    gzerr << "Unable to create service server on topic["
            << rateTopic << "].\n";
     return false;
   }
@@ -275,7 +275,7 @@ bool SensorPrivate::SetTopic(const std::string &_topic)
   auto validTopic = transport::TopicUtils::AsValidTopic(_topic);
   if (validTopic.empty())
   {
-    ignerr << "Failed to set sensor topic [" << _topic << "]" << std::endl;
+    gzerr << "Failed to set sensor topic [" << _topic << "]" << std::endl;
     return false;
   }
 
@@ -311,7 +311,7 @@ void SensorPrivate::PublishMetrics(const std::chrono::duration<double> &_now)
       this->topic + "/performance_metrics");
     if (validTopic.empty())
     {
-      ignerr << "Failed to set metrics sensor topic [" << topic << "]" <<
+      gzerr << "Failed to set metrics sensor topic [" << topic << "]" <<
         std::endl;
       return;
     }
@@ -370,7 +370,7 @@ void SensorPrivate::SetRate(const gz::msgs::Double &_rate)
   {
     if (gz::math::lessOrNearEqual(rate, 0.0))
     {
-      ignerr << "Cannot set update rate of sensor " << this->name << " to zero "
+      gzerr << "Cannot set update rate of sensor " << this->name << " to zero "
              << "because the <update_rate> SDF element is non-zero."
              << std::endl;
       return;
@@ -378,7 +378,7 @@ void SensorPrivate::SetRate(const gz::msgs::Double &_rate)
     // apply the upper rate limit from SDF
     else if (!gz::math::lessOrNearEqual(rate, this->sdfUpdateRate))
     {
-      ignerr << "Trying to set update rate of sensor " << this->name << " to "
+      gzerr << "Trying to set update rate of sensor " << this->name << " to "
              << rate << ", but the maximum rate in <update_rate> SDF element "
              << "is " << this->sdfUpdateRate << ". Ignoring the request."
              << std::endl;

@@ -84,7 +84,7 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
   {
     if (!_sdf->HasElement("logical_camera"))
     {
-      ignerr << "<sensor><camera> SDF element not found while attempting to "
+      gzerr << "<sensor><camera> SDF element not found while attempting to "
         << "load a gz::sensors::LogicalCameraSensor\n";
       return false;
     }
@@ -111,7 +111,7 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
+    gzerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
     return false;
   }
 
@@ -136,7 +136,7 @@ bool LogicalCameraSensor::Update(
   IGN_PROFILE("LogicalCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);

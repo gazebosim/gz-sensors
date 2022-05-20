@@ -79,14 +79,14 @@ bool NavSatSensor::Load(const sdf::Sensor &_sdf)
 
   if (_sdf.Type() != sdf::SensorType::NAVSAT)
   {
-    ignerr << "Attempting to a load an NAVSAT sensor, but received "
+    gzerr << "Attempting to a load an NAVSAT sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
     return false;
   }
 
   if (_sdf.NavSatSensor() == nullptr)
   {
-    ignerr << "Attempting to a load an NAVSAT sensor, but received "
+    gzerr << "Attempting to a load an NAVSAT sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -99,7 +99,7 @@ bool NavSatSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic [" << this->Topic()
+    gzerr << "Unable to create publisher on topic [" << this->Topic()
            << "]." << std::endl;
     return false;
   }
@@ -152,7 +152,7 @@ bool NavSatSensor::Update(const std::chrono::steady_clock::duration &_now)
   IGN_PROFILE("NavSatSensor::Update");
   if (!this->dataPtr->loaded)
   {
-    ignerr << "Not loaded, update ignored.\n";
+    gzerr << "Not loaded, update ignored.\n";
     return false;
   }
 

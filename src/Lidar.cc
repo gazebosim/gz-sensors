@@ -94,13 +94,13 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
   if (_sdf.Type() != sdf::SensorType::LIDAR &&
       _sdf.Type() != sdf::SensorType::GPU_LIDAR)
   {
-    ignerr << "Attempting to a load a Lidar sensor, but received "
+    gzerr << "Attempting to a load a Lidar sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
   }
 
   if (_sdf.LidarSensor() == nullptr)
   {
-    ignerr << "Attempting to a load a Lidar sensor, but received "
+    gzerr << "Attempting to a load a Lidar sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -114,7 +114,7 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
         this->Topic());
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic["
+    gzerr << "Unable to create publisher on topic["
       << this->Topic() << "].\n";
     return false;
   }
@@ -127,7 +127,7 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
 
   if (this->RayCount() == 0 || this->VerticalRayCount() == 0)
   {
-    ignerr << "Lidar: Image has 0 size!\n";
+    gzerr << "Lidar: Image has 0 size!\n";
   }
 
   // create message
@@ -160,7 +160,7 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
     }
     else if (noiseSdf.Type() != sdf::NoiseType::NONE)
     {
-      ignwarn << "The lidar sensor only supports Gaussian noise. "
+      gzwarn << "The lidar sensor only supports Gaussian noise. "
        << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
        << "] is not supported." << std::endl;
     }
@@ -190,7 +190,7 @@ gz::common::ConnectionPtr Lidar::ConnectNewLidarFrame(
 //////////////////////////////////////////////////
 bool Lidar::Update(const std::chrono::steady_clock::duration &/*_now*/)
 {
-  ignerr << "No lidar data being updated.\n";
+  gzerr << "No lidar data being updated.\n";
   return false;
 }
 
@@ -422,12 +422,12 @@ double Lidar::Range(const int _index) const
 
   if (this->dataPtr->laserMsg.ranges_size() == 0)
   {
-    ignwarn << "ranges not constructed yet (zero sized)\n";
+    gzwarn << "ranges not constructed yet (zero sized)\n";
     return 0.0;
   }
   if (_index < 0 || _index > this->dataPtr->laserMsg.ranges_size())
   {
-    ignerr << "Invalid range index[" << _index << "]\n";
+    gzerr << "Invalid range index[" << _index << "]\n";
     return 0.0;
   }
 

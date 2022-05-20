@@ -111,13 +111,13 @@ bool ForceTorqueSensor::Load(const sdf::Sensor &_sdf)
   // Check if this is the right type
   if (_sdf.Type() != sdf::SensorType::FORCE_TORQUE)
   {
-    ignerr << "Attempting to a load a Force Torque sensor, but received "
+    gzerr << "Attempting to a load a Force Torque sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
   }
 
   if (_sdf.ForceTorqueSensor() == nullptr)
   {
-    ignerr << "Attempting to a load a Force Torque sensor, but received "
+    gzerr << "Attempting to a load a Force Torque sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -134,7 +134,7 @@ bool ForceTorqueSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
+    gzerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
     return false;
   }
 
@@ -173,7 +173,7 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
   IGN_PROFILE("ForceTorqueSensor::Update");
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
@@ -220,7 +220,7 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
   }
   else
   {
-    ignerr << "measureFrame must be PARENT_LINK, CHILD_LINK or SENSOR\n";
+    gzerr << "measureFrame must be PARENT_LINK, CHILD_LINK or SENSOR\n";
   }
 
   if (this->dataPtr->measureDirection ==

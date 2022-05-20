@@ -61,7 +61,7 @@ gz::sensors::Sensor *Manager::Sensor(
 //////////////////////////////////////////////////
 void Manager::AddPluginPaths(const std::string &)
 {
-  ignwarn << "Trying to add plugin paths, but Gazebo Sensors doesn't support"
+  gzwarn << "Trying to add plugin paths, but Gazebo Sensors doesn't support"
           << " plugins anymore." << std::endl;
 }
 
@@ -96,7 +96,7 @@ gz::sensors::SensorId Manager::AddSensor(
 /////////////////////////////////////////////////
 gz::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &)
 {
-  ignwarn << "Trying to create sensor without providing sensor type. Ignition"
+  gzwarn << "Trying to create sensor without providing sensor type. Ignition"
           << " Sensor doesn't support sensor registration anymore. Use the"
           << " templated `CreateSensor` function instead." << std::endl;
   return NO_SENSOR;
@@ -105,7 +105,7 @@ gz::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &)
 /////////////////////////////////////////////////
 gz::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr)
 {
-  ignwarn << "Trying to create sensor without providing sensor type. Ignition"
+  gzwarn << "Trying to create sensor without providing sensor type. Ignition"
           << " Sensor doesn't support sensor registration anymore. Use the"
           << " templated `CreateSensor` function instead." << std::endl;
   return NO_SENSOR;
