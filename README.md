@@ -88,7 +88,7 @@ Please see
 
 # Versioning
 
-This library uses [Semantic Versioning](https://semver.org/). Additionally, this library is part of the [Gazebo Robotics project](https://ignitionrobotics.org) which periodically releases a versioned set of compatible and complimentary libraries. See the [Gazebo Robotics website](https://ignitionrobotics.org) for version and release information.
+This library uses [Semantic Versioning](https://semver.org/). Additionally, this library is part of the [Gazebo project](https://ignitionrobotics.org) which periodically releases a versioned set of compatible and complimentary libraries. See the [Gazebo website](https://ignitionrobotics.org) for version and release information.
 
 # License
 
