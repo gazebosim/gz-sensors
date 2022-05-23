@@ -179,7 +179,7 @@ If you're including a model from a place like [ignition fuel](https://app.gazebo
    <include>
       <pose>-1 0 3 0.0 0.0 1.57</pose>
       <uri>
-      https://fuel.gazebosim.org/1.0/OpenRobotics/models/Construction Cone
+      https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Construction Cone
       </uri>
       <plugin filename="ignition-gazebo-label-system" name="gz::sim::systems::Label">
         <label>30</label>
