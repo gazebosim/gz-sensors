@@ -15,8 +15,8 @@ Homebrew      | [![Build Status](https://build.osrfoundation.org/buildStatus/ico
 Windows       | [![Build Status](https://build.osrfoundation.org/job/ign_sensors-ci-win/badge/icon)](https://build.osrfoundation.org/job/ign_sensors-ci-win/)
 
 Gazebo Sensors, a component of [Ignition
-Robotics](https://ignitionrobotics.org), provides numerous sensor models
-designed to generate realistic data from simulation environments. Gazebo Sensors is used in conjunction with [Gazebo Libraries](https://ignitionrobotics/libs), and especially relies on the rendering capabilities from [Gazebo Rendering](https://ignitionrobotics.org/libs/rendering) and physics simulation from [Gazebo Physics](https://ignitionrobotics.org/libs/physics).
+Robotics](https://gazebosim.org), provides numerous sensor models
+designed to generate realistic data from simulation environments. Gazebo Sensors is used in conjunction with [Gazebo Libraries](https://gazebosim/libs), and especially relies on the rendering capabilities from [Gazebo Rendering](https://gazebosim.org/libs/rendering) and physics simulation from [Gazebo Physics](https://gazebosim.org/libs/physics).
 
 # Table of Contents
 
@@ -53,7 +53,7 @@ models into sensor streams.
 
 # Install
 
-See the [installation tutorial](https://ignitionrobotics.org/api/sensors/5.0/installation.html).
+See the [installation tutorial](https://gazebosim.org/api/sensors/5.0/installation.html).
 
 # Usage
 
@@ -79,7 +79,7 @@ Refer to the following table for information about important directories and fil
 
 # Contributing
 
-Please see the [contribution guide](https://ignitionrobotics.org/docs/all/contributing).
+Please see the [contribution guide](https://gazebosim.org/docs/all/contributing).
 
 # Code of Conduct
 
@@ -88,7 +88,7 @@ Please see
 
 # Versioning
 
-This library uses [Semantic Versioning](https://semver.org/). Additionally, this library is part of the [Gazebo project](https://ignitionrobotics.org) which periodically releases a versioned set of compatible and complimentary libraries. See the [Gazebo website](https://ignitionrobotics.org) for version and release information.
+This library uses [Semantic Versioning](https://semver.org/). Additionally, this library is part of the [Gazebo project](https://gazebosim.org) which periodically releases a versioned set of compatible and complimentary libraries. See the [Gazebo website](https://gazebosim.org) for version and release information.
 
 # License
 

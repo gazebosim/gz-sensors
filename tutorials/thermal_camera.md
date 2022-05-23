@@ -1,6 +1,6 @@
 \page thermalcameraigngazebo Thermal Camera in Gazebo
 
-In this tutorial, we will discuss how to use a thermal camera sensor in [Gazebo](https://ignitionrobotics.org/libs/gazebo).
+In this tutorial, we will discuss how to use a thermal camera sensor in [Gazebo](https://gazebosim.org/libs/gazebo).
 
 There are currently a few limitations with the thermal camera, which will be mentioned at the end of the tutorial.
 
@@ -13,7 +13,7 @@ The following thermal camera capabilities are available starting from Gazebo Dom
 * Heat signature capabilities (supports objects with a variable surface temperature)
 * 8-bit thermal camera image format (the default thermal camera image format is 16-bit)
 
-If you need to install Ignition, [pick the version you'd like to use](https://ignitionrobotics.org/docs) and then follow the installation instructions.
+If you need to install Ignition, [pick the version you'd like to use](https://gazebosim.org/docs) and then follow the installation instructions.
 
 ## Setting up the thermal camera
 
@@ -214,7 +214,7 @@ Once the thermal system plugin is specified, all we need to do is include the `<
 ### Objects with a varying surface temperature
 
 Most of the time, objects have a varying surface temperature.
-Here's an example of the [Rescue Randy](https://app.ignitionrobotics.org/OpenRobotics/fuel/models/Rescue%20Randy) model, which has a "heat signature" applied to it.
+Here's an example of the [Rescue Randy](https://app.gazebosim.org/OpenRobotics/fuel/models/Rescue%20Randy) model, which has a "heat signature" applied to it.
 The heat signature is a texture that can be applied to a model, which specifies the model's temperature across its surface.
 
 If we take a look at Rescue Randy's `model.sdf`, we can see that it incorporates the thermal system plugin, just like the uniform temperature box example above:
@@ -231,7 +231,7 @@ If we take a look at Rescue Randy's `model.sdf`, we can see that it incorporates
 There are a few differences to note for objects with a varying surface temperature:
 * `<heat_signature>`: The path to the heat signature texture.
                       In this example, the path is given relative to where the Rescue Randy fuel model is located.
-                      This can either be an [Gazebo Fuel](https://ignitionrobotics.org/libs/fuel_tools) URI, or a path to a file that is on your machine locally.
+                      This can either be an [Gazebo Fuel](https://gazebosim.org/libs/fuel_tools) URI, or a path to a file that is on your machine locally.
 * `<min_temp>`: The minimum temperature (in Kelvin) that should be represented by the heat signature.
                 This defaults to the world's ambient temperature if not specified.
 * `<max_temp>`: The maximum temperature (in Kelvin) that should be represented by the heat signature.
@@ -253,7 +253,7 @@ You should see something similar to this:
 
 Taking a look at the [SDF file](https://github.com/gazebosim/gz-sim/blob/e647570f25f962d63af75cf669ff72731d57bd5e/examples/worlds/thermal_camera.sdf) for this example shows that the box was assigned a temperature of 285 Kelvin.
 
-If we take a look at the Rescue Randy and Samsung J8 [fuel models](https://app.ignitionrobotics.org/dashboard), we see that they have the following temperature range (the SDF file we are using with these models has an [ambient temperature of 300 Kelvin](https://github.com/gazebosim/gz-sim/blob/e647570f25f962d63af75cf669ff72731d57bd5e/examples/worlds/thermal_camera.sdf#L135-L144)):
+If we take a look at the Rescue Randy and Samsung J8 [fuel models](https://app.gazebosim.org/dashboard), we see that they have the following temperature range (the SDF file we are using with these models has an [ambient temperature of 300 Kelvin](https://github.com/gazebosim/gz-sim/blob/e647570f25f962d63af75cf669ff72731d57bd5e/examples/worlds/thermal_camera.sdf#L135-L144)):
 * Rescue Randy: 300 Kelvin to 310 Kelvin
 * Samsung J8: 298.75 Kelvin to 300 Kelvin
 

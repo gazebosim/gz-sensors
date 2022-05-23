@@ -5,7 +5,7 @@ In this tutorial, we will discuss how to use a segmentation camera sensor in Gaz
 ## Requirements
 
 Since this tutorial will show how to use a segmentation camera sensor in Gazebo, you'll need to have Gazebo installed. We recommend installing all Ignition libraries, using version Fortress or newer (the segmentation camera is not available in Ignition versions prior to Fortress).
-If you need to install Ignition, [pick the version you'd like to use](https://ignitionrobotics.org/docs) and then follow the installation instructions.
+If you need to install Ignition, [pick the version you'd like to use](https://gazebosim.org/docs) and then follow the installation instructions.
 
 ## Setting up the segmentation camera
 Here's an example of how to attach a segmentation camera sensor to a model in a SDF file:
@@ -173,13 +173,13 @@ You can also attach this plugin to the model's `<model>` tag:
     </model>
 ```
 
-If you're including a model from a place like [ignition fuel](https://app.ignitionrobotics.org/dashboard), you can add the label plugin as a child for the `<include>` tag:
+If you're including a model from a place like [ignition fuel](https://app.gazebosim.org/dashboard), you can add the label plugin as a child for the `<include>` tag:
 
 ```xml
    <include>
       <pose>-1 0 3 0.0 0.0 1.57</pose>
       <uri>
-      https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Construction Cone
+      https://fuel.gazebosim.org/1.0/OpenRobotics/models/Construction Cone
       </uri>
       <plugin filename="ignition-gazebo-label-system" name="gz::sim::systems::Label">
         <label>30</label>
@@ -457,4 +457,4 @@ int main(int argc, char **argv)
 ```
 
 If you'd like to gain a better understanding of how the subscriber code works,
-you can go through the [ign-transport tutorials](https://ignitionrobotics.org/api/transport/11.0/tutorials.html).
+you can go through the [ign-transport tutorials](https://gazebosim.org/api/transport/11.0/tutorials.html).

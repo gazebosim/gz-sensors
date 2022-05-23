@@ -52,12 +52,12 @@ necessary prerequisites followed by building from source.
 
 Gazebo Sensors requires:
 
-  * [Gazebo CMake](https://ignitionrobotics.org/libs/cmake)
-  * [Gazebo Math](https://ignitionrobotics.org/libs/math)
-  * [Gazebo Common](https://ignitionrobotics.org/libs/common)
-  * [Gazebo Transport](https://ignitionrobotics.org/libs/transport)
-  * [Gazebo Rendering](https://ignitionrobotics.org/libs/rendering)
-  * [Gazebo Msgs](https://ignitionrobotics.org/libs/msgs)
+  * [Gazebo CMake](https://gazebosim.org/libs/cmake)
+  * [Gazebo Math](https://gazebosim.org/libs/math)
+  * [Gazebo Common](https://gazebosim.org/libs/common)
+  * [Gazebo Transport](https://gazebosim.org/libs/transport)
+  * [Gazebo Rendering](https://gazebosim.org/libs/rendering)
+  * [Gazebo Msgs](https://gazebosim.org/libs/msgs)
   * [SDFormat](https://github.com/osrf/sdformat)
   * [Protobuf3](https://developers.google.com/protocol-buffers/)
 
@@ -168,7 +168,7 @@ Before [ign-rendering](https://github.com/gazebosim/gz-rendering) becomes availa
 
 # Documentation
 
-API and tutorials can be found at [https://ignitionrobotics.org/libs/sensors](https://ignitionrobotics.org/libs/sensors).
+API and tutorials can be found at [https://gazebosim.org/libs/sensors](https://gazebosim.org/libs/sensors).
 
 You can also generate the documentation from a clone of this repository by following these steps.
 
