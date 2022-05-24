@@ -1,5 +1,10 @@
 ## Ignition Sensors 6
 
+### Ignition Sensors 6.5.0 (2022-05-24)
+
+1. Add HasConnections function 
+    * [Pull request #222](https://github.com/ignitionrobotics/ign-sensors/pull/222)
+
 ### Ignition Sensors 6.4.0 (2022-05-13)
 
 1. Set lidar visibility mask
