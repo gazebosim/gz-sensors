@@ -205,7 +205,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   if ((_renderEngine.compare("ogre") != 0) &&
       (_renderEngine.compare("ogre2") != 0))
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' doesn't support rgbd cameras" << std::endl;
     return;
   }
@@ -214,7 +214,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
     return;
   }

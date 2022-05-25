@@ -82,7 +82,7 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
            << "' is not supported" << std::endl;
     return;
   }

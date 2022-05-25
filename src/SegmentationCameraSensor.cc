@@ -202,7 +202,7 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  igndbg << "Colored map image for [" << this->Name() << "] advertised on ["
+  gzdbg << "Colored map image for [" << this->Name() << "] advertised on ["
     << this->Topic() << this->dataPtr->topicColoredMapSuffix << "]\n";
 
   // Create the segmentation labels map image publisher
@@ -217,7 +217,7 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  igndbg << "Segmentation labels map image for [" << this->Name()
+  gzdbg << "Segmentation labels map image for [" << this->Name()
     << "] advertised on [" << this->Topic()
     << this->dataPtr->topicLabelsMapSuffix << "]\n";
 
@@ -285,7 +285,7 @@ bool SegmentationCameraSensor::CreateCamera()
       this->dataPtr->type = rendering::SegmentationType::ST_PANOPTIC;
     else
     {
-      igndbg << "Wrong type [" << type <<
+      gzdbg << "Wrong type [" << type <<
         "], type should be semantic or instance or panoptic" << std::endl;
       return false;
     }

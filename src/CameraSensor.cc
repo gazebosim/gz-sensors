@@ -294,7 +294,7 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  igndbg << "Camera images for [" << this->Name() << "] advertised on ["
+  gzdbg << "Camera images for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
   if (_sdf.CameraSensor()->Triggered())
@@ -318,7 +318,7 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
     this->dataPtr->node.Subscribe(this->dataPtr->triggerTopic,
         &CameraSensorPrivate::OnTrigger, this->dataPtr.get());
 
-    igndbg << "Camera trigger messages for [" << this->Name() << "] subscribed"
+    gzdbg << "Camera trigger messages for [" << this->Name() << "] subscribed"
            << " on [" << this->dataPtr->triggerTopic << "]" << std::endl;
     this->dataPtr->isTriggeredCamera = true;
   }
@@ -401,7 +401,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     if (this->dataPtr->generatingData)
     {
-      igndbg << "Disabling camera sensor: '" << this->Name() << "' data "
+      gzdbg << "Disabling camera sensor: '" << this->Name() << "' data "
              << "generation. " << std::endl;;
       this->dataPtr->generatingData = false;
     }
@@ -412,7 +412,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     if (!this->dataPtr->generatingData)
     {
-      igndbg << "Enabling camera sensor: '" << this->Name() << "' data "
+      gzdbg << "Enabling camera sensor: '" << this->Name() << "' data "
              << "generation." << std::endl;;
       this->dataPtr->generatingData = true;
     }
@@ -595,7 +595,7 @@ bool CameraSensor::AdvertiseInfo(const std::string &_topic)
   }
   else
   {
-    igndbg << "Camera info for [" << this->Name() << "] advertised on ["
+    gzdbg << "Camera info for [" << this->Name() << "] advertised on ["
            << this->dataPtr->infoTopic << "]" << std::endl;
   }
 

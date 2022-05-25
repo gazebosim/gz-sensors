@@ -80,7 +80,7 @@ void DistortionCameraSensorTest::ImagesWithBuiltinSDF(
 
   if (_renderEngine == "ogre2")
   {
-    igndbg << "Distortion camera not supported yet in rendering engine: "
+    gzdbg << "Distortion camera not supported yet in rendering engine: "
             << _renderEngine << std::endl;
     return;
   }
@@ -89,7 +89,7 @@ void DistortionCameraSensorTest::ImagesWithBuiltinSDF(
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
     return;
   }

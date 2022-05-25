@@ -386,7 +386,7 @@ void SensorPrivate::SetRate(const gz::msgs::Double &_rate)
     }
   }
 
-  igndbg << "Setting update rate of sensor " << this->name << " to " << rate
+  gzdbg << "Setting update rate of sensor " << this->name << " to " << rate
          << " Hz" << std::endl;
 
   this->updateRate = rate;

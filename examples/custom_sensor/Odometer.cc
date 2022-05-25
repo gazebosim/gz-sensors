@@ -46,7 +46,7 @@ bool Odometer::Load(const sdf::Sensor &_sdf)
 
   if (!_sdf.Element()->HasElement("ignition:odometer"))
   {
-    igndbg << "No custom configuration for [" << this->Topic() << "]"
+    gzdbg << "No custom configuration for [" << this->Topic() << "]"
            << std::endl;
     return true;
   }
@@ -56,7 +56,7 @@ bool Odometer::Load(const sdf::Sensor &_sdf)
 
   if (!customElem->HasElement("noise"))
   {
-    igndbg << "No noise for [" << this->Topic() << "]" << std::endl;
+    gzdbg << "No noise for [" << this->Topic() << "]" << std::endl;
     return true;
   }
 

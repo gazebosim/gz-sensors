@@ -284,7 +284,7 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  igndbg << "Depth images for [" << this->Name() << "] advertised on ["
+  gzdbg << "Depth images for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
   if (!this->AdvertiseInfo())
@@ -301,7 +301,7 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  igndbg << "Points for [" << this->Name() << "] advertised on ["
+  gzdbg << "Points for [" << this->Name() << "] advertised on ["
          << this->Topic() << "/points]" << std::endl;
 
   // Initialize the point message.

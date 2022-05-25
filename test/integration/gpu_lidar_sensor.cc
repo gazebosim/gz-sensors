@@ -199,7 +199,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
     return;
   }
@@ -318,7 +318,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
     gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
     return;
   }
@@ -472,7 +472,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
     gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
     return;
   }
@@ -613,7 +613,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
     gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
     return;
   }
@@ -744,7 +744,7 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
     gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
     return;
   }
@@ -849,7 +849,7 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
   auto engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
     return;
   }

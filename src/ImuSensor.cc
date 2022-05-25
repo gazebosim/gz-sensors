@@ -145,7 +145,7 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  igndbg << "IMU data for [" << this->Name() << "] advertised on ["
+  gzdbg << "IMU data for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
   const std::map<SensorNoiseType, sdf::Noise> noises = {

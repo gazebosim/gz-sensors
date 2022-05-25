@@ -188,7 +188,7 @@ bool WideAngleCameraSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  igndbg << "Wide angle camera images for [" << this->Name()
+  gzdbg << "Wide angle camera images for [" << this->Name()
          << "] advertised on [" << this->Topic() << "]" << std::endl;
 
   if (!this->AdvertiseInfo())
@@ -418,7 +418,7 @@ bool WideAngleCameraSensor::Update(
   {
     if (this->dataPtr->generatingData)
     {
-      igndbg << "Disabling camera sensor: '" << this->Name() << "' data "
+      gzdbg << "Disabling camera sensor: '" << this->Name() << "' data "
              << "generation. " << std::endl;;
       this->dataPtr->generatingData = false;
     }
@@ -429,7 +429,7 @@ bool WideAngleCameraSensor::Update(
   {
     if (!this->dataPtr->generatingData)
     {
-      igndbg << "Enabling camera sensor: '" << this->Name() << "' data "
+      gzdbg << "Enabling camera sensor: '" << this->Name() << "' data "
              << "generation." << std::endl;;
       this->dataPtr->generatingData = true;
     }

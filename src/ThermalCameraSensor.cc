@@ -220,7 +220,7 @@ bool ThermalCameraSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  igndbg << "Thermal images for [" << this->Name() << "] advertised on ["
+  gzdbg << "Thermal images for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
   if (!this->AdvertiseInfo())

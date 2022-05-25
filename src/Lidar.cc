@@ -119,7 +119,7 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  igndbg << "Laser scans for [" << this->Name() << "] advertised on ["
+  gzdbg << "Laser scans for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
   // Load ray atributes
@@ -245,7 +245,7 @@ bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
   const int numRays = this->RayCount() * this->VerticalRayCount();
   if (this->dataPtr->laserMsg.ranges_size() != numRays)
   {
-    // igndbg << "Size mismatch; allocating memory\n";
+    // gzdbg << "Size mismatch; allocating memory\n";
     this->dataPtr->laserMsg.clear_ranges();
     this->dataPtr->laserMsg.clear_intensities();
     for (int i = 0; i < numRays; ++i)

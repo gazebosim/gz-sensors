@@ -118,7 +118,7 @@ void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
     return;
   }
