@@ -22,7 +22,6 @@
 #include <string>
 
 #include <gz/common/Event.hh>
-#include <gz/common/PluginMacros.hh>
 #include <gz/utils/SuppressWarning.hh>
 #include <gz/msgs.hh>
 #include <gz/transport/Node.hh>
