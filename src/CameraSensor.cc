@@ -219,6 +219,7 @@ bool CameraSensor::CreateCamera()
       break;
     case sdf::PixelFormatType::L_INT16:
       this->dataPtr->camera->SetImageFormat(ignition::rendering::PF_L16);
+      break;
     default:
       ignerr << "Unsupported pixel format ["
         << static_cast<int>(pixelFormat) << "]\n";

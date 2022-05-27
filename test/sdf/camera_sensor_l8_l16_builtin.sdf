@@ -24,6 +24,23 @@
           </noise>
         </camera>
       </sensor>
+      <sensor name="camera2" type="camera">
+        <update_rate>10</update_rate>
+        <ignition_frame_id>base_camera</ignition_frame_id>
+        <topic>/images_l16</topic>
+        <camera>
+          <horizontal_fov>1.05</horizontal_fov>
+          <image>
+            <width>512</width>
+            <height>512</height>
+            <format>L16</format>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>10.0</far>
+          </clip>
+        </camera>
+      </sensor>
     </link>
   </model>
 </sdf>
