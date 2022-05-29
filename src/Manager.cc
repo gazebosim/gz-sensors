@@ -15,19 +15,19 @@
  *
 */
 
-#include "ignition/sensors/Manager.hh"
+#include "gz/sensors/Manager.hh"
 #include <memory>
 #include <unordered_map>
-#include <ignition/common/Profiler.hh>
-#include <ignition/common/SystemPaths.hh>
-#include <ignition/common/Console.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/common/SystemPaths.hh>
+#include <gz/common/Console.hh>
 
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/SensorFactory.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/SensorFactory.hh"
 
-using namespace ignition::sensors;
+using namespace gz::sensors;
 
-class ignition::sensors::ManagerPrivate
+class gz::sensors::ManagerPrivate
 {
   /// \brief Loaded sensors.
   public: std::map<SensorId, std::unique_ptr<Sensor>> sensors;
@@ -51,8 +51,8 @@ bool Manager::Init()
 }
 
 //////////////////////////////////////////////////
-ignition::sensors::Sensor *Manager::Sensor(
-    ignition::sensors::SensorId _id)
+gz::sensors::Sensor *Manager::Sensor(
+    gz::sensors::SensorId _id)
 {
   auto iter = this->dataPtr->sensors.find(_id);
   return iter != this->dataPtr->sensors.end() ? iter->second.get() : nullptr;
@@ -61,12 +61,12 @@ ignition::sensors::Sensor *Manager::Sensor(
 //////////////////////////////////////////////////
 void Manager::AddPluginPaths(const std::string &)
 {
-  ignwarn << "Trying to add plugin paths, but Ignition Sensors doesn't support"
+  gzwarn << "Trying to add plugin paths, but Gazebo Sensors doesn't support"
           << " plugins anymore." << std::endl;
 }
 
 //////////////////////////////////////////////////
-bool Manager::Remove(const ignition::sensors::SensorId _id)
+bool Manager::Remove(const gz::sensors::SensorId _id)
 {
   return this->dataPtr->sensors.erase(_id) > 0;
 }
@@ -83,8 +83,8 @@ void Manager::RunOnce(
 }
 
 /////////////////////////////////////////////////
-ignition::sensors::SensorId Manager::AddSensor(
-  std::unique_ptr<ignition::sensors::Sensor> _sensor)
+gz::sensors::SensorId Manager::AddSensor(
+  std::unique_ptr<gz::sensors::Sensor> _sensor)
 {
   if (!_sensor)
     return NO_SENSOR;
@@ -94,18 +94,18 @@ ignition::sensors::SensorId Manager::AddSensor(
 }
 
 /////////////////////////////////////////////////
-ignition::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &)
+gz::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &)
 {
-  ignwarn << "Trying to create sensor without providing sensor type. Ignition"
+  gzwarn << "Trying to create sensor without providing sensor type. Ignition"
           << " Sensor doesn't support sensor registration anymore. Use the"
           << " templated `CreateSensor` function instead." << std::endl;
   return NO_SENSOR;
 }
 
 /////////////////////////////////////////////////
-ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr)
+gz::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr)
 {
-  ignwarn << "Trying to create sensor without providing sensor type. Ignition"
+  gzwarn << "Trying to create sensor without providing sensor type. Ignition"
           << " Sensor doesn't support sensor registration anymore. Use the"
           << " templated `CreateSensor` function instead." << std::endl;
   return NO_SENSOR;

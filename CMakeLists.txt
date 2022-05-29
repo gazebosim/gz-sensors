@@ -22,7 +22,7 @@ ign_configure_project(
 #============================================================================
 set (DRI_TESTS TRUE CACHE BOOL "True to enable DRI tests")
 
-option(ENABLE_PROFILER "Enable Ignition Profiler" FALSE)
+option(ENABLE_PROFILER "Enable Gazebo Profiler" FALSE)
 
 if(ENABLE_PROFILER)
   add_definitions("-DIGN_PROFILER_ENABLE=1")
@@ -90,8 +90,6 @@ set(IGN_MSGS_VER ${ignition-msgs9_VERSION_MAJOR})
 # Find SDFormat
 ign_find_package(sdformat13 REQUIRED)
 set(SDF_VER ${sdformat13_VERSION_MAJOR})
-
-set(IGN_SENSORS_PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 
 #============================================================================
 # Configure the build

@@ -17,10 +17,10 @@
 
 #include <gtest/gtest.h>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Filesystem.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/WideAngleCameraSensor.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Filesystem.hh>
+#include <gz/sensors/Manager.hh>
+#include <gz/sensors/WideAngleCameraSensor.hh>
 
 // TODO(louise) Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -28,9 +28,9 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/RenderEngine.hh>
-#include <ignition/rendering/RenderingIface.hh>
-#include <ignition/rendering/Scene.hh>
+#include <gz/rendering/RenderEngine.hh>
+#include <gz/rendering/RenderingIface.hh>
+#include <gz/rendering/Scene.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -40,7 +40,7 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs.hh>
+#include <gz/msgs.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -54,9 +54,9 @@ unsigned char *g_imageBuffer = nullptr;
 
 std::mutex g_infoMutex;
 unsigned int g_infoCounter = 0;
-ignition::msgs::CameraInfo g_infoMsg;
+gz::msgs::CameraInfo g_infoMsg;
 
-void OnCameraInfo(const ignition::msgs::CameraInfo & _msg)
+void OnCameraInfo(const gz::msgs::CameraInfo & _msg)
 {
   g_infoMutex.lock();
   g_infoCounter++;
@@ -64,7 +64,7 @@ void OnCameraInfo(const ignition::msgs::CameraInfo & _msg)
   g_infoMutex.unlock();
 }
 
-void OnImage(const ignition::msgs::Image &_msg)
+void OnImage(const gz::msgs::Image &_msg)
 {
   g_mutex.lock();
   unsigned int channelCount = 3u;
@@ -83,7 +83,7 @@ class WideAngleCameraSensorTest: public testing::Test,
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 
   // Create a Camera sensor from a SDF and gets a image message
@@ -95,13 +95,13 @@ void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
 {
   if (_renderEngine != "ogre")
   {
-    ignwarn << "Wide angle cameras are not supported in " << _renderEngine
+    gzwarn << "Wide angle cameras are not supported in " << _renderEngine
             << std::endl;
     return;
   }
 
   // get the darn test data
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "wide_angle_camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -115,41 +115,41 @@ void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
   auto sensorPtr = linkPtr->GetElement("sensor");
 
   // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine(_renderEngine);
+  auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
     return;
   }
 
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
   scene->SetAmbientLight(1.0, 1.0, 1.0);
 
-  ignition::rendering::VisualPtr root = scene->RootVisual();
+  gz::rendering::VisualPtr root = scene->RootVisual();
   ASSERT_NE(nullptr, root);
 
   // create blue material
-  ignition::rendering::MaterialPtr blue = scene->CreateMaterial();
+  gz::rendering::MaterialPtr blue = scene->CreateMaterial();
   blue->SetAmbient(0.0, 0.0, 0.3);
   blue->SetDiffuse(0.0, 0.0, 0.8);
   blue->SetSpecular(0.5, 0.5, 0.5);
 
   // create box visual
-  ignition::rendering::VisualPtr box = scene->CreateVisual("box");
+  gz::rendering::VisualPtr box = scene->CreateVisual("box");
   ASSERT_NE(nullptr, box);
   box->AddGeometry(scene->CreateBox());
   box->SetOrigin(0.0, 0.0, 0.0);
-  box->SetLocalPosition(ignition::math::Vector3d(2.0, 0, 0));
+  box->SetLocalPosition(gz::math::Vector3d(2.0, 0, 0));
   box->SetLocalRotation(0, 0, 0);
   box->SetMaterial(blue);
   root->AddChild(box);
 
   // do the test
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
-  ignition::sensors::WideAngleCameraSensor *sensor =
-      mgr.CreateSensor<ignition::sensors::WideAngleCameraSensor>(sensorPtr);
+  gz::sensors::WideAngleCameraSensor *sensor =
+      mgr.CreateSensor<gz::sensors::WideAngleCameraSensor>(sensorPtr);
   ASSERT_NE(sensor, nullptr);
   sensor->SetScene(scene);
 
@@ -161,10 +161,10 @@ void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
   std::string topicBase =
       "/test/integration/WideAngleCamera_imagesWithBuiltinSDF/";
   std::string topic = topicBase + "image";
-  WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
+  WaitForMessageTestHelper<gz::msgs::Image> helper(topic);
 
   std::string infoTopic = topicBase + "camera_info";
-  WaitForMessageTestHelper<ignition::msgs::CameraInfo> infoHelper(infoTopic);
+  WaitForMessageTestHelper<gz::msgs::CameraInfo> infoHelper(infoTopic);
 
   // Update once to create image
   mgr.RunOnce(std::chrono::steady_clock::duration::zero());
@@ -173,7 +173,7 @@ void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_TRUE(infoHelper.WaitForMessage()) << infoHelper;
 
   // subscribe to the wide angle camera topic
-  ignition::transport::Node node;
+  gz::transport::Node node;
   node.Subscribe(topic, &OnImage);
 
   // subscribe to the thermal camera topic
@@ -186,7 +186,7 @@ void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
       std::chrono::duration< double >(0.001));
   int counter = 0;
   int infoCounter = 0;
-  ignition::msgs::CameraInfo infoMsg;
+  gz::msgs::CameraInfo infoMsg;
   for (int sleep = 0;
        sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
   {
@@ -210,7 +210,7 @@ void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
   infoCounter = 0;
 
   // Compare image pixels
-  unsigned int channelCount = ignition::rendering::PixelUtil::ChannelCount(
+  unsigned int channelCount = gz::rendering::PixelUtil::ChannelCount(
       sensor->RenderingCamera()->ImageFormat());
   unsigned int step = sensor->ImageWidth() * channelCount;
 
@@ -225,7 +225,7 @@ void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
 
   // Clean up
   engine->DestroyScene(scene);
-  ignition::rendering::unloadEngine(engine->Name());
+  gz::rendering::unloadEngine(engine->Name());
 }
 
 //////////////////////////////////////////////////
@@ -235,12 +235,12 @@ TEST_P(WideAngleCameraSensorTest, ImagesWithBuiltinSDF)
 }
 
 INSTANTIATE_TEST_CASE_P(WideAngleCameraSensor, WideAngleCameraSensorTest,
-    RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
+    RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-  ignition::common::Console::SetVerbosity(4);
+  gz::common::Console::SetVerbosity(4);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

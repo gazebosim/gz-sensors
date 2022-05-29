@@ -19,7 +19,7 @@
 
 #include <string>
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////

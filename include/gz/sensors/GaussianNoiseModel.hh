@@ -24,12 +24,12 @@
 #include "gz/sensors/Export.hh"
 #include "gz/sensors/Noise.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     // Forward declarations
     class GaussianNoiseModelPrivate;
@@ -38,7 +38,7 @@ namespace ignition
     gz/sensors/GaussianNoiseModel.hh
     **/
     /// \brief Gaussian noise class
-    class IGNITION_SENSORS_VISIBLE GaussianNoiseModel : public Noise
+    class GZ_SENSORS_VISIBLE GaussianNoiseModel : public Noise
     {
       /// \brief Constructor.
       public: GaussianNoiseModel();

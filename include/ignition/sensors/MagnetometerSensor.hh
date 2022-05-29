@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/MagnetometerSensor.hh>
+#include <ignition/sensors/config.hh>

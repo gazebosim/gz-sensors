@@ -19,23 +19,23 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/Console.hh>
+#include <gz/common/Console.hh>
 
-#include <ignition/sensors/LogicalCameraSensor.hh>
-#include <ignition/sensors/SensorFactory.hh>
-#include <ignition/sensors/Export.hh>
+#include <gz/sensors/LogicalCameraSensor.hh>
+#include <gz/sensors/SensorFactory.hh>
+#include <gz/sensors/Export.hh>
 
-#include <ignition/math/Helpers.hh>
+#include <gz/math/Helpers.hh>
 #ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs.hh>
+#include <gz/msgs.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
-#include <ignition/transport/Node.hh>
+#include <gz/transport/Node.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
@@ -48,7 +48,7 @@
 
 /// \brief Helper function to create a logical camera sdf element
 sdf::ElementPtr LogicalCameraToSdf(const std::string &_name,
-    const ignition::math::Pose3d &_pose, const double _updateRate,
+    const gz::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const double _near,
     const double _far, const double _horzFov,
     const double _aspectRatio, const bool _alwaysOn,
@@ -92,7 +92,7 @@ class LogicalCameraSensorTest: public testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
@@ -111,16 +111,16 @@ TEST_F(LogicalCameraSensorTest, CreateLogicalCamera)
   const bool visualize = 1;
 
   // Create sensor SDF
-  ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
-      ignition::math::Quaterniond::Identity);
+  gz::math::Pose3d sensorPose(gz::math::Vector3d(0.25, 0.0, 0.5),
+      gz::math::Quaterniond::Identity);
   sdf::ElementPtr logicalCameraSdf = LogicalCameraToSdf(name, sensorPose,
         updateRate, topic, near, far, horzFov, aspectRatio, alwaysOn,
         visualize);
 
   // create the sensor using sensor factory
-  ignition::sensors::SensorFactory sf;
-  std::unique_ptr<ignition::sensors::LogicalCameraSensor> sensor =
-      sf.CreateSensor<ignition::sensors::LogicalCameraSensor>(logicalCameraSdf);
+  gz::sensors::SensorFactory sf;
+  std::unique_ptr<gz::sensors::LogicalCameraSensor> sensor =
+      sf.CreateSensor<gz::sensors::LogicalCameraSensor>(logicalCameraSdf);
   ASSERT_NE(nullptr, sensor);
 
   EXPECT_EQ(name, sensor->Name());
@@ -148,15 +148,15 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   const bool visualize = 1;
 
   // Create sensor SDF
-  ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
-      ignition::math::Quaterniond::Identity);
+  gz::math::Pose3d sensorPose(gz::math::Vector3d(0.25, 0.0, 0.5),
+      gz::math::Quaterniond::Identity);
   sdf::ElementPtr logicalCameraSdf = LogicalCameraToSdf(name, sensorPose,
         updateRate, topic, near, far, horzFov, aspectRatio, alwaysOn,
         visualize);
 
   // create the sensor using sensor factory
-  ignition::sensors::SensorFactory sf;
-  auto sensor = sf.CreateSensor<ignition::sensors::LogicalCameraSensor>(
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::LogicalCameraSensor>(
       logicalCameraSdf);
   ASSERT_NE(nullptr, sensor);
   EXPECT_FALSE(sensor->HasConnections());
@@ -168,10 +168,10 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   // Create testing boxes
   // 1. box in the center
   std::string boxName = "TestBox";
-  ignition::math::Pose3d boxPose(ignition::math::Vector3d(2, 0, 0.5),
-      ignition::math::Quaterniond::Identity);
+  gz::math::Pose3d boxPose(gz::math::Vector3d(2, 0, 0.5),
+      gz::math::Quaterniond::Identity);
 
-  std::map<std::string, ignition::math::Pose3d> modelPoses;
+  std::map<std::string, gz::math::Pose3d> modelPoses;
   modelPoses[boxName] = boxPose;
   sensor->SetModelPoses(std::move(modelPoses));
 
@@ -180,16 +180,16 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
 
   // verify box is in image
   img = sensor->Image();
-  EXPECT_EQ(sensorPose, ignition::msgs::Convert(img.pose()));
+  EXPECT_EQ(sensorPose, gz::msgs::Convert(img.pose()));
   EXPECT_EQ(1, img.model().size());
   EXPECT_EQ(boxName, img.model(0).name());
-  ignition::math::Pose3d boxPoseCameraFrame = boxPose - sensorPose;
-  EXPECT_EQ(boxPoseCameraFrame, ignition::msgs::Convert(img.model(0).pose()));
+  gz::math::Pose3d boxPoseCameraFrame = boxPose - sensorPose;
+  EXPECT_EQ(boxPoseCameraFrame, gz::msgs::Convert(img.model(0).pose()));
 
   // 2. test box outside of frustum
-  std::map<std::string, ignition::math::Pose3d> modelPoses2;
-  ignition::math::Pose3d boxPose2(ignition::math::Vector3d(8, 0, 0.5),
-      ignition::math::Quaterniond::Identity);
+  std::map<std::string, gz::math::Pose3d> modelPoses2;
+  gz::math::Pose3d boxPose2(gz::math::Vector3d(8, 0, 0.5),
+      gz::math::Quaterniond::Identity);
   modelPoses2[boxName] = boxPose2;
   sensor->SetModelPoses(std::move(modelPoses2));
 
@@ -198,18 +198,18 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
 
   // verify box is not in the image
   img = sensor->Image();
-  EXPECT_EQ(sensorPose, ignition::msgs::Convert(img.pose()));
+  EXPECT_EQ(sensorPose, gz::msgs::Convert(img.pose()));
   EXPECT_EQ(0, img.model().size());
 
   // 3. test with different sensor pose
   // camera now on y, orientated to face box
-  std::map<std::string, ignition::math::Pose3d> modelPoses3;
-  ignition::math::Pose3d sensorPose3(ignition::math::Vector3d(2, 2, 0.5),
-      ignition::math::Quaterniond(0, 0, -1.57));
+  std::map<std::string, gz::math::Pose3d> modelPoses3;
+  gz::math::Pose3d sensorPose3(gz::math::Vector3d(2, 2, 0.5),
+      gz::math::Quaterniond(0, 0, -1.57));
   sensor->SetPose(sensorPose3);
 
-  ignition::math::Pose3d boxPose3(ignition::math::Vector3d(2, 0, 0.5),
-      ignition::math::Quaterniond(0, 0, 1.57));
+  gz::math::Pose3d boxPose3(gz::math::Vector3d(2, 0, 0.5),
+      gz::math::Quaterniond(0, 0, 1.57));
   modelPoses3[boxName] = boxPose3;
   sensor->SetModelPoses(std::move(modelPoses3));
 
@@ -218,15 +218,15 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
 
   // verify box is in image
   img = sensor->Image();
-  EXPECT_EQ(sensorPose3, ignition::msgs::Convert(img.pose()));
+  EXPECT_EQ(sensorPose3, gz::msgs::Convert(img.pose()));
   EXPECT_EQ(1, img.model().size());
   EXPECT_EQ(boxName, img.model(0).name());
-  ignition::math::Pose3d boxPose3CameraFrame = boxPose3 - sensorPose3;
-  EXPECT_EQ(boxPose3CameraFrame, ignition::msgs::Convert(img.model(0).pose()));
+  gz::math::Pose3d boxPose3CameraFrame = boxPose3 - sensorPose3;
+  EXPECT_EQ(boxPose3CameraFrame, gz::msgs::Convert(img.model(0).pose()));
 
   // 4. rotate camera away and image should be empty
-  ignition::math::Pose3d sensorPose4(ignition::math::Vector3d(2, 2, 0.5),
-      ignition::math::Quaterniond(0, 0, 0));
+  gz::math::Pose3d sensorPose4(gz::math::Vector3d(2, 2, 0.5),
+      gz::math::Quaterniond(0, 0, 0));
   sensor->SetPose(sensorPose4);
 
   // update
@@ -234,11 +234,11 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
 
   // verify box is no longer in the image
   img = sensor->Image();
-  EXPECT_EQ(sensorPose4, ignition::msgs::Convert(img.pose()));
+  EXPECT_EQ(sensorPose4, gz::msgs::Convert(img.pose()));
   EXPECT_EQ(0, img.model().size());
 
   // verify connection count and msg published to topic
-  WaitForMessageTestHelper<ignition::msgs::LogicalCameraImage> helper(topic);
+  WaitForMessageTestHelper<gz::msgs::LogicalCameraImage> helper(topic);
   EXPECT_TRUE(sensor->HasConnections());
   sensor->Update(std::chrono::steady_clock::duration::zero());
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
@@ -255,10 +255,10 @@ TEST_F(LogicalCameraSensorTest, Topic)
   const double aspectRatio = 1.778;
   const bool alwaysOn = 1;
   const bool visualize = 1;
-  auto sensorPose = ignition::math::Pose3d();
+  auto sensorPose = gz::math::Pose3d();
 
   // Factory
-  ignition::sensors::SensorFactory factory;
+  gz::sensors::SensorFactory factory;
 
   // Default topic
   {
@@ -268,7 +268,7 @@ TEST_F(LogicalCameraSensorTest, Topic)
         visualize);
 
     auto logicalCamera = factory.CreateSensor<
-        ignition::sensors::LogicalCameraSensor>(logicalCameraSdf);
+        gz::sensors::LogicalCameraSensor>(logicalCameraSdf);
     ASSERT_NE(nullptr, logicalCamera);
 
     EXPECT_EQ("/logical_camera", logicalCamera->Topic());
@@ -282,7 +282,7 @@ TEST_F(LogicalCameraSensorTest, Topic)
         visualize);
 
     auto logicalCamera = factory.CreateSensor<
-        ignition::sensors::LogicalCameraSensor>(logicalCameraSdf);
+        gz::sensors::LogicalCameraSensor>(logicalCameraSdf);
     ASSERT_NE(nullptr, logicalCamera);
 
     EXPECT_EQ("/topic_with_spaces/characters", logicalCamera->Topic());
@@ -296,7 +296,7 @@ TEST_F(LogicalCameraSensorTest, Topic)
         visualize);
 
     auto sensor = factory.CreateSensor<
-        ignition::sensors::LogicalCameraSensor>(logicalCameraSdf);
+        gz::sensors::LogicalCameraSensor>(logicalCameraSdf);
     ASSERT_EQ(nullptr, sensor);
   }
 }

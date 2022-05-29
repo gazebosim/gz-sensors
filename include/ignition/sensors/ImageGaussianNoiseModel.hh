@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/ImageGaussianNoiseModel.hh>
+#include <ignition/sensors/config.hh>

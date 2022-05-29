@@ -52,12 +52,12 @@
 #include "gz/sensors/Export.hh"
 #include "gz/sensors/Sensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     // forward declarations
     class WideAngleCameraSensorPrivate;
 
@@ -68,7 +68,7 @@ namespace ignition
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-    class IGNITION_SENSORS_WIDE_ANGLE_CAMERA_VISIBLE WideAngleCameraSensor
+    class GZ_SENSORS_WIDE_ANGLE_CAMERA_VISIBLE WideAngleCameraSensor
       : public CameraSensor
     {
       /// \brief constructor
@@ -126,7 +126,7 @@ namespace ignition
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
       public: virtual void SetScene(
-                  ignition::rendering::ScenePtr _scene) override;
+                  gz::rendering::ScenePtr _scene) override;
 
       /// \brief Get image width.
       /// \return width of the image
@@ -146,7 +146,7 @@ namespace ignition
       /// \brief Callback that is triggered when the scene changes on
       /// the Manager.
       /// \param[in] _scene Pointer to the new scene.
-      private: void OnSceneChange(ignition::rendering::ScenePtr /*_scene*/)
+      private: void OnSceneChange(gz::rendering::ScenePtr /*_scene*/)
               { }
 
       IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING

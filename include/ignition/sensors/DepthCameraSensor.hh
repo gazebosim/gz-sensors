@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/DepthCameraSensor.hh>
+#include <ignition/sensors/config.hh>

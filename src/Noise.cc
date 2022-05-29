@@ -23,15 +23,15 @@
 
 #include <functional>
 
-#include <ignition/common/Console.hh>
+#include <gz/common/Console.hh>
 
-#include "ignition/sensors/GaussianNoiseModel.hh"
-#include "ignition/sensors/Noise.hh"
+#include "gz/sensors/GaussianNoiseModel.hh"
+#include "gz/sensors/Noise.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
-class ignition::sensors::NoisePrivate
+class gz::sensors::NoisePrivate
 {
   /// \brief Which type of noise we're applying
   public: NoiseType type = NoiseType::NONE;
@@ -60,7 +60,7 @@ NoisePtr NoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
         _sensorType == "multicamera" || _sensorType == "wide_angle_camera" ||
         _sensorType == "thermal_camera" || _sensorType == "rgbd_camera")
     {
-      ignerr << "Image noise requested. "
+      gzerr << "Image noise requested. "
              << "Please use ImageNoiseFactory::NoiseModel instead"
              << std::endl;
       return noise;
@@ -82,7 +82,7 @@ NoisePtr NoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
   }
   else
   {
-    ignerr << "Unrecognized noise type" << std::endl;
+    gzerr << "Unrecognized noise type" << std::endl;
     return NoisePtr();
   }
   noise->Load(_sdf);
@@ -133,7 +133,7 @@ double Noise::Apply(double _in, double _dt)
       return this->dataPtr->customNoiseCallback(_in, _dt);
     else
     {
-      ignerr << "Custom noise callback function not set!"
+      gzerr << "Custom noise callback function not set!"
           << " Please call SetCustomNoiseCallback within a sensor plugin."
           << std::endl;
       return _in;

@@ -20,24 +20,24 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/wrench.pb.h>
+#include <gz/msgs/wrench.pb.h>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include <ignition/common/Profiler.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/transport/Node.hh>
 
-#include "ignition/sensors/ForceTorqueSensor.hh"
-#include "ignition/sensors/Noise.hh"
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/SensorTypes.hh"
+#include "gz/sensors/ForceTorqueSensor.hh"
+#include "gz/sensors/Noise.hh"
+#include "gz/sensors/SensorFactory.hh"
+#include "gz/sensors/SensorTypes.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for ForceTorqueSensor
-class ignition::sensors::ForceTorqueSensorPrivate
+class gz::sensors::ForceTorqueSensorPrivate
 {
   /// \brief node to create publisher
   public: transport::Node node;
@@ -49,10 +49,10 @@ class ignition::sensors::ForceTorqueSensorPrivate
   public: bool initialized = false;
 
   /// \brief Noise free force as set by SetForce
-  public: ignition::math::Vector3d force{0, 0, 0};
+  public: gz::math::Vector3d force{0, 0, 0};
 
   /// \brief Noise free torque as set by SetTorque
-  public: ignition::math::Vector3d torque{0, 0, 0};
+  public: gz::math::Vector3d torque{0, 0, 0};
 
   /// \brief Frame in which we return the measured force torque info.
   public: sdf::ForceTorqueFrame measureFrame;
@@ -65,16 +65,16 @@ class ignition::sensors::ForceTorqueSensorPrivate
   ///  \note We store the rotation as a 3x3 matrix because matrix-vector
   ///  product is than quaternion-vector when there are a lot of vectors and the
   ///  rotation is not changing frequently.
-  public: ignition::math::Matrix3d rotationParentInSensor{
-              ignition::math::Matrix3d::Identity};
+  public: gz::math::Matrix3d rotationParentInSensor{
+              gz::math::Matrix3d::Identity};
 
   /// \brief Rotation matrix that transforms a vector expressed in the child
   /// frame to a vector expressed in the sensor frame.
   ///  \note We store the rotation as a 3x3 matrix because matrix-vector
   ///  product is than quaternion-vector when there are a lot of vectors and the
   ///  rotation is not changing frequently.
-  public: ignition::math::Matrix3d rotationChildInSensor{
-              ignition::math::Matrix3d::Identity};
+  public: gz::math::Matrix3d rotationChildInSensor{
+              gz::math::Matrix3d::Identity};
 
   /// \brief Flag for if time has been initialized
   public: bool timeInitialized = false;
@@ -111,13 +111,13 @@ bool ForceTorqueSensor::Load(const sdf::Sensor &_sdf)
   // Check if this is the right type
   if (_sdf.Type() != sdf::SensorType::FORCE_TORQUE)
   {
-    ignerr << "Attempting to a load a Force Torque sensor, but received "
+    gzerr << "Attempting to a load a Force Torque sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
   }
 
   if (_sdf.ForceTorqueSensor() == nullptr)
   {
-    ignerr << "Attempting to a load a Force Torque sensor, but received "
+    gzerr << "Attempting to a load a Force Torque sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -130,11 +130,11 @@ bool ForceTorqueSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/forcetorque");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::Wrench>(this->Topic());
+      this->dataPtr->node.Advertise<gz::msgs::Wrench>(this->Topic());
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
+    gzerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
     return false;
   }
 
@@ -173,7 +173,7 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
   IGN_PROFILE("ForceTorqueSensor::Update");
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
@@ -196,8 +196,8 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
     dt = 0.0;
   }
   // Get the force and torque in the appropriate frame.
-  ignition::math::Vector3d measuredForce;
-  ignition::math::Vector3d measuredTorque;
+  gz::math::Vector3d measuredForce;
+  gz::math::Vector3d measuredTorque;
 
   if (this->dataPtr->measureFrame == sdf::ForceTorqueFrame::PARENT)
   {
@@ -220,7 +220,7 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
   }
   else
   {
-    ignerr << "measureFrame must be PARENT_LINK, CHILD_LINK or SENSOR\n";
+    gzerr << "measureFrame must be PARENT_LINK, CHILD_LINK or SENSOR\n";
   }
 
   if (this->dataPtr->measureDirection ==

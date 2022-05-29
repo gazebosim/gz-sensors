@@ -20,16 +20,16 @@
   #include <Winsock2.h>
 #endif
 
-#include "ignition/sensors/BrownDistortionModel.hh"
+#include "gz/sensors/BrownDistortionModel.hh"
 
-#include <ignition/common/Console.hh>
-#include <ignition/math/Helpers.hh>
-#include <ignition/math/Rand.hh>
+#include <gz/common/Console.hh>
+#include <gz/math/Helpers.hh>
+#include <gz/math/Rand.hh>
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
-class ignition::sensors::BrownDistortionModel::Implementation
+class gz::sensors::BrownDistortionModel::Implementation
 {
   /// \brief The radial distortion coefficient k1.
   public: double k1 = 0.0;

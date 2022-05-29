@@ -16,15 +16,15 @@
 */
 
 #include <gtest/gtest.h>
-#include <ignition/common/Console.hh>
-#include <ignition/common/Filesystem.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Filesystem.hh>
 #include <sdf/Root.hh>
 #include <sdf/Link.hh>
 #include <sdf/Model.hh>
 #include <sdf/World.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
-#include "ignition/sensors/Util.hh"
+#include "gz/sensors/Util.hh"
 
 /// \brief Test Util functions
 class Util_TEST : public ::testing::Test
@@ -32,17 +32,17 @@ class Util_TEST : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////
 TEST_F(Util_TEST, customType)
 {
-  auto sdfFile = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  auto sdfFile = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "custom_sensors.sdf");
 
   sdf::Root root;

@@ -19,13 +19,13 @@
 
 #include <numeric>
 
-#include <ignition/common/Console.hh>
-#include <ignition/math/Rand.hh>
+#include <gz/common/Console.hh>
+#include <gz/math/Rand.hh>
 
-#include "ignition/sensors/Noise.hh"
-#include "ignition/sensors/GaussianNoiseModel.hh"
+#include "gz/sensors/Noise.hh"
+#include "gz/sensors/GaussianNoiseModel.hh"
 
-using namespace ignition;
+using namespace gz;
 
 const unsigned int g_applyCount = 100;
 
@@ -61,7 +61,7 @@ class NoiseTest : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
@@ -132,7 +132,7 @@ void NoNoise(sensors::NoisePtr _noise, unsigned int _count)
   // Expect no change in input value
   for (unsigned int i = 0; i < _count; ++i)
   {
-    double x = ignition::math::Rand::DblUniform(-1e6, 1e6);
+    double x = gz::math::Rand::DblUniform(-1e6, 1e6);
     EXPECT_NEAR(x, _noise->Apply(x), 1e-6);
   }
 }

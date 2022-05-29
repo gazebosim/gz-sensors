@@ -35,12 +35,12 @@
 #include "gz/sensors/rendering/Export.hh"
 #include "gz/sensors/Sensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief forward declarations
     class RenderingSensorPrivate;
@@ -49,7 +49,7 @@ namespace ignition
     ///
     ///   This class is a base for all rendering sensor classes. It provides
     /// interface to ignition rendering objects
-    class IGNITION_SENSORS_RENDERING_VISIBLE RenderingSensor
+    class GZ_SENSORS_RENDERING_VISIBLE RenderingSensor
         : public Sensor
     {
       /// \brief constructor

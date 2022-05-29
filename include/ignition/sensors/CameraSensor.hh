@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/CameraSensor.hh>
+#include <ignition/sensors/config.hh>

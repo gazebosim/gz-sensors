@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/Manager.hh>
+#include <ignition/sensors/config.hh>

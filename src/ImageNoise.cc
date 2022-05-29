@@ -21,12 +21,12 @@
   #include <Winsock2.h>
 #endif
 
-#include "ignition/common/Console.hh"
+#include "gz/common/Console.hh"
 
-#include "ignition/sensors/ImageNoise.hh"
-#include "ignition/sensors/ImageGaussianNoiseModel.hh"
+#include "gz/sensors/ImageNoise.hh"
+#include "gz/sensors/ImageGaussianNoiseModel.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////
@@ -65,7 +65,7 @@ NoisePtr ImageNoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
   }
   else
   {
-    ignerr << "Unrecognized noise type" << std::endl;
+    gzerr << "Unrecognized noise type" << std::endl;
     return NoisePtr();
   }
   noise->Load(_sdf);
