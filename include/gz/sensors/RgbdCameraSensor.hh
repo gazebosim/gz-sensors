@@ -28,12 +28,12 @@
 #include "gz/sensors/rgbd_camera/Export.hh"
 #include "gz/sensors/Export.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     // forward declarations
     class RgbdCameraSensorPrivate;
 
@@ -48,7 +48,7 @@ namespace ignition
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-    class IGNITION_SENSORS_RGBD_CAMERA_VISIBLE RgbdCameraSensor
+    class GZ_SENSORS_RGBD_CAMERA_VISIBLE RgbdCameraSensor
       : public CameraSensor
     {
       /// \brief constructor
@@ -80,7 +80,7 @@ namespace ignition
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
       public: virtual void SetScene(
-                  ignition::rendering::ScenePtr _scene) override;
+                  gz::rendering::ScenePtr _scene) override;
 
       /// \brief Get image width.
       /// \return width of the image

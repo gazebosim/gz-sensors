@@ -27,12 +27,12 @@
 
 #include "gz/sensors/Sensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief forward declarations
     class NavSatPrivate;
@@ -40,13 +40,13 @@ namespace ignition
     /// \brief NavSat Sensor Class
     ///
     /// A sensor that reports position and velocity readings over
-    /// Ignition Transport using spherical coordinates (latitude / longitude).
+    /// Gazebo Transport using spherical coordinates (latitude / longitude).
     ///
-    /// By default, it publishes `ignition::msgs::NavSat` messages on the
+    /// By default, it publishes `gz::msgs::NavSat` messages on the
     /// `/.../navsat` topic.
     ///
     /// This sensor assumes the world is using the East-North-Up (ENU) frame.
-    class IGNITION_SENSORS_NAVSAT_VISIBLE NavSatSensor : public Sensor
+    class GZ_SENSORS_NAVSAT_VISIBLE NavSatSensor : public Sensor
     {
       /// \brief Constructor
       public: NavSatSensor();

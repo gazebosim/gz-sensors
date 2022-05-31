@@ -19,16 +19,16 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/math/Helpers.hh>
-#include <ignition/sensors/AirPressureSensor.hh>
-#include <ignition/sensors/SensorFactory.hh>
+#include <gz/math/Helpers.hh>
+#include <gz/sensors/AirPressureSensor.hh>
+#include <gz/sensors/SensorFactory.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 /// \brief Helper function to create an air pressure sdf element
 sdf::ElementPtr AirPressureToSdf(const std::string &_name,
-    const ignition::math::Pose3d &_pose, const double _updateRate,
+    const gz::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
     const bool _visualize)
 {
@@ -60,7 +60,7 @@ sdf::ElementPtr AirPressureToSdf(const std::string &_name,
 
 /// \brief Helper function to create an air pressure sdf element with noise
 sdf::ElementPtr AirPressureToSdfWithNoise(const std::string &_name,
-    const ignition::math::Pose3d &_pose, const double _updateRate,
+    const gz::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
     const bool _visualize, double _mean, double _stddev, double _bias)
 {
@@ -105,7 +105,7 @@ class AirPressureSensorTest: public testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
@@ -121,8 +121,8 @@ TEST_F(AirPressureSensorTest, CreateAirPressure)
   const bool visualize = 1;
 
   // Create sensor SDF
-  ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
-      ignition::math::Quaterniond::Identity);
+  gz::math::Pose3d sensorPose(gz::math::Vector3d(0.25, 0.0, 0.5),
+      gz::math::Quaterniond::Identity);
   sdf::ElementPtr airPressureSdf = AirPressureToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
@@ -130,17 +130,17 @@ TEST_F(AirPressureSensorTest, CreateAirPressure)
       sensorPose, updateRate, topicNoise, alwaysOn, visualize, 1.0, 0.2, 10.0);
 
   // create the sensor using sensor factory
-  ignition::sensors::SensorFactory sf;
-  std::unique_ptr<ignition::sensors::AirPressureSensor> sensor =
-      sf.CreateSensor<ignition::sensors::AirPressureSensor>(airPressureSdf);
+  gz::sensors::SensorFactory sf;
+  std::unique_ptr<gz::sensors::AirPressureSensor> sensor =
+      sf.CreateSensor<gz::sensors::AirPressureSensor>(airPressureSdf);
   ASSERT_NE(nullptr, sensor);
 
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(topic, sensor->Topic());
   EXPECT_DOUBLE_EQ(updateRate, sensor->UpdateRate());
 
-  std::unique_ptr<ignition::sensors::AirPressureSensor> sensorNoise =
-      sf.CreateSensor<ignition::sensors::AirPressureSensor>(
+  std::unique_ptr<gz::sensors::AirPressureSensor> sensorNoise =
+      sf.CreateSensor<gz::sensors::AirPressureSensor>(
           airPressureSdfNoise);
   ASSERT_NE(nullptr, sensorNoise);
 
@@ -161,8 +161,8 @@ TEST_F(AirPressureSensorTest, SensorReadings)
   const bool visualize = 1;
 
   // Create sensor SDF
-  ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
-      ignition::math::Quaterniond::Identity);
+  gz::math::Pose3d sensorPose(gz::math::Vector3d(0.25, 0.0, 0.5),
+      gz::math::Quaterniond::Identity);
   sdf::ElementPtr airPressureSdf = AirPressureToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
@@ -170,13 +170,13 @@ TEST_F(AirPressureSensorTest, SensorReadings)
       sensorPose, updateRate, topicNoise, alwaysOn, visualize, 1.0, 0.2, 10.0);
 
   // create the sensor using sensor factory
-  ignition::sensors::SensorFactory sf;
-  auto sensor = sf.CreateSensor<ignition::sensors::AirPressureSensor>(
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::AirPressureSensor>(
       airPressureSdf);
   ASSERT_NE(nullptr, sensor);
   EXPECT_FALSE(sensor->HasConnections());
 
-  auto sensorNoise = sf.CreateSensor<ignition::sensors::AirPressureSensor>(
+  auto sensorNoise = sf.CreateSensor<gz::sensors::AirPressureSensor>(
       airPressureSdfNoise);
   ASSERT_NE(nullptr, sensorNoise);
 
@@ -194,10 +194,10 @@ TEST_F(AirPressureSensorTest, SensorReadings)
   EXPECT_DOUBLE_EQ(vertRef, sensorNoise->ReferenceAltitude());
 
   sensor->SetPose(
-      ignition::math::Pose3d(0, 0, 1.5, 0, 0, 0) * sensorNoise->Pose());
+      gz::math::Pose3d(0, 0, 1.5, 0, 0, 0) * sensorNoise->Pose());
 
   // verify msg received on the topic
-  WaitForMessageTestHelper<ignition::msgs::FluidPressure> msgHelper(topic);
+  WaitForMessageTestHelper<gz::msgs::FluidPressure> msgHelper(topic);
   EXPECT_TRUE(sensor->HasConnections());
   sensor->Update(std::chrono::steady_clock::duration(std::chrono::seconds(1)));
   EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
@@ -208,7 +208,7 @@ TEST_F(AirPressureSensorTest, SensorReadings)
   EXPECT_DOUBLE_EQ(0.0, msg.variance());
 
   // verify msg with noise received on the topic
-  WaitForMessageTestHelper<ignition::msgs::FluidPressure>
+  WaitForMessageTestHelper<gz::msgs::FluidPressure>
     msgHelperNoise(topicNoise);
   sensorNoise->Update(std::chrono::steady_clock::duration(
       std::chrono::seconds(1)), false);
@@ -216,7 +216,7 @@ TEST_F(AirPressureSensorTest, SensorReadings)
   auto msgNoise = msgHelperNoise.Message();
   EXPECT_EQ(1, msg.header().stamp().sec());
   EXPECT_EQ(0, msg.header().stamp().nsec());
-  EXPECT_FALSE(ignition::math::equal(101288.9657925308, msgNoise.pressure()));
+  EXPECT_FALSE(gz::math::equal(101288.9657925308, msgNoise.pressure()));
   EXPECT_DOUBLE_EQ(sqrt(0.2), msgNoise.variance());
 }
 
@@ -227,10 +227,10 @@ TEST_F(AirPressureSensorTest, Topic)
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
-  auto sensorPose = ignition::math::Pose3d();
+  auto sensorPose = gz::math::Pose3d();
 
   // Factory
-  ignition::sensors::SensorFactory factory;
+  gz::sensors::SensorFactory factory;
 
   // Default topic
   {
@@ -239,7 +239,7 @@ TEST_F(AirPressureSensorTest, Topic)
           updateRate, topic, alwaysOn, visualize);
 
     auto airPressure = factory.CreateSensor<
-        ignition::sensors::AirPressureSensor>(airPressureSdf);
+        gz::sensors::AirPressureSensor>(airPressureSdf);
     ASSERT_NE(nullptr, airPressure);
 
     EXPECT_EQ("/air_pressure", airPressure->Topic());
@@ -252,7 +252,7 @@ TEST_F(AirPressureSensorTest, Topic)
           updateRate, topic, alwaysOn, visualize);
 
     auto airPressure = factory.CreateSensor<
-        ignition::sensors::AirPressureSensor>(airPressureSdf);
+        gz::sensors::AirPressureSensor>(airPressureSdf);
     ASSERT_NE(nullptr, airPressure);
 
     EXPECT_EQ("/topic_with_spaces/characters", airPressure->Topic());
@@ -265,7 +265,7 @@ TEST_F(AirPressureSensorTest, Topic)
           updateRate, topic, alwaysOn, visualize);
 
     auto sensor = factory.CreateSensor<
-        ignition::sensors::AirPressureSensor>(airPressureSdf);
+        gz::sensors::AirPressureSensor>(airPressureSdf);
     ASSERT_EQ(nullptr, sensor);
   }
 }

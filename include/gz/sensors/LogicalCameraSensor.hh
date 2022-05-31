@@ -42,12 +42,12 @@
 #include "gz/sensors/logical_camera/Export.hh"
 #include "gz/sensors/Sensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief forward declarations
     class LogicalCameraSensorPrivate;
@@ -57,7 +57,7 @@ namespace ignition
     /// A logical camera reports locations of objects. This camera finds models
     /// within the sensor's frustum and publishes information about the models
     /// on the sensor's topic.
-    class IGNITION_SENSORS_LOGICAL_CAMERA_VISIBLE LogicalCameraSensor
+    class GZ_SENSORS_LOGICAL_CAMERA_VISIBLE LogicalCameraSensor
       : public Sensor
     {
       /// \brief constructor
@@ -101,7 +101,7 @@ namespace ignition
       /// angle between the frustum's vertex and the edges of the near or far
       /// plane. This value represents the horizontal angle.
       /// \return The field of view.
-      public: ignition::math::Angle HorizontalFOV() const;
+      public: gz::math::Angle HorizontalFOV() const;
 
       /// \brief Get the aspect ratio, which is the width divided by height
       /// of the near or far planes.

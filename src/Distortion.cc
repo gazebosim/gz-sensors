@@ -23,15 +23,15 @@
 
 #include <functional>
 
-#include <ignition/common/Console.hh>
+#include <gz/common/Console.hh>
 
-#include "ignition/sensors/BrownDistortionModel.hh"
-#include "ignition/sensors/Distortion.hh"
+#include "gz/sensors/BrownDistortionModel.hh"
+#include "gz/sensors/Distortion.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
-class ignition::sensors::Distortion::Implementation
+class gz::sensors::Distortion::Implementation
 {
   /// \brief Which type of distortion we're applying
   public: DistortionType type = DistortionType::NONE;
@@ -54,7 +54,7 @@ DistortionPtr DistortionFactory::NewDistortionModel(const sdf::Camera &_sdf,
   {
     if (_sensorType == "camera")
     {
-      ignerr << "Image distortion requested. "
+      gzerr << "Image distortion requested. "
              << "Please use ImageDistortionFactory::DistortionModel instead"
              << std::endl;
       return distortion;
@@ -76,7 +76,7 @@ DistortionPtr DistortionFactory::NewDistortionModel(const sdf::Camera &_sdf,
   }
   else
   {
-    ignerr << "Unrecognized distortion type" << std::endl;
+    gzerr << "Unrecognized distortion type" << std::endl;
     return DistortionPtr();
   }
   distortion->Load(_sdf);

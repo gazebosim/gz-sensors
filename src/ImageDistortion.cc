@@ -21,12 +21,12 @@
   #include <Winsock2.h>
 #endif
 
-#include "ignition/common/Console.hh"
+#include "gz/common/Console.hh"
 
-#include "ignition/sensors/ImageDistortion.hh"
-#include "ignition/sensors/ImageBrownDistortionModel.hh"
+#include "gz/sensors/ImageDistortion.hh"
+#include "gz/sensors/ImageBrownDistortionModel.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////
@@ -62,7 +62,7 @@ DistortionPtr ImageDistortionFactory::NewDistortionModel(
   }
   else
   {
-    ignerr << "Unrecognized distortion type" << std::endl;
+    gzerr << "Unrecognized distortion type" << std::endl;
     return DistortionPtr();
   }
   distortion->Load(_sdf);

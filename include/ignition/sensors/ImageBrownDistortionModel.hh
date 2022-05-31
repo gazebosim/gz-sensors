@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/ImageBrownDistortionModel.hh>
+#include <ignition/sensors/config.hh>

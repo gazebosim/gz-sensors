@@ -29,12 +29,12 @@
 
 #include "gz/sensors/Sensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief forward declarations
     class MagnetometerSensorPrivate;
@@ -42,7 +42,7 @@ namespace ignition
     /// \brief Magnetometer Sensor Class
     ///
     /// A magnetometer reports the magnetic field vector
-    class IGNITION_SENSORS_MAGNETOMETER_VISIBLE MagnetometerSensor
+    class GZ_SENSORS_MAGNETOMETER_VISIBLE MagnetometerSensor
         : public Sensor
     {
       /// \brief constructor

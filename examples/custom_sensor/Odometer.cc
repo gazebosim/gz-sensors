@@ -30,23 +30,23 @@ using namespace custom;
 //////////////////////////////////////////////////
 bool Odometer::Load(const sdf::Sensor &_sdf)
 {
-  auto type = ignition::sensors::customType(_sdf);
+  auto type = gz::sensors::customType(_sdf);
   if ("odometer" != type)
   {
-    ignerr << "Trying to load [odometer] sensor, but got type ["
+    gzerr << "Trying to load [odometer] sensor, but got type ["
            << type << "] instead." << std::endl;
     return false;
   }
 
   // Load common sensor params
-  ignition::sensors::Sensor::Load(_sdf);
+  gz::sensors::Sensor::Load(_sdf);
 
   // Advertise topic where data will be published
-  this->pub = this->node.Advertise<ignition::msgs::Double>(this->Topic());
+  this->pub = this->node.Advertise<gz::msgs::Double>(this->Topic());
 
   if (!_sdf.Element()->HasElement("ignition:odometer"))
   {
-    igndbg << "No custom configuration for [" << this->Topic() << "]"
+    gzdbg << "No custom configuration for [" << this->Topic() << "]"
            << std::endl;
     return true;
   }
@@ -56,16 +56,16 @@ bool Odometer::Load(const sdf::Sensor &_sdf)
 
   if (!customElem->HasElement("noise"))
   {
-    igndbg << "No noise for [" << this->Topic() << "]" << std::endl;
+    gzdbg << "No noise for [" << this->Topic() << "]" << std::endl;
     return true;
   }
 
   sdf::Noise noiseSdf;
   noiseSdf.Load(customElem->GetElement("noise"));
-  this->noise = ignition::sensors::NoiseFactory::NewNoiseModel(noiseSdf);
+  this->noise = gz::sensors::NoiseFactory::NewNoiseModel(noiseSdf);
   if (nullptr == this->noise)
   {
-    ignerr << "Failed to load noise." << std::endl;
+    gzerr << "Failed to load noise." << std::endl;
     return false;
   }
 
@@ -75,8 +75,8 @@ bool Odometer::Load(const sdf::Sensor &_sdf)
 //////////////////////////////////////////////////
 bool Odometer::Update(const std::chrono::steady_clock::duration &_now)
 {
-  ignition::msgs::Double msg;
-  *msg.mutable_header()->mutable_stamp() = ignition::msgs::Convert(_now);
+  gz::msgs::Double msg;
+  *msg.mutable_header()->mutable_stamp() = gz::msgs::Convert(_now);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->Name());
@@ -92,7 +92,7 @@ bool Odometer::Update(const std::chrono::steady_clock::duration &_now)
 }
 
 //////////////////////////////////////////////////
-void Odometer::NewPosition(const ignition::math::Vector3d &_pos)
+void Odometer::NewPosition(const gz::math::Vector3d &_pos)
 {
   if (!isnan(this->prevPos.X()))
   {
@@ -102,7 +102,7 @@ void Odometer::NewPosition(const ignition::math::Vector3d &_pos)
 }
 
 //////////////////////////////////////////////////
-const ignition::math::Vector3d &Odometer::Position() const
+const gz::math::Vector3d &Odometer::Position() const
 {
   return this->prevPos;
 }

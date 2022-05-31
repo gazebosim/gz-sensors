@@ -39,12 +39,12 @@
 #include "gz/sensors/RenderingEvents.hh"
 #include "gz/sensors/Lidar.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief forward declarations
     class GpuLidarSensorPrivate;
@@ -58,7 +58,7 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-    class IGNITION_SENSORS_GPU_LIDAR_VISIBLE GpuLidarSensor : public Lidar
+    class GZ_SENSORS_GPU_LIDAR_VISIBLE GpuLidarSensor : public Lidar
     {
       /// \brief constructor
       public: GpuLidarSensor();
@@ -95,15 +95,15 @@ namespace ignition
 
       /// \brief Makes possible to change sensor scene
       /// \param[in] _scene used with the sensor
-      public: void SetScene(ignition::rendering::ScenePtr _scene) override;
+      public: void SetScene(gz::rendering::ScenePtr _scene) override;
 
       /// \brief Remove sensor from scene
       /// \param[in] _scene used with the sensor
-      public: void RemoveGpuRays(ignition::rendering::ScenePtr _scene);
+      public: void RemoveGpuRays(gz::rendering::ScenePtr _scene);
 
       /// \brief Get Gpu Rays object used in the sensor
-      /// \return Pointer to ignition::rendering::GpuRays
-      public: ignition::rendering::GpuRaysPtr GpuRays() const;
+      /// \return Pointer to gz::rendering::GpuRays
+      public: gz::rendering::GpuRaysPtr GpuRays() const;
 
       /// \brief Return the ratio of horizontal ray count to vertical ray
       /// count.
@@ -115,11 +115,11 @@ namespace ignition
 
       /// \brief Get the horizontal field of view of the laser sensor.
       /// \return The horizontal field of view of the laser sensor.
-      public: ignition::math::Angle HFOV() const;
+      public: gz::math::Angle HFOV() const;
 
       /// \brief Get the vertical field-of-view.
       /// \return Vertical field of view.
-      public: ignition::math::Angle VFOV() const;
+      public: gz::math::Angle VFOV() const;
 
       /// \brief Check if there are any subscribers
       /// \return True if there are subscribers, false otherwise
@@ -127,14 +127,14 @@ namespace ignition
       public: bool HasConnections() const;
 
       /// \brief Connect function pointer to internal GpuRays callback
-      /// \return ignition::common::Connection pointer
-      public: virtual ignition::common::ConnectionPtr ConnectNewLidarFrame(
+      /// \return gz::common::Connection pointer
+      public: virtual gz::common::ConnectionPtr ConnectNewLidarFrame(
           std::function<void(const float *_scan, unsigned int _width,
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &/*_format*/)> _subscriber) override;
 
       /// \brief Connect function pointer to internal GpuRays callback
-      /// \return ignition::common::Connection pointer
+      /// \return gz::common::Connection pointer
       private: void OnNewLidarFrame(const float *_scan, unsigned int _width,
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &_format);

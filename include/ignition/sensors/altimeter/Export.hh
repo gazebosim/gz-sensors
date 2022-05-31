@@ -15,3 +15,4 @@
  *
  */
 #include <gz/sensors/altimeter/Export.hh>
+#include <ignition/sensors/config.hh>

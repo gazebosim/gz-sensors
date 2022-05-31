@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/ThermalCameraSensor.hh>
+#include <ignition/sensors/config.hh>

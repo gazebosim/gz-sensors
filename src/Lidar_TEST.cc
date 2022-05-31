@@ -17,21 +17,21 @@
 #include <gtest/gtest.h>
 #include <sdf/sdf.hh>
 
-#include <ignition/math/Angle.hh>
-#include <ignition/math/Helpers.hh>
+#include <gz/math/Angle.hh>
+#include <gz/math/Helpers.hh>
 #ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs.hh>
+#include <gz/msgs.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/Lidar.hh>
+#include <gz/sensors/Export.hh>
+#include <gz/sensors/Manager.hh>
+#include <gz/sensors/Lidar.hh>
 
 sdf::ElementPtr LidarToSDF(const std::string &name, double update_rate,
     const std::string &topic, double horz_samples, double horz_resolution,
@@ -103,7 +103,7 @@ class Lidar_TEST : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
@@ -112,7 +112,7 @@ class Lidar_TEST : public ::testing::Test
 TEST(Lidar_TEST, CreateLaser)
 {
   // Create a sensor manager
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
   // Create SDF describing a camera sensor
   const std::string name = "TestLidar";
@@ -140,7 +140,7 @@ TEST(Lidar_TEST, CreateLaser)
     visualize);
 
   // Create a CameraSensor
-  ignition::sensors::Lidar *sensor = mgr.CreateSensor<ignition::sensors::Lidar>(
+  gz::sensors::Lidar *sensor = mgr.CreateSensor<gz::sensors::Lidar>(
       lidarSDF);
 
   // Make sure the above dynamic cast worked.
@@ -148,8 +148,8 @@ TEST(Lidar_TEST, CreateLaser)
 
   double angleRes = (sensor->AngleMax() - sensor->AngleMin()).Radian() /
                     sensor->RayCount();
-  EXPECT_EQ(sensor->AngleMin(), ignition::math::Angle(-1.396263));
-  EXPECT_EQ(sensor->AngleMax(), ignition::math::Angle(1.396263));
+  EXPECT_EQ(sensor->AngleMin(), gz::math::Angle(-1.396263));
+  EXPECT_EQ(sensor->AngleMax(), gz::math::Angle(1.396263));
   EXPECT_NEAR(sensor->RangeMin(), 0.08, 1e-6);
   EXPECT_NEAR(sensor->RangeMax(), 10.0, 1e-6);
   EXPECT_NEAR(sensor->AngleResolution(), angleRes, 1e-3);

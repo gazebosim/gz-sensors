@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/magnetometer/Export.hh>
+#include <ignition/sensors/config.hh>

@@ -19,15 +19,15 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/sensors/ImuSensor.hh>
-#include <ignition/sensors/SensorFactory.hh>
+#include <gz/sensors/ImuSensor.hh>
+#include <gz/sensors/SensorFactory.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 /// \brief Helper function to create an imu sdf element
 sdf::ElementPtr ImuToSdf(const std::string &_name,
-    const ignition::math::Pose3d &_pose, const double _updateRate,
+    const gz::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
     const bool _visualize)
 {
@@ -63,7 +63,7 @@ class ImuSensorTest: public testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
@@ -78,15 +78,15 @@ TEST_F(ImuSensorTest, CreateImu)
   const bool visualize = 1;
 
   // Create sensor SDF
-  ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
-      ignition::math::Quaterniond::Identity);
+  gz::math::Pose3d sensorPose(gz::math::Vector3d(0.25, 0.0, 0.5),
+      gz::math::Quaterniond::Identity);
   sdf::ElementPtr imuSdf = ImuToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
   // create the sensor using sensor factory
-  ignition::sensors::SensorFactory sf;
-  std::unique_ptr<ignition::sensors::ImuSensor> sensor =
-      sf.CreateSensor<ignition::sensors::ImuSensor>(imuSdf);
+  gz::sensors::SensorFactory sf;
+  std::unique_ptr<gz::sensors::ImuSensor> sensor =
+      sf.CreateSensor<gz::sensors::ImuSensor>(imuSdf);
   ASSERT_NE(nullptr, sensor);
 
   EXPECT_EQ(name, sensor->Name());
@@ -105,55 +105,55 @@ TEST_F(ImuSensorTest, SensorReadings)
   const bool visualize = 1;
 
   // Create sensor SDF
-  ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
-      ignition::math::Quaterniond::Identity);
+  gz::math::Pose3d sensorPose(gz::math::Vector3d(0.25, 0.0, 0.5),
+      gz::math::Quaterniond::Identity);
   sdf::ElementPtr imuSdf = ImuToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
   // create the sensor using sensor factory
-  ignition::sensors::SensorFactory sf;
-  auto sensor = sf.CreateSensor<ignition::sensors::ImuSensor>(imuSdf);
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::ImuSensor>(imuSdf);
   ASSERT_NE(nullptr, sensor);
   EXPECT_FALSE(sensor->HasConnections());
 
   // subscribe to the topic
-  WaitForMessageTestHelper<ignition::msgs::IMU> msgHelper(topic);
+  WaitForMessageTestHelper<gz::msgs::IMU> msgHelper(topic);
   EXPECT_TRUE(sensor->HasConnections());
 
   // verify initial readings
-  EXPECT_EQ(ignition::math::Pose3d::Zero, sensor->WorldPose());
-  EXPECT_EQ(ignition::math::Vector3d::Zero, sensor->LinearAcceleration());
-  EXPECT_EQ(ignition::math::Vector3d::Zero, sensor->AngularVelocity());
-  EXPECT_EQ(ignition::math::Vector3d::Zero, sensor->Gravity());
-  EXPECT_EQ(ignition::math::Quaterniond::Identity,
+  EXPECT_EQ(gz::math::Pose3d::Zero, sensor->WorldPose());
+  EXPECT_EQ(gz::math::Vector3d::Zero, sensor->LinearAcceleration());
+  EXPECT_EQ(gz::math::Vector3d::Zero, sensor->AngularVelocity());
+  EXPECT_EQ(gz::math::Vector3d::Zero, sensor->Gravity());
+  EXPECT_EQ(gz::math::Quaterniond::Identity,
       sensor->OrientationReference());
-  EXPECT_EQ(ignition::math::Quaterniond::Identity, sensor->Orientation());
+  EXPECT_EQ(gz::math::Quaterniond::Identity, sensor->Orientation());
 
 
   // 1. Verify imu readings at rest
 
   // set orientation reference and verify readings
   // this sets the initial imu rotation to be +90 degrees in z
-  ignition::math::Quaterniond orientRef(
-    ignition::math::Vector3d(0, 0, 1.57));
+  gz::math::Quaterniond orientRef(
+    gz::math::Vector3d(0, 0, 1.57));
   sensor->SetOrientationReference(orientRef);
   EXPECT_EQ(orientRef, sensor->OrientationReference());
 
   // set gravity and verify
-  ignition::math::Vector3d gravity(0, 0, -4);
+  gz::math::Vector3d gravity(0, 0, -4);
   sensor->SetGravity(gravity);
   EXPECT_EQ(gravity, sensor->Gravity());
 
   // set world pose and verify
-  ignition::math::Vector3d position(1, 0, 3);
-  ignition::math::Quaterniond orientation =
-      ignition::math::Quaterniond::Identity;
-  ignition::math::Pose3d pose(position, orientation);
+  gz::math::Vector3d position(1, 0, 3);
+  gz::math::Quaterniond orientation =
+      gz::math::Quaterniond::Identity;
+  gz::math::Pose3d pose(position, orientation);
   sensor->SetWorldPose(pose);
   EXPECT_EQ(pose, sensor->WorldPose());
 
   // orientation should still be identity before update
-  EXPECT_EQ(ignition::math::Quaterniond::Identity, sensor->Orientation());
+  EXPECT_EQ(gz::math::Quaterniond::Identity, sensor->Orientation());
 
   // update sensor and verify new readings
   EXPECT_TRUE(sensor->Update(std::chrono::steady_clock::duration(
@@ -161,9 +161,9 @@ TEST_F(ImuSensorTest, SensorReadings)
   EXPECT_EQ(orientRef, sensor->OrientationReference());
   EXPECT_EQ(gravity, sensor->Gravity());
   EXPECT_EQ(pose, sensor->WorldPose());
-  EXPECT_EQ(ignition::math::Vector3d::Zero, sensor->AngularVelocity());
+  EXPECT_EQ(gz::math::Vector3d::Zero, sensor->AngularVelocity());
   EXPECT_EQ(-gravity, sensor->LinearAcceleration());
-  EXPECT_EQ(ignition::math::Quaterniond(ignition::math::Vector3d(0, 0, -1.57)),
+  EXPECT_EQ(gz::math::Quaterniond(gz::math::Vector3d(0, 0, -1.57)),
       sensor->Orientation());
 
   // verify msg received on the topic
@@ -171,28 +171,28 @@ TEST_F(ImuSensorTest, SensorReadings)
   auto msg = msgHelper.Message();
   EXPECT_EQ(1, msg.header().stamp().sec());
   EXPECT_EQ(0, msg.header().stamp().nsec());
-  EXPECT_EQ(ignition::math::Vector3d::Zero,
-      ignition::msgs::Convert(msg.angular_velocity()));
-  EXPECT_EQ(-gravity, ignition::msgs::Convert(msg.linear_acceleration()));
-  EXPECT_EQ(ignition::math::Quaterniond(ignition::math::Vector3d(0, 0, -1.57)),
-      ignition::msgs::Convert(msg.orientation()));
+  EXPECT_EQ(gz::math::Vector3d::Zero,
+      gz::msgs::Convert(msg.angular_velocity()));
+  EXPECT_EQ(-gravity, gz::msgs::Convert(msg.linear_acceleration()));
+  EXPECT_EQ(gz::math::Quaterniond(gz::math::Vector3d(0, 0, -1.57)),
+      gz::msgs::Convert(msg.orientation()));
 
   // 2. Turn imu upside down, give it some linear acc and angular velocity and
   // verify readings
 
   // set angular velocity and verify
-  ignition::math::Vector3d angularVel(1.0, 2.0, 3.0);
+  gz::math::Vector3d angularVel(1.0, 2.0, 3.0);
   sensor->SetAngularVelocity(angularVel);
   EXPECT_EQ(angularVel, sensor->AngularVelocity());
 
   // set linear acceleration and verify
-  ignition::math::Vector3d linearAcc(0, 0, 3);
+  gz::math::Vector3d linearAcc(0, 0, 3);
   sensor->SetLinearAcceleration(linearAcc);
   EXPECT_EQ(linearAcc, sensor->LinearAcceleration());
 
   // set orientation and verify
-  ignition::math::Quaterniond newOrientation(0, 3.14, 0);
-  ignition::math::Pose3d newPose(position, newOrientation);
+  gz::math::Quaterniond newOrientation(0, 3.14, 0);
+  gz::math::Pose3d newPose(position, newOrientation);
   sensor->SetWorldPose(newPose);
   EXPECT_EQ(newPose, sensor->WorldPose());
 
@@ -203,12 +203,12 @@ TEST_F(ImuSensorTest, SensorReadings)
   EXPECT_EQ(gravity, sensor->Gravity());
   EXPECT_EQ(angularVel, sensor->AngularVelocity());
   EXPECT_EQ(newPose, sensor->WorldPose());
-  ignition::math::Vector3d expectedLinAcc = linearAcc + gravity;
+  gz::math::Vector3d expectedLinAcc = linearAcc + gravity;
   EXPECT_NEAR(expectedLinAcc.X(), sensor->LinearAcceleration().X(), 1e-2);
   EXPECT_NEAR(expectedLinAcc.Y(), sensor->LinearAcceleration().Y(), 1e-6);
   EXPECT_NEAR(expectedLinAcc.Z(), sensor->LinearAcceleration().Z(), 1e-5);
   EXPECT_EQ(
-      ignition::math::Quaterniond(ignition::math::Vector3d(0, 3.14, -1.57)),
+      gz::math::Quaterniond(gz::math::Vector3d(0, 3.14, -1.57)),
       sensor->Orientation());
 
   // verify updated msg
@@ -217,15 +217,15 @@ TEST_F(ImuSensorTest, SensorReadings)
   EXPECT_EQ(2, msg.header().stamp().sec());
   EXPECT_EQ(0, msg.header().stamp().nsec());
   EXPECT_EQ(angularVel,
-      ignition::msgs::Convert(msg.angular_velocity()));
-  ignition::math::Vector3d actualLinAcc =
-      ignition::msgs::Convert(msg.linear_acceleration());
+      gz::msgs::Convert(msg.angular_velocity()));
+  gz::math::Vector3d actualLinAcc =
+      gz::msgs::Convert(msg.linear_acceleration());
   EXPECT_NEAR(expectedLinAcc.X(), actualLinAcc.X(), 1e-2);
   EXPECT_NEAR(expectedLinAcc.Y(), actualLinAcc.Y(), 1e-6);
   EXPECT_NEAR(expectedLinAcc.Z(), actualLinAcc.Z(), 1e-5);
   EXPECT_EQ(
-      ignition::math::Quaterniond(ignition::math::Vector3d(0, 3.14, -1.57)),
-      ignition::msgs::Convert(msg.orientation()));
+      gz::math::Quaterniond(gz::math::Vector3d(0, 3.14, -1.57)),
+      gz::msgs::Convert(msg.orientation()));
 }
 
 /////////////////////////////////////////////////
@@ -235,10 +235,10 @@ TEST_F(ImuSensorTest, Topic)
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
-  auto sensorPose = ignition::math::Pose3d();
+  auto sensorPose = gz::math::Pose3d();
 
   // Factory
-  ignition::sensors::SensorFactory factory;
+  gz::sensors::SensorFactory factory;
 
   // Default topic
   {
@@ -246,7 +246,7 @@ TEST_F(ImuSensorTest, Topic)
     auto imuSdf = ImuToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto imu = factory.CreateSensor<ignition::sensors::ImuSensor>(imuSdf);
+    auto imu = factory.CreateSensor<gz::sensors::ImuSensor>(imuSdf);
     ASSERT_NE(nullptr, imu);
 
     EXPECT_EQ("/imu", imu->Topic());
@@ -258,7 +258,7 @@ TEST_F(ImuSensorTest, Topic)
     auto imuSdf = ImuToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto imu = factory.CreateSensor<ignition::sensors::ImuSensor>(imuSdf);
+    auto imu = factory.CreateSensor<gz::sensors::ImuSensor>(imuSdf);
     ASSERT_NE(nullptr, imu);
 
     EXPECT_EQ("/topic_with_spaces/characters", imu->Topic());
@@ -270,7 +270,7 @@ TEST_F(ImuSensorTest, Topic)
     auto imuSdf = ImuToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto sensor = factory.CreateSensor<ignition::sensors::ImuSensor>(imuSdf);
+    auto sensor = factory.CreateSensor<gz::sensors::ImuSensor>(imuSdf);
     ASSERT_EQ(nullptr, sensor);
   }
 }

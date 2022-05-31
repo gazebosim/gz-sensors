@@ -25,17 +25,17 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/performance_sensor_metrics.pb.h>
+#include <gz/msgs/performance_sensor_metrics.pb.h>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include <ignition/common/Console.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/Sensor.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Console.hh>
+#include <gz/sensors/Export.hh>
+#include <gz/sensors/Sensor.hh>
+#include <gz/transport/Node.hh>
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 class TestSensor : public Sensor
@@ -55,7 +55,7 @@ class Sensor_TEST : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
@@ -101,7 +101,7 @@ TEST(Sensor_TEST, Sensor)
 TEST(Sensor_TEST, AddSequence)
 {
   TestSensor sensor;
-  ignition::msgs::Header header;
+  gz::msgs::Header header;
   sensor.AddSequence(&header);
   EXPECT_EQ("seq", header.data(0).key());
   EXPECT_EQ("0", header.data(0).value(0));
@@ -120,7 +120,7 @@ TEST(Sensor_TEST, AddSequence)
   EXPECT_EQ("101", header.data(0).value(0));
 
   // Add another sequence for this sensor.
-  ignition::msgs::Header header2;
+  gz::msgs::Header header2;
   sensor.AddSequence(&header2, "other");
   // The original header shouldn't change
   EXPECT_EQ(1, header.data_size());
@@ -152,14 +152,14 @@ class SensorUpdate : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
     node.Subscribe(kPerformanceMetricTopic,
       &SensorUpdate::OnPerformanceMetric, this);
   }
 
   // Callback function for the performance metric topic.
   protected: void OnPerformanceMetric(
-    const ignition::msgs::PerformanceSensorMetrics &_msg)
+    const gz::msgs::PerformanceSensorMetrics &_msg)
   {
     EXPECT_EQ(kSensorName, _msg.name());
     performanceMetricsMsgsCount++;
@@ -246,7 +246,7 @@ TEST(Sensor_TEST, SetRateService)
   EXPECT_EQ("test_topic", sensor.Topic());
   EXPECT_FLOAT_EQ(10.0, sensor.UpdateRate());
 
-  ignition::transport::Node node;
+  gz::transport::Node node;
 
   std::vector<std::string> services;
   node.ServiceList(services);
@@ -256,13 +256,13 @@ TEST(Sensor_TEST, SetRateService)
     std::find(services.begin(), services.end(), "/test_topic/set_rate");
   ASSERT_NE(services.end(), serviceIt);
 
-  std::vector<ignition::transport::ServicePublisher> publishers;
+  std::vector<gz::transport::ServicePublisher> publishers;
   ASSERT_TRUE(node.ServiceInfo("/test_topic/set_rate", publishers));
 
   ASSERT_LT(0u, publishers.size());
 
-  ignition::msgs::Double msg;
-  ignition::msgs::Empty rep;
+  gz::msgs::Double msg;
+  gz::msgs::Empty rep;
   bool res;
 
   // can set value lower than in SDF
@@ -319,10 +319,10 @@ TEST(Sensor_TEST, SetRateZeroService)
   EXPECT_EQ("test_topic2", sensor.Topic());
   EXPECT_FLOAT_EQ(0.0, sensor.UpdateRate());
 
-  ignition::transport::Node node;
+  gz::transport::Node node;
 
-  ignition::msgs::Double msg;
-  ignition::msgs::Empty rep;
+  gz::msgs::Double msg;
+  gz::msgs::Empty rep;
   bool res;
 
   // can set any value if SDF has 0
