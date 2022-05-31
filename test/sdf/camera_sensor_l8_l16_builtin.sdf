@@ -2,7 +2,7 @@
 <sdf version="1.6">
   <model name="m1">
     <link name="link1">
-      <sensor name="camera1" type="camera">
+      <sensor name="camera_8_bit" type="camera">
         <update_rate>10</update_rate>
         <ignition_frame_id>base_camera</ignition_frame_id>
         <topic>/images_l8</topic>
@@ -24,7 +24,7 @@
           </noise>
         </camera>
       </sensor>
-      <sensor name="camera2" type="camera">
+      <sensor name="camera_16_bit" type="camera">
         <update_rate>10</update_rate>
         <ignition_frame_id>base_camera</ignition_frame_id>
         <topic>/images_l16</topic>

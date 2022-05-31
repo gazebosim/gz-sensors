@@ -52,7 +52,7 @@ std::mutex g_mutex;
 unsigned int g_imgCounter1 = 0;
 unsigned int g_imgCounter2 = 0;
 
-void OnGrayscaleImageL8(const ignition::msgs::Image &_msg)
+void OnGrayscaleImageL8(const gz::msgs::Image &_msg)
 {
   std::lock_guard<std::mutex> lock(g_mutex);
   EXPECT_EQ(gz::msgs::PixelFormatType::L_INT8, _msg.pixel_format_type());
@@ -61,10 +61,10 @@ void OnGrayscaleImageL8(const ignition::msgs::Image &_msg)
   g_imgCounter1++;
 }
 
-void OnGrayscaleImageL16(const ignition::msgs::Image &_msg)
+void OnGrayscaleImageL16(const gz::msgs::Image &_msg)
 {
   std::lock_guard<std::mutex> lock(g_mutex);
-  EXPECT_EQ(ignition::msgs::PixelFormatType::L_INT16, _msg.pixel_format_type());
+  EXPECT_EQ(gz::msgs::PixelFormatType::L_INT16, _msg.pixel_format_type());
   EXPECT_EQ(512u, _msg.width());
   EXPECT_EQ(512u, _msg.height());
   g_imgCounter2++;
@@ -182,7 +182,7 @@ TEST_P(CameraSensorTest, ImagesWithBuiltinSDF)
 void CameraSensorTest::ImageFormatLInt8LInt16(const std::string &_renderEngine)
 {
   // get the darn test data
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "camera_sensor_l8_l16_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -193,8 +193,8 @@ void CameraSensorTest::ImageFormatLInt8LInt16(const std::string &_renderEngine)
   ASSERT_TRUE(modelPtr->HasElement("link"));
   auto linkPtr = modelPtr->GetElement("link");
   ASSERT_TRUE(linkPtr->HasElement("sensor"));
-  auto sensorPtr1 = linkPtr->GetElement("sensor");
-  auto sensorPtr2 = linkPtr->GetElement("sensor")->GetNextElement();
+  auto sensorPtrCamera8Bit = linkPtr->GetElement("sensor");
+  auto sensorPtrCamera16Bit = linkPtr->GetElement("sensor")->GetNextElement();
 
   // Setup ign-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
@@ -210,30 +210,31 @@ void CameraSensorTest::ImageFormatLInt8LInt16(const std::string &_renderEngine)
   // do the test
   gz::sensors::Manager mgr;
 
-  ignition::sensors::CameraSensor *sensor1 =
-      mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr1);
-  ignition::sensors::CameraSensor *sensor2 =
-      mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr2);
-  ASSERT_NE(sensor1, nullptr);
-  ASSERT_NE(sensor2, nullptr);
-  sensor1->SetScene(scene);
-  sensor2->SetScene(scene);
+  gz::sensors::CameraSensor *sensorCamera8Bit =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtrCamera8Bit);
+  gz::sensors::CameraSensor *sensorCamera16Bit =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtrCamera16Bit);
+  ASSERT_NE(sensorCamera8Bit, nullptr);
+  ASSERT_NE(sensorCamera16Bit, nullptr);
+  sensorCamera8Bit->SetScene(scene);
+  sensorCamera16Bit->SetScene(scene);
 
-  ASSERT_NE(sensor1->RenderingCamera(), nullptr);
-  EXPECT_NE(sensor1->Id(), sensor1->RenderingCamera()->Id());
-  EXPECT_EQ(256u, sensor1->ImageWidth());
-  EXPECT_EQ(256u, sensor1->ImageHeight());
+  ASSERT_NE(sensorCamera8Bit->RenderingCamera(), nullptr);
+  EXPECT_NE(sensorCamera8Bit->Id(), sensorCamera8Bit->RenderingCamera()->Id());
+  EXPECT_EQ(256u, sensorCamera8Bit->ImageWidth());
+  EXPECT_EQ(256u, sensorCamera8Bit->ImageHeight());
 
-  ASSERT_NE(sensor2->RenderingCamera(), nullptr);
-  EXPECT_NE(sensor2->Id(), sensor2->RenderingCamera()->Id());
-  EXPECT_EQ(512u, sensor2->ImageWidth());
-  EXPECT_EQ(512u, sensor2->ImageHeight());
+  ASSERT_NE(sensorCamera16Bit->RenderingCamera(), nullptr);
+  EXPECT_NE(sensorCamera16Bit->Id(),
+            sensorCamera16Bit->RenderingCamera()->Id());
+  EXPECT_EQ(512u, sensorCamera16Bit->ImageWidth());
+  EXPECT_EQ(512u, sensorCamera16Bit->ImageHeight());
 
-  std::string topic1 = "/images_l8";
-  WaitForMessageTestHelper<ignition::msgs::Image> helper1(topic1);
+  std::string topicCamera8Bit = "/images_l8";
+  WaitForMessageTestHelper<gz::msgs::Image> helper1(topicCamera8Bit);
 
-  std::string topic2 = "/images_l16";
-  WaitForMessageTestHelper<ignition::msgs::Image> helper2(topic2);
+  std::string topicCamera16Bit = "/images_l16";
+  WaitForMessageTestHelper<gz::msgs::Image> helper2(topicCamera16Bit);
 
   // Update once to create image
   mgr.RunOnce(std::chrono::steady_clock::duration::zero());
@@ -242,9 +243,9 @@ void CameraSensorTest::ImageFormatLInt8LInt16(const std::string &_renderEngine)
   EXPECT_TRUE(helper2.WaitForMessage()) << helper2;
 
   // subscribe to the camera topic
-  ignition::transport::Node node;
-  node.Subscribe(topic1, &OnGrayscaleImageL8);
-  node.Subscribe(topic2, &OnGrayscaleImageL16);
+  gz::transport::Node node;
+  node.Subscribe(topicCamera8Bit, &OnGrayscaleImageL8);
+  node.Subscribe(topicCamera16Bit, &OnGrayscaleImageL16);
 
   // wait for a few camera frames
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
@@ -262,21 +263,21 @@ void CameraSensorTest::ImageFormatLInt8LInt16(const std::string &_renderEngine)
 
   // test removing sensor
   // first make sure the sensor objects do exist
-  auto sensorId1 = sensor1->Id();
-  auto sensorId2 = sensor2->Id();
-  auto cameraId1 = sensor1->RenderingCamera()->Id();
-  auto cameraId2 = sensor2->RenderingCamera()->Id();
+  auto sensorIdCamera8Bit = sensorCamera8Bit->Id();
+  auto sensorIdCamera16Bit = sensorCamera16Bit->Id();
+  auto cameraId1 = sensorCamera8Bit->RenderingCamera()->Id();
+  auto cameraId2 = sensorCamera16Bit->RenderingCamera()->Id();
 
-  EXPECT_EQ(sensor1, mgr.Sensor(sensorId1));
-  EXPECT_EQ(sensor1->RenderingCamera(), scene->SensorById(cameraId1));
-  EXPECT_EQ(sensor2, mgr.Sensor(sensorId2));
-  EXPECT_EQ(sensor2->RenderingCamera(), scene->SensorById(cameraId2));
+  EXPECT_EQ(sensorCamera8Bit, mgr.Sensor(sensorIdCamera8Bit));
+  EXPECT_EQ(sensorCamera8Bit->RenderingCamera(), scene->SensorById(cameraId1));
+  EXPECT_EQ(sensorCamera16Bit, mgr.Sensor(sensorIdCamera16Bit));
+  EXPECT_EQ(sensorCamera16Bit->RenderingCamera(), scene->SensorById(cameraId2));
   // remove and check sensor objects no longer exist in both sensors and
   // rendering
-  EXPECT_TRUE(mgr.Remove(sensorId1));
-  EXPECT_TRUE(mgr.Remove(sensorId2));
-  EXPECT_EQ(nullptr, mgr.Sensor(sensorId1));
-  EXPECT_EQ(nullptr, mgr.Sensor(sensorId2));
+  EXPECT_TRUE(mgr.Remove(sensorIdCamera8Bit));
+  EXPECT_TRUE(mgr.Remove(sensorIdCamera16Bit));
+  EXPECT_EQ(nullptr, mgr.Sensor(sensorIdCamera8Bit));
+  EXPECT_EQ(nullptr, mgr.Sensor(sensorIdCamera16Bit));
   EXPECT_EQ(nullptr, scene->SensorById(cameraId1));
   EXPECT_EQ(nullptr, scene->SensorById(cameraId2));
 
