@@ -25,12 +25,12 @@
 #include "gz/sensors/config.hh"
 #include "gz/sensors/Export.hh"
 
-namespace ignition
+namespace gz
 {
 namespace sensors
 {
 // Inline bracket to help doxygen filtering.
-inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+inline namespace GZ_SENSORS_VERSION_NAMESPACE {
 //
 /// \brief Get the name of a sensor's custom type from SDF.
 ///
@@ -45,7 +45,7 @@ inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
 ///
 /// \param[in] _sdf Sensor SDF object.
 /// \return _sensorType Name of sensor type.
-std::string IGNITION_SENSORS_VISIBLE customType(const sdf::Sensor &_sdf); // NOLINT
+std::string GZ_SENSORS_VISIBLE customType(const sdf::Sensor &_sdf); // NOLINT
 
 /// \brief Get the name of a sensor's custom type from SDF.
 ///
@@ -60,7 +60,7 @@ std::string IGNITION_SENSORS_VISIBLE customType(const sdf::Sensor &_sdf); // NOL
 ///
 /// \param[in] _sdf Sensor SDF object.
 /// \return _sensorType Name of sensor type.
-std::string IGNITION_SENSORS_VISIBLE customType(sdf::ElementPtr _sdf); // NOLINT
+std::string GZ_SENSORS_VISIBLE customType(sdf::ElementPtr _sdf); // NOLINT
 }
 }
 }

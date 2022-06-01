@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/air_pressure/Export.hh>
+#include <ignition/sensors/config.hh>

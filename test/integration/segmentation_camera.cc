@@ -17,18 +17,18 @@
 
 #include <gtest/gtest.h>
 
-#include <ignition/common/Filesystem.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/SegmentationCameraSensor.hh>
+#include <gz/common/Filesystem.hh>
+#include <gz/sensors/Manager.hh>
+#include <gz/sensors/SegmentationCameraSensor.hh>
 
 #ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/RenderEngine.hh>
-#include <ignition/rendering/RenderingIface.hh>
-#include <ignition/rendering/Scene.hh>
-#include <ignition/rendering/SegmentationCamera.hh>
+#include <gz/rendering/RenderEngine.hh>
+#include <gz/rendering/RenderingIface.hh>
+#include <gz/rendering/Scene.hh>
+#include <gz/rendering/SegmentationCamera.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -38,7 +38,7 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs.hh>
+#include <gz/msgs.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -46,7 +46,7 @@
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
-using namespace ignition;
+using namespace gz;
 
 /// \brief mutex for thread safety
 std::mutex g_mutex;
@@ -80,7 +80,7 @@ void OnNewSegmentationFrame(const msgs::Image &_msg)
 }
 
 /// \brief wait till you read the published frame
-void WaitForNewFrame(ignition::sensors::Manager &_mgr)
+void WaitForNewFrame(gz::sensors::Manager &_mgr)
 {
   g_counter = 0;
 
@@ -141,7 +141,7 @@ void BuildScene(rendering::ScenePtr _scene)
   root->AddChild(box1);
 
   // create box visual of different label
-  ignition::rendering::VisualPtr box2 = _scene->CreateVisual("box_mid");
+  gz::rendering::VisualPtr box2 = _scene->CreateVisual("box_mid");
   ASSERT_NE(nullptr, box2);
   box2->AddGeometry(_scene->CreateBox());
   box2->SetOrigin(0.0, 0.0, 0.0);
@@ -152,7 +152,7 @@ void BuildScene(rendering::ScenePtr _scene)
   root->AddChild(box2);
 
   // create box visual of the hidden box
-  ignition::rendering::VisualPtr hiddenBox = _scene->CreateVisual("box_hidden");
+  gz::rendering::VisualPtr hiddenBox = _scene->CreateVisual("box_hidden");
   ASSERT_NE(nullptr, hiddenBox);
   hiddenBox->AddGeometry(_scene->CreateBox());
   hiddenBox->SetOrigin(0.0, 0.0, 0.0);
@@ -175,7 +175,7 @@ class SegmentationCameraSensorTest: public testing::Test,
 void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   const std::string &_renderEngine)
 {
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "segmentation_camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -198,24 +198,24 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   // If ogre2 is not the engine, don't run the test
   if (_renderEngine.compare("ogre2") != 0)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
       << "' doesn't support segmentation cameras" << std::endl;
     return;
   }
   // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine(_renderEngine);
+  auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
     return;
   }
 
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
   ASSERT_NE(nullptr, scene);
   BuildScene(scene);
 
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
   sdf::Sensor sdfSensor;
   sdfSensor.Load(sensorPtr);
@@ -223,8 +223,8 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   std::string type = sdfSensor.TypeStr();
   EXPECT_EQ(type, "segmentation_camera");
 
-  ignition::sensors::SegmentationCameraSensor *sensor =
-    mgr.CreateSensor<ignition::sensors::SegmentationCameraSensor>(sdfSensor);
+  gz::sensors::SegmentationCameraSensor *sensor =
+    mgr.CreateSensor<gz::sensors::SegmentationCameraSensor>(sdfSensor);
 
   ASSERT_NE(sensor, nullptr);
   EXPECT_FALSE(sensor->HasConnections());
@@ -253,9 +253,9 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   // TODO(anyone) add test coverage for the colored map topic and its data
   topic += "/labels_map";
 
-  WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
+  WaitForMessageTestHelper<gz::msgs::Image> helper(topic);
   EXPECT_TRUE(sensor->HasConnections());
-  WaitForMessageTestHelper<ignition::msgs::CameraInfo> infoHelper(infoTopic);
+  WaitForMessageTestHelper<gz::msgs::CameraInfo> infoHelper(infoTopic);
 
   // Update once to create image
   mgr.RunOnce(std::chrono::steady_clock::duration::zero());
@@ -263,7 +263,7 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
 
   // subscribe to the segmentation camera topic
-  ignition::transport::Node node;
+  gz::transport::Node node;
   EXPECT_TRUE(node.Subscribe(topic, &OnNewSegmentationFrame));
 
   // wait for a new frame
@@ -354,7 +354,7 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
 
   // Clean up
   engine->DestroyScene(scene);
-  ignition::rendering::unloadEngine(engine->Name());
+  gz::rendering::unloadEngine(engine->Name());
 }
 
 //////////////////////////////////////////////////
@@ -364,12 +364,12 @@ TEST_P(SegmentationCameraSensorTest, ImagesWithBuiltinSDF)
 }
 
 INSTANTIATE_TEST_CASE_P(SegmentationCameraSensor, SegmentationCameraSensorTest,
-    RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
+    RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-  ignition::common::Console::SetVerbosity(4);
+  gz::common::Console::SetVerbosity(4);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -28,12 +28,12 @@
 
 #include "gz/sensors/Sensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief forward declarations
     class AirPressureSensorPrivate;
@@ -41,7 +41,7 @@ namespace ignition
     /// \brief AirPressure Sensor Class
     ///
     /// A sensor that reports air pressure readings.
-    class IGNITION_SENSORS_AIR_PRESSURE_VISIBLE AirPressureSensor :
+    class GZ_SENSORS_AIR_PRESSURE_VISIBLE AirPressureSensor :
       public Sensor
     {
       /// \brief constructor

@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/wide_angle_camera/Export.hh>
+#include <ignition/sensors/config.hh>

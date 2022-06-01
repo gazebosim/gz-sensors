@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/Distortion.hh>
+#include <ignition/sensors/config.hh>

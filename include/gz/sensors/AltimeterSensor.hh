@@ -28,12 +28,12 @@
 
 #include "gz/sensors/Sensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief forward declarations
     class AltimeterSensorPrivate;
@@ -42,7 +42,7 @@ namespace ignition
     ///
     /// An altimeter sensor that reports vertical position and velocity
     /// readings over ign transport
-    class IGNITION_SENSORS_ALTIMETER_VISIBLE AltimeterSensor : public Sensor
+    class GZ_SENSORS_ALTIMETER_VISIBLE AltimeterSensor : public Sensor
     {
       /// \brief constructor
       public: AltimeterSensor();

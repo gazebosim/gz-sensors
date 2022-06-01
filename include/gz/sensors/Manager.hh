@@ -30,12 +30,12 @@
 #include <gz/sensors/Sensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     // Forward declarations
     class ManagerPrivate;
 
@@ -50,7 +50,7 @@ namespace ignition
     ///   be in the <plugin> tag of the sdf::Element. The manager will
     ///   dynamically load the sensor library and update it.
     /// \remarks This class is not thread safe.
-    class IGNITION_SENSORS_VISIBLE Manager
+    class GZ_SENSORS_VISIBLE Manager
     {
       /// \brief constructor
       public: Manager();
@@ -77,13 +77,13 @@ namespace ignition
                 auto sensor = sensorFactory.CreateSensor<SensorType>(_sdf);
                 if (nullptr == sensor)
                 {
-                  ignerr << "Failed to create sensor." << std::endl;
+                  gzerr << "Failed to create sensor." << std::endl;
                   return nullptr;
                 }
                 auto result = sensor.get();
                 if (NO_SENSOR == this->AddSensor(std::move(sensor)))
                 {
-                  ignerr << "Failed to add sensor." << std::endl;
+                  gzerr << "Failed to add sensor." << std::endl;
                   return nullptr;
                 }
                 return result;
@@ -97,7 +97,7 @@ namespace ignition
       /// \deprecated Sensor registration is deprecated, so it's necessary to
       /// provide the specific sensor type to create it. Use the templated
       /// `CreateSensor` function.
-      public: ignition::sensors::SensorId IGN_DEPRECATED(6) CreateSensor(
+      public: gz::sensors::SensorId GZ_DEPRECATED(6) CreateSensor(
           sdf::ElementPtr _sdf);
 
       /// \brief Create a sensor from SDF without a known sensor type.
@@ -108,7 +108,7 @@ namespace ignition
       /// \deprecated Sensor registration is deprecated, so it's necessary to
       /// provide the specific sensor type to create it. Use the templated
       /// `CreateSensor` function.
-      public: ignition::sensors::SensorId IGN_DEPRECATED(6) CreateSensor(
+      public: gz::sensors::SensorId GZ_DEPRECATED(6) CreateSensor(
           const sdf::Sensor &_sdf);
 
       /// \brief Add a sensor for this manager to manage.
@@ -121,13 +121,13 @@ namespace ignition
       /// \brief Get an instance of a loaded sensor by sensor id
       /// \param[in] _id Idenitifier of the sensor.
       /// \return Pointer to the sensor, nullptr on error.
-      public: ignition::sensors::Sensor *Sensor(
-                  ignition::sensors::SensorId _id);
+      public: gz::sensors::Sensor *Sensor(
+                  gz::sensors::SensorId _id);
 
       /// \brief Remove a sensor by ID
       /// \param[in] _sensorId ID of the sensor to remove
       /// \return True if the sensor exists and removed.
-      public: bool Remove(const ignition::sensors::SensorId _id);
+      public: bool Remove(const gz::sensors::SensorId _id);
 
       /// \brief Run the sensor generation one step.
       /// \param _time: The current simulated time
@@ -137,7 +137,7 @@ namespace ignition
                   bool _force = false);
 
       /// \brief Adds colon delimited paths sensor plugins may be
-      public: void IGN_DEPRECATED(6) AddPluginPaths(const std::string &_path);
+      public: void GZ_DEPRECATED(6) AddPluginPaths(const std::string &_path);
 
       IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief private data pointer

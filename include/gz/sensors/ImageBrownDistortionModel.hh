@@ -35,12 +35,12 @@
 #include "gz/sensors/BrownDistortionModel.hh"
 #include "gz/sensors/rendering/Export.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     // Forward declarations
     class ImageBrownDistortionModelPrivate;
 
@@ -48,7 +48,7 @@ namespace ignition
     gz/sensors/ImageBrownDistortionModel.hh
     **/
     /// \brief Distortion Model class for image sensors
-    class IGNITION_SENSORS_RENDERING_VISIBLE ImageBrownDistortionModel :
+    class GZ_SENSORS_RENDERING_VISIBLE ImageBrownDistortionModel :
       public BrownDistortionModel
     {
       /// \brief Constructor.

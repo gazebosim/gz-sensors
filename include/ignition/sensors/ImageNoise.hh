@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/ImageNoise.hh>
+#include <ignition/sensors/config.hh>

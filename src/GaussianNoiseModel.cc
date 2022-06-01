@@ -20,16 +20,16 @@
   #include <Winsock2.h>
 #endif
 
-#include "ignition/sensors/GaussianNoiseModel.hh"
-#include <ignition/math/Helpers.hh>
-#include <ignition/math/Rand.hh>
+#include "gz/sensors/GaussianNoiseModel.hh"
+#include <gz/math/Helpers.hh>
+#include <gz/math/Rand.hh>
 
-#include "ignition/common/Console.hh"
+#include "gz/common/Console.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
-class ignition::sensors::GaussianNoiseModelPrivate
+class gz::sensors::GaussianNoiseModelPrivate
 {
   /// \brief If type starts with GAUSSIAN, the mean of the distribution
   /// from which we sample when adding noise.
@@ -87,20 +87,20 @@ void GaussianNoiseModel::Load(const sdf::Noise &_sdf)
   double biasStdDev = 0;
   biasMean = _sdf.BiasMean();
   biasStdDev = _sdf.BiasStdDev();
-  this->dataPtr->bias = ignition::math::Rand::DblNormal(biasMean, biasStdDev);
+  this->dataPtr->bias = gz::math::Rand::DblNormal(biasMean, biasStdDev);
 
   // With equal probability, we pick a negative bias (by convention,
   // rateBiasMean should be positive, though it would work fine if
   // negative).
-  if (ignition::math::Rand::DblUniform() < 0.5)
+  if (gz::math::Rand::DblUniform() < 0.5)
     this->dataPtr->bias = -this->dataPtr->bias;
 
   this->Print(out);
 
   this->dataPtr->precision = _sdf.Precision();
   if (this->dataPtr->precision < 0)
-    ignerr << "Noise precision cannot be less than 0" << std::endl;
-  else if (!ignition::math::equal(this->dataPtr->precision, 0.0, 1e-6))
+    gzerr << "Noise precision cannot be less than 0" << std::endl;
+  else if (!gz::math::equal(this->dataPtr->precision, 0.0, 1e-6))
     this->dataPtr->quantized = true;
 }
 
@@ -108,7 +108,7 @@ void GaussianNoiseModel::Load(const sdf::Noise &_sdf)
 double GaussianNoiseModel::ApplyImpl(double _in, double _dt)
 {
   // Generate independent (uncorrelated) Gaussian noise to each input value.
-  double whiteNoise = ignition::math::Rand::DblNormal(
+  double whiteNoise = gz::math::Rand::DblNormal(
       this->dataPtr->mean, this->dataPtr->stdDev);
 
   // Generate varying (correlated) bias to each input value.
@@ -132,7 +132,7 @@ double GaussianNoiseModel::ApplyImpl(double _in, double _dt)
         tau / 2 * expm1(-2 * _dt / tau));
     double phi_d = exp(-_dt / tau);
     this->dataPtr->bias = phi_d * this->dataPtr->bias +
-      ignition::math::Rand::DblNormal(0, sigma_b_d);
+      gz::math::Rand::DblNormal(0, sigma_b_d);
   }
 
   double output = _in + this->dataPtr->bias + whiteNoise;
@@ -140,7 +140,7 @@ double GaussianNoiseModel::ApplyImpl(double _in, double _dt)
   if (this->dataPtr->quantized)
   {
     // Apply this->dataPtr->precision
-    if (!ignition::math::equal(this->dataPtr->precision, 0.0, 1e-6))
+    if (!gz::math::equal(this->dataPtr->precision, 0.0, 1e-6))
     {
       output = std::round(output / this->dataPtr->precision) *
         this->dataPtr->precision;

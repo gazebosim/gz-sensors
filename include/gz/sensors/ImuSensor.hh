@@ -29,15 +29,15 @@
 
 #include "gz/sensors/Sensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     /// Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
 
     /// \brief Reference frames enum
-    enum class IGNITION_SENSORS_VISIBLE WorldFrameEnumType
+    enum class GZ_SENSORS_VISIBLE WorldFrameEnumType
     {
       /// \brief NONE : To be used only when <localization>
       /// reference orientation tag is empty.
@@ -64,7 +64,7 @@ namespace ignition
     ///
     /// An imu sensor that reports linear acceleration, angular velocity, and
     /// orientation
-    class IGNITION_SENSORS_IMU_VISIBLE ImuSensor : public Sensor
+    class GZ_SENSORS_IMU_VISIBLE ImuSensor : public Sensor
     {
       /// \brief constructor
       public: ImuSensor();

@@ -15,9 +15,9 @@
  *
 */
 
-#include "ignition/sensors/SensorTypes.hh"
+#include "gz/sensors/SensorTypes.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 // Initialize enum iterator, and string converter

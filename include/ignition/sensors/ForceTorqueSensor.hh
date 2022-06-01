@@ -16,3 +16,4 @@
  */
 
 #include <gz/sensors/ForceTorqueSensor.hh>
+#include <ignition/sensors/config.hh>

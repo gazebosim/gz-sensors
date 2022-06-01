@@ -15,21 +15,21 @@
  *
 */
 
-#include <ignition/common/Profiler.hh>
-#include <ignition/math/Angle.hh>
-#include <ignition/math/Vector3.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/math/Angle.hh>
+#include <gz/math/Vector3.hh>
+#include <gz/transport/Node.hh>
 
-#include "ignition/sensors/NavSatSensor.hh"
-#include "ignition/sensors/Noise.hh"
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/SensorTypes.hh"
+#include "gz/sensors/NavSatSensor.hh"
+#include "gz/sensors/Noise.hh"
+#include "gz/sensors/SensorFactory.hh"
+#include "gz/sensors/SensorTypes.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for NavSat
-class ignition::sensors::NavSatPrivate
+class gz::sensors::NavSatPrivate
 {
   /// \brief Node to create publisher
   public: transport::Node node;
@@ -79,14 +79,14 @@ bool NavSatSensor::Load(const sdf::Sensor &_sdf)
 
   if (_sdf.Type() != sdf::SensorType::NAVSAT)
   {
-    ignerr << "Attempting to a load an NAVSAT sensor, but received "
+    gzerr << "Attempting to a load an NAVSAT sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
     return false;
   }
 
   if (_sdf.NavSatSensor() == nullptr)
   {
-    ignerr << "Attempting to a load an NAVSAT sensor, but received "
+    gzerr << "Attempting to a load an NAVSAT sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -99,7 +99,7 @@ bool NavSatSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic [" << this->Topic()
+    gzerr << "Unable to create publisher on topic [" << this->Topic()
            << "]." << std::endl;
     return false;
   }
@@ -152,7 +152,7 @@ bool NavSatSensor::Update(const std::chrono::steady_clock::duration &_now)
   IGN_PROFILE("NavSatSensor::Update");
   if (!this->dataPtr->loaded)
   {
-    ignerr << "Not loaded, update ignored.\n";
+    gzerr << "Not loaded, update ignored.\n";
     return false;
   }
 

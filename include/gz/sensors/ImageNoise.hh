@@ -26,18 +26,18 @@
 #include "gz/sensors/SensorTypes.hh"
 #include "gz/sensors/rendering/Export.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     // Forward declarations
     class NoisePrivate;
 
     /// \class NoiseFactory Noise.hh gz/sensors/Noise.hh
     /// \brief Use this noise manager for creating and loading noise models.
-    class IGNITION_SENSORS_RENDERING_VISIBLE ImageNoiseFactory
+    class GZ_SENSORS_RENDERING_VISIBLE ImageNoiseFactory
     {
       /// \brief Load a noise model based on the input sdf parameters and
       /// sensor type.

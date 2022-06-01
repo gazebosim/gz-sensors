@@ -19,35 +19,35 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/camera_info.pb.h>
+#include <gz/msgs/camera_info.pb.h>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
 #include <mutex>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Event.hh>
-#include <ignition/common/Image.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/common/StringUtils.hh>
-#include <ignition/math/Angle.hh>
-#include <ignition/math/Helpers.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Event.hh>
+#include <gz/common/Image.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/common/StringUtils.hh>
+#include <gz/math/Angle.hh>
+#include <gz/math/Helpers.hh>
+#include <gz/transport/Node.hh>
 
-#include "ignition/sensors/WideAngleCameraSensor.hh"
-#include "ignition/sensors/ImageGaussianNoiseModel.hh"
-#include "ignition/sensors/ImageNoise.hh"
-#include "ignition/sensors/Manager.hh"
-#include "ignition/sensors/RenderingEvents.hh"
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/SensorTypes.hh"
+#include "gz/sensors/WideAngleCameraSensor.hh"
+#include "gz/sensors/ImageGaussianNoiseModel.hh"
+#include "gz/sensors/ImageNoise.hh"
+#include "gz/sensors/Manager.hh"
+#include "gz/sensors/RenderingEvents.hh"
+#include "gz/sensors/SensorFactory.hh"
+#include "gz/sensors/SensorTypes.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for WideAngleCameraSensor
-class ignition::sensors::WideAngleCameraSensorPrivate
+class gz::sensors::WideAngleCameraSensorPrivate
 {
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
@@ -59,7 +59,7 @@ class ignition::sensors::WideAngleCameraSensorPrivate
   /// of the path was not possible.
   /// \sa ImageSaver
   public: bool SaveImage(const unsigned char *_data, unsigned int _width,
-    unsigned int _height, ignition::common::Image::PixelFormatType _format);
+    unsigned int _height, gz::common::Image::PixelFormatType _format);
 
   /// \brief node to create publisher
   public: transport::Node node;
@@ -74,27 +74,27 @@ class ignition::sensors::WideAngleCameraSensorPrivate
   public: bool initialized = false;
 
   /// \brief Rendering camera
-  public: ignition::rendering::WideAngleCameraPtr camera;
+  public: gz::rendering::WideAngleCameraPtr camera;
 
   /// \brief Image data buffer.
   public: unsigned char *imageBuffer = nullptr;
 
   /// \brief Pointer to an image to be published
-  // public: ignition::rendering::Image image;
+  // public: gz::rendering::Image image;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
-  public: ignition::common::EventT<
-          void(const ignition::msgs::Image &)> imageEvent;
+  public: gz::common::EventT<
+          void(const gz::msgs::Image &)> imageEvent;
 
   /// \brief Connection from wide angle camera with image data
-  public: ignition::common::ConnectionPtr imageConnection;
+  public: gz::common::ConnectionPtr imageConnection;
 
   /// \brief Connection to the Manager's scene change event.
-  public: ignition::common::ConnectionPtr sceneChangeConnection;
+  public: gz::common::ConnectionPtr sceneChangeConnection;
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
@@ -163,13 +163,13 @@ bool WideAngleCameraSensor::Load(const sdf::Sensor &_sdf)
   // Check if this is the right type
   if (_sdf.Type() != sdf::SensorType::WIDE_ANGLE_CAMERA)
   {
-    ignerr << "Attempting to a load a Wide Angle Camera sensor, but received "
+    gzerr << "Attempting to a load a Wide Angle Camera sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
   }
 
   if (_sdf.CameraSensor() == nullptr)
   {
-    ignerr << "Attempting to a load a Wide Angle Camera sensor, but received "
+    gzerr << "Attempting to a load a Wide Angle Camera sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -178,17 +178,17 @@ bool WideAngleCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the image publisher
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+      this->dataPtr->node.Advertise<gz::msgs::Image>(
           this->Topic());
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic["
+    gzerr << "Unable to create publisher on topic["
       << this->Topic() << "].\n";
     return false;
   }
 
-  igndbg << "Wide angle camera images for [" << this->Name()
+  gzdbg << "Wide angle camera images for [" << this->Name()
          << "] advertised on [" << this->Topic() << "]" << std::endl;
 
   if (!this->AdvertiseInfo())
@@ -214,7 +214,7 @@ bool WideAngleCameraSensor::CreateCamera()
   const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
   if (!cameraSdf)
   {
-    ignerr << "Unable to access camera SDF element.\n";
+    gzerr << "Unable to access camera SDF element.\n";
     return false;
   }
 
@@ -227,7 +227,7 @@ bool WideAngleCameraSensor::CreateCamera()
 
   if (!this->dataPtr->camera)
   {
-    ignerr << "Failed to create wide angle camera" << std::endl;
+    gzerr << "Failed to create wide angle camera" << std::endl;
     return false;
   }
   this->dataPtr->camera->SetImageWidth(width);
@@ -300,7 +300,7 @@ bool WideAngleCameraSensor::CreateCamera()
     }
     else if (noiseSdf.Type() != sdf::NoiseType::NONE)
     {
-      ignwarn << "The camera sensor only supports Gaussian noise. "
+      gzwarn << "The camera sensor only supports Gaussian noise. "
        << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
        << "] is not supported." << std::endl;
     }
@@ -318,10 +318,10 @@ bool WideAngleCameraSensor::CreateCamera()
   switch (pixelFormat)
   {
     case sdf::PixelFormatType::RGB_INT8:
-      this->dataPtr->camera->SetImageFormat(ignition::rendering::PF_R8G8B8);
+      this->dataPtr->camera->SetImageFormat(gz::rendering::PF_R8G8B8);
       break;
     default:
-      ignerr << "Unsupported pixel format ["
+      gzerr << "Unsupported pixel format ["
         << static_cast<int>(pixelFormat) << "]\n";
       break;
   }
@@ -364,8 +364,8 @@ void WideAngleCameraSensor::OnNewWideAngleFrame(
 }
 
 /////////////////////////////////////////////////
-ignition::common::ConnectionPtr WideAngleCameraSensor::ConnectImageCallback(
-    std::function<void(const ignition::msgs::Image &)> _callback)
+gz::common::ConnectionPtr WideAngleCameraSensor::ConnectImageCallback(
+    std::function<void(const gz::msgs::Image &)> _callback)
 {
   return this->dataPtr->imageEvent.Connect(_callback);
 }
@@ -377,7 +377,7 @@ rendering::WideAngleCameraPtr WideAngleCameraSensor::WideAngleCamera() const
 }
 
 /////////////////////////////////////////////////
-void WideAngleCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
+void WideAngleCameraSensor::SetScene(gz::rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
@@ -398,13 +398,13 @@ bool WideAngleCameraSensor::Update(
   IGN_PROFILE("WideAngleCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
   if (!this->dataPtr->camera)
   {
-    ignerr << "WideAngleCamera doesn't exist.\n";
+    gzerr << "WideAngleCamera doesn't exist.\n";
     return false;
   }
 
@@ -418,7 +418,7 @@ bool WideAngleCameraSensor::Update(
   {
     if (this->dataPtr->generatingData)
     {
-      igndbg << "Disabling camera sensor: '" << this->Name() << "' data "
+      gzdbg << "Disabling camera sensor: '" << this->Name() << "' data "
              << "generation. " << std::endl;;
       this->dataPtr->generatingData = false;
     }
@@ -429,7 +429,7 @@ bool WideAngleCameraSensor::Update(
   {
     if (!this->dataPtr->generatingData)
     {
-      igndbg << "Enabling camera sensor: '" << this->Name() << "' data "
+      gzdbg << "Enabling camera sensor: '" << this->Name() << "' data "
              << "generation." << std::endl;;
       this->dataPtr->generatingData = true;
     }
@@ -444,7 +444,7 @@ bool WideAngleCameraSensor::Update(
   unsigned int width = this->dataPtr->camera->ImageWidth();
   unsigned int height = this->dataPtr->camera->ImageHeight();
 
-  ignition::common::Image::PixelFormatType
+  gz::common::Image::PixelFormatType
       format{common::Image::UNKNOWN_PIXEL_FORMAT};
   msgs::PixelFormatType msgsPixelFormat =
     msgs::PixelFormatType::UNKNOWN_PIXEL_FORMAT;
@@ -453,12 +453,12 @@ bool WideAngleCameraSensor::Update(
   auto renderingFormat = this->dataPtr->camera->ImageFormat();
   switch (renderingFormat)
   {
-    case ignition::rendering::PF_R8G8B8:
-      format = ignition::common::Image::RGB_INT8;
+    case gz::rendering::PF_R8G8B8:
+      format = gz::common::Image::RGB_INT8;
       msgsPixelFormat = msgs::PixelFormatType::RGB_INT8;
       break;
     default:
-      ignerr << "Unsupported pixel format ["
+      gzerr << "Unsupported pixel format ["
         << this->dataPtr->camera->ImageFormat() << "]\n";
       break;
   }
@@ -466,7 +466,7 @@ bool WideAngleCameraSensor::Update(
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   // create message
-  ignition::msgs::Image msg;
+  gz::msgs::Image msg;
   {
     IGN_PROFILE("WideAngleCameraSensor::Update Message");
     msg.set_width(width);
@@ -502,7 +502,7 @@ bool WideAngleCameraSensor::Update(
     }
     catch(...)
     {
-      ignerr << "Exception thrown in an image callback.\n";
+      gzerr << "Exception thrown in an image callback.\n";
     }
   }
 
@@ -518,12 +518,12 @@ bool WideAngleCameraSensor::Update(
 //////////////////////////////////////////////////
 bool WideAngleCameraSensorPrivate::SaveImage(const unsigned char *_data,
     unsigned int _width, unsigned int _height,
-    ignition::common::Image::PixelFormatType _format)
+    gz::common::Image::PixelFormatType _format)
 {
   // Attempt to create the directory if it doesn't exist
-  if (!ignition::common::isDirectory(this->saveImagePath))
+  if (!gz::common::isDirectory(this->saveImagePath))
   {
-    if (!ignition::common::createDirectories(this->saveImagePath))
+    if (!gz::common::createDirectories(this->saveImagePath))
       return false;
   }
 
@@ -531,11 +531,11 @@ bool WideAngleCameraSensorPrivate::SaveImage(const unsigned char *_data,
                          std::to_string(this->saveImageCounter) + ".png";
   ++this->saveImageCounter;
 
-  ignition::common::Image localImage;
+  gz::common::Image localImage;
   localImage.SetFromData(_data, _width, _height, _format);
 
   localImage.SavePNG(
-      ignition::common::joinPaths(this->saveImagePath, filename));
+      gz::common::joinPaths(this->saveImagePath, filename));
   return true;
 }
 

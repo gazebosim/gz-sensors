@@ -51,12 +51,12 @@
 #include "gz/sensors/Export.hh"
 #include "gz/sensors/RenderingSensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief forward declarations
     class CameraSensorPrivate;
@@ -68,7 +68,7 @@ namespace ignition
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
-    class IGNITION_SENSORS_CAMERA_VISIBLE CameraSensor : public RenderingSensor
+    class GZ_SENSORS_CAMERA_VISIBLE CameraSensor : public RenderingSensor
     {
       /// \brief constructor
       public: CameraSensor();
@@ -106,14 +106,14 @@ namespace ignition
       /// \remark Do not block inside of the callback.
       /// \return A connection pointer that must remain in scope. When the
       /// connection pointer falls out of scope, the connection is broken.
-      public: ignition::common::ConnectionPtr ConnectImageCallback(
+      public: gz::common::ConnectionPtr ConnectImageCallback(
                   std::function<
-                  void(const ignition::msgs::Image &)> _callback);
+                  void(const gz::msgs::Image &)> _callback);
 
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
       public: virtual void SetScene(
-                  ignition::rendering::ScenePtr _scene) override;
+                  gz::rendering::ScenePtr _scene) override;
 
       /// \brief Get image width.
       /// \return width of the image
@@ -124,7 +124,7 @@ namespace ignition
       public: virtual unsigned int ImageHeight() const;
 
       /// \brief Get pointer to rendering camera object.
-      /// \return Camera in Ignition Rendering.
+      /// \return Camera in Gazebo Rendering.
       public: virtual rendering::CameraPtr RenderingCamera() const;
 
       /// \brief Topic where camera info is published.
@@ -173,7 +173,7 @@ namespace ignition
       /// \brief Callback that is triggered when the scene changes on
       /// the Manager.
       /// \param[in] _scene Pointer to the new scene.
-      private: void OnSceneChange(ignition::rendering::ScenePtr /*_scene*/);
+      private: void OnSceneChange(gz::rendering::ScenePtr /*_scene*/);
 
       IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

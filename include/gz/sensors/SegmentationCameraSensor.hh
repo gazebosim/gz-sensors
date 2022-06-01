@@ -22,7 +22,6 @@
 #include <string>
 
 #include <gz/common/Event.hh>
-#include <gz/common/PluginMacros.hh>
 #include <gz/utils/SuppressWarning.hh>
 #include <gz/msgs.hh>
 #include <gz/transport/Node.hh>
@@ -35,12 +34,12 @@
 
 #include "gz/sensors/segmentation_camera/Export.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     // forward declarations
     class SegmentationCameraSensorPrivate;
 
@@ -51,7 +50,7 @@ namespace ignition
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-    class IGNITION_SENSORS_SEGMENTATION_CAMERA_VISIBLE
+    class GZ_SENSORS_SEGMENTATION_CAMERA_VISIBLE
       SegmentationCameraSensor : public CameraSensor
     {
       /// \brief constructor
@@ -102,13 +101,13 @@ namespace ignition
       /// \remark Do not block inside of the callback.
       /// \return A connection pointer that must remain in scope. When the
       /// connection pointer falls out of scope, the connection is broken.
-      public: ignition::common::ConnectionPtr ConnectImageCallback(
-                  std::function<void(const ignition::msgs::Image &)> _callback);
+      public: gz::common::ConnectionPtr ConnectImageCallback(
+                  std::function<void(const gz::msgs::Image &)> _callback);
 
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
       public: virtual void SetScene(
-                  ignition::rendering::ScenePtr _scene) override;
+                  gz::rendering::ScenePtr _scene) override;
 
       /// \brief Get image width.
       /// \return width of the image

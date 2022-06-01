@@ -31,12 +31,12 @@
 
 #include "gz/sensors/Sensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief forward declarations
     class ForceTorqueSensorPrivate;
@@ -44,7 +44,7 @@ namespace ignition
     /// \brief Force Torque Sensor Class
     ///
     /// A force-torque Sensor that reports force and torque applied on a joint.
-    class IGNITION_SENSORS_FORCE_TORQUE_VISIBLE ForceTorqueSensor
+    class GZ_SENSORS_FORCE_TORQUE_VISIBLE ForceTorqueSensor
         : public Sensor
     {
       /// \brief constructor

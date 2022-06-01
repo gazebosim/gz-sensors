@@ -29,19 +29,19 @@
 
 #include <sdf/sdf.hh>
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
+    inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     // Forward declarations
     class DistortionPrivate;
 
     /// \class DistortionFactory Distortion.hh gz/sensors/Distortion.hh
     /// \brief Use this distortion manager for creating and loading distortion
     /// models.
-    class IGNITION_SENSORS_VISIBLE DistortionFactory
+    class GZ_SENSORS_VISIBLE DistortionFactory
     {
       /// \brief Load a distortion model based on the input sdf parameters and
       /// sensor type.
@@ -66,7 +66,7 @@ namespace ignition
     };
 
     /// \brief Which distortion types we support
-    enum class IGNITION_SENSORS_VISIBLE DistortionType : int
+    enum class GZ_SENSORS_VISIBLE DistortionType : int
     {
       NONE = 0,
       CUSTOM = 1,
@@ -75,7 +75,7 @@ namespace ignition
 
     /// \class Distortion Distortion.hh gz/sensors/Distortion.hh
     /// \brief Distortion models for sensor output signals.
-    class IGNITION_SENSORS_VISIBLE Distortion
+    class GZ_SENSORS_VISIBLE Distortion
     {
       /// \brief Constructor. This should not be called directly unless creating
       /// an empty distortion model. Use DistortionFactory::NewDistortionModel
