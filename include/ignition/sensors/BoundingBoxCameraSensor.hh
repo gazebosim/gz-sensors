@@ -18,24 +18,13 @@
 #ifndef IGNITION_SENSORS_BOUNDINGBOXCAMERASENSOR_HH_
 #define IGNITION_SENSORS_BOUNDINGBOXCAMERASENSOR_HH_
 
-#include <string>
 #include <memory>
 #include <vector>
 
-#include <sdf/sdf.hh>
-#include <ignition/common/Event.hh>
-#include <ignition/common/PluginMacros.hh>
-#include <ignition/common/SuppressWarning.hh>
-#include <ignition/common/Time.hh>
-#include <ignition/msgs.hh>
 #include <ignition/rendering/BoundingBoxCamera.hh>
-#include <ignition/transport/Node.hh>
-#include <ignition/transport/Publisher.hh>
+#include <sdf/Sensor.hh>
 
 #include "ignition/sensors/CameraSensor.hh"
-#include "ignition/sensors/Export.hh"
-#include "ignition/sensors/Sensor.hh"
-
 #include "ignition/sensors/boundingbox_camera/Export.hh"
 
 namespace ignition
@@ -79,7 +68,7 @@ namespace ignition
 
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
-      /// \return true if the update was successfull
+      /// \return true if the update was successful
       public: virtual bool Update(
         const std::chrono::steady_clock::duration &_now) override;
 
@@ -106,13 +95,14 @@ namespace ignition
       /// \return height of the image
       public: virtual unsigned int ImageHeight() const override;
 
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Garden
+      public: bool HasConnections() const;
+
       /// \brief Create a camera in a scene
       /// \return True on success.
       private: bool CreateCamera();
-
-      /// \brief Create boxes publisher & rgb image publisher
-      /// \return True on success.
-      private: bool CreatePublishers();
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

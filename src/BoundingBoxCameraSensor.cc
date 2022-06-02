@@ -15,20 +15,21 @@
  *
 */
 
-#include "ignition/sensors/BoundingBoxCameraSensor.hh"
-
-#include <memory>
 #include <mutex>
+
+#include <ignition/msgs/image.pb.h>
+#include <ignition/msgs/annotated_axis_aligned_2d_box.pb.h>
+#include <ignition/msgs/annotated_oriented_3d_box.pb.h>
 
 #include <ignition/common/Console.hh>
 #include <ignition/common/Image.hh>
 #include <ignition/common/Profiler.hh>
 #include <ignition/common/Util.hh>
-#include <ignition/msgs.hh>
 #include <ignition/rendering/BoundingBoxCamera.hh>
 #include <ignition/transport/Node.hh>
 #include <ignition/transport/Publisher.hh>
 
+#include "ignition/sensors/BoundingBoxCameraSensor.hh"
 #include "ignition/sensors/RenderingEvents.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
@@ -47,14 +48,14 @@ class ignition::sensors::BoundingBoxCameraSensorPrivate
   public: sdf::Sensor sdfSensor;
 
   /// \brief True if Load() has been called and was successful
-  public: bool initialized = false;
+  public: bool initialized{false};
 
   /// \brief Rendering BoundingBox Camera
-  public: rendering::BoundingBoxCameraPtr boundingboxCamera {nullptr};
+  public: rendering::BoundingBoxCameraPtr boundingboxCamera{nullptr};
 
   /// \brief Rendering RGB Camera to draw boxes on it and publish
   /// its image (just for visualization)
-  public: rendering::CameraPtr rgbCamera {nullptr};
+  public: rendering::CameraPtr rgbCamera{nullptr};
 
   /// \brief Node to create publisher
   public: transport::Node node;
@@ -65,32 +66,14 @@ class ignition::sensors::BoundingBoxCameraSensorPrivate
   /// \brief Publisher to publish BoundingBoxes msg
   public: transport::Node::Publisher boxesPublisher;
 
-  /// \brief Image msg with drawn boxes on it
-  public: msgs::Image imageMsg;
-
-  /// \brief 2D axis aligned bounding boxes msg
-  public: msgs::AnnotatedAxisAligned2DBox_V boxes2DMsg;
-
-  /// \brief 3D oreinted bounding boxes msg
-  public: msgs::AnnotatedOriented3DBox_V boxes3DMsg;
-
-  /// \brief Topic to publish the bounding box msg
-  public: std::string topicBoundingBoxes = "";
-
-  /// \brief Topic to publish the image with drawn boxes
-  public: std::string topicImage = "";
-
   /// \brief Vector to receive boxes from the rendering camera
   public: std::vector<rendering::BoundingBox> boundingBoxes;
 
   /// \brief RGB Image to draw boxes on it
   public: rendering::Image image;
 
-  /// \brief Buffer contains the image data with drawn boxes
-  public: unsigned char *imageBuffer {nullptr};
-
   /// \brief Buffer contains the image data to be saved
-  public: unsigned char *saveImageBuffer {nullptr};
+  public: unsigned char *saveImageBuffer{nullptr};
 
   /// \brief Connection to the new BoundingBox frames data
   public: common::ConnectionPtr newBoundingBoxConnection;
@@ -106,24 +89,24 @@ class ignition::sensors::BoundingBoxCameraSensorPrivate
     {rendering::BoundingBoxType::BBT_VISIBLEBOX2D};
 
   /// \brief True to save images & boxes
-  public: bool saveSample = false;
+  public: bool saveSample{false};
 
   /// \brief path directory to where images & boxes are saved
-  public: std::string savePath = "./";
+  public: std::string savePath{"./"};
 
   /// \brief Folder to save the image
-  public: std::string saveImageFolder = "/images";
+  public: std::string saveImageFolder{"/images"};
 
   /// \brief Folder to save the bounding boxes
-  public: std::string saveBoxesFolder = "/boxes";
+  public: std::string saveBoxesFolder{"/boxes"};
 
   /// \brief counter used to set the sample filename
-  public: std::uint64_t saveCounter = 0;
+  public: std::uint64_t saveCounter{0};
 };
 
 //////////////////////////////////////////////////
 BoundingBoxCameraSensor::BoundingBoxCameraSensor()
-  : CameraSensor(), dataPtr(new BoundingBoxCameraSensorPrivate)
+  : CameraSensor(), dataPtr(std::make_unique<BoundingBoxCameraSensorPrivate>())
 {
 }
 
@@ -196,47 +179,42 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
 
   this->dataPtr->sdfSensor = _sdf;
 
-  this->dataPtr->topicBoundingBoxes = this->Topic();
-  this->dataPtr->topicImage = this->Topic() + "_image";
+  auto topicBoundingBoxes = this->Topic();
+  auto topicImage = this->Topic() + "_image";
 
   this->dataPtr->imagePublisher =
-    this->dataPtr->node.Advertise<ignition::msgs::Image>(
-      this->dataPtr->topicImage);
+    this->dataPtr->node.Advertise<msgs::Image>(topicImage);
 
   if (!this->dataPtr->imagePublisher)
   {
     ignerr << "Unable to create publisher on topic ["
-      << this->dataPtr->topicImage << "].\n";
+      << topicImage << "].\n";
     return false;
   }
 
   igndbg << "Camera images for [" << this->Name() << "] advertised on ["
-    << this->dataPtr->topicImage << "]" << std::endl;
+    << topicImage << "]" << std::endl;
 
   if (this->dataPtr->type == rendering::BoundingBoxType::BBT_BOX3D)
   {
-    this->dataPtr->boxesPublisher =
-      this->dataPtr->node.Advertise<
-      ignition::msgs::AnnotatedOriented3DBox_V>(
-      this->dataPtr->topicBoundingBoxes);
+    this->dataPtr->boxesPublisher = this->dataPtr->node.Advertise<
+      msgs::AnnotatedOriented3DBox_V>(topicBoundingBoxes);
   }
   else
   {
-    this->dataPtr->boxesPublisher =
-      this->dataPtr->node.Advertise<
-      ignition::msgs::AnnotatedAxisAligned2DBox_V>(
-      this->dataPtr->topicBoundingBoxes);
+    this->dataPtr->boxesPublisher = this->dataPtr->node.Advertise<
+      msgs::AnnotatedAxisAligned2DBox_V>(topicBoundingBoxes);
   }
 
   if (!this->dataPtr->boxesPublisher)
   {
     ignerr << "Unable to create publisher on topic ["
-      << this->dataPtr->topicBoundingBoxes << "].\n";
+      << topicBoundingBoxes << "].\n";
     return false;
   }
 
   igndbg << "Bounding boxes for [" << this->Name() << "] advertised on ["
-    << this->dataPtr->topicBoundingBoxes << std::endl;
+    << topicBoundingBoxes << std::endl;
 
   if (!this->AdvertiseInfo())
     return false;
@@ -258,7 +236,7 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
 
 /////////////////////////////////////////////////
 void BoundingBoxCameraSensor::SetScene(
-  ignition::rendering::ScenePtr _scene)
+  rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
@@ -349,7 +327,7 @@ bool BoundingBoxCameraSensor::CreateCamera()
 
     // Set the save counter to be equal number of images in the folder + 1
     // to continue adding to the images in the folder (multi scene datasets)
-    if (ignition::common::isDirectory(this->dataPtr->saveImageFolder))
+    if (common::isDirectory(this->dataPtr->saveImageFolder))
     {
       common::DirIter endIter;
       for (common::DirIter dirIter(this->dataPtr->saveImageFolder);
@@ -380,11 +358,11 @@ rendering::BoundingBoxCameraPtr
 
 /////////////////////////////////////////////////
 void BoundingBoxCameraSensor::OnNewBoundingBoxes(
-  const std::vector<rendering::BoundingBox> &boxes)
+  const std::vector<rendering::BoundingBox> &_boxes)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   this->dataPtr->boundingBoxes.clear();
-  for (const auto &box : boxes)
+  for (const auto &box : _boxes)
     this->dataPtr->boundingBoxes.push_back(box);
 }
 
@@ -424,7 +402,7 @@ bool BoundingBoxCameraSensor::Update(
   // Render the rgb camera
   this->dataPtr->rgbCamera->Copy(this->dataPtr->image);
 
-  this->dataPtr->imageBuffer = this->dataPtr->image.Data<unsigned char>();
+  auto imageBuffer = this->dataPtr->image.Data<unsigned char>();
 
   if (this->dataPtr->saveSample)
   {
@@ -432,7 +410,7 @@ bool BoundingBoxCameraSensor::Update(
     if (!this->dataPtr->saveImageBuffer)
       this->dataPtr->saveImageBuffer = new uint8_t[bufferSize];
 
-    memcpy(this->dataPtr->saveImageBuffer, this->dataPtr->imageBuffer,
+    memcpy(this->dataPtr->saveImageBuffer, imageBuffer,
       bufferSize);
   }
 
@@ -440,108 +418,83 @@ bool BoundingBoxCameraSensor::Update(
   for (const auto &box : this->dataPtr->boundingBoxes)
   {
     this->dataPtr->boundingboxCamera->DrawBoundingBox(
-      this->dataPtr->imageBuffer, math::Color::Green, box);
+      imageBuffer, math::Color::Green, box);
   }
 
   auto width = this->dataPtr->rgbCamera->ImageWidth();
   auto height = this->dataPtr->rgbCamera->ImageHeight();
 
   // Create Image message
-  this->dataPtr->imageMsg.set_width(width);
-  this->dataPtr->imageMsg.set_height(height);
+  msgs::Image imageMsg;
+  imageMsg.set_width(width);
+  imageMsg.set_height(height);
   // Format
-  this->dataPtr->imageMsg.set_step(
+  imageMsg.set_step(
     width * rendering::PixelUtil::BytesPerPixel(rendering::PF_R8G8B8));
-  this->dataPtr->imageMsg.set_pixel_format_type(
+  imageMsg.set_pixel_format_type(
     msgs::PixelFormatType::RGB_INT8);
   // Time stamp
-  auto stamp = this->dataPtr->imageMsg.mutable_header()->mutable_stamp();
+  auto stamp = imageMsg.mutable_header()->mutable_stamp();
   *stamp = msgs::Convert(_now);
-  auto frame = this->dataPtr->imageMsg.mutable_header()->add_data();
+  auto frame = imageMsg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->Name());
   // Image data
-  this->dataPtr->imageMsg.set_data(this->dataPtr->imageBuffer,
+  imageMsg.set_data(imageBuffer,
       rendering::PixelUtil::MemorySize(rendering::PF_R8G8B8,
       width, height));
 
   // Publish
-  this->AddSequence(this->dataPtr->imageMsg.mutable_header(), "rgbImage");
-  this->dataPtr->imagePublisher.Publish(this->dataPtr->imageMsg);
+  this->AddSequence(imageMsg.mutable_header(), "rgbImage");
+  this->dataPtr->imagePublisher.Publish(imageMsg);
+
+  msgs::AnnotatedAxisAligned2DBox_V boxes2DMsg;
+  msgs::AnnotatedOriented3DBox_V boxes3DMsg;
 
   if (this->dataPtr->type == rendering::BoundingBoxType::BBT_BOX3D)
   {
-    this->dataPtr->boxes3DMsg.Clear();
-
     // Create 3D boxes message
     for (const auto &box : this->dataPtr->boundingBoxes)
     {
       // box data
-      auto annotated_box = this->dataPtr->boxes3DMsg.add_annotated_box();
+      auto annotatedBox = boxes3DMsg.add_annotated_box();
+      annotatedBox->set_label(box.Label());
 
-      auto oriented3DBox = new msgs::Oriented3DBox();
-      auto center = new msgs::Vector3d();
-      auto size = new msgs::Vector3d();
-      auto rotation = new msgs::Quaternion();
-
-      center->set_x(box.Center().X());
-      center->set_y(box.Center().Y());
-      center->set_z(box.Center().Z());
-
-      size->set_x(box.Size().X());
-      size->set_y(box.Size().Y());
-      size->set_z(box.Size().Z());
-
-      rotation->set_x(box.Orientation().X());
-      rotation->set_y(box.Orientation().Y());
-      rotation->set_z(box.Orientation().Z());
-      rotation->set_w(box.Orientation().W());
-
-      oriented3DBox->set_allocated_center(center);
-      oriented3DBox->set_allocated_orientation(rotation);
-      oriented3DBox->set_allocated_boxsize(size);
-
-      annotated_box->set_allocated_box(oriented3DBox);
-      annotated_box->set_label(box.Label());
+      auto oriented3DBox = annotatedBox->mutable_box();
+      msgs::Set(oriented3DBox->mutable_center(), box.Center());
+      msgs::Set(oriented3DBox->mutable_boxsize(), box.Size());
+      msgs::Set(oriented3DBox->mutable_orientation(), box.Orientation());
     }
     // time stamp
     auto stampBoxes =
-      this->dataPtr->boxes3DMsg.mutable_header()->mutable_stamp();
+      boxes3DMsg.mutable_header()->mutable_stamp();
     *stampBoxes = msgs::Convert(_now);
-    auto frameBoxes = this->dataPtr->boxes3DMsg.mutable_header()->add_data();
+    auto frameBoxes = boxes3DMsg.mutable_header()->add_data();
     frameBoxes->set_key("frame_id");
     frameBoxes->add_value(this->Name());
   }
   else
   {
-    this->dataPtr->boxes2DMsg.Clear();
-
     // Create 2D boxes message
     for (const auto &box : this->dataPtr->boundingBoxes)
     {
       // box data
-      auto annotated_box = this->dataPtr->boxes2DMsg.add_annotated_box();
+      auto annotatedBox = boxes2DMsg.add_annotated_box();
+      annotatedBox->set_label(box.Label());
 
-      auto axisAlignedBox = new msgs::AxisAligned2DBox();
-      auto min_corner = new msgs::Vector2d();
-      auto max_corner = new msgs::Vector2d();
+      auto minCorner = box.Center() - box.Size() * 0.5;
+      auto maxCorner = box.Center() + box.Size() * 0.5;
 
-      min_corner->set_x(box.Center().X() - box.Size().X() / 2);
-      min_corner->set_y(box.Center().Y() - box.Size().Y() / 2);
-
-      max_corner->set_x(box.Center().X() + box.Size().X() / 2);
-      max_corner->set_y(box.Center().Y() + box.Size().Y() / 2);
-
-      axisAlignedBox->set_allocated_min_corner(min_corner);
-      axisAlignedBox->set_allocated_max_corner(max_corner);
-      annotated_box->set_allocated_box(axisAlignedBox);
-      annotated_box->set_label(box.Label());
+      auto axisAlignedBox = annotatedBox->mutable_box();
+      msgs::Set(axisAlignedBox->mutable_min_corner(),
+          {minCorner.X(), minCorner.Y()});
+      msgs::Set(axisAlignedBox->mutable_max_corner(),
+          {maxCorner.X(), maxCorner.Y()});
     }
     // time stamp
-    auto stampBoxes =
-      this->dataPtr->boxes2DMsg.mutable_header()->mutable_stamp();
+    auto stampBoxes = boxes2DMsg.mutable_header()->mutable_stamp();
     *stampBoxes = msgs::Convert(_now);
-    auto frameBoxes = this->dataPtr->boxes2DMsg.mutable_header()->add_data();
+    auto frameBoxes = boxes2DMsg.mutable_header()->add_data();
     frameBoxes->set_key("frame_id");
     frameBoxes->add_value(this->Name());
   }
@@ -552,15 +505,13 @@ bool BoundingBoxCameraSensor::Update(
   this->PublishInfo(_now);
   if (this->dataPtr->type == rendering::BoundingBoxType::BBT_BOX3D)
   {
-    this->AddSequence(
-      this->dataPtr->boxes3DMsg.mutable_header(), "boundingboxes");
-    this->dataPtr->boxesPublisher.Publish(this->dataPtr->boxes3DMsg);
+    this->AddSequence(boxes3DMsg.mutable_header(), "boundingboxes");
+    this->dataPtr->boxesPublisher.Publish(boxes3DMsg);
   }
   else
   {
-    this->AddSequence(
-      this->dataPtr->boxes2DMsg.mutable_header(), "boundingboxes");
-    this->dataPtr->boxesPublisher.Publish(this->dataPtr->boxes2DMsg);
+    this->AddSequence(boxes2DMsg.mutable_header(), "boundingboxes");
+    this->dataPtr->boxesPublisher.Publish(boxes2DMsg);
   }
 
   // Save a sample (image & its bounding boxes)
@@ -590,16 +541,24 @@ unsigned int BoundingBoxCameraSensor::ImageWidth() const
 void BoundingBoxCameraSensorPrivate::SaveImage()
 {
   // Attempt to create the save directory if it doesn't exist
-  if (!ignition::common::isDirectory(this->savePath))
+  if (!common::isDirectory(this->savePath))
   {
-    if (!ignition::common::createDirectories(this->savePath))
+    if (!common::createDirectories(this->savePath))
+    {
+      ignerr << "Failed to create directory [" << this->savePath << "]"
+             << std::endl;
       return;
+    }
   }
   // Attempt to create the image directory if it doesn't exist
-  if (!ignition::common::isDirectory(this->saveImageFolder))
+  if (!common::isDirectory(this->saveImageFolder))
   {
-    if (!ignition::common::createDirectories(this->saveImageFolder))
+    if (!common::createDirectories(this->saveImageFolder))
+    {
+      ignerr << "Failed to create directory [" << this->saveImageFolder << "]"
+             << std::endl;
       return;
+    }
   }
 
   auto width = this->rgbCamera->ImageWidth();
@@ -607,7 +566,7 @@ void BoundingBoxCameraSensorPrivate::SaveImage()
   if (width == 0 || height == 0)
     return;
 
-  ignition::common::Image localImage;
+  common::Image localImage;
 
   // Save the images in format of 0000001, 0000002 .. etc
   // Useful in sorting them in python
@@ -620,23 +579,31 @@ void BoundingBoxCameraSensorPrivate::SaveImage()
   localImage.SetFromData(this->saveImageBuffer, width, height,
       common::Image::RGB_INT8);
   localImage.SavePNG(
-      ignition::common::joinPaths(this->saveImageFolder, filename));
+      common::joinPaths(this->saveImageFolder, filename));
 }
 
 //////////////////////////////////////////////////
 void BoundingBoxCameraSensorPrivate::SaveBoxes()
 {
   // Attempt to create the save directory if it doesn't exist
-  if (!ignition::common::isDirectory(this->savePath))
+  if (!common::isDirectory(this->savePath))
   {
-    if (!ignition::common::createDirectories(this->savePath))
+    if (!common::createDirectories(this->savePath))
+    {
+      ignerr << "Failed to create directory [" << this->savePath << "]"
+             << std::endl;
       return;
+    }
   }
   // Attempt to create the boxes directory if it doesn't exist
-  if (!ignition::common::isDirectory(this->saveBoxesFolder))
+  if (!common::isDirectory(this->saveBoxesFolder))
   {
-    if (!ignition::common::createDirectories(this->saveBoxesFolder))
+    if (!common::createDirectories(this->saveBoxesFolder))
+    {
+      ignerr << "Failed to create directory [" << this->saveBoxesFolder << "]"
+             << std::endl;
       return;
+    }
   }
 
   // Save the images in format of 0000001, 0000002 .. etc
@@ -652,7 +619,7 @@ void BoundingBoxCameraSensorPrivate::SaveBoxes()
   if (this->type == rendering::BoundingBoxType::BBT_BOX3D)
   {
     file << "label,x,y,z,w,h,l,roll,pitch,yaw\n";
-    for (auto box : this->boundingBoxes)
+    for (const auto &box : this->boundingBoxes)
     {
       auto label = std::to_string(box.Label());
 
@@ -679,7 +646,7 @@ void BoundingBoxCameraSensorPrivate::SaveBoxes()
   else
   {
     file << "label,x_center,y_center,width,height\n";
-    for (auto box : this->boundingBoxes)
+    for (const auto &box : this->boundingBoxes)
     {
       auto label = std::to_string(box.Label());
 
@@ -697,4 +664,13 @@ void BoundingBoxCameraSensorPrivate::SaveBoxes()
     }
   }
   file.close();
+}
+
+//////////////////////////////////////////////////
+bool BoundingBoxCameraSensor::HasConnections() const
+{
+  return (this->dataPtr->imagePublisher &&
+      this->dataPtr->imagePublisher.HasConnections()) ||
+      (this->dataPtr->boxesPublisher &&
+      this->dataPtr->boxesPublisher.HasConnections());
 }
