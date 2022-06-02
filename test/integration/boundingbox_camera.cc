@@ -59,22 +59,22 @@ void OnNewBoundingBoxes(const msgs::AnnotatedAxisAligned2DBox_V &_boxes)
   int size = _boxes.annotated_box_size();
   for (int i = 0; i < size; ++i)
   {
-    rendering::BoundingBox box(rendering::BoundingBoxType::BBT_VISIBLEBOX2D);
+    rendering::BoundingBox box;
     auto annotated_box = _boxes.annotated_box(i);
     auto axisAlignedBox = annotated_box.box();
     auto min_corner = axisAlignedBox.min_corner();
     auto max_corner = axisAlignedBox.max_corner();
 
-    box.size.X(max_corner.x() - min_corner.x());
-    box.size.Y(max_corner.y() - min_corner.y());
-    box.size.Z(0);
+    box.SetSize({max_corner.x() - min_corner.x(),
+        max_corner.y() - min_corner.y(),
+        0});
 
-    box.center.X(min_corner.x() + box.size.X() / 2);
-    box.center.Y(min_corner.y() + box.size.Y() / 2);
-    box.center.Z(0);
+    box.SetCenter({min_corner.x() + box.Size().X() / 2,
+        min_corner.y() + box.Size().Y() / 2,
+        0});
 
-    box.orientation.Set(0, 0, 0, 0);
-    box.label = annotated_box.label();
+    box.SetOrientation({0, 0, 0});
+    box.SetLabel(annotated_box.label());
     g_boxes.push_back(box);
   }
   g_counter++;
@@ -90,21 +90,21 @@ void OnNew3DBoundingBoxes(const msgs::AnnotatedOriented3DBox_V &_boxes)
   int size = _boxes.annotated_box_size();
   for (int i = 0; i < size; ++i)
   {
-    rendering::BoundingBox box(rendering::BoundingBoxType::BBT_BOX3D);
+    rendering::BoundingBox box;
     auto annotated_box = _boxes.annotated_box(i);
     auto orientedBox = annotated_box.box();
     // center
-    box.center.Set(orientedBox.center().x(), orientedBox.center().y(),
-      orientedBox.center().z());
+    box.SetCenter({orientedBox.center().x(), orientedBox.center().y(),
+      orientedBox.center().z()});
     // orientation
     auto orientation = orientedBox.orientation();
-    box.orientation.Set(orientation.w(), orientation.x(),
-      orientation.y(), orientation.z());
+    box.SetOrientation({orientation.w(), orientation.x(),
+      orientation.y(), orientation.z()});
     // size
     auto boxSize = orientedBox.boxsize();
-    box.size.Set(boxSize.x(), boxSize.y(), boxSize.z());
+    box.SetSize({boxSize.x(), boxSize.y(), boxSize.z()});
 
-    box.label = annotated_box.label();
+    box.SetLabel(annotated_box.label());
     g_boxes.push_back(box);
   }
   g_counter++;
@@ -287,17 +287,17 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
   unsigned int frontLabel = 2;
 
   // hard-coded comparasion with acceptable error
-  EXPECT_NEAR(occludedBox.center.X(), 98, margin_error);
-  EXPECT_NEAR(occludedBox.center.Y(), 119, margin_error);
-  EXPECT_NEAR(occludedBox.size.X(), 15, margin_error);
-  EXPECT_NEAR(occludedBox.size.Y(), 45, margin_error);
-  EXPECT_EQ(occludedBox.label, occludedLabel);
+  EXPECT_NEAR(occludedBox.Center().X(), 98, margin_error);
+  EXPECT_NEAR(occludedBox.Center().Y(), 119, margin_error);
+  EXPECT_NEAR(occludedBox.Size().X(), 15, margin_error);
+  EXPECT_NEAR(occludedBox.Size().Y(), 45, margin_error);
+  EXPECT_EQ(occludedBox.Label(), occludedLabel);
 
-  EXPECT_NEAR(frontBox.center.X(), 159, margin_error);
-  EXPECT_NEAR(frontBox.center.Y(), 119, margin_error);
-  EXPECT_NEAR(frontBox.size.X(), 105, margin_error);
-  EXPECT_NEAR(frontBox.size.Y(), 105, margin_error);
-  EXPECT_EQ(frontBox.label, frontLabel);
+  EXPECT_NEAR(frontBox.Center().X(), 159, margin_error);
+  EXPECT_NEAR(frontBox.Center().Y(), 119, margin_error);
+  EXPECT_NEAR(frontBox.Size().X(), 105, margin_error);
+  EXPECT_NEAR(frontBox.Size().Y(), 105, margin_error);
+  EXPECT_EQ(frontBox.Label(), frontLabel);
 
   g_mutex.unlock();
 
@@ -318,17 +318,17 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
   rendering::BoundingBox frontFullBox = g_boxes[1];
 
   // coordinates of partially occluded object is bigger
-  EXPECT_NEAR(occludedFullBox.center.X(), 116, margin_error);
-  EXPECT_NEAR(occludedFullBox.center.Y(), 119, margin_error);
-  EXPECT_NEAR(occludedFullBox.size.X(), 51, margin_error);
-  EXPECT_NEAR(occludedFullBox.size.Y(), 45, margin_error);
-  EXPECT_EQ(occludedFullBox.label, occludedLabel);
+  EXPECT_NEAR(occludedFullBox.Center().X(), 116, margin_error);
+  EXPECT_NEAR(occludedFullBox.Center().Y(), 119, margin_error);
+  EXPECT_NEAR(occludedFullBox.Size().X(), 51, margin_error);
+  EXPECT_NEAR(occludedFullBox.Size().Y(), 45, margin_error);
+  EXPECT_EQ(occludedFullBox.Label(), occludedLabel);
 
-  EXPECT_NEAR(frontFullBox.center.X(), 159, margin_error);
-  EXPECT_NEAR(frontFullBox.center.Y(), 119, margin_error);
-  EXPECT_NEAR(frontFullBox.size.X(), 108, margin_error);
-  EXPECT_NEAR(frontFullBox.size.Y(), 108, margin_error);
-  EXPECT_EQ(frontFullBox.label, frontLabel);
+  EXPECT_NEAR(frontFullBox.Center().X(), 159, margin_error);
+  EXPECT_NEAR(frontFullBox.Center().Y(), 119, margin_error);
+  EXPECT_NEAR(frontFullBox.Size().X(), 108, margin_error);
+  EXPECT_NEAR(frontFullBox.Size().Y(), 108, margin_error);
+  EXPECT_EQ(frontFullBox.Label(), frontLabel);
 
   g_mutex.unlock();
 
@@ -429,18 +429,18 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   rendering::BoundingBox box3D = g_boxes[0];
 
   double margin_error = 0.01;
-  EXPECT_NEAR(box3D.center.X(), 0, margin_error);
-  EXPECT_NEAR(box3D.center.Y(), 0, margin_error);
-  EXPECT_NEAR(box3D.center.Z(), -2, margin_error);
+  EXPECT_NEAR(box3D.Center().X(), 0, margin_error);
+  EXPECT_NEAR(box3D.Center().Y(), 0, margin_error);
+  EXPECT_NEAR(box3D.Center().Z(), -2, margin_error);
 
-  EXPECT_NEAR(box3D.size.X(), 1, margin_error);
-  EXPECT_NEAR(box3D.size.Y(), 1, margin_error);
-  EXPECT_NEAR(box3D.size.Z(), 1, margin_error);
+  EXPECT_NEAR(box3D.Size().X(), 1, margin_error);
+  EXPECT_NEAR(box3D.Size().Y(), 1, margin_error);
+  EXPECT_NEAR(box3D.Size().Z(), 1, margin_error);
 
-  EXPECT_NEAR(box3D.orientation.X(), 0.322329, margin_error);
-  EXPECT_NEAR(box3D.orientation.Y(), -0.886405, margin_error);
-  EXPECT_NEAR(box3D.orientation.Z(), -0.0805823, margin_error);
-  EXPECT_NEAR(box3D.orientation.W(), -0.322329, margin_error);
+  EXPECT_NEAR(box3D.Orientation().X(), 0.322329, margin_error);
+  EXPECT_NEAR(box3D.Orientation().Y(), -0.886405, margin_error);
+  EXPECT_NEAR(box3D.Orientation().Z(), -0.0805823, margin_error);
+  EXPECT_NEAR(box3D.Orientation().W(), -0.322329, margin_error);
 
   g_mutex.unlock();
 

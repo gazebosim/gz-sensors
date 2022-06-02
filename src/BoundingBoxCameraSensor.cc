@@ -440,7 +440,7 @@ bool BoundingBoxCameraSensor::Update(
   for (const auto &box : this->dataPtr->boundingBoxes)
   {
     this->dataPtr->boundingboxCamera->DrawBoundingBox(
-      this->dataPtr->imageBuffer, box);
+      this->dataPtr->imageBuffer, math::Color::Green, box);
   }
 
   auto width = this->dataPtr->rgbCamera->ImageWidth();
@@ -484,25 +484,25 @@ bool BoundingBoxCameraSensor::Update(
       auto size = new msgs::Vector3d();
       auto rotation = new msgs::Quaternion();
 
-      center->set_x(box.center.X());
-      center->set_y(box.center.Y());
-      center->set_z(box.center.Z());
+      center->set_x(box.Center().X());
+      center->set_y(box.Center().Y());
+      center->set_z(box.Center().Z());
 
-      size->set_x(box.size.X());
-      size->set_y(box.size.Y());
-      size->set_z(box.size.Z());
+      size->set_x(box.Size().X());
+      size->set_y(box.Size().Y());
+      size->set_z(box.Size().Z());
 
-      rotation->set_x(box.orientation.X());
-      rotation->set_y(box.orientation.Y());
-      rotation->set_z(box.orientation.Z());
-      rotation->set_w(box.orientation.W());
+      rotation->set_x(box.Orientation().X());
+      rotation->set_y(box.Orientation().Y());
+      rotation->set_z(box.Orientation().Z());
+      rotation->set_w(box.Orientation().W());
 
       oriented3DBox->set_allocated_center(center);
       oriented3DBox->set_allocated_orientation(rotation);
       oriented3DBox->set_allocated_boxsize(size);
 
       annotated_box->set_allocated_box(oriented3DBox);
-      annotated_box->set_label(box.label);
+      annotated_box->set_label(box.Label());
     }
     // time stamp
     auto stampBoxes =
@@ -526,16 +526,16 @@ bool BoundingBoxCameraSensor::Update(
       auto min_corner = new msgs::Vector2d();
       auto max_corner = new msgs::Vector2d();
 
-      min_corner->set_x(box.center.X() - box.size.X() / 2);
-      min_corner->set_y(box.center.Y() - box.size.Y() / 2);
+      min_corner->set_x(box.Center().X() - box.Size().X() / 2);
+      min_corner->set_y(box.Center().Y() - box.Size().Y() / 2);
 
-      max_corner->set_x(box.center.X() + box.size.X() / 2);
-      max_corner->set_y(box.center.Y() + box.size.Y() / 2);
+      max_corner->set_x(box.Center().X() + box.Size().X() / 2);
+      max_corner->set_y(box.Center().Y() + box.Size().Y() / 2);
 
       axisAlignedBox->set_allocated_min_corner(min_corner);
       axisAlignedBox->set_allocated_max_corner(max_corner);
       annotated_box->set_allocated_box(axisAlignedBox);
-      annotated_box->set_label(box.label);
+      annotated_box->set_label(box.Label());
     }
     // time stamp
     auto stampBoxes =
@@ -654,19 +654,19 @@ void BoundingBoxCameraSensorPrivate::SaveBoxes()
     file << "label,x,y,z,w,h,l,roll,pitch,yaw\n";
     for (auto box : this->boundingBoxes)
     {
-      auto label = std::to_string(box.label);
+      auto label = std::to_string(box.Label());
 
-      auto x = std::to_string(box.center.X());
-      auto y = std::to_string(box.center.Y());
-      auto z = std::to_string(box.center.Z());
+      auto x = std::to_string(box.Center().X());
+      auto y = std::to_string(box.Center().Y());
+      auto z = std::to_string(box.Center().Z());
 
-      auto w = std::to_string(box.size.X());
-      auto h = std::to_string(box.size.Y());
-      auto l = std::to_string(box.size.Z());
+      auto w = std::to_string(box.Size().X());
+      auto h = std::to_string(box.Size().Y());
+      auto l = std::to_string(box.Size().Z());
 
-      auto roll = std::to_string(box.orientation.Roll());
-      auto pitch = std::to_string(box.orientation.Pitch());
-      auto yaw = std::to_string(box.orientation.Yaw());
+      auto roll = std::to_string(box.Orientation().Roll());
+      auto pitch = std::to_string(box.Orientation().Pitch());
+      auto yaw = std::to_string(box.Orientation().Yaw());
 
       // label x y z w h l roll pitch yaw
       std::string sep = ",";
@@ -681,12 +681,12 @@ void BoundingBoxCameraSensorPrivate::SaveBoxes()
     file << "label,x_center,y_center,width,height\n";
     for (auto box : this->boundingBoxes)
     {
-      auto label = std::to_string(box.label);
+      auto label = std::to_string(box.Label());
 
-      auto x = std::to_string(box.center.X());
-      auto y = std::to_string(box.center.Y());
-      auto width = std::to_string(box.size.X());
-      auto height = std::to_string(box.size.Y());
+      auto x = std::to_string(box.Center().X());
+      auto y = std::to_string(box.Center().Y());
+      auto width = std::to_string(box.Size().X());
+      auto height = std::to_string(box.Size().Y());
 
       // label x y width height
       std::string sep = ",";
