@@ -457,7 +457,7 @@ bool ThermalCameraSensor::Update(
   *stamp = msgs::Convert(_now);
   auto frame = this->dataPtr->thermalMsg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->Name());
+  frame->add_value(this->FrameId());
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
@@ -651,3 +651,10 @@ bool ThermalCameraSensorPrivate::SaveImage(const uint16_t *_data,
   return true;
 }
 
+//////////////////////////////////////////////////
+bool ThermalCameraSensor::HasConnections() const
+{
+  return (this->dataPtr->thermalPub &&
+      this->dataPtr->thermalPub.HasConnections()) ||
+      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+}

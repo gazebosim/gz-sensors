@@ -48,6 +48,21 @@ class ignition::sensors::GpuLidarSensorPrivate
   /// \brief Connection to the Manager's scene change event.
   public: ignition::common::ConnectionPtr sceneChangeConnection;
 
+  /// \brief Event that is used to trigger callbacks when a new
+  /// lidar frame is available
+  public: ignition::common::EventT<
+          void(const float *_scan, unsigned int _width,
+               unsigned int _height, unsigned int _channels,
+               const std::string &_format)> lidarEvent;
+
+  /// \brief Callback when new lidar frame is received
+  public: void OnNewLidarFrame(const float *_scan, unsigned int _width,
+               unsigned int _height, unsigned int _channels,
+               const std::string &_format);
+
+  /// \brief Connection to gpuRays new lidar frame event
+  public: ignition::common::ConnectionPtr lidarFrameConnection;
+
   /// \brief The point cloud message.
   public: msgs::PointCloudPacked pointMsg;
 
@@ -211,10 +226,38 @@ bool GpuLidarSensor::CreateLidar()
   this->dataPtr->pointMsg.set_row_step(
       this->dataPtr->pointMsg.point_step() *
       this->dataPtr->pointMsg.width());
+  this->dataPtr->gpuRays->SetVisibilityMask(this->VisibilityMask());
+
+  this->dataPtr->lidarFrameConnection =
+      this->dataPtr->gpuRays->ConnectNewGpuRaysFrame(
+      std::bind(&GpuLidarSensor::OnNewLidarFrame, this,
+      std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+      std::placeholders::_4, std::placeholders::_5));
 
   this->AddSensor(this->dataPtr->gpuRays);
 
   return true;
+}
+
+/////////////////////////////////////////////////
+void GpuLidarSensor::OnNewLidarFrame(const float *_data,
+    unsigned int _width, unsigned int _height, unsigned int _channels,
+    const std::string &_format)
+{
+  std::lock_guard<std::mutex> lock(this->lidarMutex);
+
+  unsigned int samples = _width * _height * _channels;
+  unsigned int lidarBufferSize = samples * sizeof(float);
+
+  if (!this->laserBuffer)
+    this->laserBuffer = new float[samples];
+
+  memcpy(this->laserBuffer, _data, lidarBufferSize);
+
+  if (this->dataPtr->lidarEvent.ConnectionCount() > 0)
+  {
+    this->dataPtr->lidarEvent(_data, _width, _height, _channels, _format);
+  }
 }
 
 //////////////////////////////////////////////////
@@ -233,18 +276,7 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
     return false;
   }
 
-  int len = this->dataPtr->gpuRays->RayCount() *
-    this->dataPtr->gpuRays->VerticalRayCount() * 3;
-
-  if (this->laserBuffer == nullptr)
-  {
-    this->laserBuffer = new float[len];
-  }
-
   this->Render();
-
-  /// \todo(anyone) It would be nice to remove this copy.
-  this->dataPtr->gpuRays->Copy(this->laserBuffer);
 
   // Apply noise before publishing the data.
   this->ApplyNoise();
@@ -256,7 +288,19 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
     // Set the time stamp
     *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
       msgs::Convert(_now);
-    this->dataPtr->pointMsg.set_is_dense(true);
+    // Set frame_id
+    for (auto i = 0;
+         i < this->dataPtr->pointMsg.mutable_header()->data_size();
+         ++i)
+    {
+      if (this->dataPtr->pointMsg.mutable_header()->data(i).key() == "frame_id"
+          && this->dataPtr->pointMsg.mutable_header()->data(i).value_size() > 0)
+      {
+        this->dataPtr->pointMsg.mutable_header()->mutable_data(i)->set_value(
+              0,
+              this->FrameId());
+      }
+    }
 
     this->dataPtr->FillPointCloudMsg(this->laserBuffer);
 
@@ -275,7 +319,7 @@ ignition::common::ConnectionPtr GpuLidarSensor::ConnectNewLidarFrame(
                   unsigned int _height, unsigned int _channels,
                   const std::string &/*_format*/)> _subscriber)
 {
-  return this->dataPtr->gpuRays->ConnectNewGpuRaysFrame(_subscriber);
+  return this->dataPtr->lidarEvent.Connect(_subscriber);
 }
 
 /////////////////////////////////////////////////
@@ -303,6 +347,14 @@ ignition::math::Angle GpuLidarSensor::VFOV() const
 }
 
 //////////////////////////////////////////////////
+bool GpuLidarSensor::HasConnections() const
+{
+  return Lidar::HasConnections() ||
+     (this->dataPtr->pointPub && this->dataPtr->pointPub.HasConnections()) ||
+     this->dataPtr->lidarEvent.ConnectionCount() > 0u;
+}
+
+//////////////////////////////////////////////////
 void GpuLidarSensorPrivate::FillPointCloudMsg(const float *_laserBuffer)
 {
   IGN_PROFILE("GpuLidarSensorPrivate::FillPointCloudMsg");
@@ -326,7 +378,8 @@ void GpuLidarSensorPrivate::FillPointCloudMsg(const float *_laserBuffer)
   msgBuffer->resize(this->pointMsg.row_step() *
       this->pointMsg.height());
   char *msgBufferIndex = msgBuffer->data();
-
+  // Set Pointcloud as dense. Change if invalid points are found.
+  bool isDense { true };
   // Iterate over scan and populate point cloud
   for (uint32_t j = 0; j < height; ++j)
   {
@@ -337,6 +390,10 @@ void GpuLidarSensorPrivate::FillPointCloudMsg(const float *_laserBuffer)
       // Index of current point, and the depth value at that point
       auto index = j * width * channels + i * channels;
       float depth = _laserBuffer[index];
+      // Validate Depth/Radius and update pointcloud density flag
+      if (isDense)
+        isDense = !(ignition::math::isnan(depth) || std::isinf(depth));
+
       float intensity = _laserBuffer[index + 1];
       uint16_t ring = j;
 
@@ -371,5 +428,5 @@ void GpuLidarSensorPrivate::FillPointCloudMsg(const float *_laserBuffer)
     }
     inclination += verticleAngleStep;
   }
+  this->pointMsg.set_is_dense(isDense);
 }
-

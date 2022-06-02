@@ -5,6 +5,14 @@ Deprecated code produces compile-time warnings. These warning serve as
 notification to users that their code should be upgraded. The next major
 release will remove the deprecated code.
 
+## Ignition Sensors 6.0.1 to 6.1.0
+
+### Modifications
+
+1. Point Cloud Density flag (**is_dense** from GpuLidarSensor) is set to **false**
+   if invalid points (NaN or +/-INF) are found, and **true** otherwise.
+
+
 ## Ignition Sensors 5.X to 6.X
 
 1. Sensors aren't loaded as plugins anymore. Instead, downstream libraries must

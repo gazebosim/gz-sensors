@@ -545,28 +545,30 @@ bool DepthCameraSensor::Update(
   *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->Name());
+  frame->add_value(this->FrameId());
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   msg.set_data(this->dataPtr->depthBuffer,
       rendering::PixelUtil::MemorySize(rendering::PF_FLOAT32_R,
       width, height));
 
-  // publish
   this->AddSequence(msg.mutable_header(), "default");
   this->dataPtr->pub.Publish(msg);
 
   // publish the camera info message
   this->PublishInfo(_now);
 
-  // Trigger callbacks.
-  try
+  if (this->dataPtr->imageEvent.ConnectionCount() > 0u)
   {
-    this->dataPtr->imageEvent(msg);
-  }
-  catch(...)
-  {
-    ignerr << "Exception thrown in an image callback.\n";
+    // Trigger callbacks.
+    try
+    {
+      this->dataPtr->imageEvent(msg);
+    }
+    catch(...)
+    {
+      ignerr << "Exception thrown in an image callback.\n";
+    }
   }
 
   if (this->dataPtr->pointPub.HasConnections() &&
@@ -632,3 +634,10 @@ double DepthCameraSensor::NearClip() const
   return this->dataPtr->near;
 }
 
+//////////////////////////////////////////////////
+bool DepthCameraSensor::HasConnections() const
+{
+  return (this->dataPtr->pub && this->dataPtr->pub.HasConnections()) ||
+      (this->dataPtr->pointPub && this->dataPtr->pointPub.HasConnections()) ||
+      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+}

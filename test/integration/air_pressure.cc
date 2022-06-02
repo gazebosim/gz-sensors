@@ -170,11 +170,11 @@ TEST_F(AirPressureSensorTest, SensorReadings)
       sensorPose, updateRate, topicNoise, alwaysOn, visualize, 1.0, 0.2, 10.0);
 
   // create the sensor using sensor factory
-  // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
   auto sensor = sf.CreateSensor<ignition::sensors::AirPressureSensor>(
       airPressureSdf);
   ASSERT_NE(nullptr, sensor);
+  EXPECT_FALSE(sensor->HasConnections());
 
   auto sensorNoise = sf.CreateSensor<ignition::sensors::AirPressureSensor>(
       airPressureSdfNoise);
@@ -193,11 +193,12 @@ TEST_F(AirPressureSensorTest, SensorReadings)
   EXPECT_DOUBLE_EQ(vertRef, sensor->ReferenceAltitude());
   EXPECT_DOUBLE_EQ(vertRef, sensorNoise->ReferenceAltitude());
 
-  sensor->SetPose(sensorNoise->Pose() +
-      ignition::math::Pose3d(0, 0, 1.5, 0, 0, 0));
+  sensor->SetPose(
+      ignition::math::Pose3d(0, 0, 1.5, 0, 0, 0) * sensorNoise->Pose());
 
   // verify msg received on the topic
   WaitForMessageTestHelper<ignition::msgs::FluidPressure> msgHelper(topic);
+  EXPECT_TRUE(sensor->HasConnections());
   sensor->Update(std::chrono::steady_clock::duration(std::chrono::seconds(1)));
   EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
   auto msg = msgHelper.Message();

@@ -230,6 +230,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   ignition::sensors::DepthCameraSensor *depthSensor =
       mgr.CreateSensor<ignition::sensors::DepthCameraSensor>(sensorPtr);
   ASSERT_NE(depthSensor, nullptr);
+  EXPECT_FALSE(depthSensor->HasConnections());
   depthSensor->SetScene(scene);
 
   EXPECT_EQ(depthSensor->ImageWidth(), static_cast<unsigned int>(imgWidth));
@@ -240,6 +241,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   std::string topic =
     "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/image";
   WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
+  EXPECT_TRUE(depthSensor->HasConnections());
 
   std::string pointsTopic =
     "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/image/points";

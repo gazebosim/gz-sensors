@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
 #============================================================================
 # Initialize the project
 #============================================================================
-project(ignition-sensors6 VERSION 6.0.0)
+project(ignition-sensors6 VERSION 6.5.0)
 
 #============================================================================
 # Find ignition-cmake
@@ -13,7 +13,7 @@ find_package(ignition-cmake2 2.8.0 REQUIRED)
 #============================================================================
 # Configure the project
 #============================================================================
-ign_configure_project(VERSION_SUFFIX pre1)
+ign_configure_project(VERSION_SUFFIX)
 
 #============================================================================
 # Set project-specific options
@@ -60,7 +60,13 @@ set(IGN_TRANSPORT_VER ${ignition-transport11_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-rendering
-ign_find_package(ignition-rendering6 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
+
+# See CMP0072 for more details (cmake --help-policy CMP0072)
+if ((NOT ${CMAKE_VERSION} VERSION_LESS 3.11) AND (NOT OpenGL_GL_PREFERENCE))
+  set(OpenGL_GL_PREFERENCE "GLVND")
+endif()
+
+ign_find_package(ignition-rendering6 REQUIRED VERSION 6.2 OPTIONAL_COMPONENTS ogre ogre2)
 set(IGN_RENDERING_VER ${ignition-rendering6_VERSION_MAJOR})
 
 if (TARGET ignition-rendering${IGN_RENDERING_VER}::ogre)
@@ -75,12 +81,12 @@ endif()
 
 #--------------------------------------
 # Find ignition-msgs
-ign_find_package(ignition-msgs8 REQUIRED)
+ign_find_package(ignition-msgs8 REQUIRED VERSION 8.2)
 set(IGN_MSGS_VER ${ignition-msgs8_VERSION_MAJOR})
 
 #--------------------------------------
 # Find SDFormat
-ign_find_package(sdformat12 REQUIRED)
+ign_find_package(sdformat12 REQUIRED VERSION 12.5.0)
 set(SDF_VER ${sdformat12_VERSION_MAJOR})
 
 set(IGN_SENSORS_PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})

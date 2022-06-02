@@ -181,11 +181,11 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
       sensorPose, updateRate, noiseTopic, alwaysOn, visualize, 1.0, 0.2, 10.0);
 
   // create the sensor using sensor factory
-  // try creating without specifying the sensor type and then cast it
   ignition::sensors::SensorFactory sf;
   auto sensor = sf.CreateSensor<ignition::sensors::MagnetometerSensor>(
       magnetometerSdf);
   ASSERT_NE(nullptr, sensor);
+  EXPECT_FALSE(sensor->HasConnections());
 
   auto sensorNoise = sf.CreateSensor<ignition::sensors::MagnetometerSensor>(
       magnetometerSdfNoise);
@@ -193,6 +193,7 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
 
   // subscribe to the topic
   WaitForMessageTestHelper<ignition::msgs::Magnetometer> msgHelper(topic);
+  EXPECT_TRUE(sensor->HasConnections());
 
   // subscribe to the topic
   WaitForMessageTestHelper<ignition::msgs::Magnetometer> msgHelperNoise(

@@ -36,6 +36,8 @@
 #include <ignition/transport/Node.hh>
 
 #include "ignition/sensors/CameraSensor.hh"
+#include "ignition/sensors/ImageBrownDistortionModel.hh"
+#include "ignition/sensors/ImageDistortion.hh"
 #include "ignition/sensors/ImageGaussianNoiseModel.hh"
 #include "ignition/sensors/ImageNoise.hh"
 #include "ignition/sensors/Manager.hh"
@@ -49,6 +51,10 @@ using namespace sensors;
 /// \brief Private data for CameraSensor
 class ignition::sensors::CameraSensorPrivate
 {
+  /// \brief Callback for triggered subscription
+  /// \param[in] _msg Boolean message
+  public: void OnTrigger(const ignition::msgs::Boolean &_msg);
+
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
   /// \param[in] _width width of image in pixels
@@ -82,6 +88,9 @@ class ignition::sensors::CameraSensorPrivate
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
 
+  /// \brief Distortion added to sensor data
+  public: DistortionPtr distortion;
+
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
   public: ignition::common::EventT<
@@ -92,6 +101,15 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
+
+  /// \brief True if camera is triggered by a topic
+  public: bool isTriggeredCamera = false;
+
+  /// \brief True if camera has been triggered by a topic
+  public: bool isTriggered = false;
+
+  /// \brief Topic for camera trigger
+  public: std::string triggerTopic = "";
 
   /// \brief True to save images
   public: bool saveImage = false;
@@ -181,15 +199,23 @@ bool CameraSensor::CreateCamera()
   this->dataPtr->camera->SetAspectRatio(static_cast<double>(width)/height);
   this->dataPtr->camera->SetHFOV(angle);
 
-  // \todo(nkoenig) Port Distortion class
-  // This->dataPtr->distortion.reset(new Distortion());
-  // This->dataPtr->distortion->Load(this->sdf->GetElement("distortion"));
+  if (cameraSdf->Element()->HasElement("distortion")) {
+    this->dataPtr->distortion =
+        ImageDistortionFactory::NewDistortionModel(*cameraSdf, "camera");
+    this->dataPtr->distortion->Load(*cameraSdf);
+
+    std::dynamic_pointer_cast<ImageBrownDistortionModel>(
+        this->dataPtr->distortion)->SetCamera(this->dataPtr->camera);
+  }
 
   sdf::PixelFormatType pixelFormat = cameraSdf->PixelFormat();
   switch (pixelFormat)
   {
     case sdf::PixelFormatType::RGB_INT8:
       this->dataPtr->camera->SetImageFormat(ignition::rendering::PF_R8G8B8);
+      break;
+    case sdf::PixelFormatType::L_INT8:
+      this->dataPtr->camera->SetImageFormat(ignition::rendering::PF_L8);
       break;
     default:
       ignerr << "Unsupported pixel format ["
@@ -271,6 +297,32 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
   igndbg << "Camera images for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
+  if (_sdf.CameraSensor()->Triggered())
+  {
+    if (!_sdf.CameraSensor()->TriggerTopic().empty())
+    {
+      this->dataPtr->triggerTopic = _sdf.CameraSensor()->TriggerTopic();
+    }
+    else
+    {
+      this->dataPtr->triggerTopic =
+          transport::TopicUtils::AsValidTopic(this->dataPtr->triggerTopic);
+
+      if (this->dataPtr->triggerTopic.empty())
+      {
+        ignerr << "Invalid trigger topic name" << std::endl;
+        return false;
+      }
+    }
+
+    this->dataPtr->node.Subscribe(this->dataPtr->triggerTopic,
+        &CameraSensorPrivate::OnTrigger, this->dataPtr.get());
+
+    igndbg << "Camera trigger messages for [" << this->Name() << "] subscribed"
+           << " on [" << this->dataPtr->triggerTopic << "]" << std::endl;
+    this->dataPtr->isTriggeredCamera = true;
+  }
+
   if (!this->AdvertiseInfo())
     return false;
 
@@ -337,6 +389,12 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   this->dataPtr->camera->SetLocalPose(this->Pose());
 
   // render only if necessary
+  if (this->dataPtr->isTriggeredCamera &&
+      !this->dataPtr->isTriggered)
+  {
+    return true;
+  }
+
   if (!this->dataPtr->pub.HasConnections() &&
       this->dataPtr->imageEvent.ConnectionCount() <= 0 &&
       !this->dataPtr->saveImage)
@@ -382,6 +440,10 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       format = ignition::common::Image::RGB_INT8;
       msgsPixelFormat = msgs::PixelFormatType::RGB_INT8;
       break;
+    case ignition::rendering::PF_L8:
+      format = ignition::common::Image::L_INT8;
+      msgsPixelFormat = msgs::PixelFormatType::L_INT8;
+      break;
     default:
       ignerr << "Unsupported pixel format ["
         << this->dataPtr->camera->ImageFormat() << "]\n";
@@ -400,7 +462,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
     auto frame = msg.mutable_header()->add_data();
     frame->set_key("frame_id");
-    frame->add_value(this->Name());
+    frame->add_value(this->FrameId());
     msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
   }
 
@@ -433,7 +495,19 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     this->dataPtr->SaveImage(data, width, height, format);
   }
 
+  if (this->dataPtr->isTriggeredCamera)
+  {
+    return this->dataPtr->isTriggered = false;
+  }
+
   return true;
+}
+
+//////////////////////////////////////////////////
+void CameraSensorPrivate::OnTrigger(const ignition::msgs::Boolean &/*_msg*/)
+{
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->isTriggered = true;
 }
 
 //////////////////////////////////////////////////
@@ -606,7 +680,7 @@ void CameraSensor::PopulateInfo(const sdf::Camera *_cameraSdf)
   // can populate it with arbitrary frames.
   auto infoFrame = this->dataPtr->infoMsg.mutable_header()->add_data();
   infoFrame->set_key("frame_id");
-  infoFrame->add_value(this->Name());
+  infoFrame->add_value(this->FrameId());
 
   this->dataPtr->infoMsg.set_width(width);
   this->dataPtr->infoMsg.set_height(height);
@@ -632,3 +706,9 @@ double CameraSensor::Baseline() const
   return this->dataPtr->baseline;
 }
 
+//////////////////////////////////////////////////
+bool CameraSensor::HasConnections() const
+{
+  return (this->dataPtr->pub && this->dataPtr->pub.HasConnections()) ||
+      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+}

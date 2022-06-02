@@ -33,9 +33,30 @@ namespace ignition
 {
   namespace sensors
   {
-    // Inline bracket to help doxygen filtering.
+    /// Inline bracket to help doxygen filtering.
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
-    //
+
+    /// \brief Reference frames enum
+    enum class IGNITION_SENSORS_VISIBLE WorldFrameEnumType
+    {
+      /// \brief NONE : To be used only when <localization>
+      /// reference orientation tag is empty.
+      NONE = 0,
+
+      /// \brief ENU (East-North-Up): x - East, y - North, z - Up.
+      ENU = 1,
+
+      /// \brief NED (North-East-Down): x - North, y - East, z - Down.
+      NED = 2,
+
+      /// \brief NWU (North-West-Up): x - North, y - West, z - Up.
+      NWU = 3,
+
+      /// \brief CUSTOM : The frame is described using custom_rpy tag.
+      CUSTOM = 4
+    };
+
+    ///
     /// \brief forward declarations
     class ImuSensorPrivate;
 
@@ -135,6 +156,18 @@ namespace ignition
       /// \brief Get the gravity vector
       /// \return Gravity vectory in meters per second squared.
       public: math::Vector3d Gravity() const;
+
+      /// \brief Specify the rotation offset of the coordinates of the World
+      /// frame relative to a geo-referenced frame
+      /// \param[in] _rot rotation offset
+      /// \param[in] _relativeTo world frame orientation, ENU by default
+      public: void SetWorldFrameOrientation(
+        const math::Quaterniond &_rot, WorldFrameEnumType _relativeTo);
+
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Garden
+      public: bool HasConnections() const;
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

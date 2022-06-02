@@ -56,6 +56,15 @@ RenderingSensor::RenderingSensor() :
 //////////////////////////////////////////////////
 RenderingSensor::~RenderingSensor()
 {
+  if (!this->dataPtr->scene)
+    return;
+  for (auto &s : this->dataPtr->sensors)
+  {
+    auto sensor = s.lock();
+    if (sensor)
+      this->dataPtr->scene->DestroySensor(sensor);
+  }
+  this->dataPtr->sensors.clear();
 }
 
 /////////////////////////////////////////////////
@@ -120,4 +129,3 @@ void RenderingSensor::Render()
     this->dataPtr->scene->PostRender();
   }
 }
-

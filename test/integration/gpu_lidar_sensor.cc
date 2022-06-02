@@ -220,6 +220,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   // Make sure the above dynamic cast worked.
   ASSERT_NE(nullptr, sensor);
   sensor->SetScene(scene);
+  EXPECT_FALSE(sensor->HasConnections());
 
   // Set a callback on the lidar sensor to get a scan
   ignition::common::ConnectionPtr c =
@@ -229,6 +230,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
           std::placeholders::_4, std::placeholders::_5));
 
   EXPECT_TRUE(c != nullptr);
+  EXPECT_TRUE(sensor->HasConnections());
 
   double angleRes = (sensor->AngleMax() - sensor->AngleMin()).Radian() /
                     sensor->RayCount();
@@ -411,7 +413,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   EXPECT_FALSE(pointMsgs.back().is_bigendian());
   EXPECT_EQ(32u, pointMsgs.back().point_step());
   EXPECT_EQ(32u * horzSamples, pointMsgs.back().row_step());
-  EXPECT_TRUE(pointMsgs.back().is_dense());
+  EXPECT_FALSE(pointMsgs.back().is_dense());
   EXPECT_EQ(32u * horzSamples * vertSamples, pointMsgs.back().data().size());
 
   // Clean up
@@ -901,31 +903,51 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
 }
 
 /////////////////////////////////////////////////
+#ifdef __APPLE__
+TEST_P(GpuLidarSensorTest, DISABLED_CreateGpuLidar)
+#else
 TEST_P(GpuLidarSensorTest, CreateGpuLidar)
+#endif
 {
   CreateGpuLidar(GetParam());
 }
 
 /////////////////////////////////////////////////
+#ifdef __APPLE__
+TEST_P(GpuLidarSensorTest, DISABLED_DetectBox)
+#else
 TEST_P(GpuLidarSensorTest, DetectBox)
+#endif
 {
   DetectBox(GetParam());
 }
 
 /////////////////////////////////////////////////
+#ifdef __APPLE__
+TEST_P(GpuLidarSensorTest, DISABLED_TestThreeBoxes)
+#else
 TEST_P(GpuLidarSensorTest, TestThreeBoxes)
+#endif
 {
   TestThreeBoxes(GetParam());
 }
 
 /////////////////////////////////////////////////
+#ifdef __APPLE__
+TEST_P(GpuLidarSensorTest, DISABLED_VerticalLidar)
+#else
 TEST_P(GpuLidarSensorTest, VerticalLidar)
+#endif
 {
   VerticalLidar(GetParam());
 }
 
 /////////////////////////////////////////////////
+#ifdef __APPLE__
+TEST_P(GpuLidarSensorTest, DISABLED_ManualUpdate)
+#else
 TEST_P(GpuLidarSensorTest, ManualUpdate)
+#endif
 {
   ManualUpdate(GetParam());
 }

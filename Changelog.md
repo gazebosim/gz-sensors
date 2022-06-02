@@ -1,12 +1,144 @@
 ## Ignition Sensors 6
 
-### Ignition Sensors 6.X.X
+### Ignition Sensors 6.5.0 (2022-05-24)
 
-### Ignition Sensors 6.0.0 (20XX-XX-XX)
+1. Add HasConnections function 
+    * [Pull request #222](https://github.com/ignitionrobotics/ign-sensors/pull/222)
+
+### Ignition Sensors 6.4.0 (2022-05-13)
+
+1. Set lidar visibility mask
+    * [Pull request #224](https://github.com/ignitionrobotics/ign-sensors/pull/224)
+
+1. Fix triggered camera test
+    * [Pull request #215](https://github.com/ignitionrobotics/ign-sensors/pull/215)
+
+1. Add support for l8 format
+    * [Pull request #220](https://github.com/ignitionrobotics/ign-sensors/pull/220)
+
+1. Fix `<ignition_frame_id>` not working for GpuLidarSensor
+    * [Pull request #218](https://github.com/ignitionrobotics/ign-sensors/pull/218)
+
+### Ignition Sensors 6.3.0 (2022-04-04)
+
+1. IMU custom_rpy parent_frame should be set to 'world'
+    * [Pull request #212](https://github.com/ignitionrobotics/ign-sensors/pull/212)
+
+1. Triggered Camera
+    * [Pull request #194](https://github.com/ignitionrobotics/ign-sensors/pull/194)
+
+1. Check if noise or distortion render pass is null
+    * [Pull request #211](https://github.com/ignitionrobotics/ign-sensors/pull/211)
+
+### Ignition Sensors 6.2.0 (2022-03-29)
+
+1. Distortion Camera Sensor
+    * [Pull request #192](https://github.com/ignitionrobotics/ign-sensors/pull/192)
+
+1. Add Ubuntu Jammy CI
+    * [Pull request #206](https://github.com/ignitionrobotics/ign-sensors/pull/206)
+
+1. Add function for enabling / disabling a sensor
+    * [Pull request #204](https://github.com/ignitionrobotics/ign-sensors/pull/204)
+
+1. IMU sensor API to get world ref frame and heading offset
+    * [Pull request #186](https://github.com/ignitionrobotics/ign-sensors/pull/186)
+
+1. Use pose multiplication instead of addition
+    * [Pull request #199](https://github.com/ignitionrobotics/ign-sensors/pull/199)
+
+1. Enable cpplint check in github actions CI
+    * [Pull request #198](https://github.com/ignitionrobotics/ign-sensors/pull/198)
+
+1. Conform to ros format for header field frame_id of sensor msgs
+    * [Pull request #195](https://github.com/ignitionrobotics/ign-sensors/pull/195)
+
+1. Fix compiler warnings (CMP0072 and copy elision)
+    * [Pull request #188](https://github.com/ignitionrobotics/ign-sensors/pull/188)
+
+### Ignition Sensors 6.1.0 (2022-01-04)
+
+1. Add NavSat (GPS) sensor
+    * [Pull request #177](https://github.com/ignitionrobotics/ign-sensors/pull/177)
+
+1. Added Logic to flag pointcloud as not dense if invalid point is detected
+    * [Pull request #180](https://github.com/ignitionrobotics/ign-sensors/pull/180)
+
+1. IMU ``custom_rpy``  tag parsing added
+    * [Pull request #178](https://github.com/ignitionrobotics/ign-sensors/pull/178)
+
+### Ignition Sensors 6.0.1 (2021-11-12)
+
+1. Disable GPU lidar tests on macOS
+    * [Pull request #163](https://github.com/ignitionrobotics/ign-sensors/pull/163)
+
+1. Added macOS install instructions.
+    * [Pull request #162](https://github.com/ignitionrobotics/ign-sensors/pull/162)
+
+1. Destroy rendering sensors when sensor is removed.
+    * [Pull request #169](https://github.com/ignitionrobotics/ign-sensors/pull/169)
+
+### Ignition Sensors 6.0.0 (2021-09-30)
+
+1. Trivial tutorial typo correction in Custom Sensors tutorial
+    * [Pull request #160](https://github.com/ignitionrobotics/ign-sensors/pull/160)
+
+1. Bumps in fortress: ign-sensors6
+    * [Pull request #120](https://github.com/ignitionrobotics/ign-sensors/pull/120)
+
+1. Port codecov to new configuration
+    * [Pull request #129](https://github.com/ignitionrobotics/ign-sensors/pull/129)
+
+1. Remove deprecations: tock
+    * [Pull request #141](https://github.com/ignitionrobotics/ign-sensors/pull/141)
+
+1. Make Sensors aware of CameraPassCountPerGpuFlush & Scene::PostFrame
+    * [Pull request #145](https://github.com/ignitionrobotics/ign-sensors/pull/145)
+
+1. Remove plugin interface and support custom sensors
+    * [Pull request #90](https://github.com/ignitionrobotics/ign-sensors/pull/90)
+
+1. Run ogre 1.x tests on macos
+    * [Pull request #156](https://github.com/ignitionrobotics/ign-sensors/pull/156)
+
+1. Segmentation sensor
+    * [Pull request #133](https://github.com/ignitionrobotics/ign-sensors/pull/133)
+
+1. Joint Force-Torque Sensor
+    * [Pull request #144](https://github.com/ignitionrobotics/ign-sensors/pull/144)
 
 ## Ignition Sensors 5
 
 ### Ignition Sensors 5.X.X
+
+### Ignition Sensors 5.1.0 (2021-10-15)
+
+1. Depend on ign-msgs 7.2 and libSDFormat 11.3
+    * [Pull request #154](https://github.com/ignitionrobotics/ign-sensors/pull/154)
+
+1. 👩‍🌾 Print debug messages when sensors advertise topics
+    * [Pull request #151](https://github.com/ignitionrobotics/ign-sensors/pull/151)
+
+1. Infrastructure
+    * [Pull request #150](https://github.com/ignitionrobotics/ign-sensors/pull/150)
+    * [Pull request #130](https://github.com/ignitionrobotics/ign-sensors/pull/130)
+    * [Pull request #126](https://github.com/ignitionrobotics/ign-sensors/pull/126)
+    * [Pull request #124](https://github.com/ignitionrobotics/ign-sensors/pull/124)
+
+1. Publish performance sensor metrics.
+    * [Pull request #146](https://github.com/ignitionrobotics/ign-sensors/pull/146)
+
+1. Add API for enabling / disabling IMU orientation
+    * [Pull request #142](https://github.com/ignitionrobotics/ign-sensors/pull/142)
+
+1. Init will now set the nextUpdateTime to zero
+    * [Pull request #137](https://github.com/ignitionrobotics/ign-sensors/pull/137)
+
+1. Remove clamping from lidar noise
+    * [Pull request #132](https://github.com/ignitionrobotics/ign-sensors/pull/132)
+
+1. 👩‍🌾 Disable tests that consistently fail on macOS
+    * [Pull request #121](https://github.com/ignitionrobotics/ign-sensors/pull/121)
 
 ### Ignition Sensors 5.0.0 (2021-03-30)
 

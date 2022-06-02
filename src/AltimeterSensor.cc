@@ -146,7 +146,7 @@ bool AltimeterSensor::Update(const std::chrono::steady_clock::duration &_now)
   *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->Name());
+  frame->add_value(this->FrameId());
 
   // Apply altimeter vertical position noise
   if (this->dataPtr->noises.find(ALTIMETER_VERTICAL_POSITION_NOISE_METERS) !=
@@ -215,3 +215,8 @@ double AltimeterSensor::VerticalVelocity() const
   return this->dataPtr->verticalVelocity;
 }
 
+//////////////////////////////////////////////////
+bool AltimeterSensor::HasConnections() const
+{
+  return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
+}

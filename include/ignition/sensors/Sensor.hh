@@ -142,6 +142,14 @@ namespace ignition
       /// \return Name of sensor.
       public: std::string Name() const;
 
+      /// \brief FrameId.
+      /// \return FrameId of sensor.
+      public: std::string FrameId() const;
+
+      /// \brief Set Frame ID of the sensor
+      /// \param[in] _frameId Frame ID of the sensor
+      public: void SetFrameId(const std::string &_frameId);
+
       /// \brief Get topic where sensor data is published.
       /// \return Topic sensor publishes data to
       public: std::string Topic() const;
@@ -199,6 +207,19 @@ namespace ignition
       public: void PublishMetrics(
         const std::chrono::duration<double> &_now);
 
+      /// \brief Get whether the sensor is enabled or not
+      /// \return True if the sensor is active, false otherwise.
+      /// \sa SetActive
+      public: bool IsActive() const;
+
+      /// \brief Enable or disable the sensor. Disabled sensors will not
+      /// generate or publish data unless Update is called with the
+      /// '_force' argument set to true.
+      /// \param[in] _active True to set the sensor to be active,
+      /// false to disable the sensor.
+      /// \sa IsActive
+      public: void SetActive(bool _active);
+
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal
       /// \brief Data pointer for private data
@@ -208,5 +229,4 @@ namespace ignition
     }
   }
 }
-
 #endif
