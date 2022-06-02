@@ -17,6 +17,9 @@
 
 #include <gtest/gtest.h>
 
+#include <ignition/msgs/annotated_axis_aligned_2d_box.pb.h>
+#include <ignition/msgs/annotated_oriented_3d_box.pb.h>
+
 #include <ignition/common/Filesystem.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/BoundingBoxCameraSensor.hh>
@@ -25,7 +28,6 @@
 #include <ignition/rendering/RenderingIface.hh>
 #include <ignition/rendering/Scene.hh>
 #include <ignition/rendering/BoundingBoxCamera.hh>
-#include <ignition/msgs.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
@@ -185,7 +187,7 @@ void BuildScene3D(rendering::ScenePtr _scene)
 void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
   const std::string &_renderEngine)
 {
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  std::string path = common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "boundingbox_camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -209,7 +211,7 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
   EXPECT_EQ(height, 240u);
 
   // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine(_renderEngine);
+  auto *engine = rendering::engine(_renderEngine);
   if (!engine)
   {
     igndbg << "Engine '" << _renderEngine
@@ -217,10 +219,10 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
     return;
   }
 
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  rendering::ScenePtr scene = engine->CreateScene("scene");
   BuildScene2d(scene);
 
-  ignition::sensors::Manager mgr;
+  sensors::Manager mgr;
 
   sdf::Sensor sdfSensor;
   sdfSensor.Load(sensorPtr);
@@ -229,7 +231,7 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
   EXPECT_EQ(type, "boundingbox_camera");
 
   auto *sensor =
-    mgr.CreateSensor<ignition::sensors::BoundingBoxCameraSensor>(sdfSensor);
+    mgr.CreateSensor<sensors::BoundingBoxCameraSensor>(sdfSensor);
 
   ASSERT_NE(sensor, nullptr);
   sensor->SetScene(scene);
@@ -254,7 +256,7 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
   std::string topic =
     "/test/integration/BoundingBoxCameraPlugin_boxesWithBuiltinSDF";
   WaitForMessageTestHelper<
-    ignition::msgs::AnnotatedAxisAligned2DBox_V> helper(topic);
+    msgs::AnnotatedAxisAligned2DBox_V> helper(topic);
 
   // Update once to create image
   mgr.RunOnce(std::chrono::steady_clock::duration::zero());
@@ -262,7 +264,7 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
 
   // subscribe to the BoundingBox camera topic
-  ignition::transport::Node node;
+  transport::Node node;
   node.Subscribe(topic, &OnNewBoundingBoxes);
 
   // wait for a few BoundingBox camera boxes
@@ -334,14 +336,14 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
 
   // Clean up
   engine->DestroyScene(scene);
-  ignition::rendering::unloadEngine(engine->Name());
+  rendering::unloadEngine(engine->Name());
 }
 
 /////////////////////////////////////////////////
 void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   const std::string &_renderEngine)
 {
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  std::string path = common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "boundingbox_3d_camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -365,7 +367,7 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   EXPECT_EQ(height, 240u);
 
   // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine(_renderEngine);
+  auto *engine = rendering::engine(_renderEngine);
   if (!engine)
   {
     igndbg << "Engine '" << _renderEngine
@@ -373,10 +375,10 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
     return;
   }
 
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  rendering::ScenePtr scene = engine->CreateScene("scene");
   BuildScene3D(scene);
 
-  ignition::sensors::Manager mgr;
+  sensors::Manager mgr;
 
   sdf::Sensor sdfSensor;
   sdfSensor.Load(sensorPtr);
@@ -385,7 +387,7 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   EXPECT_EQ(type, "boundingbox_camera");
 
   auto *sensor =
-    mgr.CreateSensor<ignition::sensors::BoundingBoxCameraSensor>(sdfSensor);
+    mgr.CreateSensor<sensors::BoundingBoxCameraSensor>(sdfSensor);
 
   ASSERT_NE(sensor, nullptr);
   sensor->SetScene(scene);
@@ -406,7 +408,7 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   std::string topic =
     "/test/integration/BoundingBox3DCameraPlugin_boxesWithBuiltinSDF";
   WaitForMessageTestHelper<
-    ignition::msgs::AnnotatedOriented3DBox_V> helper(topic);
+    msgs::AnnotatedOriented3DBox_V> helper(topic);
 
   // Update once to create image
   mgr.RunOnce(std::chrono::steady_clock::duration::zero());
@@ -414,7 +416,7 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
 
   // subscribe to the BoundingBox camera topic
-  ignition::transport::Node node;
+  transport::Node node;
   node.Subscribe(topic, &OnNew3DBoundingBoxes);
 
   // wait for a few BoundingBox camera boxes
@@ -446,7 +448,7 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
 
   // Clean up
   engine->DestroyScene(scene);
-  ignition::rendering::unloadEngine(engine->Name());
+  rendering::unloadEngine(engine->Name());
 }
 
 //////////////////////////////////////////////////
@@ -462,12 +464,12 @@ TEST_P(BoundingBoxCameraSensorTest, Boxes3DWithBuiltinSDF)
 }
 
 INSTANTIATE_TEST_CASE_P(BoundingBoxCameraSensor, BoundingBoxCameraSensorTest,
-    RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
+    RENDER_ENGINE_VALUES, rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-  ignition::common::Console::SetVerbosity(4);
+  common::Console::SetVerbosity(4);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

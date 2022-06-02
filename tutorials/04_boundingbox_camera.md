@@ -1,10 +1,10 @@
-# Bounding Box Camera in Ignition Gazebo
-In this tutorial, we will discuss how to use a bounding box camera sensor in Ignition Gazebo.
+# Bounding Box Camera in Gazebo Sim
+In this tutorial, we will discuss how to use a bounding box camera sensor in Gazebo Sim.
 
 ## Requirements
 
-Since this tutorial will show how to use a bounding box camera sensor in Ignition Gazebo, you'll need to have Ignition Gazebo installed. We recommend installing all Ignition libraries, using version Fortress or newer (the bounding box camera is not available in Ignition versions prior to Fortress).
-If you need to install Ignition, pick the version you'd like to use and then follow the installation instructions.
+Since this tutorial will show how to use a bounding box camera sensor in Gazebo Sim, you'll need to have Gazebo Sim installed. We recommend installing all Gazebo libraries, using version Fortress or newer (the bounding box camera is not available in Gazebo versions prior to Fortress).
+If you need to install Gazebo, pick the version you'd like to use and then follow the installation instructions.
 
 ## Setting up the bounding box camera
 Here's an example of how to attach a bounding box camera sensor to a model in a SDF file:
@@ -82,28 +82,25 @@ Let’s take a closer look at the portion of the code above that focuses on the 
 ```
 
 As we can see, we define a sensor with the following SDF elements:
+* `<box_type>`: The type of bounding boxes, boxes can be 2d or 3d, and 2d boxes can be visible 2d boxes or full 2d boxes
+    * Visible 2d box: 2D axis aligned box that shows the visible part of the occluded object
+    * Full 2d box: 2D axis aligned box that shows the full box of occluded objects
+    * 3D box: Oriented 3D box defined by the center position / orientation / size
+    The default value is Visible 2d box.
+    The `<box_type>` values can be
+    - For visible 2d boxes: `2d`, `visible_2d`, “`visible_box_2d`
+    - For full 2d boxes: `full_2d`, “`visible_box_2d`
+    - For 3d boxes: `3d`
 * `<camera>`: The camera, which has the following child elements:
-	* `<horizontal_fov>`: The horizontal field of view, in radians.
-	* `<image>`: The image size, in pixels.
-	* `<clip>`: The near and far clip planes. Objects are only rendered if they're within these planes.
-* `<always_on>`: Whether the sensor will always be updated (indicated by 1) or not (indicated by 0). This is currently unused by Ignition Gazebo.
+  	* `<horizontal_fov>`: The horizontal field of view, in radians.
+  	* `<image>`: The image size, in pixels.
+  	* `<clip>`: The near and far clip planes. Objects are only rendered if they're within these planes.
+* `<always_on>`: Whether the sensor will always be updated (indicated by 1) or not (indicated by 0). This is currently unused by Gazebo Sim.
 * `<update_rate>`: The sensor's update rate, in Hz.
-* `<visualize>`: Whether the sensor should be visualized in the GUI (indicated by true) or not (indicated by false). This is currently unused by Ignition Gazebo.
+* `<visualize>`: Whether the sensor should be visualized in the GUI (indicated by true) or not (indicated by false). This is currently unused by Gazebo Sim.
 * `<topic>`: The name of the topic where sensor data is published.
 
 <br>
-There's also an optional plugin used here that allows for further configuration of the bounding box camera. Here's a description of the elements in this plugin (if the plugin isn't used, the default values mentioned below are used):
-
-`<box_type>`: The type of bounding boxes, boxes can be 2d or 3d, and 2d boxes can be visible 2d boxes or full 2d boxes
-
-Visible 2d box: 2D axis aligned box that shows the visible part of the occluded object
-Full 2d box: 2D axis aligned box that shows the full box of occluded objects
-3D box: Oriented 3D box defined by the center position / orientation / size
-Default value for the `<box_type>` is “Visible 2d box”
-The `<box_type>` values can be
-- For visible 2d boxes: [“2d”, “visible_2d”, “visible_box_2d” ]
-- For full 2d boxes: [“full_2d”, “visible_box_2d”]
-- For 3d boxes: [“3d”]
 
 
 ## Assigning a label to a model
@@ -562,7 +559,7 @@ And Its CMakeLists.txt file
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(ignition-sensors-camera-demo)
 
-# Find the Ignition Libraries used directly by the example
+# Find the Gazebo Libraries used directly by the example
 find_package(ignition-rendering6 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
 find_package(ignition-sensors6 REQUIRED COMPONENTS rendering camera)
 
