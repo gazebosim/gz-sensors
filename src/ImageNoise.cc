@@ -51,7 +51,7 @@ NoisePtr ImageNoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
     else
       noise.reset(new GaussianNoiseModel());
 
-    IGN_ASSERT(noise->Type() == NoiseType::GAUSSIAN,
+    GZ_ASSERT(noise->Type() == NoiseType::GAUSSIAN,
         "Noise type should be 'gaussian'");
   }
   else if (noiseType == sdf::NoiseType::NONE)
@@ -60,7 +60,7 @@ NoisePtr ImageNoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
     // if 'custom', the type will be set once the user calls the
     // SetCustomNoiseCallback function.
     noise.reset(new Noise(NoiseType::NONE));
-    IGN_ASSERT(noise->Type() == NoiseType::NONE,
+    GZ_ASSERT(noise->Type() == NoiseType::NONE,
         "Noise type should be 'none'");
   }
   else
@@ -77,8 +77,8 @@ NoisePtr ImageNoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
 NoisePtr ImageNoiseFactory::NewNoiseModel(sdf::ElementPtr _sdf,
     const std::string &_sensorType)
 {
-  IGN_ASSERT(_sdf != nullptr, "noise sdf is null");
-  IGN_ASSERT(_sdf->GetName() == "noise", "Not a noise SDF element");
+  GZ_ASSERT(_sdf != nullptr, "noise sdf is null");
+  GZ_ASSERT(_sdf->GetName() == "noise", "Not a noise SDF element");
   sdf::Noise noiseDom;
   noiseDom.Load(_sdf);
 
