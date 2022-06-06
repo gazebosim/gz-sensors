@@ -133,7 +133,7 @@ void LogicalCameraSensor::SetModelPoses(
 bool LogicalCameraSensor::Update(
   const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("LogicalCameraSensor::Update");
+  GZ_PROFILE("LogicalCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
     gzerr << "Not initialized, update ignored.\n";

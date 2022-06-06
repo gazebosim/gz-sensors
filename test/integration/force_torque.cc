@@ -231,9 +231,9 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
 
   // Set rotation of child
   const math::Quaterniond rotChildInSensor{
-      math::Vector3d{IGN_PI_4, IGN_PI_2, 0}};
+      math::Vector3d{GZ_PI_4, GZ_PI_2, 0}};
   const math::Quaterniond rotParentInSensor{
-      math::Vector3d{0, IGN_PI_4, IGN_PI_4}};
+      math::Vector3d{0, GZ_PI_4, GZ_PI_4}};
 
   sensor->SetRotationChildInSensor(rotChildInSensor);
   EXPECT_EQ(rotChildInSensor, sensor->RotationChildInSensor());

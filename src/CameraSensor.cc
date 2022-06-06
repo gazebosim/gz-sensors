@@ -190,7 +190,7 @@ bool CameraSensor::CreateCamera()
   this->dataPtr->camera->SetAntiAliasing(cameraSdf->AntiAliasingValue());
 
   math::Angle angle = cameraSdf->HorizontalFov();
-  if (angle < 0.01 || angle > IGN_PI*2)
+  if (angle < 0.01 || angle > GZ_PI*2)
   {
     gzerr << "Invalid horizontal field of view [" << angle << "]\n";
 
@@ -373,7 +373,7 @@ void CameraSensor::SetScene(gz::rendering::ScenePtr _scene)
 //////////////////////////////////////////////////
 bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("CameraSensor::Update");
+  GZ_PROFILE("CameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
     gzerr << "Not initialized, update ignored.\n";
@@ -424,7 +424,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // generate sensor data
   this->Render();
   {
-    IGN_PROFILE("CameraSensor::Update Copy image");
+    GZ_PROFILE("CameraSensor::Update Copy image");
     this->dataPtr->camera->Copy(this->dataPtr->image);
   }
 
@@ -460,7 +460,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // create message
   gz::msgs::Image msg;
   {
-    IGN_PROFILE("CameraSensor::Update Message");
+    GZ_PROFILE("CameraSensor::Update Message");
     msg.set_width(width);
     msg.set_height(height);
     msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
@@ -476,7 +476,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // publish the image message
   {
     this->AddSequence(msg.mutable_header());
-    IGN_PROFILE("CameraSensor::Update Publish");
+    GZ_PROFILE("CameraSensor::Update Publish");
     this->dataPtr->pub.Publish(msg);
 
     // publish the camera info message

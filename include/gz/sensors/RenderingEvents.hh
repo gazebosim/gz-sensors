@@ -55,12 +55,12 @@ namespace gz
                   std::function<void(const gz::rendering::ScenePtr &)>
                   _callback);
 
-      IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
+      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Event that is used to trigger callbacks when the scene
       /// is changed
       public: static gz::common::EventT<
               void(const gz::rendering::ScenePtr &)> sceneEvent;
-      IGN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

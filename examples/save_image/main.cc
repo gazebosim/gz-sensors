@@ -86,7 +86,7 @@ int main()
   const double hz = 30;
   const std::size_t width = 480;
   const std::size_t height = 320;
-  const std::size_t hfov = IGN_DTOR(60);
+  const std::size_t hfov = GZ_DTOR(60);
   const double near = 0.1;
   const double far = 100;
   const auto format = sdf::PixelFormatType::RGB_INT8;
@@ -202,7 +202,7 @@ void BuildScene(gz::rendering::ScenePtr _scene)
   box->AddGeometry(_scene->CreateBox());
   box->SetOrigin(0.0, 0.5, 0.0);
   box->SetLocalPosition(3, 0, 0);
-  box->SetLocalRotation(IGN_PI / 4, 0, IGN_PI / 3);
+  box->SetLocalRotation(GZ_PI / 4, 0, GZ_PI / 3);
   box->SetLocalScale(1, 2.5, 1);
   box->SetMaterial(blue);
   root->AddChild(box);

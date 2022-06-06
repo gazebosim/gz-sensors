@@ -326,7 +326,7 @@ bool ThermalCameraSensor::CreateCamera()
   }
 
   math::Angle angle = cameraSdf->HorizontalFov();
-  if (angle < 0.01 || angle > IGN_PI*2)
+  if (angle < 0.01 || angle > GZ_PI*2)
   {
     gzerr << "Invalid horizontal field of view [" << angle << "]\n";
 
@@ -409,7 +409,7 @@ void ThermalCameraSensor::SetScene(gz::rendering::ScenePtr _scene)
 bool ThermalCameraSensor::Update(
   const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("ThermalCameraSensor::Update");
+  GZ_PROFILE("ThermalCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
     gzerr << "Not initialized, update ignored.\n";

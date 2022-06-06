@@ -135,7 +135,7 @@ bool AltimeterSensor::Load(sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 bool AltimeterSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("AltimeterSensor::Update");
+  GZ_PROFILE("AltimeterSensor::Update");
   if (!this->dataPtr->initialized)
   {
     gzerr << "Not initialized, update ignored.\n";

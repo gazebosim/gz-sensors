@@ -439,7 +439,7 @@ void Sensor::SetUpdateRate(const double _hz)
 bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
                   const bool _force)
 {
-  IGN_PROFILE("Sensor::Update");
+  GZ_PROFILE("Sensor::Update");
   bool result = false;
 
   // Check if it's time to update
