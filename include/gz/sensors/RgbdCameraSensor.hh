@@ -39,7 +39,7 @@ namespace gz
 
     /// \brief RGBD camera sensor class.
     ///
-    /// This class creates a few types of sensor data from an Gazebo
+    /// This class creates a few types of sensor data from a Gazebo
     /// Rendering scene:
     /// * RGB image (same as CameraSensor)
     /// * Depth image (same as DepthCamera)
