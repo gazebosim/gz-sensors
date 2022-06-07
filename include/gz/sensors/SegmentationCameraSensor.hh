@@ -45,7 +45,7 @@ namespace gz
 
     /// \brief Segmentation camera sensor class.
     ///
-    /// This class creates segmentation images from an ignition rendering scene.
+    /// This class creates segmentation images from an Gazebo Rendering scene.
     /// The scene must be created in advance and given to Manager::Init().
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be

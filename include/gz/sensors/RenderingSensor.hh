@@ -48,7 +48,7 @@ namespace gz
     /// \brief a rendering sensor class
     ///
     ///   This class is a base for all rendering sensor classes. It provides
-    /// interface to ignition rendering objects
+    /// interface to Gazebo Rendering objects
     class GZ_SENSORS_RENDERING_VISIBLE RenderingSensor
         : public Sensor
     {

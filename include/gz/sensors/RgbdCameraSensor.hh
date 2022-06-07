@@ -39,8 +39,8 @@ namespace gz
 
     /// \brief RGBD camera sensor class.
     ///
-    /// This class creates a few types of sensor data from an ignition
-    /// rendering scene:
+    /// This class creates a few types of sensor data from an Gazebo
+    /// Rendering scene:
     /// * RGB image (same as CameraSensor)
     /// * Depth image (same as DepthCamera)
     /// * (future / todo) Color point cloud

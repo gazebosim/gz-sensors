@@ -63,7 +63,7 @@ namespace gz
 
     /// \brief Camera Sensor Class
     ///
-    ///   This class creates images from an ignition rendering scene. The scene
+    ///   This class creates images from an Gazebo Rendering scene. The scene
     ///   must be created in advance and given to Manager::Init().
     ///   It offers both an ignition-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
