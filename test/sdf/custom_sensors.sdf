@@ -3,10 +3,10 @@
   <world name="my_world">
     <model name="my_model">
       <link name="my_link">
-        <sensor name="complete" type="custom" ignition:type="sensor_type">
+        <sensor name="complete" type="custom" gz:type="sensor_type">
           <ignition:sensor_type/>
         </sensor>
-        <sensor name="wrong_type" type="imu" ignition:type="sensor_type">
+        <sensor name="wrong_type" type="imu" gz:type="sensor_type">
           <ignition:sensor_type/>
         </sensor>
         <sensor name="missing_ignition_type" type="custom">

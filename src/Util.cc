@@ -47,11 +47,22 @@ std::string gz::sensors::customType(sdf::ElementPtr _sdf)
     return std::string();
   }
 
-  if (!_sdf->HasAttribute("ignition:type"))
+  if (!_sdf->HasAttribute("gz:type"))
   {
-    gzerr << "Custom sensor missing `ignition:type` attribute." << std::endl;
-    return std::string();
+    // TODO(CH3): Deprecated. Remove on tock.
+    // Try deprecated ignition:type attribute if gz:type attribute is missing
+    if (_sdf->HasAttribute("ignition:type"))
+    {
+      gzwarn << "The `ignition:type` attribute is deprecated. Please use "
+             << "`gz:type` instead." << std::endl;
+      return _sdf->Get<std::string>("ignition:type");
+    }
+    else
+    {
+      gzerr << "Custom sensor missing `gz:type` attribute." << std::endl;
+      return std::string();
+    }
   }
 
-  return _sdf->Get<std::string>("ignition:type");
+  return _sdf->Get<std::string>("gz:type");
 }
