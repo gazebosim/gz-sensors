@@ -155,7 +155,7 @@ bool LogicalCameraSensor::Update(
       msgs::LogicalCameraImage::Model *modelMsg =
           this->dataPtr->msg.add_model();
       modelMsg->set_name(it.first);
-      msgs::Set(modelMsg->mutable_pose(), it.second - this->Pose());
+      msgs::Set(modelMsg->mutable_pose(), this->Pose().Inverse() * it.second);
     }
   }
   *this->dataPtr->msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
