@@ -560,3 +560,10 @@ rendering::CameraPtr WideAngleCameraSensor::RenderingCamera() const
 {
   return this->dataPtr->camera;
 }
+
+//////////////////////////////////////////////////
+bool WideAngleCameraSensor::HasConnections() const
+{
+  return (this->dataPtr->pub && this->dataPtr->pub.HasConnections()) ||
+      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+}

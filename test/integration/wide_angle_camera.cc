@@ -151,6 +151,7 @@ void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
   gz::sensors::WideAngleCameraSensor *sensor =
       mgr.CreateSensor<gz::sensors::WideAngleCameraSensor>(sensorPtr);
   ASSERT_NE(sensor, nullptr);
+  EXPECT_FALSE(sensor->HasConnections());
   sensor->SetScene(scene);
 
   ASSERT_NE(sensor->RenderingCamera(), nullptr);
@@ -162,6 +163,7 @@ void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
       "/test/integration/WideAngleCamera_imagesWithBuiltinSDF/";
   std::string topic = topicBase + "image";
   WaitForMessageTestHelper<gz::msgs::Image> helper(topic);
+  EXPECT_TRUE(sensor->HasConnections());
 
   std::string infoTopic = topicBase + "camera_info";
   WaitForMessageTestHelper<gz::msgs::CameraInfo> infoHelper(infoTopic);

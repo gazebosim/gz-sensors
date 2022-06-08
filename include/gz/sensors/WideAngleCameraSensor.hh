@@ -139,6 +139,9 @@ namespace gz
       // Documentation inherited.
       public: rendering::CameraPtr RenderingCamera() const override;
 
+      // Documentation inherited.
+      public: virtual bool HasConnections() const override;
+
       /// \brief Create a camera in a scene
       /// \return True on success.
       private: bool CreateCamera();

@@ -90,10 +90,8 @@ namespace gz
       /// \return height of the image
       public: virtual unsigned int ImageHeight() const override;
 
-      /// \brief Check if there are any subscribers
-      /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Garden
-      public: bool HasConnections() const;
+      // Documentation inherited.
+      public: virtual bool HasConnections() const override;
 
       /// \brief Create an RGB camera and a depth camera.
       /// \return True on success.

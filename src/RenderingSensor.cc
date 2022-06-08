@@ -129,3 +129,9 @@ void RenderingSensor::Render()
     this->dataPtr->scene->PostRender();
   }
 }
+
+//////////////////////////////////////////////////
+bool RenderingSensor::HasConnections() const
+{
+  return true;
+}
