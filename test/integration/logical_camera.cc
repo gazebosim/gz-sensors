@@ -183,7 +183,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   EXPECT_EQ(sensorPose, gz::msgs::Convert(img.pose()));
   EXPECT_EQ(1, img.model().size());
   EXPECT_EQ(boxName, img.model(0).name());
-  gz::math::Pose3d boxPoseCameraFrame = boxPose - sensorPose;
+  gz::math::Pose3d boxPoseCameraFrame = sensorPose.Inverse() * boxPose;
   EXPECT_EQ(boxPoseCameraFrame, gz::msgs::Convert(img.model(0).pose()));
 
   // 2. test box outside of frustum
@@ -221,7 +221,7 @@ TEST_F(LogicalCameraSensorTest, DetectBox)
   EXPECT_EQ(sensorPose3, gz::msgs::Convert(img.pose()));
   EXPECT_EQ(1, img.model().size());
   EXPECT_EQ(boxName, img.model(0).name());
-  gz::math::Pose3d boxPose3CameraFrame = boxPose3 - sensorPose3;
+  gz::math::Pose3d boxPose3CameraFrame = sensorPose3.Inverse() * boxPose3;
   EXPECT_EQ(boxPose3CameraFrame, gz::msgs::Convert(img.model(0).pose()));
 
   // 4. rotate camera away and image should be empty
