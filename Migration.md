@@ -12,6 +12,8 @@ release will remove the deprecated code.
 1. Header files under `ignition/...` are deprecated and will be removed in future versions.
   Use `gz/...` instead.
 
+1. **CameraSensor**: the default anti-aliasing value has changed from `2` to `4`.
+
 ## Gazebo Sensors 6.0.1 to 6.1.0
 
 ### Modifications
