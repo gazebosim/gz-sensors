@@ -139,7 +139,7 @@ To assign a label to a model we use the label plugin in the SDF file:
             <diffuse>0 0 1 1</diffuse>
             <specular>0 0 0.3 1</specular>
           </material>
-          <plugin filename="ignition-gazebo-label-system" name="gz::sim::systems::Label">
+          <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
             <label>10</label>
           </plugin>
         </visual>
@@ -150,7 +150,7 @@ To assign a label to a model we use the label plugin in the SDF file:
 Lets zoom in the label plugin:
 
 ```xml
-          <plugin filename="ignition-gazebo-label-system" name="gz::sim::systems::Label">
+          <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
             <label>10</label>
           </plugin>
 ```
@@ -167,7 +167,7 @@ You can also attach this plugin to the model's `<model>` tag:
       <link name="sphere_link">
       ...
       </link>
-      <plugin filename="ignition-gazebo-label-system" name="gz::sim::systems::Label">
+      <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
         <label>20</label>
       </plugin>
     </model>
@@ -181,7 +181,7 @@ If you're including a model from a place like [Gazebo Fuel](https://app.gazebosi
       <uri>
       https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Construction Cone
       </uri>
-      <plugin filename="ignition-gazebo-label-system" name="gz::sim::systems::Label">
+      <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
         <label>30</label>
       </plugin>
     </include>
