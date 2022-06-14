@@ -187,7 +187,7 @@ bool CameraSensor::CreateCamera()
   }
 
   // \todo(nkoeng) these parameters via sdf
-  this->dataPtr->camera->SetAntiAliasing(2);
+  this->dataPtr->camera->SetAntiAliasing(cameraSdf->AntiAliasingValue());
 
   math::Angle angle = cameraSdf->HorizontalFov();
   if (angle < 0.01 || angle > IGN_PI*2)
