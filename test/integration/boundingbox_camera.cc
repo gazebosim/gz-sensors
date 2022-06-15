@@ -130,9 +130,9 @@ void WaitForNewFrame()
   EXPECT_GT(counter, 0);
 }
 
-/// \brief Build a scene with 3 overlapping boxes - one box will be fully visible,
-/// another box will be partially visible, and the last box won't be visible
-/// (it's occluded by the other 2 boxes)
+/// \brief Build a scene with 3 overlapping boxes - one box will be fully
+/// visible, another box will be partially visible, and the last box won't be
+/// visible (it's occluded by the other 2 boxes)
 void BuildScene2d(rendering::ScenePtr _scene)
 {
   math::Vector3d occludedPosition(4, 1, 0);
