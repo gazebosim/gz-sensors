@@ -40,6 +40,7 @@ class BoundingBoxCameraSensorTest: public testing::Test,
   // Create a BoundingBox Camera sensor from a SDF and gets a boxes message
   public: void BoxesWithBuiltinSDF(const std::string &_renderEngine);
 
+  // Create a BoundingBox Camera 3D sensor from a SDF and gets a boxes message
   public: void Boxes3DWithBuiltinSDF(const std::string &_renderEngine);
 };
 
@@ -210,6 +211,14 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
   EXPECT_EQ(width, 320u);
   EXPECT_EQ(height, 240u);
 
+  // Skip unsupported engines
+  if (_renderEngine != "ogre2")
+  {
+    igndbg << "Engine '" << _renderEngine
+              << "' doesn't support bounding box cameras" << std::endl;
+    return;
+  }
+
   // Setup ign-rendering with an empty scene
   auto *engine = rendering::engine(_renderEngine);
   if (!engine)
@@ -366,6 +375,14 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
 
   EXPECT_EQ(width, 320u);
   EXPECT_EQ(height, 240u);
+
+  // Skip unsupported engines
+  if (_renderEngine != "ogre2")
+  {
+    igndbg << "Engine '" << _renderEngine
+              << "' doesn't support bounding box cameras" << std::endl;
+    return;
+  }
 
   // Setup ign-rendering with an empty scene
   auto *engine = rendering::engine(_renderEngine);
