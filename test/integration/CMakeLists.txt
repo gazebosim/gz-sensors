@@ -34,7 +34,7 @@ if (UNIX AND NOT APPLE)
 endif()
 
 if (DRI_TESTS)
-  ign_build_tests(TYPE INTEGRATION
+  gz_build_tests(TYPE INTEGRATION
     SOURCES
       ${dri_tests}
     LIB_DEPS
@@ -50,7 +50,7 @@ if (DRI_TESTS)
   )
 endif()
 
-ign_build_tests(TYPE INTEGRATION
+gz_build_tests(TYPE INTEGRATION
   SOURCES
     ${tests}
   LIB_DEPS
