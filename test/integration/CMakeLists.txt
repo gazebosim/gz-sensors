@@ -1,6 +1,7 @@
 set(TEST_TYPE "INTEGRATION")
 
 set(dri_tests
+  boundingbox_camera.cc
   camera.cc
   depth_camera.cc
   distortion_camera.cc
@@ -38,6 +39,7 @@ if (DRI_TESTS)
       ${dri_tests}
     LIB_DEPS
       ${IGNITION-TRANSPORT_LIBRARIES}
+      ${PROJECT_LIBRARY_TARGET_NAME}-boundingbox_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-camera
       ${PROJECT_LIBRARY_TARGET_NAME}-lidar

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="m1">
+    <link name="link1">
+      <sensor name="boundingbox_camera" type="boundingbox_camera">
+        <update_rate>10</update_rate>
+        <topic>/test/integration/BoundingBoxCameraPlugin_boxesWithBuiltinSDF</topic>
+        <camera>
+          <image>
+              <width>320</width>
+              <height>240</height>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>1000.0</far>
+          </clip>
+        </camera>
+      </sensor>
+    </link>
+  </model>
+</sdf>
