@@ -9,7 +9,7 @@
         <sensor name="wrong_type" type="imu" gz:type="sensor_type">
           <ignition:sensor_type/>
         </sensor>
-        <sensor name="missing_ignition_type" type="custom">
+        <sensor name="missing_gz_type" type="custom">
           <ignition:sensor_type/>
         </sensor>
       </link>

@@ -82,7 +82,7 @@ TEST_F(Util_TEST, customType)
   {
     auto sensor = link->SensorByIndex(2);
     ASSERT_NE(nullptr, sensor);
-    EXPECT_EQ("missing_ignition_type", sensor->Name());
+    EXPECT_EQ("missing_gz_type", sensor->Name());
     EXPECT_TRUE(customType(*sensor).empty());
     EXPECT_TRUE(customType(sensor->Element()).empty());
   }
