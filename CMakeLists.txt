@@ -25,9 +25,9 @@ set (DRI_TESTS TRUE CACHE BOOL "True to enable DRI tests")
 option(ENABLE_PROFILER "Enable Gazebo Profiler" FALSE)
 
 if(ENABLE_PROFILER)
-  add_definitions("-DIGN_PROFILER_ENABLE=1")
+  add_definitions("-DGZ_PROFILER_ENABLE=1")
 else()
-  add_definitions("-DIGN_PROFILER_ENABLE=0")
+  add_definitions("-DGZ_PROFILER_ENABLE=0")
 endif()
 
 #============================================================================

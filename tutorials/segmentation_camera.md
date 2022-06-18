@@ -173,7 +173,7 @@ You can also attach this plugin to the model's `<model>` tag:
     </model>
 ```
 
-If you're including a model from a place like [ignition fuel](https://app.gazebosim.org/dashboard), you can add the label plugin as a child for the `<include>` tag:
+If you're including a model from a place like [Gazebo Fuel](https://app.gazebosim.org/dashboard), you can add the label plugin as a child for the `<include>` tag:
 
 ```xml
    <include>

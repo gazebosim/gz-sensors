@@ -344,7 +344,7 @@ bool SegmentationCameraSensor::CreateCamera()
   auto height = sdfCamera->ImageHeight();
 
   math::Angle angle = sdfCamera->HorizontalFov();
-  if (angle < 0.01 || angle > IGN_PI*2)
+  if (angle < 0.01 || angle > GZ_PI*2)
   {
     gzerr << "Invalid horizontal field of view [" << angle << "]\n";
     return false;
@@ -428,7 +428,7 @@ void SegmentationCameraSensor::OnNewSegmentationFrame(const uint8_t * _data,
 bool SegmentationCameraSensor::Update(
   const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("SegmentationCameraSensor::Update");
+  GZ_PROFILE("SegmentationCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
     gzerr << "Not initialized, update ignored.\n";

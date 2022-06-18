@@ -371,7 +371,7 @@
 
 ### Gazebo Sensors 2.5.0
 
-1. Add `IGN_PROFILER_ENABLE` cmake option for enabling the ign-common profiler.
+1. Add `GZ_PROFILER_ENABLE` cmake option for enabling the ign-common profiler.
     * [BitBucket pull request 82](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/82)
 
 1. Deduplicate `frame_ids` from sensor message headers

@@ -395,7 +395,7 @@ void WideAngleCameraSensor::SetScene(gz::rendering::ScenePtr _scene)
 bool WideAngleCameraSensor::Update(
     const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("WideAngleCameraSensor::Update");
+  GZ_PROFILE("WideAngleCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
     gzerr << "Not initialized, update ignored.\n";
@@ -468,7 +468,7 @@ bool WideAngleCameraSensor::Update(
   // create message
   gz::msgs::Image msg;
   {
-    IGN_PROFILE("WideAngleCameraSensor::Update Message");
+    GZ_PROFILE("WideAngleCameraSensor::Update Message");
     msg.set_width(width);
     msg.set_height(height);
     msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
@@ -486,7 +486,7 @@ bool WideAngleCameraSensor::Update(
   // publish the image message
   {
     this->AddSequence(msg.mutable_header());
-    IGN_PROFILE("WideAngleCameraSensor::Update Publish");
+    GZ_PROFILE("WideAngleCameraSensor::Update Publish");
     this->dataPtr->pub.Publish(msg);
 
     // publish the camera info message

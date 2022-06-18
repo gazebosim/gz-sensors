@@ -10,7 +10,10 @@ release will remove the deprecated code.
 1. The `ignition` namespace is deprecated and will be removed in future versions.  Use `gz` instead.
 
 1. Header files under `ignition/...` are deprecated and will be removed in future versions.
-  Use `gz/...` instead.
+     Use `gz/...` instead.
+
+1. The `ignition:type` SDF attribute is deprecated and will be removed.
+     Please use `gz:type` instead.
 
 1. **CameraSensor**: the default anti-aliasing value has changed from `2` to `4`.
 

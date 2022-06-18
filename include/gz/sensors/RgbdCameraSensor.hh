@@ -39,8 +39,8 @@ namespace gz
 
     /// \brief RGBD camera sensor class.
     ///
-    /// This class creates a few types of sensor data from an ignition
-    /// rendering scene:
+    /// This class creates a few types of sensor data from a Gazebo
+    /// Rendering scene:
     /// * RGB image (same as CameraSensor)
     /// * Depth image (same as DepthCamera)
     /// * (future / todo) Color point cloud
@@ -99,11 +99,11 @@ namespace gz
       /// \return True on success.
       private: bool CreateCameras();
 
-      IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
+      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<RgbdCameraSensorPrivate> dataPtr;
-      IGN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

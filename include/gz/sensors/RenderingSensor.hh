@@ -48,7 +48,7 @@ namespace gz
     /// \brief a rendering sensor class
     ///
     ///   This class is a base for all rendering sensor classes. It provides
-    /// interface to ignition rendering objects
+    /// interface to Gazebo Rendering objects
     class GZ_SENSORS_RENDERING_VISIBLE RenderingSensor
         : public Sensor
     {
@@ -86,11 +86,11 @@ namespace gz
       /// \param[in] _sensor Sensor to add.
       protected: void AddSensor(rendering::SensorPtr _sensor);
 
-      IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
+      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal
       /// \brief Data pointer for private data
       private: std::unique_ptr<RenderingSensorPrivate> dataPtr;
-      IGN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

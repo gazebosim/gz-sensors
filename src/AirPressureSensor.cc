@@ -148,7 +148,7 @@ bool AirPressureSensor::Load(sdf::ElementPtr _sdf)
 bool AirPressureSensor::Update(
   const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("AirPressureSensor::Update");
+  GZ_PROFILE("AirPressureSensor::Update");
   if (!this->dataPtr->initialized)
   {
     gzerr << "Not initialized, update ignored.\n";

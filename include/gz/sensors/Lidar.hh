@@ -245,10 +245,10 @@ namespace gz
       /// \return Visibility mask
       public: uint32_t VisibilityMask() const;
 
-      IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
+      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Just a mutex for thread safety
       public: mutable std::mutex lidarMutex;
-      IGN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
 
       /// \brief Raw buffer of laser data.
       public: float *laserBuffer = nullptr;
@@ -268,11 +268,11 @@ namespace gz
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &/*_format*/)> _subscriber);
 
-      IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
+      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<LidarPrivate> dataPtr;
-      IGN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }
