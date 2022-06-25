@@ -38,7 +38,7 @@ if (DRI_TESTS)
     SOURCES
       ${dri_tests}
     LIB_DEPS
-      ${IGNITION-TRANSPORT_LIBRARIES}
+      ${GZ-TRANSPORT_LIBRARIES}
       ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-camera
       ${PROJECT_LIBRARY_TARGET_NAME}-lidar
