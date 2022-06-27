@@ -44,15 +44,31 @@ bool Odometer::Load(const sdf::Sensor &_sdf)
   // Advertise topic where data will be published
   this->pub = this->node.Advertise<gz::msgs::Double>(this->Topic());
 
-  if (!_sdf.Element()->HasElement("ignition:odometer"))
+  if (!_sdf->HasAttribute("gz:odometer"))
   {
-    gzdbg << "No custom configuration for [" << this->Topic() << "]"
-           << std::endl;
-    return true;
-  }
+    // TODO(CH3): Deprecated. Remove on tock.
+    // Try deprecated ignition:odometer attribute
+    // if gz:odometer attribute is missing
+    if (_sdf->HasAttribute("ignition:odometer"))
+    {
+      gzwarn << "The `ignition:odometer` attribute is deprecated. Please use "
+             << "`gz:odometer` instead." << std::endl;
 
-  // Load custom sensor params
-  auto customElem = _sdf.Element()->GetElement("ignition:odometer");
+      // Load custom sensor params
+      auto customElem = _sdf.Element()->GetElement("gz:odometer");
+    }
+    else  // This should be preserved on tock, just undented!
+    {
+      gzdbg << "No custom configuration for [" << this->Topic() << "]"
+             << std::endl;
+      return true;
+    }
+  }
+  else
+  {
+    // Load custom sensor params
+    auto customElem = _sdf.Element()->GetElement("gz:odometer");
+  }
 
   if (!customElem->HasElement("noise"))
   {
@@ -106,4 +122,3 @@ const gz::math::Vector3d &Odometer::Position() const
 {
   return this->prevPos;
 }
-
