@@ -7,13 +7,13 @@ There are currently a few limitations with the thermal camera, which will be men
 ## Requirements
 
 Since this tutorial will show how to use a thermal camera sensor in Gazebo, you'll need to have Gazebo installed.
-We recommend installing all Ignition libraries, using version Citadel or newer (the thermal camera is not available in Ignition versions prior to Citadel).
+We recommend installing all Gazebo libraries, using version Citadel or newer (the thermal camera is not available in Gazebo versions prior to Citadel).
 
 The following thermal camera capabilities are available starting from Gazebo Dome:
 * Heat signature capabilities (supports objects with a variable surface temperature)
 * 8-bit thermal camera image format (the default thermal camera image format is 16-bit)
 
-If you need to install Ignition, [pick the version you'd like to use](https://gazebosim.org/docs) and then follow the installation instructions.
+If you need to install Gazebo, [pick the version you'd like to use](https://gazebosim.org/docs) and then follow the installation instructions.
 
 ## Setting up the thermal camera
 
