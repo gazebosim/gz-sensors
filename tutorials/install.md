@@ -155,7 +155,7 @@ Before [gz-rendering](https://github.com/gazebosim/gz-rendering) becomes availab
   cd build
   ```
 
-    Before `gz-rendering` becomes available on conda-forge, we need to build it from source and specify the path containing `gz-rendering-config.cmake` in `CMAKE_PREFIX_PATH`, for cmake to find `gz-rendering`. That path could be `gz-rendering-install-path\lib\cmake\ignition-rendering4`, for example.
+    Before `gz-rendering` becomes available on conda-forge, we need to build it from source and specify the path containing `gz-rendering-config.cmake` in `CMAKE_PREFIX_PATH`, for cmake to find `gz-rendering`. That path could be `gz-rendering-install-path\lib\cmake\gz-rendering4`, for example.
   ```
   cmake .. -DBUILD_TESTING=OFF -DCMAKE_PREFIX_PATH=path\containing\ignition-rendering-config  # Optionally, -DCMAKE_INSTALL_PREFIX=path\to\install
   cmake --build . --config Release
