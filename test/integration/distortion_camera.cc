@@ -138,16 +138,9 @@ void DistortionCameraSensorTest::ImagesWithBuiltinSDF(
 //////////////////////////////////////////////////
 TEST_P(DistortionCameraSensorTest, ImagesWithBuiltinSDF)
 {
+  gz::common::Console::SetVerbosity(4);
   ImagesWithBuiltinSDF(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(DistortionCameraSensor, DistortionCameraSensorTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
-
-//////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  gz::common::Console::SetVerbosity(4);
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

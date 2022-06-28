@@ -165,10 +165,3 @@ TEST(Lidar_TEST, CreateLaser)
 
   EXPECT_TRUE(sensor->IsActive());
 }
-
-//////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

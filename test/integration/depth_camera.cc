@@ -506,15 +506,8 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
 TEST_P(DepthCameraSensorTest, ImagesWithBuiltinSDF)
 {
   ImagesWithBuiltinSDF(GetParam());
+  gz::common::Console::SetVerbosity(4);
 }
 
 INSTANTIATE_TEST_SUITE_P(DepthCameraSensor, DepthCameraSensorTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
-
-//////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  gz::common::Console::SetVerbosity(4);
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

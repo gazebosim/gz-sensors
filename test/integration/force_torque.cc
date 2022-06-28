@@ -303,9 +303,3 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Combine(::testing::Values("child", "parent", "sensor"),
                        ::testing::Values("parent_to_child",
                                          "child_to_parent")));
-
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

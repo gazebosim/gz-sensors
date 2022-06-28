@@ -155,16 +155,9 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 //////////////////////////////////////////////////
 TEST_P(TriggeredCameraTest, ImagesWithBuiltinSDF)
 {
+  gz::common::Console::SetVerbosity(4);
   ImagesWithBuiltinSDF(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(CameraSensor, TriggeredCameraTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
-
-//////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  gz::common::Console::SetVerbosity(4);
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

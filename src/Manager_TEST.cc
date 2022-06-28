@@ -94,10 +94,3 @@ TEST_F(Manager_TEST, RemoveSensor)
 
   EXPECT_TRUE(mgr.Remove(createdSensor->Id()));
 }
-
-//////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

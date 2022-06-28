@@ -619,16 +619,9 @@ void ThermalCameraSensorTest::Images8BitWithBuiltinSDF(
 //////////////////////////////////////////////////
 TEST_P(ThermalCameraSensorTest, Images8BitWithBuiltinSDF)
 {
+  gz::common::Console::SetVerbosity(4);
   Images8BitWithBuiltinSDF(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(ThermalCameraSensor, ThermalCameraSensorTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
-
-//////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  gz::common::Console::SetVerbosity(4);
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

@@ -90,10 +90,3 @@ TEST_F(Util_TEST, customType)
   sdf::ElementPtr ptr{nullptr};
   EXPECT_TRUE(customType(ptr).empty());
 }
-
-//////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

@@ -955,15 +955,9 @@ TEST_P(GpuLidarSensorTest, ManualUpdate)
 /////////////////////////////////////////////////
 TEST_P(GpuLidarSensorTest, Topic)
 {
+  gz::common::Console::SetVerbosity(4);
   Topic(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(GpuLidarSensor, GpuLidarSensorTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
-
-int main(int argc, char **argv)
-{
-  gz::common::Console::SetVerbosity(4);
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

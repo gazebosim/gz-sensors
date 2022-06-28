@@ -748,16 +748,9 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
 //////////////////////////////////////////////////
 TEST_P(RgbdCameraSensorTest, ImagesWithBuiltinSDF)
 {
+  gz::common::Console::SetVerbosity(4);
   ImagesWithBuiltinSDF(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(RgbdCameraSensor, RgbdCameraSensorTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
-
-//////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  gz::common::Console::SetVerbosity(4);
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
