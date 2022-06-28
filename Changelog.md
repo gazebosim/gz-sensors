@@ -84,7 +84,7 @@
 1. Trivial tutorial typo correction in Custom Sensors tutorial
     * [Pull request #160](https://github.com/gazebosim/gz-sensors/pull/160)
 
-1. Bumps in fortress: ign-sensors6
+1. Bumps in fortress: gz-sensors6
     * [Pull request #120](https://github.com/gazebosim/gz-sensors/pull/120)
 
 1. Port codecov to new configuration
@@ -143,16 +143,16 @@
 
 ### Gazebo Sensors 5.0.0 (2021-03-30)
 
-1. Bump in edifice: ign-common4
+1. Bump in edifice: gz-common4
     * [Pull request #85](https://github.com/gazebosim/gz-sensors/pull/85)
 
 1. Bump in edifice: sdformat11
     * [Pull request #78](https://github.com/gazebosim/gz-sensors/pull/78)
 
-1. Bump in edifice: ign-msgs7
+1. Bump in edifice: gz-msgs7
     * [Pull request #75](https://github.com/gazebosim/gz-sensors/pull/75)
 
-1. Bump in edifice: ign-rendering5
+1. Bump in edifice: gz-rendering5
     * [Pull request #55](https://github.com/gazebosim/gz-sensors/pull/55)
 
 1. Documentation updates
@@ -224,7 +224,7 @@
 1. Replaced common::Time with std::chrono
     * [Pull request 41](https://github.com/gazebosim/gz-sensors/pull/41)
 
-1. Depend on ign-msgs6, ign-transport9, sdf10
+1. Depend on gz-msgs6, gz-transport9, sdf10
     * [Pull request 31](https://github.com/gazebosim/gz-sensors/pull/31)
 
 1. GitHub migration
@@ -235,7 +235,7 @@
 1. Set camera sensor visibility mask
     * [BitBucket pull request 115](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/115)
 
-1. Depend on ign-rendering4
+1. Depend on gz-rendering4
     * [BitBucket pull request 111](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/111)
 
 ## Gazebo Sensors 3
@@ -309,13 +309,13 @@
 1. Add support for sdformat frame semantics
     * [BitBucket pull request 104](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/104)
 
-1. Remove deprecations in ign-sensors3
+1. Remove deprecations in gz-sensors3
     * [BitBucket pull request 103](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/103)
 
 1. Break out image noise classes
     * [BitBucket pull request 102](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/102)
 
-1. Depend on ign-transport8, ign-msgs5, sdformat9
+1. Depend on gz-transport8, gz-msgs5, sdformat9
     * [BitBucket pull request 101](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/101)
     * [BitBucket pull request 105](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/105)
 
@@ -328,7 +328,7 @@
 1. Removed deprecations from Manager.
     * [BitBucket pull request 99](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/99)
 
-1. Depend on ign-rendering3
+1. Depend on gz-rendering3
     * [BitBucket pull request 88](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/88)
 
 ## Gazebo Sensors 2
