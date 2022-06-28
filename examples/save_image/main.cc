@@ -133,7 +133,7 @@ int main()
   return 0;
 }
 
-// Copy/paste from an ignition-rendering example
+// Copy/paste from an gz-rendering example
 void BuildScene(gz::rendering::ScenePtr _scene)
 {
   // initialize _scene
