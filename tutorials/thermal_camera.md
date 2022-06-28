@@ -7,13 +7,13 @@ There are currently a few limitations with the thermal camera, which will be men
 ## Requirements
 
 Since this tutorial will show how to use a thermal camera sensor in Gazebo, you'll need to have Gazebo installed.
-We recommend installing all Ignition libraries, using version Citadel or newer (the thermal camera is not available in Ignition versions prior to Citadel).
+We recommend installing all Gazebo libraries, using version Citadel or newer (the thermal camera is not available in Gazebo versions prior to Citadel).
 
 The following thermal camera capabilities are available starting from Gazebo Dome:
 * Heat signature capabilities (supports objects with a variable surface temperature)
 * 8-bit thermal camera image format (the default thermal camera image format is 16-bit)
 
-If you need to install Ignition, [pick the version you'd like to use](https://gazebosim.org/docs) and then follow the installation instructions.
+If you need to install Gazebo, [pick the version you'd like to use](https://gazebosim.org/docs) and then follow the installation instructions.
 
 ## Setting up the thermal camera
 
@@ -244,7 +244,7 @@ Now that we've discussed how a thermal camera and models with temperature can be
 Run the following command:
 
 ```
-ign gazebo -r thermal_camera.sdf
+gz sim -r thermal_camera.sdf
 ```
 
 You should see something similar to this:
@@ -267,7 +267,7 @@ An easy way to move objects in the world is by using `Transform Control`:
 @image html files/thermal_camera/thermal_camera_demo_2.png
 
 Another thing that you can do is modify the temperature ranges for objects with a heat signature.
-For example, if you go to the fuel cache on your machine (located at `~/.ignition/fuel/` by default) and then modify Rescue Randy's `model.sdf` to have `min_temp` be `200`, and `max_temp` be `500`, you should see output similar to this (be sure to re-start the simulator by killing the current simulator (`ctrl-c` will do) and then re-running `ign gazebo -r thermal_camera.sdf`):
+For example, if you go to the fuel cache on your machine (located at `~/.ignition/fuel/` by default) and then modify Rescue Randy's `model.sdf` to have `min_temp` be `200`, and `max_temp` be `500`, you should see output similar to this (be sure to re-start the simulator by killing the current simulator (`ctrl-c` will do) and then re-running `gz sim -r thermal_camera.sdf`):
 
 @image html files/thermal_camera/thermal_camera_demo_3.png
 

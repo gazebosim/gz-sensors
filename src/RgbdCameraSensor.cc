@@ -481,7 +481,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 
     std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-    // The following code is a work around since ign-rendering's depth camera
+    // The following code is a work around since gz-rendering's depth camera
     // does not support 2 different clipping distances. An assumption is made
     // that the depth clipping distances are within bounds of the rgb clipping
     // distances, if not, the rgb clipping values will take priority.

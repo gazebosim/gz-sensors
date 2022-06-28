@@ -41,7 +41,7 @@ which version you need.
 
 ### Windows
 
-Binary install is pending `ignition-rendering` and `ignition-sensors` being added to conda-forge.
+Binary install is pending `gz-rendering` and `gz-sensors` being added to conda-forge.
 
 ## Source Install
 
@@ -74,7 +74,7 @@ Gazebo Sensors requires:
 
 4. Configure and build
   ```
-  cd ign-sensors; mkdir build; cd build; cmake ..;  make
+  cd gz-sensors; mkdir build; cd build; cmake ..;  make
   ```
 
 5. Optionally, install the library
@@ -100,7 +100,7 @@ Gazebo Sensors requires:
 
 3. Configure and build
   ```
-  cd ign-sensors
+  cd gz-sensors
   mkdir build
   cd build
   cmake ..
@@ -116,30 +116,30 @@ Gazebo Sensors requires:
 
 #### Install Prerequisites
 
-First, follow the [ign-cmake](https://github.com/gazebosim/gz-cmake) tutorial for installing Conda, Visual Studio, CMake, etc., prerequisites, and creating a Conda environment.
+First, follow the [gz-cmake](https://github.com/gazebosim/gz-cmake) tutorial for installing Conda, Visual Studio, CMake, etc., prerequisites, and creating a Conda environment.
 
 Navigate to `condabin` if necessary to use the `conda` command (i.e., if Conda is not in your `PATH` environment variable. You can find the location of `condabin` in Anaconda Prompt, `where conda`).
 
 Create if necessary, and activate a Conda environment:
 
 ```
-conda create -n ign-ws
-conda activate ign-ws
+conda create -n gz-ws
+conda activate gz-ws
 ```
 
-Install Ignition dependencies, replacing `<#>` with the desired versions:
+Install Gazebo dependencies, replacing `<#>` with the desired versions:
 
 ```
 conda install libignition-cmake<#> libignition-common<#> libignition-math<#> libignition-transport<#> libignition-msgs<#> --channel conda-forge
 ```
 
-Before [ign-rendering](https://github.com/gazebosim/gz-rendering) becomes available on conda-forge, follow its tutorial to build it from source.
+Before [gz-rendering](https://github.com/gazebosim/gz-rendering) becomes available on conda-forge, follow its tutorial to build it from source.
 
 #### Build from source
 
 1. Activate the Conda environment created in the prerequisites:
   ```
-  conda activate ign-ws
+  conda activate gz-ws
   ```
 
 1. Navigate to where you would like to build the library, and clone the repository.
@@ -150,12 +150,12 @@ Before [ign-rendering](https://github.com/gazebosim/gz-rendering) becomes availa
 
 1. Configure and build
   ```
-  cd ign-sensors
+  cd gz-sensors
   mkdir build
   cd build
   ```
 
-    Before `ign-rendering` becomes available on conda-forge, we need to build it from source and specify the path containing `ignition-rendering-config.cmake` in `CMAKE_PREFIX_PATH`, for cmake to find `ign-rendering`. That path could be `ign-rendering-install-path\lib\cmake\ignition-rendering4`, for example.
+    Before `gz-rendering` becomes available on conda-forge, we need to build it from source and specify the path containing `gz-rendering-config.cmake` in `CMAKE_PREFIX_PATH`, for cmake to find `gz-rendering`. That path could be `gz-rendering-install-path\lib\cmake\gz-rendering4`, for example.
   ```
   cmake .. -DBUILD_TESTING=OFF -DCMAKE_PREFIX_PATH=path\containing\ignition-rendering-config  # Optionally, -DCMAKE_INSTALL_PREFIX=path\to\install
   cmake --build . --config Release
@@ -184,7 +184,7 @@ You can also generate the documentation from a clone of this repository by follo
 
 3. Configure and build the documentation.
   ```
-  cd ign-sensors; mkdir build; cd build; cmake ../; make doc
+  cd gz-sensors; mkdir build; cd build; cmake ../; make doc
   ```
 
 4. View the documentation by running the following command from the build directory.
