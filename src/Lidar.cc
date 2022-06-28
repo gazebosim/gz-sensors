@@ -17,6 +17,8 @@
 #include <gz/common/Console.hh>
 #include <gz/common/Event.hh>
 #include <gz/common/Profiler.hh>
+#include <gz/msgs/laserscan.pb.h>
+#include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 #include <sdf/Lidar.hh>
 

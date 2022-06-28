@@ -18,6 +18,8 @@
 #include <gz/common/Profiler.hh>
 #include <gz/math/Angle.hh>
 #include <gz/math/Vector3.hh>
+#include <gz/msgs/navsat.pb.h>
+#include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 
 #include "gz/sensors/NavSatSensor.hh"

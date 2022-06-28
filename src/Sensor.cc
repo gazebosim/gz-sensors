@@ -24,6 +24,7 @@
 #include <gz/common/Console.hh>
 #include <gz/common/Profiler.hh>
 #include <gz/msgs/double.pb.h>
+#include <gz/msgs/performance_sensor_metrics.pb.h>
 #include <gz/transport/Node.hh>
 #include <gz/transport/TopicUtils.hh>
 
