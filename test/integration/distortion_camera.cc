@@ -45,7 +45,7 @@
 #pragma warning(pop)
 #endif
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 class DistortionCameraSensorTest: public testing::Test,
@@ -141,7 +141,7 @@ TEST_P(DistortionCameraSensorTest, ImagesWithBuiltinSDF)
   ImagesWithBuiltinSDF(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(DistortionCameraSensor, DistortionCameraSensorTest,
+INSTANTIATE_TEST_SUITE_P(DistortionCameraSensor, DistortionCameraSensorTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////

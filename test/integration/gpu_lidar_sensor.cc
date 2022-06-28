@@ -52,7 +52,7 @@
 
 #include <sdf/sdf.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 #define LASER_TOL 1e-4
@@ -958,7 +958,7 @@ TEST_P(GpuLidarSensorTest, Topic)
   Topic(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(GpuLidarSensor, GpuLidarSensorTest,
+INSTANTIATE_TEST_SUITE_P(GpuLidarSensor, GpuLidarSensorTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 
 int main(int argc, char **argv)

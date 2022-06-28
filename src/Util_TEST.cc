@@ -23,7 +23,7 @@
 #include <sdf/Model.hh>
 #include <sdf/World.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "gz/sensors/Util.hh"
 
 /// \brief Test Util functions

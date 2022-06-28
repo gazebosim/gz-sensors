@@ -43,7 +43,7 @@
 #pragma warning(pop)
 #endif
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 using namespace gz;
@@ -363,7 +363,7 @@ TEST_P(SegmentationCameraSensorTest, ImagesWithBuiltinSDF)
   ImagesWithBuiltinSDF(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(SegmentationCameraSensor, SegmentationCameraSensorTest,
+INSTANTIATE_TEST_SUITE_P(SegmentationCameraSensor, SegmentationCameraSensorTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////

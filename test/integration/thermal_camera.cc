@@ -47,7 +47,7 @@
 #pragma warning(pop)
 #endif
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 #define DOUBLE_TOL 1e-6
@@ -622,7 +622,7 @@ TEST_P(ThermalCameraSensorTest, Images8BitWithBuiltinSDF)
   Images8BitWithBuiltinSDF(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(ThermalCameraSensor, ThermalCameraSensorTest,
+INSTANTIATE_TEST_SUITE_P(ThermalCameraSensor, ThermalCameraSensorTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////

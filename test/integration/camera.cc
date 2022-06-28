@@ -45,7 +45,7 @@
 #pragma warning(pop)
 #endif
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 std::mutex g_mutex;
@@ -292,7 +292,7 @@ TEST_P(CameraSensorTest, LInt8ImagesWithBuiltinSDF)
   ImageFormatLInt8LInt16(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(CameraSensor, CameraSensorTest,
+INSTANTIATE_TEST_SUITE_P(CameraSensor, CameraSensorTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////

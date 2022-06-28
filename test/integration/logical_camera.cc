@@ -37,7 +37,7 @@
 #endif
 #include <gz/transport/Node.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 // undefine near and far macros from windows.h

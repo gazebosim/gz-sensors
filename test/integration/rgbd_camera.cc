@@ -48,7 +48,7 @@
 #pragma warning(pop)
 #endif
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 #include "PointCloudUtil.hh"
@@ -751,7 +751,7 @@ TEST_P(RgbdCameraSensorTest, ImagesWithBuiltinSDF)
   ImagesWithBuiltinSDF(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(RgbdCameraSensor, RgbdCameraSensorTest,
+INSTANTIATE_TEST_SUITE_P(RgbdCameraSensor, RgbdCameraSensorTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////
