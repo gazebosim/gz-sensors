@@ -191,7 +191,7 @@ If you're including a model from a place like [Gazebo Fuel](https://app.gazebosi
 Now that we've discussed how a segmentation camera and models with labels can be specified, let's run an example world that uses the segmentation camera.
 Run the following command:
 ```
-ign gazebo segmentation_camera.sdf
+gz sim segmentation_camera.sdf
 ```
 
 You should see something similar to this:

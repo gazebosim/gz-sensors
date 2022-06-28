@@ -244,7 +244,7 @@ Now that we've discussed how a thermal camera and models with temperature can be
 Run the following command:
 
 ```
-ign gazebo -r thermal_camera.sdf
+gz sim -r thermal_camera.sdf
 ```
 
 You should see something similar to this:
@@ -267,7 +267,7 @@ An easy way to move objects in the world is by using `Transform Control`:
 @image html files/thermal_camera/thermal_camera_demo_2.png
 
 Another thing that you can do is modify the temperature ranges for objects with a heat signature.
-For example, if you go to the fuel cache on your machine (located at `~/.ignition/fuel/` by default) and then modify Rescue Randy's `model.sdf` to have `min_temp` be `200`, and `max_temp` be `500`, you should see output similar to this (be sure to re-start the simulator by killing the current simulator (`ctrl-c` will do) and then re-running `ign gazebo -r thermal_camera.sdf`):
+For example, if you go to the fuel cache on your machine (located at `~/.ignition/fuel/` by default) and then modify Rescue Randy's `model.sdf` to have `min_temp` be `200`, and `max_temp` be `500`, you should see output similar to this (be sure to re-start the simulator by killing the current simulator (`ctrl-c` will do) and then re-running `gz sim -r thermal_camera.sdf`):
 
 @image html files/thermal_camera/thermal_camera_demo_3.png
 
