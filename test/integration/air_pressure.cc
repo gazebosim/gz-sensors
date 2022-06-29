@@ -23,7 +23,7 @@
 #include <gz/sensors/AirPressureSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 /// \brief Helper function to create an air pressure sdf element
@@ -268,10 +268,4 @@ TEST_F(AirPressureSensorTest, Topic)
         gz::sensors::AirPressureSensor>(airPressureSdf);
     ASSERT_EQ(nullptr, sensor);
   }
-}
-
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

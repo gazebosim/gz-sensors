@@ -23,7 +23,7 @@
 #include <sdf/Model.hh>
 #include <sdf/World.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "gz/sensors/Util.hh"
 
 /// \brief Test Util functions
@@ -89,11 +89,4 @@ TEST_F(Util_TEST, customType)
 
   sdf::ElementPtr ptr{nullptr};
   EXPECT_TRUE(customType(ptr).empty());
-}
-
-//////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

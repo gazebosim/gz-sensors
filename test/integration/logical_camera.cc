@@ -37,7 +37,7 @@
 #endif
 #include <gz/transport/Node.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 // undefine near and far macros from windows.h
@@ -299,10 +299,4 @@ TEST_F(LogicalCameraSensorTest, Topic)
         gz::sensors::LogicalCameraSensor>(logicalCameraSdf);
     ASSERT_EQ(nullptr, sensor);
   }
-}
-
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

@@ -813,10 +813,3 @@ TEST(ImuSensor_TEST, LocalizationTagInvalid)
   math::Quaterniond orientValue(math::Vector3d(0, 0, 0));
   EXPECT_EQ(orientValue, sensor->Orientation());
 }
-
-//////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

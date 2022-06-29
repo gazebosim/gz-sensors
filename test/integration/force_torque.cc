@@ -24,7 +24,7 @@
 #include <gz/sensors/ForceTorqueSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 /// \brief Helper function to create a force torque sensor sdf element.
@@ -298,14 +298,8 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
   EXPECT_EQ(torque, sensor->Torque());
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     FrameAndDirection, ForceTorqueSensorTest,
     ::testing::Combine(::testing::Values("child", "parent", "sensor"),
                        ::testing::Values("parent_to_child",
-                                         "child_to_parent")), );
-
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+                                         "child_to_parent")));

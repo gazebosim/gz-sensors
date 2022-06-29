@@ -23,7 +23,7 @@
 #include <gz/sensors/AltimeterSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 /// \brief Helper function to create an altimeter sdf element
@@ -296,10 +296,4 @@ TEST_F(AltimeterSensorTest, Topic)
         gz::sensors::AltimeterSensor>(altimeterSdf);
     ASSERT_EQ(nullptr, sensor);
   }
-}
-
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

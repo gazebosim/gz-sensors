@@ -23,7 +23,7 @@
 #include <gz/sensors/NavSatSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 using namespace gz;
@@ -332,10 +332,4 @@ TEST_F(NavSatSensorTest, Topic)
         NavSatSensor>(navsatSdf);
     ASSERT_EQ(nullptr, sensor);
   }
-}
-
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

@@ -37,8 +37,8 @@ if (MSVC)
 endif()
 
 # Create the library target.
-gz_create_core_library(SOURCES ${sources} CXX_STANDARD 14)
 
+gz_create_core_library(SOURCES ${sources})
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC
     gz-math${GZ_MATH_VER}::gz-math${GZ_MATH_VER}
