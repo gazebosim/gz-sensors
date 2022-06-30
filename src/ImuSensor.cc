@@ -200,7 +200,7 @@ bool ImuSensor::Load(sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 bool ImuSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("ImuSensor::Update");
+  GZ_PROFILE("ImuSensor::Update");
   if (!this->dataPtr->initialized)
   {
     gzerr << "Not initialized, update ignored.\n";
@@ -344,25 +344,25 @@ void ImuSensor::SetWorldFrameOrientation(
         {
           {WorldFrameEnumType::ENU, gz::math::Quaterniond(0, 0, 0)},
           {WorldFrameEnumType::NED, gz::math::Quaterniond(
-            IGN_PI, 0, IGN_PI/2)},
+            GZ_PI, 0, GZ_PI/2)},
           {WorldFrameEnumType::NWU, gz::math::Quaterniond(
-            0, 0, IGN_PI/2)},
+            0, 0, GZ_PI/2)},
         }
       },
       {WorldFrameEnumType::NED,
         {
           {WorldFrameEnumType::ENU, gz::math::Quaterniond(
-            IGN_PI, 0, IGN_PI/2).Inverse()},
+            GZ_PI, 0, GZ_PI/2).Inverse()},
           {WorldFrameEnumType::NED, gz::math::Quaterniond(0, 0, 0)},
           {WorldFrameEnumType::NWU, gz::math::Quaterniond(
-            -IGN_PI, 0, 0)},
+            -GZ_PI, 0, 0)},
         }
       },
       {WorldFrameEnumType::NWU,
         {
           {WorldFrameEnumType::ENU, gz::math::Quaterniond(
-            0, 0, -IGN_PI/2)},
-          {WorldFrameEnumType::NED, gz::math::Quaterniond(IGN_PI, 0, 0)},
+            0, 0, -GZ_PI/2)},
+          {WorldFrameEnumType::NED, gz::math::Quaterniond(GZ_PI, 0, 0)},
           {WorldFrameEnumType::NWU, gz::math::Quaterniond(0, 0, 0)},
         }
       }

@@ -220,7 +220,7 @@ void Lidar::ApplyNoise()
 //////////////////////////////////////////////////
 bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("Lidar::PublishLidarScan");
+  GZ_PROFILE("Lidar::PublishLidarScan");
   if (!this->laserBuffer)
     return false;
 

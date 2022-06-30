@@ -34,11 +34,11 @@ if (UNIX AND NOT APPLE)
 endif()
 
 if (DRI_TESTS)
-  ign_build_tests(TYPE INTEGRATION
+  gz_build_tests(TYPE INTEGRATION
     SOURCES
       ${dri_tests}
     LIB_DEPS
-      ${IGNITION-TRANSPORT_LIBRARIES}
+      ${GZ-TRANSPORT_LIBRARIES}
       ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-camera
       ${PROJECT_LIBRARY_TARGET_NAME}-lidar
@@ -50,7 +50,7 @@ if (DRI_TESTS)
   )
 endif()
 
-ign_build_tests(TYPE INTEGRATION
+gz_build_tests(TYPE INTEGRATION
   SOURCES
     ${tests}
   LIB_DEPS

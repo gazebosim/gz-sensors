@@ -22,7 +22,7 @@
 #include <gz/sensors/ImuSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 /// \brief Helper function to create an imu sdf element
@@ -273,10 +273,4 @@ TEST_F(ImuSensorTest, Topic)
     auto sensor = factory.CreateSensor<gz::sensors::ImuSensor>(imuSdf);
     ASSERT_EQ(nullptr, sensor);
   }
-}
-
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

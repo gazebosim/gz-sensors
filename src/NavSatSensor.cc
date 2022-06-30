@@ -149,7 +149,7 @@ bool NavSatSensor::Load(sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 bool NavSatSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("NavSatSensor::Update");
+  GZ_PROFILE("NavSatSensor::Update");
   if (!this->dataPtr->loaded)
   {
     gzerr << "Not loaded, update ignored.\n";
@@ -164,8 +164,8 @@ bool NavSatSensor::Update(const std::chrono::steady_clock::duration &_now)
   auto iter = this->dataPtr->noises.find(NAVSAT_HORIZONTAL_POSITION_NOISE);
   if (iter != this->dataPtr->noises.end())
   {
-    this->SetLatitude(IGN_DTOR(iter->second->Apply(this->Latitude().Degree())));
-    this->SetLongitude(IGN_DTOR(iter->second->Apply(
+    this->SetLatitude(GZ_DTOR(iter->second->Apply(this->Latitude().Degree())));
+    this->SetLongitude(GZ_DTOR(iter->second->Apply(
         this->Longitude().Degree())));
   }
   iter = this->dataPtr->noises.find(NAVSAT_VERTICAL_POSITION_NOISE);

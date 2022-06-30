@@ -63,7 +63,7 @@ namespace gz
 
     /// \brief Wide Angle camera sensor class.
     ///
-    /// This class creates wide angle camera image from an ignition rendering
+    /// This class creates wide angle camera image from a Gazebo Rendering
     /// scene. The scene must be created in advance and given to Manager::Init()
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
@@ -152,11 +152,11 @@ namespace gz
       private: void OnSceneChange(gz::rendering::ScenePtr /*_scene*/)
               { }
 
-      IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
+      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<WideAngleCameraSensorPrivate> dataPtr;
-      IGN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

@@ -263,7 +263,7 @@ void GpuLidarSensor::OnNewLidarFrame(const float *_data,
 //////////////////////////////////////////////////
 bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("GpuLidarSensor::Update");
+  GZ_PROFILE("GpuLidarSensor::Update");
   if (!this->initialized)
   {
     gzerr << "Not initialized, update ignored.\n";
@@ -306,7 +306,7 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
 
     {
       this->AddSequence(this->dataPtr->pointMsg.mutable_header());
-      IGN_PROFILE("GpuLidarSensor::Update Publish point cloud");
+      GZ_PROFILE("GpuLidarSensor::Update Publish point cloud");
       this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
     }
   }
@@ -357,7 +357,7 @@ bool GpuLidarSensor::HasConnections() const
 //////////////////////////////////////////////////
 void GpuLidarSensorPrivate::FillPointCloudMsg(const float *_laserBuffer)
 {
-  IGN_PROFILE("GpuLidarSensorPrivate::FillPointCloudMsg");
+  GZ_PROFILE("GpuLidarSensorPrivate::FillPointCloudMsg");
   uint32_t width = this->pointMsg.width();
   uint32_t height = this->pointMsg.height();
   unsigned int channels = 3;

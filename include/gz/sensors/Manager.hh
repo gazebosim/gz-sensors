@@ -139,10 +139,10 @@ namespace gz
       /// \brief Adds colon delimited paths sensor plugins may be
       public: void GZ_DEPRECATED(6) AddPluginPaths(const std::string &_path);
 
-      IGN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
+      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief private data pointer
       private: std::unique_ptr<ManagerPrivate> dataPtr;
-      IGN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }
   }

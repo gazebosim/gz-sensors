@@ -389,7 +389,7 @@ bool DepthCameraSensor::CreateCamera()
   this->dataPtr->depthCamera->SetAntiAliasing(2);
 
   math::Angle angle = cameraSdf->HorizontalFov();
-  if (angle < 0.01 || angle > IGN_PI*2)
+  if (angle < 0.01 || angle > GZ_PI*2)
   {
     gzerr << "Invalid horizontal field of view [" << angle << "]\n";
 
@@ -514,7 +514,7 @@ void DepthCameraSensor::SetScene(gz::rendering::ScenePtr _scene)
 bool DepthCameraSensor::Update(
   const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("DepthCameraSensor::Update");
+  GZ_PROFILE("DepthCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
     gzerr << "Not initialized, update ignored.\n";

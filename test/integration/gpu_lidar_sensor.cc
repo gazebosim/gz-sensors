@@ -52,7 +52,7 @@
 
 #include <sdf/sdf.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 #define LASER_TOL 1e-4
@@ -293,8 +293,8 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   const double updateRate = 30;
   const int horzSamples = 320;
   const double horzResolution = 1;
-  const double horzMinAngle = -IGN_PI/2.0;
-  const double horzMaxAngle = IGN_PI/2.0;
+  const double horzMinAngle = -GZ_PI/2.0;
+  const double horzMaxAngle = GZ_PI/2.0;
   const double vertResolution = 1;
   const int vertSamples = 1;
   const double vertMinAngle = 0;
@@ -439,8 +439,8 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   const double updateRate = 30;
   const int horzSamples = 320;
   const double horzResolution = 1;
-  const double horzMinAngle = -IGN_PI/2.0;
-  const double horzMaxAngle = IGN_PI/2.0;
+  const double horzMinAngle = -GZ_PI/2.0;
+  const double horzMaxAngle = GZ_PI/2.0;
   const double vertResolution = 1;
   const int vertSamples = 1;
   const double vertMinAngle = 0;
@@ -461,7 +461,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
 
   // Create a second sensor SDF rotated
   gz::math::Pose3d testPose2(gz::math::Vector3d(0, 0, 0.1),
-      gz::math::Quaterniond(IGN_PI/2.0, 0, 0));
+      gz::math::Quaterniond(GZ_PI/2.0, 0, 0));
   sdf::ElementPtr lidarSdf2 = GpuLidarToSdf(name2, testPose2, updateRate,
       topic2, horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
       vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
@@ -588,12 +588,12 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   const double updateRate = 30;
   const unsigned int horzSamples = 640;
   const double horzResolution = 1;
-  const double horzMinAngle = -IGN_PI/2.0;
-  const double horzMaxAngle = IGN_PI/2.0;
+  const double horzMinAngle = -GZ_PI/2.0;
+  const double horzMaxAngle = GZ_PI/2.0;
   const double vertResolution = 1;
   const unsigned int vertSamples = 4;
-  const double vertMinAngle = -IGN_PI/4.0;
-  const double vertMaxAngle = IGN_PI/4.0;
+  const double vertMinAngle = -GZ_PI/4.0;
+  const double vertMaxAngle = GZ_PI/4.0;
   const double rangeResolution = 0.01;
   const double rangeMin = 0.08;
   const double rangeMax = 10.0;
@@ -711,8 +711,8 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   const double updateRate = 30;
   const int horzSamples = 320;
   const double horzResolution = 1;
-  const double horzMinAngle = -IGN_PI/2.0;
-  const double horzMaxAngle = IGN_PI/2.0;
+  const double horzMinAngle = -GZ_PI/2.0;
+  const double horzMaxAngle = GZ_PI/2.0;
   const double vertResolution = 1;
   const int vertSamples = 1;
   const double vertMinAngle = 0;
@@ -955,15 +955,9 @@ TEST_P(GpuLidarSensorTest, ManualUpdate)
 /////////////////////////////////////////////////
 TEST_P(GpuLidarSensorTest, Topic)
 {
+  gz::common::Console::SetVerbosity(4);
   Topic(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(GpuLidarSensor, GpuLidarSensorTest,
+INSTANTIATE_TEST_SUITE_P(GpuLidarSensor, GpuLidarSensorTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
-
-int main(int argc, char **argv)
-{
-  gz::common::Console::SetVerbosity(4);
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

@@ -22,7 +22,7 @@
 #include <gz/sensors/MagnetometerSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 /// \brief Helper function to create an magnetometer sdf element
@@ -334,10 +334,4 @@ TEST_F(MagnetometerSensorTest, Topic)
         gz::sensors::MagnetometerSensor>(magnetometerSdf);
     ASSERT_EQ(nullptr, sensor);
   }
-}
-
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

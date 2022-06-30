@@ -170,7 +170,7 @@ bool ForceTorqueSensor::Load(sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("ForceTorqueSensor::Update");
+  GZ_PROFILE("ForceTorqueSensor::Update");
   if (!this->dataPtr->initialized)
   {
     gzerr << "Not initialized, update ignored.\n";

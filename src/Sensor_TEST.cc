@@ -414,10 +414,3 @@ TEST_F(SensorUpdate, NextDataUpdateTime)
     EXPECT_EQ(newNext.count(), sensor->NextDataUpdateTime().count());
   }
 }
-
-//////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

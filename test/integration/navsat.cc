@@ -23,7 +23,7 @@
 #include <gz/sensors/NavSatSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 using namespace gz;
@@ -220,13 +220,13 @@ TEST_F(NavSatSensorTest, SensorReadings)
   EXPECT_DOUBLE_EQ(0.0, sensorNoise->Velocity().Z());
 
   // set state and verify readings
-  math::Angle lat{IGN_DTOR(20)};
+  math::Angle lat{GZ_DTOR(20)};
   sensor->SetLatitude(lat);
   sensorNoise->SetLatitude(lat);
   EXPECT_EQ(lat, sensor->Latitude());
   EXPECT_EQ(lat, sensorNoise->Latitude());
 
-  math::Angle lon{IGN_DTOR(-20)};
+  math::Angle lon{GZ_DTOR(-20)};
   sensor->SetLongitude(lon);
   sensorNoise->SetLongitude(lon);
   EXPECT_EQ(lon, sensor->Longitude());
@@ -238,8 +238,8 @@ TEST_F(NavSatSensorTest, SensorReadings)
   EXPECT_DOUBLE_EQ(altitude, sensor->Altitude());
   EXPECT_DOUBLE_EQ(altitude, sensorNoise->Altitude());
 
-  lat += IGN_DTOR(20);
-  lon += IGN_DTOR(20);
+  lat += GZ_DTOR(20);
+  lon += GZ_DTOR(20);
   altitude += 100;
   sensor->SetPosition(lat, lon, altitude);
   sensorNoise->SetPosition(lat, lon, altitude);
@@ -332,10 +332,4 @@ TEST_F(NavSatSensorTest, Topic)
         NavSatSensor>(navsatSdf);
     ASSERT_EQ(nullptr, sensor);
   }
-}
-
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

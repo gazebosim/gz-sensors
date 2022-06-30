@@ -100,7 +100,7 @@ bool RenderingSensor::ManualSceneUpdate() const
 /////////////////////////////////////////////////
 void RenderingSensor::Render()
 {
-  IGN_PROFILE("RenderingSensor::Render");
+  GZ_PROFILE("RenderingSensor::Render");
   // Skip scene update. The user indicated that they will do this manually.
   // Performance is improved when a global scene update occurs only once per
   // frame, which can be acheived using a manual scene update.

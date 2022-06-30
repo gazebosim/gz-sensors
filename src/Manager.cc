@@ -75,7 +75,7 @@ bool Manager::Remove(const gz::sensors::SensorId _id)
 void Manager::RunOnce(
   const std::chrono::steady_clock::duration &_time, bool _force)
 {
-  IGN_PROFILE("SensorManager::RunOnce");
+  GZ_PROFILE("SensorManager::RunOnce");
   for (auto &s : this->dataPtr->sensors)
   {
     s.second->Update(_time, _force);

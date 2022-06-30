@@ -14,8 +14,8 @@ Ubuntu Focal | [![Build Status](https://build.osrfoundation.org/buildStatus/icon
 Homebrew      | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-main-homebrew-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-main-homebrew-amd64)
 Windows       | [![Build Status](https://build.osrfoundation.org/job/ign_sensors-ci-win/badge/icon)](https://build.osrfoundation.org/job/ign_sensors-ci-win/)
 
-Gazebo Sensors, a component of [Ignition
-Robotics](https://gazebosim.org), provides numerous sensor models
+Gazebo Sensors, a component of [Gazebo](https://gazebosim.org),
+provides numerous sensor models
 designed to generate realistic data from simulation environments. Gazebo Sensors is used in conjunction with [Gazebo Libraries](https://gazebosim/libs), and especially relies on the rendering capabilities from [Gazebo Rendering](https://gazebosim.org/libs/rendering) and physics simulation from [Gazebo Physics](https://gazebosim.org/libs/physics).
 
 # Table of Contents

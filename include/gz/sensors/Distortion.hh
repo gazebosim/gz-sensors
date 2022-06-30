@@ -100,7 +100,7 @@ namespace gz
       public: virtual void Print(std::ostream &_out) const;
 
       /// \brief Private data pointer
-      IGN_UTILS_IMPL_PTR(dataPtr)
+      GZ_UTILS_IMPL_PTR(dataPtr)
     };
     }
   }

@@ -23,7 +23,7 @@
 #include <sdf/Model.hh>
 #include <sdf/World.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "gz/sensors/Util.hh"
 
 /// \brief Test Util functions
@@ -82,18 +82,11 @@ TEST_F(Util_TEST, customType)
   {
     auto sensor = link->SensorByIndex(2);
     ASSERT_NE(nullptr, sensor);
-    EXPECT_EQ("missing_ignition_type", sensor->Name());
+    EXPECT_EQ("missing_gz_type", sensor->Name());
     EXPECT_TRUE(customType(*sensor).empty());
     EXPECT_TRUE(customType(sensor->Element()).empty());
   }
 
   sdf::ElementPtr ptr{nullptr};
   EXPECT_TRUE(customType(ptr).empty());
-}
-
-//////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

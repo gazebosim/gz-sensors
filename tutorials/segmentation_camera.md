@@ -4,8 +4,8 @@ In this tutorial, we will discuss how to use a segmentation camera sensor in Gaz
 
 ## Requirements
 
-Since this tutorial will show how to use a segmentation camera sensor in Gazebo, you'll need to have Gazebo installed. We recommend installing all Ignition libraries, using version Fortress or newer (the segmentation camera is not available in Ignition versions prior to Fortress).
-If you need to install Ignition, [pick the version you'd like to use](https://gazebosim.org/docs) and then follow the installation instructions.
+Since this tutorial will show how to use a segmentation camera sensor in Gazebo, you'll need to have Gazebo installed. We recommend installing all Gazebo libraries, using version Fortress or newer (the segmentation camera is not available in Gazebo versions prior to Fortress).
+If you need to install Gazebo, [pick the version you'd like to use](https://gazebosim.org/docs) and then follow the installation instructions.
 
 ## Setting up the segmentation camera
 Here's an example of how to attach a segmentation camera sensor to a model in a SDF file:
@@ -173,7 +173,7 @@ You can also attach this plugin to the model's `<model>` tag:
     </model>
 ```
 
-If you're including a model from a place like [ignition fuel](https://app.gazebosim.org/dashboard), you can add the label plugin as a child for the `<include>` tag:
+If you're including a model from a place like [Gazebo Fuel](https://app.gazebosim.org/dashboard), you can add the label plugin as a child for the `<include>` tag:
 
 ```xml
    <include>
@@ -191,7 +191,7 @@ If you're including a model from a place like [ignition fuel](https://app.gazebo
 Now that we've discussed how a segmentation camera and models with labels can be specified, let's run an example world that uses the segmentation camera.
 Run the following command:
 ```
-ign gazebo segmentation_camera.sdf
+gz sim segmentation_camera.sdf
 ```
 
 You should see something similar to this:
@@ -375,7 +375,7 @@ For panoptic/instance segmentation, to parse the `labels_map`, click on any pixe
 
 
 ## Processing the segmentation sensor via ign-transport
-It's possible to process the segmentation data in real time via `ign-transport`.
+It's possible to process the segmentation data in real time via `gz-transport`.
 You will need to which topics to subscribe to in order to receive this information.
 
 Consider the following SDF snippet from the segmentation camera:
@@ -457,4 +457,4 @@ int main(int argc, char **argv)
 ```
 
 If you'd like to gain a better understanding of how the subscriber code works,
-you can go through the [ign-transport tutorials](https://gazebosim.org/api/transport/11.0/tutorials.html).
+you can go through the [gz-transport tutorials](https://gazebosim.org/api/transport/11.0/tutorials.html).

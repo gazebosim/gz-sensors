@@ -348,7 +348,7 @@ bool RgbdCameraSensor::CreateCameras()
 
   math::Angle angle = cameraSdf->HorizontalFov();
   // todo(anyone) verify that rgb pixels align with d for angles >90 degrees.
-  if (angle < 0.01 || angle > IGN_PI * 2)
+  if (angle < 0.01 || angle > GZ_PI * 2)
   {
     gzerr << "Invalid horizontal field of view [" << angle << "]\n";
 
@@ -445,7 +445,7 @@ void RgbdCameraSensorPrivate::OnNewRgbPointCloud(const float *_scan,
 //////////////////////////////////////////////////
 bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("RgbdCameraSensor::Update");
+  GZ_PROFILE("RgbdCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
     gzerr << "Not initialized, update ignored.\n";
@@ -481,7 +481,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 
     std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-    // The following code is a work around since ign-rendering's depth camera
+    // The following code is a work around since gz-rendering's depth camera
     // does not support 2 different clipping distances. An assumption is made
     // that the depth clipping distances are within bounds of the rgb clipping
     // distances, if not, the rgb clipping values will take priority.
@@ -508,7 +508,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     // publish
     {
       this->AddSequence(msg.mutable_header(), "depthImage");
-      IGN_PROFILE("RgbdCameraSensor::Update Publish depth image");
+      GZ_PROFILE("RgbdCameraSensor::Update Publish depth image");
       this->dataPtr->depthPub.Publish(msg);
     }
   }
@@ -549,7 +549,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       }
 
       {
-        IGN_PROFILE("RgbdCameraSensor::Update Fill Point Cloud");
+        GZ_PROFILE("RgbdCameraSensor::Update Fill Point Cloud");
         // fill point cloud msg and image data
         this->dataPtr->pointsUtil.FillMsg(this->dataPtr->pointMsg,
             this->dataPtr->pointCloudBuffer, true,
@@ -560,7 +560,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       // publish
       {
         this->AddSequence(this->dataPtr->pointMsg.mutable_header(), "pointMsg");
-        IGN_PROFILE("RgbdCameraSensor::Update Publish point cloud");
+        GZ_PROFILE("RgbdCameraSensor::Update Publish point cloud");
         this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
       }
     }
@@ -570,7 +570,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     {
       if (!filledImgData)
       {
-        IGN_PROFILE("RgbdCameraSensor::Update Fill RGB Image");
+        GZ_PROFILE("RgbdCameraSensor::Update Fill RGB Image");
         // extract image data from point cloud data
         this->dataPtr->pointsUtil.RGBFromPointCloud(
             this->dataPtr->image.Data<unsigned char>(),
@@ -596,7 +596,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       // publish the image message
       {
         this->AddSequence(msg.mutable_header(), "rgbdImage");
-        IGN_PROFILE("RgbdCameraSensor::Update Publish RGB image");
+        GZ_PROFILE("RgbdCameraSensor::Update Publish RGB image");
         this->dataPtr->imagePub.Publish(msg);
       }
     }

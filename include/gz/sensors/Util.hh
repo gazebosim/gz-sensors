@@ -36,12 +36,12 @@ inline namespace GZ_SENSORS_VERSION_NAMESPACE {
 ///
 /// Given an SDF tag as follows:
 ///
-///     <sensor name="sensor_name" type="custom" ignition:type="sensor_type">
+///     <sensor name="sensor_name" type="custom" gz:type="sensor_type">
 ///
 /// This function returns `sensor_type`.
 ///
 /// It will return an empty string if the element is malformed. For example,
-/// if it misses the `ignition:type` attribute or is not of `type="custom"`.
+/// if it misses the `gz:type` attribute or is not of `type="custom"`.
 ///
 /// \param[in] _sdf Sensor SDF object.
 /// \return _sensorType Name of sensor type.
@@ -51,12 +51,12 @@ std::string GZ_SENSORS_VISIBLE customType(const sdf::Sensor &_sdf); // NOLINT
 ///
 /// Given an SDF tag as follows:
 ///
-///     <sensor name="sensor_name" type="custom" ignition:type="sensor_type">
+///     <sensor name="sensor_name" type="custom" gz:type="sensor_type">
 ///
 /// This function returns `sensor_type`.
 ///
 /// It will return an empty string if the element is malformed. For example,
-/// if it misses the `ignition:type` attribute or is not of `type="custom"`.
+/// if it misses the `gz:type` attribute or is not of `type="custom"`.
 ///
 /// \param[in] _sdf Sensor SDF object.
 /// \return _sensorType Name of sensor type.
