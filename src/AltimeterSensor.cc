@@ -16,6 +16,8 @@
 */
 
 #include <gz/common/Profiler.hh>
+#include <gz/msgs/altimeter.pb.h>
+#include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 
 #include "gz/sensors/AltimeterSensor.hh"
