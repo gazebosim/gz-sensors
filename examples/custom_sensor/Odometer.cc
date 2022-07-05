@@ -44,17 +44,15 @@ bool Odometer::Load(const sdf::Sensor &_sdf)
   // Advertise topic where data will be published
   this->pub = this->node.Advertise<gz::msgs::Double>(this->Topic());
 
-  if (_sdf->HasAttribute("gz:odometer"))
-  {
-    // Load custom sensor params
-    auto customElem = _sdf.Element()->GetElement("gz:odometer");
-  }
-  else
+  if (!_sdf.Element()->HasElement("gz:odometer"))
   {
     gzdbg << "No custom configuration for [" << this->Topic() << "]"
            << std::endl;
     return true;
   }
+
+  // Load custom sensor params
+  auto customElem = _sdf.Element()->GetElement("gz:odometer");
 
   if (!customElem->HasElement("noise"))
   {
