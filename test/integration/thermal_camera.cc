@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2019 Open Source Robotics Foundation
  *
@@ -32,6 +33,7 @@
 #include <ignition/common/Event.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/ThermalCameraSensor.hh>
+#include <ignition/utils/ExtraTestMacros.hh>
 
 // TODO(louise) Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -357,7 +359,9 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
 }
 
 //////////////////////////////////////////////////
-TEST_P(ThermalCameraSensorTest, ImagesWithBuiltinSDF)
+// See: https://github.com/gazebosim/gz-rendering/issues/654
+TEST_P(ThermalCameraSensorTest,
+       IGN_UTILS_TEST_DISABLED_ON_MAC(ImagesWithBuiltinSDF))
 {
   ImagesWithBuiltinSDF(GetParam());
 }
