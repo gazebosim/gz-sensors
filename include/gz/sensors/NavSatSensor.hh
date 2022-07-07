@@ -110,8 +110,7 @@ namespace gz
 
       /// \brief Check if there are any subscribers
       /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Garden
-      public: bool HasConnections() const;
+      public: virtual bool HasConnections() const override;
 
       /// \brief Easy short hand for setting the position of the sensor.
       /// \param[in] _latitude Latitude angle.
