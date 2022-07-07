@@ -4,13 +4,13 @@
     <model name="my_model">
       <link name="my_link">
         <sensor name="complete" type="custom" gz:type="sensor_type">
-          <ignition:sensor_type/>
+          <gz:sensor_type/>
         </sensor>
         <sensor name="wrong_type" type="imu" gz:type="sensor_type">
-          <ignition:sensor_type/>
+          <gz:sensor_type/>
         </sensor>
         <sensor name="missing_gz_type" type="custom">
-          <ignition:sensor_type/>
+          <gz:sensor_type/>
         </sensor>
       </link>
     </model>

@@ -26,12 +26,12 @@
           <always_on>1</always_on>
           <update_rate>30</update_rate>
           <topic>odometer</topic>
-          <ignition:odometer>
+          <gz:odometer>
             <noise type="gaussian">
               <mean>0.1</mean>
               <stddev>0.2</stddev>
             </noise>
-          </ignition:odometer>
+          </gz:odometer>
         </sensor>
       </link>
     </model>

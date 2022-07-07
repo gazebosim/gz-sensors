@@ -59,7 +59,7 @@ Custom sensors follow these rules to be loaded from SDFormat:
 * Use `type="custom"` inside the `<sensor>` tag
 * Add an extra `gz:type="odometer"` attribute, where `odometer`
   is a string that uniquely identifies the sensor type.
-* Optionally, add an `<ignition:odometer/>` element with configuration
+* Optionally, add an `<gz:odometer/>` element with configuration
   specific to that sensor.
 
 With that in mind, here's what the sensor tag would look like:
@@ -69,12 +69,12 @@ With that in mind, here's what the sensor tag would look like:
   <always_on>1</always_on>
   <update_rate>30</update_rate>
   <topic>odom</topic>
-  <ignition:odometer>
+  <gz:odometer>
     <noise type="gaussian">
       <mean>0.2</mean>
       <stddev>0.1</stddev>
     </noise>
-  </ignition:odometer>
+  </gz:odometer>
 </sensor>
 ```
 

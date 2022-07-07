@@ -15,6 +15,9 @@ release will remove the deprecated code.
 1. The `ignition:type` SDF attribute is deprecated and will be removed.
      Please use `gz:type` instead.
 
+1. The shared libraries have `gz` where there used to be `ignition`.
+  1. Using the un-migrated version is still possible due to tick-tocks, but will be removed in future versions.
+
 1. **CameraSensor**: the default anti-aliasing value has changed from `2` to `4`.
 
 * The project name has been changed to use the `gz-` prefix, you **must** use the `gz` prefix!
