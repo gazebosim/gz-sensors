@@ -140,10 +140,8 @@ namespace gz
       /// \return The distance from the 1st camera, in meters.
       public: double Baseline() const;
 
-      /// \brief Check if there are any subscribers
-      /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Garden
-      public: bool HasConnections() const;
+      // Documentation inherited.
+      public: virtual bool HasConnections() const override;
 
       /// \brief Advertise camera info topic.
       /// \return True if successful.

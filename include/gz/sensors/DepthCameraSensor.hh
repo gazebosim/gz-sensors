@@ -156,10 +156,8 @@ namespace gz
       /// \return height of the image
       public: virtual double NearClip() const;
 
-      /// \brief Check if there are any subscribers
-      /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Garden
-      public: bool HasConnections() const;
+      // Documentation inherited.
+      public: virtual bool HasConnections() const override;
 
       /// \brief Create a camera in a scene
       /// \return True on success.

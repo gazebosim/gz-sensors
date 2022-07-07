@@ -238,8 +238,7 @@ namespace gz
 
       /// \brief Check if there are any subscribers for sensor data
       /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Garden
-      public: bool HasConnections() const;
+      public: virtual bool HasConnections() const override;
 
       /// \brief Get the visibility mask
       /// \return Visibility mask

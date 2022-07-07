@@ -535,3 +535,9 @@ void Sensor::SetActive(bool _active)
 {
   this->dataPtr->active = _active;
 }
+
+//////////////////////////////////////////////////
+bool Sensor::HasConnections() const
+{
+  return true;
+}
