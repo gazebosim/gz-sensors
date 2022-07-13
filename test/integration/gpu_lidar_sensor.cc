@@ -36,7 +36,7 @@
 #endif
 #include <gz/transport/Node.hh>
 
-// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
 #ifdef _WIN32
 #pragma warning(push)
@@ -171,7 +171,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   // Create SDF describing a camera sensor
   const std::string name = "TestGpuLidar";
   const std::string parent = "parent_link";
-  const std::string topic = "/ignition/sensors/test/lidar";
+  const std::string topic = "/gz/sensors/test/lidar";
   const double updateRate = 30;
   const unsigned int horzSamples = 640;
   const double horzResolution = 1;
@@ -195,7 +195,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
     vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
     rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
 
-  // Setup ign-rendering with an empty scene
+  // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
@@ -289,7 +289,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   // Create SDF describing a camera sensor
   const std::string name = "TestGpuLidar";
   const std::string parent = "parent_link";
-  const std::string topic = "/ignition/sensors/test/lidar";
+  const std::string topic = "/gz/sensors/test/lidar";
   const double updateRate = 30;
   const int horzSamples = 320;
   const double horzResolution = 1;
@@ -434,8 +434,8 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   // Create SDF describing a gpu lidar sensors sensor
   const std::string name1 = "TestGpuLidar1";
   const std::string name2 = "TestGpuLidar2";
-  const std::string topic1 = "/ignition/sensors/test/lidar1";
-  const std::string topic2 = "/ignition/sensors/test/lidar2";
+  const std::string topic1 = "/gz/sensors/test/lidar1";
+  const std::string topic2 = "/gz/sensors/test/lidar2";
   const double updateRate = 30;
   const int horzSamples = 320;
   const double horzResolution = 1;
@@ -538,7 +538,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   double expectedRangeAtMidPointBox2 = abs(box02Pose.Pos().Y()) - unitBoxSize/2;
 
   // Sensor 1 should see box01 and box02
-  // ign-rendering uses lower resolution textures for lidars with low sample
+  // gz-rendering uses lower resolution textures for lidars with low sample
   // count after: https://github.com/gazebosim/gz-rendering/pull/296
   // Side effect is the loss of precision in the depth buffer data so we relax
   // tolerance for this check in order for test to pass.
@@ -584,7 +584,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
 {
   // Create SDF describing a camera sensor
   const std::string name = "TestGpuLidar";
-  const std::string topic = "/ignition/sensors/test/lidar";
+  const std::string topic = "/gz/sensors/test/lidar";
   const double updateRate = 30;
   const unsigned int horzSamples = 640;
   const double horzResolution = 1;
@@ -706,8 +706,8 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   // Create SDF describing a gpu lidar sensors sensor
   const std::string name1 = "TestGpuLidar1";
   const std::string name2 = "TestGpuLidar2";
-  const std::string topic1 = "/ignition/sensors/test/lidar1";
-  const std::string topic2 = "/ignition/sensors/test/lidar2";
+  const std::string topic1 = "/gz/sensors/test/lidar1";
+  const std::string topic2 = "/gz/sensors/test/lidar2";
   const double updateRate = 30;
   const int horzSamples = 320;
   const double horzResolution = 1;

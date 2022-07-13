@@ -20,7 +20,7 @@ sudo apt-get update
 
 ```{.sh}
 # Change <#> to a version number, like 3 or 4
-sudo apt install libignition-sensors<#>-dev
+sudo apt install libgz-sensors<#>-dev
 ```
 
 ### macOS
@@ -33,7 +33,7 @@ On macOS, add OSRF packages:
 
 Install Gazebo Sensors:
   ```
-  brew install ignition-sensors<#>
+  brew install gz-sensors<#>
   ```
 
 Be sure to replace `<#>` with a number value, such as 5 or 6, depending on
@@ -130,7 +130,7 @@ conda activate gz-ws
 Install Gazebo dependencies, replacing `<#>` with the desired versions:
 
 ```
-conda install libignition-cmake<#> libignition-common<#> libignition-math<#> libignition-transport<#> libignition-msgs<#> --channel conda-forge
+conda install libgz-cmake<#> libgz-common<#> libgz-math<#> libgz-transport<#> libgz-msgs<#> --channel conda-forge
 ```
 
 Before [gz-rendering](https://github.com/gazebosim/gz-rendering) becomes available on conda-forge, follow its tutorial to build it from source.

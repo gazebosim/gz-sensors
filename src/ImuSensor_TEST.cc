@@ -199,7 +199,7 @@ TEST(ImuSensor_TEST, CreateImuSensor)
   gz::sensors::Manager mgr;
 
   const std::string name = "TestImu";
-  const std::string topic = "/ignition/sensors/test/imu";
+  const std::string topic = "/gz/sensors/test/imu";
   const double update_rate = 100;
   const auto accelNoise = accelerometerParameters(update_rate, 0.0);
   const auto gyroNoise = gyroscopeParameters(update_rate, 0.0);
@@ -226,7 +226,7 @@ TEST(ImuSensor_TEST, ComputeNoise)
 
   {
     const std::string name = "TestImu_Truth";
-    const std::string topic = "/ignition/sensors/test/imu_truth";
+    const std::string topic = "/gz/sensors/test/imu_truth";
     const double update_rate = 100;
     const auto accelNoise = noNoiseParameters(update_rate, 0.0);
     const auto gyroNoise = noNoiseParameters(update_rate, 0.0);
@@ -239,7 +239,7 @@ TEST(ImuSensor_TEST, ComputeNoise)
 
   {
     const std::string name = "TestImu_Truth";
-    const std::string topic = "/ignition/sensors/test/imu_truth";
+    const std::string topic = "/gz/sensors/test/imu_truth";
     const double update_rate = 100;
     auto accelNoise = accelerometerParameters(update_rate, 0.0);
     auto gyroNoise = gyroscopeParameters(update_rate, 0.0);
@@ -322,7 +322,7 @@ TEST(ImuSensor_TEST, Orientation)
 
   {
     const std::string name = "TestImu_Truth";
-    const std::string topic = "/ignition/sensors/test/imu_truth";
+    const std::string topic = "/gz/sensors/test/imu_truth";
     const double updateRate = 100;
     const auto accelNoise = noNoiseParameters(updateRate, 0.0);
     const auto gyroNoise = noNoiseParameters(updateRate, 0.0);

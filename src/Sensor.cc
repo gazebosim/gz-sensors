@@ -129,7 +129,7 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
   //  then the update_rate will be obeyed. Gazebo seems to use it as if
   //  true means enable the sensor at startup.
 
-  // \todo(nkoenig) what to do with <visualize>? ign-sensor data is meant to
+  // \todo(nkoenig) what to do with <visualize>? gz-sensor data is meant to
   // create
   // sensor data. Whether or not that data should be visualized seems to
   // be outside the scope of this library

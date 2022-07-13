@@ -114,8 +114,8 @@ TEST_F(AirPressureSensorTest, CreateAirPressure)
 {
   // Create SDF describing an air_pressure sensor
   const std::string name = "TestAirPressure";
-  const std::string topic = "/ignition/sensors/test/air_pressure";
-  const std::string topicNoise = "/ignition/sensors/test/air_pressure_noise";
+  const std::string topic = "/gz/sensors/test/air_pressure";
+  const std::string topicNoise = "/gz/sensors/test/air_pressure_noise";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
@@ -154,8 +154,8 @@ TEST_F(AirPressureSensorTest, SensorReadings)
 {
   // Create SDF describing an air_pressure sensor
   const std::string name = "TestAirPressure";
-  const std::string topic = "/ignition/sensors/test/air_pressure";
-  const std::string topicNoise = "/ignition/sensors/test/air_pressure_noise";
+  const std::string topic = "/gz/sensors/test/air_pressure";
+  const std::string topicNoise = "/gz/sensors/test/air_pressure_noise";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;

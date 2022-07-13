@@ -47,8 +47,8 @@ SensorFactory::~SensorFactory()
 /////////////////////////////////////////////////
 std::unique_ptr<Sensor> SensorFactory::CreateSensor(const sdf::Sensor &)
 {
-  gzwarn << "Trying to create sensor without providing sensor type. Ignition"
-          << " Sensor doesn't support sensor registration anymore. Use the"
+  gzwarn << "Trying to create sensor without providing sensor type. Gazebo"
+          << " Sensors doesn't support sensor registration anymore. Use the"
           << " templated `CreateSensor` function instead." << std::endl;
   return nullptr;
 }
@@ -56,8 +56,8 @@ std::unique_ptr<Sensor> SensorFactory::CreateSensor(const sdf::Sensor &)
 /////////////////////////////////////////////////
 std::unique_ptr<Sensor> SensorFactory::CreateSensor(sdf::ElementPtr)
 {
-  gzwarn << "Trying to create sensor without providing sensor type. Ignition"
-          << " Sensor doesn't support sensor registration anymore. Use the"
+  gzwarn << "Trying to create sensor without providing sensor type. Gazebo"
+          << " Sensors doesn't support sensor registration anymore. Use the"
           << " templated `CreateSensor` function instead." << std::endl;
   return nullptr;
 }

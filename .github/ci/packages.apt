@@ -1,9 +1,9 @@
-libignition-cmake3-dev
-libignition-common5-dev
-libignition-math7-dev
-libignition-msgs9-dev
-libignition-rendering7-dev
-libignition-tools2-dev
-libignition-transport12-dev
+libgz-cmake3-dev
+libgz-common5-dev
+libgz-math7-dev
+libgz-msgs9-dev
+libgz-rendering7-dev
+libgz-tools2-dev
+libgz-transport12-dev
 libsdformat13-dev
 xvfb

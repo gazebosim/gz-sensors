@@ -461,7 +461,7 @@ bool ThermalCameraSensor::Update(
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-  // \todo(anyone) once ign-rendering supports an image event with unsigned char
+  // \todo(anyone) once gz-rendering supports an image event with unsigned char
   // data type, we can remove this check that copies uint16_t data to char array
   if (this->dataPtr->thermalCamera->ImageFormat() == rendering::PF_L8)
   {

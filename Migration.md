@@ -89,7 +89,7 @@ release will remove the deprecated code.
 
 ### Additions
 
-1. The core ignition-sensors library no longer depends on ign-rendering. All
+1. The core gz-sensors library no longer depends on gz-rendering. All
 rendering sensors and noise models are now part of the `rendering` component
 
 1. New sensors: thermal camera

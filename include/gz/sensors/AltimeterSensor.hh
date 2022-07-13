@@ -41,7 +41,7 @@ namespace gz
     /// \brief Altimeter Sensor Class
     ///
     /// An altimeter sensor that reports vertical position and velocity
-    /// readings over ign transport
+    /// readings over gz transport
     class GZ_SENSORS_ALTIMETER_VISIBLE AltimeterSensor : public Sensor
     {
       /// \brief constructor

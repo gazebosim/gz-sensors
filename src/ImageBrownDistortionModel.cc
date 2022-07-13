@@ -22,7 +22,7 @@
 
 #include <gz/common/Console.hh>
 
-// TODO(WilliamLewww): Remove these pragmas once ign-rendering is disabling the
+// TODO(WilliamLewww): Remove these pragmas once gz-rendering is disabling the
 // warnings
 #ifdef _WIN32
 #pragma warning(push)
