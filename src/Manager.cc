@@ -96,8 +96,8 @@ gz::sensors::SensorId Manager::AddSensor(
 /////////////////////////////////////////////////
 gz::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &)
 {
-  gzwarn << "Trying to create sensor without providing sensor type. Ignition"
-          << " Sensor doesn't support sensor registration anymore. Use the"
+  gzwarn << "Trying to create sensor without providing sensor type. Gazebo"
+          << " Sensors doesn't support sensor registration anymore. Use the"
           << " templated `CreateSensor` function instead." << std::endl;
   return NO_SENSOR;
 }
@@ -105,8 +105,8 @@ gz::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &)
 /////////////////////////////////////////////////
 gz::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr)
 {
-  gzwarn << "Trying to create sensor without providing sensor type. Ignition"
-          << " Sensor doesn't support sensor registration anymore. Use the"
+  gzwarn << "Trying to create sensor without providing sensor type. Gazebo"
+          << " Sensors doesn't support sensor registration anymore. Use the"
           << " templated `CreateSensor` function instead." << std::endl;
   return NO_SENSOR;
 }

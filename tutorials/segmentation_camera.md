@@ -374,7 +374,7 @@ You will see 4 windows: `image`, `labels_map`, `colored_map`, and `colored_image
 For panoptic/instance segmentation, to parse the `labels_map`, click on any pixel on the `labels_map` window to see the `label` and `instance count` of that pixel.
 
 
-## Processing the segmentation sensor via ign-transport
+## Processing the segmentation sensor via gz-transport
 It's possible to process the segmentation data in real time via `gz-transport`.
 You will need to which topics to subscribe to in order to receive this information.
 

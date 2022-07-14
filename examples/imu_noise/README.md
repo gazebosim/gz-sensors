@@ -4,7 +4,7 @@ This example creates a sequence of samples for an accelerometer and gyroscope ba
 on the https://www.analog.com/media/en/technical-documentation/data-sheets/adis16448.pdf, a commonly-used MEMS IMU.
 
 The sequence of samples can then be evaluated with Allan Variance to determine that
-the noise generation in ign-sensors is working as expected.
+the noise generation in gz-sensors is working as expected.
 
 To evaluate noise, first build and run.
 

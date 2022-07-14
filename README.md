@@ -65,7 +65,7 @@ Refer to the following table for information about important directories and fil
 
 ```
 ├── examples                  Example programs.
-├── include/ignition/sensors  Header files that will be installed.
+├── include/gz/sensors  Header files that will be installed.
 ├── src                       Source files and unit tests.
 ├── test
 │    ├── integration          Integration tests.

@@ -121,8 +121,8 @@ TEST_F(AltimeterSensorTest, CreateAltimeter)
 {
   // Create SDF describing an altimeter sensor
   const std::string name = "TestAltimeter";
-  const std::string topic = "/ignition/sensors/test/altimeter";
-  const std::string topicNoise = "/ignition/sensors/test/altimeter_noise";
+  const std::string topic = "/gz/sensors/test/altimeter";
+  const std::string topicNoise = "/gz/sensors/test/altimeter_noise";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
@@ -160,8 +160,8 @@ TEST_F(AltimeterSensorTest, SensorReadings)
 {
   // Create SDF describing an altimeter sensor
   const std::string name = "TestAltimeter";
-  const std::string topic = "/ignition/sensors/test/altimeter";
-  const std::string topicNoise = "/ignition/sensors/test/altimeter_noise";
+  const std::string topic = "/gz/sensors/test/altimeter";
+  const std::string topicNoise = "/gz/sensors/test/altimeter_noise";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;

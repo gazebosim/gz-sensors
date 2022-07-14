@@ -282,7 +282,7 @@ In the example above, the thermal cameras publish an [image message](https://git
 We can observe the contents of a single message from the 16-bit camera by running the following command:
 
 ```
-ign topic -e -n 1 -t /thermal_camera
+gz topic -e -n 1 -t /thermal_camera
 ```
 
 Here are some important things to observe from the message output:

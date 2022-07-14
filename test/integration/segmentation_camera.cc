@@ -202,7 +202,7 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
       << "' doesn't support segmentation cameras" << std::endl;
     return;
   }
-  // Setup ign-rendering with an empty scene
+  // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {

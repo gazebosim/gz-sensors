@@ -22,7 +22,7 @@
 #include <gz/sensors/Manager.hh>
 #include <gz/sensors/CameraSensor.hh>
 
-// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
 #ifdef _WIN32
 #pragma warning(push)
@@ -102,7 +102,7 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   ASSERT_TRUE(linkPtr->HasElement("sensor"));
   auto sensorPtr = linkPtr->GetElement("sensor");
 
-  // Setup ign-rendering with an empty scene
+  // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
@@ -196,7 +196,7 @@ void CameraSensorTest::ImageFormatLInt8LInt16(const std::string &_renderEngine)
   auto sensorPtrCamera8Bit = linkPtr->GetElement("sensor");
   auto sensorPtrCamera16Bit = linkPtr->GetElement("sensor")->GetNextElement();
 
-  // Setup ign-rendering with an empty scene
+  // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {

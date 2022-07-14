@@ -187,7 +187,7 @@ namespace gz
       /// information for this sensor.
       public: sdf::ElementPtr SDF() const;
 
-      /// \brief Add a sequence number to an gz::msgs::Header. This
+      /// \brief Add a sequence number to a gz::msgs::Header. This
       /// function can be called by a sensor that wants to add a sequence
       /// number to a sensor message in order to have improved
       /// accountability for generated sensor data.

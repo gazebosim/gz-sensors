@@ -45,7 +45,7 @@ namespace gz
     /// * Depth image (same as DepthCamera)
     /// * (future / todo) Color point cloud
     /// The scene  must be created in advance and given to Manager::Init().
-    /// It offers both an ignition-transport interface and a direct C++ API
+    /// It offers both a gz-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
     class GZ_SENSORS_RGBD_CAMERA_VISIBLE RgbdCameraSensor

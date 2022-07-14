@@ -25,7 +25,7 @@
 #include <gz/common/Console.hh>
 #include <gz/math/Helpers.hh>
 
-// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
 #ifdef _WIN32
 #pragma warning(push)
@@ -58,7 +58,7 @@ void BuildScene(gz::rendering::ScenePtr _scene);
 
 int main()
 {
-  // Setup ign-rendering with a scene
+  // Setup gz-rendering with a scene
 #ifdef WITH_OGRE
   auto engine = gz::rendering::engine("ogre");
 #else
@@ -82,7 +82,7 @@ int main()
 
   // Create SDF describing a camera sensor
   const std::string name = "ExampleCamera";
-  const std::string topic = "/ignition/sensors/examples/save_image";
+  const std::string topic = "/gz/sensors/examples/save_image";
   const double hz = 30;
   const std::size_t width = 480;
   const std::size_t height = 320;
@@ -133,7 +133,7 @@ int main()
   return 0;
 }
 
-// Copy/paste from an gz-rendering example
+// Copy/paste from a gz-rendering example
 void BuildScene(gz::rendering::ScenePtr _scene)
 {
   // initialize _scene

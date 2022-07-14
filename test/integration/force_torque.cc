@@ -139,7 +139,7 @@ TEST_F(ForceTorqueSensorTest, CreateForceTorqueSensor)
 {
   // Create SDF describing a force torque sensor
   const std::string name = "TestForceTorqueSensor";
-  const std::string topic = "/ignition/sensors/test/force_torque";
+  const std::string topic = "/gz/sensors/test/force_torque";
 
   const double updateRate = 30;
   const bool alwaysOn = 1;
@@ -176,7 +176,7 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
 
   // Create SDF describing a a force torque sensor
   const std::string name = "TestForceTorqueSensor";
-  const std::string topic = "/ignition/sensors/test/force_torque";
+  const std::string topic = "/gz/sensors/test/force_torque";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
