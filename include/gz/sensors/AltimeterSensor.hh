@@ -41,7 +41,7 @@ namespace gz
     /// \brief Altimeter Sensor Class
     ///
     /// An altimeter sensor that reports vertical position and velocity
-    /// readings over ign transport
+    /// readings over gz transport
     class GZ_SENSORS_ALTIMETER_VISIBLE AltimeterSensor : public Sensor
     {
       /// \brief constructor
@@ -99,8 +99,7 @@ namespace gz
 
       /// \brief Check if there are any subscribers
       /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Garden
-      public: bool HasConnections() const;
+      public: virtual bool HasConnections() const override;
 
       GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

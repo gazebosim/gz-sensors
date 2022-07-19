@@ -171,7 +171,7 @@ namespace gz
       ///
       ///   This creates sensors by looking at the given SDF Sensor DOM
       ///   object.
-      ///   Sensors created with this API offer an ignition-transport interface.
+      ///   Sensors created with this API offer a gz-transport interface.
       ///   If you need a direct C++ interface to the data, you must get the
       ///   sensor pointer and cast to the correct type.
       ///

@@ -72,7 +72,7 @@ TEST_F(ImuSensorTest, CreateImu)
 {
   // Create SDF describing an imu sensor
   const std::string name = "TestImu";
-  const std::string topic = "/ignition/sensors/test/imu";
+  const std::string topic = "/gz/sensors/test/imu";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
@@ -99,7 +99,7 @@ TEST_F(ImuSensorTest, SensorReadings)
 {
   // Create SDF describing an imu sensor
   const std::string name = "TestImu";
-  const std::string topic = "/ignition/sensors/test/imu";
+  const std::string topic = "/gz/sensors/test/imu";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;

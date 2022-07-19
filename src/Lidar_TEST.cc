@@ -116,7 +116,7 @@ TEST(Lidar_TEST, CreateLaser)
 
   // Create SDF describing a camera sensor
   const std::string name = "TestLidar";
-  const std::string topic = "/ignition/sensors/test/lidar";
+  const std::string topic = "/gz/sensors/test/lidar";
   const double update_rate = 30;
   const double horz_samples = 640;
   const double horz_resolution = 1;

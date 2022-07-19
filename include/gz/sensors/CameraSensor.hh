@@ -35,7 +35,7 @@
 #pragma warning(pop)
 #endif
 
-// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
 #ifdef _WIN32
 #pragma warning(push)
@@ -65,7 +65,7 @@ namespace gz
     ///
     ///   This class creates images from a Gazebo Rendering scene. The scene
     ///   must be created in advance and given to Manager::Init().
-    ///   It offers both an ignition-transport interface and a direct C++ API
+    ///   It offers both a gz-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
     class GZ_SENSORS_CAMERA_VISIBLE CameraSensor : public RenderingSensor
@@ -140,10 +140,8 @@ namespace gz
       /// \return The distance from the 1st camera, in meters.
       public: double Baseline() const;
 
-      /// \brief Check if there are any subscribers
-      /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Garden
-      public: bool HasConnections() const;
+      // Documentation inherited.
+      public: virtual bool HasConnections() const override;
 
       /// \brief Advertise camera info topic.
       /// \return True if successful.

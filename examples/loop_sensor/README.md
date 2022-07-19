@@ -38,7 +38,7 @@ On another terminal, check that the altimeter and odometer are generating
 data on a topic:
 
 ```
-ign topic -l
+gz topic -l
 ```
 
 You should see:
@@ -51,7 +51,7 @@ You should see:
 Then listen to the altimeter data:
 
 ```
-ign topic -e -t /altimeter
+gz topic -e -t /altimeter
 ```
 
 You'll see data like:
@@ -79,7 +79,7 @@ vertical_velocity: 10.596832320931542
 Then listen to the custom sensor:
 
 ```
-ign topic -e -t /odometer
+gz topic -e -t /odometer
 ```
 
 You'll see data like:

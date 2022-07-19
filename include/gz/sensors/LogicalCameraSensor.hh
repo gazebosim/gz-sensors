@@ -110,8 +110,7 @@ namespace gz
 
       /// \brief Check if there are any subscribers
       /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Garden
-      public: bool HasConnections() const;
+      public: virtual bool HasConnections() const override;
 
       /// \brief Get the latest image. An image is an instance of
       /// msgs::LogicalCameraImage, which contains a list of detected models.

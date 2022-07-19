@@ -127,8 +127,8 @@ TEST_F(MagnetometerSensorTest, CreateMagnetometer)
 {
   // Create SDF describing an magnetometer sensor
   const std::string name = "TestMagnetometer";
-  const std::string topic = "/ignition/sensors/test/magnetometer";
-  const std::string noiseTopic = "/ignition/sensors/test/magnetometer_noise";
+  const std::string topic = "/gz/sensors/test/magnetometer";
+  const std::string noiseTopic = "/gz/sensors/test/magnetometer_noise";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
@@ -166,8 +166,8 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
 {
   // Create SDF describing an magnetometer sensor
   const std::string name = "TestMagnetometer";
-  const std::string topic = "/ignition/sensors/test/magnetometer";
-  const std::string noiseTopic = "/ignition/sensors/test/magnetometer_noise";
+  const std::string topic = "/gz/sensors/test/magnetometer";
+  const std::string noiseTopic = "/gz/sensors/test/magnetometer_noise";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;

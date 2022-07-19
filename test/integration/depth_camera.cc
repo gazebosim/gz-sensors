@@ -33,7 +33,7 @@
 #include <gz/sensors/Manager.hh>
 #include <gz/sensors/DepthCameraSensor.hh>
 
-// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
 #ifdef _WIN32
 #pragma warning(push)
@@ -191,7 +191,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
     return;
   }
 
-  // Setup ign-rendering with an empty scene
+  // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {

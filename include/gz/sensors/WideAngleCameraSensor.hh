@@ -36,7 +36,7 @@
 #pragma warning(pop)
 #endif
 
-// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
 #ifdef _WIN32
 #pragma warning(push)
@@ -65,7 +65,7 @@ namespace gz
     ///
     /// This class creates wide angle camera image from a Gazebo Rendering
     /// scene. The scene must be created in advance and given to Manager::Init()
-    /// It offers both an ignition-transport interface and a direct C++ API
+    /// It offers both a gz-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
     class GZ_SENSORS_WIDE_ANGLE_CAMERA_VISIBLE WideAngleCameraSensor
@@ -138,6 +138,9 @@ namespace gz
 
       // Documentation inherited.
       public: rendering::CameraPtr RenderingCamera() const override;
+
+      // Documentation inherited.
+      public: virtual bool HasConnections() const override;
 
       /// \brief Create a camera in a scene
       /// \return True on success.

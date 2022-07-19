@@ -22,7 +22,7 @@
 #include <gz/sensors/Manager.hh>
 #include <gz/sensors/WideAngleCameraSensor.hh>
 
-// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
 #ifdef _WIN32
 #pragma warning(push)
@@ -114,7 +114,7 @@ void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
   ASSERT_TRUE(linkPtr->HasElement("sensor"));
   auto sensorPtr = linkPtr->GetElement("sensor");
 
-  // Setup ign-rendering with an empty scene
+  // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
@@ -151,6 +151,7 @@ void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
   gz::sensors::WideAngleCameraSensor *sensor =
       mgr.CreateSensor<gz::sensors::WideAngleCameraSensor>(sensorPtr);
   ASSERT_NE(sensor, nullptr);
+  EXPECT_FALSE(sensor->HasConnections());
   sensor->SetScene(scene);
 
   ASSERT_NE(sensor->RenderingCamera(), nullptr);
@@ -162,6 +163,7 @@ void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
       "/test/integration/WideAngleCamera_imagesWithBuiltinSDF/";
   std::string topic = topicBase + "image";
   WaitForMessageTestHelper<gz::msgs::Image> helper(topic);
+  EXPECT_TRUE(sensor->HasConnections());
 
   std::string infoTopic = topicBase + "camera_info";
   WaitForMessageTestHelper<gz::msgs::CameraInfo> infoHelper(infoTopic);

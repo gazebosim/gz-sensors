@@ -33,7 +33,7 @@
 #include <gz/sensors/Manager.hh>
 #include <gz/sensors/ThermalCameraSensor.hh>
 
-// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
 #ifdef _WIN32
 #pragma warning(push)
@@ -143,7 +143,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
     return;
   }
 
-  // Setup ign-rendering with an empty scene
+  // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
@@ -257,7 +257,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
       ambientTempRange);
   EXPECT_FLOAT_EQ(g_thermalBuffer[right], g_thermalBuffer[left]);
 
-  // temp range of visual is hardcoded in ign-rendering shaders
+  // temp range of visual is hardcoded in gz-rendering shaders
   float boxTempRange = 3.0;
   EXPECT_NEAR(boxTemp, g_thermalBuffer[mid] * linearResolution, boxTempRange);
 
@@ -405,7 +405,7 @@ void ThermalCameraSensorTest::Images8BitWithBuiltinSDF(
     return;
   }
 
-  // Setup ign-rendering with an empty scene
+  // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {

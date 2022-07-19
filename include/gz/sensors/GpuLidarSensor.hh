@@ -24,7 +24,7 @@
 
 #include <gz/utils/SuppressWarning.hh>
 
-// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
 #ifdef _WIN32
 #pragma warning(push)
@@ -55,7 +55,7 @@ namespace gz
     ///   from the origin of the center to points on the visual geometry in the
     ///   scene.
     ///
-    ///   It offers both an ignition-transport interface and a direct C++ API
+    ///   It offers both a gz-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
     class GZ_SENSORS_GPU_LIDAR_VISIBLE GpuLidarSensor : public Lidar
@@ -123,8 +123,7 @@ namespace gz
 
       /// \brief Check if there are any subscribers
       /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Garden
-      public: bool HasConnections() const;
+      public: virtual bool HasConnections() const override;
 
       /// \brief Connect function pointer to internal GpuRays callback
       /// \return gz::common::Connection pointer

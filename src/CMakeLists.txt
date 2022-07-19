@@ -28,7 +28,7 @@ set (gtest_sources
 )
 
 if (MSVC)
-  # TODO(louise) Remove this once warnings are suppressed in ign-rendering
+  # TODO(louise) Remove this once warnings are suppressed in gz-rendering
   set_source_files_properties(
       ${rendering_sources}
       SegmentationCameraSensor.cc

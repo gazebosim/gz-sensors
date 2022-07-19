@@ -143,8 +143,8 @@ TEST_F(NavSatSensorTest, CreateNavSat)
 {
   // Create SDF describing a navsat sensor
   const std::string name = "TestNavSat";
-  const std::string topic = "/ignition/sensors/test/navsat";
-  const std::string topicNoise = "/ignition/sensors/test/navsat_noise";
+  const std::string topic = "/gz/sensors/test/navsat";
+  const std::string topicNoise = "/gz/sensors/test/navsat_noise";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
@@ -180,8 +180,8 @@ TEST_F(NavSatSensorTest, SensorReadings)
 {
   // Create SDF describing a navsat sensor
   const std::string name{"TestNavSat"};
-  const std::string topic{"/ignition/sensors/test/navsat"};
-  const std::string topicNoise{"/ignition/sensors/test/navsat_noise"};
+  const std::string topic{"/gz/sensors/test/navsat"};
+  const std::string topicNoise{"/gz/sensors/test/navsat_noise"};
   const double updateRate{30.0};
   const bool alwaysOn{true};
   const bool visualize{true};
