@@ -572,15 +572,15 @@ void CameraSensor::PopulateInfo(const sdf::Camera *_cameraSdf)
   msgs::CameraInfo::Projection *proj =
     this->dataPtr->infoMsg.mutable_projection();
 
-  proj->add_p(_cameraSdf->LensIntrinsicsFx());
+  proj->add_p(_cameraSdf->LensIntrinsicsFx_p());
   proj->add_p(0.0);
-  proj->add_p(_cameraSdf->LensIntrinsicsCx());
-  proj->add_p(-_cameraSdf->LensIntrinsicsFx() * this->dataPtr->baseline);
+  proj->add_p(_cameraSdf->LensIntrinsicsCx_p());
+  proj->add_p(_cameraSdf->LensIntrinsicsTx());
 
   proj->add_p(0.0);
-  proj->add_p(_cameraSdf->LensIntrinsicsFy());
-  proj->add_p(_cameraSdf->LensIntrinsicsCy());
-  proj->add_p(0.0);
+  proj->add_p(_cameraSdf->LensIntrinsicsFy_p());
+  proj->add_p(_cameraSdf->LensIntrinsicsCy_p());
+  proj->add_p(_cameraSdf->LensIntrinsicsTy());
 
   proj->add_p(0.0);
   proj->add_p(0.0);
