@@ -26,6 +26,7 @@
 #endif
 
 #include <gz/common/Profiler.hh>
+#include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 #include <sdf/Magnetometer.hh>
 

@@ -24,6 +24,7 @@
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
+#include <gz/msgs/Utility.hh>
 
 #include <gz/common/Profiler.hh>
 #include <gz/transport/Node.hh>

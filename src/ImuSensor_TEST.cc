@@ -559,8 +559,6 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
   // Create a sensor manager
   gz::sensors::Manager mgr;
 
-  math::Quaterniond orientValue;
-
   // A. Localization tag is set to ENU
   // ---------------------------------
   auto sensorENU = mgr.CreateSensor<gz::sensors::ImuSensor>(

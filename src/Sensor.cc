@@ -15,6 +15,17 @@
  *
 */
 
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
+#include <gz/msgs/double.pb.h>
+#include <gz/msgs/performance_sensor_metrics.pb.h>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
 #include "gz/sensors/Sensor.hh"
 
 #include <chrono>
@@ -23,7 +34,6 @@
 
 #include <gz/common/Console.hh>
 #include <gz/common/Profiler.hh>
-#include <gz/msgs/double.pb.h>
 #include <gz/transport/Node.hh>
 #include <gz/transport/TopicUtils.hh>
 

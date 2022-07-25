@@ -15,7 +15,18 @@
  *
 */
 
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
+#include <gz/msgs/altimeter.pb.h>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
 #include <gz/common/Profiler.hh>
+#include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 
 #include "gz/sensors/AltimeterSensor.hh"

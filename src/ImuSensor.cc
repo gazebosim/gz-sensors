@@ -14,6 +14,7 @@
  * limitations under the License.
  *
 */
+
 #ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4005)
@@ -25,6 +26,7 @@
 #endif
 
 #include <gz/common/Profiler.hh>
+#include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 
 #include "gz/sensors/ImuSensor.hh"
