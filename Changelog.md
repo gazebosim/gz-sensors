@@ -93,6 +93,14 @@
 
 ## Ignition Sensors 2
 
+### Ignition Sensors 2.9.1 (2020-12-23)
+
+1. Fix version numbers in config.hh
+    * [Pull Request 42](https://github.com/ignitionrobotics/ign-sensors/pull/42)
+
+1. Resolve codecheck issues
+    * [Pull Request 57](https://github.com/ignitionrobotics/ign-sensors/pull/57)
+
 ### Ignition Sensors 2.9.0 (2020-08-07)
 
 1. Add noise to RGBD camera.
