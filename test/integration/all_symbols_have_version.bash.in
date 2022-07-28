@@ -2,7 +2,7 @@
 
 LIBPATH=$1
 VERSIONED_NS=v@PROJECT_VERSION_MAJOR@
-IGN_PROJECT=@IGN_DESIGNATION@
+IGN_PROJECT=@GZ_DESIGNATION@
 
 # Sanity check - there should be at least one symbol
 NUM_SYMBOLS=$(nm $LIBPATH | grep -e "ignition.*$IGN_PROJECT" | wc -l)
