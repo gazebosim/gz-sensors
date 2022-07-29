@@ -8,7 +8,7 @@ project(ignition-sensors6 VERSION 6.6.0)
 #============================================================================
 # Find ignition-cmake
 #============================================================================
-find_package(ignition-cmake2 2.8.0 REQUIRED)
+find_package(ignition-cmake2 2.13 REQUIRED)
 
 #============================================================================
 # Configure the project
