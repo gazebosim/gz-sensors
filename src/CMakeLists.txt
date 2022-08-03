@@ -148,7 +148,7 @@ target_link_libraries(${thermal_camera_target}
 )
 
 set(boundingbox_camera_sources BoundingBoxCameraSensor.cc)
-ign_add_component(boundingbox_camera SOURCES ${boundingbox_camera_sources} GET_TARGET_NAME boundingbox_camera_target)
+gz_add_component(boundingbox_camera SOURCES ${boundingbox_camera_sources} GET_TARGET_NAME boundingbox_camera_target)
 target_link_libraries(${boundingbox_camera_target}
   PRIVATE
     ${camera_target}
