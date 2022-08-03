@@ -147,6 +147,15 @@ target_link_libraries(${thermal_camera_target}
     gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
 )
 
+set(boundingbox_camera_sources BoundingBoxCameraSensor.cc)
+ign_add_component(boundingbox_camera SOURCES ${boundingbox_camera_sources} GET_TARGET_NAME boundingbox_camera_target)
+target_link_libraries(${boundingbox_camera_target}
+  PRIVATE
+    ${camera_target}
+    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
+    gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
+)
+
 set(segmentation_camera_sources SegmentationCameraSensor.cc)
 gz_add_component(segmentation_camera SOURCES ${segmentation_camera_sources} GET_TARGET_NAME segmentation_camera_target)
 target_compile_definitions(${segmentation_camera_target} PUBLIC SegmentationCameraSensor_EXPORTS)
