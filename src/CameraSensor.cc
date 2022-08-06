@@ -149,8 +149,6 @@ bool CameraSensor::CreateCamera()
     return false;
   }
 
-  this->PopulateInfo(cameraSdf);
-
   unsigned int width = cameraSdf->ImageWidth();
   unsigned int height = cameraSdf->ImageHeight();
 
@@ -237,6 +235,24 @@ bool CameraSensor::CreateCamera()
     this->dataPtr->saveImagePrefix = this->Name() + "_";
     this->dataPtr->saveImage = true;
   }
+
+  auto *cameraSdfCopy = const_cast<sdf::Camera *>(cameraSdf);
+
+  // update the DOM object intrinsics to have consistent
+  // intrinsics between ogre camera and camera_info msg
+  if(!cameraSdf->HasLensIntrinsics())
+  {
+    const math::Matrix3d& intrinsicMatrix =
+        this->dataPtr->camera->CameraIntrinsicMatrix();
+
+    cameraSdfCopy->SetLensIntrinsicsFx(intrinsicMatrix(0,0));
+    cameraSdfCopy->SetLensIntrinsicsFy(intrinsicMatrix(1,1));
+    cameraSdfCopy->SetLensIntrinsicsCx(intrinsicMatrix(0,2));
+    cameraSdfCopy->SetLensIntrinsicsCy(intrinsicMatrix(1,2));
+  }
+
+  // Populate camera info topic
+  this->PopulateInfo(cameraSdfCopy);
 
   return true;
 }
