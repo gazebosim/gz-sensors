@@ -15,6 +15,28 @@
           </image>
         </camera>
       </sensor>
+      <sensor name="camera_with_intrinsics_tag" type="camera">
+        <update_rate>10</update_rate>
+        <ignition_frame_id>base_camera</ignition_frame_id>
+        <topic>/camera2/image</topic>
+        <camera>
+          <horizontal_fov>1.05</horizontal_fov>
+          <image>
+            <width>1000</width>
+            <height>1000</height>
+            <format>L8</format>
+          </image>
+          <lens>
+            <intrinsics>
+              <fx>866.23</fx>
+              <fy>866.23</fy>
+              <cx>500</cx>
+              <cy>500</cy>
+              <s>0</s>
+            </intrinsics>
+          </lens>
+        </camera>
+      </sensor>
     </link>
   </model>
 </sdf>
