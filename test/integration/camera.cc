@@ -313,10 +313,11 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
   ASSERT_TRUE(linkPtr->HasElement("sensor"));
 
   // Camera sensor without intrinsics tag
-  auto sensorPtrCameraWithoutIntrinsicsTag = linkPtr->GetElement("sensor");
+  auto cameraWithoutIntrinsicsTag = linkPtr->GetElement("sensor");
 
   // Camera sensor with intrinsics tag
-  auto sensorPtrCameraWithIntrinsicsTag = linkPtr->GetElement("sensor")->GetNextElement();
+  auto cameraWithIntrinsicsTag =
+      linkPtr->GetElement("sensor")->GetNextElement();
 
   // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
@@ -332,10 +333,10 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
   // Do the test
   gz::sensors::Manager mgr;
 
-  gz::sensors::CameraSensor *sensor1 =
-      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtrCameraWithoutIntrinsicsTag);
-  gz::sensors::CameraSensor *sensor2 =
-      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtrCameraWithIntrinsicsTag);
+  auto *sensor1 =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(cameraWithoutIntrinsicsTag);
+  auto *sensor2 =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(cameraWithIntrinsicsTag);
   ASSERT_NE(sensor1, nullptr);
   ASSERT_NE(sensor2, nullptr);
   sensor1->SetScene(scene);

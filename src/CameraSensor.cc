@@ -245,10 +245,10 @@ bool CameraSensor::CreateCamera()
     const math::Matrix3d& intrinsicMatrix =
         this->dataPtr->camera->CameraIntrinsicMatrix();
 
-    cameraSdfCopy->SetLensIntrinsicsFx(intrinsicMatrix(0,0));
-    cameraSdfCopy->SetLensIntrinsicsFy(intrinsicMatrix(1,1));
-    cameraSdfCopy->SetLensIntrinsicsCx(intrinsicMatrix(0,2));
-    cameraSdfCopy->SetLensIntrinsicsCy(intrinsicMatrix(1,2));
+    cameraSdfCopy->SetLensIntrinsicsFx(intrinsicMatrix(0, 0));
+    cameraSdfCopy->SetLensIntrinsicsFy(intrinsicMatrix(1, 1));
+    cameraSdfCopy->SetLensIntrinsicsCx(intrinsicMatrix(0, 2));
+    cameraSdfCopy->SetLensIntrinsicsCy(intrinsicMatrix(1, 2));
   }
 
   // Populate camera info topic
