@@ -299,7 +299,7 @@ TEST_P(CameraSensorTest, LInt8ImagesWithBuiltinSDF)
 //////////////////////////////////////////////////
 void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
 {
-  // get the darn test data
+  // Get the darn test data
   std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
                                            "sdf", "camera_intrinsics.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
@@ -311,7 +311,12 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
   ASSERT_TRUE(modelPtr->HasElement("link"));
   auto linkPtr = modelPtr->GetElement("link");
   ASSERT_TRUE(linkPtr->HasElement("sensor"));
+
+  // Camera sensor without intrinsics tag
   auto sensorPtrCameraWithoutIntrinsicsTag = linkPtr->GetElement("sensor");
+
+  // Camera sensor with intrinsics tag
+  auto sensorPtrCameraWithIntrinsicsTag = linkPtr->GetElement("sensor")->GetNextElement();
 
   // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
@@ -324,73 +329,84 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
 
-  // do the test
+  // Do the test
   gz::sensors::Manager mgr;
 
   gz::sensors::CameraSensor *sensor1 =
       mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtrCameraWithoutIntrinsicsTag);
+  gz::sensors::CameraSensor *sensor2 =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtrCameraWithIntrinsicsTag);
   ASSERT_NE(sensor1, nullptr);
-  EXPECT_FALSE(sensor1->HasConnections());
+  ASSERT_NE(sensor2, nullptr);
   sensor1->SetScene(scene);
-
-  ASSERT_NE(sensor1->RenderingCamera(), nullptr);
-  EXPECT_NE(sensor1->Id(), sensor1->RenderingCamera()->Id());
-  EXPECT_EQ(1000u, sensor1->ImageWidth());
-  EXPECT_EQ(1000u, sensor1->ImageHeight());
-
-  EXPECT_EQ(std::string("base_camera"), sensor1->FrameId());
+  sensor2->SetScene(scene);
 
   std::string imageTopic1 = "/camera1/image";
   std::string infoTopic1 = "/camera1/camera_info";
-
+  std::string imageTopic2 = "/camera2/image";
+  std::string infoTopic2 = "/camera2/camera_info";
   WaitForMessageTestHelper<gz::msgs::Image> helper1(imageTopic1);
   WaitForMessageTestHelper<gz::msgs::CameraInfo> helper2(infoTopic1);
-
+  WaitForMessageTestHelper<gz::msgs::Image> helper3(imageTopic2);
+  WaitForMessageTestHelper<gz::msgs::CameraInfo> helper4(infoTopic2);
   EXPECT_TRUE(sensor1->HasConnections());
+  EXPECT_TRUE(sensor2->HasConnections());
 
   // Update once to create image
   mgr.RunOnce(std::chrono::steady_clock::duration::zero());
 
   EXPECT_TRUE(helper1.WaitForMessage()) << helper1;
   EXPECT_TRUE(helper2.WaitForMessage()) << helper2;
+  EXPECT_TRUE(helper3.WaitForMessage()) << helper3;
+  EXPECT_TRUE(helper4.WaitForMessage()) << helper4;
 
-  // subscribe to the camera info topic
-  gz::msgs::CameraInfo camera1Info;
-  int count1 = 0;
+  // Subscribe to the camera info topic
+  gz::msgs::CameraInfo camera1Info, camera2Info;
 
-  std::function<void(const gz::msgs::CameraInfo&)> func = [&camera1Info, &count1](const gz::msgs::CameraInfo& _msg) {
-    camera1Info = _msg;
-    gzerr << "Received Camera1 Info" << std::endl;
+  std::function<void(const gz::msgs::CameraInfo&)> camera1InfoCallback =
+      [&camera1Info](const gz::msgs::CameraInfo& _msg) {
+        camera1Info = _msg;
   };
 
-  // subscribe to the camera topic
-  gz::transport::Node node;
-  node.Subscribe(infoTopic1, func);
+  std::function<void(const gz::msgs::CameraInfo&)> camera2InfoCallback =
+      [&camera2Info](const gz::msgs::CameraInfo& _msg) {
+        camera2Info = _msg;
+  };
 
-  // wait for a few camera frames
+  // Subscribe to the camera topic
+  gz::transport::Node node;
+  node.Subscribe(infoTopic1, camera1InfoCallback);
+  node.Subscribe(infoTopic2, camera2InfoCallback);
+
+  // Wait for a few camera frames
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
 
-  // run to get image and check image format in callback
-  bool done = false;
+  // Run to get image and check image format in callback
   int sleep = 0;
   int maxSleep = 10;
-  while (!done && sleep++ < maxSleep)
+  while (sleep++ < maxSleep)
   {
     std::lock_guard<std::mutex> lock(g_mutex);
-    done = count1 > 0;
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
-  // image size
+  // Image size, focal length and optical center
+  // Camera sensor without intrinsics tag
+  double error = 1e-1;
   EXPECT_DOUBLE_EQ(camera1Info.width(), 1000);
   EXPECT_DOUBLE_EQ(camera1Info.height(), 1000);
-  // focal length
-  double error = 1e-2;
-  EXPECT_NEAR(camera1Info.intrinsics().k(0), 866.23, error);
-  EXPECT_NEAR(camera1Info.intrinsics().k(5), 866.23, error);
-  // optical center
+  EXPECT_NEAR(camera1Info.intrinsics().k(0), 863.2297, error);
+  EXPECT_NEAR(camera1Info.intrinsics().k(4), 863.2297, error);
   EXPECT_DOUBLE_EQ(camera1Info.intrinsics().k(2), 500);
-  EXPECT_DOUBLE_EQ(camera1Info.intrinsics().k(6), 500);
+  EXPECT_DOUBLE_EQ(camera1Info.intrinsics().k(5), 500);
+
+  // Camera sensor with intrinsics tag
+  EXPECT_DOUBLE_EQ(camera2Info.width(), 1000);
+  EXPECT_DOUBLE_EQ(camera2Info.height(), 1000);
+  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(0), 866.23);
+  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(4), 866.23);
+  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(2), 500);
+  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(5), 500);
 
   // Clean up
   engine->DestroyScene(scene);
