@@ -56,7 +56,7 @@ class Sensor_TEST : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    common::Console::SetVerbosity(4);
   }
 };
 
@@ -98,7 +98,7 @@ TEST(Sensor_TEST, Sensor)
 TEST(Sensor_TEST, AddSequence)
 {
   TestSensor sensor;
-  ignition::msgs::Header header;
+  msgs::Header header;
   sensor.AddSequence(&header);
   EXPECT_EQ("seq", header.data(0).key());
   EXPECT_EQ("0", header.data(0).value(0));
@@ -117,7 +117,7 @@ TEST(Sensor_TEST, AddSequence)
   EXPECT_EQ("101", header.data(0).value(0));
 
   // Add another sequence for this sensor.
-  ignition::msgs::Header header2;
+  msgs::Header header2;
   sensor.AddSequence(&header2, "other");
   // The original header shouldn't change
   EXPECT_EQ(1, header.data_size());
@@ -149,14 +149,14 @@ class SensorUpdate : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    common::Console::SetVerbosity(4);
     node.Subscribe(kPerformanceMetricTopic,
       &SensorUpdate::OnPerformanceMetric, this);
   }
 
   // Callback function for the performance metric topic.
   protected: void OnPerformanceMetric(
-    const ignition::msgs::PerformanceSensorMetrics &_msg)
+    const msgs::PerformanceSensorMetrics &_msg)
   {
     EXPECT_EQ(kSensorName, _msg.name());
     performanceMetricsMsgsCount++;

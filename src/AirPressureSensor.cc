@@ -113,7 +113,7 @@ bool AirPressureSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/air_pressure");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::FluidPressure>(
+      this->dataPtr->node.Advertise<msgs::FluidPressure>(
       this->Topic());
 
   if (!this->dataPtr->pub)
@@ -145,7 +145,7 @@ bool AirPressureSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool AirPressureSensor::Update(const ignition::common::Time &_now)
+bool AirPressureSensor::Update(const common::Time &_now)
 {
   IGN_PROFILE("AirPressureSensor::Update");
   if (!this->dataPtr->initialized)
@@ -193,7 +193,7 @@ bool AirPressureSensor::Update(const ignition::common::Time &_now)
         NoiseType::GAUSSIAN)
     {
      GaussianNoiseModelPtr gaussian =
-       std::dynamic_pointer_cast<sensors::GaussianNoiseModel>(
+       std::dynamic_pointer_cast<GaussianNoiseModel>(
            this->dataPtr->noises[AIR_PRESSURE_NOISE_PASCALS]);
       msg.set_variance(sqrt(gaussian->StdDev()));
     }

@@ -48,28 +48,28 @@ class ignition::sensors::ImuSensorPrivate
   public: bool initialized = false;
 
   /// \brief Noise free linear acceleration
-  public: ignition::math::Vector3d linearAcc;
+  public: math::Vector3d linearAcc;
 
   /// \brief Noise free angular velocity.
-  public: ignition::math::Vector3d angularVel;
+  public: math::Vector3d angularVel;
 
   /// \brief transform to Imu orientation reference frame.
-  public: ignition::math::Quaterniond orientationReference;
+  public: math::Quaterniond orientationReference;
 
   /// \brief transform to Imu frame from Imu reference frame.
-  public: ignition::math::Quaterniond orientation;
+  public: math::Quaterniond orientation;
 
   /// \brief store gravity vector to be added to the IMU output.
-  public: ignition::math::Vector3d gravity;
+  public: math::Vector3d gravity;
 
   /// \brief World pose of the imu sensor
-  public: ignition::math::Pose3d worldPose;
+  public: math::Pose3d worldPose;
 
   /// \brief Flag for if time has been initialized
   public: bool timeInitialized = false;
 
   /// \brief Previous update time step.
-  public: ignition::common::Time prevStep { ignition::common::Time::Zero };
+  public: common::Time prevStep { common::Time::Zero };
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -116,7 +116,7 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/imu");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::IMU>(this->Topic());
+      this->dataPtr->node.Advertise<msgs::IMU>(this->Topic());
 
   if (!this->dataPtr->pub)
   {
@@ -157,7 +157,7 @@ bool ImuSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool ImuSensor::Update(const ignition::common::Time &_now)
+bool ImuSensor::Update(const common::Time &_now)
 {
   IGN_PROFILE("ImuSensor::Update");
   if (!this->dataPtr->initialized)

@@ -72,8 +72,8 @@ bool Manager::Init()
 }
 
 //////////////////////////////////////////////////
-ignition::sensors::Sensor *Manager::Sensor(
-    ignition::sensors::SensorId _id)
+Sensor *Manager::Sensor(
+    SensorId _id)
 {
   auto iter = this->dataPtr->sensors.find(_id);
   return iter != this->dataPtr->sensors.end() ? iter->second.get() : nullptr;
@@ -86,7 +86,7 @@ void Manager::AddPluginPaths(const std::string &_paths)
 }
 
 //////////////////////////////////////////////////
-bool Manager::Remove(const ignition::sensors::SensorId _id)
+bool Manager::Remove(const SensorId _id)
 {
   return this->dataPtr->sensors.erase(_id) > 0;
 }
@@ -102,7 +102,7 @@ void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
 }
 
 /////////////////////////////////////////////////
-ignition::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &_sdf)
+SensorId Manager::CreateSensor(const sdf::Sensor &_sdf)
 {
   auto sensor = this->dataPtr->sensorFactory.CreateSensor(_sdf);
   if (!sensor)
@@ -114,7 +114,7 @@ ignition::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &_sdf)
 }
 
 /////////////////////////////////////////////////
-ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr _sdf)
+SensorId Manager::CreateSensor(sdf::ElementPtr _sdf)
 {
   auto sensor = this->dataPtr->sensorFactory.CreateSensor(_sdf);
   if (!sensor)

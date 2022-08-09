@@ -89,7 +89,7 @@ std::shared_ptr<SensorPlugin> SensorFactory::LoadSensorPlugin(
       this->dataPtr->pluginLoader.Instantiate(pluginName);
 
   auto sensorPlugin = pluginPtr->QueryInterfaceSharedPtr<
-      ignition::sensors::SensorPlugin>();
+      SensorPlugin>();
   return sensorPlugin;
 }
 

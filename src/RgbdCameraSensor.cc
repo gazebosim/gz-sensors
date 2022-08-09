@@ -202,7 +202,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the 2d image publisher
   this->dataPtr->imagePub =
-      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+      this->dataPtr->node.Advertise<msgs::Image>(
           this->Topic() + "/image");
   if (!this->dataPtr->imagePub)
   {
@@ -216,7 +216,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the depth image publisher
   this->dataPtr->depthPub =
-      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+      this->dataPtr->node.Advertise<msgs::Image>(
           this->Topic() + "/depth_image");
   if (!this->dataPtr->depthPub)
   {
@@ -230,7 +230,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the point cloud publisher
   this->dataPtr->pointPub =
-      this->dataPtr->node.Advertise<ignition::msgs::PointCloudPacked>(
+      this->dataPtr->node.Advertise<msgs::PointCloudPacked>(
           this->Topic() + "/points");
   if (!this->dataPtr->pointPub)
   {
@@ -381,7 +381,7 @@ bool RgbdCameraSensor::CreateCameras()
 }
 
 /////////////////////////////////////////////////
-void RgbdCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
+void RgbdCameraSensor::SetScene(rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
@@ -433,7 +433,7 @@ void RgbdCameraSensorPrivate::OnNewRgbPointCloud(const float *_scan,
 }
 
 //////////////////////////////////////////////////
-bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
+bool RgbdCameraSensor::Update(const common::Time &_now)
 {
   IGN_PROFILE("RgbdCameraSensor::Update");
   if (!this->dataPtr->initialized)
@@ -458,7 +458,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
   // create and publish the depthmessage
   if (this->dataPtr->depthPub.HasConnections())
   {
-    ignition::msgs::Image msg;
+    msgs::Image msg;
     msg.set_width(width);
     msg.set_height(height);
     msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
@@ -483,12 +483,12 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
         if (this->dataPtr->hasDepthFarClip &&
             (this->dataPtr->depthBuffer[i] > this->dataPtr->depthFarClip))
         {
-          this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
+          this->dataPtr->depthBuffer[i] = math::INF_D;
         }
         if (this->dataPtr->hasDepthNearClip &&
             (this->dataPtr->depthBuffer[i] < this->dataPtr->depthNearClip))
         {
-          this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
+          this->dataPtr->depthBuffer[i] = -math::INF_D;
         }
       }
     }
@@ -573,7 +573,7 @@ bool RgbdCameraSensor::Update(const ignition::common::Time &_now)
 
       unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
-      ignition::msgs::Image msg;
+      msgs::Image msg;
       msg.set_width(width);
       msg.set_height(height);
       msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
