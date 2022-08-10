@@ -8,7 +8,9 @@ find_package(gz-sensors7 REQUIRED
 )
 
 # A simple example of how to find custom sensors
-add_subdirectory(../custom_sensor odometer)
+if (NOT TARGET odometer)
+  add_subdirectory(../custom_sensor odometer)
+endif()
 
 add_executable(${PROJECT_NAME} main.cc)
 target_link_libraries(${PROJECT_NAME} PUBLIC

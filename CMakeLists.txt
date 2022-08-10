@@ -9,6 +9,7 @@ project(gz-sensors7 VERSION 7.0.0)
 # Find gz-cmake
 #============================================================================
 find_package(gz-cmake3 REQUIRED)
+set(GZ_CMAKE_VER ${gz-cmake3_VERSION_MAJOR})
 
 #============================================================================
 # Configure the project
@@ -114,4 +115,32 @@ gz_create_docs(
 
 if(TARGET doc)
   file(COPY ${CMAKE_SOURCE_DIR}/tutorials/files/ DESTINATION ${CMAKE_BINARY_DIR}/doxygen/html/files/)
+endif()
+
+#============================================================================
+# Build examples
+#============================================================================
+if (BUILD_TESTING)
+  gz_find_package(gz-utils2 REQUIRED)
+  set(GZ_UTILS_VER ${gz-utils2_VERSION_MAJOR})
+
+  gz_find_package(gz-plugin2 REQUIRED)
+  set(GZ_PLUGIN_VER ${gz-plugin2_VERSION_MAJOR})
+
+  gz_build_examples(
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/examples
+    BINARY_DIR ${PROJECT_BINARY_DIR}/examples
+    COMPONENTS
+      altimeter camera rendering
+    DEPENDENCIES
+      gz-cmake${GZ_CMAKE_VER}
+      gz-common${GZ_COMMON_VER}
+      gz-transport${GZ_TRANSPORT_VER}
+      gz-math${GZ_MATH_VER}
+      gz-msgs${GZ_MSGS_VER}
+      gz-plugin${GZ_PLUGIN_VER}
+      gz-rendering${GZ_RENDERING_VER}
+      gz-utils${GZ_UTILS_VER}
+      sdformat${SDF_VER}
+  )
 endif()
