@@ -74,9 +74,9 @@ unsigned char *g_pointsRGBBuffer = nullptr;
 
 std::mutex g_infoMutex;
 unsigned int g_infoCounter = 0;
-ignition::msgs::CameraInfo g_infoMsg;
+msgs::CameraInfo g_infoMsg;
 
-void UnpackPointCloudMsg(const ignition::msgs::PointCloudPacked &_msg,
+void UnpackPointCloudMsg(const msgs::PointCloudPacked &_msg,
   float *_xyzBuffer, unsigned char *_rgbBuffer)
 {
   std::string msgBuffer = _msg.data();
@@ -115,7 +115,7 @@ void UnpackPointCloudMsg(const ignition::msgs::PointCloudPacked &_msg,
 }
 
 
-void OnCameraInfo(const ignition::msgs::CameraInfo & _msg)
+void OnCameraInfo(const msgs::CameraInfo & _msg)
 {
   g_infoMutex.lock();
   g_infoCounter++;
@@ -123,7 +123,7 @@ void OnCameraInfo(const ignition::msgs::CameraInfo & _msg)
   g_infoMutex.unlock();
 }
 
-void OnDepthImage(const ignition::msgs::Image &_msg)
+void OnDepthImage(const msgs::Image &_msg)
 {
   g_mutex.lock();
   unsigned int depthSamples = _msg.width() * _msg.height();
@@ -135,7 +135,7 @@ void OnDepthImage(const ignition::msgs::Image &_msg)
   g_mutex.unlock();
 }
 
-void OnImage(const ignition::msgs::Image &_msg)
+void OnImage(const msgs::Image &_msg)
 {
   g_imgMutex.lock();
   unsigned int imgSize = _msg.width() * _msg.height() * 3;
@@ -146,7 +146,7 @@ void OnImage(const ignition::msgs::Image &_msg)
   g_imgMutex.unlock();
 }
 
-void OnPointCloud(const ignition::msgs::PointCloudPacked &_msg)
+void OnPointCloud(const msgs::PointCloudPacked &_msg)
 {
   g_pcMutex.lock();
 
@@ -174,7 +174,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     const std::string &_renderEngine)
 {
   // get the darn test data
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  std::string path = common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "integration", "rgbd_camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -199,7 +199,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   double near_ = clipPtr->Get<double>("near");
 
   double unitBoxSize = 1.0;
-  ignition::math::Vector3d boxPosition(3.0, 0.0, 0.0);
+  math::Vector3d boxPosition(3.0, 0.0, 0.0);
 
   // If ogre is not the engine, don't run the test
   if ((_renderEngine.compare("ogre") != 0) &&
@@ -211,7 +211,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   }
 
   // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine(_renderEngine);
+  auto *engine = rendering::engine(_renderEngine);
   if (!engine)
   {
     igndbg << "Engine '" << _renderEngine
@@ -219,23 +219,23 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     return;
   }
 
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  rendering::ScenePtr scene = engine->CreateScene("scene");
 
   // Create an scene with a box in it
   scene->SetAmbientLight(0.0, 0.0, 1.0);
-  ignition::rendering::VisualPtr root = scene->RootVisual();
+  rendering::VisualPtr root = scene->RootVisual();
 
   // red background
   scene->SetBackgroundColor(1.0, 0.0, 0.0);
 
   // create blue material
-  ignition::rendering::MaterialPtr blue = scene->CreateMaterial();
+  rendering::MaterialPtr blue = scene->CreateMaterial();
   blue->SetAmbient(0.0, 0.0, 1.0);
   blue->SetDiffuse(0.0, 0.0, 1.0);
   blue->SetSpecular(0.0, 0.0, 1.0);
 
   // create box visual
-  ignition::rendering::VisualPtr box = scene->CreateVisual();
+  rendering::VisualPtr box = scene->CreateVisual();
   box->AddGeometry(scene->CreateBox());
   box->SetOrigin(0.0, 0.0, 0.0);
   box->SetLocalPosition(boxPosition);
@@ -245,10 +245,10 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   root->AddChild(box);
 
   // do the test
-  ignition::sensors::Manager mgr;
+  sensors::Manager mgr;
 
-  ignition::sensors::RgbdCameraSensor *rgbdSensor =
-      mgr.CreateSensor<ignition::sensors::RgbdCameraSensor>(sensorPtr);
+  sensors::RgbdCameraSensor *rgbdSensor =
+      mgr.CreateSensor<sensors::RgbdCameraSensor>(sensorPtr);
   ASSERT_NE(rgbdSensor, nullptr);
   rgbdSensor->SetScene(scene);
 
@@ -257,30 +257,30 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
 
   std::string depthTopic =
     "/test/integration/RgbdCameraPlugin_imagesWithBuiltinSDF/depth_image";
-  WaitForMessageTestHelper<ignition::msgs::Image> depthHelper(depthTopic);
+  WaitForMessageTestHelper<msgs::Image> depthHelper(depthTopic);
 
   std::string imageTopic =
     "/test/integration/RgbdCameraPlugin_imagesWithBuiltinSDF/image";
-  WaitForMessageTestHelper<ignition::msgs::Image> imageHelper(imageTopic);
+  WaitForMessageTestHelper<msgs::Image> imageHelper(imageTopic);
 
   std::string pointsTopic =
     "/test/integration/RgbdCameraPlugin_imagesWithBuiltinSDF/points";
-  WaitForMessageTestHelper<ignition::msgs::PointCloudPacked>
+  WaitForMessageTestHelper<msgs::PointCloudPacked>
       pointsHelper(pointsTopic);
 
   std::string infoTopic =
     "/test/integration/RgbdCameraPlugin_imagesWithBuiltinSDF/camera_info";
-  WaitForMessageTestHelper<ignition::msgs::CameraInfo> infoHelper(infoTopic);
+  WaitForMessageTestHelper<msgs::CameraInfo> infoHelper(infoTopic);
 
   // Update once to create image
-  mgr.RunOnce(ignition::common::Time::Zero);
+  mgr.RunOnce(common::Time::Zero);
 
   EXPECT_TRUE(depthHelper.WaitForMessage()) << depthHelper;
   EXPECT_TRUE(imageHelper.WaitForMessage()) << imageHelper;
   EXPECT_TRUE(pointsHelper.WaitForMessage()) << pointsHelper;
 
   // subscribe to the depth camera topic
-  ignition::transport::Node node;
+  transport::Node node;
   node.Subscribe(depthTopic, &OnDepthImage);
 
   // subscribe to the image topic
@@ -293,15 +293,15 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   node.Subscribe(infoTopic, &OnCameraInfo);
 
   // Update once more
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(common::Time::Zero, true);
 
   // wait for an image
-  ignition::common::Time waitTime = ignition::common::Time(0.001);
+  common::Time waitTime = common::Time(0.001);
   int counter = 0;
   int infoCounter = 0;
   int imgCounter = 0;
   int pcCounter = 0;
-  ignition::msgs::CameraInfo infoMsg;
+  msgs::CameraInfo infoMsg;
   for (int sleep = 0; sleep < 300 &&
       (counter == 0 || infoCounter == 0 || imgCounter == 0 || pcCounter == 0);
       ++sleep)
@@ -319,7 +319,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.unlock();
     g_imgMutex.unlock();
     g_pcMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    common::Time::Sleep(waitTime);
   }
 
   g_mutex.lock();
@@ -362,8 +362,8 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     EXPECT_NEAR(g_depthBuffer[mid], expectedRangeAtMidPoint, DEPTH_TOL);
 
     // The left and right side of the depth frame should be inf
-    EXPECT_DOUBLE_EQ(g_depthBuffer[left], ignition::math::INF_D);
-    EXPECT_DOUBLE_EQ(g_depthBuffer[right], ignition::math::INF_D);
+    EXPECT_DOUBLE_EQ(g_depthBuffer[left], math::INF_D);
+    EXPECT_DOUBLE_EQ(g_depthBuffer[right], math::INF_D);
   }
 
   // check color
@@ -405,16 +405,16 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     float lx = g_pointsXYZBuffer[imgLeft];
     float ly = g_pointsXYZBuffer[imgLeft + 1];
     float lz = g_pointsXYZBuffer[imgLeft + 2];
-    EXPECT_FLOAT_EQ(ignition::math::INF_D, lx);
-    EXPECT_FLOAT_EQ(ignition::math::INF_D, ly);
-    EXPECT_FLOAT_EQ(ignition::math::INF_D, lz);
+    EXPECT_FLOAT_EQ(math::INF_D, lx);
+    EXPECT_FLOAT_EQ(math::INF_D, ly);
+    EXPECT_FLOAT_EQ(math::INF_D, lz);
 
     float rx = g_pointsXYZBuffer[imgRight];
     float ry = g_pointsXYZBuffer[imgRight + 1];
     float rz = g_pointsXYZBuffer[imgRight + 2];
-    EXPECT_FLOAT_EQ(ignition::math::INF_D, rx);
-    EXPECT_FLOAT_EQ(ignition::math::INF_D, ry);
-    EXPECT_FLOAT_EQ(ignition::math::INF_D, rz);
+    EXPECT_FLOAT_EQ(math::INF_D, rx);
+    EXPECT_FLOAT_EQ(math::INF_D, ry);
+    EXPECT_FLOAT_EQ(math::INF_D, rz);
 
     // point to the left of mid point should have larger y value than mid
     // point, which in turn should have large y value than point to the
@@ -464,7 +464,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   // result against actual point cloud data
   {
     // init the point cloud msg to be filled
-    ignition::msgs::PointCloudPacked pointsMsg;
+    msgs::PointCloudPacked pointsMsg;
     msgs::InitPointCloudPacked(pointsMsg, "depth2Image", true,
         {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
          {"rgb", msgs::PointCloudPacked::Field::FLOAT32}});
@@ -473,7 +473,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     pointsMsg.set_row_step(pointsMsg.point_step() * rgbdSensor->ImageWidth());
 
     // fill msg does the conversion from depth to points
-    ignition::sensors::PointCloudUtil pointsUtil;
+    sensors::PointCloudUtil pointsUtil;
     pointsUtil.FillMsg(pointsMsg, 1.05, g_pointsRGBBuffer, g_depthBuffer);
 
     // Unpack the point cloud msg into separate rgb and xyz buffers
@@ -527,12 +527,12 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
 
   // Check that for a box really close it returns -inf
   root->RemoveChild(box);
-  ignition::math::Vector3d boxPositionNear(
+  math::Vector3d boxPositionNear(
       unitBoxSize * 0.5 + near_ * 0.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionNear);
   root->AddChild(box);
 
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(common::Time::Zero, true);
   for (int sleep = 0; sleep < 300 &&
       (counter == 0 || infoCounter == 0 || imgCounter == 0 || pcCounter == 0);
       ++sleep)
@@ -550,7 +550,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.unlock();
     g_imgMutex.unlock();
     g_pcMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    common::Time::Sleep(waitTime);
   }
 
   g_mutex.lock();
@@ -578,7 +578,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
       for (unsigned int j = 0; j < rgbdSensor->ImageWidth(); ++j)
       {
         unsigned int index = step + j;
-        EXPECT_FLOAT_EQ(-ignition::math::INF_D, g_depthBuffer[index]);
+        EXPECT_FLOAT_EQ(-math::INF_D, g_depthBuffer[index]);
       }
     }
   }
@@ -612,9 +612,9 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
         float x = g_pointsXYZBuffer[index];
         float y = g_pointsXYZBuffer[index + 1];
         float z = g_pointsXYZBuffer[index + 2];
-        EXPECT_FLOAT_EQ(-ignition::math::INF_D, x);
-        EXPECT_FLOAT_EQ(-ignition::math::INF_D, y);
-        EXPECT_FLOAT_EQ(-ignition::math::INF_D, z);
+        EXPECT_FLOAT_EQ(-math::INF_D, x);
+        EXPECT_FLOAT_EQ(-math::INF_D, y);
+        EXPECT_FLOAT_EQ(-math::INF_D, z);
 
         unsigned int r = g_pointsRGBBuffer[index];
         unsigned int g = g_pointsRGBBuffer[index + 1];
@@ -633,12 +633,12 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
 
   // Check that for a box really far it returns inf
   root->RemoveChild(box);
-  ignition::math::Vector3d boxPositionFar(
+  math::Vector3d boxPositionFar(
       unitBoxSize * 0.5 + far_ * 1.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionFar);
   root->AddChild(box);
 
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(common::Time::Zero, true);
   for (int sleep = 0; sleep < 300 &&
       (counter == 0 || infoCounter == 0 || imgCounter == 0 || pcCounter == 0);
       ++sleep)
@@ -656,7 +656,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.unlock();
     g_imgMutex.unlock();
     g_pcMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    common::Time::Sleep(waitTime);
   }
 
   g_mutex.lock();
@@ -684,7 +684,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
       for (unsigned int j = 0; j < rgbdSensor->ImageWidth(); ++j)
       {
         unsigned int index = step + j;
-        EXPECT_FLOAT_EQ(ignition::math::INF_D, g_depthBuffer[index]);
+        EXPECT_FLOAT_EQ(math::INF_D, g_depthBuffer[index]);
       }
     }
   }
@@ -718,9 +718,9 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
         float x = g_pointsXYZBuffer[index];
         float y = g_pointsXYZBuffer[index + 1];
         float z = g_pointsXYZBuffer[index + 2];
-        EXPECT_FLOAT_EQ(ignition::math::INF_D, x);
-        EXPECT_FLOAT_EQ(ignition::math::INF_D, y);
-        EXPECT_FLOAT_EQ(ignition::math::INF_D, z);
+        EXPECT_FLOAT_EQ(math::INF_D, x);
+        EXPECT_FLOAT_EQ(math::INF_D, y);
+        EXPECT_FLOAT_EQ(math::INF_D, z);
 
         unsigned int r = g_pointsRGBBuffer[index];
         unsigned int g = g_pointsRGBBuffer[index + 1];
@@ -739,7 +739,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
 
   // Clean up
   engine->DestroyScene(scene);
-  ignition::rendering::unloadEngine(engine->Name());
+  rendering::unloadEngine(engine->Name());
 }
 
 //////////////////////////////////////////////////
@@ -749,12 +749,12 @@ TEST_P(RgbdCameraSensorTest, ImagesWithBuiltinSDF)
 }
 
 INSTANTIATE_TEST_CASE_P(RgbdCameraSensor, RgbdCameraSensorTest,
-    RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
+    RENDER_ENGINE_VALUES, rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-  ignition::common::Console::SetVerbosity(4);
+  common::Console::SetVerbosity(4);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
