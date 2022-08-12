@@ -142,7 +142,7 @@ class gz::sensors::CameraSensorPrivate
 //////////////////////////////////////////////////
 bool CameraSensor::CreateCamera()
 {
-  const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
+  sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
   if (!cameraSdf)
   {
     gzerr << "Unable to access camera SDF element.\n";
@@ -236,8 +236,6 @@ bool CameraSensor::CreateCamera()
     this->dataPtr->saveImage = true;
   }
 
-  auto *cameraSdfCopy = const_cast<sdf::Camera *>(cameraSdf);
-
   // update the DOM object intrinsics to have consistent
   // intrinsics between ogre camera and camera_info msg
   if(!cameraSdf->HasLensIntrinsics())
@@ -245,14 +243,14 @@ bool CameraSensor::CreateCamera()
     const math::Matrix3d& intrinsicMatrix =
         this->dataPtr->camera->CameraIntrinsicMatrix();
 
-    cameraSdfCopy->SetLensIntrinsicsFx(intrinsicMatrix(0, 0));
-    cameraSdfCopy->SetLensIntrinsicsFy(intrinsicMatrix(1, 1));
-    cameraSdfCopy->SetLensIntrinsicsCx(intrinsicMatrix(0, 2));
-    cameraSdfCopy->SetLensIntrinsicsCy(intrinsicMatrix(1, 2));
+    cameraSdf->SetLensIntrinsicsFx(intrinsicMatrix(0, 0));
+    cameraSdf->SetLensIntrinsicsFy(intrinsicMatrix(1, 1));
+    cameraSdf->SetLensIntrinsicsCx(intrinsicMatrix(0, 2));
+    cameraSdf->SetLensIntrinsicsCy(intrinsicMatrix(1, 2));
   }
 
   // Populate camera info topic
-  this->PopulateInfo(cameraSdfCopy);
+  this->PopulateInfo(cameraSdf);
 
   return true;
 }
