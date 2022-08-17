@@ -342,13 +342,11 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
   sensor1->SetScene(scene);
   sensor2->SetScene(scene);
 
-  std::string imageTopic1 = "/camera1/image";
   std::string infoTopic1 = "/camera1/camera_info";
-  std::string imageTopic2 = "/camera2/image";
   std::string infoTopic2 = "/camera2/camera_info";
-  WaitForMessageTestHelper<gz::msgs::Image> helper1(imageTopic1);
+  WaitForMessageTestHelper<gz::msgs::Image> helper1("/camera1/image");
   WaitForMessageTestHelper<gz::msgs::CameraInfo> helper2(infoTopic1);
-  WaitForMessageTestHelper<gz::msgs::Image> helper3(imageTopic2);
+  WaitForMessageTestHelper<gz::msgs::Image> helper3("/camera2/image");
   WaitForMessageTestHelper<gz::msgs::CameraInfo> helper4(infoTopic2);
   EXPECT_TRUE(sensor1->HasConnections());
   EXPECT_TRUE(sensor2->HasConnections());
@@ -363,15 +361,19 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
 
   // Subscribe to the camera info topic
   gz::msgs::CameraInfo camera1Info, camera2Info;
+  unsigned int camera1Counter = 0;
+  unsigned int camera2Counter = 0;
 
   std::function<void(const gz::msgs::CameraInfo&)> camera1InfoCallback =
-      [&camera1Info](const gz::msgs::CameraInfo& _msg) {
+      [&camera1Info, &camera1Counter](const gz::msgs::CameraInfo& _msg) {
         camera1Info = _msg;
+        camera1Counter++;
   };
 
   std::function<void(const gz::msgs::CameraInfo&)> camera2InfoCallback =
-      [&camera2Info](const gz::msgs::CameraInfo& _msg) {
+      [&camera2Info, &camera2Counter](const gz::msgs::CameraInfo& _msg) {
         camera2Info = _msg;
+        camera2Counter++;
   };
 
   // Subscribe to the camera topic
@@ -383,27 +385,29 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
 
   // Run to get image and check image format in callback
+  bool done = false;
   int sleep = 0;
   int maxSleep = 10;
-  while (sleep++ < maxSleep)
+  while (!done && sleep++ < maxSleep)
   {
     std::lock_guard<std::mutex> lock(g_mutex);
+    done = (camera1Counter > 0 && camera2Counter > 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
   // Image size, focal length and optical center
   // Camera sensor without intrinsics tag
   double error = 1e-1;
-  EXPECT_DOUBLE_EQ(camera1Info.width(), 1000);
-  EXPECT_DOUBLE_EQ(camera1Info.height(), 1000);
+  EXPECT_EQ(camera1Info.width(), 1000u);
+  EXPECT_EQ(camera1Info.height(), 1000u);
   EXPECT_NEAR(camera1Info.intrinsics().k(0), 863.2297, error);
   EXPECT_NEAR(camera1Info.intrinsics().k(4), 863.2297, error);
   EXPECT_DOUBLE_EQ(camera1Info.intrinsics().k(2), 500);
   EXPECT_DOUBLE_EQ(camera1Info.intrinsics().k(5), 500);
 
   // Camera sensor with intrinsics tag
-  EXPECT_DOUBLE_EQ(camera2Info.width(), 1000);
-  EXPECT_DOUBLE_EQ(camera2Info.height(), 1000);
+  EXPECT_EQ(camera2Info.width(), 1000u);
+  EXPECT_EQ(camera2Info.height(), 1000u);
   EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(0), 866.23);
   EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(4), 866.23);
   EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(2), 500);
