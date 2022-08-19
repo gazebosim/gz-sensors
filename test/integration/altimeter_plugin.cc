@@ -28,7 +28,7 @@
 
 /// \brief Helper function to create an altimeter sdf element
 sdf::ElementPtr AltimeterToSdf(const std::string &_name,
-    const ignition::math::Pose3d &_pose, const double _updateRate,
+    const gz::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
     const bool _visualize)
 {
@@ -60,7 +60,7 @@ sdf::ElementPtr AltimeterToSdf(const std::string &_name,
 
 /// \brief Helper function to create an altimeter sdf element with noise
 sdf::ElementPtr AltimeterToSdfWithNoise(const std::string &_name,
-    const ignition::math::Pose3d &_pose, const double _updateRate,
+    const gz::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
     const bool _visualize, double _mean, double _stddev, double _bias)
 {
@@ -112,7 +112,7 @@ class AltimeterSensorTest: public testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
@@ -128,8 +128,8 @@ TEST_F(AltimeterSensorTest, CreateAltimeter)
   const bool visualize = 1;
 
   // Create sensor SDF
-  ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
-      ignition::math::Quaterniond::Identity);
+  gz::math::Pose3d sensorPose(gz::math::Vector3d(0.25, 0.0, 0.5),
+      gz::math::Quaterniond::Identity);
   sdf::ElementPtr altimeterSdf = AltimeterToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
@@ -137,17 +137,17 @@ TEST_F(AltimeterSensorTest, CreateAltimeter)
         updateRate, topicNoise, alwaysOn, visualize, 1.0, 0.2, 10.0);
 
   // create the sensor using sensor factory
-  ignition::sensors::SensorFactory sf;
-  std::unique_ptr<ignition::sensors::AltimeterSensor> sensor =
-      sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdf);
+  gz::sensors::SensorFactory sf;
+  std::unique_ptr<gz::sensors::AltimeterSensor> sensor =
+      sf.CreateSensor<gz::sensors::AltimeterSensor>(altimeterSdf);
   ASSERT_NE(nullptr, sensor);
 
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(topic, sensor->Topic());
   EXPECT_DOUBLE_EQ(updateRate, sensor->UpdateRate());
 
-  std::unique_ptr<ignition::sensors::AltimeterSensor> sensorNoise =
-      sf.CreateSensor<ignition::sensors::AltimeterSensor>(altimeterSdfNoise);
+  std::unique_ptr<gz::sensors::AltimeterSensor> sensorNoise =
+      sf.CreateSensor<gz::sensors::AltimeterSensor>(altimeterSdfNoise);
   ASSERT_NE(nullptr, sensorNoise);
 
   EXPECT_EQ(name, sensorNoise->Name());
@@ -167,8 +167,8 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   const bool visualize = 1;
 
   // Create sensor SDF
-  ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
-      ignition::math::Quaterniond::Identity);
+  gz::math::Pose3d sensorPose(gz::math::Vector3d(0.25, 0.0, 0.5),
+      gz::math::Quaterniond::Identity);
   sdf::ElementPtr altimeterSdf = AltimeterToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
@@ -177,19 +177,19 @@ TEST_F(AltimeterSensorTest, SensorReadings)
 
   // create the sensor using sensor factory
   // try creating without specifying the sensor type and then cast it
-  ignition::sensors::SensorFactory sf;
-  std::unique_ptr<ignition::sensors::Sensor> s =
+  gz::sensors::SensorFactory sf;
+  std::unique_ptr<gz::sensors::Sensor> s =
       sf.CreateSensor(altimeterSdf);
-  std::unique_ptr<ignition::sensors::AltimeterSensor> sensor(
-      dynamic_cast<ignition::sensors::AltimeterSensor *>(s.release()));
+  std::unique_ptr<gz::sensors::AltimeterSensor> sensor(
+      dynamic_cast<gz::sensors::AltimeterSensor *>(s.release()));
 
   // Make sure the above dynamic cast worked.
   ASSERT_NE(nullptr, sensor);
 
-  std::unique_ptr<ignition::sensors::Sensor> sNoise =
+  std::unique_ptr<gz::sensors::Sensor> sNoise =
       sf.CreateSensor(altimeterSdfNoise);
-  std::unique_ptr<ignition::sensors::AltimeterSensor> sensorNoise(
-      dynamic_cast<ignition::sensors::AltimeterSensor *>(sNoise.release()));
+  std::unique_ptr<gz::sensors::AltimeterSensor> sensorNoise(
+      dynamic_cast<gz::sensors::AltimeterSensor *>(sNoise.release()));
 
   // Make sure the above dynamic cast worked.
   ASSERT_NE(nullptr, sensorNoise);
@@ -230,8 +230,8 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   EXPECT_DOUBLE_EQ(pos - vertRef, sensorNoise->VerticalPosition());
 
   // verify msg received on the topic
-  WaitForMessageTestHelper<ignition::msgs::Altimeter> msgHelper(topic);
-  sensor->Update(ignition::common::Time(1, 0));
+  WaitForMessageTestHelper<gz::msgs::Altimeter> msgHelper(topic);
+  sensor->Update(gz::common::Time(1, 0));
   EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
   auto msg = msgHelper.Message();
   EXPECT_EQ(1, msg.header().stamp().sec());
@@ -241,17 +241,17 @@ TEST_F(AltimeterSensorTest, SensorReadings)
   EXPECT_DOUBLE_EQ(vertVel, msg.vertical_velocity());
 
   // verify msg with noise received on the topic
-  WaitForMessageTestHelper<ignition::msgs::Altimeter>
+  WaitForMessageTestHelper<gz::msgs::Altimeter>
     msgHelperNoise(topicNoise);
-  sensorNoise->Update(ignition::common::Time(1, 0));
+  sensorNoise->Update(gz::common::Time(1, 0));
   EXPECT_TRUE(msgHelperNoise.WaitForMessage()) << msgHelperNoise;
   auto msgNoise = msgHelperNoise.Message();
   EXPECT_EQ(1, msg.header().stamp().sec());
   EXPECT_EQ(0, msg.header().stamp().nsec());
   EXPECT_DOUBLE_EQ(vertRef, msgNoise.vertical_reference());
-  EXPECT_FALSE(ignition::math::equal(pos - vertRef,
+  EXPECT_FALSE(gz::math::equal(pos - vertRef,
         msgNoise.vertical_position()));
-  EXPECT_FALSE(ignition::math::equal(vertVel, msgNoise.vertical_velocity()));
+  EXPECT_FALSE(gz::math::equal(vertVel, msgNoise.vertical_velocity()));
 }
 
 /////////////////////////////////////////////////
@@ -261,10 +261,10 @@ TEST_F(AltimeterSensorTest, Topic)
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
-  auto sensorPose = ignition::math::Pose3d();
+  auto sensorPose = gz::math::Pose3d();
 
   // Factory
-  ignition::sensors::SensorFactory factory;
+  gz::sensors::SensorFactory factory;
 
   // Default topic
   {
@@ -276,7 +276,7 @@ TEST_F(AltimeterSensorTest, Topic)
     EXPECT_NE(nullptr, sensor);
 
     auto altimeter =
-        dynamic_cast<ignition::sensors::AltimeterSensor *>(sensor.release());
+        dynamic_cast<gz::sensors::AltimeterSensor *>(sensor.release());
     ASSERT_NE(nullptr, altimeter);
 
     EXPECT_EQ("/altimeter", altimeter->Topic());
@@ -292,7 +292,7 @@ TEST_F(AltimeterSensorTest, Topic)
     EXPECT_NE(nullptr, sensor);
 
     auto altimeter =
-        dynamic_cast<ignition::sensors::AltimeterSensor *>(sensor.release());
+        dynamic_cast<gz::sensors::AltimeterSensor *>(sensor.release());
     ASSERT_NE(nullptr, altimeter);
 
     EXPECT_EQ("/topic_with_spaces/characters", altimeter->Topic());

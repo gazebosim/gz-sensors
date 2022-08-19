@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_LIDAR_HH_
-#define IGNITION_SENSORS_LIDAR_HH_
+#ifndef GZ_SENSORS_LIDAR_HH_
+#define GZ_SENSORS_LIDAR_HH_
 
 #include <memory>
 #include <string>
@@ -27,7 +27,7 @@
 #include "ignition/sensors/lidar/Export.hh"
 #include "ignition/sensors/RenderingSensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
@@ -95,7 +95,7 @@ namespace ignition
 
       /// \brief Get the minimum angle
       /// \return The minimum angle
-      public: ignition::math::Angle AngleMin() const;
+      public: gz::math::Angle AngleMin() const;
 
       /// \brief Set the scan minimum angle
       /// \param[in] _angle The minimum angle
@@ -103,7 +103,7 @@ namespace ignition
 
       /// \brief Get the maximum angle
       /// \return the maximum angle
-      public: ignition::math::Angle AngleMax() const;
+      public: gz::math::Angle AngleMax() const;
 
       /// \brief Set the scan maximum angle
       /// \param[in] _angle The maximum angle
@@ -148,7 +148,7 @@ namespace ignition
 
       /// \brief Get the vertical scan bottom angle
       /// \return The minimum angle of the scan block
-      public: ignition::math::Angle VerticalAngleMin() const;
+      public: gz::math::Angle VerticalAngleMin() const;
 
       /// \brief Set the vertical scan bottom angle
       /// \param[in] _angle The minimum angle of the scan block
@@ -156,7 +156,7 @@ namespace ignition
 
       /// \brief Get the vertical scan line top angle
       /// \return The Maximum angle of the scan block
-      public: ignition::math::Angle VerticalAngleMax() const;
+      public: gz::math::Angle VerticalAngleMax() const;
 
       /// \brief Set the vertical scan line top angle
       /// \param[in] _angle The Maximum angle of the scan block
@@ -252,7 +252,7 @@ namespace ignition
       /// \remark Do not block inside of the callback.
       /// \return A connection pointer that must remain in scope. When the
       /// connection pointer falls out of scope, the connection is broken.
-      public: virtual ignition::common::ConnectionPtr ConnectNewLidarFrame(
+      public: virtual gz::common::ConnectionPtr ConnectNewLidarFrame(
           std::function<void(const float *_scan, unsigned int _width,
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &/*_format*/)> _subscriber);

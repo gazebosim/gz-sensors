@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_SENSORTYPES_HH_
-#define IGNITION_SENSORS_SENSORTYPES_HH_
+#ifndef GZ_SENSORS_SENSORTYPES_HH_
+#define GZ_SENSORS_SENSORTYPES_HH_
 
 #include <vector>
 #include <memory>
@@ -27,7 +27,7 @@
 /// \file
 /// \ingroup ignition_sensors
 /// \brief Forward declarations and typedefs for sensors
-namespace ignition
+namespace gz
 {
   /// \ingroup ignition_sensors
   /// \brief Sensors namespace

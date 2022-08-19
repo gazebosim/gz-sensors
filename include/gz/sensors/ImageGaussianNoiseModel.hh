@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_IMAGEGAUSSIANNOISEMODEL_HH_
-#define IGNITION_SENSORS_IMAGEGAUSSIANNOISEMODEL_HH_
+#ifndef GZ_SENSORS_IMAGEGAUSSIANNOISEMODEL_HH_
+#define GZ_SENSORS_IMAGEGAUSSIANNOISEMODEL_HH_
 
 #include <sdf/sdf.hh>
 
@@ -35,7 +35,7 @@
 #include "ignition/sensors/GaussianNoiseModel.hh"
 #include "ignition/sensors/rendering/Export.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {

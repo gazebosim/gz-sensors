@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_CAMERASENSOR_HH_
-#define IGNITION_SENSORS_CAMERASENSOR_HH_
+#ifndef GZ_SENSORS_CAMERASENSOR_HH_
+#define GZ_SENSORS_CAMERASENSOR_HH_
 
 #include <cstdint>
 #include <memory>
@@ -53,7 +53,7 @@
 #include "ignition/sensors/Export.hh"
 #include "ignition/sensors/RenderingSensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
@@ -105,14 +105,14 @@ namespace ignition
       /// \remark Do not block inside of the callback.
       /// \return A connection pointer that must remain in scope. When the
       /// connection pointer falls out of scope, the connection is broken.
-      public: ignition::common::ConnectionPtr ConnectImageCallback(
+      public: gz::common::ConnectionPtr ConnectImageCallback(
                   std::function<
-                  void(const ignition::msgs::Image &)> _callback);
+                  void(const gz::msgs::Image &)> _callback);
 
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
       public: virtual void SetScene(
-                  ignition::rendering::ScenePtr _scene) override;
+                  gz::rendering::ScenePtr _scene) override;
 
       /// \brief Get image width.
       /// \return width of the image
@@ -157,7 +157,7 @@ namespace ignition
 
       /// \brief Publish camera info message.
       /// \param[in] _now The current time
-      protected: void PublishInfo(const ignition::common::Time &_now);
+      protected: void PublishInfo(const gz::common::Time &_now);
 
       /// \brief Create a camera in a scene
       /// \return True on success.
@@ -166,7 +166,7 @@ namespace ignition
       /// \brief Callback that is triggered when the scene changes on
       /// the Manager.
       /// \param[in] _scene Pointer to the new scene.
-      private: void OnSceneChange(ignition::rendering::ScenePtr /*_scene*/);
+      private: void OnSceneChange(gz::rendering::ScenePtr /*_scene*/);
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

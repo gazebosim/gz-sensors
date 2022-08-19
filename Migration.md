@@ -43,16 +43,16 @@ ImageNoise.hh.
    + ***Replacement*** virtual void Load(const sdf::Noise &_sdf)
 
 1. **include/sensors/Events.hh**
-    + ***Deprecation:*** public: static ignition::common::ConnectionPtr ConnectSceneChangeCallback(std::function<void(const ignition::rendering::ScenePtr &)>)
+    + ***Deprecation:*** public: static gz::common::ConnectionPtr ConnectSceneChangeCallback(std::function<void(const gz::rendering::ScenePtr &)>)
     + ***Replacement:*** RenderingEvents::ConnectSceneChangeCallback
 
 1. **include/sensors/Manager.hh**
-    + ***Deprecation:*** public: bool Init(ignition::rendering::ScenePtr);
+    + ***Deprecation:*** public: bool Init(gz::rendering::ScenePtr);
     + ***Replacement:***  RenderingSensor::SetScene
-    + ***Deprecation:*** public: void SetRenderingScene(ignition::rendering::ScenePtr
+    + ***Deprecation:*** public: void SetRenderingScene(gz::rendering::ScenePtr
     + ***Replacement:***  RenderingSensor::SetScene
 
-    + ***Deprecation:*** public: ignition::rendering::ScenePtr RenderingScene() const
+    + ***Deprecation:*** public: gz::rendering::ScenePtr RenderingScene() const
     + ***Replacement:*** RenderingSensor::Scene()
 
 1. **include/sensors/Noise.hh**

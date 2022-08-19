@@ -71,7 +71,7 @@ class WaitForMessageTestHelper
   }
 
   /// \brief Node to subscribe to topics
-  public: ignition::transport::Node node;
+  public: gz::transport::Node node;
 
   /// \brief True if subscription was created
   public: bool subscriptionCreated = false;

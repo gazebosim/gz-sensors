@@ -36,7 +36,7 @@
 #include <ignition/sensors/Export.hh>
 #include <ignition/transport/Node.hh>
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 class TestSensor : public Sensor

@@ -55,7 +55,7 @@
 #include "PointCloudUtil.hh"
 
 /// \brief Private data for RgbdCameraSensor
-class ignition::sensors::RgbdCameraSensorPrivate
+class gz::sensors::RgbdCameraSensorPrivate
 {
   /// \brief Depth data callback used to get the data from the sensor
   /// \param[in] _scan pointer to the data from the sensor
@@ -95,7 +95,7 @@ class ignition::sensors::RgbdCameraSensorPrivate
   public: bool initialized = false;
 
   /// \brief Rendering camera
-  public: ignition::rendering::DepthCameraPtr depthCamera;
+  public: gz::rendering::DepthCameraPtr depthCamera;
 
   /// \brief Depth data buffer.
   public: float *depthBuffer = nullptr;
@@ -120,19 +120,19 @@ class ignition::sensors::RgbdCameraSensorPrivate
   public: unsigned int channels = 4;
 
   /// \brief Pointer to an image to be published
-  public: ignition::rendering::Image image;
+  public: gz::rendering::Image image;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
 
   /// \brief Connection from depth camera with new depth data
-  public: ignition::common::ConnectionPtr depthConnection;
+  public: gz::common::ConnectionPtr depthConnection;
 
   /// \brief Connection from depth camera with new point cloud data
-  public: ignition::common::ConnectionPtr pointCloudConnection;
+  public: gz::common::ConnectionPtr pointCloudConnection;
 
   /// \brief Connection to the Manager's scene change event.
-  public: ignition::common::ConnectionPtr sceneChangeConnection;
+  public: gz::common::ConnectionPtr sceneChangeConnection;
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
@@ -148,7 +148,7 @@ class ignition::sensors::RgbdCameraSensorPrivate
   public: PointCloudUtil pointsUtil;
 };
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////

@@ -56,7 +56,7 @@
 #define DEPTH_TOL 1e-4
 #define DOUBLE_TOL 1e-6
 
-using namespace ignition;
+using namespace gz;
 
 std::mutex g_mutex;
 unsigned int g_depthCounter = 0;

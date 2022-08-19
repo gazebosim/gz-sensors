@@ -38,10 +38,10 @@
 
 #include "ignition/sensors/ImageGaussianNoiseModel.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
-class ignition::sensors::ImageGaussianNoiseModelPrivate
+class gz::sensors::ImageGaussianNoiseModelPrivate
 {
   /// \brief If type starts with GAUSSIAN, the mean of the distribution
   /// from which we sample when adding noise.

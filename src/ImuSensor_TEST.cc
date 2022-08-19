@@ -32,7 +32,7 @@
 #include <ignition/sensors/ImuSensor.hh>
 #include <ignition/sensors/Manager.hh>
 
-using namespace ignition;
+using namespace gz;
 
 // Default values for use with ADIS16448 IMU
 // These values come from the Rotors default values:

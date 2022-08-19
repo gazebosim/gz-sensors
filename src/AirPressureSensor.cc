@@ -34,7 +34,7 @@
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/AirPressureSensor.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 // Constants. These constants from from RotorS:
@@ -51,7 +51,7 @@ static constexpr double kAirConstantDimensionless = kGravityMagnitude *
         (kGasConstantNmPerKmolKelvin * -kTempLapseKelvinPerMeter);
 
 /// \brief Private data for AirPressureSensor
-class ignition::sensors::AirPressureSensorPrivate
+class gz::sensors::AirPressureSensorPrivate
 {
   /// \brief node to create publisher
   public: transport::Node node;

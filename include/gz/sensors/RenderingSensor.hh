@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_RENDERINGSENSOR_HH_
-#define IGNITION_SENSORS_RENDERINGSENSOR_HH_
+#ifndef GZ_SENSORS_RENDERINGSENSOR_HH_
+#define GZ_SENSORS_RENDERINGSENSOR_HH_
 
 #include <memory>
 
@@ -35,7 +35,7 @@
 #include "ignition/sensors/rendering/Export.hh"
 #include "ignition/sensors/Sensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {

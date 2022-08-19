@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_THERMALCAMERASENSOR_HH_
-#define IGNITION_SENSORS_THERMALCAMERASENSOR_HH_
+#ifndef GZ_SENSORS_THERMALCAMERASENSOR_HH_
+#define GZ_SENSORS_THERMALCAMERASENSOR_HH_
 
 #include <memory>
 #include <cstdint>
@@ -54,7 +54,7 @@
 #include "ignition/sensors/Export.hh"
 #include "ignition/sensors/Sensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
@@ -128,7 +128,7 @@ namespace ignition
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
       public: virtual void SetScene(
-                  ignition::rendering::ScenePtr _scene) override;
+                  gz::rendering::ScenePtr _scene) override;
 
       /// \brief Get image width.
       /// \return width of the image
@@ -169,7 +169,7 @@ namespace ignition
       /// \brief Callback that is triggered when the scene changes on
       /// the Manager.
       /// \param[in] _scene Pointer to the new scene.
-      private: void OnSceneChange(ignition::rendering::ScenePtr /*_scene*/)
+      private: void OnSceneChange(gz::rendering::ScenePtr /*_scene*/)
               { }
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING

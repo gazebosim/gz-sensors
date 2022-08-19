@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_POINTCLOUDUTIL_HH_
-#define IGNITION_SENSORS_POINTCLOUDUTIL_HH_
+#ifndef GZ_SENSORS_POINTCLOUDUTIL_HH_
+#define GZ_SENSORS_POINTCLOUDUTIL_HH_
 
 #ifdef _WIN32
 #pragma warning(push)
@@ -42,7 +42,7 @@
 #  endif
 #endif
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {

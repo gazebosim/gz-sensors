@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_MANAGER_HH_
-#define IGNITION_SENSORS_MANAGER_HH_
+#ifndef GZ_SENSORS_MANAGER_HH_
+#define GZ_SENSORS_MANAGER_HH_
 
 #include <memory>
 #include <string>
@@ -29,7 +29,7 @@
 #include <ignition/sensors/Export.hh>
 #include <ignition/sensors/Sensor.hh>
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
@@ -81,7 +81,7 @@ namespace ignition
       public: template<typename T>
               T *CreateSensor(sdf::Sensor _sdf)
               {
-                ignition::sensors::SensorId id = this->CreateSensor(_sdf);
+                gz::sensors::SensorId id = this->CreateSensor(_sdf);
 
                 if (id != NO_SENSOR)
                 {
@@ -118,7 +118,7 @@ namespace ignition
       public: template<typename T>
               T *CreateSensor(sdf::ElementPtr _sdf)
               {
-                ignition::sensors::SensorId id = this->CreateSensor(_sdf);
+                gz::sensors::SensorId id = this->CreateSensor(_sdf);
 
                 if (id != NO_SENSOR)
                 {
@@ -157,7 +157,7 @@ namespace ignition
       /// \param[in] _sdf pointer to the sdf element
       /// \return A sensor id that refers to the created sensor. NO_SENSOR
       /// is returned on erro.
-      public: ignition::sensors::SensorId CreateSensor(sdf::ElementPtr _sdf);
+      public: gz::sensors::SensorId CreateSensor(sdf::ElementPtr _sdf);
 
       /// \brief Create a sensor from SDF without a known sensor type.
       ///
@@ -176,25 +176,25 @@ namespace ignition
       /// \param[in] _sdf SDF sensor DOM object
       /// \return A sensor id that refers to the created sensor. NO_SENSOR
       /// is returned on erro.
-      public: ignition::sensors::SensorId CreateSensor(const sdf::Sensor &_sdf);
+      public: gz::sensors::SensorId CreateSensor(const sdf::Sensor &_sdf);
 
 
       /// \brief Get an instance of a loaded sensor by sensor id
       /// \param[in] _id Idenitifier of the sensor.
       /// \return Pointer to the sensor, nullptr on error.
-      public: ignition::sensors::Sensor *Sensor(
-                  ignition::sensors::SensorId _id);
+      public: gz::sensors::Sensor *Sensor(
+                  gz::sensors::SensorId _id);
 
       /// \brief Remove a sensor by ID
       /// \param[in] _sensorId ID of the sensor to remove
       /// \return True if the sensor exists and removed.
-      public: bool Remove(const ignition::sensors::SensorId _id);
+      public: bool Remove(const gz::sensors::SensorId _id);
 
       /// \brief Run the sensor generation one step.
       /// \param _time: The current simulated time
       /// \param _force: If true, all sensors are forced to update. Otherwise
       ///        a sensor will update based on it's Hz rate.
-      public: void RunOnce(const ignition::common::Time &_time,
+      public: void RunOnce(const gz::common::Time &_time,
                   bool _force = false);
 
       /// \brief Adds colon delimited paths sensor plugins may be
@@ -203,7 +203,7 @@ namespace ignition
       /// \brief load a plugin and return a shared_ptr
       /// \param[in] _filename Sensor plugin file to load.
       /// \return Pointer to the new sensor, nullptr on error.
-      private: ignition::sensors::SensorId LoadSensorPlugin(
+      private: gz::sensors::SensorId LoadSensorPlugin(
                    const std::string &_filename, sdf::ElementPtr _sdf);
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING

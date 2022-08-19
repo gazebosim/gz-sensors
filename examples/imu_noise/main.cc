@@ -115,7 +115,7 @@ generateSamples(size_t _nSamples, const NoiseParameters& _params)
   noise.SetDynamicBiasCorrelationTime(_params.dynamicBiasCorrelationTime);
 
   const double dt = 1.0 / _params.sampleFreq;
-  auto model = ignition::sensors::NoiseFactory::NewNoiseModel(noise);
+  auto model = gz::sensors::NoiseFactory::NewNoiseModel(noise);
   for (size_t ii = 0; ii < _nSamples ; ++ii) {
     samples.push_back(model->Apply(0.0, dt));
   }

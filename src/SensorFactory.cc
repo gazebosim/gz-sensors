@@ -23,7 +23,7 @@
 #include "ignition/sensors/SensorFactory.hh"
 
 /// \brief Private data class for SensorFactory
-class ignition::sensors::SensorFactoryPrivate
+class gz::sensors::SensorFactoryPrivate
 {
   /// \brief Constructor
   public: SensorFactoryPrivate();
@@ -32,13 +32,13 @@ class ignition::sensors::SensorFactoryPrivate
   public: std::map<std::string, std::shared_ptr<SensorPlugin>> sensorPlugins;
 
   /// \brief Stores paths to search for on file system
-  public: ignition::common::SystemPaths systemPaths;
+  public: gz::common::SystemPaths systemPaths;
 
   /// \brief For loading plugins
-  public: ignition::common::PluginLoader pluginLoader;
+  public: gz::common::PluginLoader pluginLoader;
 };
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////

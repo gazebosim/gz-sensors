@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_NOISE_HH_
-#define IGNITION_SENSORS_NOISE_HH_
+#ifndef GZ_SENSORS_NOISE_HH_
+#define GZ_SENSORS_NOISE_HH_
 
 #include <functional>
 #include <string>
@@ -28,7 +28,7 @@
 
 #include <sdf/sdf.hh>
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {

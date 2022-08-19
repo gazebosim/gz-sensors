@@ -33,20 +33,20 @@
 #include "ignition/sensors/GpuLidarSensor.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
-using namespace ignition::sensors;
+using namespace gz::sensors;
 
 /// \brief Private data for the GpuLidar class
-class ignition::sensors::GpuLidarSensorPrivate
+class gz::sensors::GpuLidarSensorPrivate
 {
   /// \brief Fill the point cloud packed message
   /// \param[in] _laserBuffer Lidar data buffer.
   public: void FillPointCloudMsg(const float *_laserBuffer);
 
   /// \brief Rendering camera
-  public: ignition::rendering::GpuRaysPtr gpuRays;
+  public: gz::rendering::GpuRaysPtr gpuRays;
 
   /// \brief Connection to the Manager's scene change event.
-  public: ignition::common::ConnectionPtr sceneChangeConnection;
+  public: gz::common::ConnectionPtr sceneChangeConnection;
 
   /// \brief The point cloud message.
   public: msgs::PointCloudPacked pointMsg;
@@ -79,7 +79,7 @@ GpuLidarSensor::~GpuLidarSensor()
 }
 
 /////////////////////////////////////////////////
-void GpuLidarSensor::SetScene(ignition::rendering::ScenePtr _scene)
+void GpuLidarSensor::SetScene(gz::rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->lidarMutex);
   // APIs make it possible for the scene pointer to change
@@ -95,7 +95,7 @@ void GpuLidarSensor::SetScene(ignition::rendering::ScenePtr _scene)
 
 //////////////////////////////////////////////////
 void GpuLidarSensor::RemoveGpuRays(
-    ignition::rendering::ScenePtr _scene)
+    gz::rendering::ScenePtr _scene)
 {
   if (_scene)
   {
@@ -136,7 +136,7 @@ bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
   this->SetTopic(this->Topic() + "/points");
 
   this->dataPtr->pointPub =
-      this->dataPtr->node.Advertise<ignition::msgs::PointCloudPacked>(
+      this->dataPtr->node.Advertise<gz::msgs::PointCloudPacked>(
           this->Topic());
 
   if (!this->dataPtr->pointPub)
@@ -218,7 +218,7 @@ bool GpuLidarSensor::CreateLidar()
 }
 
 //////////////////////////////////////////////////
-bool GpuLidarSensor::Update(const ignition::common::Time &_now)
+bool GpuLidarSensor::Update(const gz::common::Time &_now)
 {
   IGN_PROFILE("GpuLidarSensor::Update");
   if (!this->initialized)
@@ -273,7 +273,7 @@ bool GpuLidarSensor::Update(const ignition::common::Time &_now)
 }
 
 /////////////////////////////////////////////////
-ignition::common::ConnectionPtr GpuLidarSensor::ConnectNewLidarFrame(
+gz::common::ConnectionPtr GpuLidarSensor::ConnectNewLidarFrame(
           std::function<void(const float *_scan, unsigned int _width,
                   unsigned int _height, unsigned int _channels,
                   const std::string &/*_format*/)> _subscriber)
@@ -282,7 +282,7 @@ ignition::common::ConnectionPtr GpuLidarSensor::ConnectNewLidarFrame(
 }
 
 /////////////////////////////////////////////////
-ignition::rendering::GpuRaysPtr GpuLidarSensor::GpuRays() const
+gz::rendering::GpuRaysPtr GpuLidarSensor::GpuRays() const
 {
   return this->dataPtr->gpuRays;
 }
@@ -294,13 +294,13 @@ bool GpuLidarSensor::IsHorizontal() const
 }
 
 //////////////////////////////////////////////////
-ignition::math::Angle GpuLidarSensor::HFOV() const
+gz::math::Angle GpuLidarSensor::HFOV() const
 {
   return this->dataPtr->gpuRays->HFOV();
 }
 
 //////////////////////////////////////////////////
-ignition::math::Angle GpuLidarSensor::VFOV() const
+gz::math::Angle GpuLidarSensor::VFOV() const
 {
   return this->dataPtr->gpuRays->VFOV();
 }

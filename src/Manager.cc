@@ -27,9 +27,9 @@
 #include "ignition/sensors/config.hh"
 #include "ignition/sensors/SensorFactory.hh"
 
-using namespace ignition::sensors;
+using namespace gz::sensors;
 
-class ignition::sensors::ManagerPrivate
+class gz::sensors::ManagerPrivate
 {
   /// \brief constructor
   public: ManagerPrivate();
@@ -92,7 +92,7 @@ bool Manager::Remove(const SensorId _id)
 }
 
 //////////////////////////////////////////////////
-void Manager::RunOnce(const ignition::common::Time &_time, bool _force)
+void Manager::RunOnce(const gz::common::Time &_time, bool _force)
 {
   IGN_PROFILE("SensorManager::RunOnce");
   for (auto &s : this->dataPtr->sensors)

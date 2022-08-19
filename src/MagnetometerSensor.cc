@@ -34,11 +34,11 @@
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/SensorTypes.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for MagnetometerSensor
-class ignition::sensors::MagnetometerSensorPrivate
+class gz::sensors::MagnetometerSensorPrivate
 {
   /// \brief node to create publisher
   public: transport::Node node;

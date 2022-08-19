@@ -31,10 +31,10 @@
 #include "ignition/sensors/RenderingSensor.hh"
 
 /// \brief Private data class for RenderingSensor
-class ignition::sensors::RenderingSensorPrivate
+class gz::sensors::RenderingSensorPrivate
 {
   /// \brief Pointer to the scene
-  public: ignition::rendering::ScenePtr scene;
+  public: gz::rendering::ScenePtr scene;
 
   /// \brief Manually update the rendering scene graph
   public: bool manualSceneUpdate = false;
@@ -44,7 +44,7 @@ class ignition::sensors::RenderingSensorPrivate
   public: std::vector<rendering::SensorPtr::weak_type> sensors;
 };
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////

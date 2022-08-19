@@ -28,11 +28,11 @@
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/LogicalCameraSensor.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for LogicalCameraSensor
-class ignition::sensors::LogicalCameraSensorPrivate
+class gz::sensors::LogicalCameraSensorPrivate
 {
   /// \brief node to create publisher
   public: transport::Node node;

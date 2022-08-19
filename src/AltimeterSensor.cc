@@ -23,11 +23,11 @@
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/SensorTypes.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for AltimeterSensor
-class ignition::sensors::AltimeterSensorPrivate
+class gz::sensors::AltimeterSensorPrivate
 {
   /// \brief node to create publisher
   public: transport::Node node;

@@ -13,7 +13,9 @@ find_package(ignition-cmake2 2.13 REQUIRED)
 #============================================================================
 # Configure the project
 #============================================================================
-ign_configure_project()
+ign_configure_project(
+  REPLACE_IGNITION_INCLUDE_PATH gz/sensors
+)
 
 #============================================================================
 # Set project-specific options

@@ -58,9 +58,9 @@ uint16_t *g_thermalBuffer = nullptr;
 
 std::mutex g_infoMutex;
 unsigned int g_infoCounter = 0;
-ignition::msgs::CameraInfo g_infoMsg;
+gz::msgs::CameraInfo g_infoMsg;
 
-void OnCameraInfo(const ignition::msgs::CameraInfo & _msg)
+void OnCameraInfo(const gz::msgs::CameraInfo & _msg)
 {
   g_infoMutex.lock();
   g_infoCounter++;
@@ -68,7 +68,7 @@ void OnCameraInfo(const ignition::msgs::CameraInfo & _msg)
   g_infoMutex.unlock();
 }
 
-void OnImage(const ignition::msgs::Image &_msg)
+void OnImage(const gz::msgs::Image &_msg)
 {
   g_mutex.lock();
   unsigned int thermalSamples = _msg.width() * _msg.height();
@@ -91,7 +91,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
     const std::string &_renderEngine)
 {
   // get the darn test data
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "integration", "thermal_camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -116,7 +116,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   double near_ = clipPtr->Get<double>("near");
 
   double unitBoxSize = 1.0;
-  ignition::math::Vector3d boxPosition(3.0, 0.0, 0.0);
+  gz::math::Vector3d boxPosition(3.0, 0.0, 0.0);
 
   // If ogre is not the engine, don't run the test
   if ((_renderEngine.compare("ogre") != 0) &&
@@ -128,7 +128,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   }
 
   // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine(_renderEngine);
+  auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
     igndbg << "Engine '" << _renderEngine
@@ -136,14 +136,14 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
     return;
   }
 
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
 
   // Create an scene with a box in it
   scene->SetAmbientLight(0.3, 0.3, 0.3);
-  ignition::rendering::VisualPtr root = scene->RootVisual();
+  gz::rendering::VisualPtr root = scene->RootVisual();
 
   // create box visual
-  ignition::rendering::VisualPtr box = scene->CreateVisual();
+  gz::rendering::VisualPtr box = scene->CreateVisual();
   box->AddGeometry(scene->CreateBox());
   box->SetOrigin(0.0, 0.0, 0.0);
   box->SetLocalPosition(boxPosition);
@@ -156,10 +156,10 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
 
   root->AddChild(box);
 
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
-  ignition::sensors::ThermalCameraSensor *thermalSensor =
-      mgr.CreateSensor<ignition::sensors::ThermalCameraSensor>(sensorPtr);
+  gz::sensors::ThermalCameraSensor *thermalSensor =
+      mgr.CreateSensor<gz::sensors::ThermalCameraSensor>(sensorPtr);
   ASSERT_NE(thermalSensor, nullptr);
 
   float ambientTemp = 296.0f;
@@ -175,27 +175,27 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
 
   std::string topic =
     "/test/integration/ThermalCameraPlugin_imagesWithBuiltinSDF/image";
-  WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
+  WaitForMessageTestHelper<gz::msgs::Image> helper(topic);
 
   std::string infoTopic =
     "/test/integration/ThermalCameraPlugin_imagesWithBuiltinSDF/camera_info";
-  WaitForMessageTestHelper<ignition::msgs::CameraInfo> infoHelper(infoTopic);
+  WaitForMessageTestHelper<gz::msgs::CameraInfo> infoHelper(infoTopic);
 
   // Update once to create image
-  mgr.RunOnce(ignition::common::Time::Zero);
+  mgr.RunOnce(gz::common::Time::Zero);
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
   EXPECT_TRUE(infoHelper.WaitForMessage()) << infoHelper;
 
   // subscribe to the thermal camera topic
-  ignition::transport::Node node;
+  gz::transport::Node node;
   node.Subscribe(topic, &OnImage);
 
   // subscribe to the thermal camera topic
   node.Subscribe(infoTopic, &OnCameraInfo);
 
   // wait for a few thermal camera frames
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(gz::common::Time::Zero, true);
 
   int midWidth = static_cast<int>(thermalSensor->ImageWidth() * 0.5);
   int midHeight = static_cast<int>(thermalSensor->ImageHeight() * 0.5);
@@ -203,10 +203,10 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   int left = midHeight * thermalSensor->ImageWidth();
   int right = (midHeight+1) * thermalSensor->ImageWidth() - 1;
 
-  ignition::common::Time waitTime = ignition::common::Time(0.001);
+  gz::common::Time waitTime = gz::common::Time(0.001);
   int counter = 0;
   int infoCounter = 0;
-  ignition::msgs::CameraInfo infoMsg;
+  gz::msgs::CameraInfo infoMsg;
   for (int sleep = 0;
        sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
   {
@@ -218,7 +218,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
     infoCounter = g_infoCounter;
     infoMsg = g_infoMsg;
     g_infoMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    gz::common::Time::Sleep(waitTime);
   }
   g_mutex.lock();
   g_infoMutex.lock();
@@ -252,7 +252,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   ASSERT_EQ(1, infoMsg.header().data(0).value().size());
   EXPECT_EQ("camera1", infoMsg.header().data(0).value(0));
   EXPECT_TRUE(infoMsg.has_distortion());
-  EXPECT_EQ(ignition::msgs::CameraInfo::Distortion::PLUMB_BOB,
+  EXPECT_EQ(gz::msgs::CameraInfo::Distortion::PLUMB_BOB,
       infoMsg.distortion().model());
   EXPECT_EQ(5, infoMsg.distortion().k().size());
   EXPECT_TRUE(infoMsg.has_intrinsics());
@@ -263,12 +263,12 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
 
   // Check that for a box really close it returns box temperature
   root->RemoveChild(box);
-  ignition::math::Vector3d boxPositionNear(
+  gz::math::Vector3d boxPositionNear(
       unitBoxSize * 0.5 + near_ * 0.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionNear);
   root->AddChild(box);
 
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(gz::common::Time::Zero, true);
   for (int sleep = 0;
        sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
   {
@@ -279,7 +279,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.lock();
     infoCounter = g_infoCounter;
     g_infoMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    gz::common::Time::Sleep(waitTime);
   }
 
   g_mutex.lock();
@@ -297,12 +297,12 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
 
   // Check that for a box really far it returns ambient temperature
   root->RemoveChild(box);
-  ignition::math::Vector3d boxPositionFar(
+  gz::math::Vector3d boxPositionFar(
       unitBoxSize * 0.5 + far_ * 1.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionFar);
   root->AddChild(box);
 
-  mgr.RunOnce(ignition::common::Time::Zero, true);
+  mgr.RunOnce(gz::common::Time::Zero, true);
   for (int sleep = 0;
        sleep < 300 && (counter == 0 || infoCounter == 0); ++sleep)
   {
@@ -313,7 +313,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
     g_infoMutex.lock();
     infoCounter = g_infoCounter;
     g_infoMutex.unlock();
-    ignition::common::Time::Sleep(waitTime);
+    gz::common::Time::Sleep(waitTime);
   }
   g_mutex.lock();
   g_infoMutex.lock();
@@ -332,7 +332,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
 
   // Clean up
   engine->DestroyScene(scene);
-  ignition::rendering::unloadEngine(engine->Name());
+  gz::rendering::unloadEngine(engine->Name());
 }
 
 //////////////////////////////////////////////////
@@ -342,12 +342,12 @@ TEST_P(ThermalCameraSensorTest, ImagesWithBuiltinSDF)
 }
 
 INSTANTIATE_TEST_CASE_P(ThermalCameraSensor, ThermalCameraSensorTest,
-    RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
+    RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-  ignition::common::Console::SetVerbosity(4);
+  gz::common::Console::SetVerbosity(4);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -25,7 +25,7 @@
 #include "ignition/sensors/Noise.hh"
 #include "ignition/sensors/GaussianNoiseModel.hh"
 
-using namespace ignition;
+using namespace gz;
 
 const unsigned int g_applyCount = 100;
 

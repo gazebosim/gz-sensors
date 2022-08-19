@@ -28,10 +28,10 @@
 #include "ignition/sensors/GaussianNoiseModel.hh"
 #include "ignition/sensors/Noise.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
-class ignition::sensors::NoisePrivate
+class gz::sensors::NoisePrivate
 {
   /// \brief Which type of noise we're applying
   public: NoiseType type = NoiseType::NONE;

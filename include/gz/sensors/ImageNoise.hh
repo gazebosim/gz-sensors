@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_IMAGENOISE_HH_
-#define IGNITION_SENSORS_IMAGENOISE_HH_
+#ifndef GZ_SENSORS_IMAGENOISE_HH_
+#define GZ_SENSORS_IMAGENOISE_HH_
 
 #include <string>
 
@@ -26,7 +26,7 @@
 #include "ignition/sensors/SensorTypes.hh"
 #include "ignition/sensors/rendering/Export.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {

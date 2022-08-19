@@ -132,7 +132,7 @@ Here's an example of a box model that has a temperature assigned to it:
       </material>
       <plugin
         filename="ignition-gazebo-thermal-system"
-        name="ignition::gazebo::systems::Thermal">
+        name="gz::sim::systems::Thermal">
         <temperature>200.0</temperature>
       </plugin>
     </visual>
@@ -145,7 +145,7 @@ Most of the code above is for the model - here's the key piece for temperature a
 ```xml
 <plugin
   filename="ignition-gazebo-thermal-system"
-  name="ignition::gazebo::systems::Thermal">
+  name="gz::sim::systems::Thermal">
   <temperature>200.0</temperature>
 </plugin>
 ```
@@ -212,7 +212,7 @@ double linearResolution = 0.01;
 
 // a callback function that is triggered whenever the thermal camera
 // topic receives a new image message
-void OnImage(const ignition::msgs::Image &_msg)
+void OnImage(const gz::msgs::Image &_msg)
 {
   // convert the serialized image data to 16 bit temperature values
   unsigned int thermalSamples = _msg.width() * _msg.height();
@@ -240,14 +240,14 @@ void OnImage(const ignition::msgs::Image &_msg)
 
 int main(int argc, char **argv)
 {
-  ignition::transport::Node node;
+  gz::transport::Node node;
   if (!node.Subscribe("/thermal_camera", &OnImage))
   {
     std::cerr << "Error subscribing to the thermal camera topic" << std::endl;
     return -1;
   }
 
-  ignition::transport::waitForShutdown();
+  gz::transport::waitForShutdown();
 }
 ```
 

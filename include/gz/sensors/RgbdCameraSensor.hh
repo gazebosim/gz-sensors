@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_RGBDCAMERASENSOR_HH_
-#define IGNITION_SENSORS_RGBDCAMERASENSOR_HH_
+#ifndef GZ_SENSORS_RGBDCAMERASENSOR_HH_
+#define GZ_SENSORS_RGBDCAMERASENSOR_HH_
 
 #include <memory>
 
@@ -29,7 +29,7 @@
 #include "ignition/sensors/rgbd_camera/Export.hh"
 #include "ignition/sensors/Export.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
@@ -75,7 +75,7 @@ namespace ignition
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
       public: virtual void SetScene(
-                  ignition::rendering::ScenePtr _scene) override;
+                  gz::rendering::ScenePtr _scene) override;
 
       /// \brief Get image width.
       /// \return width of the image

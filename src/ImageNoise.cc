@@ -26,7 +26,7 @@
 #include "ignition/sensors/ImageNoise.hh"
 #include "ignition/sensors/ImageGaussianNoiseModel.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////

@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_SENSORS_SENSORFACTORY_HH_
-#define IGNITION_SENSORS_SENSORFACTORY_HH_
+#ifndef GZ_SENSORS_SENSORFACTORY_HH_
+#define GZ_SENSORS_SENSORFACTORY_HH_
 
 #include <memory>
 #include <string>
@@ -31,7 +31,7 @@
 
 #include "ignition/sensors/Sensor.hh"
 
-namespace ignition
+namespace gz
 {
   namespace sensors
   {
@@ -44,7 +44,7 @@ namespace ignition
     class IGNITION_SENSORS_VISIBLE SensorPlugin
     {
       /// \brief Allows using shorter APIS in common::PluginLoader
-      public: IGN_COMMON_SPECIALIZE_INTERFACE(ignition::sensors::SensorPlugin)
+      public: IGN_COMMON_SPECIALIZE_INTERFACE(gz::sensors::SensorPlugin)
 
       /// \brief Instantiate new sensor
       /// \return New sensor
@@ -186,8 +186,8 @@ namespace ignition
     /// \brief Sensor registration macro
     #define IGN_SENSORS_REGISTER_SENSOR(classname) \
     IGN_COMMON_REGISTER_SINGLE_PLUGIN(\
-       ignition::sensors::SensorTypePlugin<classname>, \
-       ignition::sensors::SensorPlugin)
+       gz::sensors::SensorTypePlugin<classname>, \
+       gz::sensors::SensorPlugin)
     }
   }
 }

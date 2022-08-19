@@ -43,11 +43,11 @@
 #include "ignition/sensors/SensorFactory.hh"
 #include "ignition/sensors/SensorTypes.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for CameraSensor
-class ignition::sensors::CameraSensorPrivate
+class gz::sensors::CameraSensorPrivate
 {
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
