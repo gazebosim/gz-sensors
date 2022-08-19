@@ -14,7 +14,7 @@
  * limitations under the License.
  *
 */
-#include <ignition/sensors/Sensor.hh>
+#include <gz/sensors/Sensor.hh>
 
 #include <atomic>
 #include <memory>
@@ -26,15 +26,15 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/performance_sensor_metrics.pb.h>
+#include <gz/msgs/performance_sensor_metrics.pb.h>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Time.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Time.hh>
+#include <gz/sensors/Export.hh>
+#include <gz/transport/Node.hh>
 
 using namespace gz;
 using namespace sensors;

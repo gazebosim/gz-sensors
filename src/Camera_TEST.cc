@@ -17,9 +17,9 @@
 #include <gtest/gtest.h>
 #include <sdf/sdf.hh>
 
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/CameraSensor.hh>
-#include <ignition/sensors/Manager.hh>
+#include <gz/sensors/Export.hh>
+#include <gz/sensors/CameraSensor.hh>
+#include <gz/sensors/Manager.hh>
 
 sdf::ElementPtr cameraToBadSdf()
 {

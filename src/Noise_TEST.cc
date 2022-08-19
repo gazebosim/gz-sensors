@@ -19,11 +19,11 @@
 
 #include <numeric>
 
-#include <ignition/common/Console.hh>
-#include <ignition/math/Rand.hh>
+#include <gz/common/Console.hh>
+#include <gz/math/Rand.hh>
 
-#include "ignition/sensors/Noise.hh"
-#include "ignition/sensors/GaussianNoiseModel.hh"
+#include "gz/sensors/Noise.hh"
+#include "gz/sensors/GaussianNoiseModel.hh"
 
 using namespace gz;
 

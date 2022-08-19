@@ -15,17 +15,17 @@
  *
 */
 
-#include "ignition/sensors/Manager.hh"
+#include "gz/sensors/Manager.hh"
 #include <memory>
 #include <unordered_map>
-#include <ignition/common/PluginLoader.hh>
-#include <ignition/common/Plugin.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/common/SystemPaths.hh>
-#include <ignition/common/Console.hh>
+#include <gz/common/PluginLoader.hh>
+#include <gz/common/Plugin.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/common/SystemPaths.hh>
+#include <gz/common/Console.hh>
 
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/SensorFactory.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/SensorFactory.hh"
 
 using namespace gz::sensors;
 

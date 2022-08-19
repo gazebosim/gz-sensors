@@ -19,9 +19,9 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/math/Helpers.hh>
-#include <ignition/sensors/AltimeterSensor.hh>
-#include <ignition/sensors/SensorFactory.hh>
+#include <gz/math/Helpers.hh>
+#include <gz/sensors/AltimeterSensor.hh>
+#include <gz/sensors/SensorFactory.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"

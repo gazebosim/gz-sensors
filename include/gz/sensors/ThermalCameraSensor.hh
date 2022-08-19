@@ -23,17 +23,17 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/Event.hh>
-#include <ignition/common/PluginMacros.hh>
-#include <ignition/common/SuppressWarning.hh>
-#include <ignition/common/Time.hh>
+#include <gz/common/Event.hh>
+#include <gz/common/PluginMacros.hh>
+#include <gz/common/SuppressWarning.hh>
+#include <gz/common/Time.hh>
 
 #ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs.hh>
+#include <gz/msgs.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -44,15 +44,15 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/ThermalCamera.hh>
+#include <gz/rendering/ThermalCamera.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include "ignition/sensors/thermal_camera/Export.hh"
-#include "ignition/sensors/CameraSensor.hh"
-#include "ignition/sensors/Export.hh"
-#include "ignition/sensors/Sensor.hh"
+#include "gz/sensors/thermal_camera/Export.hh"
+#include "gz/sensors/CameraSensor.hh"
+#include "gz/sensors/Export.hh"
+#include "gz/sensors/Sensor.hh"
 
 namespace gz
 {

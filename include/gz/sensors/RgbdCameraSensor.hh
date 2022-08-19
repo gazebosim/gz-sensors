@@ -21,13 +21,13 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/SuppressWarning.hh>
-#include <ignition/common/Time.hh>
+#include <gz/common/SuppressWarning.hh>
+#include <gz/common/Time.hh>
 
-#include "ignition/sensors/CameraSensor.hh"
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/rgbd_camera/Export.hh"
-#include "ignition/sensors/Export.hh"
+#include "gz/sensors/CameraSensor.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/rgbd_camera/Export.hh"
+#include "gz/sensors/Export.hh"
 
 namespace gz
 {

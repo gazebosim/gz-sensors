@@ -20,11 +20,11 @@
   #include <Winsock2.h>
 #endif
 
-#include "ignition/sensors/GaussianNoiseModel.hh"
-#include <ignition/math/Helpers.hh>
-#include <ignition/math/Rand.hh>
+#include "gz/sensors/GaussianNoiseModel.hh"
+#include <gz/math/Helpers.hh>
+#include <gz/math/Rand.hh>
 
-#include "ignition/common/Console.hh"
+#include "gz/common/Console.hh"
 
 using namespace gz;
 using namespace sensors;

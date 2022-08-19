@@ -21,9 +21,9 @@
 #include <sdf/Noise.hh>
 #include <sdf/Sensor.hh>
 
-#include <ignition/common/Image.hh>
-#include <ignition/common/Console.hh>
-#include <ignition/math/Helpers.hh>
+#include <gz/common/Image.hh>
+#include <gz/common/Console.hh>
+#include <gz/math/Helpers.hh>
 
 // TODO(louise) Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -31,16 +31,16 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/Material.hh>
-#include <ignition/rendering/RenderEngine.hh>
-#include <ignition/rendering/RenderingIface.hh>
-#include <ignition/rendering/Scene.hh>
-#include <ignition/rendering/Visual.hh>
+#include <gz/rendering/Material.hh>
+#include <gz/rendering/RenderEngine.hh>
+#include <gz/rendering/RenderingIface.hh>
+#include <gz/rendering/Scene.hh>
+#include <gz/rendering/Visual.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include <ignition/sensors.hh>
+#include <gz/sensors.hh>
 
 void OnImageFrame(const gz::msgs::Image &_image)
 {

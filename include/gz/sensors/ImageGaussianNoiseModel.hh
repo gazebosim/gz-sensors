@@ -26,14 +26,14 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/Camera.hh>
+#include <gz/rendering/Camera.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/GaussianNoiseModel.hh"
-#include "ignition/sensors/rendering/Export.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/GaussianNoiseModel.hh"
+#include "gz/sensors/rendering/Export.hh"
 
 namespace gz
 {

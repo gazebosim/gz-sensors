@@ -20,9 +20,9 @@
 
 #include <sdf/sdf.hh>
 
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/Export.hh"
-#include "ignition/sensors/Noise.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/Export.hh"
+#include "gz/sensors/Noise.hh"
 
 namespace gz
 {

@@ -22,7 +22,7 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/SuppressWarning.hh>
+#include <gz/common/SuppressWarning.hh>
 
 // TODO(louise) Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -30,14 +30,14 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/GpuRays.hh>
+#include <gz/rendering/GpuRays.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include "ignition/sensors/gpu_lidar/Export.hh"
-#include "ignition/sensors/RenderingEvents.hh"
-#include "ignition/sensors/Lidar.hh"
+#include "gz/sensors/gpu_lidar/Export.hh"
+#include "gz/sensors/RenderingEvents.hh"
+#include "gz/sensors/Lidar.hh"
 
 namespace gz
 {

@@ -21,11 +21,11 @@
 #include <string>
 #include <vector>
 
-#include <ignition/common/SuppressWarning.hh>
-#include <ignition/common/Event.hh>
+#include <gz/common/SuppressWarning.hh>
+#include <gz/common/Event.hh>
 
-#include "ignition/sensors/lidar/Export.hh"
-#include "ignition/sensors/RenderingSensor.hh"
+#include "gz/sensors/lidar/Export.hh"
+#include "gz/sensors/RenderingSensor.hh"
 
 namespace gz
 {

@@ -21,14 +21,14 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/SuppressWarning.hh>
-#include <ignition/common/Time.hh>
-#include <ignition/math/Pose3.hh>
+#include <gz/common/SuppressWarning.hh>
+#include <gz/common/Time.hh>
+#include <gz/math/Pose3.hh>
 
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/magnetometer/Export.hh>
+#include <gz/sensors/config.hh>
+#include <gz/sensors/magnetometer/Export.hh>
 
-#include "ignition/sensors/Sensor.hh"
+#include "gz/sensors/Sensor.hh"
 
 namespace gz
 {

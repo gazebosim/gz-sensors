@@ -23,16 +23,16 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/PluginMacros.hh>
-#include <ignition/common/SuppressWarning.hh>
-#include <ignition/common/Time.hh>
+#include <gz/common/PluginMacros.hh>
+#include <gz/common/SuppressWarning.hh>
+#include <gz/common/Time.hh>
 
 #ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs.hh>
+#include <gz/msgs.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -43,15 +43,15 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/Camera.hh>
+#include <gz/rendering/Camera.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include "ignition/sensors/camera/Export.hh"
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/Export.hh"
-#include "ignition/sensors/RenderingSensor.hh"
+#include "gz/sensors/camera/Export.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/Export.hh"
+#include "gz/sensors/RenderingSensor.hh"
 
 namespace gz
 {

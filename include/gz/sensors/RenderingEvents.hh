@@ -18,8 +18,8 @@
 #ifndef GZ_SENSORS_RENDERINGEVENTS_HH_
 #define GZ_SENSORS_RENDERINGEVENTS_HH_
 
-#include <ignition/common/Event.hh>
-#include <ignition/common/SuppressWarning.hh>
+#include <gz/common/Event.hh>
+#include <gz/common/SuppressWarning.hh>
 
 // TODO(louise) Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -27,13 +27,13 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/RenderTypes.hh>
+#include <gz/rendering/RenderTypes.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/rendering/Export.hh>
+#include <gz/sensors/config.hh>
+#include <gz/sensors/rendering/Export.hh>
 
 namespace gz
 {

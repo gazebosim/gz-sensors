@@ -17,25 +17,25 @@
 
 #include <gtest/gtest.h>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Filesystem.hh>
-#include <ignition/common/Event.hh>
-#include <ignition/common/Time.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/GpuLidarSensor.hh>
-#include <ignition/math/Angle.hh>
-#include <ignition/math/Helpers.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Filesystem.hh>
+#include <gz/common/Event.hh>
+#include <gz/common/Time.hh>
+#include <gz/sensors/Manager.hh>
+#include <gz/sensors/Export.hh>
+#include <gz/sensors/GpuLidarSensor.hh>
+#include <gz/math/Angle.hh>
+#include <gz/math/Helpers.hh>
 #ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs.hh>
+#include <gz/msgs.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
-#include <ignition/transport/Node.hh>
+#include <gz/transport/Node.hh>
 
 // TODO(louise) Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -43,10 +43,10 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/RenderEngine.hh>
-#include <ignition/rendering/RenderingIface.hh>
-#include <ignition/rendering/Scene.hh>
-#include <ignition/rendering/Visual.hh>
+#include <gz/rendering/RenderEngine.hh>
+#include <gz/rendering/RenderingIface.hh>
+#include <gz/rendering/Scene.hh>
+#include <gz/rendering/Visual.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif

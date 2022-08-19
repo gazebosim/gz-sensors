@@ -22,9 +22,9 @@
 
 #include <sdf/sdf.hh>
 
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/SensorTypes.hh"
-#include "ignition/sensors/rendering/Export.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/SensorTypes.hh"
+#include "gz/sensors/rendering/Export.hh"
 
 namespace gz
 {

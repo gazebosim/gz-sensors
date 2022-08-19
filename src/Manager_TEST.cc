@@ -16,7 +16,7 @@
 */
 
 #include <gtest/gtest.h>
-#include <ignition/sensors/Manager.hh>
+#include <gz/sensors/Manager.hh>
 
 /// \brief Test sensor manager
 class Manager_TEST : public ::testing::Test

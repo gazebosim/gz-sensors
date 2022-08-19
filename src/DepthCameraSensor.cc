@@ -19,29 +19,29 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/pointcloud_packed.pb.h>
+#include <gz/msgs/pointcloud_packed.pb.h>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
 #include <mutex>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Image.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/common/SystemPaths.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Image.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/common/SystemPaths.hh>
 
-#include <ignition/math/Angle.hh>
-#include <ignition/math/Helpers.hh>
+#include <gz/math/Angle.hh>
+#include <gz/math/Helpers.hh>
 
-#include <ignition/transport/Node.hh>
+#include <gz/transport/Node.hh>
 
-#include "ignition/sensors/DepthCameraSensor.hh"
-#include "ignition/sensors/Manager.hh"
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/ImageGaussianNoiseModel.hh"
-#include "ignition/sensors/ImageNoise.hh"
-#include "ignition/sensors/RenderingEvents.hh"
+#include "gz/sensors/DepthCameraSensor.hh"
+#include "gz/sensors/Manager.hh"
+#include "gz/sensors/SensorFactory.hh"
+#include "gz/sensors/ImageGaussianNoiseModel.hh"
+#include "gz/sensors/ImageNoise.hh"
+#include "gz/sensors/RenderingEvents.hh"
 
 #include "PointCloudUtil.hh"
 

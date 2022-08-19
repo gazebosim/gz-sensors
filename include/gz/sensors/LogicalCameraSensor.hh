@@ -23,26 +23,26 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/common/PluginMacros.hh>
-#include <ignition/common/SuppressWarning.hh>
-#include <ignition/common/Time.hh>
+#include <gz/common/PluginMacros.hh>
+#include <gz/common/SuppressWarning.hh>
+#include <gz/common/Time.hh>
 
-#include <ignition/math/Angle.hh>
+#include <gz/math/Angle.hh>
 
 #ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs.hh>
+#include <gz/msgs.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/Export.hh"
-#include "ignition/sensors/logical_camera/Export.hh"
-#include "ignition/sensors/Sensor.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/Export.hh"
+#include "gz/sensors/logical_camera/Export.hh"
+#include "gz/sensors/Sensor.hh"
 
 namespace gz
 {

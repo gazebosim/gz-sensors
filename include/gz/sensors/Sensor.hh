@@ -22,7 +22,7 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/header.pb.h>
+#include <gz/msgs/header.pb.h>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -31,11 +31,11 @@
 #include <memory>
 #include <string>
 
-#include <ignition/common/SuppressWarning.hh>
-#include <ignition/common/Time.hh>
-#include <ignition/math/Pose3.hh>
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/Export.hh>
+#include <gz/common/SuppressWarning.hh>
+#include <gz/common/Time.hh>
+#include <gz/math/Pose3.hh>
+#include <gz/sensors/config.hh>
+#include <gz/sensors/Export.hh>
 #include <sdf/sdf.hh>
 
 namespace gz

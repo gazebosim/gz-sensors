@@ -22,12 +22,12 @@
 #include <type_traits>
 #include <vector>
 #include <sdf/sdf.hh>
-#include <ignition/common/SuppressWarning.hh>
-#include <ignition/common/Time.hh>
-#include <ignition/common/Console.hh>
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/Sensor.hh>
+#include <gz/common/SuppressWarning.hh>
+#include <gz/common/Time.hh>
+#include <gz/common/Console.hh>
+#include <gz/sensors/config.hh>
+#include <gz/sensors/Export.hh>
+#include <gz/sensors/Sensor.hh>
 
 namespace gz
 {

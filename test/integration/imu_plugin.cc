@@ -19,8 +19,8 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/sensors/ImuSensor.hh>
-#include <ignition/sensors/SensorFactory.hh>
+#include <gz/sensors/ImuSensor.hh>
+#include <gz/sensors/SensorFactory.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"

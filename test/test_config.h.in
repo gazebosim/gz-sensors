@@ -36,7 +36,7 @@ static const std::vector<const char *> kRenderEngineTestValues{"none"};
 #endif
 
 #include <vector>
-#include <ignition/common/Util.hh>
+#include <gz/common/Util.hh>
 
 namespace gz
 {

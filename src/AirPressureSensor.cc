@@ -20,19 +20,19 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/fluid_pressure.pb.h>
+#include <gz/msgs/fluid_pressure.pb.h>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include <ignition/common/Profiler.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/transport/Node.hh>
 
-#include "ignition/sensors/GaussianNoiseModel.hh"
-#include "ignition/sensors/Noise.hh"
-#include "ignition/sensors/SensorTypes.hh"
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/AirPressureSensor.hh"
+#include "gz/sensors/GaussianNoiseModel.hh"
+#include "gz/sensors/Noise.hh"
+#include "gz/sensors/SensorTypes.hh"
+#include "gz/sensors/SensorFactory.hh"
+#include "gz/sensors/AirPressureSensor.hh"
 
 using namespace gz;
 using namespace sensors;

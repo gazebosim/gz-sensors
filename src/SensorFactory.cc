@@ -15,12 +15,12 @@
  *
 */
 
-#include <ignition/common/PluginLoader.hh>
-#include <ignition/common/SystemPaths.hh>
-#include <ignition/common/Console.hh>
-#include "ignition/sensors/config.hh"
+#include <gz/common/PluginLoader.hh>
+#include <gz/common/SystemPaths.hh>
+#include <gz/common/Console.hh>
+#include "gz/sensors/config.hh"
 
-#include "ignition/sensors/SensorFactory.hh"
+#include "gz/sensors/SensorFactory.hh"
 
 /// \brief Private data class for SensorFactory
 class gz::sensors::SensorFactoryPrivate

@@ -22,14 +22,14 @@
 #include <type_traits>
 #include <sdf/sdf.hh>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/PluginMacros.hh>
-#include <ignition/common/SuppressWarning.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/PluginMacros.hh>
+#include <gz/common/SuppressWarning.hh>
 
-#include <ignition/sensors/config.hh>
-#include <ignition/sensors/Export.hh>
+#include <gz/sensors/config.hh>
+#include <gz/sensors/Export.hh>
 
-#include "ignition/sensors/Sensor.hh"
+#include "gz/sensors/Sensor.hh"
 
 namespace gz
 {

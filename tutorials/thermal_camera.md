@@ -204,8 +204,8 @@ Here's an example thermal camera subscriber that performs this conversion:
 ```c
 #include <cstdint>
 
-#include <ignition/msgs.hh>
-#include <ignition/transport.hh>
+#include <gz/msgs.hh>
+#include <gz/transport.hh>
 
 // used to set the proper resolution of the camera's output (10mK)
 double linearResolution = 0.01;
