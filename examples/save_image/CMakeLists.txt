@@ -3,7 +3,7 @@ project(gz-sensors-camera-demo)
 
 # Find the Gazebo Libraries used directly by the example
 find_package(gz-rendering7 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
-find_package(gz-sensors7 REQUIRED COMPONENTS rendering camera)
+find_package(gz-sensors8 REQUIRED COMPONENTS rendering camera)
 
 if (TARGET gz-rendering7::ogre)
    add_definitions(-DWITH_OGRE)
@@ -14,4 +14,4 @@ endif()
 
 add_executable(save_image main.cc)
 target_link_libraries(save_image PUBLIC
-  gz-sensors7::camera)
+  gz-sensors8::camera)

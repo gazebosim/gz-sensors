@@ -9,7 +9,7 @@
 
 Build | Status
 -- | --
-Test coverage | [![codecov](https://codecov.io/gh/gazebosim/gz-sensors/branch/main/graph/badge.svg)](https://codecov.io/gh/gazebosim/gz-sensors)
+Test coverage | [![codecov](https://codecov.io/gh/gazebosim/gz-sensors/branch/main/graph/badge.svg)](https://codecov.io/gh/gazebosim/gz-sensors/branch/main)
 Ubuntu Focal | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-main-focal-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-main-focal-amd64)
 Homebrew      | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-main-homebrew-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-main-homebrew-amd64)
 Windows       | [![Build Status](https://build.osrfoundation.org/job/ign_sensors-ci-win/badge/icon)](https://build.osrfoundation.org/job/ign_sensors-ci-win/)
@@ -53,7 +53,7 @@ models into sensor streams.
 
 # Install
 
-See the [installation tutorial](https://gazebosim.org/api/sensors/5.0/installation.html).
+See the [installation tutorial](https://gazebosim.org/api/sensors/7.0/installation.html).
 
 # Usage
 
