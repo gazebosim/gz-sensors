@@ -53,7 +53,11 @@ target_link_libraries(${rendering_target}
 )
 
 set(camera_sources CameraSensor.cc)
-ign_add_component(camera SOURCES ${camera_sources} GET_TARGET_NAME camera_target)
+ign_add_component(camera
+  SOURCES ${camera_sources}
+  DEPENDS_ON_COMPONENTS rendering
+  GET_TARGET_NAME camera_target
+)
 # custom compile definitions since the one provided automatically is versioned and will
 # make the code need to change with every major version
 target_compile_definitions(${camera_target} PUBLIC CameraSensor_EXPORTS)
@@ -66,7 +70,11 @@ target_link_libraries(${camera_target}
 )
 
 set(depth_camera_sources DepthCameraSensor.cc)
-ign_add_component(depth_camera SOURCES ${depth_camera_sources} GET_TARGET_NAME depth_camera_target)
+ign_add_component(depth_camera
+  SOURCES ${depth_camera_sources}
+  DEPENDS_ON_COMPONENTS camera
+  GET_TARGET_NAME depth_camera_target
+)
 target_compile_definitions(${depth_camera_target} PUBLIC DepthCameraSensor_EXPORTS)
 target_link_libraries(${depth_camera_target}
   PRIVATE
@@ -76,7 +84,11 @@ target_link_libraries(${depth_camera_target}
 )
 
 set(lidar_sources Lidar.cc)
-ign_add_component(lidar SOURCES ${lidar_sources} GET_TARGET_NAME lidar_target)
+ign_add_component(lidar
+  SOURCES ${lidar_sources}
+  DEPENDS_ON_COMPONENTS rendering
+  GET_TARGET_NAME lidar_target
+)
 target_compile_definitions(${lidar_target} PUBLIC Lidar_EXPORTS)
 target_link_libraries(${lidar_target}
   PUBLIC
@@ -87,7 +99,11 @@ target_link_libraries(${lidar_target}
 )
 
 set(gpu_lidar_sources GpuLidarSensor.cc)
-ign_add_component(gpu_lidar SOURCES ${gpu_lidar_sources} GET_TARGET_NAME gpu_lidar_target)
+ign_add_component(gpu_lidar
+  DEPENDS_ON_COMPONENTS lidar
+  SOURCES ${gpu_lidar_sources}
+  GET_TARGET_NAME gpu_lidar_target
+)
 target_compile_definitions(${gpu_lidar_target} PUBLIC GpuLidarSensor_EXPORTS)
 target_link_libraries(${gpu_lidar_target}
   PRIVATE
@@ -118,7 +134,11 @@ set(air_pressure_sources AirPressureSensor.cc)
 ign_add_component(air_pressure SOURCES ${air_pressure_sources} GET_TARGET_NAME air_pressure_target)
 
 set(rgbd_camera_sources RgbdCameraSensor.cc)
-ign_add_component(rgbd_camera SOURCES ${rgbd_camera_sources} GET_TARGET_NAME rgbd_camera_target)
+ign_add_component(rgbd_camera
+  SOURCES ${rgbd_camera_sources}
+  DEPENDS_ON_COMPONENTS camera
+  GET_TARGET_NAME rgbd_camera_target
+)
 target_compile_definitions(${rgbd_camera_target} PUBLIC RgbdCameraSensor_EXPORTS)
 target_link_libraries(${rgbd_camera_target}
   PRIVATE
@@ -128,7 +148,11 @@ target_link_libraries(${rgbd_camera_target}
 )
 
 set(thermal_camera_sources ThermalCameraSensor.cc)
-ign_add_component(thermal_camera SOURCES ${thermal_camera_sources} GET_TARGET_NAME thermal_camera_target)
+ign_add_component(thermal_camera
+  SOURCES ${thermal_camera_sources}
+  DEPENDS_ON_COMPONENTS camera
+  GET_TARGET_NAME thermal_camera_target
+)
 target_link_libraries(${thermal_camera_target}
   PRIVATE
     ${camera_target}
