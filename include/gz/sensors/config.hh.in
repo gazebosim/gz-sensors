@@ -18,3 +18,12 @@
 
 #define IGN_SENSORS_PLUGIN_PATH "@IGN_SENSORS_PLUGIN_PATH@"
 #define IGN_SENSORS_PLUGIN_NAME(name) std::string("@PROJECT_LIBRARY_TARGET_NAME@-")+name
+
+namespace ignition
+{
+}
+
+namespace gz
+{
+  using namespace ignition;
+}

@@ -23,7 +23,7 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <gz/msgs.hh>
+#include <ignition/msgs.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif

@@ -27,7 +27,7 @@
 /// \file
 /// \ingroup ignition_sensors
 /// \brief Forward declarations and typedefs for sensors
-namespace gz
+namespace ignition
 {
   /// \ingroup ignition_sensors
   /// \brief Sensors namespace

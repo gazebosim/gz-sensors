@@ -22,5 +22,5 @@
 // Make sure the ignition namespace still works
 TEST(Deprecated, IgnitionNamespace)
 {
-  gz::sensors::Lidar lidar;
+  ignition::sensors::Lidar lidar;
 }

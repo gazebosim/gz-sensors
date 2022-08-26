@@ -27,7 +27,7 @@
 #include "gz/sensors/lidar/Export.hh"
 #include "gz/sensors/RenderingSensor.hh"
 
-namespace gz
+namespace ignition
 {
   namespace sensors
   {

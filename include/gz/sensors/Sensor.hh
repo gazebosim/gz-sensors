@@ -38,7 +38,7 @@
 #include <gz/sensors/Export.hh>
 #include <sdf/sdf.hh>
 
-namespace gz
+namespace ignition
 {
   namespace sensors
   {

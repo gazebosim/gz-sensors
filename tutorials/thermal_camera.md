@@ -204,7 +204,7 @@ Here's an example thermal camera subscriber that performs this conversion:
 ```c
 #include <cstdint>
 
-#include <gz/msgs.hh>
+#include <ignition/msgs.hh>
 #include <gz/transport.hh>
 
 // used to set the proper resolution of the camera's output (10mK)

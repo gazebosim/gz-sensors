@@ -35,7 +35,7 @@
 #include <gz/sensors/config.hh>
 #include <gz/sensors/rendering/Export.hh>
 
-namespace gz
+namespace ignition
 {
   namespace sensors
   {

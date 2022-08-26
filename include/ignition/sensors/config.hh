@@ -39,14 +39,4 @@
 // #define IGN_SENSORS_PLUGIN_PATH GZ_SENSORS_PLUGIN_PATH
 // #define IGN_SENSORS_PLUGIN_NAME(name) GZ_SENSORS_PLUGIN_NAME(name)
 
-namespace gz
-{
-}
-
-namespace ignition
-{
-  using namespace gz;
-}
-
-
 #endif

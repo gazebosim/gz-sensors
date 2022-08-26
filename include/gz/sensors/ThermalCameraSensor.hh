@@ -33,7 +33,7 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <gz/msgs.hh>
+#include <ignition/msgs.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -54,7 +54,7 @@
 #include "gz/sensors/Export.hh"
 #include "gz/sensors/Sensor.hh"
 
-namespace gz
+namespace ignition
 {
   namespace sensors
   {

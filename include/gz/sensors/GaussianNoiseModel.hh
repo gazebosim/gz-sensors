@@ -24,7 +24,7 @@
 #include "gz/sensors/Export.hh"
 #include "gz/sensors/Noise.hh"
 
-namespace gz
+namespace ignition
 {
   namespace sensors
   {

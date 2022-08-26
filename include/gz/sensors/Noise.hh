@@ -28,7 +28,7 @@
 
 #include <sdf/sdf.hh>
 
-namespace gz
+namespace ignition
 {
   namespace sensors
   {

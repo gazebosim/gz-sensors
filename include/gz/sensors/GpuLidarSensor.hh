@@ -39,7 +39,7 @@
 #include "gz/sensors/RenderingEvents.hh"
 #include "gz/sensors/Lidar.hh"
 
-namespace gz
+namespace ignition
 {
   namespace sensors
   {
