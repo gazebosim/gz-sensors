@@ -15,15 +15,7 @@
  *
 */
 
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
-#endif
 #include <gz/msgs/image.pb.h>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 #include <algorithm>
 #include <mutex>
@@ -36,6 +28,7 @@
 #include <gz/math/Angle.hh>
 #include <gz/math/Helpers.hh>
 
+#include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 
 #include "gz/sensors/ThermalCameraSensor.hh"

@@ -21,6 +21,7 @@
 #include <gz/common/Profiler.hh>
 #include <gz/math/Frustum.hh>
 #include <gz/math/Helpers.hh>
+#include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 
 #include "gz/sensors/SensorFactory.hh"

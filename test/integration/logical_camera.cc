@@ -17,6 +17,8 @@
 
 #include <gtest/gtest.h>
 
+#include <gz/msgs/logical_camera_image.pb.h>
+
 #include <sdf/sdf.hh>
 
 #include <gz/common/Console.hh>
@@ -26,15 +28,7 @@
 #include <gz/sensors/Export.hh>
 
 #include <gz/math/Helpers.hh>
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
-#endif
-#include <gz/msgs.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
+#include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 
 #include "test_config.hh"  // NOLINT(build/include)
