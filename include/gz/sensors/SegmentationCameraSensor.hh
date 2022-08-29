@@ -21,9 +21,10 @@
 #include <memory>
 #include <string>
 
+#include <gz/msgs/image.pb.h>
+
 #include <gz/common/Event.hh>
 #include <gz/utils/SuppressWarning.hh>
-#include <gz/msgs.hh>
 #include <gz/transport/Node.hh>
 #include <gz/transport/Publisher.hh>
 #include <sdf/sdf.hh>

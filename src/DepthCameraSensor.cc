@@ -14,15 +14,9 @@
  * limitations under the License.
  *
 */
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
-#endif
+
+#include <gz/msgs/image.pb.h>
 #include <gz/msgs/pointcloud_packed.pb.h>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 #include <mutex>
 
@@ -34,6 +28,7 @@
 #include <gz/math/Angle.hh>
 #include <gz/math/Helpers.hh>
 
+#include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 
 #include "gz/sensors/DepthCameraSensor.hh"

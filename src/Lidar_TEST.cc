@@ -19,15 +19,6 @@
 
 #include <gz/math/Angle.hh>
 #include <gz/math/Helpers.hh>
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
-#endif
-#include <gz/msgs.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 #include <gz/sensors/Export.hh>
 #include <gz/sensors/Manager.hh>
