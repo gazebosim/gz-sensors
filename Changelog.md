@@ -2,7 +2,7 @@
 
 ### Gazebo Sensors 7.X.X
 
-### Gazebo Sensors 7.0.0 (202X-XX-XX)
+### Gazebo Sensors 7.0.0 (2022-XX-XX)
 
 ## Gazebo Sensors 6
 
