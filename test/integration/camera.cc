@@ -299,7 +299,6 @@ TEST_P(CameraSensorTest, LInt8ImagesWithBuiltinSDF)
 //////////////////////////////////////////////////
 void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
 {
-  // Get the darn test data
   std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
                                            "sdf", "camera_intrinsics.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
