@@ -59,7 +59,7 @@ class ignition::sensors::CameraSensorPrivate
   /// of the path was not possible.
   /// \sa ImageSaver
   public: bool SaveImage(const unsigned char *_data, unsigned int _width,
-    unsigned int _height, ignition::common::Image::PixelFormatType _format);
+    unsigned int _height, common::Image::PixelFormatType _format);
 
   /// \brief node to create publisher
   public: transport::Node node;
@@ -74,21 +74,21 @@ class ignition::sensors::CameraSensorPrivate
   public: bool initialized = false;
 
   /// \brief Rendering camera
-  public: ignition::rendering::CameraPtr camera;
+  public: rendering::CameraPtr camera;
 
   /// \brief Pointer to an image to be published
-  public: ignition::rendering::Image image;
+  public: rendering::Image image;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
-  public: ignition::common::EventT<
-          void(const ignition::msgs::Image &)> imageEvent;
+  public: common::EventT<
+          void(const msgs::Image &)> imageEvent;
 
   /// \brief Connection to the Manager's scene change event.
-  public: ignition::common::ConnectionPtr sceneChangeConnection;
+  public: common::ConnectionPtr sceneChangeConnection;
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
@@ -188,7 +188,7 @@ bool CameraSensor::CreateCamera()
   switch (pixelFormat)
   {
     case sdf::PixelFormatType::RGB_INT8:
-      this->dataPtr->camera->SetImageFormat(ignition::rendering::PF_R8G8B8);
+      this->dataPtr->camera->SetImageFormat(rendering::PF_R8G8B8);
       break;
     default:
       ignerr << "Unsupported pixel format ["
@@ -258,7 +258,7 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/camera");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+      this->dataPtr->node.Advertise<msgs::Image>(
           this->Topic());
   if (!this->dataPtr->pub)
   {
@@ -293,14 +293,14 @@ bool CameraSensor::Load(sdf::ElementPtr _sdf)
 }
 
 /////////////////////////////////////////////////
-ignition::common::ConnectionPtr CameraSensor::ConnectImageCallback(
-    std::function<void(const ignition::msgs::Image &)> _callback)
+common::ConnectionPtr CameraSensor::ConnectImageCallback(
+    std::function<void(const msgs::Image &)> _callback)
 {
   return this->dataPtr->imageEvent.Connect(_callback);
 }
 
 /////////////////////////////////////////////////
-void CameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
+void CameraSensor::SetScene(rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
@@ -315,7 +315,7 @@ void CameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
 }
 
 //////////////////////////////////////////////////
-bool CameraSensor::Update(const ignition::common::Time &_now)
+bool CameraSensor::Update(const common::Time &_now)
 {
   IGN_PROFILE("CameraSensor::Update");
   if (!this->dataPtr->initialized)
@@ -370,15 +370,15 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
   unsigned int height = this->dataPtr->camera->ImageHeight();
   unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
-  ignition::common::Image::PixelFormatType
+  common::Image::PixelFormatType
       format{common::Image::UNKNOWN_PIXEL_FORMAT};
   msgs::PixelFormatType msgsPixelFormat =
     msgs::PixelFormatType::UNKNOWN_PIXEL_FORMAT;
 
   switch (this->dataPtr->camera->ImageFormat())
   {
-    case ignition::rendering::PF_R8G8B8:
-      format = ignition::common::Image::RGB_INT8;
+    case rendering::PF_R8G8B8:
+      format = common::Image::RGB_INT8;
       msgsPixelFormat = msgs::PixelFormatType::RGB_INT8;
       break;
     default:
@@ -388,7 +388,7 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
   }
 
   // create message
-  ignition::msgs::Image msg;
+  msgs::Image msg;
   {
     IGN_PROFILE("CameraSensor::Update Message");
     msg.set_width(width);
@@ -439,12 +439,12 @@ bool CameraSensor::Update(const ignition::common::Time &_now)
 //////////////////////////////////////////////////
 bool CameraSensorPrivate::SaveImage(const unsigned char *_data,
     unsigned int _width, unsigned int _height,
-    ignition::common::Image::PixelFormatType _format)
+    common::Image::PixelFormatType _format)
 {
   // Attempt to create the directory if it doesn't exist
-  if (!ignition::common::isDirectory(this->saveImagePath))
+  if (!common::isDirectory(this->saveImagePath))
   {
-    if (!ignition::common::createDirectories(this->saveImagePath))
+    if (!common::createDirectories(this->saveImagePath))
       return false;
   }
 
@@ -452,11 +452,11 @@ bool CameraSensorPrivate::SaveImage(const unsigned char *_data,
                          std::to_string(this->saveImageCounter) + ".png";
   ++this->saveImageCounter;
 
-  ignition::common::Image localImage;
+  common::Image localImage;
   localImage.SetFromData(_data, _width, _height, _format);
 
   localImage.SavePNG(
-      ignition::common::joinPaths(this->saveImagePath, filename));
+      common::joinPaths(this->saveImagePath, filename));
   return true;
 }
 
@@ -512,7 +512,7 @@ bool CameraSensor::AdvertiseInfo(const std::string &_topic)
   this->dataPtr->infoTopic = _topic;
 
   this->dataPtr->infoPub =
-      this->dataPtr->node.Advertise<ignition::msgs::CameraInfo>(
+      this->dataPtr->node.Advertise<msgs::CameraInfo>(
       this->dataPtr->infoTopic);
   if (!this->dataPtr->infoPub)
   {
@@ -529,7 +529,7 @@ bool CameraSensor::AdvertiseInfo(const std::string &_topic)
 }
 
 //////////////////////////////////////////////////
-void CameraSensor::PublishInfo(const ignition::common::Time &_now)
+void CameraSensor::PublishInfo(const common::Time &_now)
 {
   this->dataPtr->infoMsg.mutable_header()->mutable_stamp()->set_sec(_now.sec);
   this->dataPtr->infoMsg.mutable_header()->mutable_stamp()->set_nsec(

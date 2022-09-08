@@ -61,7 +61,7 @@ class NoiseTest : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    common::Console::SetVerbosity(4);
   }
 };
 
@@ -132,7 +132,7 @@ void NoNoise(sensors::NoisePtr _noise, unsigned int _count)
   // Expect no change in input value
   for (unsigned int i = 0; i < _count; ++i)
   {
-    double x = ignition::math::Rand::DblUniform(-1e6, 1e6);
+    double x = math::Rand::DblUniform(-1e6, 1e6);
     EXPECT_NEAR(x, _noise->Apply(x), 1e-6);
   }
 }

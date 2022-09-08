@@ -92,7 +92,7 @@ bool AltimeterSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/altimeter");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::Altimeter>(this->Topic());
+      this->dataPtr->node.Advertise<msgs::Altimeter>(this->Topic());
 
   if (!this->dataPtr->pub)
   {
@@ -133,7 +133,7 @@ bool AltimeterSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool AltimeterSensor::Update(const ignition::common::Time &_now)
+bool AltimeterSensor::Update(const common::Time &_now)
 {
   IGN_PROFILE("AltimeterSensor::Update");
   if (!this->dataPtr->initialized)

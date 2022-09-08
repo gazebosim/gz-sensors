@@ -187,7 +187,7 @@ class ImuSensor_TEST : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    common::Console::SetVerbosity(4);
   }
 };
 
@@ -195,7 +195,7 @@ class ImuSensor_TEST : public ::testing::Test
 TEST(ImuSensor_TEST, CreateImuSensor)
 {
   // Create a sensor manager
-  ignition::sensors::Manager mgr;
+  sensors::Manager mgr;
 
   const std::string name = "TestImu";
   const std::string topic = "/ignition/sensors/test/imu";
@@ -209,7 +209,7 @@ TEST(ImuSensor_TEST, CreateImuSensor)
     accelNoise, gyroNoise, always_on, visualize);
 
   // Create an ImuSensor
-  auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(imuSDF);
+  auto sensor = mgr.CreateSensor<sensors::ImuSensor>(imuSDF);
 
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
@@ -219,7 +219,7 @@ TEST(ImuSensor_TEST, CreateImuSensor)
 TEST(ImuSensor_TEST, ComputeNoise)
 {
   // Create a sensor manager
-  ignition::sensors::Manager mgr;
+  sensors::Manager mgr;
 
   sdf::ElementPtr imuSDF, imuSDF_truth;
 
@@ -253,9 +253,9 @@ TEST(ImuSensor_TEST, ComputeNoise)
   }
 
   // Create an ImuSensor
-  auto sensor_truth = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+  auto sensor_truth = mgr.CreateSensor<sensors::ImuSensor>(
       imuSDF_truth);
-  auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(imuSDF);
+  auto sensor = mgr.CreateSensor<sensors::ImuSensor>(imuSDF);
 
   // Make sure the above dynamic cast worked.
   ASSERT_NE(nullptr, sensor);
