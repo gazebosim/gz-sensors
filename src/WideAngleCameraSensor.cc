@@ -121,12 +121,15 @@ WideAngleCameraSensor::WideAngleCameraSensor()
 //////////////////////////////////////////////////
 WideAngleCameraSensor::~WideAngleCameraSensor()
 {
+  std::cerr << "wide angle sensor destructor 2" << std::endl;
   this->dataPtr->imageConnection.reset();
   if (this->dataPtr->imageBuffer)
   {
+    std::cerr << "wide angle sensor destructor 3" << std::endl;
     delete [] this->dataPtr->imageBuffer;
     this->dataPtr->imageBuffer = nullptr;
   }
+  std::cerr << "wide angle sensor destructor done " << std::endl;
 }
 
 //////////////////////////////////////////////////

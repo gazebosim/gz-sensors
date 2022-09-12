@@ -217,7 +217,13 @@ void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_GT(b, g);
   EXPECT_GT(b, r);
 
+  auto sensorId = sensor->Id();
+  EXPECT_TRUE(mgr.Remove(sensorId));
+  EXPECT_EQ(nullptr, mgr.Sensor(sensorId));
+
   // Clean up
+  box.reset();
+  blue.reset();
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }
