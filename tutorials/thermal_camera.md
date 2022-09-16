@@ -1,6 +1,6 @@
 \page thermalcameraigngazebo Thermal Camera in Gazebo
 
-In this tutorial, we will discuss how to use a thermal camera sensor in [Gazebo](https://gazebosim.org/libs/gazebo).
+In this tutorial, we will discuss how to use a thermal camera sensor in [Gazebo](https://gazebosim.org/libs/sim).
 
 There are currently a few limitations with the thermal camera, which will be mentioned at the end of the tutorial.
 
