@@ -24,14 +24,6 @@ designed to generate realistic data from simulation environments. Gazebo Sensors
 
 [Install](#install)
 
-* [Binary Install](#binary-install)
-
-* [Source Install](#source-install)
-
-    * [Prerequisites](#prerequisites)
-
-    * [Building from Source](#building-from-source)
-
 [Usage](#usage)
 
 [Folder Structure](#folder-structure)
@@ -65,7 +57,7 @@ Refer to the following table for information about important directories and fil
 
 ```
 ├── examples                  Example programs.
-├── include/gz/sensors  Header files that will be installed.
+├── include/gz/sensors        Header files that will be installed.
 ├── src                       Source files and unit tests.
 ├── test
 │    ├── integration          Integration tests.
