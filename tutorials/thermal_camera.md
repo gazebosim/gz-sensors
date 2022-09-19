@@ -299,7 +299,7 @@ Here's an example 16-bit thermal camera subscriber that performs this conversion
 ```c
 #include <cstdint>
 
-#include <gz/msgs/image.pb>
+#include <gz/msgs/image.pb.h>
 #include <gz/transport.hh>
 
 // used to set the proper resolution of the camera's output (10mK)
