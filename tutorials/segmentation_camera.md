@@ -85,7 +85,7 @@ Let’s take a closer look at the portion of the code above that focuses on the 
 
 As we can see, we define a sensor with the following SDF elements:
 * `<camera>`: The camera, which has the following child elements:
-    * `<segmentation_type>`: The type of segmentation performed by the camera. Use `semantic` for [semantic segmentation](https://www.jeremyjordan.me/semantic-segmentation/). For [panoptic (instance) segmentation](https://hasty.ai/blog/panoptic-segmentation-explained/), use `panoptic` or `instance`. The default value for `<segmentation_type>` is `semantic`.
+    * `<segmentation_type>`: The type of segmentation performed by the camera. Use `semantic` for [semantic segmentation](https://www.jeremyjordan.me/semantic-segmentation/). For [panoptic (instance) segmentation](https://en.wikipedia.org/wiki/Image_segmentation#Groups_of_image_segmentation), use `panoptic` or `instance`. The default value for `<segmentation_type>` is `semantic`.
 	* `<horizontal_fov>`: The horizontal field of view, in radians.
 	* `<image>`: The image size, in pixels.
 	* `<clip>`: The near and far clip planes. Objects are only rendered if they're within these planes.
