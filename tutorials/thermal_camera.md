@@ -346,7 +346,7 @@ int main(int argc, char **argv)
 }
 ```
 
-Use this `CMakeLists.txt` to compile the code
+Save the above code to a file named `main.cpp` and use this `CMakeLists.txt` to build it.
 
 ```cmake
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
