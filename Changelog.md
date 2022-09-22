@@ -2,7 +2,7 @@
 
 ### Gazebo Sensors 7.X.X
 
-### Gazebo Sensors 7.0.0 (202X-XX-XX)
+### Gazebo Sensors 7.0.0
 
 1. Clear scene before exiting wide_angle_camera_test
     * [Pull request #266](https://github.com/gazebosim/ign-sensors/pull/266)
