@@ -119,6 +119,9 @@ class ignition::sensors::RgbdCameraSensorPrivate
   /// point cloud.
   public: unsigned int channels = 4;
 
+  /// \brief Frame ID the camera_info message header is expressed.
+  public: std::string opticalFrameId{""};
+
   /// \brief Pointer to an image to be published
   public: ignition::rendering::Image image;
 
@@ -258,7 +261,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
   // the xyz and rgb fields to be aligned to memory boundaries. This is need
   // by ROS1: https://github.com/ros/common_msgs/pull/77. Ideally, memory
   // alignment should be configured.
-  msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->Name(), true,
+  msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->FrameId(), true,
       {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
        {"rgb", msgs::PointCloudPacked::Field::FLOAT32}});
 
@@ -298,6 +301,20 @@ bool RgbdCameraSensor::CreateCameras()
   this->dataPtr->depthCamera->SetImageHeight(height);
   this->dataPtr->depthCamera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->depthCamera->SetFarClipPlane(cameraSdf->FarClip());
+
+  // Note: while Gazebo interprets the camera frame to be looking towards +X,
+  // other tools, such as ROS, may interpret this frame as looking towards +Z.
+  // To make this configurable the user has the option to set an optical frame.
+  // If the user has set <optical_frame_id> in the cameraSdf use it,
+  // otherwise fall back to the sensor frame.
+  if (cameraSdf->OpticalFrameId().empty())
+  {
+   this->dataPtr->opticalFrameId = this->FrameId();
+  }
+  else
+  {
+   this->dataPtr->opticalFrameId = cameraSdf->OpticalFrameId();
+  }
 
   // Depth camera clip params are new and only override the camera clip
   // params if specified.
@@ -477,7 +494,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
     auto frame = msg.mutable_header()->add_data();
     frame->set_key("frame_id");
-    frame->add_value(this->FrameId());
+    frame->add_value(this->dataPtr->opticalFrameId);
 
     std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
@@ -589,7 +606,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
       auto frame = msg.mutable_header()->add_data();
       frame->set_key("frame_id");
-      frame->add_value(this->FrameId());
+      frame->add_value(this->dataPtr->opticalFrameId);
       msg.set_data(data, rendering::PixelUtil::MemorySize(rendering::PF_R8G8B8,
         width, height));
 

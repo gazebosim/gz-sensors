@@ -129,6 +129,9 @@ class ignition::sensors::CameraSensorPrivate
   /// \brief Camera information message.
   public: msgs::CameraInfo infoMsg;
 
+  /// \brief The frame this camera uses in its camera_info topic.
+  public: std::string opticalFrameId{""};
+
   /// \brief Topic for info message.
   public: std::string infoTopic{""};
 
@@ -469,7 +472,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
     auto frame = msg.mutable_header()->add_data();
     frame->set_key("frame_id");
-    frame->add_value(this->FrameId());
+    frame->add_value(this->dataPtr->opticalFrameId);
     msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
   }
 
@@ -683,11 +686,20 @@ void CameraSensor::PopulateInfo(const sdf::Camera *_cameraSdf)
 
   // Note: while Gazebo interprets the camera frame to be looking towards +X,
   // other tools, such as ROS, may interpret this frame as looking towards +Z.
-  // TODO(anyone) Expose the `frame_id` as an SDF parameter so downstream users
-  // can populate it with arbitrary frames.
+  // To make this configurable the user has the option to set an optical frame.
+  // If the user has set <optical_frame_id> in the cameraSdf use it,
+  // otherwise fall back to the sensor frame.
+  if (_cameraSdf->OpticalFrameId().empty())
+  {
+   this->dataPtr->opticalFrameId = this->FrameId();
+  }
+  else
+  {
+   this->dataPtr->opticalFrameId = _cameraSdf->OpticalFrameId();
+  }
   auto infoFrame = this->dataPtr->infoMsg.mutable_header()->add_data();
   infoFrame->set_key("frame_id");
-  infoFrame->add_value(this->FrameId());
+  infoFrame->add_value(this->dataPtr->opticalFrameId);
 
   this->dataPtr->infoMsg.set_width(width);
   this->dataPtr->infoMsg.set_height(height);
