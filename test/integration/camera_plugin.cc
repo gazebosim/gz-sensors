@@ -18,8 +18,10 @@
 #include <gtest/gtest.h>
 
 #include <ignition/common/Filesystem.hh>
+#include <ignition/common/Time.hh>
 #include <ignition/sensors/Manager.hh>
 #include <ignition/sensors/CameraSensor.hh>
+#include <ignition/transport/Node.hh>
 
 // TODO(louise) Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -48,6 +50,20 @@
 #include "TransportTestTools.hh"
 
 
+std::mutex g_infoMutex;
+unsigned int g_infoCounter = 0;
+ignition::msgs::CameraInfo g_infoMsg;
+
+//////////////////////////////////////////////////
+void OnCameraInfo(const ignition::msgs::CameraInfo & _msg)
+{
+  g_infoMutex.lock();
+  g_infoCounter++;
+  g_infoMsg.CopyFrom(_msg);
+  g_infoMutex.unlock();
+}
+
+//////////////////////////////////////////////////
 class CameraSensorTest: public testing::Test,
   public testing::WithParamInterface<const char *>
 {
@@ -55,6 +71,7 @@ class CameraSensorTest: public testing::Test,
   public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
 };
 
+//////////////////////////////////////////////////
 void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 {
   // get the darn test data
@@ -97,6 +114,12 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 
   EXPECT_EQ(std::string("base_camera"), sensor->FrameId());
 
+  // subscribe to the camera info topic
+  std::string infoTopic = sensor->InfoTopic();
+  ignition::transport::Node node;
+  node.Subscribe(infoTopic, &OnCameraInfo);
+  WaitForMessageTestHelper<ignition::msgs::CameraInfo> helperInfo(infoTopic);
+
   std::string topic = "/test/integration/CameraPlugin_imagesWithBuiltinSDF";
   WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
 
@@ -104,6 +127,45 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   mgr.RunOnce(ignition::common::Time::Zero);
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
+  EXPECT_TRUE(helperInfo.WaitForMessage()) << helperInfo;
+
+  // Check CameraInfo properties
+  ignition::msgs::CameraInfo infoMsg;
+  g_infoMutex.lock();
+  EXPECT_EQ(1u, g_infoCounter);
+  infoMsg.CopyFrom(g_infoMsg);
+  g_infoMutex.unlock();
+
+  {
+    auto intrinsics = infoMsg.intrinsics();
+    EXPECT_EQ(9, intrinsics.k_size());
+    EXPECT_EQ(280.0, intrinsics.k(0));
+    EXPECT_EQ(0.0, intrinsics.k(1));
+    EXPECT_EQ(162.0, intrinsics.k(2));
+    EXPECT_EQ(0.0, intrinsics.k(3));
+    EXPECT_EQ(281.0, intrinsics.k(4));
+    EXPECT_EQ(124.0, intrinsics.k(5));
+    EXPECT_EQ(0.0, intrinsics.k(6));
+    EXPECT_EQ(0.0, intrinsics.k(7));
+    EXPECT_EQ(1.0, intrinsics.k(8));
+  }
+
+  {
+    auto projection = infoMsg.projection();
+    EXPECT_EQ(12, projection.p_size());
+    EXPECT_EQ(282.0, projection.p(0));
+    EXPECT_EQ(0.0, projection.p(1));
+    EXPECT_EQ(163.0, projection.p(2));
+    EXPECT_EQ(1.0, projection.p(3));
+    EXPECT_EQ(0.0, projection.p(4));
+    EXPECT_EQ(283.0, projection.p(5));
+    EXPECT_EQ(125.0, projection.p(6));
+    EXPECT_EQ(2.0, projection.p(7));
+    EXPECT_EQ(0.0, projection.p(8));
+    EXPECT_EQ(0.0, projection.p(9));
+    EXPECT_EQ(1.0, projection.p(10));
+    EXPECT_EQ(0.0, projection.p(11));
+  }
 
   // Clean up
   engine->DestroyScene(scene);
