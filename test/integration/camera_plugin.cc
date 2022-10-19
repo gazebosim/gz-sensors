@@ -139,32 +139,32 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   {
     auto intrinsics = infoMsg.intrinsics();
     EXPECT_EQ(9, intrinsics.k_size());
-    EXPECT_EQ(280.0, intrinsics.k(0));
-    EXPECT_EQ(0.0, intrinsics.k(1));
-    EXPECT_EQ(162.0, intrinsics.k(2));
-    EXPECT_EQ(0.0, intrinsics.k(3));
-    EXPECT_EQ(281.0, intrinsics.k(4));
-    EXPECT_EQ(124.0, intrinsics.k(5));
-    EXPECT_EQ(0.0, intrinsics.k(6));
-    EXPECT_EQ(0.0, intrinsics.k(7));
-    EXPECT_EQ(1.0, intrinsics.k(8));
+    EXPECT_DOUBLE_EQ(280.0, intrinsics.k(0));
+    EXPECT_DOUBLE_EQ(0.0, intrinsics.k(1));
+    EXPECT_DOUBLE_EQ(162.0, intrinsics.k(2));
+    EXPECT_DOUBLE_EQ(0.0, intrinsics.k(3));
+    EXPECT_DOUBLE_EQ(281.0, intrinsics.k(4));
+    EXPECT_DOUBLE_EQ(124.0, intrinsics.k(5));
+    EXPECT_DOUBLE_EQ(0.0, intrinsics.k(6));
+    EXPECT_DOUBLE_EQ(0.0, intrinsics.k(7));
+    EXPECT_DOUBLE_EQ(1.0, intrinsics.k(8));
   }
 
   {
     auto projection = infoMsg.projection();
     EXPECT_EQ(12, projection.p_size());
-    EXPECT_EQ(282.0, projection.p(0));
-    EXPECT_EQ(0.0, projection.p(1));
-    EXPECT_EQ(163.0, projection.p(2));
-    EXPECT_EQ(1.0, projection.p(3));
-    EXPECT_EQ(0.0, projection.p(4));
-    EXPECT_EQ(283.0, projection.p(5));
-    EXPECT_EQ(125.0, projection.p(6));
-    EXPECT_EQ(2.0, projection.p(7));
-    EXPECT_EQ(0.0, projection.p(8));
-    EXPECT_EQ(0.0, projection.p(9));
-    EXPECT_EQ(1.0, projection.p(10));
-    EXPECT_EQ(0.0, projection.p(11));
+    EXPECT_DOUBLE_EQ(282.0, projection.p(0));
+    EXPECT_DOUBLE_EQ(0.0, projection.p(1));
+    EXPECT_DOUBLE_EQ(163.0, projection.p(2));
+    EXPECT_DOUBLE_EQ(1.0, projection.p(3));
+    EXPECT_DOUBLE_EQ(0.0, projection.p(4));
+    EXPECT_DOUBLE_EQ(283.0, projection.p(5));
+    EXPECT_DOUBLE_EQ(125.0, projection.p(6));
+    EXPECT_DOUBLE_EQ(2.0, projection.p(7));
+    EXPECT_DOUBLE_EQ(0.0, projection.p(8));
+    EXPECT_DOUBLE_EQ(0.0, projection.p(9));
+    EXPECT_DOUBLE_EQ(1.0, projection.p(10));
+    EXPECT_DOUBLE_EQ(0.0, projection.p(11));
   }
 
   // Clean up
