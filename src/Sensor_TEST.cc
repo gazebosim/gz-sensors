@@ -14,22 +14,22 @@
  * limitations under the License.
  *
 */
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable: 4005)
+  #pragma warning(disable: 4251)
+#endif
+#include <ignition/msgs/performance_sensor_metrics.pb.h>
+#if defined(_MSC_VER)
+  #pragma warning(pop)
+#endif
+
 #include <ignition/sensors/Sensor.hh>
 
 #include <atomic>
 #include <memory>
 
 #include <gtest/gtest.h>
-
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
-#endif
-#include <ignition/msgs/performance_sensor_metrics.pb.h>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 #include <ignition/common/Console.hh>
 #include <ignition/common/Time.hh>
