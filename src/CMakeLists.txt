@@ -177,7 +177,7 @@ foreach(plugin_test ${plugin_test_targets})
   if(TARGET ${plugin_test})
     set(_env_vars)
     list(APPEND _env_vars "IGN_PLUGIN_PATH=$<TARGET_FILE_DIR:${camera_target}>")
-    list(APPEND _env_vars "DYLD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+    list(APPEND _env_vars "DYLD_LIBRARY_PATH=$<TARGET_FILE_DIR:${camera_target}>")
 
     set_tests_properties(${plugin_test} PROPERTIES
       ENVIRONMENT "${_env_vars}")
