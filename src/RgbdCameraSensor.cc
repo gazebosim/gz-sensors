@@ -19,8 +19,8 @@
   #pragma warning(push)
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
-#include <ignition/msgs/image.pb.h>
 #endif
+#include <ignition/msgs/image.pb.h>
 #include <ignition/msgs/pointcloud_packed.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
