@@ -242,11 +242,26 @@
 1. Depend on ign-rendering4
     * [BitBucket pull request 111](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/111)
 
-## Ignition Sensors 3
+## Gazebo Sensors 3
 
-### Ignition Sensors 3.X.X (202X-XX-XX)
+### Gazebo Sensors 3.4.0 (2022-08-16)
 
-### Ignition Sensors 3.3.0 (2021-08-26)
+1. Remove redundant namespace references
+    * [Pull request #258](https://github.com/gazebosim/gz-sensors/pull/258)
+
+1. Ignition -> Gazebo
+    * [Pull request #245](https://github.com/gazebosim/gz-sensors/pull/245)
+
+1. Conform to ros format for header field `frame_id` of sensor msgs
+    * [Pull request #195](https://github.com/gazebosim/gz-sensors/pull/195)
+
+1. Fix compiler warnings (`CMP0072` and copy elision)
+    * [Pull request #188](https://github.com/gazebosim/gz-sensors/pull/188)
+
+1. Require ign-transport >= 8.2
+    * [Pull request #167](https://github.com/gazebosim/gz-sensors/pull/167)
+
+### Gazebo Sensors 3.3.0 (2021-08-26)
 
 1. 👩‍🌾 Print debug messages when sensors advertise topics
     * [Pull request #151](https://github.com/ignitionrobotics/ign-sensors/pull/151)

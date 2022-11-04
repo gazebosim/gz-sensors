@@ -14,15 +14,14 @@
  * limitations under the License.
  *
 */
-
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable: 4005)
+  #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/magnetometer.pb.h>
-#ifdef _WIN32
-#pragma warning(pop)
+#include <ignition/msgs/magnetometer_sensor.pb.h>
+#if defined(_MSC_VER)
+  #pragma warning(pop)
 #endif
 
 #include <ignition/common/Profiler.hh>
@@ -51,14 +50,14 @@ class ignition::sensors::MagnetometerSensorPrivate
 
   /// \brief The latest field reading from the sensor, based on the world
   /// field and the sensor's current pose.
-  public: ignition::math::Vector3d localField;
+  public: math::Vector3d localField;
 
   /// \brief Store world magnetic field vector. We assume it is uniform
   /// everywhere in the world, and that it doesn't change during the simulation.
-  public: ignition::math::Vector3d worldField;
+  public: math::Vector3d worldField;
 
   /// \brief World pose of the magnetometer
-  public: ignition::math::Pose3d worldPose;
+  public: math::Pose3d worldPose;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -105,7 +104,7 @@ bool MagnetometerSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/magnetometer");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::Magnetometer>(
+      this->dataPtr->node.Advertise<msgs::Magnetometer>(
       this->Topic());
 
   if (!this->dataPtr->pub)

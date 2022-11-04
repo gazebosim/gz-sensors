@@ -14,6 +14,15 @@
  * limitations under the License.
  *
 */
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable: 4005)
+  #pragma warning(disable: 4251)
+#endif
+#include <ignition/msgs/logical_camera_image.pb.h>
+#if defined(_MSC_VER)
+  #pragma warning(pop)
+#endif
 
 #include <mutex>
 
@@ -45,7 +54,7 @@ class ignition::sensors::LogicalCameraSensorPrivate
   public: std::mutex mutex;
 
   /// \brief Camera frustum.
-  public: ignition::math::Frustum frustum;
+  public: math::Frustum frustum;
 
   /// \brief Set world pose.
   public: math::Pose3d worldPose;
@@ -54,7 +63,7 @@ class ignition::sensors::LogicalCameraSensorPrivate
   public: std::map<std::string, math::Pose3d> models;
 
   /// \brief Msg containg info on models detected by logical camera
-  ignition::msgs::LogicalCameraImage msg;
+  msgs::LogicalCameraImage msg;
 };
 
 //////////////////////////////////////////////////
@@ -85,7 +94,7 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
     if (!_sdf->HasElement("logical_camera"))
     {
       ignerr << "<sensor><camera> SDF element not found while attempting to "
-        << "load a ignition::sensors::LogicalCameraSensor\n";
+        << "load a LogicalCameraSensor\n";
       return false;
     }
     cameraSdf = _sdf->GetElement("logical_camera");
@@ -106,7 +115,7 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
     this->SetTopic("/logical_camera");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::LogicalCameraImage>(
+      this->dataPtr->node.Advertise<msgs::LogicalCameraImage>(
       this->Topic());
 
   if (!this->dataPtr->pub)
@@ -185,7 +194,7 @@ double LogicalCameraSensor::Far() const
 }
 
 //////////////////////////////////////////////////
-ignition::math::Angle LogicalCameraSensor::HorizontalFOV() const
+math::Angle LogicalCameraSensor::HorizontalFOV() const
 {
   return this->dataPtr->frustum.FOV();
 }

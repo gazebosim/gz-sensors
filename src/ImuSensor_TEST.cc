@@ -14,19 +14,20 @@
  * limitations under the License.
  *
  */
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable: 4005)
+  #pragma warning(disable: 4251)
+#endif
+#include <ignition/msgs.hh>
+#if defined(_MSC_VER)
+  #pragma warning(pop)
+#endif
+
 #include <gtest/gtest.h>
 #include <sdf/sdf.hh>
 
 #include <ignition/math/Helpers.hh>
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
-#endif
-#include <ignition/msgs.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 #include <ignition/common/Console.hh>
 #include <ignition/sensors/Export.hh>
@@ -188,7 +189,7 @@ class ImuSensor_TEST : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(3);
+    common::Console::SetVerbosity(3);
   }
 };
 
@@ -196,7 +197,7 @@ class ImuSensor_TEST : public ::testing::Test
 TEST(ImuSensor_TEST, CreateImuSensor)
 {
   // Create a sensor manager
-  ignition::sensors::Manager mgr;
+  sensors::Manager mgr;
 
   const std::string name = "TestImu";
   const std::string topic = "/ignition/sensors/test/imu";
@@ -210,7 +211,7 @@ TEST(ImuSensor_TEST, CreateImuSensor)
     accelNoise, gyroNoise, always_on, visualize);
 
   // Create an ImuSensor
-  auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(imuSDF);
+  auto sensor = mgr.CreateSensor<sensors::ImuSensor>(imuSDF);
 
   // Make sure the above dynamic cast worked.
   EXPECT_TRUE(sensor != nullptr);
@@ -220,7 +221,7 @@ TEST(ImuSensor_TEST, CreateImuSensor)
 TEST(ImuSensor_TEST, ComputeNoise)
 {
   // Create a sensor manager
-  ignition::sensors::Manager mgr;
+  sensors::Manager mgr;
 
   sdf::ElementPtr imuSDF, imuSDF_truth;
 
@@ -254,9 +255,9 @@ TEST(ImuSensor_TEST, ComputeNoise)
   }
 
   // Create an ImuSensor
-  auto sensor_truth = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+  auto sensor_truth = mgr.CreateSensor<sensors::ImuSensor>(
       imuSDF_truth);
-  auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(imuSDF);
+  auto sensor = mgr.CreateSensor<sensors::ImuSensor>(imuSDF);
 
   // Make sure the above dynamic cast worked.
   ASSERT_NE(nullptr, sensor);
@@ -316,7 +317,7 @@ TEST(ImuSensor_TEST, ComputeNoise)
 TEST(ImuSensor_TEST, Orientation)
 {
   // Create a sensor manager
-  ignition::sensors::Manager mgr;
+  sensors::Manager mgr;
 
   sdf::ElementPtr imuSDF;
 
@@ -334,7 +335,7 @@ TEST(ImuSensor_TEST, Orientation)
   }
 
   // Create an ImuSensor
-  auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+  auto sensor = mgr.CreateSensor<sensors::ImuSensor>(
       imuSDF);
 
   // Make sure the above dynamic cast worked.
@@ -395,7 +396,7 @@ TEST(ImuSensor_TEST, Orientation)
 TEST(ImuSensor_TEST, OrientationReference)
 {
   // Create a sensor manager
-  ignition::sensors::Manager mgr;
+  sensors::Manager mgr;
 
   sdf::ElementPtr imuSDF;
 
@@ -434,7 +435,7 @@ TEST(ImuSensor_TEST, OrientationReference)
   }
 
   // Create an ImuSensor
-  auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+  auto sensor = mgr.CreateSensor<sensors::ImuSensor>(
       imuSDF);
   sensor->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
     sensors::WorldFrameEnumType::ENU);
@@ -454,7 +455,7 @@ TEST(ImuSensor_TEST, OrientationReference)
 TEST(ImuSensor_TEST, CustomRpyParentFrame)
 {
   // Create a sensor manager
-  ignition::sensors::Manager mgr;
+  sensors::Manager mgr;
 
   sdf::ElementPtr imuSDF;
 
@@ -495,7 +496,7 @@ TEST(ImuSensor_TEST, CustomRpyParentFrame)
   }
 
   // Create an ImuSensor
-  auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+  auto sensor = mgr.CreateSensor<sensors::ImuSensor>(
       imuSDF);
 
   sensor->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
@@ -557,13 +558,13 @@ sdf::ElementPtr sensorWithLocalization(
 TEST(ImuSensor_TEST, NamedFrameOrientationReference)
 {
   // Create a sensor manager
-  ignition::sensors::Manager mgr;
+  sensors::Manager mgr;
 
   math::Quaterniond orientValue;
 
   // A. Localization tag is set to ENU
   // ---------------------------------
-  auto sensorENU = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+  auto sensorENU = mgr.CreateSensor<sensors::ImuSensor>(
       sensorWithLocalization("ENU"));
   ASSERT_NE(nullptr, sensorENU);
 
@@ -628,7 +629,7 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
 
   // B. Localization tag is set to NWU
   // ---------------------------------
-  auto sensorNWU = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+  auto sensorNWU = mgr.CreateSensor<sensors::ImuSensor>(
       sensorWithLocalization("NWU"));
   ASSERT_NE(nullptr, sensorNWU);
 
@@ -693,7 +694,7 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
 
   // C. Localization tag is set to NED
   // ---------------------------------
-  auto sensorNED = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+  auto sensorNED = mgr.CreateSensor<sensors::ImuSensor>(
       sensorWithLocalization("NED"));
   ASSERT_NE(nullptr, sensorNED);
 
@@ -761,7 +762,7 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
 TEST(ImuSensor_TEST, LocalizationTagInvalid)
 {
   // Create a sensor manager
-  ignition::sensors::Manager mgr;
+  sensors::Manager mgr;
 
   sdf::ElementPtr imuSDF;
 
@@ -799,7 +800,7 @@ TEST(ImuSensor_TEST, LocalizationTagInvalid)
   }
 
   // Create an ImuSensor
-  auto sensor = mgr.CreateSensor<ignition::sensors::ImuSensor>(
+  auto sensor = mgr.CreateSensor<sensors::ImuSensor>(
       imuSDF);
   sensor->SetWorldFrameOrientation(math::Quaterniond(0, 0, 0),
     sensors::WorldFrameEnumType::ENU);

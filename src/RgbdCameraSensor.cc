@@ -15,32 +15,23 @@
  *
 */
 
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable: 4005)
+  #pragma warning(disable: 4251)
 #endif
 #include <ignition/msgs/image.pb.h>
 #include <ignition/msgs/pointcloud_packed.pb.h>
-#ifdef _WIN32
-#pragma warning(pop)
+#if defined(_MSC_VER)
+  #pragma warning(pop)
 #endif
 
 #include <ignition/common/Image.hh>
 #include <ignition/common/Profiler.hh>
 #include <ignition/math/Helpers.hh>
 
-// TODO(louise) Remove these pragmas once ign-rendering is disabling the
-// warnings
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4251)
-#endif
 #include <ignition/rendering/Camera.hh>
 #include <ignition/rendering/DepthCamera.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 #include <ignition/transport/Node.hh>
 
@@ -213,7 +204,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the 2d image publisher
   this->dataPtr->imagePub =
-      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+      this->dataPtr->node.Advertise<msgs::Image>(
           this->Topic() + "/image");
   if (!this->dataPtr->imagePub)
   {
@@ -227,7 +218,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the depth image publisher
   this->dataPtr->depthPub =
-      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+      this->dataPtr->node.Advertise<msgs::Image>(
           this->Topic() + "/depth_image");
   if (!this->dataPtr->depthPub)
   {
@@ -241,7 +232,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the point cloud publisher
   this->dataPtr->pointPub =
-      this->dataPtr->node.Advertise<ignition::msgs::PointCloudPacked>(
+      this->dataPtr->node.Advertise<msgs::PointCloudPacked>(
           this->Topic() + "/points");
   if (!this->dataPtr->pointPub)
   {
@@ -408,7 +399,7 @@ bool RgbdCameraSensor::CreateCameras()
 }
 
 /////////////////////////////////////////////////
-void RgbdCameraSensor::SetScene(ignition::rendering::ScenePtr _scene)
+void RgbdCameraSensor::SetScene(rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
@@ -485,7 +476,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // create and publish the depthmessage
   if (this->dataPtr->depthPub.HasConnections())
   {
-    ignition::msgs::Image msg;
+    msgs::Image msg;
     msg.set_width(width);
     msg.set_height(height);
     msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
@@ -509,12 +500,12 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
         if (this->dataPtr->hasDepthFarClip &&
             (this->dataPtr->depthBuffer[i] > this->dataPtr->depthFarClip))
         {
-          this->dataPtr->depthBuffer[i] = ignition::math::INF_D;
+          this->dataPtr->depthBuffer[i] = math::INF_D;
         }
         if (this->dataPtr->hasDepthNearClip &&
             (this->dataPtr->depthBuffer[i] < this->dataPtr->depthNearClip))
         {
-          this->dataPtr->depthBuffer[i] = -ignition::math::INF_D;
+          this->dataPtr->depthBuffer[i] = -math::INF_D;
         }
       }
     }
@@ -543,9 +534,9 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     // publish point cloud msg
     if (this->dataPtr->pointPub.HasConnections())
     {
+      // Set the time stamp
       *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
         msgs::Convert(_now);
-      // Set the time stamp
       this->dataPtr->pointMsg.set_is_dense(true);
 
       if ((this->dataPtr->hasDepthNearClip || this->dataPtr->hasDepthFarClip)
@@ -597,7 +588,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 
       unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
-      ignition::msgs::Image msg;
+      msgs::Image msg;
       msg.set_width(width);
       msg.set_height(height);
       msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
