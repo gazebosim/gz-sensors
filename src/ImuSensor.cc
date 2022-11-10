@@ -14,14 +14,14 @@
  * limitations under the License.
  *
 */
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable: 4005)
+  #pragma warning(disable: 4251)
 #endif
 #include <ignition/msgs/imu.pb.h>
-#ifdef _WIN32
-#pragma warning(pop)
+#if defined(_MSC_VER)
+  #pragma warning(pop)
 #endif
 
 #include <ignition/common/Profiler.hh>
@@ -48,31 +48,31 @@ class ignition::sensors::ImuSensorPrivate
   public: bool initialized = false;
 
   /// \brief Noise free linear acceleration
-  public: ignition::math::Vector3d linearAcc;
+  public: math::Vector3d linearAcc;
 
   /// \brief Noise free angular velocity.
-  public: ignition::math::Vector3d angularVel;
+  public: math::Vector3d angularVel;
 
   /// \brief transform to Imu orientation reference frame.
-  public: ignition::math::Quaterniond orientationReference;
+  public: math::Quaterniond orientationReference;
 
   /// \brief transform to Imu frame from Imu reference frame.
-  public: ignition::math::Quaterniond orientation;
+  public: math::Quaterniond orientation;
 
   /// \brief True to publish orientation data.
   public: bool orientationEnabled = true;
 
   /// \brief store gravity vector to be added to the IMU output.
-  public: ignition::math::Vector3d gravity;
+  public: math::Vector3d gravity;
 
   /// \brief World pose of the imu sensor
-  public: ignition::math::Pose3d worldPose;
+  public: math::Pose3d worldPose;
 
   /// \brief Flag for if time has been initialized
   public: bool timeInitialized = false;
 
   /// \brief Orientation of world frame relative to a specified frame
-  public: ignition::math::Quaterniond worldRelativeOrientation;
+  public: math::Quaterniond worldRelativeOrientation;
 
   /// \brief Frame relative-to which the worldRelativeOrientation
   //  is defined
@@ -86,7 +86,7 @@ class ignition::sensors::ImuSensorPrivate
   public: std::string customRpyParentFrame;
 
   /// \brief Quaternion for to store custom_rpy
-  public: ignition::math::Quaterniond customRpyQuaternion;
+  public: math::Quaterniond customRpyQuaternion;
 
   /// \brief Previous update time step.
   public: std::chrono::steady_clock::duration prevStep
@@ -137,7 +137,7 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/imu");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::IMU>(this->Topic());
+      this->dataPtr->node.Advertise<msgs::IMU>(this->Topic());
 
   if (!this->dataPtr->pub)
   {
@@ -182,7 +182,7 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
 
   this->dataPtr->customRpyParentFrame =
       _sdf.ImuSensor()->CustomRpyParentFrame();
-  this->dataPtr->customRpyQuaternion = ignition::math::Quaterniond(
+  this->dataPtr->customRpyQuaternion = math::Quaterniond(
       _sdf.ImuSensor()->CustomRpy());
 
   this->dataPtr->initialized = true;
@@ -337,33 +337,33 @@ void ImuSensor::SetWorldFrameOrientation(
 
   // Table to hold frame transformations
   static const std::map<WorldFrameEnumType,
-    std::map<WorldFrameEnumType, ignition::math::Quaterniond>>
+    std::map<WorldFrameEnumType, math::Quaterniond>>
       transformTable =
     {
       {WorldFrameEnumType::ENU,
         {
-          {WorldFrameEnumType::ENU, ignition::math::Quaterniond(0, 0, 0)},
-          {WorldFrameEnumType::NED, ignition::math::Quaterniond(
+          {WorldFrameEnumType::ENU, math::Quaterniond(0, 0, 0)},
+          {WorldFrameEnumType::NED, math::Quaterniond(
             IGN_PI, 0, IGN_PI/2)},
-          {WorldFrameEnumType::NWU, ignition::math::Quaterniond(
+          {WorldFrameEnumType::NWU, math::Quaterniond(
             0, 0, IGN_PI/2)},
         }
       },
       {WorldFrameEnumType::NED,
         {
-          {WorldFrameEnumType::ENU, ignition::math::Quaterniond(
+          {WorldFrameEnumType::ENU, math::Quaterniond(
             IGN_PI, 0, IGN_PI/2).Inverse()},
-          {WorldFrameEnumType::NED, ignition::math::Quaterniond(0, 0, 0)},
-          {WorldFrameEnumType::NWU, ignition::math::Quaterniond(
+          {WorldFrameEnumType::NED, math::Quaterniond(0, 0, 0)},
+          {WorldFrameEnumType::NWU, math::Quaterniond(
             -IGN_PI, 0, 0)},
         }
       },
       {WorldFrameEnumType::NWU,
         {
-          {WorldFrameEnumType::ENU, ignition::math::Quaterniond(
+          {WorldFrameEnumType::ENU, math::Quaterniond(
             0, 0, -IGN_PI/2)},
-          {WorldFrameEnumType::NED, ignition::math::Quaterniond(IGN_PI, 0, 0)},
-          {WorldFrameEnumType::NWU, ignition::math::Quaterniond(0, 0, 0)},
+          {WorldFrameEnumType::NED, math::Quaterniond(IGN_PI, 0, 0)},
+          {WorldFrameEnumType::NWU, math::Quaterniond(0, 0, 0)},
         }
       }
     };

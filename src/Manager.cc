@@ -51,8 +51,8 @@ bool Manager::Init()
 }
 
 //////////////////////////////////////////////////
-ignition::sensors::Sensor *Manager::Sensor(
-    ignition::sensors::SensorId _id)
+Sensor *Manager::Sensor(
+    SensorId _id)
 {
   auto iter = this->dataPtr->sensors.find(_id);
   return iter != this->dataPtr->sensors.end() ? iter->second.get() : nullptr;
@@ -66,7 +66,7 @@ void Manager::AddPluginPaths(const std::string &)
 }
 
 //////////////////////////////////////////////////
-bool Manager::Remove(const ignition::sensors::SensorId _id)
+bool Manager::Remove(const SensorId _id)
 {
   return this->dataPtr->sensors.erase(_id) > 0;
 }
@@ -83,8 +83,8 @@ void Manager::RunOnce(
 }
 
 /////////////////////////////////////////////////
-ignition::sensors::SensorId Manager::AddSensor(
-  std::unique_ptr<ignition::sensors::Sensor> _sensor)
+SensorId Manager::AddSensor(
+  std::unique_ptr<sensors::Sensor> _sensor)
 {
   if (!_sensor)
     return NO_SENSOR;
@@ -94,7 +94,7 @@ ignition::sensors::SensorId Manager::AddSensor(
 }
 
 /////////////////////////////////////////////////
-ignition::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &)
+SensorId Manager::CreateSensor(const sdf::Sensor &)
 {
   ignwarn << "Trying to create sensor without providing sensor type. Ignition"
           << " Sensor doesn't support sensor registration anymore. Use the"
@@ -103,7 +103,7 @@ ignition::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &)
 }
 
 /////////////////////////////////////////////////
-ignition::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr)
+SensorId Manager::CreateSensor(sdf::ElementPtr)
 {
   ignwarn << "Trying to create sensor without providing sensor type. Ignition"
           << " Sensor doesn't support sensor registration anymore. Use the"
