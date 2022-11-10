@@ -279,7 +279,7 @@ void CameraSensorTest::ImageFormatLInt8LInt16(const std::string &_renderEngine)
 }
 
 //////////////////////////////////////////////////
-TEST_P(CameraSensorTest, LInt8ImagesWithBuiltinSDF)
+TEST_P(CameraSensorTest, LInt8LInt16ImagesWithBuiltinSDF)
 {
   gz::common::Console::SetVerbosity(4);
   ImageFormatLInt8LInt16(GetParam());

@@ -22,17 +22,8 @@
 #include <gz/common/Profiler.hh>
 #include <gz/math/Helpers.hh>
 
-// TODO(louise) Remove these pragmas once gz-rendering is disabling the
-// warnings
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4251)
-#endif
 #include <gz/rendering/Camera.hh>
 #include <gz/rendering/DepthCamera.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 #include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
@@ -111,6 +102,9 @@ class gz::sensors::RgbdCameraSensorPrivate
   /// \brief The number of channels (x, y, z, rgba, ...) in the
   /// point cloud.
   public: unsigned int channels = 4;
+
+  /// \brief Frame ID the camera_info message header is expressed.
+  public: std::string opticalFrameId{""};
 
   /// \brief Pointer to an image to be published
   public: gz::rendering::Image image;
@@ -203,7 +197,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the 2d image publisher
   this->dataPtr->imagePub =
-      this->dataPtr->node.Advertise<gz::msgs::Image>(
+      this->dataPtr->node.Advertise<msgs::Image>(
           this->Topic() + "/image");
   if (!this->dataPtr->imagePub)
   {
@@ -217,7 +211,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the depth image publisher
   this->dataPtr->depthPub =
-      this->dataPtr->node.Advertise<gz::msgs::Image>(
+      this->dataPtr->node.Advertise<msgs::Image>(
           this->Topic() + "/depth_image");
   if (!this->dataPtr->depthPub)
   {
@@ -231,7 +225,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the point cloud publisher
   this->dataPtr->pointPub =
-      this->dataPtr->node.Advertise<gz::msgs::PointCloudPacked>(
+      this->dataPtr->node.Advertise<msgs::PointCloudPacked>(
           this->Topic() + "/points");
   if (!this->dataPtr->pointPub)
   {
@@ -251,7 +245,7 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
   // the xyz and rgb fields to be aligned to memory boundaries. This is need
   // by ROS1: https://github.com/ros/common_msgs/pull/77. Ideally, memory
   // alignment should be configured.
-  msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->Name(), true,
+  msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->FrameId(), true,
       {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
        {"rgb", msgs::PointCloudPacked::Field::FLOAT32}});
 
@@ -291,6 +285,20 @@ bool RgbdCameraSensor::CreateCameras()
   this->dataPtr->depthCamera->SetImageHeight(height);
   this->dataPtr->depthCamera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->depthCamera->SetFarClipPlane(cameraSdf->FarClip());
+
+  // Note: while Gazebo interprets the camera frame to be looking towards +X,
+  // other tools, such as ROS, may interpret this frame as looking towards +Z.
+  // To make this configurable the user has the option to set an optical frame.
+  // If the user has set <optical_frame_id> in the cameraSdf use it,
+  // otherwise fall back to the sensor frame.
+  if (cameraSdf->OpticalFrameId().empty())
+  {
+   this->dataPtr->opticalFrameId = this->FrameId();
+  }
+  else
+  {
+   this->dataPtr->opticalFrameId = cameraSdf->OpticalFrameId();
+  }
 
   // Depth camera clip params are new and only override the camera clip
   // params if specified.
@@ -384,7 +392,7 @@ bool RgbdCameraSensor::CreateCameras()
 }
 
 /////////////////////////////////////////////////
-void RgbdCameraSensor::SetScene(gz::rendering::ScenePtr _scene)
+void RgbdCameraSensor::SetScene(rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
@@ -461,7 +469,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // create and publish the depthmessage
   if (this->dataPtr->depthPub.HasConnections())
   {
-    gz::msgs::Image msg;
+    msgs::Image msg;
     msg.set_width(width);
     msg.set_height(height);
     msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
@@ -470,7 +478,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
     auto frame = msg.mutable_header()->add_data();
     frame->set_key("frame_id");
-    frame->add_value(this->FrameId());
+    frame->add_value(this->dataPtr->opticalFrameId);
 
     std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
@@ -485,12 +493,12 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
         if (this->dataPtr->hasDepthFarClip &&
             (this->dataPtr->depthBuffer[i] > this->dataPtr->depthFarClip))
         {
-          this->dataPtr->depthBuffer[i] = gz::math::INF_D;
+          this->dataPtr->depthBuffer[i] = math::INF_D;
         }
         if (this->dataPtr->hasDepthNearClip &&
             (this->dataPtr->depthBuffer[i] < this->dataPtr->depthNearClip))
         {
-          this->dataPtr->depthBuffer[i] = -gz::math::INF_D;
+          this->dataPtr->depthBuffer[i] = -math::INF_D;
         }
       }
     }
@@ -519,9 +527,9 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     // publish point cloud msg
     if (this->dataPtr->pointPub.HasConnections())
     {
+      // Set the time stamp
       *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
         msgs::Convert(_now);
-      // Set the time stamp
       this->dataPtr->pointMsg.set_is_dense(true);
 
       if ((this->dataPtr->hasDepthNearClip || this->dataPtr->hasDepthFarClip)
@@ -573,7 +581,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 
       unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
-      gz::msgs::Image msg;
+      msgs::Image msg;
       msg.set_width(width);
       msg.set_height(height);
       msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
@@ -582,7 +590,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
       auto frame = msg.mutable_header()->add_data();
       frame->set_key("frame_id");
-      frame->add_value(this->FrameId());
+      frame->add_value(this->dataPtr->opticalFrameId);
       msg.set_data(data, rendering::PixelUtil::MemorySize(rendering::PF_R8G8B8,
         width, height));
 

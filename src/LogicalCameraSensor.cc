@@ -46,7 +46,7 @@ class gz::sensors::LogicalCameraSensorPrivate
   public: std::mutex mutex;
 
   /// \brief Camera frustum.
-  public: gz::math::Frustum frustum;
+  public: math::Frustum frustum;
 
   /// \brief Set world pose.
   public: math::Pose3d worldPose;
@@ -55,7 +55,7 @@ class gz::sensors::LogicalCameraSensorPrivate
   public: std::map<std::string, math::Pose3d> models;
 
   /// \brief Msg containg info on models detected by logical camera
-  gz::msgs::LogicalCameraImage msg;
+  msgs::LogicalCameraImage msg;
 };
 
 //////////////////////////////////////////////////
@@ -86,7 +86,7 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
     if (!_sdf->HasElement("logical_camera"))
     {
       gzerr << "<sensor><camera> SDF element not found while attempting to "
-        << "load a gz::sensors::LogicalCameraSensor\n";
+        << "load a LogicalCameraSensor\n";
       return false;
     }
     cameraSdf = _sdf->GetElement("logical_camera");
@@ -107,7 +107,7 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
     this->SetTopic("/logical_camera");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<gz::msgs::LogicalCameraImage>(
+      this->dataPtr->node.Advertise<msgs::LogicalCameraImage>(
       this->Topic());
 
   if (!this->dataPtr->pub)
@@ -186,7 +186,7 @@ double LogicalCameraSensor::Far() const
 }
 
 //////////////////////////////////////////////////
-gz::math::Angle LogicalCameraSensor::HorizontalFOV() const
+math::Angle LogicalCameraSensor::HorizontalFOV() const
 {
   return this->dataPtr->frustum.FOV();
 }

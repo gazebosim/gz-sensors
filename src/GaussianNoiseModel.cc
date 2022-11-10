@@ -87,12 +87,12 @@ void GaussianNoiseModel::Load(const sdf::Noise &_sdf)
   double biasStdDev = 0;
   biasMean = _sdf.BiasMean();
   biasStdDev = _sdf.BiasStdDev();
-  this->dataPtr->bias = gz::math::Rand::DblNormal(biasMean, biasStdDev);
+  this->dataPtr->bias = math::Rand::DblNormal(biasMean, biasStdDev);
 
   // With equal probability, we pick a negative bias (by convention,
   // rateBiasMean should be positive, though it would work fine if
   // negative).
-  if (gz::math::Rand::DblUniform() < 0.5)
+  if (math::Rand::DblUniform() < 0.5)
     this->dataPtr->bias = -this->dataPtr->bias;
 
   this->Print(out);
@@ -100,7 +100,7 @@ void GaussianNoiseModel::Load(const sdf::Noise &_sdf)
   this->dataPtr->precision = _sdf.Precision();
   if (this->dataPtr->precision < 0)
     gzerr << "Noise precision cannot be less than 0" << std::endl;
-  else if (!gz::math::equal(this->dataPtr->precision, 0.0, 1e-6))
+  else if (!math::equal(this->dataPtr->precision, 0.0, 1e-6))
     this->dataPtr->quantized = true;
 }
 
@@ -108,7 +108,7 @@ void GaussianNoiseModel::Load(const sdf::Noise &_sdf)
 double GaussianNoiseModel::ApplyImpl(double _in, double _dt)
 {
   // Generate independent (uncorrelated) Gaussian noise to each input value.
-  double whiteNoise = gz::math::Rand::DblNormal(
+  double whiteNoise = math::Rand::DblNormal(
       this->dataPtr->mean, this->dataPtr->stdDev);
 
   // Generate varying (correlated) bias to each input value.
@@ -132,7 +132,7 @@ double GaussianNoiseModel::ApplyImpl(double _in, double _dt)
         tau / 2 * expm1(-2 * _dt / tau));
     double phi_d = exp(-_dt / tau);
     this->dataPtr->bias = phi_d * this->dataPtr->bias +
-      gz::math::Rand::DblNormal(0, sigma_b_d);
+      math::Rand::DblNormal(0, sigma_b_d);
   }
 
   double output = _in + this->dataPtr->bias + whiteNoise;
@@ -140,7 +140,7 @@ double GaussianNoiseModel::ApplyImpl(double _in, double _dt)
   if (this->dataPtr->quantized)
   {
     // Apply this->dataPtr->precision
-    if (!gz::math::equal(this->dataPtr->precision, 0.0, 1e-6))
+    if (!math::equal(this->dataPtr->precision, 0.0, 1e-6))
     {
       output = std::round(output / this->dataPtr->precision) *
         this->dataPtr->precision;
