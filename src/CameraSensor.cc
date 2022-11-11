@@ -51,7 +51,7 @@ class gz::sensors::CameraSensorPrivate
 {
   /// \brief Callback for triggered subscription
   /// \param[in] _msg Boolean message
-  public: void OnTrigger(const gz::msgs::Boolean &_msg);
+  public: void OnTrigger(const msgs::Boolean &_msg);
 
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
@@ -126,6 +126,9 @@ class gz::sensors::CameraSensorPrivate
 
   /// \brief Camera information message.
   public: msgs::CameraInfo infoMsg;
+
+  /// \brief The frame this camera uses in its camera_info topic.
+  public: std::string opticalFrameId{""};
 
   /// \brief Topic for info message.
   public: std::string infoTopic{""};
@@ -208,13 +211,13 @@ bool CameraSensor::CreateCamera()
   switch (pixelFormat)
   {
     case sdf::PixelFormatType::RGB_INT8:
-      this->dataPtr->camera->SetImageFormat(gz::rendering::PF_R8G8B8);
+      this->dataPtr->camera->SetImageFormat(rendering::PF_R8G8B8);
       break;
     case sdf::PixelFormatType::L_INT8:
-      this->dataPtr->camera->SetImageFormat(gz::rendering::PF_L8);
+      this->dataPtr->camera->SetImageFormat(rendering::PF_L8);
       break;
     case sdf::PixelFormatType::L_INT16:
-      this->dataPtr->camera->SetImageFormat(gz::rendering::PF_L16);
+      this->dataPtr->camera->SetImageFormat(rendering::PF_L16);
       break;
     default:
       gzerr << "Unsupported pixel format ["
@@ -455,16 +458,16 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 
   switch (this->dataPtr->camera->ImageFormat())
   {
-    case gz::rendering::PF_R8G8B8:
-      format = gz::common::Image::RGB_INT8;
+    case rendering::PF_R8G8B8:
+      format = common::Image::RGB_INT8;
       msgsPixelFormat = msgs::PixelFormatType::RGB_INT8;
       break;
-    case gz::rendering::PF_L8:
-      format = gz::common::Image::L_INT8;
+    case rendering::PF_L8:
+      format = common::Image::L_INT8;
       msgsPixelFormat = msgs::PixelFormatType::L_INT8;
       break;
-    case gz::rendering::PF_L16:
-      format = gz::common::Image::L_INT16;
+    case rendering::PF_L16:
+      format = common::Image::L_INT16;
       msgsPixelFormat = msgs::PixelFormatType::L_INT16;
       break;
     default:
@@ -474,7 +477,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   }
 
   // create message
-  gz::msgs::Image msg;
+  msgs::Image msg;
   {
     GZ_PROFILE("CameraSensor::Update Message");
     msg.set_width(width);
@@ -485,7 +488,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
     auto frame = msg.mutable_header()->add_data();
     frame->set_key("frame_id");
-    frame->add_value(this->FrameId());
+    frame->add_value(this->dataPtr->opticalFrameId);
     msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
   }
 
@@ -665,19 +668,18 @@ void CameraSensor::PopulateInfo(const sdf::Camera *_cameraSdf)
   intrinsics->add_k(0.0);
   intrinsics->add_k(1.0);
 
-  // TODO(anyone) Get tx and ty from SDF
   msgs::CameraInfo::Projection *proj =
     this->dataPtr->infoMsg.mutable_projection();
 
-  proj->add_p(_cameraSdf->LensIntrinsicsFx());
+  proj->add_p(_cameraSdf->LensProjectionFx());
   proj->add_p(0.0);
-  proj->add_p(_cameraSdf->LensIntrinsicsCx());
-  proj->add_p(-_cameraSdf->LensIntrinsicsFx() * this->dataPtr->baseline);
+  proj->add_p(_cameraSdf->LensProjectionCx());
+  proj->add_p(_cameraSdf->LensProjectionTx());
 
   proj->add_p(0.0);
-  proj->add_p(_cameraSdf->LensIntrinsicsFy());
-  proj->add_p(_cameraSdf->LensIntrinsicsCy());
-  proj->add_p(0.0);
+  proj->add_p(_cameraSdf->LensProjectionFy());
+  proj->add_p(_cameraSdf->LensProjectionCy());
+  proj->add_p(_cameraSdf->LensProjectionTy());
 
   proj->add_p(0.0);
   proj->add_p(0.0);
@@ -699,11 +701,20 @@ void CameraSensor::PopulateInfo(const sdf::Camera *_cameraSdf)
 
   // Note: while Gazebo interprets the camera frame to be looking towards +X,
   // other tools, such as ROS, may interpret this frame as looking towards +Z.
-  // TODO(anyone) Expose the `frame_id` as an SDF parameter so downstream users
-  // can populate it with arbitrary frames.
+  // To make this configurable the user has the option to set an optical frame.
+  // If the user has set <optical_frame_id> in the cameraSdf use it,
+  // otherwise fall back to the sensor frame.
+  if (_cameraSdf->OpticalFrameId().empty())
+  {
+   this->dataPtr->opticalFrameId = this->FrameId();
+  }
+  else
+  {
+   this->dataPtr->opticalFrameId = _cameraSdf->OpticalFrameId();
+  }
   auto infoFrame = this->dataPtr->infoMsg.mutable_header()->add_data();
   infoFrame->set_key("frame_id");
-  infoFrame->add_value(this->FrameId());
+  infoFrame->add_value(this->dataPtr->opticalFrameId);
 
   this->dataPtr->infoMsg.set_width(width);
   this->dataPtr->infoMsg.set_height(height);

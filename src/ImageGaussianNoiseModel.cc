@@ -22,19 +22,10 @@
 
 #include <gz/common/Console.hh>
 
-// TODO(louise) Remove these pragmas once gz-rendering is disabling the
-// warnings
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4251)
-#endif
 #include <gz/rendering/GaussianNoisePass.hh>
 #include <gz/rendering/RenderPass.hh>
 #include <gz/rendering/RenderEngine.hh>
 #include <gz/rendering/RenderPassSystem.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 #include "gz/sensors/ImageGaussianNoiseModel.hh"
 

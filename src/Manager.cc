@@ -83,8 +83,8 @@ void Manager::RunOnce(
 }
 
 /////////////////////////////////////////////////
-gz::sensors::SensorId Manager::AddSensor(
-  std::unique_ptr<gz::sensors::Sensor> _sensor)
+SensorId Manager::AddSensor(
+  std::unique_ptr<sensors::Sensor> _sensor)
 {
   if (!_sensor)
     return NO_SENSOR;

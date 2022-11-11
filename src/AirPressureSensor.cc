@@ -15,14 +15,14 @@
  *
 */
 
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable: 4005)
+  #pragma warning(disable: 4251)
 #endif
 #include <gz/msgs/fluid_pressure.pb.h>
-#ifdef _WIN32
-#pragma warning(pop)
+#if defined(_MSC_VER)
+  #pragma warning(pop)
 #endif
 #include <gz/msgs/Utility.hh>
 
@@ -114,7 +114,7 @@ bool AirPressureSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/air_pressure");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<gz::msgs::FluidPressure>(
+      this->dataPtr->node.Advertise<msgs::FluidPressure>(
       this->Topic());
 
   if (!this->dataPtr->pub)
@@ -194,7 +194,7 @@ bool AirPressureSensor::Update(
         NoiseType::GAUSSIAN)
     {
      GaussianNoiseModelPtr gaussian =
-       std::dynamic_pointer_cast<sensors::GaussianNoiseModel>(
+       std::dynamic_pointer_cast<GaussianNoiseModel>(
            this->dataPtr->noises[AIR_PRESSURE_NOISE_PASCALS]);
       msg.set_variance(sqrt(gaussian->StdDev()));
     }
