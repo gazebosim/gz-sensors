@@ -21,9 +21,9 @@ using namespace gz;
 using namespace sensors;
 
 // Initialize enum iterator, and string converter
-GZ_ENUM(sensorNoiseIface, sensors::SensorNoiseType,
-    sensors::SENSOR_NOISE_TYPE_BEGIN,
-    sensors::SENSOR_NOISE_TYPE_END,
+GZ_ENUM(sensorNoiseIface, SensorNoiseType,
+    SENSOR_NOISE_TYPE_BEGIN,
+    SENSOR_NOISE_TYPE_END,
     "NO_NOISE",
     "CAMERA_NOISE",
     "SENSOR_NOISE_TYPE_END")

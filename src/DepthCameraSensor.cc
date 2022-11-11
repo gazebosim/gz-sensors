@@ -173,19 +173,19 @@ bool DepthCameraSensorPrivate::ConvertDepthToImage(
 //////////////////////////////////////////////////
 bool DepthCameraSensorPrivate::SaveImage(const float *_data,
     unsigned int _width, unsigned int _height,
-    gz::common::Image::PixelFormatType /*_format*/)
+    common::Image::PixelFormatType /*_format*/)
 {
   // Attempt to create the directory if it doesn't exist
-  if (!gz::common::isDirectory(this->saveImagePath))
+  if (!common::isDirectory(this->saveImagePath))
   {
-    if (!gz::common::createDirectories(this->saveImagePath))
+    if (!common::createDirectories(this->saveImagePath))
       return false;
   }
 
   if (_width == 0 || _height == 0)
     return false;
 
-  gz::common::Image localImage;
+  common::Image localImage;
 
   unsigned int depthSamples = _width * _height;
   unsigned int depthBufferSize = depthSamples * 3;
@@ -201,7 +201,7 @@ bool DepthCameraSensorPrivate::SaveImage(const float *_data,
   localImage.SetFromData(imgDepthBuffer, _width, _height,
       common::Image::RGB_INT8);
   localImage.SavePNG(
-      gz::common::joinPaths(this->saveImagePath, filename));
+      common::joinPaths(this->saveImagePath, filename));
 
   delete[] imgDepthBuffer;
   return true;
@@ -270,7 +270,7 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/camera/depth");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<gz::msgs::Image>(
+      this->dataPtr->node.Advertise<msgs::Image>(
           this->Topic());
   if (!this->dataPtr->pub)
   {
@@ -287,7 +287,7 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the point cloud publisher
   this->dataPtr->pointPub =
-      this->dataPtr->node.Advertise<gz::msgs::PointCloudPacked>(
+      this->dataPtr->node.Advertise<msgs::PointCloudPacked>(
           this->Topic() + "/points");
   if (!this->dataPtr->pointPub)
   {
@@ -442,8 +442,8 @@ void DepthCameraSensor::OnNewDepthFrame(const float *_scan,
   unsigned int depthSamples = _width * _height;
   unsigned int depthBufferSize = depthSamples * sizeof(float);
 
-  gz::common::Image::PixelFormatType format =
-    gz::common::Image::ConvertPixelFormat(_format);
+  common::Image::PixelFormatType format =
+    common::Image::ConvertPixelFormat(_format);
 
   if (!this->dataPtr->depthBuffer)
     this->dataPtr->depthBuffer = new float[depthSamples];
@@ -477,20 +477,20 @@ void DepthCameraSensor::OnNewRgbPointCloud(const float *_scan,
 }
 
 /////////////////////////////////////////////////
-gz::rendering::DepthCameraPtr DepthCameraSensor::DepthCamera() const
+rendering::DepthCameraPtr DepthCameraSensor::DepthCamera() const
 {
   return this->dataPtr->depthCamera;
 }
 
 /////////////////////////////////////////////////
-gz::common::ConnectionPtr DepthCameraSensor::ConnectImageCallback(
-    std::function<void(const gz::msgs::Image &)> _callback)
+common::ConnectionPtr DepthCameraSensor::ConnectImageCallback(
+    std::function<void(const msgs::Image &)> _callback)
 {
   return this->dataPtr->imageEvent.Connect(_callback);
 }
 
 /////////////////////////////////////////////////
-void DepthCameraSensor::SetScene(gz::rendering::ScenePtr _scene)
+void DepthCameraSensor::SetScene(rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
@@ -531,7 +531,7 @@ bool DepthCameraSensor::Update(
   auto msgsFormat = msgs::PixelFormatType::R_FLOAT32;
 
   // create message
-  gz::msgs::Image msg;
+  msgs::Image msg;
   msg.set_width(width);
   msg.set_height(height);
   msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
