@@ -48,7 +48,7 @@ sdf::ElementPtr cameraToBadSdf()
 
 sdf::ElementPtr CameraToSdf(const std::string &_type,
     const std::string &_name, double _updateRate,
-    const std::string &_topic, const std::string &_camera_info_topic,
+    const std::string &_topic, const std::string &_cameraInfoTopic,
     bool _alwaysOn, bool _visualize)
 {
   std::ostringstream stream;
@@ -59,7 +59,7 @@ sdf::ElementPtr CameraToSdf(const std::string &_type,
     << "  <link name='link1'>"
     << "    <sensor name='" << _name << "' type='" << _type << "'>"
     << "      <topic>" << _topic << "</topic>"
-    << "      <topic>" << _camera_info_topic << "</topic>"
+    << "      <topic>" << _cameraInfoTopic << "</topic>"
     << "      <update_rate>"<< _updateRate <<"</update_rate>"
     << "      <always_on>"<< _alwaysOn <<"</always_on>"
     << "      <visualize>" << _visualize << "</visualize>"
@@ -192,8 +192,8 @@ TEST(Camera_TEST, Topic)
   // Default topic
   {
     const std::string topic;
-    const std::string camera_info_topic;
-    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, camera_info_topic,
+    const std::string cameraInfoTopic;
+    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, cameraInfoTopic,
       alwaysOn, visualize);
 
     auto sensorId = mgr.CreateSensor(cameraSdf);
