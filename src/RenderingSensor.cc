@@ -17,16 +17,7 @@
 
 #include <gz/common/Profiler.hh>
 
-// TODO(louise) Remove these pragmas once ign-rendering is disabling the
-// warnings
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4251)
-#endif
 #include <gz/rendering/Camera.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 #include "gz/sensors/RenderingSensor.hh"
 
@@ -112,4 +103,3 @@ void RenderingSensor::Render()
     }
   }
 }
-

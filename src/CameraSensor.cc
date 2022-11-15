@@ -14,14 +14,14 @@
  * limitations under the License.
  *
 */
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable: 4005)
+  #pragma warning(disable: 4251)
 #endif
 #include <gz/msgs/camera_info.pb.h>
-#ifdef _WIN32
-#pragma warning(pop)
+#if defined(_MSC_VER)
+  #pragma warning(pop)
 #endif
 
 #include <mutex>
@@ -568,19 +568,18 @@ void CameraSensor::PopulateInfo(const sdf::Camera *_cameraSdf)
   intrinsics->add_k(0.0);
   intrinsics->add_k(1.0);
 
-  // TODO(anyone) Get tx and ty from SDF
   msgs::CameraInfo::Projection *proj =
     this->dataPtr->infoMsg.mutable_projection();
 
-  proj->add_p(_cameraSdf->LensIntrinsicsFx());
+  proj->add_p(_cameraSdf->LensProjectionFx());
   proj->add_p(0.0);
-  proj->add_p(_cameraSdf->LensIntrinsicsCx());
-  proj->add_p(-_cameraSdf->LensIntrinsicsFx() * this->dataPtr->baseline);
+  proj->add_p(_cameraSdf->LensProjectionCx());
+  proj->add_p(_cameraSdf->LensProjectionTx());
 
   proj->add_p(0.0);
-  proj->add_p(_cameraSdf->LensIntrinsicsFy());
-  proj->add_p(_cameraSdf->LensIntrinsicsCy());
-  proj->add_p(0.0);
+  proj->add_p(_cameraSdf->LensProjectionFy());
+  proj->add_p(_cameraSdf->LensProjectionCy());
+  proj->add_p(_cameraSdf->LensProjectionTy());
 
   proj->add_p(0.0);
   proj->add_p(0.0);

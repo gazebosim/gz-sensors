@@ -14,20 +14,20 @@
  * limitations under the License.
  *
  */
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable: 4005)
+  #pragma warning(disable: 4251)
+#endif
+#include <gz/msgs.hh>
+#if defined(_MSC_VER)
+  #pragma warning(pop)
+#endif
+
 #include <gtest/gtest.h>
 #include <sdf/sdf.hh>
 
 #include <gz/math/Helpers.hh>
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
-#endif
-#include <ignition/msgs.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
-
 #include <gz/sensors/Export.hh>
 #include <gz/sensors/ImuSensor.hh>
 #include <gz/sensors/Manager.hh>

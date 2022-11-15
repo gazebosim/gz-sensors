@@ -14,6 +14,16 @@
  * limitations under the License.
  *
 */
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable: 4005)
+  #pragma warning(disable: 4251)
+#endif
+#include <gz/msgs/laserscan.pb.h>
+#if defined(_MSC_VER)
+  #pragma warning(pop)
+#endif
+
 #include <gz/common/Console.hh>
 #include <gz/common/Event.hh>
 #include <gz/common/Profiler.hh>

@@ -14,15 +14,14 @@
  * limitations under the License.
  *
 */
-
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable: 4005)
+  #pragma warning(disable: 4251)
 #endif
-#include <gz/msgs/magnetometer.pb.h>
-#ifdef _WIN32
-#pragma warning(pop)
+#include <gz/msgs/magnetometer_sensor.pb.h>
+#if defined(_MSC_VER)
+  #pragma warning(pop)
 #endif
 
 #include <gz/common/Profiler.hh>

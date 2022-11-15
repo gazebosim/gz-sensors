@@ -19,8 +19,11 @@
 
 #include <numeric>
 
-#include <gz/common/Console.hh>
-#include <gz/math/Rand.hh>
+#include <ignition/common/Console.hh>
+#include <ignition/math/Rand.hh>
+
+#include <sdf/Noise.hh>
+
 
 #include "gz/sensors/Noise.hh"
 #include "gz/sensors/GaussianNoiseModel.hh"
@@ -412,6 +415,31 @@ TEST(NoiseTest, OnApplyNoise)
     double value = noise->Apply(i);
     EXPECT_DOUBLE_EQ(value, i*2);
   }
+}
+
+/////////////////////////////////////////////////
+TEST(NoiseTest, NoiseFailures)
+{
+  sensors::Noise noise(sensors::NoiseType::CUSTOM);
+
+  EXPECT_DOUBLE_EQ(9, noise.Apply(9, 0.1));
+  EXPECT_DOUBLE_EQ(9, noise.ApplyImpl(9, 0.1));
+  std::ostringstream out;
+  noise.Print(out);
+  EXPECT_EQ("Noise with type[1] does not have an overloaded Print function. "
+   "No more information is available.", out.str());
+
+  sensors::Noise noiseGaussian(sensors::NoiseType::GAUSSIAN);
+
+  sensors::NoisePtr noiseFactory =
+     sensors::NoiseFactory::NewNoiseModel(
+     NoiseSdf("gaussian", 0, 0, 0, 0, 0), "camera");
+
+  sdf::Noise sdfNoise;
+  sdfNoise.SetType(static_cast<sdf::NoiseType>(99));
+  sensors::NoisePtr noiseFactory2 =
+     sensors::NoiseFactory::NewNoiseModel(
+     sdfNoise, "camera");
 }
 
 /////////////////////////////////////////////////

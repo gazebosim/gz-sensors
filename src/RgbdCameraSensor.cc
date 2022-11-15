@@ -15,32 +15,23 @@
  *
 */
 
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable: 4005)
+  #pragma warning(disable: 4251)
 #endif
 #include <gz/msgs/image.pb.h>
 #include <gz/msgs/pointcloud_packed.pb.h>
-#ifdef _WIN32
-#pragma warning(pop)
+#if defined(_MSC_VER)
+  #pragma warning(pop)
 #endif
 
 #include <gz/common/Image.hh>
 #include <gz/common/Profiler.hh>
 #include <gz/math/Helpers.hh>
 
-// TODO(louise) Remove these pragmas once ign-rendering is disabling the
-// warnings
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4251)
-#endif
 #include <gz/rendering/Camera.hh>
 #include <gz/rendering/DepthCamera.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 #include <gz/transport/Node.hh>
 

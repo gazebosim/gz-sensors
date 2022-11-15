@@ -14,20 +14,20 @@
  * limitations under the License.
  *
 */
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable: 4005)
+  #pragma warning(disable: 4251)
+#endif
+#include <gz/msgs.hh>
+#if defined(_MSC_VER)
+  #pragma warning(pop)
+#endif
 #include <gtest/gtest.h>
 #include <sdf/sdf.hh>
 
 #include <gz/math/Angle.hh>
 #include <gz/math/Helpers.hh>
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
-#endif
-#include <ignition/msgs.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 #include <gz/sensors/Export.hh>
 #include <gz/sensors/Manager.hh>
@@ -140,6 +140,8 @@ TEST(Lidar_TEST, CreateLaser)
   gz::sensors::Lidar *sensor = mgr.CreateSensor<gz::sensors::Lidar>(
       lidarSDF);
 
+  EXPECT_FALSE(sensor->CreateLidar());
+
   // Make sure the above dynamic cast worked.
   ASSERT_NE(nullptr, sensor);
 
@@ -160,6 +162,70 @@ TEST(Lidar_TEST, CreateLaser)
   EXPECT_DOUBLE_EQ(sensor->VerticalAngleMax().Radian(), 0.0);
 
   EXPECT_TRUE(sensor->IsActive());
+}
+
+TEST(Lidar_TEST, CreateLaserFailures)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.SetType(sdf::SensorType::CAMERA);
+  sdf::Lidar sdfLidarSensor;
+
+  gz::sensors::Lidar sensor;
+  EXPECT_FALSE(sensor.Load(sdfSensor));
+
+  EXPECT_DOUBLE_EQ(0.0, sensor.Range(-1));
+  EXPECT_DOUBLE_EQ(0.0, sensor.Range(0));
+
+  EXPECT_FALSE(sensor.IsHorizontal());
+  EXPECT_DOUBLE_EQ(640, sensor.RangeCountRatio());
+  sensor.SetAngleMax(0.707);
+  sensor.SetAngleMin(-0.707);
+  EXPECT_DOUBLE_EQ(-0.707, sensor.AngleMin().Radian());
+  EXPECT_DOUBLE_EQ(0.707, sensor.AngleMax().Radian());
+
+  sensor.SetVerticalAngleMax(0.707);
+  sensor.SetVerticalAngleMin(-0.707);
+  EXPECT_DOUBLE_EQ(-0.707, sensor.VerticalAngleMin().Radian());
+  EXPECT_DOUBLE_EQ(0.707, sensor.VerticalAngleMax().Radian());
+
+  sensor.ApplyNoise();
+
+  sdfSensor.SetType(sdf::SensorType::LIDAR);
+  sdfSensor.SetLidarSensor(sdfLidarSensor);
+
+  gz::sensors::Lidar sensor2;
+
+  EXPECT_TRUE(sensor2.Load(sdfSensor));
+  EXPECT_FALSE(sensor2.Load(sdfSensor));
+
+  gz::sensors::Lidar sensor3;
+
+  sdfLidarSensor.SetHorizontalScanSamples(0);
+  sdfSensor.SetLidarSensor(sdfLidarSensor);
+  EXPECT_TRUE(sensor3.Load(sdfSensor));
+
+  sdfLidarSensor.SetHorizontalScanSamples(20);
+
+  sdf::Noise noise;
+  noise.SetType(sdf::NoiseType::GAUSSIAN);
+  noise.SetMean(1.2);
+  noise.SetStdDev(2.3);
+  noise.SetBiasMean(4.5);
+  noise.SetBiasStdDev(6.7);
+  noise.SetPrecision(8.9);
+
+  sdfLidarSensor.SetLidarNoise(noise);
+  sdfSensor.SetLidarSensor(sdfLidarSensor);
+  ignition::sensors::Lidar sensor4;
+  EXPECT_TRUE(sensor4.Load(sdfSensor));
+
+  noise.SetType(sdf::NoiseType::GAUSSIAN_QUANTIZED);
+  sdfLidarSensor.SetLidarNoise(noise);
+  sdfSensor.SetLidarSensor(sdfLidarSensor);
+  ignition::sensors::Lidar sensor5;
+  EXPECT_TRUE(sensor5.Load(sdfSensor));
+
+  sensor.Update(ignition::common::Time(0.1));
 }
 
 //////////////////////////////////////////////////
