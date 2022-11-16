@@ -257,7 +257,7 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
   if (this->Topic().empty())
     this->SetTopic("/camera");
 
-  if (!_sdf.CameraSensor()->CameraInfoTopic().empty())
+  if (_sdf.CameraSensor()->CameraInfoTopic() != "__default__")
   {
     this->dataPtr->infoTopic = _sdf.CameraSensor()->CameraInfoTopic();
   }
