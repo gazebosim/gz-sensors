@@ -254,6 +254,20 @@ bool CameraSensor::CreateCamera()
     cameraSdf->SetLensIntrinsicsCy(intrinsicMatrix(1, 2));
   }
 
+  if(!cameraSdf->HasLensProjection())
+  {
+    auto intrinsicMatrix =
+      gz::rendering::projectionToCameraIntrinsic(
+        this->dataPtr->camera->ProjectionMatrix(),
+        this->dataPtr->camera->ImageWidth(),
+        this->dataPtr->camera->ImageHeight()
+      );
+    cameraSdf->SetLensProjectionFx(intrinsicMatrix(0, 0));
+    cameraSdf->SetLensProjectionFy(intrinsicMatrix(1, 1));
+    cameraSdf->SetLensProjectionCx(intrinsicMatrix(0, 2));
+    cameraSdf->SetLensProjectionCy(intrinsicMatrix(1, 2));
+  }
+
   // Populate camera info topic
   this->PopulateInfo(cameraSdf);
 
