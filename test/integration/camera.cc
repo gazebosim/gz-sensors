@@ -191,7 +191,7 @@ TEST_P(CameraSensorTest, ImagesWithBuiltinSDF)
 void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
 {
   std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
-                                           "sdf", "camera_projection.sdf");
+                                           "sdf", "camera_intrinsics.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
   ASSERT_TRUE(sdf::readFile(path, doc));
@@ -298,8 +298,8 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
   // Camera sensor with intrinsics tag
   EXPECT_EQ(camera2Info.width(), 1000u);
   EXPECT_EQ(camera2Info.height(), 1000u);
-  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(0), 863.22975158691406);
-  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(4), 863.22975158691406);
+  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(0), 866.23);
+  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(4), 866.23);
   EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(2), 500);
   EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(5), 500);
 
@@ -314,6 +314,7 @@ TEST_P(CameraSensorTest, CameraIntrinsics)
   gz::common::Console::SetVerbosity(2);
   CameraIntrinsics(GetParam());
 }
+
 
 //////////////////////////////////////////////////
 void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
