@@ -41,6 +41,8 @@
 #include "gz/sensors/SensorFactory.hh"
 #include "gz/sensors/SensorTypes.hh"
 
+#include "gz/rendering/Utils.hh"
+
 using namespace gz;
 using namespace sensors;
 
@@ -141,14 +143,12 @@ class gz::sensors::CameraSensorPrivate
 //////////////////////////////////////////////////
 bool CameraSensor::CreateCamera()
 {
-  const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
+  sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
   if (!cameraSdf)
   {
     gzerr << "Unable to access camera SDF element.\n";
     return false;
   }
-
-  this->PopulateInfo(cameraSdf);
 
   unsigned int width = cameraSdf->ImageWidth();
   unsigned int height = cameraSdf->ImageHeight();
@@ -236,6 +236,26 @@ bool CameraSensor::CreateCamera()
     this->dataPtr->saveImagePrefix = this->Name() + "_";
     this->dataPtr->saveImage = true;
   }
+
+  // Update the DOM object intrinsics to have consistent
+  // intrinsics between ogre camera and camera_info msg
+  if(!cameraSdf->HasLensIntrinsics())
+  {
+    auto intrinsicMatrix =
+      gz::rendering::projectionToCameraIntrinsic(
+        this->dataPtr->camera->ProjectionMatrix(),
+        this->dataPtr->camera->ImageWidth(),
+        this->dataPtr->camera->ImageHeight()
+      );
+
+    cameraSdf->SetLensIntrinsicsFx(intrinsicMatrix(0, 0));
+    cameraSdf->SetLensIntrinsicsFy(intrinsicMatrix(1, 1));
+    cameraSdf->SetLensIntrinsicsCx(intrinsicMatrix(0, 2));
+    cameraSdf->SetLensIntrinsicsCy(intrinsicMatrix(1, 2));
+  }
+
+  // Populate camera info topic
+  this->PopulateInfo(cameraSdf);
 
   return true;
 }
