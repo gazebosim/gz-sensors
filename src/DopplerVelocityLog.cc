@@ -64,20 +64,20 @@ namespace gz
     {
 
       using RowMajorMatrix3d = Eigen::Matrix<double, 3, 3, Eigen::RowMajor>;
-      
+
       /// \brief Axis-aligned patch on a plane, using image frame conventions.
       template <typename T>
       class AxisAlignedPatch2
       {
         public: AxisAlignedPatch2() = default;
-      
+
         public: AxisAlignedPatch2(
             const gz::math::Vector2<T> &_topLeft,
             const gz::math::Vector2<T> &_bottomRight)
           : topLeft(_topLeft), bottomRight(_bottomRight)
         {
         }
-      
+
         /// \brief Scalar converting copy constructor
         public: template<typename U>
         AxisAlignedPatch2(const AxisAlignedPatch2<U> &_other)
@@ -87,19 +87,19 @@ namespace gz
           this->bottomRight.X(static_cast<T>(_other.XMin()));
           this->bottomRight.Y(static_cast<T>(_other.YMin()));
         }
-      
+
         public: T XMax() const { return this->topLeft.X(); }
-      
+
         public: T XMin() const { return this->bottomRight.X(); }
-      
+
         public: T XSize() const { return this->XMax() - this->XMin(); }
-      
+
         public: T YMax() const { return this->topLeft.Y(); }
-      
+
         public: T YMin() const { return this->bottomRight.Y(); }
-      
+
         public: T YSize() const { return this->YMax() - this->YMin(); }
-      
+
         /// \brief Merge patch with `_other`.
         /// \return a patch that includes both.
         public: AxisAlignedPatch2<T>& Merge(const AxisAlignedPatch2<T> &_other)
@@ -112,48 +112,48 @@ namespace gz
               std::min(this->bottomRight.Y(), _other.bottomRight.Y()));
           return *this;
         }
-      
+
         /// \brief Flip patch, sending each corner to the opposite quadrant.
         public: AxisAlignedPatch2<T> Flip() const
         {
           return {-this->bottomRight, -this->topLeft};
         }
-      
+
         /// \brief Broadcast multiply corner coordinates by `_vector` coordinates.
         const AxisAlignedPatch2<T> operator*(gz::math::Vector2<T> _vector) const
         {
           return {this->topLeft * _vector, this->bottomRight * _vector};
         }
-      
+
         /// \brief Broadcast divide corner coordinates by `_vector` coordinates.
         const AxisAlignedPatch2<T> operator/(gz::math::Vector2<T> _vector) const
         {
           return {this->topLeft / _vector, this->bottomRight / _vector};
         }
-      
+
         /// \brief Broadcast sum corner coordinates with `_vector` coordinates.
         const AxisAlignedPatch2<T> operator+(gz::math::Vector2<T> _vector) const
         {
           return {this->topLeft + _vector, this->bottomRight + _vector};
         }
-      
+
         /// \brief Broadcast substract corner coordinate with `_vector` coordinates.
         const AxisAlignedPatch2<T> operator-(gz::math::Vector2<T> _vector) const
         {
           return {this->topLeft - _vector, this->bottomRight - _vector};
         }
-      
+
         /// \brief Upper-left corner i.e. (x, y) maxima
         private: gz::math::Vector2<T> topLeft;
-      
+
         /// \brief Bottom-right corner i.e (x, y) minima
         private: gz::math::Vector2<T> bottomRight;
       };
-      
+
       // Handy type definitions
       using AxisAlignedPatch2d = AxisAlignedPatch2<double>;
       using AxisAlignedPatch2i = AxisAlignedPatch2<int>;
-      
+
       /// \brief Acoustic DVL beam, modelled as a circular cone with aperture
       /// angle α and its apex at the origin. Its axis of symmetry is nominally
       /// aligned with the x-axis of an x-forward, y-left, z-up frame (following
@@ -206,47 +206,47 @@ namespace gz
             (inclinationAngle - _apertureAngle / 2.).Radian()};
           this->sphericalFootprint = AxisAlignedPatch2d{topLeft, bottomRight};
         }
-      
+
         public: int Id() const { return this->id; }
-      
+
         public: const gz::math::Pose3d &Transform() const
         {
           return this->transform;
         }
-      
+
         public: const gz::math::Vector3d &Axis() const
         {
           return this->axis;
         }
-      
+
         public: double NormalizedRadius() const
         {
           return this->normalizedRadius;
         }
-      
+
         public: const gz::math::Angle &ApertureAngle() const
         {
           return this->apertureAngle;
         }
-      
+
         public: const AxisAlignedPatch2d &SphericalFootprint() const
         {
           return this->sphericalFootprint;
         }
-      
+
         private: int id;
-      
+
         private: gz::math::Angle apertureAngle;
-      
+
         private: double normalizedRadius;
-      
+
         private: gz::math::Pose3d transform;
-      
+
         private: gz::math::Vector3d axis;
-      
+
         private: AxisAlignedPatch2d sphericalFootprint;
       };
-      
+
       /// \brief DVL acoustic beam reflecting target.
       ///
       /// Pose is defined w.r.t. to the beams frame.
@@ -255,7 +255,7 @@ namespace gz
         gz::math::Pose3d pose;
         uint64_t entity;
       };
-      
+
       /// \brief DVL tracking mode update info.
       ///
       /// Useful for performance comparison.
@@ -265,7 +265,7 @@ namespace gz
           std::numeric_limits<double>::infinity()};
         size_t numBeamsLocked{0};
       };
-      
+
       /// \brief DVL tracking mode multi-state switch
       ///
       /// An enum class-like POD type that can be used
@@ -273,7 +273,7 @@ namespace gz
       class TrackingModeSwitch
       {
         public: enum Value {Off, On, Best};
-      
+
         public: static bool fromString(
           const std::string &_string,
           TrackingModeSwitch &_value)
@@ -295,18 +295,18 @@ namespace gz
           }
           return false;
         }
-      
+
         public: TrackingModeSwitch() = default;
-      
+
         public: TrackingModeSwitch(Value _value) : value(_value) {}
-      
+
         public: operator Value() const { return value; }
-      
+
         public: explicit operator bool() const { return value != Off; }
-      
+
         private: Value value;
       };
-      
+
       /// \brief A time-varying vector field built on
       /// per-axis time-varying volumetric data grids
       ///
@@ -315,12 +315,12 @@ namespace gz
       class InMemoryTimeVaryingVectorField
       {
         public: using SessionT = gz::math::InMemorySession<T, P>;
-      
+
         public: using GridT = gz::math::InMemoryTimeVaryingVolumetricGrid<T, V, P>;
-      
+
         /// \brief Default constructor.
         public: InMemoryTimeVaryingVectorField() = default;
-      
+
         /// \brief Constructor
         /// \param[in] _xData X-axis volumetric data grid.
         /// \param[in] _yData Y-axis volumetric data grid.
@@ -342,7 +342,7 @@ namespace gz
             this->zSession = this->zData->CreateSession();
           }
         }
-      
+
         /// \brief Advance vector field in time.
         /// \param[in] _now Time to step data grids to.
         public: void StepTo(const std::chrono::steady_clock::duration &_now)
@@ -361,7 +361,7 @@ namespace gz
             this->zSession = this->zData->StepTo(this->zSession.value(), now);
           }
         }
-      
+
         /// \brief Look up vector field value, interpolating data grids.
         /// \param[in] _pos Vector field argument.
         /// \return vector field value at `_pos`
@@ -388,22 +388,22 @@ namespace gz
           }
           return outcome;
         }
-      
+
         /// \brief Session for x-axis volumetric data grid, if any.
         private: std::optional<SessionT> xSession{std::nullopt};
-      
+
         /// \brief Session for y-axis volumetric data grid, if any.
         private: std::optional<SessionT> ySession{std::nullopt};
-      
+
         /// \brief Session for z-axis volumetric data grid, if any.
         private: std::optional<SessionT> zSession{std::nullopt};
-      
+
         /// \brief X-axis volumetric data grid, if any.
         private: const GridT * xData{nullptr};
-      
+
         /// \brief Y-axis volumetric data grid, if any.
         private: const GridT * yData{nullptr};
-      
+
         /// \brief Z-axis volumetric data grid, if any.
         private: const GridT * zData{nullptr};
       };
@@ -411,52 +411,52 @@ namespace gz
     }
 
     using namespace gz::msgs;
-    
+
     /// \brief Implementation for DopplerVelocityLog
     class DopplerVelocityLog::Implementation
     {
       /// \brief SDF DOM object
       public: sdf::ElementPtr sensorSdf;
-    
+
       public: using DVLType = DVLVelocityTracking_DVLType;
-    
+
       /// \brief Dictionary of known DVL types
       public: const std::unordered_map<std::string, DVLType> knownDVLTypes{
         {"piston", DVLVelocityTracking::DVL_TYPE_PISTON},
         {"phased_array", DVLVelocityTracking::DVL_TYPE_PHASED_ARRAY}};
-    
+
       /// \brief Type of DVL
       public: DVLType dvlType;
-    
+
       /// \brief Sensor entity ID (for world state lookup)
       public: uint64_t entityId{0};
-    
+
       /// \brief true if Load() has been called and was successful
       public: bool initialized = false;
-    
+
       /// \brief Initialize DVL sensor
       public: bool Initialize(DopplerVelocityLog *_sensor);
-    
+
       /// \brief Initialize beam arrangement for DVL sensor
       ///
       /// This primarily creates rendering sensors.
       public: bool InitializeBeamArrangement(DopplerVelocityLog *_sensor);
-    
+
       /// \brief Initialize tracking modes for DVL sensor
       ///
       /// This sets up bottom and/or water-mass tracking modes, as needed.
       public: bool InitializeTrackingModes(DopplerVelocityLog *_sensor);
-    
+
       /// \brief Maximum range for DVL beams.
       public: double maximumRange;
-    
+
       /// \brief Depth sensor resolution at 1 m distance, in meters.
       public: double resolution;
-    
+
       /// \brief Whether bottom tracking mode is enabled
       /// and which variant if it is.
       public: TrackingModeSwitch bottomModeSwitch{TrackingModeSwitch::Off};
-    
+
       /// \brief Perform bottom tracking.
       /// \param[in] _now Current simulation time.
       /// \param[out] _info Optional tracking mode info,
@@ -465,11 +465,11 @@ namespace gz
       public: DVLVelocityTracking TrackBottom(
           const std::chrono::steady_clock::duration &_now,
           TrackingModeInfo *_info);
-    
+
       /// \brief Whether water-mass tracking mode is enabled
       /// and which variant if it is.
       public: TrackingModeSwitch waterMassModeSwitch{TrackingModeSwitch::Off};
-    
+
       /// \brief Perform water-mass tracking.
       /// \param[in] _now Current simulation time.
       /// \param[out] _info Optional tracking mode info,
@@ -478,74 +478,74 @@ namespace gz
       public: DVLVelocityTracking TrackWaterMass(
           const std::chrono::steady_clock::duration &_now,
           TrackingModeInfo *_info);
-    
+
       /// \brief Number of bins for water-mass sampling.
       public: int waterMassModeNumBins;
-    
+
       /// \brief Water-mass sampling bin height, in meters.
       public: double waterMassModeBinHeight;
-    
+
       /// \brief Distance to nearest water-mass boundary, in meters.
       public: double waterMassModeNearBoundary;
-    
+
       /// \brief Distance to farthest water-mass boundary, in meters.
       public: double waterMassModeFarBoundary;
-    
+
       /// \brief Bottom tracking mode noise model
       public: std::shared_ptr<gz::sensors::GaussianNoiseModel> bottomModeNoise;
-    
+
       /// \brief Water-mass tracking mode noise model
       public: std::shared_ptr<gz::sensors::GaussianNoiseModel> waterMassModeNoise;
-    
+
       /// \brief State of the world.
       public: const WorldState *worldState;
-    
+
       /// \brief Water velocity vector field for water-mass sampling.
       public: std::optional<InMemoryTimeVaryingVectorField<double>> waterVelocity;
-    
+
       /// \brief Water velocity data shape, as dimension names,
       /// for environmental data indexing.
       public: std::array<std::string, 3> waterVelocityShape;
-    
+
       /// \brief Reference system in which coordinates for water-mass sampling
       /// are to be defined in.
       public: EnvironmentalData::ReferenceT waterVelocityReference;
-    
+
       /// \brief Whether water velocity was updated since last use.
       public: bool waterVelocityUpdated{true};
-    
+
       /// \brief Depth sensor (i.e. a GPU raytracing sensor).
       public: gz::rendering::GpuRaysPtr depthSensor;
-    
+
       /// \brief Image sensor (i.e. a camera sensor) to aid ray querys.
       public: gz::rendering::CameraPtr imageSensor;
-    
+
       /// \brief Depth sensor intrinsic constants
       public: struct {
         gz::math::Vector2d offset; ///<! Azimuth and elevation offsets
         gz::math::Vector2d step;  ///<! Azimuth and elevation steps
       } depthSensorIntrinsics;
-    
+
       /// \brief Callback for rendering sensor frames
       public: void OnNewFrame(
           const float *_scan, unsigned int _width,
           unsigned int _height, unsigned int _channels,
           const std::string & /*_format*/);
-    
+
       /// \brief Connection from depth camera with new depth data.
       public: gz::common::ConnectionPtr depthConnection;
-    
+
       /// \brief Connection to the Manager's scene change event.
       public: gz::common::ConnectionPtr sceneChangeConnection;
-    
+
       /// \brief DVL acoustic beams' description
       public: std::vector<AcousticBeam> beams;
-    
+
       /// \brief Rotation from sensor frame to reference frame.
       ///
       /// Useful to cope with different DVL frame conventions.
       public: gz::math::Quaterniond referenceFrameRotation;
-    
+
       /// \brief Transform from sensor frame to acoustic beams' frame.
       ///
       /// I.e. x-forward, y-left, z-up (dvl sensor frame) rotates to
@@ -553,22 +553,22 @@ namespace gz
       public: const gz::math::Pose3d beamsFrameTransform{
         gz::math::Vector3d::Zero,
         gz::math::Quaterniond{0., M_PI/2., 0.}};
-    
+
       /// \brief DVL acoustic beams' targets
       public: std::vector<std::optional<TrackingTarget>> beamTargets;
-    
+
       /// \brief DVL acoustic beams' patches in depth scan frame.
       public: std::vector<AxisAlignedPatch2i> beamScanPatches;
-    
+
       /// \brief Node to create a topic publisher with.
       public: gz::transport::Node node;
-    
+
       /// \brief Publisher for velocity tracking messages.
       public: gz::transport::Node::Publisher pub;
-    
+
       /// \brief Flag to indicate if sensor should be publishing estimates.
       public: bool publishingEstimates = false;
-    
+
       /// \brief Setup beam markers for a generic tracking mode.
       /// \param[in] _sensor (Outer) DVL sensor holding beam arrangement.
       /// \param[in] _namespace Namespace to tell markers apart.
@@ -576,7 +576,7 @@ namespace gz
       public: gz::msgs::Marker_V SetupBeamMarkers(
           DopplerVelocityLog *_sensor,
           const std::string &_namespace);
-    
+
       /// \brief Update beam markers based on tracking output
       /// both locally and remotely (by publishing).
       ///
@@ -590,33 +590,33 @@ namespace gz
           DopplerVelocityLog *_sensor,
           const DVLVelocityTracking &_trackingMessage,
           gz::msgs::Marker_V *_beamMarkers);
-    
+
       /// \brief Bottom tracking mode beam lobe markers.
       public: gz::msgs::Marker_V bottomModeBeamMarkers;
-    
+
       /// \brief Whether to display bottom tracking mode beams.
       public: bool visualizeBottomModeBeams = false;
-    
+
       /// \brief Water-mass tracking mode beam lobe markers.
       public: gz::msgs::Marker_V waterMassModeBeamMarkers;
-    
+
       /// \brief Whether to display water-mass tracking mode beams.
       public: bool visualizeWaterMassModeBeams = false;
     };
-    
+
     //////////////////////////////////////////////////
     DopplerVelocityLog::DopplerVelocityLog()
       : dataPtr(new Implementation())
     {
     }
-    
+
     //////////////////////////////////////////////////
     DopplerVelocityLog::~DopplerVelocityLog()
     {
       this->dataPtr->depthConnection.reset();
       this->dataPtr->sceneChangeConnection.reset();
     }
-    
+
     //////////////////////////////////////////////////
     bool DopplerVelocityLog::Load(const sdf::Sensor &_sdf)
     {
@@ -624,7 +624,7 @@ namespace gz
       {
         return false;
       }
-    
+
       // Check if this sensor is of the right type
       if (_sdf.Type() != sdf::SensorType::CUSTOM)
       {
@@ -633,7 +633,7 @@ namespace gz
                << std::endl;
         return false;
       }
-    
+
       sdf::ElementPtr elem = _sdf.Element();
       if (!elem->HasAttribute("gz:type"))
       {
@@ -658,7 +658,7 @@ namespace gz
         return false;
       }
       this->dataPtr->sensorSdf = elem->GetElement("gz:dvl");
-    
+
       // Instantiate interfaces
       this->dataPtr->pub =
           this->dataPtr->node.Advertise<DVLVelocityTracking>(this->Topic());
@@ -669,7 +669,7 @@ namespace gz
                << "[" << this->Name() << "]" << std::endl;
         return false;
       }
-    
+
       // Setup sensors
       if (this->Scene())
       {
@@ -680,15 +680,15 @@ namespace gz
           return false;
         }
       }
-    
+
       gzmsg << "Loaded [" << this->Name() << "] DVL sensor." << std::endl;
       this->dataPtr->sceneChangeConnection =
           gz::sensors::RenderingEvents::ConnectSceneChangeCallback(
           std::bind(&DopplerVelocityLog::SetScene, this, std::placeholders::_1));
-    
+
       return true;
     }
-    
+
     //////////////////////////////////////////////////
     bool DopplerVelocityLog::Implementation::Initialize(DopplerVelocityLog *_sensor)
     {
@@ -702,7 +702,7 @@ namespace gz
         return false;
       }
       this->dvlType = this->knownDVLTypes.at(dvlTypeName);
-    
+
       if (!this->InitializeBeamArrangement(_sensor))
       {
         gzerr << "Failed to initialize beam arrangement for "
@@ -710,7 +710,7 @@ namespace gz
                << std::endl;
         return false;
       }
-    
+
       if (!this->InitializeTrackingModes(_sensor))
       {
         gzerr << "Failed to initialize velocity tracking modes "
@@ -718,13 +718,13 @@ namespace gz
                << std::endl;
         return false;
       }
-    
+
       gz::math::Pose3d referenceFrameTransform =
           this->sensorSdf->Get<gz::math::Pose3d>(
               "reference_frame", gz::math::Pose3d{}).first;
-    
+
       this->referenceFrameRotation = referenceFrameTransform.Rot().Inverse();
-    
+
       gzmsg << "Initialized [" << _sensor->Name() << "] sensor." << std::endl;
       this->initialized = true;
       return true;
@@ -743,14 +743,14 @@ namespace gz
                << std::endl;
         return false;
       }
-    
+
       sdf::ElementPtr bottomModeElement =
           trackingElement->GetElement("bottom_mode");
       if (bottomModeElement)
       {
         const std::string switchOptionName =
             bottomModeElement->Get<std::string>("when", "always").first;
-    
+
         TrackingModeSwitch switchOption;
         if (!TrackingModeSwitch::fromString(switchOptionName,
                                             switchOption))
@@ -762,7 +762,7 @@ namespace gz
           return false;
         }
         this->bottomModeSwitch = switchOption;
-    
+
         if (this->bottomModeSwitch)
         {
           sdf::ElementPtr bottomModeNoiseElement =
@@ -771,7 +771,7 @@ namespace gz
           {
             gzmsg << "Initializing bottom tracking mode for "
                   << "[" << _sensor->Name() << "] sensor." << std::endl;
-    
+
             sdf::Noise bottomModeNoiseSDF;
             bottomModeNoiseSDF.Load(bottomModeNoiseElement);
             if (bottomModeNoiseSDF.Type() != sdf::NoiseType::GAUSSIAN)
@@ -788,7 +788,7 @@ namespace gz
                 new gz::sensors::GaussianNoiseModel());
             this->bottomModeNoise->Load(bottomModeNoiseSDF);
           }
-    
+
           this->visualizeBottomModeBeams =
               bottomModeElement->Get<bool>("visualize", false).first;
           if (this->visualizeBottomModeBeams)
@@ -800,15 +800,15 @@ namespace gz
           }
         }
       }
-    
+
       sdf::ElementPtr waterMassModeElement =
           trackingElement->GetElement("water_mass_mode");
-    
+
       if (waterMassModeElement)
       {
         const std::string switchOptionName =
             waterMassModeElement->Get<std::string>("when", "always").first;
-    
+
         TrackingModeSwitch switchOption;
         if (!TrackingModeSwitch::fromString(switchOptionName,
                                             switchOption))
@@ -820,22 +820,22 @@ namespace gz
           return false;
         }
         this->waterMassModeSwitch = switchOption;
-    
+
         if (this->waterMassModeSwitch)
         {
           gzmsg << "Initializing water-mass tracking mode for "
                 << "[" << _sensor->Name() << "] sensor." << std::endl;
-    
+
           sdf::ElementPtr waterVelocityElement =
               waterMassModeElement->GetElement("water_velocity");
-    
+
           this->waterVelocityShape[0] =
               waterVelocityElement->Get<std::string>("x");
           this->waterVelocityShape[1] =
               waterVelocityElement->Get<std::string>("y");
           this->waterVelocityShape[2] =
               waterVelocityElement->Get<std::string>("z");
-    
+
           if (this->waterVelocityShape[0].empty() &&
               this->waterVelocityShape[1].empty() &&
               this->waterVelocityShape[2].empty())
@@ -852,27 +852,27 @@ namespace gz
                 << "'] variables in environmental data for "
                 << "[" << _sensor->Name() << "] sensor."
                 << std::endl;
-    
+
           this->waterMassModeNumBins =
               waterMassModeElement->Get<int>("bins", 5).first;
           gzmsg << "Using " << this->waterMassModeNumBins
                 << " water-mass sampling bins for "
                 << "[" << _sensor->Name() << "] sensor."
                 << std::endl;
-    
+
           sdf::ElementPtr waterMassModeBoundariesElement =
               waterMassModeElement->GetElement("boundaries");
-    
+
           const double defaultNearBoundary = 0.2 * this->maximumRange;
           this->waterMassModeNearBoundary =
               waterMassModeBoundariesElement->Get<double>(
                   "near", defaultNearBoundary).first;
-    
+
           const double defaultFarBoundary = 0.8 * this->maximumRange;
           this->waterMassModeFarBoundary =
               waterMassModeBoundariesElement->Get<double>(
                   "far", defaultFarBoundary).first;
-    
+
           if (this->waterMassModeFarBoundary <= this->waterMassModeNearBoundary)
           {
             gzerr << "Far boundary for water mass mode "
@@ -881,7 +881,7 @@ namespace gz
                   << std::endl;
             return false;
           }
-    
+
           if (this->maximumRange < this->waterMassModeFarBoundary)
           {
             gzerr << "Far boundary for water mass mode "
@@ -890,19 +890,19 @@ namespace gz
                   << std::endl;
             return false;
           }
-    
-    
+
+
           gzmsg << "Setting water-mass layer boundaries to ["
                 << this->waterMassModeNearBoundary << ", "
                 << this->waterMassModeFarBoundary << "] for "
                 << "[" << _sensor->Name() << "] sensor."
                 << std::endl;
-    
+
           this->waterMassModeBinHeight = (
               this->waterMassModeFarBoundary -
               this->waterMassModeNearBoundary) /
               this->waterMassModeNumBins;
-    
+
           sdf::ElementPtr waterMassModeNoiseElement =
               waterMassModeElement->GetElement("noise");
           if (waterMassModeNoiseElement)
@@ -923,7 +923,7 @@ namespace gz
                 new gz::sensors::GaussianNoiseModel());
             this->waterMassModeNoise->Load(waterMassModeNoiseSDF);
           }
-    
+
           this->visualizeWaterMassModeBeams =
               waterMassModeElement->Get<bool>("visualize", false).first;
           if (this->visualizeWaterMassModeBeams)
@@ -935,10 +935,10 @@ namespace gz
           }
         }
       }
-    
+
       return true;
     }
-    
+
     //////////////////////////////////////////////////
     gz::msgs::Marker_V
     DopplerVelocityLog::Implementation::SetupBeamMarkers(
@@ -950,7 +950,7 @@ namespace gz
               1.1 * std::chrono::duration<double>(
                   _sensor->UpdateRate() > epsilon ?
                   1. / _sensor->UpdateRate() : 0.001));
-    
+
       gz::msgs::Marker_V beamMarkers;
       for (const AcousticBeam & beam : this->beams)
       {
@@ -958,7 +958,7 @@ namespace gz
             this->resolution / beam.NormalizedRadius();
         const size_t lobeNumTriangles =
             static_cast<size_t>(std::ceil(2. * GZ_PI / angularResolution));
-    
+
         auto * beamLowerQuantileConeMarker = beamMarkers.add_marker();
         beamLowerQuantileConeMarker->set_id(3 * beam.Id());
         beamLowerQuantileConeMarker->set_ns(
@@ -968,7 +968,7 @@ namespace gz
         beamLowerQuantileConeMarker->set_visibility(gz::msgs::Marker::GUI);
         *beamLowerQuantileConeMarker->
             mutable_lifetime() = gz::msgs::Convert(lifetime);
-    
+
         gz::msgs::Set(
             beamLowerQuantileConeMarker->add_point(), gz::math::Vector3d::Zero);
         for (size_t i = 0; i < lobeNumTriangles; ++i)
@@ -983,11 +983,11 @@ namespace gz
         gz::msgs::Set(
             beamLowerQuantileConeMarker->add_point(),
             gz::math::Vector3d{1., -beam.NormalizedRadius(), 0.});
-    
+
         auto * beamUpperQuantileConeMarker = beamMarkers.add_marker();
         *beamUpperQuantileConeMarker = *beamLowerQuantileConeMarker;
         beamUpperQuantileConeMarker->set_id(3 * beam.Id() + 1);
-    
+
         auto * beamCapMarker = beamMarkers.add_marker();
         beamCapMarker->set_id(3 * beam.Id() + 2);
         beamCapMarker->set_ns(
@@ -996,7 +996,7 @@ namespace gz
         beamCapMarker->set_type(gz::msgs::Marker::TRIANGLE_FAN);
         beamCapMarker->set_visibility(gz::msgs::Marker::GUI);
         *beamCapMarker->mutable_lifetime() = gz::msgs::Convert(lifetime);
-    
+
         gz::msgs::Set(beamCapMarker->add_point(), gz::math::Vector3d{1., 0., 0.});
         for (size_t i = 0; i < lobeNumTriangles; ++i)
         {
@@ -1013,7 +1013,7 @@ namespace gz
       }
       return beamMarkers;
     }
-    
+
     //////////////////////////////////////////////////
     bool
     DopplerVelocityLog::Implementation::
@@ -1021,7 +1021,7 @@ namespace gz
     {
       this->beams.clear();
       this->beamTargets.clear();
-    
+
       int defaultBeamId = 0;
       sdf::ElementPtr arrangementElement =
           this->sensorSdf->GetElement("arrangement");
@@ -1035,7 +1035,7 @@ namespace gz
       const bool useDegrees =
           arrangementElement->Get("degrees", false).first;
       const gz::math::Angle angleUnit = useDegrees ? GZ_DTOR(1.) : 1.;
-    
+
       sdf::ElementPtr beamElement = arrangementElement->GetElement("beam");
       while (beamElement)
       {
@@ -1058,12 +1058,12 @@ namespace gz
                  << "not in the (-90, 90) degree interval." << std::endl;
           return false;
         }
-    
+
         // Build acoustic beam
         this->beams.push_back(AcousticBeam{
             beamId, beamApertureAngle, beamRotationAngle,
             beamTiltAngle});
-    
+
         gzmsg << "Adding acoustic beam #" << beamId
                << " to [" << _sensor->Name() << "] sensor. "
                << "Beam has a " << beamApertureAngle.Radian() << " rads "
@@ -1073,11 +1073,11 @@ namespace gz
                << "and it is rotated " << beamRotationAngle.Radian() << " rads "
                << "(" << beamRotationAngle.Degree() << " degrees)."
                << std::endl;
-    
+
         defaultBeamId = this->beams.back().Id() + 1;
         beamElement = beamElement->GetNextElement("beam");
       }
-    
+
       if (this->beams.size() < 3)
       {
         gzerr << "Expected at least three (3) beams "
@@ -1087,7 +1087,7 @@ namespace gz
       }
       // Add as many (still null) targets as beams
       this->beamTargets.resize(this->beams.size());
-    
+
       this->depthSensor =
           _sensor->Scene()->CreateGpuRays(
               _sensor->Name() + "_depth_sensor");
@@ -1098,7 +1098,7 @@ namespace gz
                << std::endl;
         return false;
       }
-    
+
       // Aggregate all beams' footprint in spherical coordinates into one
       AxisAlignedPatch2d beamsSphericalFootprint;
       for (const auto & beam : this->beams)
@@ -1107,13 +1107,13 @@ namespace gz
       }
       // Rendering sensors' FOV must be symmetric about its main axis
       beamsSphericalFootprint.Merge(beamsSphericalFootprint.Flip());
-    
+
       this->resolution  =
           this->sensorSdf->Get<double>("resolution", 0.01).first;
       gzmsg << "Setting beams' resolution to " << this->resolution
             << " m at a 1 m distance for [" << _sensor->Name() << "] sensor."
             << std::endl;
-    
+
       this->depthSensor->SetAngleMin(beamsSphericalFootprint.XMin());
       this->depthSensor->SetAngleMax(beamsSphericalFootprint.XMax());
       auto horizontalRayCount = static_cast<unsigned int>(
@@ -1121,7 +1121,7 @@ namespace gz
                     this->resolution));
       if (horizontalRayCount % 2 == 0) ++horizontalRayCount;  // ensure odd
       this->depthSensor->SetRayCount(horizontalRayCount);
-    
+
       this->depthSensor->SetVerticalAngleMin(
           beamsSphericalFootprint.YMin());
       this->depthSensor->SetVerticalAngleMax(
@@ -1131,13 +1131,13 @@ namespace gz
                     this->resolution));
       if (verticalRayCount % 2 == 0) ++verticalRayCount;  // ensure odd
       this->depthSensor->SetVerticalRayCount(verticalRayCount);
-    
+
       auto & intrinsics = this->depthSensorIntrinsics;
       intrinsics.offset.X(beamsSphericalFootprint.XMin());
       intrinsics.offset.Y(beamsSphericalFootprint.YMin());
       intrinsics.step.X(beamsSphericalFootprint.XSize() / (horizontalRayCount - 1));
       intrinsics.step.Y(beamsSphericalFootprint.YSize() / (verticalRayCount - 1));
-    
+
       // Pre-compute scan indices covered by beam spherical
       // footprints for speed during scan iteration
       this->beamScanPatches.clear();
@@ -1146,24 +1146,24 @@ namespace gz
         this->beamScanPatches.push_back(AxisAlignedPatch2i{
             (beam.SphericalFootprint() - intrinsics.offset) / intrinsics.step});
       }
-    
+
       const double minimumRange =
           this->sensorSdf->Get<double>("minimum_range", 0.1).first;
       gzmsg << "Setting minimum range to " << minimumRange
             << " m for [" << _sensor->Name() << "] sensor." << std::endl;
       this->depthSensor->SetNearClipPlane(minimumRange);
-    
+
       this->maximumRange =
           this->sensorSdf->Get<double>("maximum_range", 100.).first;
       gzmsg << "Setting maximum range to " << this->maximumRange
             << " m for [" << _sensor->Name() << "] sensor." << std::endl;
       this->depthSensor->SetFarClipPlane(this->maximumRange);
-    
+
       this->depthSensor->SetVisibilityMask(GZ_VISIBILITY_ALL);
       this->depthSensor->SetClamp(false);
-    
+
       _sensor->AddSensor(this->depthSensor);
-    
+
       this->imageSensor =
           _sensor->Scene()->CreateCamera(
               _sensor->Name() + "_image_sensor");
@@ -1174,38 +1174,38 @@ namespace gz
                << std::endl;
         return false;
       }
-    
+
       this->imageSensor->SetImageWidth(horizontalRayCount);
       this->imageSensor->SetImageHeight(verticalRayCount);
-    
+
       this->imageSensor->SetNearClipPlane(minimumRange);
       this->imageSensor->SetFarClipPlane(this->maximumRange);
       this->imageSensor->SetAntiAliasing(2);
-    
+
       this->imageSensor->SetAspectRatio(
           beamsSphericalFootprint.XSize() / beamsSphericalFootprint.YSize());
       this->imageSensor->SetHFOV(beamsSphericalFootprint.XSize());
       this->imageSensor->SetVisibilityMask(~GZ_VISIBILITY_GUI);
-    
+
       _sensor->AddSensor(this->imageSensor);
-    
+
       this->depthConnection =
           this->depthSensor->ConnectNewGpuRaysFrame(
               std::bind(&DopplerVelocityLog::Implementation::OnNewFrame, this,
                         std::placeholders::_1, std::placeholders::_2,
                         std::placeholders::_3, std::placeholders::_4,
                         std::placeholders::_5));
-    
+
       return true;
     }
-    
+
     //////////////////////////////////////////////////
     std::vector<gz::rendering::SensorPtr>
     DopplerVelocityLog::RenderingSensors() const
     {
       return {this->dataPtr->depthSensor, this->dataPtr->imageSensor};
     }
-    
+
     //////////////////////////////////////////////////
     void DopplerVelocityLog::Implementation::OnNewFrame(
         const float *_scan, unsigned int _width,
@@ -1213,41 +1213,41 @@ namespace gz
         const std::string & /*_format*/)
     {
       const auto & intrinsics = this->depthSensorIntrinsics;
-    
+
       for (size_t i = 0; i < this->beams.size(); ++i)
       {
         const AxisAlignedPatch2i & beamScanPatch =
             this->beamScanPatches[i];
         const AcousticBeam & beam = this->beams[i];
-    
+
         // Clear existing target, if any
         std::optional<TrackingTarget> & beamTarget = this->beamTargets[i];
         beamTarget.reset();
-    
+
         // Iterate over the beam solid angle in camera coordinates
         for (auto v = beamScanPatch.YMin(); v < beamScanPatch.YMax(); ++v)
         {
           assert(v >= 0 && v < static_cast<int>(_height));
           const gz::math::Angle inclination =
               v * intrinsics.step.Y() + intrinsics.offset.Y();
-    
+
           for (auto u = beamScanPatch.XMin(); u < beamScanPatch.XMax(); ++u)
           {
             assert(u >= 0 && u < static_cast<int>(_width));
-    
+
             const float range = _scan[(u + v * _width) * _channels];
             if (!std::isfinite(range)) continue;
-    
+
             const gz::math::Angle azimuth =
                 u * intrinsics.step.X() + intrinsics.offset.X();
-    
+
             // Convert to cartesian coordinates in the acoustic beams' frame
             const auto point = range * gz::math::Vector3d{
               std::cos(inclination.Radian()) * std::cos(azimuth.Radian()),
               std::cos(inclination.Radian()) * std::sin(azimuth.Radian()),
               std::sin(inclination.Radian())
             };
-    
+
             // Track point if (a) it effectively lies within the
             // beam's aperture and (b) it is the closest seen so far
             const gz::math::Angle angle = std::acos(
@@ -1275,7 +1275,7 @@ namespace gz
         }
       }
     }
-    
+
     /////////////////////////////////////////////////
     void DopplerVelocityLog::SetScene(gz::rendering::ScenePtr _scene)
     {
@@ -1297,13 +1297,13 @@ namespace gz
         }
       }
     }
-    
+
     //////////////////////////////////////////////////
     void DopplerVelocityLog::SetWorldState(const WorldState &_state)
     {
       this->dataPtr->worldState = &_state;
     }
-    
+
     //////////////////////////////////////////////////
     void DopplerVelocityLog::SetEnvironmentalData(const EnvironmentalData &_data)
     {
@@ -1312,10 +1312,10 @@ namespace gz
         gzmsg << "Updating water velocity data for "
               << "[" << this->Name() << "] sensor."
               << std::endl;
-    
+
         using VectorFieldT = InMemoryTimeVaryingVectorField<double>;
         const auto & [xDim, yDim, zDim] = this->dataPtr->waterVelocityShape;
-    
+
         const VectorFieldT::GridT *xData = nullptr;
         if (!xDim.empty())
         {
@@ -1349,23 +1349,23 @@ namespace gz
           }
           zData = &_data.frame[zDim];
         }
-    
+
         this->dataPtr->waterVelocity = VectorFieldT(xData, yData, zData);
         this->dataPtr->waterVelocityReference = _data.reference;
         this->dataPtr->waterVelocityUpdated = true;
-    
+
         gzmsg << "Water velocity data updated for "
               << "[" << this->Name() << "] sensor."
               << std::endl;
       }
     }
-    
+
     //////////////////////////////////////////////////
     void DopplerVelocityLog::SetEntity(uint64_t _entityId)
     {
       this->dataPtr->entityId = _entityId;
     }
-    
+
     //////////////////////////////////////////////////
     bool DopplerVelocityLog::Update(const std::chrono::steady_clock::duration &)
     {
@@ -1375,7 +1375,7 @@ namespace gz
         gzerr << "Not initialized, update ignored." << std::endl;
         return false;
       }
-    
+
       if (!this->dataPtr->pub.HasConnections())
       {
         if (this->dataPtr->publishingEstimates)
@@ -1385,7 +1385,7 @@ namespace gz
                 << " were found." << std::endl;
           this->dataPtr->publishingEstimates = false;
         }
-    
+
         if (!this->dataPtr->visualizeBottomModeBeams &&
             !this->dataPtr->visualizeWaterMassModeBeams)
         {
@@ -1404,18 +1404,18 @@ namespace gz
           this->dataPtr->publishingEstimates = true;
         }
       }
-    
+
       const gz::math::Pose3d beamsFramePose =
           this->Pose() * this->dataPtr->beamsFrameTransform;
       this->dataPtr->depthSensor->SetLocalPose(beamsFramePose);
       this->dataPtr->imageSensor->SetLocalPose(beamsFramePose);
-    
+
       // Generate sensor data
       this->Render();
-    
+
       return true;
     }
-    
+
     //////////////////////////////////////////////////
     DVLVelocityTracking
     DopplerVelocityLog::Implementation::TrackBottom(
@@ -1426,7 +1426,7 @@ namespace gz
       DVLVelocityTracking message;
       auto * headerMessage = message.mutable_header();
       *headerMessage->mutable_stamp() = gz::msgs::Convert(_now);
-    
+
       // Estimate DVL velocity by least squares using beam axes
       // and measured beam speeds ie.
       //
@@ -1444,70 +1444,70 @@ namespace gz
       Eigen::VectorXd beamSpeeds(this->beams.size());
       const EntityKinematicState & sensorStateInWorldFrame =
           this->worldState->kinematics.at(this->entityId);
-    
+
       const double bottomModeNoiseVariance =
           std::pow(this->bottomModeNoise->StdDev(), 2.);
-    
+
       for (size_t i = 0; i < this->beams.size(); ++i)
       {
         const AcousticBeam & beam = this->beams[i];
         auto * beamMessage = message.add_beams();
         beamMessage->set_id(beam.Id());
-    
+
         auto & beamTarget = this->beamTargets[i];
         if (beamTarget)
         {
           const double beamRange = beamTarget->pose.Pos().Length();
           auto * beamRangeMessage = beamMessage->mutable_range();
           beamRangeMessage->set_mean(beamRange);
-    
+
           // Use shortest beam range as target range
           targetRange = std::min(targetRange, beamRange);
-    
+
           EntityKinematicState targetEntityStateInWorldFrame;
           if (this->worldState->kinematics.count(beamTarget->entity) > 0)
           {
             targetEntityStateInWorldFrame =
                 this->worldState->kinematics.at(beamTarget->entity);
           }
-    
+
           // Transform beam reflecting target pose in the (global) world frame
           const gz::math::Pose3d targetPoseInWorldFrame =
               sensorStateInWorldFrame.pose *
               this->beamsFrameTransform *
               beamTarget->pose;
-    
+
           // Compute beam reflecting target velocity in the (global) world frame
           const gz::math::Vector3d targetVelocityInWorldFrame =
               targetEntityStateInWorldFrame.linearVelocity +
               targetEntityStateInWorldFrame.angularVelocity.Cross(
                   targetPoseInWorldFrame.Pos() -
                   targetEntityStateInWorldFrame.pose.Pos());
-    
+
           // Compute DVL velocity w.r.t. target velocity in the sensor frame
           const gz::math::Vector3d relativeSensorVelocityInSensorFrame =
               sensorStateInWorldFrame.pose.Rot().RotateVectorReverse(
                   sensorStateInWorldFrame.linearVelocity -
                   targetVelocityInWorldFrame);
-    
+
           // Estimate speed as measured by beam (incl. measurement noise)
           const gz::math::Vector3d beamAxisInSensorFrame =
               this->beamsFrameTransform.Rot() * beam.Axis();
-    
+
           const double beamSpeed =
               this->bottomModeNoise->Apply(
                   relativeSensorVelocityInSensorFrame.Dot(beamAxisInSensorFrame));
-    
+
           const gz::math::Vector3d beamAxisInReferenceFrame =
               this->referenceFrameRotation * beamAxisInSensorFrame;
-    
+
           // Set beam velocity mean and covariance in the reference frame
           auto * beamVelocityMessage = beamMessage->mutable_velocity();
           beamVelocityMessage->set_reference(
               DVLKinematicEstimate::DVL_REFERENCE_SHIP);
           *beamVelocityMessage->mutable_mean() =
               gz::msgs::Convert(beamAxisInReferenceFrame * beamSpeed);
-    
+
           const auto beamBasisElement =
               Eigen::Vector3d{beamAxisInReferenceFrame.X(),
                               beamAxisInReferenceFrame.Y(),
@@ -1515,12 +1515,12 @@ namespace gz
           const RowMajorMatrix3d beamVelocityCovarianceInReferenceFrame =
               bottomModeNoiseVariance *
               beamBasisElement * beamBasisElement.transpose();
-    
+
           beamVelocityMessage->mutable_covariance()->Resize(9, 0.);
           std::copy(beamVelocityCovarianceInReferenceFrame.data(),
                     beamVelocityCovarianceInReferenceFrame.data() + 9,
                     beamVelocityMessage->mutable_covariance()->begin());
-    
+
           // Build least squares problem in the reference frame
           beamBasis.row(numBeamsLocked) = beamBasisElement.transpose();
           beamSpeeds(numBeamsLocked) = beamSpeed;
@@ -1528,14 +1528,14 @@ namespace gz
         }
         beamMessage->set_locked(beamTarget.has_value());
       }
-    
+
       if (numBeamsLocked >= 3)
       {
         // Enough rows for a unique least squares solution
         const auto svdDecomposition =
             beamBasis.topRows(numBeamsLocked).jacobiSvd(
                 Eigen::ComputeThinU | Eigen::ComputeThinV);
-    
+
         // Estimate DVL velocity mean and covariance in the reference frame
         const Eigen::Vector3d velocityMeanInReferenceFrame =
             svdDecomposition.solve(beamSpeeds.head(numBeamsLocked));
@@ -1544,25 +1544,25 @@ namespace gz
         // Use row-major 1D layout for covariance
         const RowMajorMatrix3d velocityCovarianceInReferenceFrame =
             pseudoInverse * bottomModeNoiseVariance * pseudoInverse.transpose();
-    
+
         auto * velocityMessage = message.mutable_velocity();
         velocityMessage->set_reference(DVLKinematicEstimate::DVL_REFERENCE_SHIP);
         velocityMessage->mutable_mean()->set_x(velocityMeanInReferenceFrame.x());
         velocityMessage->mutable_mean()->set_y(velocityMeanInReferenceFrame.y());
         velocityMessage->mutable_mean()->set_z(velocityMeanInReferenceFrame.z());
-    
+
         velocityMessage->mutable_covariance()->Resize(9, 0.);
         std::copy(velocityCovarianceInReferenceFrame.data(),
                   velocityCovarianceInReferenceFrame.data() + 9,
                   velocityMessage->mutable_covariance()->begin());
-    
+
         if (_info)
         {
           // Compute total variance for scoring
           _info->totalVariance = velocityCovarianceInReferenceFrame.trace();
         }
       }
-    
+
       if (numBeamsLocked > 0)
       {
         auto * targetMessage = message.mutable_target();
@@ -1571,15 +1571,15 @@ namespace gz
         rangeMessage->set_mean(targetRange);
       }
       message.set_status(0);
-    
+
       if (_info)
       {
         _info->numBeamsLocked = numBeamsLocked;
       }
-    
+
       return message;
     }
-    
+
     //////////////////////////////////////////////////
     DVLVelocityTracking
     DopplerVelocityLog::Implementation::TrackWaterMass(
@@ -1590,10 +1590,10 @@ namespace gz
       DVLVelocityTracking message;
       auto * headerMessage = message.mutable_header();
       *headerMessage->mutable_stamp() = gz::msgs::Convert(_now);
-    
+
       const double waterMassModeNoiseVariance =
           std::pow(this->waterMassModeNoise->StdDev(), 2.);
-    
+
       // Estimate DVL velocity by least squares using beam axes
       // and average beams speeds ie.
       //
@@ -1608,22 +1608,22 @@ namespace gz
       size_t numBeamsLocked = 0;
       double meanTargetRange = std::numeric_limits<double>::infinity();
       double targetRangeVariance = std::numeric_limits<double>::infinity();
-    
+
       Eigen::MatrixXd beamBasis(this->beams.size(), 3);
       Eigen::VectorXd averageBeamSpeeds(this->beams.size());
-    
+
       const EntityKinematicState & sensorStateInWorldFrame =
           this->worldState->kinematics.at(this->entityId);
-    
+
       for (size_t i = 0; i < this->beams.size(); ++i)
       {
         const AcousticBeam & beam = this->beams[i];
         auto * beamMessage = message.add_beams();
         beamMessage->set_id(beam.Id());
-    
+
         const gz::math::Vector3d beamAxisInSensorFrame =
             this->beamsFrameTransform.Rot() * beam.Axis();
-    
+
         // Discard beams that do not span both water mass boundaries
         const auto & beamTarget = this->beamTargets[i];
         if (beamTarget)
@@ -1637,13 +1637,13 @@ namespace gz
             continue;
           }
         }
-    
+
         const gz::math::Vector3d beamAxisInWorldFrame =
             sensorStateInWorldFrame.pose.Rot() * beamAxisInSensorFrame;
-    
+
         const gz::math::Vector3d beamAxisInReferenceFrame =
             this->referenceFrameRotation * beamAxisInSensorFrame;
-    
+
         // Assume uniform water density distribution for range estimate.
         auto * beamRangeMessage = beamMessage->mutable_range();
         const double projectionScale =
@@ -1657,7 +1657,7 @@ namespace gz
                 this->waterMassModeNearBoundary), 2.) / 12.;
         beamRangeMessage->set_mean(meanBeamRange);
         beamRangeMessage->set_variance(beamRangeVariance);
-    
+
         // Use shortest beam range as target range
         if (meanTargetRange > meanBeamRange)
         {
@@ -1675,41 +1675,41 @@ namespace gz
               this->waterMassModeBinHeight * j +
               this->waterMassModeBinHeight / 2 +
               this->waterMassModeNearBoundary);
-    
+
           // Compute sample point as the intersection between
           // beam axis and mid-bin plane in the sensor frame
           const gz::math::Vector3d samplePointInSensorFrame =
               (offsetToBinPlane * beamAxisInSensorFrame) /
               -gz::math::Vector3d::UnitZ.Dot(beamAxisInSensorFrame);
-    
+
           // Transform sample point to the (global) world frame
           const gz::math::Vector3d samplePointInWorldFrame =
               sensorStateInWorldFrame.pose.Pos() +
               sensorStateInWorldFrame.pose.Rot() *
               samplePointInSensorFrame;
-    
+
           // Transform sample point to the environmental data frame
           const gz::math::Vector3d samplePointInDataFrame =
               this->worldState->origin.PositionTransform(
                   samplePointInWorldFrame,
                   gz::math::SphericalCoordinates::GLOBAL,
                   this->waterVelocityReference);
-    
+
           // Sample water velocity in the world frame at sample point
           const gz::math::Vector3d sampledVelocityInWorldFrame =
               this->waterVelocity->LookUp(samplePointInDataFrame);
-    
+
           // Compute DVL velocity w.r.t. sampled water velocity in the sensor frame
           const gz::math::Vector3d relativeSensorVelocityInSensorFrame =
               sensorStateInWorldFrame.pose.Rot().RotateVectorReverse(
                   sensorStateInWorldFrame.linearVelocity -
                   sampledVelocityInWorldFrame);
-    
+
           // Estimate speed as measured by beam (incl. measurement noise)
           const double beamSpeed =
               this->waterMassModeNoise->Apply(
                   relativeSensorVelocityInSensorFrame.Dot(beamAxisInSensorFrame));
-    
+
           const double prevAverageBeamSpeed = averageBeamSpeed;
           // Use cumulative average algorithm to avoid keeping samples
           averageBeamSpeed = (beamSpeed + i * prevAverageBeamSpeed) / (i + 1);
@@ -1725,36 +1725,36 @@ namespace gz
                             beamAxisInReferenceFrame.Z()};
         const Eigen::Matrix3d beamVelocityCovarianceInReferenceFrame =
             beamSpeedVariance * beamBasisElement * beamBasisElement.transpose();
-    
+
         // Set beam velocity mean and covariance in the reference frame
         auto * beamVelocityMessage = beamMessage->mutable_velocity();
         beamVelocityMessage->set_reference(
             DVLKinematicEstimate::DVL_REFERENCE_SHIP);
         *beamVelocityMessage->mutable_mean() =
             gz::msgs::Convert(beamAxisInReferenceFrame * averageBeamSpeed);
-    
+
         // Use row-major 1D layout for covariance
         beamVelocityMessage->mutable_covariance()->Resize(9, 0.);
         std::copy(beamVelocityCovarianceInReferenceFrame.data(),
                   beamVelocityCovarianceInReferenceFrame.data() + 9,
                   beamVelocityMessage->mutable_covariance()->begin());
-    
+
         // Build least squares problem in the reference frame
         beamBasis.row(numBeamsLocked) = beamBasisElement;
         averageBeamSpeeds(numBeamsLocked) = averageBeamSpeed;
-    
+
         ++numBeamsLocked;
-    
+
         beamMessage->set_locked(true);
       }
-    
+
       if (numBeamsLocked >= 3)
       {
         // Enough rows for a unique least squares solution
         const auto svdDecomposition =
             beamBasis.topRows(numBeamsLocked).jacobiSvd(
                 Eigen::ComputeThinU | Eigen::ComputeThinV);
-    
+
         // Estimate DVL velocity mean and covariance in the reference frame
         const Eigen::Vector3d velocityMeanInReferenceFrame =
             svdDecomposition.solve(averageBeamSpeeds.head(numBeamsLocked));
@@ -1763,25 +1763,25 @@ namespace gz
         // Use row-major 1D layout for covariance
         const RowMajorMatrix3d velocityCovarianceInReferenceFrame =
             pseudoInverse * waterMassModeNoiseVariance * pseudoInverse.transpose();
-    
+
         auto * velocityMessage = message.mutable_velocity();
         velocityMessage->set_reference(DVLKinematicEstimate::DVL_REFERENCE_SHIP);
         velocityMessage->mutable_mean()->set_x(velocityMeanInReferenceFrame.x());
         velocityMessage->mutable_mean()->set_y(velocityMeanInReferenceFrame.y());
         velocityMessage->mutable_mean()->set_z(velocityMeanInReferenceFrame.z());
-    
+
         velocityMessage->mutable_covariance()->Resize(9, 0.);
         std::copy(velocityCovarianceInReferenceFrame.data(),
                   velocityCovarianceInReferenceFrame.data() + 9,
                   velocityMessage->mutable_covariance()->begin());
-    
+
         if (_info)
         {
           // Track total variance for scoring
           _info->totalVariance = velocityCovarianceInReferenceFrame.trace();
         }
       }
-    
+
       if (numBeamsLocked > 0)
       {
         auto * targetMessage = message.mutable_target();
@@ -1791,7 +1791,7 @@ namespace gz
         rangeMessage->set_variance(targetRangeVariance);
       }
       message.set_status(0);
-    
+
       if (_info)
       {
         // Track number of beams locked for scoring
@@ -1799,13 +1799,13 @@ namespace gz
       }
       return message;
     }
-    
+
     //////////////////////////////////////////////////
     void DopplerVelocityLog::PostUpdate(
         const std::chrono::steady_clock::duration &_now)
     {
       GZ_PROFILE("DopplerVelocityLog::PostUpdate");
-    
+
       if (!this->dataPtr->worldState)
       {
         gzwarn << "No world state available, "
@@ -1813,7 +1813,7 @@ namespace gz
                << std::endl;
         return;
       }
-    
+
       for (size_t i = 0; i < this->dataPtr->beams.size(); ++i)
       {
         auto & beamTarget = this->dataPtr->beamTargets[i];
@@ -1838,7 +1838,7 @@ namespace gz
           }
         }
       }
-    
+
       TrackingModeInfo bottomModeInfo;
       DVLVelocityTracking bottomModeMessage;
       if (this->dataPtr->bottomModeSwitch)
@@ -1846,7 +1846,7 @@ namespace gz
         bottomModeMessage =
             this->dataPtr->TrackBottom(_now, &bottomModeInfo);
       }
-    
+
       TrackingModeInfo waterMassModeInfo;
       DVLVelocityTracking waterMassModeMessage;
       if (this->dataPtr->waterMassModeSwitch)
@@ -1854,7 +1854,7 @@ namespace gz
         if (this->dataPtr->waterVelocity)
         {
           this->dataPtr->waterVelocity->StepTo(_now);
-    
+
           waterMassModeMessage =
               this->dataPtr->TrackWaterMass(_now, &waterMassModeInfo);
         }
@@ -1866,7 +1866,7 @@ namespace gz
         }
         this->dataPtr->waterVelocityUpdated = false;
       }
-    
+
       double bottomModeScore, waterMassModeScore;
       if (std::isfinite(bottomModeInfo.totalVariance) ||
           std::isfinite(waterMassModeInfo.totalVariance))
@@ -1879,7 +1879,7 @@ namespace gz
         bottomModeScore = bottomModeInfo.numBeamsLocked;
         waterMassModeScore = waterMassModeInfo.numBeamsLocked;
       }
-    
+
       if (this->dataPtr->bottomModeSwitch == TrackingModeSwitch::On ||
           (this->dataPtr->bottomModeSwitch == TrackingModeSwitch::Best &&
            bottomModeScore >= waterMassModeScore))
@@ -1890,7 +1890,7 @@ namespace gz
           this->AddSequence(headerMessage, "doppler_velocity_log");
           this->dataPtr->pub.Publish(bottomModeMessage);
         }
-    
+
         if (this->dataPtr->visualizeBottomModeBeams)
         {
           this->dataPtr->UpdateBeamMarkers(
@@ -1898,7 +1898,7 @@ namespace gz
               &this->dataPtr->bottomModeBeamMarkers);
         }
       }
-    
+
       if (this->dataPtr->waterMassModeSwitch == TrackingModeSwitch::On ||
           (this->dataPtr->waterMassModeSwitch == TrackingModeSwitch::Best &&
            bottomModeScore < waterMassModeScore))
@@ -1909,7 +1909,7 @@ namespace gz
           this->AddSequence(headerMessage, "doppler_velocity_log");
           this->dataPtr->pub.Publish(waterMassModeMessage);
         }
-    
+
         if (this->dataPtr->visualizeWaterMassModeBeams)
         {
           this->dataPtr->UpdateBeamMarkers(
@@ -1918,7 +1918,7 @@ namespace gz
         }
       }
     }
-    
+
     //////////////////////////////////////////////////
     void DopplerVelocityLog::Implementation::UpdateBeamMarkers(
         DopplerVelocityLog *_sensor,
@@ -1927,7 +1927,7 @@ namespace gz
     {
       auto * headerMessage = _beamMarkersMessage->mutable_header();
       _sensor->AddSequence(headerMessage, "doppler_velocity_log_viz");
-    
+
       for (int i = 0; i < _trackingMessage.beams_size(); ++i)
       {
         auto * beamLowerQuantileConeMarker =
@@ -1936,14 +1936,14 @@ namespace gz
             _beamMarkersMessage->mutable_marker(3 * i + 1);
         auto * beamCapMarker =
             _beamMarkersMessage->mutable_marker(3 * i + 2);
-    
+
         beamLowerQuantileConeMarker->set_parent(
             this->depthSensor->Parent()->Name());
         beamUpperQuantileConeMarker->set_parent(
             this->depthSensor->Parent()->Name());
         beamCapMarker->set_parent(
             this->depthSensor->Parent()->Name());
-    
+
         const gz::math::Pose3d beamLocalTransform =
             this->depthSensor->LocalPose() * this->beams[i].Transform();
         gz::msgs::Set(
@@ -1951,7 +1951,7 @@ namespace gz
         gz::msgs::Set(
             beamUpperQuantileConeMarker->mutable_pose(), beamLocalTransform);
         gz::msgs::Set(beamCapMarker->mutable_pose(), beamLocalTransform);
-    
+
         const auto & beamMessage = _trackingMessage.beams(i);
         if (beamMessage.locked())
         {
@@ -1960,18 +1960,18 @@ namespace gz
               beamMessage.range().mean() - 2. * beamRangeStdDev;
           const double beamRangeUpperQuantile =
               beamMessage.range().mean() + 2. * beamRangeStdDev;
-    
+
           gz::msgs::Set(beamLowerQuantileConeMarker->mutable_scale(),
                         beamRangeLowerQuantile * gz::math::Vector3d::One);
           gz::msgs::Set(beamUpperQuantileConeMarker->mutable_scale(),
                         beamRangeUpperQuantile * gz::math::Vector3d::One);
           gz::msgs::Set(beamCapMarker->mutable_scale(),
                         beamRangeUpperQuantile * gz::math::Vector3d::One);
-    
+
           const gz::math::Vector3d beamAxis =
               this->referenceFrameRotation * this->beamsFrameTransform.Rot() *
               this->beams[i].Axis();
-    
+
           const double beamSpeed =
               gz::msgs::Convert(beamMessage.velocity().mean()).Dot(beamAxis);
           gz::math::Color beamLowerQuantileMarkerColor{0., 0., 0., 0.85};
@@ -2009,7 +2009,7 @@ namespace gz
           beamCapMarker->set_action(gz::msgs::Marker::DELETE_MARKER);
         }
       }
-    
+
       bool result;
       gz::msgs::Boolean reply;
       constexpr unsigned int timeout_ms = 1000u;
@@ -2022,6 +2022,6 @@ namespace gz
                << _sensor->Name() << "] sensor."
                << std::endl;
       }
-    }  
+    }
   }  // namespace sensors
 }  // namespace gz

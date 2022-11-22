@@ -192,43 +192,43 @@ namespace gz
     class DopplerVelocityLog : public gz::sensors::RenderingSensor
     {
       public: DopplerVelocityLog();
-    
+
       public: ~DopplerVelocityLog();
-    
+
       /// Inherits documentation from parent class
       public: virtual bool Load(const sdf::Sensor &_sdf) override;
-    
+
       /// Inherits documentation from parent class
       public: virtual bool Update(
         const std::chrono::steady_clock::duration &_now) override;
-    
+
       /// Perform any sensor updates after the rendering pass
       public: virtual void PostUpdate(
         const std::chrono::steady_clock::duration &_now);
-    
+
       /// Inherits documentation from parent class
       public: void SetScene(gz::rendering::ScenePtr _scene) override;
-    
+
       /// \brief Set this sensor's entity ID (for world state lookup).
       public: void SetEntity(uint64_t entity);
-    
+
       /// \brief Set world `_state` to support DVL water and bottom-tracking.
       public: void SetWorldState(const WorldState &_state);
-    
+
       /// \brief Set environmental `_data` to support DVL water-tracking.
       public: void SetEnvironmentalData(const EnvironmentalData &_data);
-    
+
       /// \brief Yield rendering sensors that underpin the implementation.
       ///
       /// \internal
       public: std::vector<gz::rendering::SensorPtr> RenderingSensors() const;
-    
+
       private: class Implementation;
-    
+
       private: std::unique_ptr<Implementation> dataPtr;
-    };    
-    
+    };
+
   }  // namespace sensors
 }  // namespace gz
-   
+
 #endif // GZ_SENSORS_DOPPLERVELOCITYLOG_HH_

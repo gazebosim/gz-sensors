@@ -37,13 +37,13 @@ namespace gz
       using T = math::InMemoryTimeVaryingVolumetricGrid<double>;
       using FrameT = common::DataFrame<std::string, T>;
       using ReferenceT = math::SphericalCoordinates::CoordinateType;
-  
+
       /// \brief Reference units
       enum class ReferenceUnits {
         RADIANS = 0,
         DEGREES
       };
-  
+
       /// \brief Instantiate environmental data.
       ///
       /// An std::make_shared equivalent that ensures
@@ -54,20 +54,20 @@ namespace gz
       MakeShared(FrameT _frame, ReferenceT _reference,
         ReferenceUnits _units = ReferenceUnits::RADIANS,
         bool _ignoreTimeStep = false);
-  
+
       /// \brief Environmental data frame.
       FrameT frame;
-  
+
       /// \brief Spatial reference for data coordinates.
       ReferenceT reference;
-  
+
       /// \brief The units to be used (only for spherical coordinates)
       ReferenceUnits units;
-  
+
       /// \brief Use time axis or not.
       bool staticTime;
     };
   }  // namespace sensors
 }  // namespace gz
 
-#endif 
+#endif
