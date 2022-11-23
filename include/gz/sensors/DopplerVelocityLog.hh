@@ -21,6 +21,7 @@
 #include <chrono>
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 #include <gz/math/Pose3.hh>
 #include <gz/math/Vector3.hh>
@@ -135,46 +136,49 @@ namespace gz
     /// estimates. Only 'gaussian' noise is currently supported. Defaults to
     /// none if left unspecified.
     /// - `<tracking><bottom_mode><visualize>` enables visual aids to validate
-    /// bottom tracking. Acoustic beam reflection paths are depicted, where the
-    /// color scales linearly in hue with measured speed and low opacity sections
-    /// depict range uncertainty (+/- 2 standard deviations).
-    /// - `<tracking><water_mass_mode>` configures the water-mass tracking mode.
-    /// - `<tracking><water_mass_mode><when>` enables (or disables) the water-mass
-    /// tracking mode. Supported values are 'never', to disable it completely
-    /// (as if no <water_mass_mode> configuration had been specified), 'always'
-    /// to enable it at all times, and 'best' to track at all times but only
-    /// publish estimates when it performs best among all configured modes.
-    /// Defaults to 'always' if left unspecified.
-    /// - `<tracking><water_mass_mode><water_velocity>` set the variables in world
-    /// environmental data to be used to sample water velocity w.r.t. the world frame
-    /// in each axis. At least one axis must be specified.
-    /// - `<tracking><water_mass_mode><water_velocity><x>` set the variable in world
-    /// environmental data to be used to sample water velocity w.r.t. the world frame
-    /// along the x-axis (that is, towards east). Defaults to none (and thus zero
-    /// water velocity in this axis) if left unspecified.
-    /// - `<tracking><water_mass_mode><water_velocity><y>` set the variable in world
-    /// environmental data to be used to sample water velocity w.r.t. the world frame
-    /// along the y-axis (that is, towards north). Defaults to none (and thus zero
-    /// water velocity in this axis) if left unspecified.
-    /// - `<tracking><water_mass_mode><water_velocity><z>` set the variable in world
-    /// environmental data to be used to sample water velocity w.r.t. the world frame
-    /// along the z-axis (that is, upwards). Defaults to none (and thus zero
-    /// water velocity in this axis) if left unspecified.
-    /// - `<tracking><water_mass_mode><boundaries>` sets water-mass layer boundaries.
-    /// These boundaries are planar at given z-offsets in the sensor frame.
-    /// - `<tracking><water_mass_mode><boundaries><near>` sets the water-mass layer
-    /// boundary that is the closest to the sensor.
-    /// - `<tracking><water_mass_mode><boundaries><far>` sets the water-mass layer
-    /// boundary that is the farthest to the sensor.
-    /// - `<tracking><water_mass_mode><bins>` sets the number of bins to use for
-    /// water-mass velocity sampling. Each bin is a slab of water between boundaries.
-    /// - `<tracking><water_mass_mode><noise>` sets the noise model for velocity
-    /// estimates. Only 'gaussian' noise is currently supported. Defaults to
-    /// none if left unspecified.
-    /// - `<tracking><water_mass_mode><visualize>` enables visual aids to validate
-    /// bottom tracking. Acoustic beam reflection paths are depicted, where the
-    /// color scales linearly in hue with measured speed and low opacity sections
-    /// depict range uncertainty (+/- 2 standard deviations).
+    /// bottom tracking. Acoustic beam reflection paths are depicted, where
+    /// the color scales linearly in hue with measured speed and low opacity
+    /// sections depict range uncertainty (+/- 2 standard deviations).
+    /// - `<tracking><water_mass_mode>` configures the water-mass tracking
+    /// mode.
+    /// - `<tracking><water_mass_mode><when>` enables (or disables) the
+    /// water-mass tracking mode. Supported values are 'never', to disable it
+    /// completely (as if no <water_mass_mode> configuration had been
+    /// specified), 'always' to enable it at all times, and 'best' to track at
+    /// all times but only publish estimates when it performs best among all
+    /// configured modes. Defaults to 'always' if left unspecified.
+    /// - `<tracking><water_mass_mode><water_velocity>` set the variables in
+    /// world environmental data to be used to sample water velocity w.r.t.
+    /// the world frame in each axis. At least one axis must be specified.
+    /// - `<tracking><water_mass_mode><water_velocity><x>` set the variable
+    /// in world environmental data to be used to sample water velocity w.r.t.
+    /// the world frame along the x-axis (that is, towards east). Defaults to
+    /// none (and thus zero water velocity in this axis) if left unspecified.
+    /// - `<tracking><water_mass_mode><water_velocity><y>` set the variable in
+    /// world environmental data to be used to sample water velocity w.r.t. the
+    /// world frame along the y-axis (that is, towards north). Defaults to none
+    /// (and thus zero water velocity in this axis) if left unspecified.
+    /// - `<tracking><water_mass_mode><water_velocity><z>` set the variable in
+    /// world environmental data to be used to sample water velocity w.r.t. the
+    /// world frame along the z-axis (that is, upwards). Defaults to none (and
+    /// thus zero water velocity in this axis) if left unspecified.
+    /// - `<tracking><water_mass_mode><boundaries>` sets water-mass layer
+    /// boundaries. These boundaries are planar at given z-offsets in the
+    /// sensor frame.
+    /// - `<tracking><water_mass_mode><boundaries><near>` sets the water-mass
+    /// layer boundary that is the closest to the sensor.
+    /// - `<tracking><water_mass_mode><boundaries><far>` sets the water-mass
+    /// layer boundary that is the farthest to the sensor.
+    /// - `<tracking><water_mass_mode><bins>` sets the number of bins to use
+    /// for water-mass velocity sampling. Each bin is a slab of water between
+    /// boundaries.
+    /// - `<tracking><water_mass_mode><noise>` sets the noise model for
+    /// velocity estimates. Only 'gaussian' noise is currently supported.
+    /// Defaults to none if left unspecified.
+    /// - `<tracking><water_mass_mode><visualize>` enables visual aids to
+    /// validate bottom tracking. Acoustic beam reflection paths are depicted,
+    /// where the color scales linearly in hue with measured speed and low
+    /// opacity sections depict range uncertainty (+/- 2 standard deviations).
     /// - `<type>` sets the sensor type, either 'piston' or 'phased_array'.
     /// Defaults to unspecified.
     /// - `<resolution>` sets the resolution of the beam for bottom
@@ -231,4 +235,4 @@ namespace gz
   }  // namespace sensors
 }  // namespace gz
 
-#endif // GZ_SENSORS_DOPPLERVELOCITYLOG_HH_
+#endif  // GZ_SENSORS_DOPPLERVELOCITYLOG_HH_

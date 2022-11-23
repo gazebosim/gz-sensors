@@ -80,6 +80,7 @@ namespace gz
 
         /// \brief Scalar converting copy constructor
         public: template<typename U>
+        // cppcheck-suppress noExplicitConstructor
         AxisAlignedPatch2(const AxisAlignedPatch2<U> &_other)
         {
           this->topLeft.X(static_cast<T>(_other.XMax()));
@@ -119,13 +120,15 @@ namespace gz
           return {-this->bottomRight, -this->topLeft};
         }
 
-        /// \brief Broadcast multiply corner coordinates by `_vector` coordinates.
+        /// \brief Broadcast multiply corner coordinates by `_vector`
+        /// coordinates.
         const AxisAlignedPatch2<T> operator*(gz::math::Vector2<T> _vector) const
         {
           return {this->topLeft * _vector, this->bottomRight * _vector};
         }
 
-        /// \brief Broadcast divide corner coordinates by `_vector` coordinates.
+        /// \brief Broadcast divide corner coordinates by `_vector`
+        /// coordinates.
         const AxisAlignedPatch2<T> operator/(gz::math::Vector2<T> _vector) const
         {
           return {this->topLeft / _vector, this->bottomRight / _vector};
@@ -137,7 +140,8 @@ namespace gz
           return {this->topLeft + _vector, this->bottomRight + _vector};
         }
 
-        /// \brief Broadcast substract corner coordinate with `_vector` coordinates.
+        /// \brief Broadcast substract corner coordinate with `_vector`
+        /// coordinates.
         const AxisAlignedPatch2<T> operator-(gz::math::Vector2<T> _vector) const
         {
           return {this->topLeft - _vector, this->bottomRight - _vector};
@@ -156,8 +160,9 @@ namespace gz
 
       /// \brief Acoustic DVL beam, modelled as a circular cone with aperture
       /// angle α and its apex at the origin. Its axis of symmetry is nominally
-      /// aligned with the x-axis of an x-forward, y-left, z-up frame (following
-      /// usual Gazebo frame conventions, typically facing downwards).
+      /// aligned with the x-axis of an x-forward, y-left, z-up frame
+      /// (following usual Gazebo frame conventions, typically facing
+      /// downwards).
       ///
       ///          +            The cone may be tilted w.r.t. the x-axis
       ///         /|\           and rotated about the same to accomodate
@@ -298,6 +303,7 @@ namespace gz
 
         public: TrackingModeSwitch() = default;
 
+        // cppcheck-suppress noExplicitConstructor
         public: TrackingModeSwitch(Value _value) : value(_value) {}
 
         public: operator Value() const { return value; }
@@ -316,7 +322,8 @@ namespace gz
       {
         public: using SessionT = gz::math::InMemorySession<T, P>;
 
-        public: using GridT = gz::math::InMemoryTimeVaryingVolumetricGrid<T, V, P>;
+        public: using GridT =
+          gz::math::InMemoryTimeVaryingVolumetricGrid<T, V, P>;
 
         /// \brief Default constructor.
         public: InMemoryTimeVaryingVectorField() = default;
@@ -492,23 +499,26 @@ namespace gz
       public: double waterMassModeFarBoundary;
 
       /// \brief Bottom tracking mode noise model
-      public: std::shared_ptr<gz::sensors::GaussianNoiseModel> bottomModeNoise;
+      public:
+      std::shared_ptr<gz::sensors::GaussianNoiseModel> bottomModeNoise;
 
       /// \brief Water-mass tracking mode noise model
-      public: std::shared_ptr<gz::sensors::GaussianNoiseModel> waterMassModeNoise;
+      public:
+      std::shared_ptr<gz::sensors::GaussianNoiseModel> waterMassModeNoise;
 
       /// \brief State of the world.
       public: const WorldState *worldState;
 
       /// \brief Water velocity vector field for water-mass sampling.
-      public: std::optional<InMemoryTimeVaryingVectorField<double>> waterVelocity;
+      public:
+      std::optional<InMemoryTimeVaryingVectorField<double>> waterVelocity;
 
       /// \brief Water velocity data shape, as dimension names,
       /// for environmental data indexing.
       public: std::array<std::string, 3> waterVelocityShape;
 
-      /// \brief Reference system in which coordinates for water-mass sampling
-      /// are to be defined in.
+      /// \brief Reference system in which coordinates for water-mass
+      /// sampling are to be defined in.
       public: EnvironmentalData::ReferenceT waterVelocityReference;
 
       /// \brief Whether water velocity was updated since last use.
@@ -522,7 +532,7 @@ namespace gz
 
       /// \brief Depth sensor intrinsic constants
       public: struct {
-        gz::math::Vector2d offset; ///<! Azimuth and elevation offsets
+        gz::math::Vector2d offset;  ///<! Azimuth and elevation offsets
         gz::math::Vector2d step;  ///<! Azimuth and elevation steps
       } depthSensorIntrinsics;
 
@@ -684,13 +694,15 @@ namespace gz
       gzmsg << "Loaded [" << this->Name() << "] DVL sensor." << std::endl;
       this->dataPtr->sceneChangeConnection =
           gz::sensors::RenderingEvents::ConnectSceneChangeCallback(
-          std::bind(&DopplerVelocityLog::SetScene, this, std::placeholders::_1));
+          std::bind(&DopplerVelocityLog::SetScene,
+                    this, std::placeholders::_1));
 
       return true;
     }
 
     //////////////////////////////////////////////////
-    bool DopplerVelocityLog::Implementation::Initialize(DopplerVelocityLog *_sensor)
+    bool
+    DopplerVelocityLog::Implementation::Initialize(DopplerVelocityLog *_sensor)
     {
       gzmsg << "Initializing [" << _sensor->Name() << "] sensor." << std::endl;
       const auto dvlTypeName =
@@ -997,7 +1009,8 @@ namespace gz
         beamCapMarker->set_visibility(gz::msgs::Marker::GUI);
         *beamCapMarker->mutable_lifetime() = gz::msgs::Convert(lifetime);
 
-        gz::msgs::Set(beamCapMarker->add_point(), gz::math::Vector3d{1., 0., 0.});
+        gz::msgs::Set(beamCapMarker->add_point(),
+                      gz::math::Vector3d{1., 0., 0.});
         for (size_t i = 0; i < lobeNumTriangles; ++i)
         {
           gz::msgs::Set(
@@ -1042,12 +1055,18 @@ namespace gz
         // Fetch acoustic beam specification
         const auto beamId =
             beamElement->Get<int>("id", defaultBeamId).first;
-        const auto beamApertureAngle = (beamElement->Get<gz::math::Angle>(
-            "aperture", gz::math::Angle::HalfPi).first * angleUnit).Normalized();
-        const auto beamRotationAngle = (beamElement->Get<gz::math::Angle>(
-            "rotation", gz::math::Angle::Zero).first * angleUnit).Normalized();
-        const auto beamTiltAngle = (beamElement->Get<gz::math::Angle>(
-            "tilt", gz::math::Angle::Zero).first * angleUnit).Normalized();
+        const auto beamApertureAngle = (
+          beamElement->Get<gz::math::Angle>(
+            "aperture", gz::math::Angle::HalfPi
+          ).first * angleUnit).Normalized();
+        const auto beamRotationAngle = (
+          beamElement->Get<gz::math::Angle>(
+            "rotation", gz::math::Angle::Zero
+            ).first * angleUnit).Normalized();
+        const auto beamTiltAngle = (
+          beamElement->Get<gz::math::Angle>(
+            "tilt", gz::math::Angle::Zero
+            ).first * angleUnit).Normalized();
         if (std::abs(beamTiltAngle.Radian()) >=
             std::abs(gz::math::Angle::HalfPi.Radian()))
         {
@@ -1067,11 +1086,11 @@ namespace gz
         gzmsg << "Adding acoustic beam #" << beamId
                << " to [" << _sensor->Name() << "] sensor. "
                << "Beam has a " << beamApertureAngle.Radian() << " rads "
-               << "(" << beamApertureAngle.Degree() << " degrees) aperture angle, "
-               << "it exhibits a " << beamTiltAngle.Radian() << " rads "
-               << "(" << beamTiltAngle.Degree() << " degrees) tilt, "
-               << "and it is rotated " << beamRotationAngle.Radian() << " rads "
-               << "(" << beamRotationAngle.Degree() << " degrees)."
+               << "(" << beamApertureAngle.Degree() << " degrees) aperture "
+               << "angle, it exhibits a " << beamTiltAngle.Radian()
+               << " rads (" << beamTiltAngle.Degree() << " degrees) tilt, "
+               << "and it is rotated " << beamRotationAngle.Radian()
+               << " rads (" << beamRotationAngle.Degree() << " degrees)."
                << std::endl;
 
         defaultBeamId = this->beams.back().Id() + 1;
@@ -1135,8 +1154,10 @@ namespace gz
       auto & intrinsics = this->depthSensorIntrinsics;
       intrinsics.offset.X(beamsSphericalFootprint.XMin());
       intrinsics.offset.Y(beamsSphericalFootprint.YMin());
-      intrinsics.step.X(beamsSphericalFootprint.XSize() / (horizontalRayCount - 1));
-      intrinsics.step.Y(beamsSphericalFootprint.YSize() / (verticalRayCount - 1));
+      intrinsics.step.X(
+        beamsSphericalFootprint.XSize() / (horizontalRayCount - 1));
+      intrinsics.step.Y(
+        beamsSphericalFootprint.YSize() / (verticalRayCount - 1));
 
       // Pre-compute scan indices covered by beam spherical
       // footprints for speed during scan iteration
@@ -1144,7 +1165,8 @@ namespace gz
       for (const auto & beam : this->beams)
       {
         this->beamScanPatches.push_back(AxisAlignedPatch2i{
-            (beam.SphericalFootprint() - intrinsics.offset) / intrinsics.step});
+            (beam.SphericalFootprint() - intrinsics.offset) /
+            intrinsics.step});
       }
 
       const double minimumRange =
@@ -1305,7 +1327,8 @@ namespace gz
     }
 
     //////////////////////////////////////////////////
-    void DopplerVelocityLog::SetEnvironmentalData(const EnvironmentalData &_data)
+    void
+    DopplerVelocityLog::SetEnvironmentalData(const EnvironmentalData &_data)
     {
       if (this->dataPtr->waterMassModeSwitch)
       {
@@ -1367,7 +1390,8 @@ namespace gz
     }
 
     //////////////////////////////////////////////////
-    bool DopplerVelocityLog::Update(const std::chrono::steady_clock::duration &)
+    bool
+    DopplerVelocityLog::Update(const std::chrono::steady_clock::duration &)
     {
       GZ_PROFILE("DopplerVelocityLog::Update");
       if (!this->dataPtr->initialized || this->dataPtr->entityId == 0)
@@ -1471,13 +1495,15 @@ namespace gz
                 this->worldState->kinematics.at(beamTarget->entity);
           }
 
-          // Transform beam reflecting target pose in the (global) world frame
+          // Transform beam reflecting target pose
+          // in the (global) world frame
           const gz::math::Pose3d targetPoseInWorldFrame =
               sensorStateInWorldFrame.pose *
               this->beamsFrameTransform *
               beamTarget->pose;
 
-          // Compute beam reflecting target velocity in the (global) world frame
+          // Compute beam reflecting target velocity
+          // in the (global) world frame
           const gz::math::Vector3d targetVelocityInWorldFrame =
               targetEntityStateInWorldFrame.linearVelocity +
               targetEntityStateInWorldFrame.angularVelocity.Cross(
@@ -1496,7 +1522,8 @@ namespace gz
 
           const double beamSpeed =
               this->bottomModeNoise->Apply(
-                  relativeSensorVelocityInSensorFrame.Dot(beamAxisInSensorFrame));
+                  relativeSensorVelocityInSensorFrame.Dot(
+                      beamAxisInSensorFrame));
 
           const gz::math::Vector3d beamAxisInReferenceFrame =
               this->referenceFrameRotation * beamAxisInSensorFrame;
@@ -1546,10 +1573,14 @@ namespace gz
             pseudoInverse * bottomModeNoiseVariance * pseudoInverse.transpose();
 
         auto * velocityMessage = message.mutable_velocity();
-        velocityMessage->set_reference(DVLKinematicEstimate::DVL_REFERENCE_SHIP);
-        velocityMessage->mutable_mean()->set_x(velocityMeanInReferenceFrame.x());
-        velocityMessage->mutable_mean()->set_y(velocityMeanInReferenceFrame.y());
-        velocityMessage->mutable_mean()->set_z(velocityMeanInReferenceFrame.z());
+        velocityMessage->set_reference(
+            DVLKinematicEstimate::DVL_REFERENCE_SHIP);
+        velocityMessage->mutable_mean()->set_x(
+            velocityMeanInReferenceFrame.x());
+        velocityMessage->mutable_mean()->set_y(
+            velocityMeanInReferenceFrame.y());
+        velocityMessage->mutable_mean()->set_z(
+            velocityMeanInReferenceFrame.z());
 
         velocityMessage->mutable_covariance()->Resize(9, 0.);
         std::copy(velocityCovarianceInReferenceFrame.data(),
@@ -1699,7 +1730,8 @@ namespace gz
           const gz::math::Vector3d sampledVelocityInWorldFrame =
               this->waterVelocity->LookUp(samplePointInDataFrame);
 
-          // Compute DVL velocity w.r.t. sampled water velocity in the sensor frame
+          // Compute DVL velocity w.r.t. sampled water velocity
+          // in the sensor frame
           const gz::math::Vector3d relativeSensorVelocityInSensorFrame =
               sensorStateInWorldFrame.pose.Rot().RotateVectorReverse(
                   sensorStateInWorldFrame.linearVelocity -
@@ -1708,14 +1740,16 @@ namespace gz
           // Estimate speed as measured by beam (incl. measurement noise)
           const double beamSpeed =
               this->waterMassModeNoise->Apply(
-                  relativeSensorVelocityInSensorFrame.Dot(beamAxisInSensorFrame));
+                  relativeSensorVelocityInSensorFrame.Dot(
+                      beamAxisInSensorFrame));
 
           const double prevAverageBeamSpeed = averageBeamSpeed;
           // Use cumulative average algorithm to avoid keeping samples
           averageBeamSpeed = (beamSpeed + i * prevAverageBeamSpeed) / (i + 1);
           // Use Welford's moving variance algorithm to avoid keeping samples
           beamSpeedRSS +=
-              (beamSpeed - prevAverageBeamSpeed) * (beamSpeed - averageBeamSpeed);
+              (beamSpeed - prevAverageBeamSpeed) *
+              (beamSpeed - averageBeamSpeed);
         }
         const double beamSpeedVariance =
             beamSpeedRSS / (this->waterMassModeNumBins - 1);
@@ -1724,7 +1758,8 @@ namespace gz
                             beamAxisInReferenceFrame.Y(),
                             beamAxisInReferenceFrame.Z()};
         const Eigen::Matrix3d beamVelocityCovarianceInReferenceFrame =
-            beamSpeedVariance * beamBasisElement * beamBasisElement.transpose();
+            beamSpeedVariance * beamBasisElement *
+            beamBasisElement.transpose();
 
         // Set beam velocity mean and covariance in the reference frame
         auto * beamVelocityMessage = beamMessage->mutable_velocity();
@@ -1762,13 +1797,18 @@ namespace gz
             Eigen::MatrixXd::Identity(numBeamsLocked, numBeamsLocked));
         // Use row-major 1D layout for covariance
         const RowMajorMatrix3d velocityCovarianceInReferenceFrame =
-            pseudoInverse * waterMassModeNoiseVariance * pseudoInverse.transpose();
+            pseudoInverse * waterMassModeNoiseVariance *
+            pseudoInverse.transpose();
 
         auto * velocityMessage = message.mutable_velocity();
-        velocityMessage->set_reference(DVLKinematicEstimate::DVL_REFERENCE_SHIP);
-        velocityMessage->mutable_mean()->set_x(velocityMeanInReferenceFrame.x());
-        velocityMessage->mutable_mean()->set_y(velocityMeanInReferenceFrame.y());
-        velocityMessage->mutable_mean()->set_z(velocityMeanInReferenceFrame.z());
+        velocityMessage->set_reference(
+            DVLKinematicEstimate::DVL_REFERENCE_SHIP);
+        velocityMessage->mutable_mean()->set_x(
+            velocityMeanInReferenceFrame.x());
+        velocityMessage->mutable_mean()->set_y(
+            velocityMeanInReferenceFrame.y());
+        velocityMessage->mutable_mean()->set_z(
+            velocityMeanInReferenceFrame.z());
 
         velocityMessage->mutable_covariance()->Resize(9, 0.);
         std::copy(velocityCovarianceInReferenceFrame.data(),
@@ -1832,8 +1872,9 @@ namespace gz
             }
             else
             {
-              gzdbg << "No entity associated to [" << visual->Name() << "] visual."
-                    << " Assuming it is static w.r.t. the world." << std::endl;
+              gzdbg << "No entity associated to [" << visual->Name() << "]"
+                    << " visual. Assuming it is static w.r.t. the world."
+                    << std::endl;
             }
           }
         }
@@ -1955,7 +1996,8 @@ namespace gz
         const auto & beamMessage = _trackingMessage.beams(i);
         if (beamMessage.locked())
         {
-          const double beamRangeStdDev = std::sqrt(beamMessage.range().variance());
+          const double beamRangeStdDev =
+              std::sqrt(beamMessage.range().variance());
           const double beamRangeLowerQuantile =
               beamMessage.range().mean() - 2. * beamRangeStdDev;
           const double beamRangeUpperQuantile =
@@ -1976,7 +2018,8 @@ namespace gz
               gz::msgs::Convert(beamMessage.velocity().mean()).Dot(beamAxis);
           gz::math::Color beamLowerQuantileMarkerColor{0., 0., 0., 0.85};
           // Linearly map beam speed in the [-1 m/s, 1 m/s] to full-scale hue.
-          beamLowerQuantileMarkerColor.SetFromHSV(180. + beamSpeed * 360., 1., 0.75);
+          beamLowerQuantileMarkerColor.SetFromHSV(
+              180. + beamSpeed * 360., 1., 0.75);
           auto * beamLowerQuantileConeMaterial =
               beamLowerQuantileConeMarker->mutable_material();
           gz::msgs::Set(beamLowerQuantileConeMaterial->mutable_ambient(),
@@ -1998,14 +2041,18 @@ namespace gz
                         beamUpperQuantileMarkerColor);
           *beamCapMarker->mutable_material() =
               beamUpperQuantileConeMarker->material();
-          beamLowerQuantileConeMarker->set_action(gz::msgs::Marker::ADD_MODIFY);
-          beamUpperQuantileConeMarker->set_action(gz::msgs::Marker::ADD_MODIFY);
+          beamLowerQuantileConeMarker->set_action(
+              gz::msgs::Marker::ADD_MODIFY);
+          beamUpperQuantileConeMarker->set_action(
+              gz::msgs::Marker::ADD_MODIFY);
           beamCapMarker->set_action(gz::msgs::Marker::ADD_MODIFY);
         }
         else
         {
-          beamLowerQuantileConeMarker->set_action(gz::msgs::Marker::DELETE_MARKER);
-          beamUpperQuantileConeMarker->set_action(gz::msgs::Marker::DELETE_MARKER);
+          beamLowerQuantileConeMarker->set_action(
+              gz::msgs::Marker::DELETE_MARKER);
+          beamUpperQuantileConeMarker->set_action(
+              gz::msgs::Marker::DELETE_MARKER);
           beamCapMarker->set_action(gz::msgs::Marker::DELETE_MARKER);
         }
       }

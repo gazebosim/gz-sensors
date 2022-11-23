@@ -18,6 +18,7 @@
 #define GZ_SENSORS_ENVIRONMENTAL_DATA_HH_
 
 #include <memory>
+#include <string>
 
 #include <gz/common/DataFrame.hh>
 #include <gz/math/SphericalCoordinates.hh>
