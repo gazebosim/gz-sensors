@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
 #============================================================================
 # Initialize the project
 #============================================================================
-project(ignition-sensors3 VERSION 3.4.0)
+project(ignition-sensors3 VERSION 3.5.0)
 
 #============================================================================
 # Find ignition-cmake
@@ -15,6 +15,7 @@ find_package(ignition-cmake2 2.13 REQUIRED)
 #============================================================================
 ign_configure_project(
   REPLACE_IGNITION_INCLUDE_PATH gz/sensors
+  VERSION_SUFFIX pre1
 )
 
 #============================================================================
