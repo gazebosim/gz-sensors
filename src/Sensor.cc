@@ -15,20 +15,20 @@
  *
 */
 
-#include "ignition/sensors/Sensor.hh"
+#include "gz/sensors/Sensor.hh"
 
 #include <chrono>
 #include <map>
 #include <vector>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/transport/Node.hh>
-#include <ignition/transport/TopicUtils.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/transport/Node.hh>
+#include <gz/transport/TopicUtils.hh>
 
-using namespace ignition::sensors;
+using namespace gz::sensors;
 
-class ignition::sensors::SensorPrivate
+class gz::sensors::SensorPrivate
 {
   /// \brief Populates fields from a <sensor> DOM
   public: bool PopulateFromSDF(const sdf::Sensor &_sdf);
@@ -58,7 +58,7 @@ class ignition::sensors::SensorPrivate
   public: std::string topic;
 
   /// \brief Pose of the sensor
-  public: ignition::math::Pose3d pose;
+  public: gz::math::Pose3d pose;
 
   /// \brief Flag to enable publishing performance metrics.
   public: bool enableMetrics{false};
@@ -67,7 +67,7 @@ class ignition::sensors::SensorPrivate
   public: double updateRate = 0.0;
 
   /// \brief What sim time should this sensor update at
-  public: ignition::common::Time nextUpdateTime;
+  public: gz::common::Time nextUpdateTime;
 
   /// \brief Last steady clock time reading from last Update call.
   public: std::chrono::time_point<std::chrono::steady_clock> lastRealTime;
@@ -76,10 +76,10 @@ class ignition::sensors::SensorPrivate
   public: std::chrono::duration<double> lastUpdateTime{0};
 
   /// \brief Transport node.
-  public: ignition::transport::Node node;
+  public: gz::transport::Node node;
 
   /// \brief Publishes the PerformanceSensorMetrics message.
-  public: ignition::transport::Node::Publisher performanceSensorMetricsPub;
+  public: gz::transport::Node::Publisher performanceSensorMetricsPub;
 
   /// \brief SDF element with sensor information.
   public: sdf::ElementPtr sdf = nullptr;
@@ -320,7 +320,7 @@ void SensorPrivate::PublishMetrics(const std::chrono::duration<double> &_now)
 }
 
 //////////////////////////////////////////////////
-ignition::math::Pose3d Sensor::Pose() const
+gz::math::Pose3d Sensor::Pose() const
 {
   return this->dataPtr->pose;
 }
@@ -338,7 +338,7 @@ void Sensor::SetParent(const std::string &_parent)
 }
 
 //////////////////////////////////////////////////
-void Sensor::SetPose(const ignition::math::Pose3d &_pose)
+void Sensor::SetPose(const gz::math::Pose3d &_pose)
 {
   this->dataPtr->pose = _pose;
 }
@@ -363,7 +363,7 @@ void Sensor::SetUpdateRate(const double _hz)
 }
 
 //////////////////////////////////////////////////
-bool Sensor::Update(const ignition::common::Time &_now,
+bool Sensor::Update(const gz::common::Time &_now,
                   const bool _force)
 {
   IGN_PROFILE("Sensor::Update");
@@ -388,7 +388,7 @@ bool Sensor::Update(const ignition::common::Time &_now,
   if (!_force && this->dataPtr->updateRate > 0.0)
   {
     // Update the time the plugin should be loaded
-    ignition::common::Time delta(1.0 / this->dataPtr->updateRate);
+    gz::common::Time delta(1.0 / this->dataPtr->updateRate);
     this->dataPtr->nextUpdateTime += delta;
   }
 
@@ -396,13 +396,13 @@ bool Sensor::Update(const ignition::common::Time &_now,
 }
 
 //////////////////////////////////////////////////
-ignition::common::Time Sensor::NextUpdateTime() const
+gz::common::Time Sensor::NextUpdateTime() const
 {
   return this->dataPtr->nextUpdateTime;
 }
 
 /////////////////////////////////////////////////
-void Sensor::AddSequence(ignition::msgs::Header *_msg,
+void Sensor::AddSequence(gz::msgs::Header *_msg,
                          const std::string &_seqKey)
 {
   std::string value = "0";
@@ -426,7 +426,7 @@ void Sensor::AddSequence(ignition::msgs::Header *_msg,
   }
 
   // Otherwise, add the sequence key-value pair.
-  ignition::msgs::Header::Map *map = _msg->add_data();
+  gz::msgs::Header::Map *map = _msg->add_data();
   map->set_key("seq");
   map->add_value(value);
 }

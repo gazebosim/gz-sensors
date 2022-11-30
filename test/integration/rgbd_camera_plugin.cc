@@ -22,16 +22,16 @@
 #pragma warning(disable: 4005)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/camera_info.pb.h>
+#include <gz/msgs/camera_info.pb.h>
 #include <ignition/msgs.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include <ignition/common/Filesystem.hh>
-#include <ignition/common/Event.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/RgbdCameraSensor.hh>
+#include <gz/common/Filesystem.hh>
+#include <gz/common/Event.hh>
+#include <gz/sensors/Manager.hh>
+#include <gz/sensors/RgbdCameraSensor.hh>
 
 // TODO(louise) Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -39,11 +39,11 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/Material.hh>
-#include <ignition/rendering/RenderEngine.hh>
-#include <ignition/rendering/RenderingIface.hh>
-#include <ignition/rendering/Scene.hh>
-#include <ignition/rendering/Visual.hh>
+#include <gz/rendering/Material.hh>
+#include <gz/rendering/RenderEngine.hh>
+#include <gz/rendering/RenderingIface.hh>
+#include <gz/rendering/Scene.hh>
+#include <gz/rendering/Visual.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -56,7 +56,7 @@
 #define DEPTH_TOL 1e-4
 #define DOUBLE_TOL 1e-6
 
-using namespace ignition;
+using namespace gz;
 
 std::mutex g_mutex;
 unsigned int g_depthCounter = 0;
@@ -374,7 +374,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     EXPECT_EQ(0u, mr);
     EXPECT_EQ(0u, mg);
 #ifndef __APPLE__
-    // See https://github.com/ignitionrobotics/ign-sensors/issues/66
+    // See https://github.com/gazebosim/gz-sensors/issues/66
     EXPECT_GT(mb, 0u);
 #endif
 
@@ -440,7 +440,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     EXPECT_EQ(0u, mr);
     EXPECT_EQ(0u, mg);
 #ifndef __APPLE__
-    // See https://github.com/ignitionrobotics/ign-sensors/issues/66
+    // See https://github.com/gazebosim/gz-sensors/issues/66
     EXPECT_GT(mb, 0u);
 #endif
 

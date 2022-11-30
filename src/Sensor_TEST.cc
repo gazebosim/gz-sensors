@@ -19,24 +19,24 @@
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/performance_sensor_metrics.pb.h>
+#include <gz/msgs/performance_sensor_metrics.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
 
-#include <ignition/sensors/Sensor.hh>
+#include <gz/sensors/Sensor.hh>
 
 #include <atomic>
 #include <memory>
 
 #include <gtest/gtest.h>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Time.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Time.hh>
+#include <gz/sensors/Export.hh>
+#include <gz/transport/Node.hh>
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 class TestSensor : public Sensor

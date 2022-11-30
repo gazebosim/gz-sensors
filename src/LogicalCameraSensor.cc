@@ -26,22 +26,22 @@
 
 #include <mutex>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Profiler.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Profiler.hh>
 
-#include <ignition/transport/Node.hh>
+#include <gz/transport/Node.hh>
 
-#include <ignition/math/Frustum.hh>
-#include <ignition/math/Helpers.hh>
+#include <gz/math/Frustum.hh>
+#include <gz/math/Helpers.hh>
 
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/LogicalCameraSensor.hh"
+#include "gz/sensors/SensorFactory.hh"
+#include "gz/sensors/LogicalCameraSensor.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for LogicalCameraSensor
-class ignition::sensors::LogicalCameraSensorPrivate
+class gz::sensors::LogicalCameraSensorPrivate
 {
   /// \brief node to create publisher
   public: transport::Node node;

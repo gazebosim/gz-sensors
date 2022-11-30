@@ -17,11 +17,11 @@
 
 #include <gtest/gtest.h>
 
-#include <ignition/common/Filesystem.hh>
-#include <ignition/common/Time.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/CameraSensor.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Filesystem.hh>
+#include <gz/common/Time.hh>
+#include <gz/sensors/Manager.hh>
+#include <gz/sensors/CameraSensor.hh>
+#include <gz/transport/Node.hh>
 
 // TODO(louise) Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -29,9 +29,9 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/RenderEngine.hh>
-#include <ignition/rendering/RenderingIface.hh>
-#include <ignition/rendering/Scene.hh>
+#include <gz/rendering/RenderEngine.hh>
+#include <gz/rendering/RenderingIface.hh>
+#include <gz/rendering/Scene.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -52,10 +52,10 @@
 
 std::mutex g_infoMutex;
 unsigned int g_infoCounter = 0;
-ignition::msgs::CameraInfo g_infoMsg;
+gz::msgs::CameraInfo g_infoMsg;
 
 //////////////////////////////////////////////////
-void OnCameraInfo(const ignition::msgs::CameraInfo & _msg)
+void OnCameraInfo(const gz::msgs::CameraInfo & _msg)
 {
   g_infoMutex.lock();
   g_infoCounter++;
@@ -75,7 +75,7 @@ class CameraSensorTest: public testing::Test,
 void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 {
   // get the darn test data
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "integration", "camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -89,7 +89,7 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   auto sensorPtr = linkPtr->GetElement("sensor");
 
   // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine(_renderEngine);
+  auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
     igndbg << "Engine '" << _renderEngine
@@ -97,13 +97,13 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
     return;
   }
 
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
 
   // do the test
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
-  ignition::sensors::CameraSensor *sensor =
-      mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
+  gz::sensors::CameraSensor *sensor =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtr);
   ASSERT_NE(sensor, nullptr);
   sensor->SetScene(scene);
 
@@ -116,21 +116,21 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 
   // subscribe to the camera info topic
   std::string infoTopic = sensor->InfoTopic();
-  ignition::transport::Node node;
+  gz::transport::Node node;
   node.Subscribe(infoTopic, &OnCameraInfo);
-  WaitForMessageTestHelper<ignition::msgs::CameraInfo> helperInfo(infoTopic);
+  WaitForMessageTestHelper<gz::msgs::CameraInfo> helperInfo(infoTopic);
 
   std::string topic = "/test/integration/CameraPlugin_imagesWithBuiltinSDF";
-  WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
+  WaitForMessageTestHelper<gz::msgs::Image> helper(topic);
 
   // Update once to create image
-  mgr.RunOnce(ignition::common::Time::Zero);
+  mgr.RunOnce(gz::common::Time::Zero);
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
   EXPECT_TRUE(helperInfo.WaitForMessage()) << helperInfo;
 
   // Check CameraInfo properties
-  ignition::msgs::CameraInfo infoMsg;
+  gz::msgs::CameraInfo infoMsg;
   g_infoMutex.lock();
   EXPECT_EQ(1u, g_infoCounter);
   infoMsg.CopyFrom(g_infoMsg);
@@ -169,7 +169,7 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 
   // Clean up
   engine->DestroyScene(scene);
-  ignition::rendering::unloadEngine(engine->Name());
+  gz::rendering::unloadEngine(engine->Name());
 }
 
 //////////////////////////////////////////////////
@@ -179,12 +179,12 @@ TEST_P(CameraSensorTest, ImagesWithBuiltinSDF)
 }
 
 INSTANTIATE_TEST_CASE_P(CameraSensor, CameraSensorTest,
-    RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
+    RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-  ignition::common::Console::SetVerbosity(4);
+  gz::common::Console::SetVerbosity(4);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

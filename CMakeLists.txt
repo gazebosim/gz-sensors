@@ -13,14 +13,16 @@ find_package(ignition-cmake2 2.13 REQUIRED)
 #============================================================================
 # Configure the project
 #============================================================================
-ign_configure_project()
+ign_configure_project(
+  REPLACE_IGNITION_INCLUDE_PATH gz/sensors
+)
 
 #============================================================================
 # Set project-specific options
 #============================================================================
 set (DRI_TESTS TRUE CACHE BOOL "True to enable DRI tests")
 
-option(ENABLE_PROFILER "Enable Ignition Profiler" FALSE)
+option(ENABLE_PROFILER "Enable Gazebo Profiler" FALSE)
 
 if(ENABLE_PROFILER)
   add_definitions("-DIGN_PROFILER_ENABLE=1")
