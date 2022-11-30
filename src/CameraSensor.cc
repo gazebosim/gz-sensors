@@ -254,6 +254,11 @@ bool CameraSensor::CreateCamera()
     cameraSdf->SetLensIntrinsicsCy(intrinsicMatrix(1, 2));
   }
 
+  // Update the DOM object intrinsics to have consistent
+  // projection matrix values between ogre camera and camera_info msg
+  // If these values are not defined in the SDF then we need to update
+  // these values to something reasonable. The projection matrix is
+  // the cumulative effect of intrinsic and extrinsic parameters
   if(!cameraSdf->HasLensProjection())
   {
     auto intrinsicMatrix =
