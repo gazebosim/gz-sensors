@@ -6,7 +6,7 @@ notification to users that their code should be upgraded. The next major
 release will remove the deprecated code.
 
 
-## Ignition Sensors 2.X to 3.X
+## Gazebo Sensors 2.X to 3.X
 
 ### Additions
 
@@ -24,7 +24,7 @@ and header files. Similarly, noise models for rendering sensors need be created
 using the new ImageNoiseFactory class instead of NoiseFactory by including
 ImageNoise.hh.
 
-## Ignition Sensors 1.X to 2.X
+## Gazebo Sensors 1.X to 2.X
 
 ### Additions
 

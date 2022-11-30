@@ -1,13 +1,13 @@
 \page tutorials Tutorials
 
-Welcome to the Ignition @GZ_DESIGNATION_CAP@ tutorials. These tutorials
+Welcome to the Gazebo @GZ_DESIGNATION_CAP@ tutorials. These tutorials
 will guide you through the process of understanding the capabilities of the
-Ignition @GZ_DESIGNATION_CAP@ library and how to use the library effectively.
+Gazebo @GZ_DESIGNATION_CAP@ library and how to use the library effectively.
 
 **The tutorials**
 
 1. \subpage introduction "Introduction"
-2. \subpage thermalcameraigngazebo "Thermal Camera in Ignition Gazebo": Using a thermal camera in Ignition Gazebo to detect objects of specific temperatures in camera images.
+2. \subpage thermalcameraigngazebo "Thermal Camera in Gazebo Sim": Using a thermal camera in Gazebo Sim to detect objects of specific temperatures in camera images.
 
 ## License
 
