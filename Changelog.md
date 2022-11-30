@@ -242,10 +242,10 @@
 1. Create component for rendering sensor classes
     * [BitBucket pull request 42](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/42)
 
-1. Upgrade to ignition-rendering2
+1. Upgrade to gz-rendering2
     * [BitBucket pull request 45](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/45)
 
-1. Upgrade to ignition-msgs4 and ignition-transport7
+1. Upgrade to gz-msgs4 and gz-transport7
     * [BitBucket pull request 51](https://osrf-migration.github.io/ignition-gh-pages/#!/gazebosim/gz-sensors/pull-requests/51)
 
 ### Gazebo Sensors 1.X.X (2019-XX-XX)

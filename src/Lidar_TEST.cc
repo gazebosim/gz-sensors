@@ -33,6 +33,8 @@
 #include <gz/sensors/Manager.hh>
 #include <gz/sensors/Lidar.hh>
 
+using namespace ignition;
+
 sdf::ElementPtr LidarToSDF(const std::string &name, double update_rate,
     const std::string &topic, double horz_samples, double horz_resolution,
     double horz_min_angle, double horz_max_angle, double vert_samples,
@@ -115,7 +117,7 @@ TEST(Lidar_TEST, CreateLaser)
 
   // Create SDF describing a camera sensor
   const std::string name = "TestLidar";
-  const std::string topic = "/ignition/sensors/test/lidar";
+  const std::string topic = "/gz/sensors/test/lidar";
   const double update_rate = 30;
   const double horz_samples = 640;
   const double horz_resolution = 1;
@@ -216,16 +218,16 @@ TEST(Lidar_TEST, CreateLaserFailures)
 
   sdfLidarSensor.SetLidarNoise(noise);
   sdfSensor.SetLidarSensor(sdfLidarSensor);
-  ignition::sensors::Lidar sensor4;
+  sensors::Lidar sensor4;
   EXPECT_TRUE(sensor4.Load(sdfSensor));
 
   noise.SetType(sdf::NoiseType::GAUSSIAN_QUANTIZED);
   sdfLidarSensor.SetLidarNoise(noise);
   sdfSensor.SetLidarSensor(sdfLidarSensor);
-  ignition::sensors::Lidar sensor5;
+  sensors::Lidar sensor5;
   EXPECT_TRUE(sensor5.Load(sdfSensor));
 
-  sensor.Update(ignition::common::Time(0.1));
+  sensor.Update(common::Time(0.1));
 }
 
 //////////////////////////////////////////////////
