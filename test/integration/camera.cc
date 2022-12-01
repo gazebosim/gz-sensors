@@ -282,9 +282,9 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
 
   // Subscribe to the camera info topic
   gz::msgs::CameraInfo camera1Info, camera2Info, camera3Info;
-  unsigned int camera1Counter = 0;
-  unsigned int camera2Counter = 0;
-  unsigned int camera3Counter = 0;
+  unsigned int camera1Counter = 0u;
+  unsigned int camera2Counter = 0u;
+  unsigned int camera3Counter = 0u;
 
   std::function<void(const gz::msgs::CameraInfo&)> camera1InfoCallback =
       [&camera1Info, &camera1Counter](const gz::msgs::CameraInfo& _msg)
@@ -305,16 +305,16 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
     camera3Counter++;
   };
 
-  unsigned int height = 1000;
-  unsigned int width = 1000;
+  unsigned int height = 1000u;
+  unsigned int width = 1000u;
   unsigned int bpp = 3u;
   unsigned int imgBufferSize = width * height * bpp;
   unsigned char* img1 = new unsigned char[imgBufferSize];
   unsigned char* img2 = new unsigned char[imgBufferSize];
   unsigned char* img3 = new unsigned char[imgBufferSize];
-  unsigned int camera1DataCounter = 0;
-  unsigned int camera2DataCounter = 0;
-  unsigned int camera3DataCounter = 0;
+  unsigned int camera1DataCounter = 0u;
+  unsigned int camera2DataCounter = 0u;
+  unsigned int camera3DataCounter = 0u;
   std::function<void(const gz::msgs::Image &)> camera1Callback =
       [&img1, &camera1DataCounter, &imgBufferSize](const gz::msgs::Image & _msg)
   {
@@ -354,9 +354,9 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
   while (!done && sleep++ < maxSleep)
   {
     std::lock_guard<std::mutex> lock(g_mutex);
-    done = (camera1Counter > 0 && camera2Counter > 0 && camera3Counter > 0 &&
-        camera1DataCounter > 0 && camera2DataCounter > 0 &&
-        camera3DataCounter > 0);
+    done = (camera1Counter > 0u && camera2Counter > 0u && camera3Counter > 0u &&
+        camera1DataCounter > 0u && camera2DataCounter > 0u &&
+        camera3DataCounter > 0u);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
@@ -399,9 +399,9 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
 
   // get sum of each color channel
   // all cameras should just see blue colors
-  for (unsigned int i = 0; i < height; ++i)
+  for (unsigned int i = 0u; i < height; ++i)
   {
-    for (unsigned int j = 0; j < step; j+=bpp)
+    for (unsigned int j = 0u; j < step; j+=bpp)
     {
       unsigned int idx = i * step + j;
       unsigned int r1 = img1[idx];
@@ -445,8 +445,6 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
   EXPECT_EQ(r2Sum, r3Sum);
   EXPECT_EQ(g2Sum, g3Sum);
   EXPECT_NE(b2Sum, b3Sum);
-
-  std::cerr << r3Sum << " " << g3Sum << " " << b3Sum << std::endl;
 
   delete []  img1;
   delete []  img2;
