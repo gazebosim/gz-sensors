@@ -65,7 +65,6 @@ class gz::sensors::CameraSensorPrivate
   public: bool SaveImage(const unsigned char *_data, unsigned int _width,
     unsigned int _height, gz::common::Image::PixelFormatType _format);
 
-
   /// \brief Computes the OpenGL NDC matrix
   /// \param[in] _left Left vertical clipping plane
   /// \param[in] _right Right vertical clipping plane
