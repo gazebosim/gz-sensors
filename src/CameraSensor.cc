@@ -265,6 +265,11 @@ bool CameraSensor::CreateCamera()
   // the cumulative effect of intrinsic and extrinsic parameters
   if(!cameraSdf->HasLensProjection())
   {
+    // Note that the matrix from Ogre via camera->ProjectionMatrix() has a
+    // different format than the projection matrix used in SDFormat.
+    // This is why they are converted using projectionToCameraIntrinsic.
+    // The resulting matrix is the intrinsic matrix, but since the user has
+    // not overridden the values, this is also equal to the projection matrix.
     auto intrinsicMatrix =
       gz::rendering::projectionToCameraIntrinsic(
         this->dataPtr->camera->ProjectionMatrix(),
