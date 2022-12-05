@@ -13,65 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
-#ifndef IGNITION_SENSORS_GAUSSIANNOISEMODEL_HH_
-#define IGNITION_SENSORS_GAUSSIANNOISEMODEL_HH_
-
-#include <sdf/sdf.hh>
-
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/Export.hh"
-#include "ignition/sensors/Noise.hh"
-
-namespace ignition
-{
-  namespace sensors
-  {
-    // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
-    //
-    // Forward declarations
-    class GaussianNoiseModelPrivate;
-
-    /** \class GaussianNoiseModel GaussianNoiseModel.hh \
-    ignition/sensors/GaussianNoiseModel.hh
-    **/
-    /// \brief Gaussian noise class
-    class IGNITION_SENSORS_VISIBLE GaussianNoiseModel : public Noise
-    {
-      /// \brief Constructor.
-      public: GaussianNoiseModel();
-
-      /// \brief Destructor.
-      public: virtual ~GaussianNoiseModel();
-
-      // Documentation inherited.
-      public: virtual void Load(const sdf::Noise &_sdf) override;
-
-      // Documentation inherited.
-      public: double ApplyImpl(double _in, double _dt) override;
-
-      /// \brief Accessor for mean.
-      /// \return Mean of Gaussian noise.
-      public: double Mean() const;
-
-      /// \brief Accessor for stddev.
-      /// \return Standard deviation of Gaussian noise.
-      public: double StdDev() const;
-
-      /// \brief Accessor for bias.
-      /// \return Bias on output.
-      public: double Bias() const;
-
-      /// Documentation inherited
-      public: virtual void Print(std::ostream &_out) const override;
-
-      /// \brief Private data pointer.
-      private: GaussianNoiseModelPrivate *dataPtr = nullptr;
-    };
-  }
-  }
-}
-
-#endif
+#include <gz/sensors/GaussianNoiseModel.hh>
+#include <ignition/sensors/config.hh>

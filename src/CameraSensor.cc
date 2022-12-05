@@ -14,42 +14,40 @@
  * limitations under the License.
  *
 */
-#if defined(_MSC_VER)
-  #pragma warning(push)
-  #pragma warning(disable: 4005)
-  #pragma warning(disable: 4251)
-#endif
-#include <ignition/msgs/camera_info.pb.h>
-#if defined(_MSC_VER)
-  #pragma warning(pop)
-#endif
+
+#include <gz/msgs/boolean.pb.h>
+#include <gz/msgs/camera_info.pb.h>
+#include <gz/msgs/image.pb.h>
 
 #include <mutex>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Event.hh>
-#include <ignition/common/Image.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/common/StringUtils.hh>
-#include <ignition/math/Angle.hh>
-#include <ignition/math/Helpers.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Event.hh>
+#include <gz/common/Image.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/common/StringUtils.hh>
+#include <gz/math/Angle.hh>
+#include <gz/math/Helpers.hh>
+#include <gz/msgs/Utility.hh>
+#include <gz/transport/Node.hh>
 
-#include "ignition/sensors/CameraSensor.hh"
-#include "ignition/sensors/ImageBrownDistortionModel.hh"
-#include "ignition/sensors/ImageDistortion.hh"
-#include "ignition/sensors/ImageGaussianNoiseModel.hh"
-#include "ignition/sensors/ImageNoise.hh"
-#include "ignition/sensors/Manager.hh"
-#include "ignition/sensors/RenderingEvents.hh"
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/SensorTypes.hh"
+#include "gz/sensors/CameraSensor.hh"
+#include "gz/sensors/ImageBrownDistortionModel.hh"
+#include "gz/sensors/ImageDistortion.hh"
+#include "gz/sensors/ImageGaussianNoiseModel.hh"
+#include "gz/sensors/ImageNoise.hh"
+#include "gz/sensors/Manager.hh"
+#include "gz/sensors/RenderingEvents.hh"
+#include "gz/sensors/SensorFactory.hh"
+#include "gz/sensors/SensorTypes.hh"
 
-using namespace ignition;
+#include "gz/rendering/Utils.hh"
+
+using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for CameraSensor
-class ignition::sensors::CameraSensorPrivate
+class gz::sensors::CameraSensorPrivate
 {
   /// \brief Callback for triggered subscription
   /// \param[in] _msg Boolean message
@@ -65,7 +63,7 @@ class ignition::sensors::CameraSensorPrivate
   /// of the path was not possible.
   /// \sa ImageSaver
   public: bool SaveImage(const unsigned char *_data, unsigned int _width,
-    unsigned int _height, common::Image::PixelFormatType _format);
+    unsigned int _height, gz::common::Image::PixelFormatType _format);
 
   /// \brief node to create publisher
   public: transport::Node node;
@@ -80,10 +78,10 @@ class ignition::sensors::CameraSensorPrivate
   public: bool initialized = false;
 
   /// \brief Rendering camera
-  public: rendering::CameraPtr camera;
+  public: gz::rendering::CameraPtr camera;
 
   /// \brief Pointer to an image to be published
-  public: rendering::Image image;
+  public: gz::rendering::Image image;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -93,11 +91,11 @@ class ignition::sensors::CameraSensorPrivate
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
-  public: common::EventT<
-          void(const msgs::Image &)> imageEvent;
+  public: gz::common::EventT<
+          void(const gz::msgs::Image &)> imageEvent;
 
   /// \brief Connection to the Manager's scene change event.
-  public: common::ConnectionPtr sceneChangeConnection;
+  public: gz::common::ConnectionPtr sceneChangeConnection;
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
@@ -145,14 +143,12 @@ class ignition::sensors::CameraSensorPrivate
 //////////////////////////////////////////////////
 bool CameraSensor::CreateCamera()
 {
-  const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
+  sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
   if (!cameraSdf)
   {
-    ignerr << "Unable to access camera SDF element.\n";
+    gzerr << "Unable to access camera SDF element.\n";
     return false;
   }
-
-  this->PopulateInfo(cameraSdf);
 
   unsigned int width = cameraSdf->ImageWidth();
   unsigned int height = cameraSdf->ImageHeight();
@@ -183,19 +179,19 @@ bool CameraSensor::CreateCamera()
     }
     else if (noiseSdf.Type() != sdf::NoiseType::NONE)
     {
-      ignwarn << "The camera sensor only supports Gaussian noise. "
+      gzwarn << "The camera sensor only supports Gaussian noise. "
        << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
        << "] is not supported." << std::endl;
     }
   }
 
   // \todo(nkoeng) these parameters via sdf
-  this->dataPtr->camera->SetAntiAliasing(2);
+  this->dataPtr->camera->SetAntiAliasing(cameraSdf->AntiAliasingValue());
 
   math::Angle angle = cameraSdf->HorizontalFov();
-  if (angle < 0.01 || angle > IGN_PI*2)
+  if (angle < 0.01 || angle > GZ_PI*2)
   {
-    ignerr << "Invalid horizontal field of view [" << angle << "]\n";
+    gzerr << "Invalid horizontal field of view [" << angle << "]\n";
 
     return false;
   }
@@ -224,7 +220,7 @@ bool CameraSensor::CreateCamera()
       this->dataPtr->camera->SetImageFormat(rendering::PF_L16);
       break;
     default:
-      ignerr << "Unsupported pixel format ["
+      gzerr << "Unsupported pixel format ["
         << static_cast<int>(pixelFormat) << "]\n";
       break;
   }
@@ -240,6 +236,26 @@ bool CameraSensor::CreateCamera()
     this->dataPtr->saveImagePrefix = this->Name() + "_";
     this->dataPtr->saveImage = true;
   }
+
+  // Update the DOM object intrinsics to have consistent
+  // intrinsics between ogre camera and camera_info msg
+  if(!cameraSdf->HasLensIntrinsics())
+  {
+    auto intrinsicMatrix =
+      gz::rendering::projectionToCameraIntrinsic(
+        this->dataPtr->camera->ProjectionMatrix(),
+        this->dataPtr->camera->ImageWidth(),
+        this->dataPtr->camera->ImageHeight()
+      );
+
+    cameraSdf->SetLensIntrinsicsFx(intrinsicMatrix(0, 0));
+    cameraSdf->SetLensIntrinsicsFy(intrinsicMatrix(1, 1));
+    cameraSdf->SetLensIntrinsicsCx(intrinsicMatrix(0, 2));
+    cameraSdf->SetLensIntrinsicsCy(intrinsicMatrix(1, 2));
+  }
+
+  // Populate camera info topic
+  this->PopulateInfo(cameraSdf);
 
   return true;
 }
@@ -274,13 +290,13 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
   // Check if this is the right type
   if (_sdf.Type() != sdf::SensorType::CAMERA)
   {
-    ignerr << "Attempting to a load a Camera sensor, but received "
+    gzerr << "Attempting to a load a Camera sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
   }
 
   if (_sdf.CameraSensor() == nullptr)
   {
-    ignerr << "Attempting to a load a Camera sensor, but received "
+    gzerr << "Attempting to a load a Camera sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -291,16 +307,16 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/camera");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<msgs::Image>(
+      this->dataPtr->node.Advertise<gz::msgs::Image>(
           this->Topic());
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic["
+    gzerr << "Unable to create publisher on topic["
       << this->Topic() << "].\n";
     return false;
   }
 
-  igndbg << "Camera images for [" << this->Name() << "] advertised on ["
+  gzdbg << "Camera images for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
   if (_sdf.CameraSensor()->Triggered())
@@ -316,7 +332,7 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
 
       if (this->dataPtr->triggerTopic.empty())
       {
-        ignerr << "Invalid trigger topic name" << std::endl;
+        gzerr << "Invalid trigger topic name" << std::endl;
         return false;
       }
     }
@@ -324,7 +340,7 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
     this->dataPtr->node.Subscribe(this->dataPtr->triggerTopic,
         &CameraSensorPrivate::OnTrigger, this->dataPtr.get());
 
-    igndbg << "Camera trigger messages for [" << this->Name() << "] subscribed"
+    gzdbg << "Camera trigger messages for [" << this->Name() << "] subscribed"
            << " on [" << this->dataPtr->triggerTopic << "]" << std::endl;
     this->dataPtr->isTriggeredCamera = true;
   }
@@ -352,14 +368,14 @@ bool CameraSensor::Load(sdf::ElementPtr _sdf)
 }
 
 /////////////////////////////////////////////////
-common::ConnectionPtr CameraSensor::ConnectImageCallback(
-    std::function<void(const msgs::Image &)> _callback)
+gz::common::ConnectionPtr CameraSensor::ConnectImageCallback(
+    std::function<void(const gz::msgs::Image &)> _callback)
 {
   return this->dataPtr->imageEvent.Connect(_callback);
 }
 
 /////////////////////////////////////////////////
-void CameraSensor::SetScene(rendering::ScenePtr _scene)
+void CameraSensor::SetScene(gz::rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
@@ -376,16 +392,16 @@ void CameraSensor::SetScene(rendering::ScenePtr _scene)
 //////////////////////////////////////////////////
 bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("CameraSensor::Update");
+  GZ_PROFILE("CameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
   if (!this->dataPtr->camera)
   {
-    ignerr << "Camera doesn't exist.\n";
+    gzerr << "Camera doesn't exist.\n";
     return false;
   }
 
@@ -407,7 +423,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     if (this->dataPtr->generatingData)
     {
-      igndbg << "Disabling camera sensor: '" << this->Name() << "' data "
+      gzdbg << "Disabling camera sensor: '" << this->Name() << "' data "
              << "generation. " << std::endl;;
       this->dataPtr->generatingData = false;
     }
@@ -418,7 +434,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     if (!this->dataPtr->generatingData)
     {
-      igndbg << "Enabling camera sensor: '" << this->Name() << "' data "
+      gzdbg << "Enabling camera sensor: '" << this->Name() << "' data "
              << "generation." << std::endl;;
       this->dataPtr->generatingData = true;
     }
@@ -427,7 +443,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // generate sensor data
   this->Render();
   {
-    IGN_PROFILE("CameraSensor::Update Copy image");
+    GZ_PROFILE("CameraSensor::Update Copy image");
     this->dataPtr->camera->Copy(this->dataPtr->image);
   }
 
@@ -435,7 +451,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   unsigned int height = this->dataPtr->camera->ImageHeight();
   unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
-  common::Image::PixelFormatType
+  gz::common::Image::PixelFormatType
       format{common::Image::UNKNOWN_PIXEL_FORMAT};
   msgs::PixelFormatType msgsPixelFormat =
     msgs::PixelFormatType::UNKNOWN_PIXEL_FORMAT;
@@ -455,7 +471,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       msgsPixelFormat = msgs::PixelFormatType::L_INT16;
       break;
     default:
-      ignerr << "Unsupported pixel format ["
+      gzerr << "Unsupported pixel format ["
         << this->dataPtr->camera->ImageFormat() << "]\n";
       break;
   }
@@ -463,7 +479,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // create message
   msgs::Image msg;
   {
-    IGN_PROFILE("CameraSensor::Update Message");
+    GZ_PROFILE("CameraSensor::Update Message");
     msg.set_width(width);
     msg.set_height(height);
     msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
@@ -479,7 +495,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // publish the image message
   {
     this->AddSequence(msg.mutable_header());
-    IGN_PROFILE("CameraSensor::Update Publish");
+    GZ_PROFILE("CameraSensor::Update Publish");
     this->dataPtr->pub.Publish(msg);
 
     // publish the camera info message
@@ -495,7 +511,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     }
     catch(...)
     {
-      ignerr << "Exception thrown in an image callback.\n";
+      gzerr << "Exception thrown in an image callback.\n";
     }
   }
 
@@ -514,7 +530,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 }
 
 //////////////////////////////////////////////////
-void CameraSensorPrivate::OnTrigger(const msgs::Boolean &/*_msg*/)
+void CameraSensorPrivate::OnTrigger(const gz::msgs::Boolean &/*_msg*/)
 {
   std::lock_guard<std::mutex> lock(this->mutex);
   this->isTriggered = true;
@@ -523,12 +539,12 @@ void CameraSensorPrivate::OnTrigger(const msgs::Boolean &/*_msg*/)
 //////////////////////////////////////////////////
 bool CameraSensorPrivate::SaveImage(const unsigned char *_data,
     unsigned int _width, unsigned int _height,
-    common::Image::PixelFormatType _format)
+    gz::common::Image::PixelFormatType _format)
 {
   // Attempt to create the directory if it doesn't exist
-  if (!common::isDirectory(this->saveImagePath))
+  if (!gz::common::isDirectory(this->saveImagePath))
   {
-    if (!common::createDirectories(this->saveImagePath))
+    if (!gz::common::createDirectories(this->saveImagePath))
       return false;
   }
 
@@ -536,11 +552,11 @@ bool CameraSensorPrivate::SaveImage(const unsigned char *_data,
                          std::to_string(this->saveImageCounter) + ".png";
   ++this->saveImageCounter;
 
-  common::Image localImage;
+  gz::common::Image localImage;
   localImage.SetFromData(_data, _width, _height, _format);
 
   localImage.SavePNG(
-      common::joinPaths(this->saveImagePath, filename));
+      gz::common::joinPaths(this->saveImagePath, filename));
   return true;
 }
 
@@ -596,16 +612,16 @@ bool CameraSensor::AdvertiseInfo(const std::string &_topic)
   this->dataPtr->infoTopic = _topic;
 
   this->dataPtr->infoPub =
-      this->dataPtr->node.Advertise<msgs::CameraInfo>(
+      this->dataPtr->node.Advertise<gz::msgs::CameraInfo>(
       this->dataPtr->infoTopic);
   if (!this->dataPtr->infoPub)
   {
-    ignerr << "Unable to create publisher on topic ["
+    gzerr << "Unable to create publisher on topic ["
       << this->dataPtr->infoTopic << "].\n";
   }
   else
   {
-    igndbg << "Camera info for [" << this->Name() << "] advertised on ["
+    gzdbg << "Camera info for [" << this->Name() << "] advertised on ["
            << this->dataPtr->infoTopic << "]" << std::endl;
   }
 

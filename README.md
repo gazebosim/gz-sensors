@@ -9,12 +9,13 @@
 
 Build | Status
 -- | --
-Test coverage | [![codecov](https://codecov.io/gh/gazebosim/gz-sensors/branch/ign-sensors6/graph/badge.svg)](https://codecov.io/gh/gazebosim/gz-sensors/branch/ign-sensors6)
-Ubuntu Focal | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-ign-sensors6-focal-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-ign-sensors6-focal-amd64)
-Homebrew      | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-ign-sensors6-homebrew-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-ign-sensors6-homebrew-amd64)
-Windows       | [![Build Status](https://build.osrfoundation.org/job/ign_sensors-ign-6-win/badge/icon)](https://build.osrfoundation.org/job/ign_sensors-ign-6-win/)
+Test coverage | [![codecov](https://codecov.io/gh/gazebosim/gz-sensors/branch/main/graph/badge.svg)](https://codecov.io/gh/gazebosim/gz-sensors/branch/main)
+Ubuntu Focal | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-main-focal-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-main-focal-amd64)
+Homebrew      | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=ignition_sensors-ci-main-homebrew-amd64)](https://build.osrfoundation.org/job/ignition_sensors-ci-main-homebrew-amd64)
+Windows       | [![Build Status](https://build.osrfoundation.org/job/ign_sensors-ci-win/badge/icon)](https://build.osrfoundation.org/job/ign_sensors-ci-win/)
 
-Gazebo Sensors, a component of [Gazebo](https://gazebosim.org), provides numerous sensor models
+Gazebo Sensors, a component of [Gazebo](https://gazebosim.org),
+provides numerous sensor models
 designed to generate realistic data from simulation environments. Gazebo Sensors is used in conjunction with [Gazebo Libraries](https://gazebosim/libs), and especially relies on the rendering capabilities from [Gazebo Rendering](https://gazebosim.org/libs/rendering) and physics simulation from [Gazebo Physics](https://gazebosim.org/libs/physics).
 
 # Table of Contents
@@ -22,14 +23,6 @@ designed to generate realistic data from simulation environments. Gazebo Sensors
 [Features](#features)
 
 [Install](#install)
-
-* [Binary Install](#binary-install)
-
-* [Source Install](#source-install)
-
-    * [Prerequisites](#prerequisites)
-
-    * [Building from Source](#building-from-source)
 
 [Usage](#usage)
 
@@ -52,11 +45,11 @@ models into sensor streams.
 
 # Install
 
-See the [installation tutorial](https://gazebosim.org/api/sensors/6.0/installation.html).
+See the [installation tutorial](https://gazebosim.org/api/sensors/7.0/installation.html).
 
 # Usage
 
-Please refer to the [examples directory](https://github.com/gazebosim/gz-sensors/tree/ign-sensors6/examples/).
+Please refer to the [examples directory](https://github.com/gazebosim/gz-sensors/raw/main/examples/).
 
 # Folder Structure
 
@@ -64,7 +57,7 @@ Refer to the following table for information about important directories and fil
 
 ```
 ├── examples                  Example programs.
-├── include/ignition/sensors  Header files that will be installed.
+├── include/gz/sensors        Header files that will be installed.
 ├── src                       Source files and unit tests.
 ├── test
 │    ├── integration          Integration tests.

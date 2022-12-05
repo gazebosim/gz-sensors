@@ -15,21 +15,31 @@
  *
 */
 
-#include "ignition/sensors/Sensor.hh"
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4005)
+#pragma warning(disable: 4251)
+#endif
+#include <gz/msgs/double.pb.h>
+#include <gz/msgs/performance_sensor_metrics.pb.h>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
+#include "gz/sensors/Sensor.hh"
 
 #include <chrono>
 #include <map>
 #include <vector>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/msgs/double.pb.h>
-#include <ignition/transport/Node.hh>
-#include <ignition/transport/TopicUtils.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/transport/Node.hh>
+#include <gz/transport/TopicUtils.hh>
 
-using namespace ignition::sensors;
+using namespace gz::sensors;
 
-class ignition::sensors::SensorPrivate
+class gz::sensors::SensorPrivate
 {
   /// \brief Populates fields from a <sensor> DOM
   public: bool PopulateFromSDF(const sdf::Sensor &_sdf);
@@ -49,7 +59,7 @@ class ignition::sensors::SensorPrivate
   /// <update_rate> value from SDF, and zero is allowed only when zero is also
   /// in SDF.
   /// \return True if a valid topic was set.
-  public: void SetRate(const ignition::msgs::Double &_rate);
+  public: void SetRate(const gz::msgs::Double &_rate);
 
   /// \brief id given to sensor when constructed
   public: SensorId id;
@@ -67,7 +77,7 @@ class ignition::sensors::SensorPrivate
   public: std::string topic;
 
   /// \brief Pose of the sensor
-  public: ignition::math::Pose3d pose;
+  public: gz::math::Pose3d pose;
 
   /// \brief Flag to enable publishing performance metrics.
   public: bool enableMetrics{false};
@@ -91,10 +101,10 @@ class ignition::sensors::SensorPrivate
   public: std::chrono::duration<double> lastUpdateTime{0};
 
   /// \brief Transport node.
-  public: ignition::transport::Node node;
+  public: gz::transport::Node node;
 
   /// \brief Publishes the PerformanceSensorMetrics message.
-  public: ignition::transport::Node::Publisher performanceSensorMetricsPub;
+  public: gz::transport::Node::Publisher performanceSensorMetricsPub;
 
   /// \brief SDF element with sensor information.
   public: sdf::ElementPtr sdf = nullptr;
@@ -129,7 +139,7 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
   //  then the update_rate will be obeyed. Gazebo seems to use it as if
   //  true means enable the sensor at startup.
 
-  // \todo(nkoenig) what to do with <visualize>? ign-sensor data is meant to
+  // \todo(nkoenig) what to do with <visualize>? gz-sensor data is meant to
   // create
   // sensor data. Whether or not that data should be visualized seems to
   // be outside the scope of this library
@@ -204,7 +214,7 @@ bool Sensor::Load(const sdf::Sensor &_sdf)
   if (!this->dataPtr->node.Advertise(rateTopic,
     &SensorPrivate::SetRate, this->dataPtr.get()))
   {
-    ignerr << "Unable to create service server on topic["
+    gzerr << "Unable to create service server on topic["
            << rateTopic << "].\n";
     return false;
   }
@@ -275,7 +285,7 @@ bool SensorPrivate::SetTopic(const std::string &_topic)
   auto validTopic = transport::TopicUtils::AsValidTopic(_topic);
   if (validTopic.empty())
   {
-    ignerr << "Failed to set sensor topic [" << _topic << "]" << std::endl;
+    gzerr << "Failed to set sensor topic [" << _topic << "]" << std::endl;
     return false;
   }
 
@@ -311,7 +321,7 @@ void SensorPrivate::PublishMetrics(const std::chrono::duration<double> &_now)
       this->topic + "/performance_metrics");
     if (validTopic.empty())
     {
-      ignerr << "Failed to set metrics sensor topic [" << topic << "]" <<
+      gzerr << "Failed to set metrics sensor topic [" << topic << "]" <<
         std::endl;
       return;
     }
@@ -357,7 +367,7 @@ void SensorPrivate::PublishMetrics(const std::chrono::duration<double> &_now)
 }
 
 //////////////////////////////////////////////////
-void SensorPrivate::SetRate(const ignition::msgs::Double &_rate)
+void SensorPrivate::SetRate(const gz::msgs::Double &_rate)
 {
   auto rate = _rate.data();
   if (rate < 0.0)
@@ -366,19 +376,19 @@ void SensorPrivate::SetRate(const ignition::msgs::Double &_rate)
   // if SDF has zero, any value can be set; for non-zero SDF values, we need to
   // check whether they are in bounds, i.e. greater than zero and lower or equal
   // to the SDF value
-  if (!ignition::math::lessOrNearEqual(this->sdfUpdateRate, 0.0))
+  if (!gz::math::lessOrNearEqual(this->sdfUpdateRate, 0.0))
   {
-    if (ignition::math::lessOrNearEqual(rate, 0.0))
+    if (gz::math::lessOrNearEqual(rate, 0.0))
     {
-      ignerr << "Cannot set update rate of sensor " << this->name << " to zero "
+      gzerr << "Cannot set update rate of sensor " << this->name << " to zero "
              << "because the <update_rate> SDF element is non-zero."
              << std::endl;
       return;
     }
     // apply the upper rate limit from SDF
-    else if (!ignition::math::lessOrNearEqual(rate, this->sdfUpdateRate))
+    else if (!gz::math::lessOrNearEqual(rate, this->sdfUpdateRate))
     {
-      ignerr << "Trying to set update rate of sensor " << this->name << " to "
+      gzerr << "Trying to set update rate of sensor " << this->name << " to "
              << rate << ", but the maximum rate in <update_rate> SDF element "
              << "is " << this->sdfUpdateRate << ". Ignoring the request."
              << std::endl;
@@ -386,14 +396,14 @@ void SensorPrivate::SetRate(const ignition::msgs::Double &_rate)
     }
   }
 
-  igndbg << "Setting update rate of sensor " << this->name << " to " << rate
+  gzdbg << "Setting update rate of sensor " << this->name << " to " << rate
          << " Hz" << std::endl;
 
   this->updateRate = rate;
 }
 
 //////////////////////////////////////////////////
-ignition::math::Pose3d Sensor::Pose() const
+gz::math::Pose3d Sensor::Pose() const
 {
   return this->dataPtr->pose;
 }
@@ -411,7 +421,7 @@ void Sensor::SetParent(const std::string &_parent)
 }
 
 //////////////////////////////////////////////////
-void Sensor::SetPose(const ignition::math::Pose3d &_pose)
+void Sensor::SetPose(const gz::math::Pose3d &_pose)
 {
   this->dataPtr->pose = _pose;
 }
@@ -439,7 +449,7 @@ void Sensor::SetUpdateRate(const double _hz)
 bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
                   const bool _force)
 {
-  IGN_PROFILE("Sensor::Update");
+  GZ_PROFILE("Sensor::Update");
   bool result = false;
 
   // Check if it's time to update
@@ -468,7 +478,14 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
     // Update the time the plugin should be loaded
     auto delta = std::chrono::duration_cast< std::chrono::milliseconds>
       (std::chrono::duration< double >(1.0 / this->dataPtr->updateRate));
+
     this->dataPtr->nextUpdateTime += delta;
+
+    // Catch up to "now", if necessary.
+    while (this->dataPtr->nextUpdateTime <= _now)
+    {
+      this->dataPtr->nextUpdateTime += delta;
+    }
   }
 
   return result;
@@ -480,8 +497,15 @@ std::chrono::steady_clock::duration Sensor::NextDataUpdateTime() const
   return this->dataPtr->nextUpdateTime;
 }
 
+//////////////////////////////////////////////////
+void Sensor::SetNextDataUpdateTime(
+    const std::chrono::steady_clock::duration &_time)
+{
+  this->dataPtr->nextUpdateTime = _time;
+}
+
 /////////////////////////////////////////////////
-void Sensor::AddSequence(ignition::msgs::Header *_msg,
+void Sensor::AddSequence(gz::msgs::Header *_msg,
                          const std::string &_seqKey)
 {
   std::string value = "0";
@@ -505,7 +529,7 @@ void Sensor::AddSequence(ignition::msgs::Header *_msg,
   }
 
   // Otherwise, add the sequence key-value pair.
-  ignition::msgs::Header::Map *map = _msg->add_data();
+  gz::msgs::Header::Map *map = _msg->add_data();
   map->set_key("seq");
   map->add_value(value);
 }
@@ -520,4 +544,10 @@ bool Sensor::IsActive() const
 void Sensor::SetActive(bool _active)
 {
   this->dataPtr->active = _active;
+}
+
+//////////////////////////////////////////////////
+bool Sensor::HasConnections() const
+{
+  return true;
 }

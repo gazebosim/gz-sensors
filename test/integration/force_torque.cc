@@ -19,25 +19,25 @@
 
 #include <sdf/ForceTorque.hh>
 
-#include <ignition/math/Helpers.hh>
+#include <gz/math/Helpers.hh>
 
-#include <ignition/sensors/ForceTorqueSensor.hh>
-#include <ignition/sensors/SensorFactory.hh>
+#include <gz/sensors/ForceTorqueSensor.hh>
+#include <gz/sensors/SensorFactory.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 /// \brief Helper function to create a force torque sensor sdf element.
 void CreateForceTorqueToSdf(const std::string &_name,
-                            const ignition::math::Pose3d &_pose,
+                            const gz::math::Pose3d &_pose,
                             const double _updateRate, const std::string &_topic,
                             const bool _alwaysOn, const bool _visualize,
                             const std::string &_frame,
                             const std::string &_measureDir,
-                            const ignition::math::Vector3d &_forceNoiseMean,
-                            const ignition::math::Vector3d &_forceNoiseStddev,
-                            const ignition::math::Vector3d &_torqueNoiseMean,
-                            const ignition::math::Vector3d &_torqueNoiseStddev,
+                            const gz::math::Vector3d &_forceNoiseMean,
+                            const gz::math::Vector3d &_forceNoiseStddev,
+                            const gz::math::Vector3d &_torqueNoiseMean,
+                            const gz::math::Vector3d &_torqueNoiseStddev,
                             sdf::ElementPtr &_sensorSdf)
 {
   std::ostringstream stream;
@@ -130,7 +130,7 @@ class ForceTorqueSensorTest
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
@@ -139,15 +139,15 @@ TEST_F(ForceTorqueSensorTest, CreateForceTorqueSensor)
 {
   // Create SDF describing a force torque sensor
   const std::string name = "TestForceTorqueSensor";
-  const std::string topic = "/ignition/sensors/test/force_torque";
+  const std::string topic = "/gz/sensors/test/force_torque";
 
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
 
   // Create sensor SDF
-  ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
-      ignition::math::Quaterniond::Identity);
+  gz::math::Pose3d sensorPose(gz::math::Vector3d(0.25, 0.0, 0.5),
+      gz::math::Quaterniond::Identity);
   sdf::ElementPtr forcetorqueSdf;
   CreateForceTorqueToSdf(name, sensorPose, updateRate, topic, alwaysOn,
                          visualize, "child", "child_to_parent", {}, {}, {}, {},
@@ -156,9 +156,9 @@ TEST_F(ForceTorqueSensorTest, CreateForceTorqueSensor)
   ASSERT_NE(nullptr, forcetorqueSdf);
 
   // create the sensor using sensor factory
-  ignition::sensors::SensorFactory sf;
+  gz::sensors::SensorFactory sf;
   auto sensor =
-      sf.CreateSensor<ignition::sensors::ForceTorqueSensor>(forcetorqueSdf);
+      sf.CreateSensor<gz::sensors::ForceTorqueSensor>(forcetorqueSdf);
   ASSERT_NE(nullptr, sensor);
 
   EXPECT_EQ(name, sensor->Name());
@@ -169,14 +169,14 @@ TEST_F(ForceTorqueSensorTest, CreateForceTorqueSensor)
 /////////////////////////////////////////////////
 TEST_P(ForceTorqueSensorTest, SensorReadings)
 {
-  namespace math = ignition::math;
+  namespace math = gz::math;
 
   std::string frame, measureDirection;
   std::tie(frame, measureDirection) = GetParam();
 
   // Create SDF describing a a force torque sensor
   const std::string name = "TestForceTorqueSensor";
-  const std::string topic = "/ignition/sensors/test/force_torque";
+  const std::string topic = "/gz/sensors/test/force_torque";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
@@ -202,9 +202,9 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
   ASSERT_NE(nullptr, forcetorqueSdf);
 
   // create the sensor using sensor factory
-  ignition::sensors::SensorFactory sf;
+  gz::sensors::SensorFactory sf;
   auto sensor =
-      sf.CreateSensor<ignition::sensors::ForceTorqueSensor>(forcetorqueSdf);
+      sf.CreateSensor<gz::sensors::ForceTorqueSensor>(forcetorqueSdf);
 
   ASSERT_NE(nullptr, sensor);
   EXPECT_FALSE(sensor->HasConnections());
@@ -225,22 +225,22 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
   EXPECT_EQ(torque, sensor->Torque());
 
   // verify msg received on the topic
-  WaitForMessageTestHelper<ignition::msgs::Wrench> msgHelper(topic);
+  WaitForMessageTestHelper<gz::msgs::Wrench> msgHelper(topic);
   EXPECT_TRUE(sensor->HasConnections());
   auto dt = std::chrono::steady_clock::duration(std::chrono::seconds(1));
 
   // Set rotation of child
   const math::Quaterniond rotChildInSensor{
-      math::Vector3d{IGN_PI_4, IGN_PI_2, 0}};
+      math::Vector3d{GZ_PI_4, GZ_PI_2, 0}};
   const math::Quaterniond rotParentInSensor{
-      math::Vector3d{0, IGN_PI_4, IGN_PI_4}};
+      math::Vector3d{0, GZ_PI_4, GZ_PI_4}};
 
   sensor->SetRotationChildInSensor(rotChildInSensor);
   EXPECT_EQ(rotChildInSensor, sensor->RotationChildInSensor());
   sensor->SetRotationParentInSensor(rotParentInSensor);
   EXPECT_EQ(rotParentInSensor, sensor->RotationParentInSensor());
 
-  sensor->Update(dt);
+  sensor->Update(dt, false);
   EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
   auto msg = msgHelper.Message();
   EXPECT_EQ(1, msg.header().stamp().sec());
@@ -251,22 +251,22 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
     if (frame == "child")
     {
       EXPECT_EQ((rotChildInSensor.Inverse() * force) + forceNoiseMean,
-                ignition::msgs::Convert(msg.force()));
+                gz::msgs::Convert(msg.force()));
       EXPECT_EQ((rotChildInSensor.Inverse() * torque) + torqueNoiseMean,
-                ignition::msgs::Convert(msg.torque()));
+                gz::msgs::Convert(msg.torque()));
     }
     else if (frame == "parent")
     {
       EXPECT_EQ((rotParentInSensor.Inverse() * force) + forceNoiseMean,
-                ignition::msgs::Convert(msg.force()));
+                gz::msgs::Convert(msg.force()));
       EXPECT_EQ((rotParentInSensor.Inverse() * torque) + torqueNoiseMean,
-                ignition::msgs::Convert(msg.torque()));
+                gz::msgs::Convert(msg.torque()));
     }
     else
     {
-      EXPECT_EQ(force + forceNoiseMean, ignition::msgs::Convert(msg.force()));
+      EXPECT_EQ(force + forceNoiseMean, gz::msgs::Convert(msg.force()));
       EXPECT_EQ(torque + torqueNoiseMean,
-                ignition::msgs::Convert(msg.torque()));
+                gz::msgs::Convert(msg.torque()));
     }
   }
   else
@@ -274,22 +274,22 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
     if (frame == "child")
     {
       EXPECT_EQ(-(rotChildInSensor.Inverse() * force) + forceNoiseMean,
-                ignition::msgs::Convert(msg.force()));
+                gz::msgs::Convert(msg.force()));
       EXPECT_EQ(-(rotChildInSensor.Inverse() * torque) + torqueNoiseMean,
-                ignition::msgs::Convert(msg.torque()));
+                gz::msgs::Convert(msg.torque()));
     }
     else if (frame == "parent")
     {
       EXPECT_EQ(-(rotParentInSensor.Inverse() * force) + forceNoiseMean,
-                ignition::msgs::Convert(msg.force()));
+                gz::msgs::Convert(msg.force()));
       EXPECT_EQ(-(rotParentInSensor.Inverse() * torque) + torqueNoiseMean,
-                ignition::msgs::Convert(msg.torque()));
+                gz::msgs::Convert(msg.torque()));
     }
     else
     {
-      EXPECT_EQ(-force + forceNoiseMean, ignition::msgs::Convert(msg.force()));
+      EXPECT_EQ(-force + forceNoiseMean, gz::msgs::Convert(msg.force()));
       EXPECT_EQ(-torque + torqueNoiseMean,
-                ignition::msgs::Convert(msg.torque()));
+                gz::msgs::Convert(msg.torque()));
     }
   }
   // The Force() and Torque() functions return the noise-free forces and
@@ -298,14 +298,8 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
   EXPECT_EQ(torque, sensor->Torque());
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     FrameAndDirection, ForceTorqueSensorTest,
     ::testing::Combine(::testing::Values("child", "parent", "sensor"),
                        ::testing::Values("parent_to_child",
-                                         "child_to_parent")), );
-
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+                                         "child_to_parent")));

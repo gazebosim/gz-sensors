@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(loop_sensor)
 
-find_package(ignition-sensors6 REQUIRED
+find_package(gz-sensors7 REQUIRED
   # Find built-in sensors
   COMPONENTS
     altimeter
@@ -12,10 +12,10 @@ add_subdirectory(../custom_sensor odometer)
 
 add_executable(${PROJECT_NAME} main.cc)
 target_link_libraries(${PROJECT_NAME} PUBLIC
-  ignition-sensors6::ignition-sensors6
+  gz-sensors7::gz-sensors7
 
   # Link to custom sensors
   odometer
 
   # Link to built-in sensors
-  ignition-sensors6::altimeter)
+  gz-sensors7::altimeter)

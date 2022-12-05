@@ -15,36 +15,29 @@
  *
 */
 
-#if defined(_MSC_VER)
-  #pragma warning(push)
-  #pragma warning(disable: 4005)
-  #pragma warning(disable: 4251)
-#endif
-#include <ignition/msgs/image.pb.h>
-#if defined(_MSC_VER)
-  #pragma warning(pop)
-#endif
+#include <gz/msgs/image.pb.h>
 
 #include <algorithm>
 #include <mutex>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Image.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/common/SystemPaths.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Image.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/common/SystemPaths.hh>
 
-#include <ignition/math/Angle.hh>
-#include <ignition/math/Helpers.hh>
+#include <gz/math/Angle.hh>
+#include <gz/math/Helpers.hh>
 
-#include <ignition/transport/Node.hh>
+#include <gz/msgs/Utility.hh>
+#include <gz/transport/Node.hh>
 
-#include "ignition/sensors/ThermalCameraSensor.hh"
-#include "ignition/sensors/ImageGaussianNoiseModel.hh"
-#include "ignition/sensors/RenderingEvents.hh"
-#include "ignition/sensors/SensorFactory.hh"
+#include "gz/sensors/ThermalCameraSensor.hh"
+#include "gz/sensors/ImageGaussianNoiseModel.hh"
+#include "gz/sensors/RenderingEvents.hh"
+#include "gz/sensors/SensorFactory.hh"
 
 /// \brief Private data for ThermalCameraSensor
-class ignition::sensors::ThermalCameraSensorPrivate
+class gz::sensors::ThermalCameraSensorPrivate
 {
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
@@ -56,7 +49,7 @@ class ignition::sensors::ThermalCameraSensorPrivate
   /// of the path was not possible.
   /// \sa ImageSaver
   public: bool SaveImage(const uint16_t *_data, unsigned int _width,
-    unsigned int _height, ignition::common::Image::PixelFormatType _format);
+    unsigned int _height, gz::common::Image::PixelFormatType _format);
 
   /// \brief Helper function to convert temperature data to thermal image
   /// \param[in] _data temperature data
@@ -73,7 +66,7 @@ class ignition::sensors::ThermalCameraSensorPrivate
   public: bool initialized = false;
 
   /// \brief Rendering camera
-  public: ignition::rendering::ThermalCameraPtr thermalCamera;
+  public: gz::rendering::ThermalCameraPtr thermalCamera;
 
   /// \brief Thermal data buffer.
   public: uint16_t *thermalBuffer = nullptr;
@@ -89,21 +82,21 @@ class ignition::sensors::ThermalCameraSensorPrivate
       math::Vector2i::Zero;
 
   /// \brief Pointer to an image to be published
-  public: ignition::rendering::Image image;
+  public: gz::rendering::Image image;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
-  public: ignition::common::EventT<
-          void(const ignition::msgs::Image &)> imageEvent;
+  public: gz::common::EventT<
+          void(const gz::msgs::Image &)> imageEvent;
 
   /// \brief Connection from thermal camera with thermal data
-  public: ignition::common::ConnectionPtr thermalConnection;
+  public: gz::common::ConnectionPtr thermalConnection;
 
   /// \brief Connection to the Manager's scene change event.
-  public: ignition::common::ConnectionPtr sceneChangeConnection;
+  public: gz::common::ConnectionPtr sceneChangeConnection;
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
@@ -136,16 +129,16 @@ class ignition::sensors::ThermalCameraSensorPrivate
   public: float ambientRange = 0.0;
 
   /// \brief Min temperature the sensor can detect
-  public: float minTemp = -ignition::math::INF_F;
+  public: float minTemp = -gz::math::INF_F;
 
   /// \brief Max temperature the sensor can detect
-  public: float maxTemp = ignition::math::INF_F;
+  public: float maxTemp = gz::math::INF_F;
 
   /// \brief Linear resolution. Defaults to 10mK
   public: float resolution = 0.01f;
 };
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////
@@ -195,13 +188,13 @@ bool ThermalCameraSensor::Load(const sdf::Sensor &_sdf)
   // Check if this is the right type
   if (_sdf.Type() != sdf::SensorType::THERMAL_CAMERA)
   {
-    ignerr << "Attempting to a load a Thermal Camera sensor, but received "
+    gzerr << "Attempting to a load a Thermal Camera sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
   }
 
   if (_sdf.CameraSensor() == nullptr)
   {
-    ignerr << "Attempting to a load a Thermal Camera sensor, but received "
+    gzerr << "Attempting to a load a Thermal Camera sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -215,12 +208,12 @@ bool ThermalCameraSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->thermalPub)
   {
-    ignerr << "Unable to create publisher on topic["
+    gzerr << "Unable to create publisher on topic["
       << this->Topic() << "].\n";
     return false;
   }
 
-  igndbg << "Thermal images for [" << this->Name() << "] advertised on ["
+  gzdbg << "Thermal images for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
   if (!this->AdvertiseInfo())
@@ -247,7 +240,7 @@ bool ThermalCameraSensor::CreateCamera()
 
   if (!cameraSdf)
   {
-    ignerr << "Unable to access camera SDF element\n";
+    gzerr << "Unable to access camera SDF element\n";
     return false;
   }
 
@@ -275,7 +268,7 @@ bool ThermalCameraSensor::CreateCamera()
       // 0 to 2.55 degrees Kelvin ((2^8-1) * 0.01 = 2.55).
       if (this->dataPtr->resolution < 1.0)
       {
-        ignwarn << "8 bit thermal camera image format selected. "
+        gzwarn << "8 bit thermal camera image format selected. "
                 << "The temperature linear resolution needs to be higher "
                 << "than 1.0. Defaulting to 3.0, output range = [0, 255*3] K"
                 << std::endl;
@@ -319,16 +312,16 @@ bool ThermalCameraSensor::CreateCamera()
     }
     else if (noiseSdf.Type() != sdf::NoiseType::NONE)
     {
-      ignwarn << "The thermal camera sensor only supports Gaussian noise. "
+      gzwarn << "The thermal camera sensor only supports Gaussian noise. "
        << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
        << "] is not supported." << std::endl;
     }
   }
 
   math::Angle angle = cameraSdf->HorizontalFov();
-  if (angle < 0.01 || angle > IGN_PI*2)
+  if (angle < 0.01 || angle > GZ_PI*2)
   {
-    ignerr << "Invalid horizontal field of view [" << angle << "]\n";
+    gzerr << "Invalid horizontal field of view [" << angle << "]\n";
 
     return false;
   }
@@ -377,7 +370,7 @@ void ThermalCameraSensor::OnNewThermalFrame(const uint16_t *_scan,
 }
 
 /////////////////////////////////////////////////
-rendering::ThermalCameraPtr ThermalCameraSensor::ThermalCamera()
+rendering::ThermalCameraPtr ThermalCameraSensor::ThermalCamera() const
 {
   return this->dataPtr->thermalCamera;
 }
@@ -409,16 +402,16 @@ void ThermalCameraSensor::SetScene(rendering::ScenePtr _scene)
 bool ThermalCameraSensor::Update(
   const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("ThermalCameraSensor::Update");
+  GZ_PROFILE("ThermalCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
   if (!this->dataPtr->thermalCamera)
   {
-    ignerr << "Camera doesn't exist.\n";
+    gzerr << "Camera doesn't exist.\n";
     return false;
   }
 
@@ -461,7 +454,7 @@ bool ThermalCameraSensor::Update(
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-  // \todo(anyone) once ign-rendering supports an image event with unsigned char
+  // \todo(anyone) once gz-rendering supports an image event with unsigned char
   // data type, we can remove this check that copies uint16_t data to char array
   if (this->dataPtr->thermalCamera->ImageFormat() == rendering::PF_L8)
   {
@@ -496,7 +489,7 @@ bool ThermalCameraSensor::Update(
   }
   catch(...)
   {
-    ignerr << "Exception thrown in an image callback.\n";
+    gzerr << "Exception thrown in an image callback.\n";
   }
 
   // Save image

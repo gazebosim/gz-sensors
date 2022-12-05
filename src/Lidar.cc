@@ -14,32 +14,34 @@
  * limitations under the License.
  *
 */
+
 #if defined(_MSC_VER)
   #pragma warning(push)
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/laserscan.pb.h>
+#include <gz/msgs/laserscan.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Event.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Event.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/msgs/Utility.hh>
+#include <gz/transport/Node.hh>
 #include <sdf/Lidar.hh>
 
-#include "ignition/sensors/GaussianNoiseModel.hh"
-#include "ignition/sensors/Lidar.hh"
-#include "ignition/sensors/Noise.hh"
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/SensorTypes.hh"
+#include "gz/sensors/GaussianNoiseModel.hh"
+#include "gz/sensors/Lidar.hh"
+#include "gz/sensors/Noise.hh"
+#include "gz/sensors/SensorFactory.hh"
+#include "gz/sensors/SensorTypes.hh"
 
-using namespace ignition::sensors;
+using namespace gz::sensors;
 
 /// \brief Private data for Lidar class
-class ignition::sensors::LidarPrivate
+class gz::sensors::LidarPrivate
 {
   /// \brief node to create publisher
   public: transport::Node node;
@@ -48,7 +50,7 @@ class ignition::sensors::LidarPrivate
   public: transport::Node::Publisher pub;
 
   /// \brief Laser message to publish data.
-  public: ignition::msgs::LaserScan laserMsg;
+  public: gz::msgs::LaserScan laserMsg;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -104,13 +106,13 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
   if (_sdf.Type() != sdf::SensorType::LIDAR &&
       _sdf.Type() != sdf::SensorType::GPU_LIDAR)
   {
-    ignerr << "Attempting to a load a Lidar sensor, but received "
+    gzerr << "Attempting to a load a Lidar sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
   }
 
   if (_sdf.LidarSensor() == nullptr)
   {
-    ignerr << "Attempting to a load a Lidar sensor, but received "
+    gzerr << "Attempting to a load a Lidar sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -120,16 +122,16 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/lidar");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<ignition::msgs::LaserScan>(
+      this->dataPtr->node.Advertise<gz::msgs::LaserScan>(
         this->Topic());
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic["
+    gzerr << "Unable to create publisher on topic["
       << this->Topic() << "].\n";
     return false;
   }
 
-  igndbg << "Laser scans for [" << this->Name() << "] advertised on ["
+  gzdbg << "Laser scans for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
   // Load ray atributes
@@ -137,7 +139,7 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
 
   if (this->RayCount() == 0 || this->VerticalRayCount() == 0)
   {
-    ignerr << "Lidar: Image has 0 size!\n";
+    gzerr << "Lidar: Image has 0 size!\n";
   }
 
   // create message
@@ -170,7 +172,7 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
     }
     else if (noiseSdf.Type() != sdf::NoiseType::NONE)
     {
-      ignwarn << "The lidar sensor only supports Gaussian noise. "
+      gzwarn << "The lidar sensor only supports Gaussian noise. "
        << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
        << "] is not supported." << std::endl;
     }
@@ -189,7 +191,7 @@ bool Lidar::Load(sdf::ElementPtr _sdf)
 }
 
 /////////////////////////////////////////////////
-ignition::common::ConnectionPtr Lidar::ConnectNewLidarFrame(
+gz::common::ConnectionPtr Lidar::ConnectNewLidarFrame(
           std::function<void(const float *_scan, unsigned int _width,
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &/*_format*/)> /*_subscriber*/)
@@ -200,7 +202,7 @@ ignition::common::ConnectionPtr Lidar::ConnectNewLidarFrame(
 //////////////////////////////////////////////////
 bool Lidar::Update(const std::chrono::steady_clock::duration &/*_now*/)
 {
-  ignerr << "No lidar data being updated.\n";
+  gzerr << "No lidar data being updated.\n";
   return false;
 }
 
@@ -218,7 +220,7 @@ void Lidar::ApplyNoise()
         range = this->dataPtr->noises[LIDAR_NOISE]->Apply(range);
         if (std::isfinite(range))
         {
-          range = ignition::math::clamp(range,
+          range = gz::math::clamp(range,
             this->RangeMin(), this->RangeMax());
         }
         this->laserBuffer[index*3] = range;
@@ -230,7 +232,7 @@ void Lidar::ApplyNoise()
 //////////////////////////////////////////////////
 bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("Lidar::PublishLidarScan");
+  GZ_PROFILE("Lidar::PublishLidarScan");
   if (!this->laserBuffer)
     return false;
 
@@ -255,13 +257,13 @@ bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
   const int numRays = this->RayCount() * this->VerticalRayCount();
   if (this->dataPtr->laserMsg.ranges_size() != numRays)
   {
-    // igndbg << "Size mismatch; allocating memory\n";
+    // gzdbg << "Size mismatch; allocating memory\n";
     this->dataPtr->laserMsg.clear_ranges();
     this->dataPtr->laserMsg.clear_intensities();
     for (int i = 0; i < numRays; ++i)
     {
-      this->dataPtr->laserMsg.add_ranges(ignition::math::NAN_F);
-      this->dataPtr->laserMsg.add_intensities(ignition::math::NAN_F);
+      this->dataPtr->laserMsg.add_ranges(gz::math::NAN_F);
+      this->dataPtr->laserMsg.add_intensities(gz::math::NAN_F);
     }
   }
 
@@ -272,7 +274,7 @@ bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
       int index = j * this->RangeCount() + i;
       double range = this->laserBuffer[index*3];
 
-      range = ignition::math::isnan(range) ? this->RangeMax() : range;
+      range = gz::math::isnan(range) ? this->RangeMax() : range;
       this->dataPtr->laserMsg.set_ranges(index, range);
       this->dataPtr->laserMsg.set_intensities(index,
           this->laserBuffer[index * 3 + 1]);
@@ -300,7 +302,7 @@ double Lidar::RangeCountRatio() const
 }
 
 //////////////////////////////////////////////////
-ignition::math::Angle Lidar::AngleMin() const
+gz::math::Angle Lidar::AngleMin() const
 {
   return this->dataPtr->sdfLidar.HorizontalScanMinAngle();
 }
@@ -312,7 +314,7 @@ void Lidar::SetAngleMin(double _angle)
 }
 
 //////////////////////////////////////////////////
-ignition::math::Angle Lidar::AngleMax() const
+gz::math::Angle Lidar::AngleMax() const
 {
   return this->dataPtr->sdfLidar.HorizontalScanMaxAngle();
 }
@@ -385,7 +387,7 @@ void Lidar::SetParent(const std::string &_parent)
 }
 
 //////////////////////////////////////////////////
-ignition::math::Angle Lidar::VerticalAngleMin() const
+gz::math::Angle Lidar::VerticalAngleMin() const
 {
   return this->dataPtr->sdfLidar.VerticalScanMinAngle();
 }
@@ -397,7 +399,7 @@ void Lidar::SetVerticalAngleMin(const double _angle)
 }
 
 //////////////////////////////////////////////////
-ignition::math::Angle Lidar::VerticalAngleMax() const
+gz::math::Angle Lidar::VerticalAngleMax() const
 {
   return this->dataPtr->sdfLidar.VerticalScanMaxAngle();
 }
@@ -432,12 +434,12 @@ double Lidar::Range(const int _index) const
 
   if (this->dataPtr->laserMsg.ranges_size() == 0)
   {
-    ignwarn << "ranges not constructed yet (zero sized)\n";
+    gzwarn << "ranges not constructed yet (zero sized)\n";
     return 0.0;
   }
   if (_index < 0 || _index > this->dataPtr->laserMsg.ranges_size())
   {
-    ignerr << "Invalid range index[" << _index << "]\n";
+    gzerr << "Invalid range index[" << _index << "]\n";
     return 0.0;
   }
 

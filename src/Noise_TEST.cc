@@ -19,16 +19,15 @@
 
 #include <numeric>
 
-#include <ignition/common/Console.hh>
-#include <ignition/math/Rand.hh>
+#include <gz/common/Console.hh>
+#include <gz/math/Rand.hh>
 
 #include <sdf/Noise.hh>
 
+#include "gz/sensors/Noise.hh"
+#include "gz/sensors/GaussianNoiseModel.hh"
 
-#include "ignition/sensors/Noise.hh"
-#include "ignition/sensors/GaussianNoiseModel.hh"
-
-using namespace ignition;
+using namespace gz;
 
 const unsigned int g_applyCount = 100;
 
@@ -440,11 +439,4 @@ TEST(NoiseTest, NoiseFailures)
   sensors::NoisePtr noiseFactory2 =
      sensors::NoiseFactory::NewNoiseModel(
      sdfNoise, "camera");
-}
-
-/////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

@@ -142,7 +142,7 @@ To assign a label to a model we use the label plugin in the SDF file
             <diffuse>0 0 1 1</diffuse>
             <specular>0 0 0.3 1</specular>
           </material>
-          <plugin filename="ignition-gazebo-label-system" name="ignition::gazebo::systems::Label">
+          <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
             <label>10</label>
           </plugin>
         </visual>
@@ -153,7 +153,7 @@ To assign a label to a model we use the label plugin in the SDF file
 Lets zoom in the label plugin
 
 ```xml
-          <plugin filename="ignition-gazebo-label-system" name="ignition::gazebo::systems::Label">
+          <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
             <label>10</label>
           </plugin>
 ```
@@ -171,21 +171,21 @@ Example for adding the label plugin as a child for the `<model>` tag
       <link name="sphere_link">
       ...
       </link>
-      <plugin filename="ignition-gazebo-label-system" name="ignition::gazebo::systems::Label">
+      <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
         <label>20</label>
       </plugin>
     </model>
 ```
 
-Or by including a model from ignition fuel, you can add the label plugin as a child for the <include> tag
+Or by including a model from gz fuel, you can add the label plugin as a child for the <include> tag
 
 ```xml
    <include>
       <pose>-1 0 3 0.0 0.0 1.57</pose>
       <uri>
-      https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Construction Cone
+      https://fuel.gazebosim.org/1.0/OpenRobotics/models/Construction Cone
       </uri>
-      <plugin filename="ignition-gazebo-label-system" name="ignition::gazebo::systems::Label">
+      <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
         <label>30</label>
       </plugin>
     </include>
@@ -195,7 +195,7 @@ Or by including a model from ignition fuel, you can add the label plugin as a ch
 Now that we've discussed how a bounding box camera and models with labels can be specified, let's start with an example world that uses the bounding box camera.
 Run the following command:
 ```
-ign gazebo boundingbox_camera.sdf
+gz sim boundingbox_camera.sdf
 ```
 
 You should see something similar to this:
@@ -213,10 +213,10 @@ You will see output like this:
 ![full_boxes](files/boundingbox_camera/boundingbox_camera_full.png)
 
 
-To visualize the output from different SDF file, you can include the model of the sensor in any SDF file then run it via ign gazebo and open the `Image Display` plugin and select the topic you specified in the `<topic>` tag.
+To visualize the output from different SDF file, you can include the model of the sensor in any SDF file then run it via gz sim and open the `Image Display` plugin and select the topic you specified in the `<topic>` tag.
 
 
-Taking a look at the [SDF](https://github.com/ignitionrobotics/ign-gazebo/blob/ign-gazebo5/examples/worlds/boundingbox_camera.sdf) file for this example.
+Taking a look at the [SDF](https://github.com/gazebosim/gz-sim/blob/main/examples/worlds/boundingbox_camera.sdf) file for this example.
 
 
 ## Object Detection Dataset Generation
@@ -236,7 +236,7 @@ To save the output of the sensor as an object detection dataset samples we add t
 
 Set up the path of the dataset and run:
 ```
-ign gazebo boundingbox_camera.sdf
+gz sim boundingbox_camera.sdf
 ```
 
 you will find that the dataset is saved in the given path
@@ -474,7 +474,7 @@ You should see output like this
 
 
 
-## Processing the bounding box sensor via ign-transport
+## Processing the bounding box sensor via gz-transport
 In the example above, the bounding box cameras publish an axis aligned 2d bounding box message in case of 2d boxes mode (visible 2d or full 2d) or a oriented 3d bounding box message  to the topic provided in the `<topic>` tag in SDF
 For example, in the next code we publish on the topic “boxes”
 
@@ -486,26 +486,26 @@ For example, in the next code we publish on the topic “boxes”
 The camera also publishes an image message of an image with the bounding boxes drawn on it(not valid in case of 3d boxes), and it publish it on topic “TOPIC_TAG_NAME_image”, for example, in the above code, it will publish the image message on “boxes_image”.
 
 We can see the bounding boxes by running the following command:
-```ign topic -e -t TOPIC_TAG_NAME```
+```gz topic -e -t TOPIC_TAG_NAME```
 In the above example, it will be:
-```ign topic -e -t boxes```
+```gz topic -e -t boxes```
 
 
 Here's an example for bounding box camera subscriber that gets the boxes:
 ```cpp
 #include <cstdint>
-#include <ignition/msgs.hh>
-#include <ignition/transport.hh>
+#include <gz/msgs.hh>
+#include <gz/transport.hh>
 
 // a callback function that is triggered whenever the bounding box camera
 // topic receives a new 2d boxes message
-void OnNewBoxes2D(const ignition::msgs::AnnotatedAxisAligned2DBox_V &_msg)
+void OnNewBoxes2D(const gz::msgs::AnnotatedAxisAligned2DBox_V &_msg)
 {
  int size = _msg.annotated_box_size();
  std::cout << "Reveived [" << size << "] 2D bounding boxes: " << std::endl;
  for (int i = 0; i < size; i++)
  {
-   ignition::msgs::AnnotatedAxisAligned2DBox annotatedBox = _msg.annotated_box(i);
+   gz::msgs::AnnotatedAxisAligned2DBox annotatedBox = _msg.annotated_box(i);
    std::cout << annotatedBox.DebugString() << std::endl;
  }
  std::cout << std::endl;
@@ -513,13 +513,13 @@ void OnNewBoxes2D(const ignition::msgs::AnnotatedAxisAligned2DBox_V &_msg)
 
 // a callback function that is triggered whenever the bounding box camera
 // topic receives a new 3d boxes message
-void OnNewBoxes3D(const ignition::msgs::AnnotatedOriented3DBox_V &_msg)
+void OnNewBoxes3D(const gz::msgs::AnnotatedOriented3DBox_V &_msg)
 {
  int size = _msg.annotated_box_size();
  std::cout << "Reveived [" << size << "] 3D bounding boxes: " << std::endl;
  for (int i = 0; i < size; i++)
  {
-   ignition::msgs::AnnotatedOriented3DBox annotatedBox = _msg.annotated_box(i);
+   gz::msgs::AnnotatedOriented3DBox annotatedBox = _msg.annotated_box(i);
    std::cout << annotatedBox.DebugString() << std::endl;
  }
  std::cout << std::endl;
@@ -527,7 +527,7 @@ void OnNewBoxes3D(const ignition::msgs::AnnotatedOriented3DBox_V &_msg)
 
 int main(int argc, char **argv)
 {
- ignition::transport::Node node;
+ gz::transport::Node node;
  bool subscribed = false;
 
  if (argc > 1)
@@ -546,7 +546,7 @@ int main(int argc, char **argv)
    return -1;
  }
 
- ignition::transport::waitForShutdown();
+ gz::transport::waitForShutdown();
  return 0;
 }
 ```
@@ -557,21 +557,21 @@ And Its CMakeLists.txt file
 
 ```cmake
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(ignition-sensors-camera-demo)
+project(gz-sensors-camera-demo)
 
 # Find the Gazebo Libraries used directly by the example
-find_package(ignition-rendering6 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
-find_package(ignition-sensors6 REQUIRED COMPONENTS rendering camera)
+find_package(gz-rendering6 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
+find_package(gz-sensors6 REQUIRED COMPONENTS rendering camera)
 
-if (TARGET ignition-rendering6::ogre)
+if (TARGET gz-rendering6::ogre)
   add_definitions(-DWITH_OGRE)
 endif()
-if (TARGET ignition-rendering6::ogre2)
+if (TARGET gz-rendering6::ogre2)
   add_definitions(-DWITH_OGRE2)
 endif()
 
 add_executable(boundingbox_camera main.cc)
 target_link_libraries(boundingbox_camera PUBLIC
- ignition-sensors6::camera)
+ gz-sensors6::camera)
 
 ```

@@ -17,38 +17,30 @@
 
 #include <gtest/gtest.h>
 
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
-#endif
-#include <ignition/msgs/camera_info.pb.h>
-#include <ignition/msgs.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
+#include <gz/msgs/camera_info.pb.h>
+#include <gz/msgs/image.pb.h>
 
-#include <ignition/common/Filesystem.hh>
-#include <ignition/common/Event.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/RgbdCameraSensor.hh>
+#include <gz/common/Filesystem.hh>
+#include <gz/common/Event.hh>
+#include <gz/sensors/Manager.hh>
+#include <gz/sensors/RgbdCameraSensor.hh>
 
-// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+// TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
 #ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/Material.hh>
-#include <ignition/rendering/RenderEngine.hh>
-#include <ignition/rendering/RenderingIface.hh>
-#include <ignition/rendering/Scene.hh>
-#include <ignition/rendering/Visual.hh>
+#include <gz/rendering/Material.hh>
+#include <gz/rendering/RenderEngine.hh>
+#include <gz/rendering/RenderingIface.hh>
+#include <gz/rendering/Scene.hh>
+#include <gz/rendering/Visual.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 #include "PointCloudUtil.hh"
@@ -56,7 +48,7 @@
 #define DEPTH_TOL 1e-4
 #define DOUBLE_TOL 1e-6
 
-using namespace ignition;
+using namespace gz;
 
 std::mutex g_mutex;
 unsigned int g_depthCounter = 0;
@@ -205,16 +197,16 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   if ((_renderEngine.compare("ogre") != 0) &&
       (_renderEngine.compare("ogre2") != 0))
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' doesn't support rgbd cameras" << std::endl;
     return;
   }
 
-  // Setup ign-rendering with an empty scene
+  // Setup gz-rendering with an empty scene
   auto *engine = rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
     return;
   }
@@ -377,7 +369,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     EXPECT_EQ(0u, mr);
     EXPECT_EQ(0u, mg);
 #ifndef __APPLE__
-    // See https://github.com/ignitionrobotics/ign-sensors/issues/66
+    // See https://github.com/gazebosim/gz-sensors/issues/66
     EXPECT_GT(mb, 0u);
 #endif
 
@@ -443,7 +435,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
     EXPECT_EQ(0u, mr);
     EXPECT_EQ(0u, mg);
 #ifndef __APPLE__
-    // See https://github.com/ignitionrobotics/ign-sensors/issues/66
+    // See https://github.com/gazebosim/gz-sensors/issues/66
     EXPECT_GT(mb, 0u);
 #endif
 
@@ -748,16 +740,9 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
 //////////////////////////////////////////////////
 TEST_P(RgbdCameraSensorTest, ImagesWithBuiltinSDF)
 {
+  common::Console::SetVerbosity(4);
   ImagesWithBuiltinSDF(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(RgbdCameraSensor, RgbdCameraSensorTest,
+INSTANTIATE_TEST_SUITE_P(RgbdCameraSensor, RgbdCameraSensorTest,
     RENDER_ENGINE_VALUES, rendering::PrintToStringParam());
-
-//////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  common::Console::SetVerbosity(4);
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

@@ -15,38 +15,31 @@
  *
 */
 
-#if defined(_MSC_VER)
-  #pragma warning(push)
-  #pragma warning(disable: 4005)
-  #pragma warning(disable: 4251)
-#endif
-#include <ignition/msgs/image.pb.h>
-#include <ignition/msgs/pointcloud_packed.pb.h>
-#if defined(_MSC_VER)
-  #pragma warning(pop)
-#endif
+#include <gz/msgs/image.pb.h>
+#include <gz/msgs/pointcloud_packed.pb.h>
 
-#include <ignition/common/Image.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/math/Helpers.hh>
+#include <gz/common/Image.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/math/Helpers.hh>
 
-#include <ignition/rendering/Camera.hh>
-#include <ignition/rendering/DepthCamera.hh>
+#include <gz/rendering/Camera.hh>
+#include <gz/rendering/DepthCamera.hh>
 
-#include <ignition/transport/Node.hh>
+#include <gz/msgs/Utility.hh>
+#include <gz/transport/Node.hh>
 
 #include <sdf/Sensor.hh>
 
-#include "ignition/sensors/ImageGaussianNoiseModel.hh"
-#include "ignition/sensors/ImageNoise.hh"
-#include "ignition/sensors/RgbdCameraSensor.hh"
-#include "ignition/sensors/RenderingEvents.hh"
-#include "ignition/sensors/SensorFactory.hh"
+#include "gz/sensors/ImageGaussianNoiseModel.hh"
+#include "gz/sensors/ImageNoise.hh"
+#include "gz/sensors/RgbdCameraSensor.hh"
+#include "gz/sensors/RenderingEvents.hh"
+#include "gz/sensors/SensorFactory.hh"
 
 #include "PointCloudUtil.hh"
 
 /// \brief Private data for RgbdCameraSensor
-class ignition::sensors::RgbdCameraSensorPrivate
+class gz::sensors::RgbdCameraSensorPrivate
 {
   /// \brief Depth data callback used to get the data from the sensor
   /// \param[in] _scan pointer to the data from the sensor
@@ -86,7 +79,7 @@ class ignition::sensors::RgbdCameraSensorPrivate
   public: bool initialized = false;
 
   /// \brief Rendering camera
-  public: ignition::rendering::DepthCameraPtr depthCamera;
+  public: gz::rendering::DepthCameraPtr depthCamera;
 
   /// \brief Depth data buffer.
   public: float *depthBuffer = nullptr;
@@ -114,19 +107,19 @@ class ignition::sensors::RgbdCameraSensorPrivate
   public: std::string opticalFrameId{""};
 
   /// \brief Pointer to an image to be published
-  public: ignition::rendering::Image image;
+  public: gz::rendering::Image image;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
 
   /// \brief Connection from depth camera with new depth data
-  public: ignition::common::ConnectionPtr depthConnection;
+  public: gz::common::ConnectionPtr depthConnection;
 
   /// \brief Connection from depth camera with new point cloud data
-  public: ignition::common::ConnectionPtr pointCloudConnection;
+  public: gz::common::ConnectionPtr pointCloudConnection;
 
   /// \brief Connection to the Manager's scene change event.
-  public: ignition::common::ConnectionPtr sceneChangeConnection;
+  public: gz::common::ConnectionPtr sceneChangeConnection;
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
@@ -142,7 +135,7 @@ class ignition::sensors::RgbdCameraSensorPrivate
   public: PointCloudUtil pointsUtil;
 };
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////
@@ -189,13 +182,13 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
   // Check if this is the right type
   if (_sdf.Type() != sdf::SensorType::RGBD_CAMERA)
   {
-    ignerr << "Attempting to a load a RGBD Camera sensor, but received "
+    gzerr << "Attempting to a load a RGBD Camera sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
   }
 
   if (_sdf.CameraSensor() == nullptr)
   {
-    ignerr << "Attempting to a load an RGBD Camera sensor, but received "
+    gzerr << "Attempting to a load an RGBD Camera sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -208,12 +201,12 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
           this->Topic() + "/image");
   if (!this->dataPtr->imagePub)
   {
-    ignerr << "Unable to create publisher on topic["
+    gzerr << "Unable to create publisher on topic["
       << this->Topic() + "/image" << "].\n";
     return false;
   }
 
-  igndbg << "RGB images for [" << this->Name() << "] advertised on ["
+  gzdbg << "RGB images for [" << this->Name() << "] advertised on ["
          << this->Topic() << "/image]" << std::endl;
 
   // Create the depth image publisher
@@ -222,12 +215,12 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
           this->Topic() + "/depth_image");
   if (!this->dataPtr->depthPub)
   {
-    ignerr << "Unable to create publisher on topic["
+    gzerr << "Unable to create publisher on topic["
       << this->Topic() + "/depth_image" << "].\n";
     return false;
   }
 
-  igndbg << "Depth images for [" << this->Name() << "] advertised on ["
+  gzdbg << "Depth images for [" << this->Name() << "] advertised on ["
          << this->Topic() << "/depth_image]" << std::endl;
 
   // Create the point cloud publisher
@@ -236,12 +229,12 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
           this->Topic() + "/points");
   if (!this->dataPtr->pointPub)
   {
-    ignerr << "Unable to create publisher on topic["
+    gzerr << "Unable to create publisher on topic["
       << this->Topic() + "/points" << "].\n";
     return false;
   }
 
-  igndbg << "Points for [" << this->Name() << "] advertised on ["
+  gzdbg << "Points for [" << this->Name() << "] advertised on ["
          << this->Topic() << "/points]" << std::endl;
 
   if (!this->AdvertiseInfo(this->Topic() + "/camera_info"))
@@ -277,7 +270,7 @@ bool RgbdCameraSensor::CreateCameras()
 
   if (!cameraSdf)
   {
-    ignerr << "Unable to access camera SDF element\n";
+    gzerr << "Unable to access camera SDF element\n";
     return false;
   }
 
@@ -345,7 +338,7 @@ bool RgbdCameraSensor::CreateCameras()
     }
     else if (noiseSdf.Type() != sdf::NoiseType::NONE)
     {
-      ignwarn << "The depth camera sensor only supports Gaussian noise. "
+      gzwarn << "The depth camera sensor only supports Gaussian noise. "
        << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
        << "] is not supported." << std::endl;
     }
@@ -356,9 +349,9 @@ bool RgbdCameraSensor::CreateCameras()
 
   math::Angle angle = cameraSdf->HorizontalFov();
   // todo(anyone) verify that rgb pixels align with d for angles >90 degrees.
-  if (angle < 0.01 || angle > IGN_PI * 2)
+  if (angle < 0.01 || angle > GZ_PI * 2)
   {
-    ignerr << "Invalid horizontal field of view [" << angle << "]\n";
+    gzerr << "Invalid horizontal field of view [" << angle << "]\n";
 
     return false;
   }
@@ -453,16 +446,16 @@ void RgbdCameraSensorPrivate::OnNewRgbPointCloud(const float *_scan,
 //////////////////////////////////////////////////
 bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("RgbdCameraSensor::Update");
+  GZ_PROFILE("RgbdCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
   if (!this->dataPtr->depthCamera)
   {
-    ignerr << "Depth or image cameras don't exist.\n";
+    gzerr << "Depth or image cameras don't exist.\n";
     return false;
   }
 
@@ -489,7 +482,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 
     std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-    // The following code is a work around since ign-rendering's depth camera
+    // The following code is a work around since gz-rendering's depth camera
     // does not support 2 different clipping distances. An assumption is made
     // that the depth clipping distances are within bounds of the rgb clipping
     // distances, if not, the rgb clipping values will take priority.
@@ -516,7 +509,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     // publish
     {
       this->AddSequence(msg.mutable_header(), "depthImage");
-      IGN_PROFILE("RgbdCameraSensor::Update Publish depth image");
+      GZ_PROFILE("RgbdCameraSensor::Update Publish depth image");
       this->dataPtr->depthPub.Publish(msg);
     }
   }
@@ -557,7 +550,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       }
 
       {
-        IGN_PROFILE("RgbdCameraSensor::Update Fill Point Cloud");
+        GZ_PROFILE("RgbdCameraSensor::Update Fill Point Cloud");
         // fill point cloud msg and image data
         this->dataPtr->pointsUtil.FillMsg(this->dataPtr->pointMsg,
             this->dataPtr->pointCloudBuffer, true,
@@ -568,7 +561,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       // publish
       {
         this->AddSequence(this->dataPtr->pointMsg.mutable_header(), "pointMsg");
-        IGN_PROFILE("RgbdCameraSensor::Update Publish point cloud");
+        GZ_PROFILE("RgbdCameraSensor::Update Publish point cloud");
         this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
       }
     }
@@ -578,7 +571,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     {
       if (!filledImgData)
       {
-        IGN_PROFILE("RgbdCameraSensor::Update Fill RGB Image");
+        GZ_PROFILE("RgbdCameraSensor::Update Fill RGB Image");
         // extract image data from point cloud data
         this->dataPtr->pointsUtil.RGBFromPointCloud(
             this->dataPtr->image.Data<unsigned char>(),
@@ -604,7 +597,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       // publish the image message
       {
         this->AddSequence(msg.mutable_header(), "rgbdImage");
-        IGN_PROFILE("RgbdCameraSensor::Update Publish RGB image");
+        GZ_PROFILE("RgbdCameraSensor::Update Publish RGB image");
         this->dataPtr->imagePub.Publish(msg);
       }
     }

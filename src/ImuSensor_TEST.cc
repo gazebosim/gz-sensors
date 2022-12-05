@@ -14,39 +14,29 @@
  * limitations under the License.
  *
  */
-#if defined(_MSC_VER)
-  #pragma warning(push)
-  #pragma warning(disable: 4005)
-  #pragma warning(disable: 4251)
-#endif
-#include <ignition/msgs.hh>
-#if defined(_MSC_VER)
-  #pragma warning(pop)
-#endif
-
 #include <gtest/gtest.h>
 #include <sdf/sdf.hh>
 
-#include <ignition/math/Helpers.hh>
+#include <gz/math/Helpers.hh>
 
-#include <ignition/common/Console.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/ImuSensor.hh>
-#include <ignition/sensors/Manager.hh>
+#include <gz/common/Console.hh>
+#include <gz/sensors/Export.hh>
+#include <gz/sensors/ImuSensor.hh>
+#include <gz/sensors/Manager.hh>
 
-using namespace ignition;
+using namespace gz;
 
 // Default values for use with ADIS16448 IMU
 // These values come from the Rotors default values:
 // https://github.com/ethz-asl/rotors_simulator/blob/513bb92da0c1a0c968bdc679dffc8fe7d77de918/rotors_gazebo_plugins/include/rotors_gazebo_plugins/gazebo_imu_plugin.h#L40
 static constexpr double kDefaultAdisGyroscopeNoiseDensity =
-    2.0 * 35.0 / 3600.0 / 180.0 * IGN_PI;
+    2.0 * 35.0 / 3600.0 / 180.0 * GZ_PI;
 static constexpr double kDefaultAdisGyroscopeRandomWalk =
-    2.0 * 4.0 / 3600.0 / 180.0 * IGN_PI;
+    2.0 * 4.0 / 3600.0 / 180.0 * GZ_PI;
 static constexpr double kDefaultAdisGyroscopeBiasCorrelationTime =
     1.0e+3;
 static constexpr double kDefaultAdisGyroscopeTurnOnBiasSigma =
-    0.5 / 180.0 * IGN_PI;
+    0.5 / 180.0 * GZ_PI;
 static constexpr double kDefaultAdisAccelerometerNoiseDensity =
     2.0 * 2.0e-3;
 static constexpr double kDefaultAdisAccelerometerRandomWalk =
@@ -200,7 +190,7 @@ TEST(ImuSensor_TEST, CreateImuSensor)
   sensors::Manager mgr;
 
   const std::string name = "TestImu";
-  const std::string topic = "/ignition/sensors/test/imu";
+  const std::string topic = "/gz/sensors/test/imu";
   const double update_rate = 100;
   const auto accelNoise = accelerometerParameters(update_rate, 0.0);
   const auto gyroNoise = gyroscopeParameters(update_rate, 0.0);
@@ -227,7 +217,7 @@ TEST(ImuSensor_TEST, ComputeNoise)
 
   {
     const std::string name = "TestImu_Truth";
-    const std::string topic = "/ignition/sensors/test/imu_truth";
+    const std::string topic = "/gz/sensors/test/imu_truth";
     const double update_rate = 100;
     const auto accelNoise = noNoiseParameters(update_rate, 0.0);
     const auto gyroNoise = noNoiseParameters(update_rate, 0.0);
@@ -240,7 +230,7 @@ TEST(ImuSensor_TEST, ComputeNoise)
 
   {
     const std::string name = "TestImu_Truth";
-    const std::string topic = "/ignition/sensors/test/imu_truth";
+    const std::string topic = "/gz/sensors/test/imu_truth";
     const double update_rate = 100;
     auto accelNoise = accelerometerParameters(update_rate, 0.0);
     auto gyroNoise = gyroscopeParameters(update_rate, 0.0);
@@ -323,7 +313,7 @@ TEST(ImuSensor_TEST, Orientation)
 
   {
     const std::string name = "TestImu_Truth";
-    const std::string topic = "/ignition/sensors/test/imu_truth";
+    const std::string topic = "/gz/sensors/test/imu_truth";
     const double updateRate = 100;
     const auto accelNoise = noNoiseParameters(updateRate, 0.0);
     const auto gyroNoise = noNoiseParameters(updateRate, 0.0);
@@ -342,7 +332,7 @@ TEST(ImuSensor_TEST, Orientation)
   ASSERT_NE(nullptr, sensor);
 
   math::Quaterniond orientRef;
-  math::Quaterniond orientValue(math::Vector3d(IGN_PI/2.0, 0, IGN_PI));
+  math::Quaterniond orientValue(math::Vector3d(GZ_PI/2.0, 0, GZ_PI));
   math::Pose3d pose(math::Vector3d(0, 1, 2), orientValue);
 
   sensor->SetOrientationReference(orientRef);
@@ -357,7 +347,7 @@ TEST(ImuSensor_TEST, Orientation)
   EXPECT_EQ(orientValue, sensor->Orientation());
 
   // update pose and check orientation
-  math::Quaterniond newOrientValue(math::Vector3d(IGN_PI, IGN_PI/2, IGN_PI));
+  math::Quaterniond newOrientValue(math::Vector3d(GZ_PI, GZ_PI/2, GZ_PI));
   math::Pose3d newPose(math::Vector3d(0, 1, 1), newOrientValue);
   sensor->SetWorldPose(newPose);
 
@@ -377,7 +367,7 @@ TEST(ImuSensor_TEST, Orientation)
 
   // update world pose with orientation disabled and verify that orientation
   // does not change
-  math::Quaterniond newOrientValue2(math::Vector3d(IGN_PI/2, IGN_PI/2, IGN_PI));
+  math::Quaterniond newOrientValue2(math::Vector3d(GZ_PI/2, GZ_PI/2, GZ_PI));
   math::Pose3d newPose2(math::Vector3d(1, 1, 0), newOrientValue2);
   sensor->SetWorldPose(newPose2);
   sensor->Update(std::chrono::steady_clock::duration(
@@ -560,8 +550,6 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
   // Create a sensor manager
   sensors::Manager mgr;
 
-  math::Quaterniond orientValue;
-
   // A. Localization tag is set to ENU
   // ---------------------------------
   auto sensorENU = mgr.CreateSensor<sensors::ImuSensor>(
@@ -585,10 +573,10 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
 
   // Case A.2 Localization ref: ENU, World : ENU + rotation offset
   {
-    const math::Quaterniond worldFrameOrientation(0, 0, IGN_PI/4);
+    const math::Quaterniond worldFrameOrientation(0, 0, GZ_PI/4);
     const sensors::WorldFrameEnumType worldRelativeTo =
       sensors::WorldFrameEnumType::ENU;
-    const math::Quaterniond expectedSensorOrientation(0, 0, -IGN_PI/4);
+    const math::Quaterniond expectedSensorOrientation(0, 0, -GZ_PI/4);
 
     sensorENU->SetWorldFrameOrientation(worldFrameOrientation,
       worldRelativeTo);
@@ -603,7 +591,7 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
     const math::Quaterniond worldFrameOrientation(0, 0, 0);
     const sensors::WorldFrameEnumType worldRelativeTo =
       sensors::WorldFrameEnumType::NWU;
-    const math::Quaterniond expectedSensorOrientation(0, 0, IGN_PI/2);
+    const math::Quaterniond expectedSensorOrientation(0, 0, GZ_PI/2);
 
     sensorENU->SetWorldFrameOrientation(worldFrameOrientation,
       worldRelativeTo);
@@ -618,7 +606,7 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
     const math::Quaterniond worldFrameOrientation(0, 0, 0);
     const sensors::WorldFrameEnumType worldRelativeTo =
       sensors::WorldFrameEnumType::NED;
-    const math::Quaterniond expectedSensorOrientation(IGN_PI, 0, IGN_PI/2);
+    const math::Quaterniond expectedSensorOrientation(GZ_PI, 0, GZ_PI/2);
 
     sensorENU->SetWorldFrameOrientation(worldFrameOrientation,
       worldRelativeTo);
@@ -650,10 +638,10 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
 
   // Case B.2 : Localization ref: NWU, World : NWU + rotation offset
   {
-    const math::Quaterniond worldFrameOrientation(0, 0, IGN_PI/4);
+    const math::Quaterniond worldFrameOrientation(0, 0, GZ_PI/4);
     const sensors::WorldFrameEnumType worldRelativeTo =
       sensors::WorldFrameEnumType::NWU;
-    const math::Quaterniond expectedSensorOrientation(0, 0, -IGN_PI/4);
+    const math::Quaterniond expectedSensorOrientation(0, 0, -GZ_PI/4);
 
     sensorNWU->SetWorldFrameOrientation(worldFrameOrientation,
       worldRelativeTo);
@@ -668,7 +656,7 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
     const math::Quaterniond worldFrameOrientation(0, 0, 0);
     const sensors::WorldFrameEnumType worldRelativeTo =
       sensors::WorldFrameEnumType::ENU;
-    const math::Quaterniond expectedSensorOrientation(0, 0, -IGN_PI/2);
+    const math::Quaterniond expectedSensorOrientation(0, 0, -GZ_PI/2);
 
     sensorNWU->SetWorldFrameOrientation(worldFrameOrientation,
       worldRelativeTo);
@@ -683,7 +671,7 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
     const math::Quaterniond worldFrameOrientation(0, 0, 0);
     const sensors::WorldFrameEnumType worldRelativeTo =
       sensors::WorldFrameEnumType::NED;
-    const math::Quaterniond expectedSensorOrientation(IGN_PI, 0, 0);
+    const math::Quaterniond expectedSensorOrientation(GZ_PI, 0, 0);
 
     sensorNWU->SetWorldFrameOrientation(worldFrameOrientation,
       worldRelativeTo);
@@ -715,10 +703,10 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
 
   // Case C.2 : Localization ref: NED, World : NED + rotation offset
   {
-    const math::Quaterniond worldFrameOrientation(0, 0, IGN_PI/4);
+    const math::Quaterniond worldFrameOrientation(0, 0, GZ_PI/4);
     const sensors::WorldFrameEnumType worldRelativeTo =
       sensors::WorldFrameEnumType::NED;
-    const math::Quaterniond expectedSensorOrientation(0, 0, -IGN_PI/4);
+    const math::Quaterniond expectedSensorOrientation(0, 0, -GZ_PI/4);
 
     sensorNED->SetWorldFrameOrientation(worldFrameOrientation,
       worldRelativeTo);
@@ -733,7 +721,7 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
     const math::Quaterniond worldFrameOrientation(0, 0, 0);
     const sensors::WorldFrameEnumType worldRelativeTo =
       sensors::WorldFrameEnumType::NWU;
-    const math::Quaterniond expectedSensorOrientation(-IGN_PI, 0, 0);
+    const math::Quaterniond expectedSensorOrientation(-GZ_PI, 0, 0);
 
     sensorNED->SetWorldFrameOrientation(worldFrameOrientation,
       worldRelativeTo);
@@ -748,7 +736,7 @@ TEST(ImuSensor_TEST, NamedFrameOrientationReference)
     const math::Quaterniond worldFrameOrientation(0, 0, 0);
     const sensors::WorldFrameEnumType worldRelativeTo =
       sensors::WorldFrameEnumType::ENU;
-    const math::Quaterniond expectedSensorOrientation(-IGN_PI, 0, IGN_PI/2);
+    const math::Quaterniond expectedSensorOrientation(-GZ_PI, 0, GZ_PI/2);
 
     sensorNED->SetWorldFrameOrientation(worldFrameOrientation,
       worldRelativeTo);
@@ -813,11 +801,4 @@ TEST(ImuSensor_TEST, LocalizationTagInvalid)
 
   math::Quaterniond orientValue(math::Vector3d(0, 0, 0));
   EXPECT_EQ(orientValue, sensor->Orientation());
-}
-
-//////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

@@ -10,6 +10,7 @@ set(dri_tests
   segmentation_camera.cc
   thermal_camera.cc
   triggered_camera.cc
+  wide_angle_camera.cc
 )
 
 set(tests
@@ -34,11 +35,11 @@ if (UNIX AND NOT APPLE)
 endif()
 
 if (DRI_TESTS)
-  ign_build_tests(TYPE INTEGRATION
+  gz_build_tests(TYPE INTEGRATION
     SOURCES
       ${dri_tests}
     LIB_DEPS
-      ${IGNITION-TRANSPORT_LIBRARIES}
+      ${GZ-TRANSPORT_LIBRARIES}
       ${PROJECT_LIBRARY_TARGET_NAME}-boundingbox_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-depth_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-camera
@@ -47,10 +48,11 @@ if (DRI_TESTS)
       ${PROJECT_LIBRARY_TARGET_NAME}-rgbd_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-segmentation_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-thermal_camera
+      ${PROJECT_LIBRARY_TARGET_NAME}-wide_angle_camera
   )
 endif()
 
-ign_build_tests(TYPE INTEGRATION
+gz_build_tests(TYPE INTEGRATION
   SOURCES
     ${tests}
   LIB_DEPS
@@ -62,3 +64,4 @@ ign_build_tests(TYPE INTEGRATION
     ${PROJECT_LIBRARY_TARGET_NAME}-magnetometer
     ${PROJECT_LIBRARY_TARGET_NAME}-navsat
 )
+

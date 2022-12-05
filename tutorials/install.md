@@ -9,31 +9,29 @@ The source install instructions should be used if you need the very latest softw
 ### Ubuntu
 
 1. Setup your computer to accept software from packages.osrfoundation.org:
-
 ```{.sh}
 sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
 wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
 sudo apt-get update
 ```
 
-1. Install Ignition Sensors
-
+2. Install Gazebo Sensors
 ```{.sh}
 # Change <#> to a version number, like 3 or 4
-sudo apt install libignition-sensors<#>-dev
+sudo apt install libgz-sensors<#>-dev
 ```
 
 ### macOS
 
-On macOS, add OSRF packages:
+1. On macOS, add OSRF packages:
   ```
   ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   brew tap osrf/simulation
   ```
 
-Install Ignition Sensors:
+2. Install Gazebo Sensors:
   ```
-  brew install ignition-sensors<#>
+  brew install gz-sensors<#>
   ```
 
 Be sure to replace `<#>` with a number value, such as 5 or 6, depending on
@@ -41,7 +39,7 @@ which version you need.
 
 ### Windows
 
-Binary install is pending `ignition-rendering` and `ignition-sensors` being added to conda-forge.
+Binary install is pending `gz-rendering` and `gz-sensors` being added to conda-forge.
 
 ## Source Install
 
@@ -50,40 +48,34 @@ necessary prerequisites followed by building from source.
 
 ### Prerequisites
 
-Ignition Sensors requires:
+Gazebo Sensors requires:
 
-  * [Ignition CMake](https://ignitionrobotics.org/libs/cmake)
-  * [Ignition Math](https://ignitionrobotics.org/libs/math)
-  * [Ignition Common](https://ignitionrobotics.org/libs/common)
-  * [Ignition Transport](https://ignitionrobotics.org/libs/transport)
-  * [Ignition Rendering](https://ignitionrobotics.org/libs/rendering)
-  * [Ignition Msgs](https://ignitionrobotics.org/libs/msgs)
+  * [Gazebo CMake](https://gazebosim.org/libs/cmake)
+  * [Gazebo Math](https://gazebosim.org/libs/math)
+  * [Gazebo Common](https://gazebosim.org/libs/common)
+  * [Gazebo Transport](https://gazebosim.org/libs/transport)
+  * [Gazebo Rendering](https://gazebosim.org/libs/rendering)
+  * [Gazebo Msgs](https://gazebosim.org/libs/msgs)
   * [SDFormat](https://github.com/osrf/sdformat)
   * [Protobuf3](https://developers.google.com/protocol-buffers/)
 
 ### Ubuntu
 
-1. Make sure you are running [Ubuntu Bionic](http://releases.ubuntu.com/18.04/) or above.
+1. Make sure you are running [Ubuntu Focal](http://releases.ubuntu.com/20.04/) or above.
 
 2. Install the Prerequisites.
 
-3. Configure to use gcc8 if that is not the default compiler
+3. Clone the repository
 ```{.sh}
-  sudo apt-get install g++-8
-  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8 --slave /usr/bin/gcov gcov /usr/bin/gcov-8
+  git clone https://github.com/gazebosim/gz-sensors
   ```
 
-4. Clone the repository
-```{.sh}
-  git clone https://github.com/ignitionrobotics/ign-sensors
+4. Configure and build
+  ```
+  cd gz-sensors; mkdir build; cd build; cmake ..;  make
   ```
 
-5. Configure and build
-  ```
-  cd ign-sensors; mkdir build; cd build; cmake ..;  make
-  ```
-
-6. Optionally, install the library
+5. Optionally, install the library
   ```
   sudo make install
   ```
@@ -92,7 +84,7 @@ Ignition Sensors requires:
 
 1. Clone the repository
   ```
-  git clone https://github.com/ignitionrobotics/ign-sensors -b ign-sensors<#>
+  git clone https://github.com/gazebosim/gz-sensors -b ign-sensors<#>
   ```
   Be sure to replace `<#>` with a number value, such as 5 or 6, depending on
   which version you need.
@@ -106,7 +98,7 @@ Ignition Sensors requires:
 
 3. Configure and build
   ```
-  cd ign-sensors
+  cd gz-sensors
   mkdir build
   cd build
   cmake ..
@@ -122,59 +114,59 @@ Ignition Sensors requires:
 
 #### Install Prerequisites
 
-First, follow the [ign-cmake](https://github.com/ignitionrobotics/ign-cmake) tutorial for installing Conda, Visual Studio, CMake, etc., prerequisites, and creating a Conda environment.
+First, follow the [gz-cmake](https://github.com/gazebosim/gz-cmake) tutorial for installing Conda, Visual Studio, CMake, etc., prerequisites, and creating a Conda environment.
 
 Navigate to `condabin` if necessary to use the `conda` command (i.e., if Conda is not in your `PATH` environment variable. You can find the location of `condabin` in Anaconda Prompt, `where conda`).
 
 Create if necessary, and activate a Conda environment:
 
 ```
-conda create -n ign-ws
-conda activate ign-ws
+conda create -n gz-ws
+conda activate gz-ws
 ```
 
-Install Ignition dependencies, replacing `<#>` with the desired versions:
+Install Gazebo dependencies, replacing `<#>` with the desired versions:
 
 ```
-conda install libignition-cmake<#> libignition-common<#> libignition-math<#> libignition-transport<#> libignition-msgs<#> --channel conda-forge
+conda install libgz-cmake<#> libgz-common<#> libgz-math<#> libgz-transport<#> libgz-msgs<#> --channel conda-forge
 ```
 
-Before [ign-rendering](https://github.com/ignitionrobotics/ign-rendering) becomes available on conda-forge, follow its tutorial to build it from source.
+Before [gz-rendering](https://github.com/gazebosim/gz-rendering) becomes available on conda-forge, follow its tutorial to build it from source.
 
 #### Build from source
 
 1. Activate the Conda environment created in the prerequisites:
   ```
-  conda activate ign-ws
+  conda activate gz-ws
   ```
 
-1. Navigate to where you would like to build the library, and clone the repository.
+2. Navigate to where you would like to build the library, and clone the repository.
   ```
   # Optionally, append `-b ign-sensors#` (replace # with a number) to check out a specific version
-  git clone https://github.com/ignitionrobotics/ign-sensors.git
+  git clone https://github.com/gazebosim/gz-sensors.git
   ```
 
-1. Configure and build
+3. Configure and build
   ```
-  cd ign-sensors
+  cd gz-sensors
   mkdir build
   cd build
   ```
 
-    Before `ign-rendering` becomes available on conda-forge, we need to build it from source and specify the path containing `ignition-rendering-config.cmake` in `CMAKE_PREFIX_PATH`, for cmake to find `ign-rendering`. That path could be `ign-rendering-install-path\lib\cmake\ignition-rendering4`, for example.
+4. Before `gz-rendering` becomes available on conda-forge, we need to build it from source and specify the path containing `gz-rendering-config.cmake` in `CMAKE_PREFIX_PATH`, for cmake to find `gz-rendering`. That path could be `gz-rendering-install-path\lib\cmake\gz-rendering4`, for example.
   ```
   cmake .. -DBUILD_TESTING=OFF -DCMAKE_PREFIX_PATH=path\containing\ignition-rendering-config  # Optionally, -DCMAKE_INSTALL_PREFIX=path\to\install
   cmake --build . --config Release
   ```
 
-1. Optionally, install. You will likely need to run a terminal with admin privileges for this call to succeed.
+5. Optionally, install. You will likely need to run a terminal with admin privileges for this call to succeed.
   ```
   cmake --install . --config Release
   ```
 
 # Documentation
 
-API and tutorials can be found at [https://ignitionrobotics.org/libs/sensors](https://ignitionrobotics.org/libs/sensors).
+API and tutorials can be found at [https://gazebosim.org/libs/sensors](https://gazebosim.org/libs/sensors).
 
 You can also generate the documentation from a clone of this repository by following these steps.
 
@@ -185,12 +177,12 @@ You can also generate the documentation from a clone of this repository by follo
 
 2. Clone the repository
   ```
-  git clone https://github.com/ignitionrobotics/ign-sensors
+  git clone https://github.com/gazebosim/gz-sensors
   ```
 
 3. Configure and build the documentation.
   ```
-  cd ign-sensors; mkdir build; cd build; cmake ../; make doc
+  cd gz-sensors; mkdir build; cd build; cmake ../; make doc
   ```
 
 4. View the documentation by running the following command from the build directory.

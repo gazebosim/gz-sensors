@@ -17,15 +17,15 @@
 #ifndef ODOMETER_HH_
 #define ODOMETER_HH_
 
-#include <ignition/sensors/Sensor.hh>
-#include <ignition/sensors/SensorTypes.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/sensors/Sensor.hh>
+#include <gz/sensors/SensorTypes.hh>
+#include <gz/transport/Node.hh>
 
 namespace custom
 {
   /// \brief Example sensor that publishes the total distance travelled by a
   /// robot, with noise.
-  class Odometer : public ignition::sensors::Sensor
+  class Odometer : public gz::sensors::Sensor
   {
     /// \brief Load the sensor with SDF parameters.
     /// \param[in] _sdf SDF Sensor parameters.
@@ -41,27 +41,27 @@ namespace custom
     /// \brief Set the current postiion of the robot, so the odometer can
     /// calculate the distance travelled.
     /// \param[in] _pos Current position in world coordinates.
-    public: void NewPosition(const ignition::math::Vector3d &_pos);
+    public: void NewPosition(const gz::math::Vector3d &_pos);
 
     /// \brief Get the latest world postiion of the robot.
     /// \return The latest position given to the odometer.
-    public: const ignition::math::Vector3d &Position() const;
+    public: const gz::math::Vector3d &Position() const;
 
     /// \brief Previous position of the robot.
-    private: ignition::math::Vector3d prevPos{std::nan(""), std::nan(""),
+    private: gz::math::Vector3d prevPos{std::nan(""), std::nan(""),
         std::nan("")};
 
     /// \brief Latest total distance.
     private: double totalDistance{0.0};
 
     /// \brief Noise that will be applied to the sensor data
-    private: ignition::sensors::NoisePtr noise{nullptr};
+    private: gz::sensors::NoisePtr noise{nullptr};
 
     /// \brief Node for communication
-    private: ignition::transport::Node node;
+    private: gz::transport::Node node;
 
     /// \brief Publishes sensor data
-    private: ignition::transport::Node::Publisher pub;
+    private: gz::transport::Node::Publisher pub;
   };
 }
 

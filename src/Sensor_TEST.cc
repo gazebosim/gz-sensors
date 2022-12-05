@@ -29,13 +29,12 @@
 
 #include <gtest/gtest.h>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Time.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/Sensor.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Console.hh>
+#include <gz/sensors/Export.hh>
+#include <gz/sensors/Sensor.hh>
+#include <gz/transport/Node.hh>
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 class TestSensor : public Sensor
@@ -350,10 +349,67 @@ TEST(Sensor_TEST, SetRateZeroService)
   EXPECT_FLOAT_EQ(20.0, sensor.UpdateRate());
 }
 
-
 //////////////////////////////////////////////////
-int main(int argc, char **argv)
+TEST_F(SensorUpdate, NextDataUpdateTime)
 {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  // Create sensor.
+  sdf::Sensor sdfSensor;
+  sdfSensor.SetName(kSensorName);
+  sdfSensor.SetTopic(kSensorTopic);
+  sdfSensor.SetUpdateRate(1);
+
+  std::unique_ptr<Sensor> sensor = std::make_unique<TestSensor>();
+  sensor->Load(sdfSensor);
+
+  {
+    std::chrono::steady_clock::duration now = std::chrono::seconds(0);
+    std::chrono::steady_clock::duration next = std::chrono::seconds(1);
+    EXPECT_TRUE(sensor->Update(now, false));
+    EXPECT_EQ(next.count(), sensor->NextDataUpdateTime().count());
+  }
+
+  {
+    std::chrono::steady_clock::duration now = std::chrono::seconds(1);
+    std::chrono::steady_clock::duration next = std::chrono::seconds(2);
+    EXPECT_TRUE(sensor->Update(now, false));
+    EXPECT_EQ(next.count(), sensor->NextDataUpdateTime().count());
+  }
+
+  {
+    // set the next data update time into the future, so we no longer
+    // expect an update to happen
+    std::chrono::steady_clock::duration now = std::chrono::seconds(2);
+    std::chrono::steady_clock::duration next = std::chrono::seconds(5);
+    sensor->SetNextDataUpdateTime(next);
+    EXPECT_FALSE(sensor->Update(now, false));
+    EXPECT_EQ(next.count(), sensor->NextDataUpdateTime().count());
+  }
+
+  {
+    // Force has no impact  on the next update time
+    std::chrono::steady_clock::duration now = std::chrono::seconds(3);
+    std::chrono::steady_clock::duration next = std::chrono::seconds(5);
+    EXPECT_TRUE(sensor->Update(now, true));
+    EXPECT_EQ(next.count(), sensor->NextDataUpdateTime().count());
+  }
+
+  {
+    // When that time point is reached, the update happens
+    std::chrono::steady_clock::duration now = std::chrono::seconds(5);
+    std::chrono::steady_clock::duration next = std::chrono::seconds(6);
+    EXPECT_TRUE(sensor->Update(now, false));
+    EXPECT_EQ(next.count(), sensor->NextDataUpdateTime().count());
+  }
+
+  {
+    // Jump backwards in time
+    std::chrono::steady_clock::duration now = std::chrono::seconds(5);
+    std::chrono::steady_clock::duration next = std::chrono::seconds(1);
+    sensor->SetNextDataUpdateTime(next);
+    EXPECT_TRUE(sensor->Update(now, false));
+
+    // The next update should be the first dt past the current time
+    std::chrono::steady_clock::duration newNext = std::chrono::seconds(6);
+    EXPECT_EQ(newNext.count(), sensor->NextDataUpdateTime().count());
+  }
 }

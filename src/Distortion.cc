@@ -23,15 +23,15 @@
 
 #include <functional>
 
-#include <ignition/common/Console.hh>
+#include <gz/common/Console.hh>
 
-#include "ignition/sensors/BrownDistortionModel.hh"
-#include "ignition/sensors/Distortion.hh"
+#include "gz/sensors/BrownDistortionModel.hh"
+#include "gz/sensors/Distortion.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
-class ignition::sensors::Distortion::Implementation
+class gz::sensors::Distortion::Implementation
 {
   /// \brief Which type of distortion we're applying
   public: DistortionType type = DistortionType::NONE;
@@ -54,7 +54,7 @@ DistortionPtr DistortionFactory::NewDistortionModel(const sdf::Camera &_sdf,
   {
     if (_sensorType == "camera")
     {
-      ignerr << "Image distortion requested. "
+      gzerr << "Image distortion requested. "
              << "Please use ImageDistortionFactory::DistortionModel instead"
              << std::endl;
       return distortion;
@@ -62,7 +62,7 @@ DistortionPtr DistortionFactory::NewDistortionModel(const sdf::Camera &_sdf,
     else
       distortion.reset(new BrownDistortionModel());
 
-    IGN_ASSERT(distortion->Type() == DistortionType::BROWN,
+    GZ_ASSERT(distortion->Type() == DistortionType::BROWN,
         "Distortion type should be 'brown'");
   }
   else if (distortionType == DistortionType::NONE)
@@ -71,12 +71,12 @@ DistortionPtr DistortionFactory::NewDistortionModel(const sdf::Camera &_sdf,
     // if 'custom', the type will be set once the user calls the
     // SetCustomDistortionCallback function.
     distortion.reset(new Distortion(DistortionType::NONE));
-    IGN_ASSERT(distortion->Type() == DistortionType::NONE,
+    GZ_ASSERT(distortion->Type() == DistortionType::NONE,
         "Distortion type should be 'none'");
   }
   else
   {
-    ignerr << "Unrecognized distortion type" << std::endl;
+    gzerr << "Unrecognized distortion type" << std::endl;
     return DistortionPtr();
   }
   distortion->Load(_sdf);
@@ -90,8 +90,8 @@ DistortionPtr DistortionFactory::NewDistortionModel(sdf::ElementPtr _sdf,
 {
   // TODO(WilliamLewww): create a distortion SDF to support different
   // distortion models
-  IGN_ASSERT(_sdf != nullptr, "camera sdf is null");
-  IGN_ASSERT(_sdf->GetName() == "camera", "Not a camera SDF element");
+  GZ_ASSERT(_sdf != nullptr, "camera sdf is null");
+  GZ_ASSERT(_sdf->GetName() == "camera", "Not a camera SDF element");
   sdf::Camera cameraDom;
   cameraDom.Load(_sdf);
 

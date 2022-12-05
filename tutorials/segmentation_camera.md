@@ -1,11 +1,11 @@
-\page segmentationcamera_igngazebo Segmentation Camera in Ignition Gazebo
+\page segmentationcamera_igngazebo Segmentation Camera in Gazebo
 
-In this tutorial, we will discuss how to use a segmentation camera sensor in Ignition Gazebo.
+In this tutorial, we will discuss how to use a segmentation camera sensor in Gazebo.
 
 ## Requirements
 
-Since this tutorial will show how to use a segmentation camera sensor in Ignition Gazebo, you'll need to have Ignition Gazebo installed. We recommend installing all Ignition libraries, using version Fortress or newer (the segmentation camera is not available in Ignition versions prior to Fortress).
-If you need to install Ignition, [pick the version you'd like to use](https://ignitionrobotics.org/docs) and then follow the installation instructions.
+Since this tutorial will show how to use a segmentation camera sensor in Gazebo, you'll need to have Gazebo installed. We recommend installing all Gazebo libraries, using version Fortress or newer (the segmentation camera is not available in Gazebo versions prior to Fortress).
+If you need to install Gazebo, [pick the version you'd like to use](https://gazebosim.org/docs) and then follow the installation instructions.
 
 ## Setting up the segmentation camera
 Here's an example of how to attach a segmentation camera sensor to a model in a SDF file:
@@ -85,13 +85,13 @@ Let’s take a closer look at the portion of the code above that focuses on the 
 
 As we can see, we define a sensor with the following SDF elements:
 * `<camera>`: The camera, which has the following child elements:
-    * `<segmentation_type>`: The type of segmentation performed by the camera. Use `semantic` for [semantic segmentation](https://www.jeremyjordan.me/semantic-segmentation/). For [panoptic (instance) segmentation](https://hasty.ai/blog/panoptic-segmentation-explained/), use `panoptic` or `instance`. The default value for `<segmentation_type>` is `semantic`.
+    * `<segmentation_type>`: The type of segmentation performed by the camera. Use `semantic` for [semantic segmentation](https://www.jeremyjordan.me/semantic-segmentation/). For [panoptic (instance) segmentation](https://en.wikipedia.org/wiki/Image_segmentation#Groups_of_image_segmentation), use `panoptic` or `instance`. The default value for `<segmentation_type>` is `semantic`.
 	* `<horizontal_fov>`: The horizontal field of view, in radians.
 	* `<image>`: The image size, in pixels.
 	* `<clip>`: The near and far clip planes. Objects are only rendered if they're within these planes.
-* `<always_on>`: Whether the sensor will always be updated (indicated by 1) or not (indicated by 0). This is currently unused by Ignition Gazebo.
+* `<always_on>`: Whether the sensor will always be updated (indicated by 1) or not (indicated by 0). This is currently unused by Gazebo.
 * `<update_rate>`: The sensor's update rate, in Hz.
-* `<visualize>`: Whether the sensor should be visualized in the GUI (indicated by true) or not (indicated by false). This is currently unused by Ignition Gazebo.
+* `<visualize>`: Whether the sensor should be visualized in the GUI (indicated by true) or not (indicated by false). This is currently unused by Gazebo.
 * `<topic>`: The name of the topic which will be used to publish the sensor data.
 
 #### Label map & Colored map
@@ -139,7 +139,7 @@ To assign a label to a model we use the label plugin in the SDF file:
             <diffuse>0 0 1 1</diffuse>
             <specular>0 0 0.3 1</specular>
           </material>
-          <plugin filename="ignition-gazebo-label-system" name="ignition::gazebo::systems::Label">
+          <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
             <label>10</label>
           </plugin>
         </visual>
@@ -150,7 +150,7 @@ To assign a label to a model we use the label plugin in the SDF file:
 Lets zoom in the label plugin:
 
 ```xml
-          <plugin filename="ignition-gazebo-label-system" name="ignition::gazebo::systems::Label">
+          <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
             <label>10</label>
           </plugin>
 ```
@@ -167,21 +167,21 @@ You can also attach this plugin to the model's `<model>` tag:
       <link name="sphere_link">
       ...
       </link>
-      <plugin filename="ignition-gazebo-label-system" name="ignition::gazebo::systems::Label">
+      <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
         <label>20</label>
       </plugin>
     </model>
 ```
 
-If you're including a model from a place like [ignition fuel](https://app.ignitionrobotics.org/dashboard), you can add the label plugin as a child for the `<include>` tag:
+If you're including a model from a place like [Gazebo Fuel](https://app.gazebosim.org/dashboard), you can add the label plugin as a child for the `<include>` tag:
 
 ```xml
    <include>
       <pose>-1 0 3 0.0 0.0 1.57</pose>
       <uri>
-      https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Construction Cone
+      https://fuel.gazebosim.org/1.0/OpenRobotics/models/Construction Cone
       </uri>
-      <plugin filename="ignition-gazebo-label-system" name="ignition::gazebo::systems::Label">
+      <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
         <label>30</label>
       </plugin>
     </include>
@@ -191,7 +191,7 @@ If you're including a model from a place like [ignition fuel](https://app.igniti
 Now that we've discussed how a segmentation camera and models with labels can be specified, let's run an example world that uses the segmentation camera.
 Run the following command:
 ```
-ign gazebo segmentation_camera.sdf
+gz sim segmentation_camera.sdf
 ```
 
 You should see something similar to this:
@@ -277,8 +277,8 @@ You'll see the camera drop, capturing updated segmentation images along the way:
 
 @image html files/segmentation_camera/segmentation_dataset.gif
 
-Once the camera has reached the ground plane, you can go ahead and close Ignition Gazebo.
-We will now discuss how to visualize the segmentation data that was just generated by Ignition Gazebo.
+Once the camera has reached the ground plane, you can go ahead and close Gazebo.
+We will now discuss how to visualize the segmentation data that was just generated by Gazebo.
 
 ## Visualize the segmentation dataset via Python
 Put the following code in a Python script called `segmentation_visualizer.py`:
@@ -374,8 +374,8 @@ You will see 4 windows: `image`, `labels_map`, `colored_map`, and `colored_image
 For panoptic/instance segmentation, to parse the `labels_map`, click on any pixel on the `labels_map` window to see the `label` and `instance count` of that pixel.
 
 
-## Processing the segmentation sensor via ign-transport
-It's possible to process the segmentation data in real time via `ign-transport`.
+## Processing the segmentation sensor via gz-transport
+It's possible to process the segmentation data in real time via `gz-transport`.
 You will need to which topics to subscribe to in order to receive this information.
 
 Consider the following SDF snippet from the segmentation camera:
@@ -389,11 +389,11 @@ We can write some c++ code that subscribes to these topics:
 ```cpp
 #include <cstdint>
 
-#include <ignition/msgs.hh>
-#include <ignition/rendering.hh>
-#include <ignition/transport.hh>
+#include <gz/msgs.hh>
+#include <gz/rendering.hh>
+#include <gz/transport.hh>
 
-void OnNewLabelMap(const ignition::msgs::Image &_msg)
+void OnNewLabelMap(const gz::msgs::Image &_msg)
 {
   auto width = _msg.width();
   auto height = _msg.height();
@@ -421,7 +421,7 @@ void OnNewLabelMap(const ignition::msgs::Image &_msg)
   }
 }
 
-void OnNewColoredMap(const ignition::msgs::Image &_msg)
+void OnNewColoredMap(const gz::msgs::Image &_msg)
 {
   auto width = _msg.width();
   auto height = _msg.height();
@@ -441,7 +441,7 @@ void OnNewColoredMap(const ignition::msgs::Image &_msg)
 
 int main(int argc, char **argv)
 {
-  ignition::transport::Node node;
+  gz::transport::Node node;
 
   if (!node.Subscribe("/segmentation/colored_map", &OnNewColoredMap) ||
     !node.Subscribe("/segmentation/labels_map", &OnNewLabelMap))
@@ -451,10 +451,10 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  ignition::transport::waitForShutdown();
+  gz::transport::waitForShutdown();
   return 0;
 }
 ```
 
 If you'd like to gain a better understanding of how the subscriber code works,
-you can go through the [ign-transport tutorials](https://ignitionrobotics.org/api/transport/11.0/tutorials.html).
+you can go through the [gz-transport tutorials](https://gazebosim.org/api/transport/11.0/tutorials.html).

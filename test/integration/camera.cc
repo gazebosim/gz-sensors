@@ -17,56 +17,49 @@
 
 #include <gtest/gtest.h>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Filesystem.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/CameraSensor.hh>
+#include <gz/msgs/image.pb.h>
 
-// TODO(louise) Remove these pragmas once ign-rendering is disabling the
+#include <gz/common/Console.hh>
+#include <gz/common/Filesystem.hh>
+#include <gz/sensors/Manager.hh>
+#include <gz/sensors/CameraSensor.hh>
+
+// TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
 #ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/RenderEngine.hh>
-#include <ignition/rendering/RenderingIface.hh>
-#include <ignition/rendering/Scene.hh>
+#include <gz/rendering/RenderEngine.hh>
+#include <gz/rendering/RenderingIface.hh>
+#include <gz/rendering/Scene.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
-#endif
-#include <ignition/msgs.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
-
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 std::mutex g_mutex;
-unsigned int g_imgCounter = 0;
+unsigned int g_imgCounter1 = 0;
+unsigned int g_imgCounter2 = 0;
 
-void OnGrayscale8bitImage(const ignition::msgs::Image &_msg)
+void OnGrayscaleImageL8(const gz::msgs::Image &_msg)
 {
   std::lock_guard<std::mutex> lock(g_mutex);
-  EXPECT_EQ(ignition::msgs::PixelFormatType::L_INT8, _msg.pixel_format_type());
+  EXPECT_EQ(gz::msgs::PixelFormatType::L_INT8, _msg.pixel_format_type());
   EXPECT_EQ(256u, _msg.width());
   EXPECT_EQ(256u, _msg.height());
-  g_imgCounter++;
+  g_imgCounter1++;
 }
 
-void OnGrayscale16bitImage(const ignition::msgs::Image &_msg)
+void OnGrayscaleImageL16(const gz::msgs::Image &_msg)
 {
   std::lock_guard<std::mutex> lock(g_mutex);
-  EXPECT_EQ(ignition::msgs::PixelFormatType::L_INT16, _msg.pixel_format_type());
-  EXPECT_EQ(256u, _msg.width());
-  EXPECT_EQ(256u, _msg.height());
-  g_imgCounter++;
+  EXPECT_EQ(gz::msgs::PixelFormatType::L_INT16, _msg.pixel_format_type());
+  EXPECT_EQ(512u, _msg.width());
+  EXPECT_EQ(512u, _msg.height());
+  g_imgCounter2++;
 }
 
 class CameraSensorTest: public testing::Test,
@@ -75,23 +68,23 @@ class CameraSensorTest: public testing::Test,
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 
   // Create a Camera sensor from a SDF and gets a image message
   public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
 
-  // Create a 8 bit grayscale camera sensor and verify image format
-  public: void ImageFormatLInt8(const std::string &_renderEngine);
+  // Create 8 bit and 16 bit grayscale camera sensors and verify image format
+  public: void ImageFormatLInt8LInt16(const std::string &_renderEngine);
 
-  // Create a 16 bit grayscale camera sensor and verify image format
-  public: void ImageFormatLInt16(const std::string &_renderEngine);
+  // Create camera sensors and verify camera intrinsics
+  public: void CameraIntrinsics(const std::string &_renderEngine);
 };
 
 void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 {
   // get the darn test data
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -104,22 +97,22 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   ASSERT_TRUE(linkPtr->HasElement("sensor"));
   auto sensorPtr = linkPtr->GetElement("sensor");
 
-  // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine(_renderEngine);
+  // Setup gz-rendering with an empty scene
+  auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
     return;
   }
 
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
 
   // do the test
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
-  ignition::sensors::CameraSensor *sensor =
-      mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
+  gz::sensors::CameraSensor *sensor =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtr);
   ASSERT_NE(sensor, nullptr);
   EXPECT_FALSE(sensor->HasConnections());
   sensor->SetScene(scene);
@@ -132,7 +125,7 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   EXPECT_EQ(std::string("base_camera"), sensor->FrameId());
 
   std::string topic = "/test/integration/CameraPlugin_imagesWithBuiltinSDF";
-  WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
+  WaitForMessageTestHelper<gz::msgs::Image> helper(topic);
 
   EXPECT_TRUE(sensor->HasConnections());
 
@@ -171,7 +164,7 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 
   // Clean up
   engine->DestroyScene(scene);
-  ignition::rendering::unloadEngine(engine->Name());
+  gz::rendering::unloadEngine(engine->Name());
 }
 
 //////////////////////////////////////////////////
@@ -181,11 +174,10 @@ TEST_P(CameraSensorTest, ImagesWithBuiltinSDF)
 }
 
 //////////////////////////////////////////////////
-void CameraSensorTest::ImageFormatLInt8(const std::string &_renderEngine)
+void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
 {
-  // get the darn test data
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
-      "sdf", "camera_sensor_l8_builtin.sdf");
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+                                           "sdf", "camera_intrinsics.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
   ASSERT_TRUE(sdf::readFile(path, doc));
@@ -195,45 +187,188 @@ void CameraSensorTest::ImageFormatLInt8(const std::string &_renderEngine)
   ASSERT_TRUE(modelPtr->HasElement("link"));
   auto linkPtr = modelPtr->GetElement("link");
   ASSERT_TRUE(linkPtr->HasElement("sensor"));
-  auto sensorPtr = linkPtr->GetElement("sensor");
 
-  // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine(_renderEngine);
+  // Camera sensor without intrinsics tag
+  auto cameraWithoutIntrinsicsTag = linkPtr->GetElement("sensor");
+
+  // Camera sensor with intrinsics tag
+  auto cameraWithIntrinsicsTag =
+      linkPtr->GetElement("sensor")->GetNextElement();
+
+  // Setup gz-rendering with an empty scene
+  auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
-              << "' is not supported" << std::endl;
+    gzdbg << "Engine '" << _renderEngine
+          << "' is not supported" << std::endl;
     return;
   }
 
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
 
-  // do the test
-  ignition::sensors::Manager mgr;
+  // Do the test
+  gz::sensors::Manager mgr;
 
-  ignition::sensors::CameraSensor *sensor =
-      mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
-  ASSERT_NE(sensor, nullptr);
-  sensor->SetScene(scene);
+  auto *sensor1 =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(cameraWithoutIntrinsicsTag);
+  auto *sensor2 =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(cameraWithIntrinsicsTag);
+  ASSERT_NE(sensor1, nullptr);
+  ASSERT_NE(sensor2, nullptr);
+  sensor1->SetScene(scene);
+  sensor2->SetScene(scene);
 
-  ASSERT_NE(sensor->RenderingCamera(), nullptr);
-  EXPECT_NE(sensor->Id(), sensor->RenderingCamera()->Id());
-  EXPECT_EQ(256u, sensor->ImageWidth());
-  EXPECT_EQ(256u, sensor->ImageHeight());
-
-  std::string topic = "/images_l8";
-  WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
+  std::string infoTopic1 = "/camera1/camera_info";
+  std::string infoTopic2 = "/camera2/camera_info";
+  WaitForMessageTestHelper<gz::msgs::Image> helper1("/camera1/image");
+  WaitForMessageTestHelper<gz::msgs::CameraInfo> helper2(infoTopic1);
+  WaitForMessageTestHelper<gz::msgs::Image> helper3("/camera2/image");
+  WaitForMessageTestHelper<gz::msgs::CameraInfo> helper4(infoTopic2);
+  EXPECT_TRUE(sensor1->HasConnections());
+  EXPECT_TRUE(sensor2->HasConnections());
 
   // Update once to create image
   mgr.RunOnce(std::chrono::steady_clock::duration::zero());
 
-  EXPECT_TRUE(helper.WaitForMessage()) << helper;
+  EXPECT_TRUE(helper1.WaitForMessage()) << helper1;
+  EXPECT_TRUE(helper2.WaitForMessage()) << helper2;
+  EXPECT_TRUE(helper3.WaitForMessage()) << helper3;
+  EXPECT_TRUE(helper4.WaitForMessage()) << helper4;
 
-  g_imgCounter = 0u;
+  // Subscribe to the camera info topic
+  gz::msgs::CameraInfo camera1Info, camera2Info;
+  unsigned int camera1Counter = 0;
+  unsigned int camera2Counter = 0;
+
+  std::function<void(const gz::msgs::CameraInfo&)> camera1InfoCallback =
+      [&camera1Info, &camera1Counter](const gz::msgs::CameraInfo& _msg) {
+        camera1Info = _msg;
+        camera1Counter++;
+  };
+
+  std::function<void(const gz::msgs::CameraInfo&)> camera2InfoCallback =
+      [&camera2Info, &camera2Counter](const gz::msgs::CameraInfo& _msg) {
+        camera2Info = _msg;
+        camera2Counter++;
+  };
+
+  // Subscribe to the camera topic
+  gz::transport::Node node;
+  node.Subscribe(infoTopic1, camera1InfoCallback);
+  node.Subscribe(infoTopic2, camera2InfoCallback);
+
+  // Wait for a few camera frames
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+
+  // Run to get image and check image format in callback
+  bool done = false;
+  int sleep = 0;
+  int maxSleep = 10;
+  while (!done && sleep++ < maxSleep)
+  {
+    std::lock_guard<std::mutex> lock(g_mutex);
+    done = (camera1Counter > 0 && camera2Counter > 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+
+  // Image size, focal length and optical center
+  // Camera sensor without intrinsics tag
+  double error = 1e-1;
+  EXPECT_EQ(camera1Info.width(), 1000u);
+  EXPECT_EQ(camera1Info.height(), 1000u);
+  EXPECT_NEAR(camera1Info.intrinsics().k(0), 863.2297, error);
+  EXPECT_NEAR(camera1Info.intrinsics().k(4), 863.2297, error);
+  EXPECT_DOUBLE_EQ(camera1Info.intrinsics().k(2), 500);
+  EXPECT_DOUBLE_EQ(camera1Info.intrinsics().k(5), 500);
+
+  // Camera sensor with intrinsics tag
+  EXPECT_EQ(camera2Info.width(), 1000u);
+  EXPECT_EQ(camera2Info.height(), 1000u);
+  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(0), 866.23);
+  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(4), 866.23);
+  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(2), 500);
+  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(5), 500);
+
+  // Clean up
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+TEST_P(CameraSensorTest, CameraIntrinsics)
+{
+  gz::common::Console::SetVerbosity(2);
+  CameraIntrinsics(GetParam());
+}
+
+//////////////////////////////////////////////////
+void CameraSensorTest::ImageFormatLInt8LInt16(const std::string &_renderEngine)
+{
+  // get the darn test data
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+      "sdf", "camera_sensor_l8_l16_builtin.sdf");
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  ASSERT_NE(nullptr, doc->Root());
+  ASSERT_TRUE(doc->Root()->HasElement("model"));
+  auto modelPtr = doc->Root()->GetElement("model");
+  ASSERT_TRUE(modelPtr->HasElement("link"));
+  auto linkPtr = modelPtr->GetElement("link");
+  ASSERT_TRUE(linkPtr->HasElement("sensor"));
+  auto sensorPtrCamera8Bit = linkPtr->GetElement("sensor");
+  auto sensorPtrCamera16Bit = linkPtr->GetElement("sensor")->GetNextElement();
+
+  // Setup gz-rendering with an empty scene
+  auto *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    gzdbg << "Engine '" << _renderEngine
+              << "' is not supported" << std::endl;
+    return;
+  }
+
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
+
+  // do the test
+  gz::sensors::Manager mgr;
+
+  gz::sensors::CameraSensor *sensorCamera8Bit =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtrCamera8Bit);
+  gz::sensors::CameraSensor *sensorCamera16Bit =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtrCamera16Bit);
+  ASSERT_NE(sensorCamera8Bit, nullptr);
+  ASSERT_NE(sensorCamera16Bit, nullptr);
+  sensorCamera8Bit->SetScene(scene);
+  sensorCamera16Bit->SetScene(scene);
+
+  ASSERT_NE(sensorCamera8Bit->RenderingCamera(), nullptr);
+  EXPECT_NE(sensorCamera8Bit->Id(), sensorCamera8Bit->RenderingCamera()->Id());
+  EXPECT_EQ(256u, sensorCamera8Bit->ImageWidth());
+  EXPECT_EQ(256u, sensorCamera8Bit->ImageHeight());
+
+  ASSERT_NE(sensorCamera16Bit->RenderingCamera(), nullptr);
+  EXPECT_NE(sensorCamera16Bit->Id(),
+            sensorCamera16Bit->RenderingCamera()->Id());
+  EXPECT_EQ(512u, sensorCamera16Bit->ImageWidth());
+  EXPECT_EQ(512u, sensorCamera16Bit->ImageHeight());
+
+  std::string topicCamera8Bit = "/images_l8";
+  WaitForMessageTestHelper<gz::msgs::Image> helper1(topicCamera8Bit);
+
+  std::string topicCamera16Bit = "/images_l16";
+  WaitForMessageTestHelper<gz::msgs::Image> helper2(topicCamera16Bit);
+
+  // Update once to create image
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
+
+  EXPECT_TRUE(helper1.WaitForMessage()) << helper1;
+  EXPECT_TRUE(helper2.WaitForMessage()) << helper2;
 
   // subscribe to the camera topic
-  ignition::transport::Node node;
-  node.Subscribe(topic, &OnGrayscale8bitImage);
+  gz::transport::Node node;
+  node.Subscribe(topicCamera8Bit, &OnGrayscaleImageL8);
+  node.Subscribe(topicCamera16Bit, &OnGrayscaleImageL16);
 
   // wait for a few camera frames
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
@@ -245,132 +380,41 @@ void CameraSensorTest::ImageFormatLInt8(const std::string &_renderEngine)
   while (!done && sleep++ < maxSleep)
   {
     std::lock_guard<std::mutex> lock(g_mutex);
-    done = (g_imgCounter > 0);
+    done = (g_imgCounter1 > 0 && g_imgCounter2 > 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
   // test removing sensor
   // first make sure the sensor objects do exist
-  auto sensorId = sensor->Id();
-  auto cameraId = sensor->RenderingCamera()->Id();
-  EXPECT_EQ(sensor, mgr.Sensor(sensorId));
-  EXPECT_EQ(sensor->RenderingCamera(), scene->SensorById(cameraId));
+  auto sensorIdCamera8Bit = sensorCamera8Bit->Id();
+  auto sensorIdCamera16Bit = sensorCamera16Bit->Id();
+  auto cameraId1 = sensorCamera8Bit->RenderingCamera()->Id();
+  auto cameraId2 = sensorCamera16Bit->RenderingCamera()->Id();
+
+  EXPECT_EQ(sensorCamera8Bit, mgr.Sensor(sensorIdCamera8Bit));
+  EXPECT_EQ(sensorCamera8Bit->RenderingCamera(), scene->SensorById(cameraId1));
+  EXPECT_EQ(sensorCamera16Bit, mgr.Sensor(sensorIdCamera16Bit));
+  EXPECT_EQ(sensorCamera16Bit->RenderingCamera(), scene->SensorById(cameraId2));
   // remove and check sensor objects no longer exist in both sensors and
   // rendering
-  EXPECT_TRUE(mgr.Remove(sensorId));
-  EXPECT_EQ(nullptr, mgr.Sensor(sensorId));
-  EXPECT_EQ(nullptr, scene->SensorById(cameraId));
+  EXPECT_TRUE(mgr.Remove(sensorIdCamera8Bit));
+  EXPECT_TRUE(mgr.Remove(sensorIdCamera16Bit));
+  EXPECT_EQ(nullptr, mgr.Sensor(sensorIdCamera8Bit));
+  EXPECT_EQ(nullptr, mgr.Sensor(sensorIdCamera16Bit));
+  EXPECT_EQ(nullptr, scene->SensorById(cameraId1));
+  EXPECT_EQ(nullptr, scene->SensorById(cameraId2));
 
   // Clean up
   engine->DestroyScene(scene);
-  ignition::rendering::unloadEngine(engine->Name());
+  gz::rendering::unloadEngine(engine->Name());
 }
 
 //////////////////////////////////////////////////
-TEST_P(CameraSensorTest, LInt8ImagesWithBuiltinSDF)
+TEST_P(CameraSensorTest, LInt8LInt16ImagesWithBuiltinSDF)
 {
-  ImageFormatLInt8(GetParam());
+  gz::common::Console::SetVerbosity(4);
+  ImageFormatLInt8LInt16(GetParam());
 }
 
-//////////////////////////////////////////////////
-void CameraSensorTest::ImageFormatLInt16(const std::string &_renderEngine)
-{
-  // get the darn test data
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
-      "sdf", "camera_sensor_l16_builtin.sdf");
-  sdf::SDFPtr doc(new sdf::SDF());
-  sdf::init(doc);
-  ASSERT_TRUE(sdf::readFile(path, doc));
-  ASSERT_NE(nullptr, doc->Root());
-  ASSERT_TRUE(doc->Root()->HasElement("model"));
-  auto modelPtr = doc->Root()->GetElement("model");
-  ASSERT_TRUE(modelPtr->HasElement("link"));
-  auto linkPtr = modelPtr->GetElement("link");
-  ASSERT_TRUE(linkPtr->HasElement("sensor"));
-  auto sensorPtr = linkPtr->GetElement("sensor");
-
-  // Setup empty scene
-  auto *engine = ignition::rendering::engine(_renderEngine);
-  if (!engine)
-  {
-    igndbg << "Engine '" << _renderEngine
-              << "' is not supported" << std::endl;
-    return;
-  }
-
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
-
-  // do the test
-  ignition::sensors::Manager mgr;
-
-  ignition::sensors::CameraSensor *sensor =
-      mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
-  ASSERT_NE(sensor, nullptr);
-  sensor->SetScene(scene);
-
-  ASSERT_NE(sensor->RenderingCamera(), nullptr);
-  EXPECT_NE(sensor->Id(), sensor->RenderingCamera()->Id());
-  EXPECT_EQ(256u, sensor->ImageWidth());
-  EXPECT_EQ(256u, sensor->ImageHeight());
-
-  std::string topic = "/images_l16";
-  WaitForMessageTestHelper<ignition::msgs::Image> helper(topic);
-
-  // Update once to create image
-  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
-
-  EXPECT_TRUE(helper.WaitForMessage()) << helper;
-
-  g_imgCounter = 0u;
-
-  // subscribe to the camera topic
-  ignition::transport::Node node;
-  node.Subscribe(topic, &OnGrayscale16bitImage);
-
-  // wait for a few camera frames
-  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
-
-  // run to get image and check image format in callback
-  bool done = false;
-  int sleep = 0;
-  int maxSleep = 10;
-  while (!done && sleep++ < maxSleep)
-  {
-    std::lock_guard<std::mutex> lock(g_mutex);
-    done = (g_imgCounter > 0);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  }
-
-  // test removing sensor
-  // first make sure the sensor objects do exist
-  auto sensorId = sensor->Id();
-  auto cameraId = sensor->RenderingCamera()->Id();
-  EXPECT_EQ(sensor, mgr.Sensor(sensorId));
-  EXPECT_EQ(sensor->RenderingCamera(), scene->SensorById(cameraId));
-  // remove and check sensor objects no longer exist in both sensors and
-  // rendering
-  EXPECT_TRUE(mgr.Remove(sensorId));
-  EXPECT_EQ(nullptr, mgr.Sensor(sensorId));
-  EXPECT_EQ(nullptr, scene->SensorById(cameraId));
-
-  // Clean up
-  engine->DestroyScene(scene);
-  ignition::rendering::unloadEngine(engine->Name());
-}
-
-//////////////////////////////////////////////////
-TEST_P(CameraSensorTest, LInt16ImagesWithBuiltinSDF)
-{
-  ImageFormatLInt16(GetParam());
-}
-
-INSTANTIATE_TEST_CASE_P(CameraSensor, CameraSensorTest,
-    RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
-
-//////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  ignition::common::Console::SetVerbosity(4);
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+INSTANTIATE_TEST_SUITE_P(CameraSensor, CameraSensorTest,
+    RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());

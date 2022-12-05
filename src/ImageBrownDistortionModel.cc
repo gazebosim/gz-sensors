@@ -20,28 +20,28 @@
   #include <Winsock2.h>
 #endif
 
-#include <ignition/common/Console.hh>
+#include <gz/common/Console.hh>
 
-// TODO(WilliamLewww): Remove these pragmas once ign-rendering is disabling the
+// TODO(WilliamLewww): Remove these pragmas once gz-rendering is disabling the
 // warnings
 #ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/DistortionPass.hh>
-#include <ignition/rendering/RenderEngine.hh>
-#include <ignition/rendering/RenderPass.hh>
-#include <ignition/rendering/RenderPassSystem.hh>
+#include <gz/rendering/DistortionPass.hh>
+#include <gz/rendering/RenderEngine.hh>
+#include <gz/rendering/RenderPass.hh>
+#include <gz/rendering/RenderPassSystem.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-#include "ignition/sensors/ImageBrownDistortionModel.hh"
+#include "gz/sensors/ImageBrownDistortionModel.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
-class ignition::sensors::ImageBrownDistortionModelPrivate
+class gz::sensors::ImageBrownDistortionModelPrivate
 {
   /// \brief The radial distortion coefficient k1.
   public: double k1 = 0.0;
@@ -96,7 +96,7 @@ void ImageBrownDistortionModel::SetCamera(rendering::CameraPtr _camera)
 {
   if (!_camera)
   {
-    ignerr << "Unable to apply distortion, camera is null\n";
+    gzerr << "Unable to apply distortion, camera is null\n";
     return;
   }
 
@@ -109,7 +109,7 @@ void ImageBrownDistortionModel::SetCamera(rendering::CameraPtr _camera)
       rpSystem->Create<rendering::DistortionPass>();
     if (!distortionPass)
     {
-      ignwarn << "ImageBrownDistortionModel is not supported in "
+      gzwarn << "ImageBrownDistortionModel is not supported in "
               << engine->Name() << std::endl;
       return;
     }

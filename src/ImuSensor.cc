@@ -14,29 +14,31 @@
  * limitations under the License.
  *
 */
+
 #if defined(_MSC_VER)
   #pragma warning(push)
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/imu.pb.h>
+#include <gz/msgs/imu.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
 
-#include <ignition/common/Profiler.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/msgs/Utility.hh>
+#include <gz/transport/Node.hh>
 
-#include "ignition/sensors/ImuSensor.hh"
-#include "ignition/sensors/Noise.hh"
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/SensorTypes.hh"
+#include "gz/sensors/ImuSensor.hh"
+#include "gz/sensors/Noise.hh"
+#include "gz/sensors/SensorFactory.hh"
+#include "gz/sensors/SensorTypes.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for ImuSensor
-class ignition::sensors::ImuSensorPrivate
+class gz::sensors::ImuSensorPrivate
 {
   /// \brief node to create publisher
   public: transport::Node node;
@@ -122,13 +124,13 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
   // Check if this is the right type
   if (_sdf.Type() != sdf::SensorType::IMU)
   {
-    ignerr << "Attempting to a load an IMU sensor, but received "
+    gzerr << "Attempting to a load an IMU sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
   }
 
   if (_sdf.ImuSensor() == nullptr)
   {
-    ignerr << "Attempting to a load an IMU sensor, but received "
+    gzerr << "Attempting to a load an IMU sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -141,11 +143,11 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
 
   if (!this->dataPtr->pub)
   {
-    ignerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
+    gzerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
     return false;
   }
 
-  igndbg << "IMU data for [" << this->Name() << "] advertised on ["
+  gzdbg << "IMU data for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
   const std::map<SensorNoiseType, sdf::Noise> noises = {
@@ -200,10 +202,10 @@ bool ImuSensor::Load(sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 bool ImuSensor::Update(const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("ImuSensor::Update");
+  GZ_PROFILE("ImuSensor::Update");
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
@@ -328,7 +330,7 @@ void ImuSensor::SetWorldFrameOrientation(
     }
     else
     {
-      ignwarn << "custom_rpy parent frame must be set to 'world' "
+      gzwarn << "custom_rpy parent frame must be set to 'world' "
                 "string. Setting it to any other frame is not "
                 "supported yet." << std::endl;
     }
@@ -344,25 +346,25 @@ void ImuSensor::SetWorldFrameOrientation(
         {
           {WorldFrameEnumType::ENU, math::Quaterniond(0, 0, 0)},
           {WorldFrameEnumType::NED, math::Quaterniond(
-            IGN_PI, 0, IGN_PI/2)},
+            GZ_PI, 0, GZ_PI/2)},
           {WorldFrameEnumType::NWU, math::Quaterniond(
-            0, 0, IGN_PI/2)},
+            0, 0, GZ_PI/2)},
         }
       },
       {WorldFrameEnumType::NED,
         {
           {WorldFrameEnumType::ENU, math::Quaterniond(
-            IGN_PI, 0, IGN_PI/2).Inverse()},
+            GZ_PI, 0, GZ_PI/2).Inverse()},
           {WorldFrameEnumType::NED, math::Quaterniond(0, 0, 0)},
           {WorldFrameEnumType::NWU, math::Quaterniond(
-            -IGN_PI, 0, 0)},
+            -GZ_PI, 0, 0)},
         }
       },
       {WorldFrameEnumType::NWU,
         {
           {WorldFrameEnumType::ENU, math::Quaterniond(
-            0, 0, -IGN_PI/2)},
-          {WorldFrameEnumType::NED, math::Quaterniond(IGN_PI, 0, 0)},
+            0, 0, -GZ_PI/2)},
+          {WorldFrameEnumType::NED, math::Quaterniond(GZ_PI, 0, 0)},
           {WorldFrameEnumType::NWU, math::Quaterniond(0, 0, 0)},
         }
       }

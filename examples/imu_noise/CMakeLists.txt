@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(ignition-sensors-noise-demo)
+project(gz-sensors-noise-demo)
 
-# Find the Ignition Libraries used directly by the example
-find_package(ignition-sensors6 REQUIRED)
+# Find the Gazebo Libraries used directly by the example
+find_package(gz-sensors7 REQUIRED)
 
 add_executable(sensor_noise main.cc)
-target_link_libraries(sensor_noise PUBLIC ignition-sensors6)
+target_link_libraries(sensor_noise PUBLIC gz-sensors7)

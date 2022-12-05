@@ -17,22 +17,22 @@
 
 #include <gtest/gtest.h>
 
-#include <ignition/msgs/annotated_axis_aligned_2d_box.pb.h>
-#include <ignition/msgs/annotated_oriented_3d_box.pb.h>
+#include <gz/msgs/annotated_axis_aligned_2d_box.pb.h>
+#include <gz/msgs/annotated_oriented_3d_box.pb.h>
 
-#include <ignition/common/Filesystem.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/BoundingBoxCameraSensor.hh>
+#include <gz/common/Filesystem.hh>
+#include <gz/sensors/Manager.hh>
+#include <gz/sensors/BoundingBoxCameraSensor.hh>
 
-#include <ignition/rendering/RenderEngine.hh>
-#include <ignition/rendering/RenderingIface.hh>
-#include <ignition/rendering/Scene.hh>
-#include <ignition/rendering/BoundingBoxCamera.hh>
+#include <gz/rendering/RenderEngine.hh>
+#include <gz/rendering/RenderingIface.hh>
+#include <gz/rendering/Scene.hh>
+#include <gz/rendering/BoundingBoxCamera.hh>
 
-#include "test_config.h"  // NOLINT(build/include)
+#include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
-using namespace ignition;
+using namespace gz;
 
 class BoundingBoxCameraSensorTest: public testing::Test,
   public testing::WithParamInterface<const char *>
@@ -214,16 +214,16 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
   // Skip unsupported engines
   if (_renderEngine != "ogre2")
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' doesn't support bounding box cameras" << std::endl;
     return;
   }
 
-  // Setup ign-rendering with an empty scene
+  // Setup gz-rendering with an empty scene
   auto *engine = rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
     return;
   }
@@ -255,7 +255,7 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
   camera->SetLocalPosition(0.0, 0.0, 0.0);
   camera->SetLocalRotation(0.0, 0.0, 0.0);
   camera->SetAspectRatio(1.333);
-  camera->SetHFOV(IGN_PI / 2);
+  camera->SetHFOV(GZ_PI / 2);
   camera->SetBoundingBoxType(rendering::BoundingBoxType::BBT_VISIBLEBOX2D);
 
   EXPECT_EQ(camera->Type(), rendering::BoundingBoxType::BBT_VISIBLEBOX2D);
@@ -379,16 +379,16 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   // Skip unsupported engines
   if (_renderEngine != "ogre2")
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' doesn't support bounding box cameras" << std::endl;
     return;
   }
 
-  // Setup ign-rendering with an empty scene
+  // Setup gz-rendering with an empty scene
   auto *engine = rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    gzdbg << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
     return;
   }
@@ -420,7 +420,7 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
   camera->SetLocalPosition(0.0, 0.0, 0.0);
   camera->SetLocalRotation(0.0, 0.0, 0.0);
   camera->SetAspectRatio(1.333);
-  camera->SetHFOV(IGN_PI / 2);
+  camera->SetHFOV(GZ_PI / 2);
   camera->SetBoundingBoxType(rendering::BoundingBoxType::BBT_BOX3D);
 
   // Get the Msg
@@ -482,7 +482,7 @@ TEST_P(BoundingBoxCameraSensorTest, Boxes3DWithBuiltinSDF)
   Boxes3DWithBuiltinSDF(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(BoundingBoxCameraSensor, BoundingBoxCameraSensorTest,
+INSTANTIATE_TEST_SUITE_P(BoundingBoxCameraSensor, BoundingBoxCameraSensorTest,
     RENDER_ENGINE_VALUES, rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////

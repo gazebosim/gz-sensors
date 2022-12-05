@@ -21,12 +21,12 @@
   #include <Winsock2.h>
 #endif
 
-#include "ignition/common/Console.hh"
+#include "gz/common/Console.hh"
 
-#include "ignition/sensors/ImageDistortion.hh"
-#include "ignition/sensors/ImageBrownDistortionModel.hh"
+#include "gz/sensors/ImageDistortion.hh"
+#include "gz/sensors/ImageBrownDistortionModel.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////
@@ -48,7 +48,7 @@ DistortionPtr ImageDistortionFactory::NewDistortionModel(
     else
       distortion.reset(new BrownDistortionModel());
 
-    IGN_ASSERT(distortion->Type() == DistortionType::BROWN,
+    GZ_ASSERT(distortion->Type() == DistortionType::BROWN,
         "Distortion type should be 'brown'");
   }
   else if (distortionType == DistortionType::NONE)
@@ -57,12 +57,12 @@ DistortionPtr ImageDistortionFactory::NewDistortionModel(
     // if 'custom', the type will be set once the user calls the
     // SetCustomDistortionCallback function.
     distortion.reset(new Distortion(DistortionType::NONE));
-    IGN_ASSERT(distortion->Type() == DistortionType::NONE,
+    GZ_ASSERT(distortion->Type() == DistortionType::NONE,
         "Distortion type should be 'none'");
   }
   else
   {
-    ignerr << "Unrecognized distortion type" << std::endl;
+    gzerr << "Unrecognized distortion type" << std::endl;
     return DistortionPtr();
   }
   distortion->Load(_sdf);
@@ -76,8 +76,8 @@ DistortionPtr ImageDistortionFactory::NewDistortionModel(sdf::ElementPtr _sdf,
 {
   // TODO(WilliamLewww): create a distortion SDF to support different
   // distortion models
-  IGN_ASSERT(_sdf != nullptr, "camera sdf is null");
-  IGN_ASSERT(_sdf->GetName() == "camera", "Not a camera SDF element");
+  GZ_ASSERT(_sdf != nullptr, "camera sdf is null");
+  GZ_ASSERT(_sdf->GetName() == "camera", "Not a camera SDF element");
   sdf::Camera cameraDom;
   cameraDom.Load(_sdf);
 

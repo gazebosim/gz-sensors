@@ -19,23 +19,23 @@
 
 #include <sdf/Sensor.hh>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/SignalHandler.hh>
-#include <ignition/sensors/Manager.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/SignalHandler.hh>
+#include <gz/sensors/Manager.hh>
 
 // Include all supported sensors
-#include <ignition/sensors/AltimeterSensor.hh>
+#include <gz/sensors/AltimeterSensor.hh>
 #include "../custom_sensor/Odometer.hh"
 
 using namespace std::literals::chrono_literals;
 
 int main(int argc,  char **argv)
 {
-  ignition::common::Console::SetVerbosity(4);
+  gz::common::Console::SetVerbosity(4);
 
   if (argc < 2)
   {
-    ignerr << "Missing path to SDF file" << std::endl;
+    gzerr << "Missing path to SDF file" << std::endl;
     return 1;
   }
 
@@ -47,21 +47,21 @@ int main(int argc,  char **argv)
 
   for (const auto &error : errors)
   {
-    ignerr << error << std::endl;
+    gzerr << error << std::endl;
   }
 
   auto world = root.WorldByIndex(0);
   if (nullptr == world)
   {
-    ignerr << "Failed to load world from [" << sdfFile << "]" << std::endl;
+    gzerr << "Failed to load world from [" << sdfFile << "]" << std::endl;
     return 1;
   }
 
   // Initiate sensor manager
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
   // Loop thorough SDF file and add all supported sensors to manager
-  std::vector<ignition::sensors::Sensor *> sensors;
+  std::vector<gz::sensors::Sensor *> sensors;
   for (auto m = 0; m < world->ModelCount(); ++m)
   {
     auto model = world->ModelByIndex(m);
@@ -72,10 +72,10 @@ int main(int argc,  char **argv)
       {
         auto sensor = link->SensorByIndex(s);
 
-        ignition::sensors::Sensor *sensorPtr;
+        gz::sensors::Sensor *sensorPtr;
         if (sensor->Type() == sdf::SensorType::ALTIMETER)
         {
-          sensorPtr = mgr.CreateSensor<ignition::sensors::AltimeterSensor>(
+          sensorPtr = mgr.CreateSensor<gz::sensors::AltimeterSensor>(
               *sensor);
         }
         else if (sensor->Type() == sdf::SensorType::CUSTOM)
@@ -84,20 +84,20 @@ int main(int argc,  char **argv)
         }
         else
         {
-          ignerr << "Sensor type [" << static_cast<int>(sensor->Type())
+          gzerr << "Sensor type [" << static_cast<int>(sensor->Type())
                  << "] not supported." << std::endl;
         }
 
         if (nullptr == sensorPtr)
         {
-          ignerr << "Failed to create sensor [" << sensor->Name() << "]"
+          gzerr << "Failed to create sensor [" << sensor->Name() << "]"
                  << std::endl;
           continue;
         }
 
         sensors.push_back(sensorPtr);
 
-        ignmsg << "Added sensor [" << sensor->Name() << "] to manager."
+        gzmsg << "Added sensor [" << sensor->Name() << "] to manager."
                << std::endl;
       }
     }
@@ -105,19 +105,19 @@ int main(int argc,  char **argv)
 
   if (sensors.empty())
   {
-    ignerr << "No sensors have been added to the manager." << std::endl;
+    gzerr << "No sensors have been added to the manager." << std::endl;
     return 1;
   }
 
   // Stop when user presses Ctrl+C
   bool signaled{false};
-  ignition::common::SignalHandler sigHandler;
+  gz::common::SignalHandler sigHandler;
   sigHandler.AddCallback([&] (int)
   {
     signaled = true;
   });
 
-  ignmsg << "Looping sensor manager. Press Ctrl + C to stop." << std::endl;
+  gzmsg << "Looping sensor manager. Press Ctrl + C to stop." << std::endl;
 
   auto time = 0s;
   while (!signaled)
@@ -125,7 +125,7 @@ int main(int argc,  char **argv)
     // Update each sensor using their specific APIs
     for (const auto &sensorPtr : sensors)
     {
-      if (auto altimeter = dynamic_cast<ignition::sensors::AltimeterSensor *>(
+      if (auto altimeter = dynamic_cast<gz::sensors::AltimeterSensor *>(
           sensorPtr))
       {
         altimeter->SetVerticalVelocity(altimeter->VerticalVelocity() + 0.1);
@@ -133,7 +133,7 @@ int main(int argc,  char **argv)
       else if (auto odometer = dynamic_cast<custom::Odometer *>(sensorPtr))
       {
         odometer->NewPosition(odometer->Position() +
-            ignition::math::Vector3d(0.1, 0.1, 0.0));
+            gz::math::Vector3d(0.1, 0.1, 0.0));
       }
     }
 

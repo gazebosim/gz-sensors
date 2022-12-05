@@ -20,9 +20,9 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/sensors/Noise.hh>
-#include <ignition/sensors/GaussianNoiseModel.hh>
-#include <ignition/sensors/SensorFactory.hh>
+#include <gz/sensors/Noise.hh>
+#include <gz/sensors/GaussianNoiseModel.hh>
+#include <gz/sensors/SensorFactory.hh>
 
 static constexpr double kSampleFrequency = 100.0;
 // 16-bit ADC
@@ -34,13 +34,13 @@ static constexpr double kNumSamples = 6 * 3600 * kSampleFrequency;
 // These values come from the Rotors default values:
 // https://github.com/ethz-asl/rotors_simulator/blob/513bb92da0c1a0c968bdc679dffc8fe7d77de918/rotors_gazebo_plugins/include/rotors_gazebo_plugins/gazebo_imu_plugin.h#L40
 static constexpr double kDefaultAdisGyroscopeNoiseDensity =
-    2.0 * 35.0 / 3600.0 / 180.0 * IGN_PI;
+    2.0 * 35.0 / 3600.0 / 180.0 * GZ_PI;
 static constexpr double kDefaultAdisGyroscopeRandomWalk =
-    2.0 * 4.0 / 3600.0 / 180.0 * IGN_PI;
+    2.0 * 4.0 / 3600.0 / 180.0 * GZ_PI;
 static constexpr double kDefaultAdisGyroscopeBiasCorrelationTime =
     1.0e+3;
 static constexpr double kDefaultAdisGyroscopeTurnOnBiasSigma =
-    0.5 / 180.0 * IGN_PI;
+    0.5 / 180.0 * GZ_PI;
 static constexpr double kDefaultAdisAccelerometerNoiseDensity =
     2.0 * 2.0e-3;
 static constexpr double kDefaultAdisAccelerometerRandomWalk =
@@ -115,7 +115,7 @@ generateSamples(size_t _nSamples, const NoiseParameters& _params)
   noise.SetDynamicBiasCorrelationTime(_params.dynamicBiasCorrelationTime);
 
   const double dt = 1.0 / _params.sampleFreq;
-  auto model = ignition::sensors::NoiseFactory::NewNoiseModel(noise);
+  auto model = gz::sensors::NoiseFactory::NewNoiseModel(noise);
   for (size_t ii = 0; ii < _nSamples ; ++ii) {
     samples.push_back(model->Apply(0.0, dt));
   }

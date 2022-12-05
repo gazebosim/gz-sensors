@@ -18,23 +18,25 @@
 #include <memory>
 #include <mutex>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Image.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/common/Util.hh>
-#include <ignition/msgs.hh>
-#include <ignition/rendering/SegmentationCamera.hh>
-#include <ignition/transport/Node.hh>
-#include <ignition/transport/Publisher.hh>
+#include <gz/msgs/image.pb.h>
 
-#include "ignition/sensors/RenderingEvents.hh"
-#include "ignition/sensors/SegmentationCameraSensor.hh"
-#include "ignition/sensors/SensorFactory.hh"
+#include <gz/common/Console.hh>
+#include <gz/common/Image.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/common/Util.hh>
+#include <gz/msgs/Utility.hh>
+#include <gz/rendering/SegmentationCamera.hh>
+#include <gz/transport/Node.hh>
+#include <gz/transport/Publisher.hh>
 
-using namespace ignition;
+#include "gz/sensors/RenderingEvents.hh"
+#include "gz/sensors/SegmentationCameraSensor.hh"
+#include "gz/sensors/SensorFactory.hh"
+
+using namespace gz;
 using namespace sensors;
 
-class ignition::sensors::SegmentationCameraSensorPrivate
+class gz::sensors::SegmentationCameraSensorPrivate
 {
   /// \brief Save a sample for the dataset (image & colored map & labels map)
   /// \return True if the image was saved successfully. False can mean
@@ -123,8 +125,8 @@ class ignition::sensors::SegmentationCameraSensorPrivate
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
-  public: ignition::common::EventT<
-          void(const ignition::msgs::Image &)> imageEvent;
+  public: gz::common::EventT<
+          void(const gz::msgs::Image &)> imageEvent;
 };
 
 //////////////////////////////////////////////////
@@ -176,14 +178,14 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
   // Check if this is the right type
   if (_sdf.Type() != sdf::SensorType::SEGMENTATION_CAMERA)
   {
-    ignerr << "Attempting to a load a Segmentation Camera sensor, but received "
+    gzerr << "Attempting to a load a Segmentation Camera sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
     return false;
   }
 
   if (_sdf.CameraSensor() == nullptr)
   {
-    ignerr << "Attempting to a load a Segmentation Camera sensor, but received "
+    gzerr << "Attempting to a load a Segmentation Camera sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
@@ -192,32 +194,32 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the segmentation colored map image publisher
   this->dataPtr->coloredMapPublisher =
-      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+      this->dataPtr->node.Advertise<gz::msgs::Image>(
           this->Topic() + this->dataPtr->topicColoredMapSuffix);
 
   if (!this->dataPtr->coloredMapPublisher)
   {
-    ignerr << "Unable to create publisher on topic ["
+    gzerr << "Unable to create publisher on topic ["
       << this->Topic() << this->dataPtr->topicColoredMapSuffix << "].\n";
     return false;
   }
 
-  igndbg << "Colored map image for [" << this->Name() << "] advertised on ["
+  gzdbg << "Colored map image for [" << this->Name() << "] advertised on ["
     << this->Topic() << this->dataPtr->topicColoredMapSuffix << "]\n";
 
   // Create the segmentation labels map image publisher
   this->dataPtr->labelsMapPublisher =
-      this->dataPtr->node.Advertise<ignition::msgs::Image>(
+      this->dataPtr->node.Advertise<gz::msgs::Image>(
           this->Topic() + this->dataPtr->topicLabelsMapSuffix);
 
   if (!this->dataPtr->labelsMapPublisher)
   {
-    ignerr << "Unable to create publisher on topic ["
+    gzerr << "Unable to create publisher on topic ["
       << this->Topic() << this->dataPtr->topicLabelsMapSuffix << "].\n";
     return false;
   }
 
-  igndbg << "Segmentation labels map image for [" << this->Name()
+  gzdbg << "Segmentation labels map image for [" << this->Name()
     << "] advertised on [" << this->Topic()
     << this->dataPtr->topicLabelsMapSuffix << "]\n";
 
@@ -229,7 +231,7 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
   {
     if (!this->CreateCamera())
     {
-      ignerr << "Unable to create segmentation camera sensor\n";
+      gzerr << "Unable to create segmentation camera sensor\n";
       return false;
     }
   }
@@ -246,7 +248,7 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
 
 /////////////////////////////////////////////////
 void SegmentationCameraSensor::SetScene(
-  ignition::rendering::ScenePtr _scene)
+  gz::rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
@@ -265,7 +267,7 @@ bool SegmentationCameraSensor::CreateCamera()
   const auto sdfCamera = this->dataPtr->sdfSensor.CameraSensor();
   if (!sdfCamera)
   {
-    ignerr << "Unable to access camera SDF element\n";
+    gzerr << "Unable to access camera SDF element\n";
     return false;
   }
 
@@ -285,7 +287,7 @@ bool SegmentationCameraSensor::CreateCamera()
       this->dataPtr->type = rendering::SegmentationType::ST_PANOPTIC;
     else
     {
-      igndbg << "Wrong type [" << type <<
+      gzdbg << "Wrong type [" << type <<
         "], type should be semantic or instance or panoptic" << std::endl;
       return false;
     }
@@ -311,7 +313,7 @@ bool SegmentationCameraSensor::CreateCamera()
 
     // Set the save counter to be equal number of images in the folder + 1
     // to continue adding to the images in the folder (multi scene datasets)
-    if (ignition::common::isDirectory(this->dataPtr->saveImageFolder))
+    if (gz::common::isDirectory(this->dataPtr->saveImageFolder))
     {
       common::DirIter endIter;
       for (common::DirIter dirIter(this->dataPtr->saveImageFolder);
@@ -344,9 +346,9 @@ bool SegmentationCameraSensor::CreateCamera()
   auto height = sdfCamera->ImageHeight();
 
   math::Angle angle = sdfCamera->HorizontalFov();
-  if (angle < 0.01 || angle > IGN_PI*2)
+  if (angle < 0.01 || angle > GZ_PI*2)
   {
-    ignerr << "Invalid horizontal field of view [" << angle << "]\n";
+    gzerr << "Invalid horizontal field of view [" << angle << "]\n";
     return false;
   }
   double aspectRatio = static_cast<double>(width)/height;
@@ -428,16 +430,16 @@ void SegmentationCameraSensor::OnNewSegmentationFrame(const uint8_t * _data,
 bool SegmentationCameraSensor::Update(
   const std::chrono::steady_clock::duration &_now)
 {
-  IGN_PROFILE("SegmentationCameraSensor::Update");
+  GZ_PROFILE("SegmentationCameraSensor::Update");
   if (!this->dataPtr->initialized)
   {
-    ignerr << "Not initialized, update ignored.\n";
+    gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
   if (!this->dataPtr->camera)
   {
-    ignerr << "Camera doesn't exist.\n";
+    gzerr << "Camera doesn't exist.\n";
     return false;
   }
 
@@ -519,7 +521,7 @@ bool SegmentationCameraSensor::Update(
     }
     catch(...)
     {
-      ignerr << "Exception thrown in an image callback.\n";
+      gzerr << "Exception thrown in an image callback.\n";
     }
   }
 
@@ -567,24 +569,24 @@ bool SegmentationCameraSensor::HasConnections() const
 bool SegmentationCameraSensorPrivate::SaveSample()
 {
   // Attempt to create the directories if they don't exist
-  if (!ignition::common::isDirectory(this->savePath))
+  if (!gz::common::isDirectory(this->savePath))
   {
-    if (!ignition::common::createDirectories(this->savePath))
+    if (!gz::common::createDirectories(this->savePath))
       return false;
   }
-  if (!ignition::common::isDirectory(this->saveImageFolder))
+  if (!gz::common::isDirectory(this->saveImageFolder))
   {
-    if (!ignition::common::createDirectories(this->saveImageFolder))
+    if (!gz::common::createDirectories(this->saveImageFolder))
       return false;
   }
-  if (!ignition::common::isDirectory(this->saveColoredMapsFolder))
+  if (!gz::common::isDirectory(this->saveColoredMapsFolder))
   {
-    if (!ignition::common::createDirectories(this->saveColoredMapsFolder))
+    if (!gz::common::createDirectories(this->saveColoredMapsFolder))
       return false;
   }
-  if (!ignition::common::isDirectory(this->saveLabelsMapsFolder))
+  if (!gz::common::isDirectory(this->saveLabelsMapsFolder))
   {
-    if (!ignition::common::createDirectories(this->saveLabelsMapsFolder))
+    if (!gz::common::createDirectories(this->saveLabelsMapsFolder))
       return false;
   }
 
@@ -602,28 +604,28 @@ bool SegmentationCameraSensorPrivate::SaveSample()
   std::string rgbImageName = "image_" + saveCounterString + ".png";
 
   // Save rgb image
-  ignition::common::Image rgbImage;
+  gz::common::Image rgbImage;
   rgbImage.SetFromData(this->saveImageBuffer,
-    width, height, ignition::common::Image::RGB_INT8);
+    width, height, gz::common::Image::RGB_INT8);
 
   rgbImage.SavePNG(
-      ignition::common::joinPaths(this->saveImageFolder, rgbImageName));
+      gz::common::joinPaths(this->saveImageFolder, rgbImageName));
 
   // Save colored map
-  ignition::common::Image localColoredImage;
+  gz::common::Image localColoredImage;
   localColoredImage.SetFromData(this->segmentationColoredBuffer,
-    width, height, ignition::common::Image::RGB_INT8);
+    width, height, gz::common::Image::RGB_INT8);
 
   localColoredImage.SavePNG(
-      ignition::common::joinPaths(this->saveColoredMapsFolder, coloredName));
+      gz::common::joinPaths(this->saveColoredMapsFolder, coloredName));
 
   // Save labels map
-  ignition::common::Image localLabelsImage;
+  gz::common::Image localLabelsImage;
   localLabelsImage.SetFromData(this->segmentationLabelsBuffer,
-    width, height, ignition::common::Image::RGB_INT8);
+    width, height, gz::common::Image::RGB_INT8);
 
   localLabelsImage.SavePNG(
-      ignition::common::joinPaths(this->saveLabelsMapsFolder, labelsName));
+      gz::common::joinPaths(this->saveLabelsMapsFolder, labelsName));
 
   ++this->saveCounter;
   return true;

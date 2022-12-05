@@ -1,0 +1,3 @@
+// Automatically generated
+#include <gz/sensors/config.hh>
+${gz_headers}

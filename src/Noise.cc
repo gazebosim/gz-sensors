@@ -23,15 +23,15 @@
 
 #include <functional>
 
-#include <ignition/common/Console.hh>
+#include <gz/common/Console.hh>
 
-#include "ignition/sensors/GaussianNoiseModel.hh"
-#include "ignition/sensors/Noise.hh"
+#include "gz/sensors/GaussianNoiseModel.hh"
+#include "gz/sensors/Noise.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
-class ignition::sensors::NoisePrivate
+class gz::sensors::NoisePrivate
 {
   /// \brief Which type of noise we're applying
   public: NoiseType type = NoiseType::NONE;
@@ -57,10 +57,10 @@ NoisePtr NoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
       noiseType == sdf::NoiseType::GAUSSIAN_QUANTIZED)
   {
     if (_sensorType == "camera" || _sensorType == "depth" ||
-        _sensorType == "multicamera" || _sensorType == "wideanglecamera" ||
+        _sensorType == "multicamera" || _sensorType == "wide_angle_camera" ||
         _sensorType == "thermal_camera" || _sensorType == "rgbd_camera")
     {
-      ignerr << "Image noise requested. "
+      gzerr << "Image noise requested. "
              << "Please use ImageNoiseFactory::NoiseModel instead"
              << std::endl;
       return noise;
@@ -68,7 +68,7 @@ NoisePtr NoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
     else
       noise.reset(new GaussianNoiseModel());
 
-    IGN_ASSERT(noise->Type() == NoiseType::GAUSSIAN,
+    GZ_ASSERT(noise->Type() == NoiseType::GAUSSIAN,
         "Noise type should be 'gaussian'");
   }
   else if (noiseType == sdf::NoiseType::NONE)
@@ -77,12 +77,12 @@ NoisePtr NoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
     // if 'custom', the type will be set once the user calls the
     // SetCustomNoiseCallback function.
     noise.reset(new Noise(NoiseType::NONE));
-    IGN_ASSERT(noise->Type() == NoiseType::NONE,
+    GZ_ASSERT(noise->Type() == NoiseType::NONE,
         "Noise type should be 'none'");
   }
   else
   {
-    ignerr << "Unrecognized noise type" << std::endl;
+    gzerr << "Unrecognized noise type" << std::endl;
     return NoisePtr();
   }
   noise->Load(_sdf);
@@ -94,8 +94,8 @@ NoisePtr NoiseFactory::NewNoiseModel(const sdf::Noise &_sdf,
 NoisePtr NoiseFactory::NewNoiseModel(sdf::ElementPtr _sdf,
     const std::string &_sensorType)
 {
-  IGN_ASSERT(_sdf != nullptr, "noise sdf is null");
-  IGN_ASSERT(_sdf->GetName() == "noise", "Not a noise SDF element");
+  GZ_ASSERT(_sdf != nullptr, "noise sdf is null");
+  GZ_ASSERT(_sdf->GetName() == "noise", "Not a noise SDF element");
   sdf::Noise noiseDom;
   noiseDom.Load(_sdf);
 
@@ -133,7 +133,7 @@ double Noise::Apply(double _in, double _dt)
       return this->dataPtr->customNoiseCallback(_in, _dt);
     else
     {
-      ignerr << "Custom noise callback function not set!"
+      gzerr << "Custom noise callback function not set!"
           << " Please call SetCustomNoiseCallback within a sensor plugin."
           << std::endl;
       return _in;
