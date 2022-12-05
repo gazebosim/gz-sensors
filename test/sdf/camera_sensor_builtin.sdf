@@ -4,7 +4,7 @@
     <link name="link1">
       <sensor name="camera1" type="camera">
         <update_rate>10</update_rate>
-        <ignition_frame_id>base_camera</ignition_frame_id>
+        <gz_frame_id>base_camera</gz_frame_id>
         <topic>/test/integration/CameraPlugin_imagesWithBuiltinSDF</topic>
         <camera>
           <horizontal_fov>1.05</horizontal_fov>
