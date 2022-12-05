@@ -701,6 +701,14 @@ namespace gz
     }
 
     //////////////////////////////////////////////////
+    bool DopplerVelocityLog::Load(sdf::ElementPtr _sdf)
+    {
+      sdf::Sensor sdfSensor;
+      sdfSensor.Load(_sdf);
+      return this->Load(sdfSensor);
+    }
+
+    //////////////////////////////////////////////////
     bool
     DopplerVelocityLog::Implementation::Initialize(DopplerVelocityLog *_sensor)
     {
@@ -756,10 +764,11 @@ namespace gz
         return false;
       }
 
-      sdf::ElementPtr bottomModeElement =
-          trackingElement->GetElement("bottom_mode");
-      if (bottomModeElement)
+      if (trackingElement->HasElement("bottom_mode"))
       {
+        sdf::ElementPtr bottomModeElement =
+            trackingElement->GetElement("bottom_mode");
+
         const std::string switchOptionName =
             bottomModeElement->Get<std::string>("when", "always").first;
 
@@ -777,10 +786,10 @@ namespace gz
 
         if (this->bottomModeSwitch)
         {
-          sdf::ElementPtr bottomModeNoiseElement =
-              bottomModeElement->GetElement("noise");
-          if (bottomModeNoiseElement)
+          if (bottomModeElement->HasElement("noise"))
           {
+            sdf::ElementPtr bottomModeNoiseElement =
+                bottomModeElement->GetElement("noise");
             gzmsg << "Initializing bottom tracking mode for "
                   << "[" << _sensor->Name() << "] sensor." << std::endl;
 
@@ -813,11 +822,11 @@ namespace gz
         }
       }
 
-      sdf::ElementPtr waterMassModeElement =
-          trackingElement->GetElement("water_mass_mode");
-
-      if (waterMassModeElement)
+      if (trackingElement->HasElement("water_mass_mode"))
       {
+        sdf::ElementPtr waterMassModeElement =
+            trackingElement->GetElement("water_mass_mode");
+
         const std::string switchOptionName =
             waterMassModeElement->Get<std::string>("when", "always").first;
 
@@ -903,7 +912,6 @@ namespace gz
             return false;
           }
 
-
           gzmsg << "Setting water-mass layer boundaries to ["
                 << this->waterMassModeNearBoundary << ", "
                 << this->waterMassModeFarBoundary << "] for "
@@ -915,10 +923,11 @@ namespace gz
               this->waterMassModeNearBoundary) /
               this->waterMassModeNumBins;
 
-          sdf::ElementPtr waterMassModeNoiseElement =
-              waterMassModeElement->GetElement("noise");
-          if (waterMassModeNoiseElement)
+          if (waterMassModeElement->HasElement("noise"))
           {
+            sdf::ElementPtr waterMassModeNoiseElement =
+              waterMassModeElement->GetElement("noise");
+
             sdf::Noise waterMassModeNoiseSDF;
             waterMassModeNoiseSDF.Load(waterMassModeNoiseElement);
             if (waterMassModeNoiseSDF.Type() != sdf::NoiseType::GAUSSIAN)
@@ -1450,6 +1459,7 @@ namespace gz
       DVLVelocityTracking message;
       auto * headerMessage = message.mutable_header();
       *headerMessage->mutable_stamp() = gz::msgs::Convert(_now);
+      message.set_type(this->dvlType);
 
       // Estimate DVL velocity by least squares using beam axes
       // and measured beam speeds ie.
@@ -1470,7 +1480,8 @@ namespace gz
           this->worldState->kinematics.at(this->entityId);
 
       const double bottomModeNoiseVariance =
-          std::pow(this->bottomModeNoise->StdDev(), 2.);
+          this->bottomModeNoise ?
+          std::pow(this->bottomModeNoise->StdDev(), 2.) : 0.0;
 
       for (size_t i = 0; i < this->beams.size(); ++i)
       {
@@ -1519,11 +1530,12 @@ namespace gz
           // Estimate speed as measured by beam (incl. measurement noise)
           const gz::math::Vector3d beamAxisInSensorFrame =
               this->beamsFrameTransform.Rot() * beam.Axis();
-
-          const double beamSpeed =
-              this->bottomModeNoise->Apply(
-                  relativeSensorVelocityInSensorFrame.Dot(
-                      beamAxisInSensorFrame));
+          double beamSpeed =
+              relativeSensorVelocityInSensorFrame.Dot(beamAxisInSensorFrame);
+          if (this->bottomModeNoise)
+          {
+            beamSpeed = this->bottomModeNoise->Apply(beamSpeed);
+          }
 
           const gz::math::Vector3d beamAxisInReferenceFrame =
               this->referenceFrameRotation * beamAxisInSensorFrame;
@@ -1534,7 +1546,6 @@ namespace gz
               DVLKinematicEstimate::DVL_REFERENCE_SHIP);
           *beamVelocityMessage->mutable_mean() =
               gz::msgs::Convert(beamAxisInReferenceFrame * beamSpeed);
-
           const auto beamBasisElement =
               Eigen::Vector3d{beamAxisInReferenceFrame.X(),
                               beamAxisInReferenceFrame.Y(),
@@ -1621,9 +1632,11 @@ namespace gz
       DVLVelocityTracking message;
       auto * headerMessage = message.mutable_header();
       *headerMessage->mutable_stamp() = gz::msgs::Convert(_now);
+      message.set_type(this->dvlType);
 
       const double waterMassModeNoiseVariance =
-          std::pow(this->waterMassModeNoise->StdDev(), 2.);
+          this->waterMassModeNoise ?
+          std::pow(this->waterMassModeNoise->StdDev(), 2.) : 0.0;
 
       // Estimate DVL velocity by least squares using beam axes
       // and average beams speeds ie.
@@ -1659,8 +1672,8 @@ namespace gz
         const auto & beamTarget = this->beamTargets[i];
         if (beamTarget)
         {
-          const double beamTargetBoundary =
-              (beamTarget->pose.Pos().Length() * beamAxisInSensorFrame).Z();
+          const double beamTargetBoundary = std::abs(
+            (beamTarget->pose.Pos().Length() * beamAxisInSensorFrame).Z());
           if (beamTargetBoundary < this->waterMassModeFarBoundary)
           {
             // Bottom is too close for water mass tracking
@@ -1738,14 +1751,16 @@ namespace gz
                   sampledVelocityInWorldFrame);
 
           // Estimate speed as measured by beam (incl. measurement noise)
-          const double beamSpeed =
-              this->waterMassModeNoise->Apply(
-                  relativeSensorVelocityInSensorFrame.Dot(
-                      beamAxisInSensorFrame));
+          double beamSpeed =
+              relativeSensorVelocityInSensorFrame.Dot(beamAxisInSensorFrame);
+          if (this->waterMassModeNoise)
+          {
+            this->waterMassModeNoise->Apply(beamSpeed);
+          }
 
           const double prevAverageBeamSpeed = averageBeamSpeed;
           // Use cumulative average algorithm to avoid keeping samples
-          averageBeamSpeed = (beamSpeed + i * prevAverageBeamSpeed) / (i + 1);
+          averageBeamSpeed = (beamSpeed + j * prevAverageBeamSpeed) / (j + 1);
           // Use Welford's moving variance algorithm to avoid keeping samples
           beamSpeedRSS +=
               (beamSpeed - prevAverageBeamSpeed) *
@@ -2069,6 +2084,12 @@ namespace gz
                << _sensor->Name() << "] sensor."
                << std::endl;
       }
+    }
+
+    //////////////////////////////////////////////////
+    bool DopplerVelocityLog::HasConnections() const
+    {
+      return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
     }
   }  // namespace sensors
 }  // namespace gz

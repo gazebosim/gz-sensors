@@ -203,6 +203,9 @@ namespace gz
       public: virtual bool Load(const sdf::Sensor &_sdf) override;
 
       /// Inherits documentation from parent class
+      public: virtual bool Load(sdf::ElementPtr _sdf) override;
+
+      /// Inherits documentation from parent class
       public: virtual bool Update(
         const std::chrono::steady_clock::duration &_now) override;
 
@@ -221,6 +224,9 @@ namespace gz
 
       /// \brief Set environmental `_data` to support DVL water-tracking.
       public: void SetEnvironmentalData(const EnvironmentalData &_data);
+
+      /// \brief Inherits documentation from parent class
+      public: virtual bool HasConnections() const override;
 
       /// \brief Yield rendering sensors that underpin the implementation.
       ///
