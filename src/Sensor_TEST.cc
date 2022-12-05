@@ -19,7 +19,7 @@
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/performance_sensor_metrics.pb.h>
+#include <gz/msgs/performance_sensor_metrics.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
