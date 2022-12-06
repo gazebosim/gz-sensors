@@ -1932,8 +1932,8 @@ namespace gz
       }
       else
       {
-        bottomModeScore = bottomModeInfo.numBeamsLocked;
-        waterMassModeScore = waterMassModeInfo.numBeamsLocked;
+        bottomModeScore = static_cast<double>(bottomModeInfo.numBeamsLocked);
+        waterMassModeScore = static_cast<double>(waterMassModeInfo.numBeamsLocked);
       }
 
       if (this->dataPtr->bottomModeSwitch == TrackingModeSwitch::On ||
@@ -2031,10 +2031,10 @@ namespace gz
 
           const double beamSpeed =
               gz::msgs::Convert(beamMessage.velocity().mean()).Dot(beamAxis);
-          gz::math::Color beamLowerQuantileMarkerColor{0., 0., 0., 0.85};
+          gz::math::Color beamLowerQuantileMarkerColor{0.f, 0.f, 0.f, 0.85f};
           // Linearly map beam speed in the [-1 m/s, 1 m/s] to full-scale hue.
           beamLowerQuantileMarkerColor.SetFromHSV(
-              180. + beamSpeed * 360., 1., 0.75);
+              180.f + static_cast<float>(beamSpeed) * 360.f, 1.f, 0.75f);
           auto * beamLowerQuantileConeMaterial =
               beamLowerQuantileConeMarker->mutable_material();
           gz::msgs::Set(beamLowerQuantileConeMaterial->mutable_ambient(),
@@ -2045,7 +2045,7 @@ namespace gz
                         beamLowerQuantileMarkerColor);
           gz::math::Color beamUpperQuantileMarkerColor =
               beamLowerQuantileMarkerColor;
-          beamUpperQuantileMarkerColor.A(0.25);
+          beamUpperQuantileMarkerColor.A(0.25f);
           auto * beamUpperQuantileConeMaterial =
               beamUpperQuantileConeMarker->mutable_material();
           gz::msgs::Set(beamUpperQuantileConeMaterial->mutable_ambient(),
