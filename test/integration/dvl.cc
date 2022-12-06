@@ -56,6 +56,8 @@ struct DVLConfig
   double waterMassNearBoundary = 20.;
   double waterMassFarBoundary = 60.;
 
+  double trackingNoise = 0.001;
+
   std::string waterVelocityVariable = "underwater_current_velocity";
 
   bool alwaysOn = true;
@@ -74,6 +76,7 @@ sdf::ElementPtr MakeDVLSdf(const DVLConfig &_config)
     << "    <always_on>" << _config.alwaysOn << "</always_on>"
     << "    <update_rate>" << _config.updateRate << "</update_rate>"
     << "    <topic>" << _config.topic << "</topic>"
+    << "    <visualize>1</visualize>"
     << "    <gz:dvl>"
     << "     <type>phased_array</type>"
     << "     <arrangement degrees='true'>"
@@ -101,9 +104,15 @@ sdf::ElementPtr MakeDVLSdf(const DVLConfig &_config)
     << "     <tracking>"
     << "      <bottom_mode>"
     << "       <when>" << _config.bottomTrackingMode << "</when>"
+    << "       <noise type='gaussian'>"
+    << "        <stddev>" << _config.trackingNoise << "</stddev>"
+    << "       </noise>"
     << "      </bottom_mode>"
     << "      <water_mass_mode>"
     << "       <when>" << _config.waterMassTrackingMode << "</when>"
+    << "       <noise type='gaussian'>"
+    << "        <stddev>" << _config.trackingNoise << "</stddev>"
+    << "       </noise>"
     << "       <water_velocity>"
     << "        <x>" << _config.waterVelocityVariable << "_x</x>"
     << "        <y>" << _config.waterVelocityVariable << "_y</y>"
@@ -295,7 +304,9 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileStatic)
   using DVLKinematicEstimate = msgs::DVLKinematicEstimate;
   constexpr auto velocityReference = DVLKinematicEstimate::DVL_REFERENCE_SHIP;
   EXPECT_EQ(velocityReference, message.velocity().reference());
-  EXPECT_EQ(math::Vector3d::Zero, msgs::Convert(message.velocity().mean()));
+  EXPECT_TRUE(math::Vector3d::Zero.Equal(
+    msgs::Convert(message.velocity().mean()),
+    2 * config.trackingNoise));
   EXPECT_EQ(4, message.beams_size());
   for (int i = 0; i < message.beams_size(); ++i)
   {
@@ -311,8 +322,9 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileStatic)
                 config.apertureAngle / 2);
 
     EXPECT_EQ(velocityReference, message.beams(i).velocity().reference());
-    EXPECT_EQ(math::Vector3d::Zero, msgs::Convert(
-        message.beams(i).velocity().mean()));
+    EXPECT_TRUE(math::Vector3d::Zero.Equal(
+      msgs::Convert(message.beams(i).velocity().mean()),
+      2 * config.trackingNoise));
   }
   EXPECT_EQ(0, message.status());
 }
@@ -378,7 +390,9 @@ TEST_P(DopplerVelocityLogTest, WaterMassTrackingWhileStatic)
   constexpr auto velocityReference = DVLKinematicEstimate::DVL_REFERENCE_SHIP;
   EXPECT_EQ(velocityReference, message.velocity().reference());
   const math::Vector3d waterVelocity(1.0, 0.5, 0.0);
-  EXPECT_EQ(-waterVelocity, msgs::Convert(message.velocity().mean()));
+  EXPECT_TRUE((-waterVelocity).Equal(
+    msgs::Convert(message.velocity().mean()),
+    2 * config.trackingNoise));
   EXPECT_EQ(4, message.beams_size());
   for (int i = 0; i < message.beams_size(); ++i)
   {
@@ -396,7 +410,9 @@ TEST_P(DopplerVelocityLogTest, WaterMassTrackingWhileStatic)
               message.beams(i).range().mean());
 
     const auto beamVelocity = beamAxis * beamAxis.Dot(-waterVelocity);
-    EXPECT_EQ(beamVelocity, msgs::Convert(message.beams(i).velocity().mean()));
+    EXPECT_TRUE(beamVelocity.Equal(
+      msgs::Convert(message.beams(i).velocity().mean()),
+      2 * config.trackingNoise));
     EXPECT_EQ(velocityReference, message.beams(i).velocity().reference());
   }
   EXPECT_EQ(0, message.status());
@@ -462,7 +478,9 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileInMotion)
   using DVLKinematicEstimate = msgs::DVLKinematicEstimate;
   constexpr auto velocityReference = DVLKinematicEstimate::DVL_REFERENCE_SHIP;
   EXPECT_EQ(velocityReference, message.velocity().reference());
-  EXPECT_EQ(math::Vector3d::UnitX, msgs::Convert(message.velocity().mean()));
+  EXPECT_TRUE(math::Vector3d::UnitX.Equal(
+    msgs::Convert(message.velocity().mean()),
+    2 * config.trackingNoise));
   EXPECT_EQ(4, message.beams_size());
   for (int i = 0; i < message.beams_size(); ++i)
   {
@@ -473,7 +491,9 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileInMotion)
     const auto beamAxis = beamRotation * -math::Vector3d::UnitZ;
     const auto beamVelocity =
       beamAxis * beamAxis.Dot(deviceState.linearVelocity);
-    EXPECT_EQ(beamVelocity, msgs::Convert(message.beams(i).velocity().mean()));
+    EXPECT_TRUE(beamVelocity.Equal(
+      msgs::Convert(message.beams(i).velocity().mean()),
+      2 * config.trackingNoise));
     EXPECT_EQ(velocityReference, message.beams(i).velocity().reference());
   }
   EXPECT_EQ(0, message.status());
