@@ -306,7 +306,7 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileStatic)
   EXPECT_EQ(velocityReference, message.velocity().reference());
   EXPECT_TRUE(math::Vector3d::Zero.Equal(
     msgs::Convert(message.velocity().mean()),
-    2 * config.trackingNoise));
+    4 * config.trackingNoise));
   EXPECT_EQ(4, message.beams_size());
   for (int i = 0; i < message.beams_size(); ++i)
   {
@@ -324,7 +324,7 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileStatic)
     EXPECT_EQ(velocityReference, message.beams(i).velocity().reference());
     EXPECT_TRUE(math::Vector3d::Zero.Equal(
       msgs::Convert(message.beams(i).velocity().mean()),
-      2 * config.trackingNoise));
+      4 * config.trackingNoise));
   }
   EXPECT_EQ(0, message.status());
 }
@@ -392,7 +392,7 @@ TEST_P(DopplerVelocityLogTest, WaterMassTrackingWhileStatic)
   const math::Vector3d waterVelocity(1.0, 0.5, 0.0);
   EXPECT_TRUE((-waterVelocity).Equal(
     msgs::Convert(message.velocity().mean()),
-    2 * config.trackingNoise));
+    4 * config.trackingNoise));
   EXPECT_EQ(4, message.beams_size());
   for (int i = 0; i < message.beams_size(); ++i)
   {
@@ -412,7 +412,7 @@ TEST_P(DopplerVelocityLogTest, WaterMassTrackingWhileStatic)
     const auto beamVelocity = beamAxis * beamAxis.Dot(-waterVelocity);
     EXPECT_TRUE(beamVelocity.Equal(
       msgs::Convert(message.beams(i).velocity().mean()),
-      2 * config.trackingNoise));
+      4 * config.trackingNoise));
     EXPECT_EQ(velocityReference, message.beams(i).velocity().reference());
   }
   EXPECT_EQ(0, message.status());
@@ -480,7 +480,7 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileInMotion)
   EXPECT_EQ(velocityReference, message.velocity().reference());
   EXPECT_TRUE(math::Vector3d::UnitX.Equal(
     msgs::Convert(message.velocity().mean()),
-    2 * config.trackingNoise));
+    4 * config.trackingNoise));
   EXPECT_EQ(4, message.beams_size());
   for (int i = 0; i < message.beams_size(); ++i)
   {
@@ -493,7 +493,7 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileInMotion)
       beamAxis * beamAxis.Dot(deviceState.linearVelocity);
     EXPECT_TRUE(beamVelocity.Equal(
       msgs::Convert(message.beams(i).velocity().mean()),
-      2 * config.trackingNoise));
+      4 * config.trackingNoise));
     EXPECT_EQ(velocityReference, message.beams(i).velocity().reference());
   }
   EXPECT_EQ(0, message.status());
