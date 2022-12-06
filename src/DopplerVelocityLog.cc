@@ -1932,8 +1932,10 @@ namespace gz
       }
       else
       {
-        bottomModeScore = static_cast<double>(bottomModeInfo.numBeamsLocked);
-        waterMassModeScore = static_cast<double>(waterMassModeInfo.numBeamsLocked);
+        bottomModeScore =
+          static_cast<double>(bottomModeInfo.numBeamsLocked);
+        waterMassModeScore =
+          static_cast<double>(waterMassModeInfo.numBeamsLocked);
       }
 
       if (this->dataPtr->bottomModeSwitch == TrackingModeSwitch::On ||
