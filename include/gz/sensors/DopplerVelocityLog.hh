@@ -28,6 +28,8 @@
 #include <gz/sensors/EnvironmentalData.hh>
 #include <gz/sensors/RenderingSensor.hh>
 
+#include "gz/sensors/dvl/Export.hh"
+
 namespace gz
 {
   namespace sensors
@@ -193,7 +195,8 @@ namespace gz
     ///
     /// Note the tethys::DopplerVelocityLogSystem plugin must be
     /// loaded for these custom sensors to be picked up and setup.
-    class DopplerVelocityLog : public gz::sensors::RenderingSensor
+    class GZ_SENSORS_DVL_VISIBLE DopplerVelocityLog
+      : public gz::sensors::RenderingSensor
     {
       public: DopplerVelocityLog();
 

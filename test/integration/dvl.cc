@@ -107,6 +107,7 @@ sdf::ElementPtr MakeDVLSdf(const DVLConfig &_config)
     << "       <noise type='gaussian'>"
     << "        <stddev>" << _config.trackingNoise << "</stddev>"
     << "       </noise>"
+    << "       <visualize>1</visualize>"
     << "      </bottom_mode>"
     << "      <water_mass_mode>"
     << "       <when>" << _config.waterMassTrackingMode << "</when>"
@@ -122,6 +123,7 @@ sdf::ElementPtr MakeDVLSdf(const DVLConfig &_config)
     << "        <far>" << _config.waterMassFarBoundary << "</far>"
     << "       </boundaries>"
     << "       <bins>10</bins>"
+    << "       <visualize>1</visualize>"
     << "      </water_mass_mode>"
     << "     </tracking>"
     << "     <resolution>0.01</resolution>"
@@ -178,6 +180,7 @@ class DopplerVelocityLogTest : public testing::Test,
         this->worldState.kinematics[seabedEntity];
     seabedState.pose = seabedPose;
 
+    sensors::EnvironmentalData::FrameT dataframe;
     math::InMemoryTimeVaryingVolumetricGridFactory<double, double> xGridFactory;  // NOLINT
     xGridFactory.AddPoint(0., math::Vector3d(1e3, 1e3, 0.), 1.);
     xGridFactory.AddPoint(0., math::Vector3d(-1e3, 1e3, 0.), 1.);
@@ -195,7 +198,7 @@ class DopplerVelocityLogTest : public testing::Test,
     xGridFactory.AddPoint(1e5, math::Vector3d(-1e3, 1e3, -100.), 1.);
     xGridFactory.AddPoint(1e5, math::Vector3d(-1e3, -1e3, -100.), 1.);
     xGridFactory.AddPoint(1e5, math::Vector3d(1e3, -1e3, -100.), 1.);
-    this->environment.frame["underwater_current_velocity_x"] = xGridFactory.Build();  // NOLINT
+    dataframe["underwater_current_velocity_x"] = xGridFactory.Build();
     math::InMemoryTimeVaryingVolumetricGridFactory<double, double>  yGridFactory;  // NOLINT
     yGridFactory.AddPoint(0., math::Vector3d(1e3, 1e3, 0.), 0.5);
     yGridFactory.AddPoint(0., math::Vector3d(-1e3, 1e3, 0.), 0.5);
@@ -213,9 +216,12 @@ class DopplerVelocityLogTest : public testing::Test,
     yGridFactory.AddPoint(1e5, math::Vector3d(-1e3, 1e3, -100.), 0.5);
     yGridFactory.AddPoint(1e5, math::Vector3d(-1e3, -1e3, -100.), 0.5);
     yGridFactory.AddPoint(1e5, math::Vector3d(1e3, -1e3, -100.), 0.5);
-    this->environment.frame["underwater_current_velocity_y"] = yGridFactory.Build();  // NOLINT
+    dataframe["underwater_current_velocity_y"] = yGridFactory.Build();
 
-    this->environment.reference = math::SphericalCoordinates::GLOBAL;
+    constexpr bool useTime = true;
+    this->environment = sensors::EnvironmentalData::MakeShared(
+      std::move(dataframe), math::SphericalCoordinates::GLOBAL,
+      sensors::EnvironmentalData::ReferenceUnits::RADIANS, useTime);
   }
   // Documentation inherited
   protected: void TearDown() override
@@ -230,7 +236,7 @@ class DopplerVelocityLogTest : public testing::Test,
 
   static constexpr double seabedDepth = 80.;
   sensors::WorldState worldState;
-  sensors::EnvironmentalData environment;
+  std::shared_ptr<sensors::EnvironmentalData> environment;
 };
 
 /////////////////////////////////////////////////
@@ -367,7 +373,7 @@ TEST_P(DopplerVelocityLogTest, WaterMassTrackingWhileStatic)
       this->worldState.kinematics[deviceEntity];
   deviceState.pose = devicePose;
   sensor->SetWorldState(this->worldState);
-  sensor->SetEnvironmentalData(this->environment);
+  sensor->SetEnvironmentalData(*this->environment);
 
   const auto now = (
     std::chrono::seconds(100) +
