@@ -562,7 +562,7 @@ namespace gz
       /// x-down, y-left, z-forward (acoustic beams' frame).
       public: const gz::math::Pose3d beamsFrameTransform{
         gz::math::Vector3d::Zero,
-        gz::math::Quaterniond{0., M_PI/2., 0.}};
+        gz::math::Quaterniond{0., GZ_PI/2., 0.}};
 
       /// \brief DVL acoustic beams' targets
       public: std::vector<std::optional<TrackingTarget>> beamTargets;
