@@ -4,7 +4,7 @@
     <link name="link1">
       <sensor name="camera_8_bit" type="camera">
         <update_rate>10</update_rate>
-        <ignition_frame_id>base_camera</ignition_frame_id>
+        <gz_frame_id>base_camera</gz_frame_id>
         <topic>/images_l8</topic>
         <camera>
           <horizontal_fov>1.05</horizontal_fov>
@@ -26,7 +26,7 @@
       </sensor>
       <sensor name="camera_16_bit" type="camera">
         <update_rate>10</update_rate>
-        <ignition_frame_id>base_camera</ignition_frame_id>
+        <gz_frame_id>base_camera</gz_frame_id>
         <topic>/images_l16</topic>
         <camera>
           <horizontal_fov>1.05</horizontal_fov>

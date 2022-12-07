@@ -169,7 +169,7 @@ bool NavSatSensor::Update(const std::chrono::steady_clock::duration &_now)
 
   msgs::NavSat msg;
   *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
-  msg.set_frame_id(this->Name());
+  msg.set_frame_id(this->FrameId());
 
   // Apply noise
   auto iter = this->dataPtr->noises.find(NAVSAT_HORIZONTAL_POSITION_NOISE);

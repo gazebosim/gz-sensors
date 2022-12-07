@@ -5,6 +5,7 @@ set(dri_tests
   camera.cc
   depth_camera.cc
   distortion_camera.cc
+  dvl.cc
   gpu_lidar_sensor.cc
   rgbd_camera.cc
   segmentation_camera.cc
@@ -49,6 +50,7 @@ if (DRI_TESTS)
       ${PROJECT_LIBRARY_TARGET_NAME}-segmentation_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-thermal_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-wide_angle_camera
+      ${PROJECT_LIBRARY_TARGET_NAME}-dvl
   )
 endif()
 
