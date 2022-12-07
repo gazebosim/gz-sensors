@@ -4,7 +4,84 @@
 
 ## Gazebo Sensors 7
 
-### Gazebo Sensors 7.0.0 (202X-XX-XX)
+### Gazebo Sensors 7.0.0
+
+1. Clear scene before exiting wide_angle_camera_test
+    * [Pull request #266](https://github.com/gazebosim/ign-sensors/pull/266)
+
+1. Fixed INTEGRATION triggered_camera test
+    * [Pull request #272](https://github.com/gazebosim/ign-sensors/pull/272)
+
+1. Update README.md
+    * [Pull request #267](https://github.com/gazebosim/ign-sensors/pull/267)
+
+1. Tutorial and documentation updates
+    * [Pull request #270](https://github.com/gazebosim/ign-sensors/pull/270)
+    * [Pull request #269](https://github.com/gazebosim/ign-sensors/pull/269)
+    * [Pull request #268](https://github.com/gazebosim/ign-sensors/pull/268)
+    * [Pull request #271](https://github.com/gazebosim/ign-sensors/pull/271)
+
+1. Fix msgs.hh uses
+    * [Pull request #263](https://github.com/gazebosim/ign-sensors/pull/263)
+
+1. Fix forward-port: use gz_add_component
+    * [Pull request #253](https://github.com/gazebosim/ign-sensors/pull/253)
+
+1. Add missing msgs include statements
+    * [Pull request #242](https://github.com/gazebosim/ign-sensors/pull/242)
+
+1. ign -> gz
+    * [Pull request #245](https://github.com/gazebosim/ign-sensors/pull/245)
+    * [Pull request #244](https://github.com/gazebosim/ign-sensors/pull/244)
+    * [Pull request #235](https://github.com/gazebosim/ign-sensors/pull/235)
+    * [Pull request #240](https://github.com/gazebosim/ign-sensors/pull/240)
+    * [Pull request #232](https://github.com/gazebosim/ign-sensors/pull/232)
+    * [Pull request #237](https://github.com/gazebosim/ign-sensors/pull/237)
+    * [Pull request #226](https://github.com/gazebosim/ign-sensors/pull/226)
+    * [Pull request #221](https://github.com/gazebosim/ign-sensors/pull/221)
+    * [Pull request #233](https://github.com/gazebosim/ign-sensors/pull/233)
+
+1. Make sensors' HasConnections function virtual
+    * [Pull request #234](https://github.com/gazebosim/ign-sensors/pull/234)
+
+1. Disable thermal camera test on MacOS
+    * [Pull request #243](https://github.com/gazebosim/ign-sensors/pull/243)
+
+1. Update GoogleTest to latest version
+    * [Pull request #241](https://github.com/gazebosim/ign-sensors/pull/241)
+
+1. [garden] Use anti-aliasing value from <anti_aliasing> SDF element
+    * [Pull request #210](https://github.com/gazebosim/ign-sensors/pull/210)
+
+1. Use pose multiplication instead of subtraction
+    * [Pull request #231](https://github.com/gazebosim/ign-sensors/pull/231)
+
+1. Add support for single channel 16 bit grayscale image format
+    * [Pull request #229](https://github.com/gazebosim/ign-sensors/pull/229)
+
+1. Remove deprecated common/PluginMacros.hh include
+    * [Pull request #230](https://github.com/gazebosim/ign-sensors/pull/230)
+
+1. Bumps in garden : ign-sensors7
+    * [Pull request #216](https://github.com/gazebosim/ign-sensors/pull/216)
+    * [Pull request #168](https://github.com/gazebosim/ign-sensors/pull/168)
+    * [Pull request #183](https://github.com/gazebosim/ign-sensors/pull/183)
+    * [Pull request #173](https://github.com/gazebosim/ign-sensors/pull/173)
+
+1. Remove Bionic from future releases (Garden+)
+    * [Pull request #205](https://github.com/gazebosim/ign-sensors/pull/205)
+
+1. Add API to set next sensor update time
+    * [Pull request #196](https://github.com/gazebosim/ign-sensors/pull/196)
+
+1. Change to use SuppressWarning from ign-utils
+    * [Pull request #193](https://github.com/gazebosim/ign-sensors/pull/193)
+
+1. Let derived sensors call Sensor::Update
+    * [Pull request #187](https://github.com/gazebosim/ign-sensors/pull/187)
+
+1. Add wide angle camera sensor
+    * [Pull request #171](https://github.com/gazebosim/ign-sensors/pull/171)
 
 ## Gazebo Sensors 6
 
@@ -252,7 +329,22 @@
 
 ## Gazebo Sensors 3
 
-### Gazebo Sensors 3.X.X (202X-XX-XX)
+### Gazebo Sensors 3.4.0 (2022-08-16)
+
+1. Remove redundant namespace references
+    * [Pull request #258](https://github.com/gazebosim/gz-sensors/pull/258)
+
+1. Ignition -> Gazebo
+    * [Pull request #245](https://github.com/gazebosim/gz-sensors/pull/245)
+
+1. Conform to ros format for header field `frame_id` of sensor msgs
+    * [Pull request #195](https://github.com/gazebosim/gz-sensors/pull/195)
+
+1. Fix compiler warnings (`CMP0072` and copy elision)
+    * [Pull request #188](https://github.com/gazebosim/gz-sensors/pull/188)
+
+1. Require ign-transport >= 8.2
+    * [Pull request #167](https://github.com/gazebosim/gz-sensors/pull/167)
 
 ### Gazebo Sensors 3.3.0 (2021-08-26)
 

@@ -1,6 +1,6 @@
 \page thermalcameraigngazebo Thermal Camera in Gazebo
 
-In this tutorial, we will discuss how to use a thermal camera sensor in [Gazebo](https://gazebosim.org/libs/gazebo).
+In this tutorial, we will discuss how to use a thermal camera sensor in [Gazebo](https://gazebosim.org/libs/sim).
 
 There are currently a few limitations with the thermal camera, which will be mentioned at the end of the tutorial.
 
@@ -299,7 +299,7 @@ Here's an example 16-bit thermal camera subscriber that performs this conversion
 ```c
 #include <cstdint>
 
-#include <gz/msgs.hh>
+#include <gz/msgs/image.pb.h>
 #include <gz/transport.hh>
 
 // used to set the proper resolution of the camera's output (10mK)
@@ -344,6 +344,21 @@ int main(int argc, char **argv)
 
   gz::transport::waitForShutdown();
 }
+```
+
+Save the above code to a file named `main.cpp` and use this `CMakeLists.txt` to build it.
+
+```cmake
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+project(image-listener)
+
+# Find the Gazebo Libraries used directly by the example
+find_package(gz-msgs9 REQUIRED)
+find_package(gz-transport12 REQUIRED)
+
+add_executable(${PROJECT_NAME} main.cpp)
+target_link_libraries(${PROJECT_NAME} PUBLIC gz-msgs9 gz-transport12)
+target_include_directories(${PROJECT_NAME} PUBLIC ${gz_msgs9_INCLUDE_DIRS})
 ```
 
 Although most of the code above is described in the comments, let's go over the key points again:

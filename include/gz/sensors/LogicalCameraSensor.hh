@@ -27,15 +27,7 @@
 
 #include <gz/math/Angle.hh>
 
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
-#endif
-#include <gz/msgs.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
+#include <gz/msgs/logical_camera_image.pb.h>
 
 #include "gz/sensors/config.hh"
 #include "gz/sensors/Export.hh"

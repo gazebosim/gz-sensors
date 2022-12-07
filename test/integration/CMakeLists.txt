@@ -5,6 +5,7 @@ set(dri_tests
   camera.cc
   depth_camera.cc
   distortion_camera.cc
+  dvl.cc
   gpu_lidar_sensor.cc
   rgbd_camera.cc
   segmentation_camera.cc
@@ -17,10 +18,10 @@ set(tests
   air_pressure.cc
   altimeter.cc
   force_torque.cc
+  imu.cc
   logical_camera.cc
   magnetometer.cc
   navsat.cc
-  imu.cc
 )
 
 link_directories(${PROJECT_BINARY_DIR}/test)
@@ -46,9 +47,10 @@ if (DRI_TESTS)
       ${PROJECT_LIBRARY_TARGET_NAME}-lidar
       ${PROJECT_LIBRARY_TARGET_NAME}-gpu_lidar
       ${PROJECT_LIBRARY_TARGET_NAME}-rgbd_camera
-      ${PROJECT_LIBRARY_TARGET_NAME}-thermal_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-segmentation_camera
+      ${PROJECT_LIBRARY_TARGET_NAME}-thermal_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-wide_angle_camera
+      ${PROJECT_LIBRARY_TARGET_NAME}-dvl
   )
 endif()
 
@@ -58,10 +60,10 @@ gz_build_tests(TYPE INTEGRATION
   LIB_DEPS
     ${PROJECT_LIBRARY_TARGET_NAME}-air_pressure
     ${PROJECT_LIBRARY_TARGET_NAME}-altimeter
+    ${PROJECT_LIBRARY_TARGET_NAME}-force_torque
+    ${PROJECT_LIBRARY_TARGET_NAME}-imu
     ${PROJECT_LIBRARY_TARGET_NAME}-logical_camera
     ${PROJECT_LIBRARY_TARGET_NAME}-magnetometer
-    ${PROJECT_LIBRARY_TARGET_NAME}-imu
-    ${PROJECT_LIBRARY_TARGET_NAME}-force_torque
     ${PROJECT_LIBRARY_TARGET_NAME}-navsat
 )
 

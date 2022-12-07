@@ -17,16 +17,8 @@
 
 #include <gtest/gtest.h>
 
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
-#endif
 #include <gz/msgs/camera_info.pb.h>
-#include <gz/msgs.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
+#include <gz/msgs/image.pb.h>
 
 #include <gz/common/Filesystem.hh>
 #include <gz/common/Event.hh>

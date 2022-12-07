@@ -18,11 +18,13 @@
 #include <memory>
 #include <mutex>
 
+#include <gz/msgs/image.pb.h>
+
 #include <gz/common/Console.hh>
 #include <gz/common/Image.hh>
 #include <gz/common/Profiler.hh>
 #include <gz/common/Util.hh>
-#include <gz/msgs.hh>
+#include <gz/msgs/Utility.hh>
 #include <gz/rendering/SegmentationCamera.hh>
 #include <gz/transport/Node.hh>
 #include <gz/transport/Publisher.hh>
