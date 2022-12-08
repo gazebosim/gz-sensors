@@ -15,15 +15,7 @@
  *
 */
 
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
-#endif
 #include <gz/msgs/image.pb.h>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 #include <algorithm>
 #include <mutex>
@@ -36,6 +28,7 @@
 #include <gz/math/Angle.hh>
 #include <gz/math/Helpers.hh>
 
+#include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 
 #include "gz/sensors/ThermalCameraSensor.hh"
@@ -210,7 +203,7 @@ bool ThermalCameraSensor::Load(const sdf::Sensor &_sdf)
 
   // Create the thermal image publisher
   this->dataPtr->thermalPub =
-      this->dataPtr->node.Advertise<gz::msgs::Image>(
+      this->dataPtr->node.Advertise<msgs::Image>(
           this->Topic());
 
   if (!this->dataPtr->thermalPub)
@@ -384,13 +377,13 @@ rendering::ThermalCameraPtr ThermalCameraSensor::ThermalCamera() const
 
 /////////////////////////////////////////////////
 common::ConnectionPtr ThermalCameraSensor::ConnectImageCallback(
-    std::function<void(const gz::msgs::Image &)> _callback)
+    std::function<void(const msgs::Image &)> _callback)
 {
   return this->dataPtr->imageEvent.Connect(_callback);
 }
 
 /////////////////////////////////////////////////
-void ThermalCameraSensor::SetScene(gz::rendering::ScenePtr _scene)
+void ThermalCameraSensor::SetScene(rendering::ScenePtr _scene)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // APIs make it possible for the scene pointer to change
@@ -613,19 +606,19 @@ bool ThermalCameraSensorPrivate::ConvertTemperatureToImage(
 //////////////////////////////////////////////////
 bool ThermalCameraSensorPrivate::SaveImage(const uint16_t *_data,
     unsigned int _width, unsigned int _height,
-    gz::common::Image::PixelFormatType /*_format*/)
+    common::Image::PixelFormatType /*_format*/)
 {
   // Attempt to create the directory if it doesn't exist
-  if (!gz::common::isDirectory(this->saveImagePath))
+  if (!common::isDirectory(this->saveImagePath))
   {
-    if (!gz::common::createDirectories(this->saveImagePath))
+    if (!common::createDirectories(this->saveImagePath))
       return false;
   }
 
   if (_width == 0 || _height == 0)
     return false;
 
-  gz::common::Image localImage;
+  common::Image localImage;
 
   if (static_cast<int>(_width) != this->imgThermalBufferSize.X() ||
       static_cast<int>(_height) != this->imgThermalBufferSize.Y())
@@ -646,7 +639,7 @@ bool ThermalCameraSensorPrivate::SaveImage(const uint16_t *_data,
   localImage.SetFromData(this->imgThermalBuffer, _width, _height,
       common::Image::RGB_INT8);
   localImage.SavePNG(
-      gz::common::joinPaths(this->saveImagePath, filename));
+      common::joinPaths(this->saveImagePath, filename));
 
   return true;
 }

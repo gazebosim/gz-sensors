@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Open Source Robotics Foundation
+ * Copyright (C) 2022 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
-#include "gz/sensors/SensorTypes.hh"
+#include "gz/sensors/EnvironmentalData.hh"
 
-using namespace gz;
-using namespace sensors;
+#include <memory>
+#include <utility>
 
-// Initialize enum iterator, and string converter
-GZ_ENUM(sensorNoiseIface, SensorNoiseType,
-    SENSOR_NOISE_TYPE_BEGIN,
-    SENSOR_NOISE_TYPE_END,
-    "NO_NOISE",
-    "CAMERA_NOISE",
-    "SENSOR_NOISE_TYPE_END")
+using namespace gz::sensors;
+
+std::shared_ptr<EnvironmentalData>
+EnvironmentalData::MakeShared(FrameT _frame, ReferenceT _reference,
+  ReferenceUnits _units, bool _ignoreTimeStep)
+{
+  auto data = std::make_shared<EnvironmentalData>();
+  data->frame = std::move(_frame);
+  data->reference = _reference;
+  data->units = _units;
+  data->staticTime = _ignoreTimeStep;
+  return data;
+}

@@ -22,6 +22,8 @@
 #include <gz/common/Console.hh>
 #include <gz/math/Rand.hh>
 
+#include <sdf/Noise.hh>
+
 #include "gz/sensors/Noise.hh"
 #include "gz/sensors/GaussianNoiseModel.hh"
 
@@ -61,7 +63,7 @@ class NoiseTest : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    gz::common::Console::SetVerbosity(4);
+    common::Console::SetVerbosity(4);
   }
 };
 
@@ -132,7 +134,7 @@ void NoNoise(sensors::NoisePtr _noise, unsigned int _count)
   // Expect no change in input value
   for (unsigned int i = 0; i < _count; ++i)
   {
-    double x = gz::math::Rand::DblUniform(-1e6, 1e6);
+    double x = math::Rand::DblUniform(-1e6, 1e6);
     EXPECT_NEAR(x, _noise->Apply(x), 1e-6);
   }
 }
@@ -412,4 +414,29 @@ TEST(NoiseTest, OnApplyNoise)
     double value = noise->Apply(i);
     EXPECT_DOUBLE_EQ(value, i*2);
   }
+}
+
+/////////////////////////////////////////////////
+TEST(NoiseTest, NoiseFailures)
+{
+  sensors::Noise noise(sensors::NoiseType::CUSTOM);
+
+  EXPECT_DOUBLE_EQ(9, noise.Apply(9, 0.1));
+  EXPECT_DOUBLE_EQ(9, noise.ApplyImpl(9, 0.1));
+  std::ostringstream out;
+  noise.Print(out);
+  EXPECT_EQ("Noise with type[1] does not have an overloaded Print function. "
+   "No more information is available.", out.str());
+
+  sensors::Noise noiseGaussian(sensors::NoiseType::GAUSSIAN);
+
+  sensors::NoisePtr noiseFactory =
+     sensors::NoiseFactory::NewNoiseModel(
+     NoiseSdf("gaussian", 0, 0, 0, 0, 0), "camera");
+
+  sdf::Noise sdfNoise;
+  sdfNoise.SetType(static_cast<sdf::NoiseType>(99));
+  sensors::NoisePtr noiseFactory2 =
+     sensors::NoiseFactory::NewNoiseModel(
+     sdfNoise, "camera");
 }

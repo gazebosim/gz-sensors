@@ -26,15 +26,7 @@
 #include <gz/common/Event.hh>
 #include <gz/utils/SuppressWarning.hh>
 
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
-#endif
-#include <gz/msgs.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
+#include <gz/msgs/image.pb.h>
 
 // TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
@@ -145,12 +137,6 @@ namespace gz
       /// \brief Create a camera in a scene
       /// \return True on success.
       private: bool CreateCamera();
-
-      /// \brief Callback that is triggered when the scene changes on
-      /// the Manager.
-      /// \param[in] _scene Pointer to the new scene.
-      private: void OnSceneChange(gz::rendering::ScenePtr /*_scene*/)
-              { }
 
       GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

@@ -15,14 +15,14 @@
  *
 */
 
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable: 4005)
+  #pragma warning(disable: 4251)
 #endif
 #include <gz/msgs/altimeter.pb.h>
-#ifdef _WIN32
-#pragma warning(pop)
+#if defined(_MSC_VER)
+  #pragma warning(pop)
 #endif
 
 #include <gz/common/Profiler.hh>
@@ -103,7 +103,7 @@ bool AltimeterSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/altimeter");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<gz::msgs::Altimeter>(this->Topic());
+      this->dataPtr->node.Advertise<msgs::Altimeter>(this->Topic());
 
   if (!this->dataPtr->pub)
   {
