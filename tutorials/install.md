@@ -9,15 +9,13 @@ The source install instructions should be used if you need the very latest softw
 ### Ubuntu
 
 1. Setup your computer to accept software from packages.osrfoundation.org:
-
 ```{.sh}
 sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
 wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
 sudo apt-get update
 ```
 
-1. Install Gazebo Sensors
-
+2. Install Gazebo Sensors
 ```{.sh}
 # Change <#> to a version number, like 3 or 4
 sudo apt install libgz-sensors<#>-dev
@@ -25,13 +23,13 @@ sudo apt install libgz-sensors<#>-dev
 
 ### macOS
 
-On macOS, add OSRF packages:
+1. On macOS, add OSRF packages:
   ```
   ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   brew tap osrf/simulation
   ```
 
-Install Gazebo Sensors:
+2. Install Gazebo Sensors:
   ```
   brew install gz-sensors<#>
   ```
@@ -142,26 +140,26 @@ Before [gz-rendering](https://github.com/gazebosim/gz-rendering) becomes availab
   conda activate gz-ws
   ```
 
-1. Navigate to where you would like to build the library, and clone the repository.
+2. Navigate to where you would like to build the library, and clone the repository.
   ```
   # Optionally, append `-b ign-sensors#` (replace # with a number) to check out a specific version
   git clone https://github.com/gazebosim/gz-sensors.git
   ```
 
-1. Configure and build
+3. Configure and build
   ```
   cd gz-sensors
   mkdir build
   cd build
   ```
 
-    Before `gz-rendering` becomes available on conda-forge, we need to build it from source and specify the path containing `gz-rendering-config.cmake` in `CMAKE_PREFIX_PATH`, for cmake to find `gz-rendering`. That path could be `gz-rendering-install-path\lib\cmake\gz-rendering4`, for example.
+4. Before `gz-rendering` becomes available on conda-forge, we need to build it from source and specify the path containing `gz-rendering-config.cmake` in `CMAKE_PREFIX_PATH`, for cmake to find `gz-rendering`. That path could be `gz-rendering-install-path\lib\cmake\gz-rendering4`, for example.
   ```
   cmake .. -DBUILD_TESTING=OFF -DCMAKE_PREFIX_PATH=path\containing\ignition-rendering-config  # Optionally, -DCMAKE_INSTALL_PREFIX=path\to\install
   cmake --build . --config Release
   ```
 
-1. Optionally, install. You will likely need to run a terminal with admin privileges for this call to succeed.
+5. Optionally, install. You will likely need to run a terminal with admin privileges for this call to succeed.
   ```
   cmake --install . --config Release
   ```

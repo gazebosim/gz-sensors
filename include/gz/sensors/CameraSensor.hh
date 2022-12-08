@@ -21,19 +21,11 @@
 #include <memory>
 #include <string>
 
+#include <gz/msgs/image.pb.h>
+
 #include <sdf/sdf.hh>
 
 #include <gz/utils/SuppressWarning.hh>
-
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4251)
-#endif
-#include <gz/msgs.hh>
-#ifdef _WIN32
-#pragma warning(pop)
-#endif
 
 // TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings

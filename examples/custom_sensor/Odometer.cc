@@ -20,6 +20,7 @@
 #include <gz/msgs/double.pb.h>
 
 #include <gz/common/Console.hh>
+#include <gz/msgs/Utility.hh>
 #include <gz/sensors/Noise.hh>
 #include <gz/sensors/Util.hh>
 
