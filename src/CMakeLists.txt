@@ -1,7 +1,6 @@
 set (sources
   BrownDistortionModel.cc
   Distortion.cc
-  EnvironmentalData.cc
   GaussianNoiseModel.cc
   Manager.cc
   Noise.cc
@@ -88,22 +87,6 @@ target_link_libraries(${depth_camera_target}
     gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
     gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
 )
-
-set(dvl_sources DopplerVelocityLog.cc)
-gz_add_component(dvl
-  SOURCES ${dvl_sources}
-  DEPENDS_ON_COMPONENTS rendering
-  GET_TARGET_NAME dvl_target)
-target_compile_definitions(${dvl_target} PUBLIC DopplerVelocityLog_EXPORTS)
-target_link_libraries(${dvl_target}
-  PUBLIC
-    ${rendering_target}
-    Eigen3::Eigen
-  PRIVATE
-    gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
-    gz-math${GZ_MATH_VER}::gz-math${GZ_MATH_VER}
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
-    gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER})
 
 set(lidar_sources Lidar.cc)
 gz_add_component(lidar
