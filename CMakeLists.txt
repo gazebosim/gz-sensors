@@ -92,10 +92,6 @@ set(GZ_MSGS_VER ${gz-msgs9_VERSION_MAJOR})
 gz_find_package(sdformat13 REQUIRED)
 set(SDF_VER ${sdformat13_VERSION_MAJOR})
 
-#--------------------------------------
-# Find Eigen3
-find_package(Eigen3 REQUIRED)
-
 #============================================================================
 # Configure the build
 #============================================================================
