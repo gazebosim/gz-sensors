@@ -125,7 +125,7 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
         "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF";
     WaitForMessageTestHelper<gz::msgs::Image> helper(imageTopic);
     mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
-    EXPECT_TRUE(helper.WaitForMessage()) << helper;
+    EXPECT_TRUE(helper.WaitForMessage(10s)) << helper;
   }
 
   // test removing sensor
