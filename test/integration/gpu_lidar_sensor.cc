@@ -15,6 +15,7 @@
  *
 */
 
+#include <cstring>
 #include <gtest/gtest.h>
 
 #include <gz/msgs/laserscan.pb.h>
@@ -139,6 +140,19 @@ void pointCb(const gz::msgs::PointCloudPacked &_msg)
 class GpuLidarSensorTest: public testing::Test,
                   public testing::WithParamInterface<const char *>
 {
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    // Disable Ogre tests on windows. See
+    // https://github.com/gazebosim/gz-sensors/issues/284
+#ifdef _WIN32
+    if (strcmp(GetParam(), "ogre") == 0)
+    {
+      GTEST_SKIP() << "Ogre tests disabled on windows. See #284.";
+    }
+#endif
+  }
+
   // Test and verify gpu rays properties setters and getters
   public: void CreateGpuLidar(const std::string &_renderEngine);
 
