@@ -160,41 +160,16 @@ bool AirSpeedSensor::Update(
   frame->set_key("frame_id");
   frame->add_value(this->FrameId());
 
-  // // This block of code comes from RotorS:
-  // // https://github.com/ethz-asl/rotors_simulator/blob/master/rotors_gazebo_plugins/src/gazebo_pressure_plugin.cpp
-  // {
-  //   // Get the current height.
-  //   double height = this->dataPtr->referenceAltitude + this->Pose().Pos().Z();
-  //
-  //   // Compute the geopotential height.
-  //   double geoHeight = kEarthRadiusMeters * height /
-  //     (kEarthRadiusMeters + height);
-  //
-  //   // Compute the temperature at the current altitude in Kelvin.
-  //   double tempAtHeight =
-  //     kSeaLevelTempKelvin - kTempLapseKelvinPerMeter * geoHeight;
-  //
-  //   // Compute the current air pressure.
-  //   this->dataPtr->pressure =
-  //     kPressureOneAtmospherePascals * exp(kAirConstantDimensionless *
-  //         log(kSeaLevelTempKelvin / tempAtHeight));
-  // }
-
   const float alt_rel = static_cast<float>(this->Pose().Pos().Z()); // Z-component from ENU
   const float alt_amsl = (float)DEFAULT_HOME_ALT_AMSL + alt_rel;
   const float temperature_local = TEMPERATURE_MSL - LAPSE_RATE * alt_amsl;
   const float density_ratio = powf(TEMPERATURE_MSL / temperature_local , 4.256f);
   const float air_density = AIR_DENSITY_MSL / density_ratio;
-	std::cerr << "air_density " << air_density << '\n';
-  // 	// calculate differential pressure + noise in hPa
 
 	gz::math::Vector3d wind_vel_{0, 0, 0};
   gz::math::Quaterniond veh_q_world_to_body = this->Pose().Rot();
 	gz::math::Vector3d air_vel_in_body_ = this->dataPtr->vel - veh_q_world_to_body.RotateVectorReverse(wind_vel_);
 	double diff_pressure = gz::math::sgn(air_vel_in_body_.X()) * 0.005f * air_density  * air_vel_in_body_.X() * air_vel_in_body_.X();
-  std::cerr << "diff_pressure " << diff_pressure << '\n';
-  std::cerr << "this->dataPtr->vel " << this->dataPtr->vel << '\n';
-  std::cerr << "veh_q_world_to_body " << veh_q_world_to_body << '\n';
 
   // Apply pressure noise
   if (this->dataPtr->noises.find(AIR_SPEED_NOISE_PASCALS) !=
@@ -214,7 +189,7 @@ bool AirSpeedSensor::Update(
     }
   }
 
-  msg.set_pressure(diff_pressure);
+  msg.set_pressure(diff_pressure * 100);
   msg.set_variance(temperature_local);
 
   // publish
