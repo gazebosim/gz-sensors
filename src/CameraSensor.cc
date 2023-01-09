@@ -403,7 +403,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 
   if (!this->dataPtr->pub.HasConnections() &&
       this->dataPtr->imageEvent.ConnectionCount() <= 0 &&
-      !this->dataPtr->saveImage)
+      !this->dataPtr->saveImage && !this->dataPtr->infoPub.HasConnections())
   {
     if (this->dataPtr->generatingData)
     {
@@ -481,7 +481,10 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     this->AddSequence(msg.mutable_header());
     IGN_PROFILE("CameraSensor::Update Publish");
     this->dataPtr->pub.Publish(msg);
+  }
 
+  if (this->dataPtr->infoPub.HasConnections())
+  {
     // publish the camera info message
     this->PublishInfo(_now);
   }
@@ -728,5 +731,6 @@ double CameraSensor::Baseline() const
 bool CameraSensor::HasConnections() const
 {
   return (this->dataPtr->pub && this->dataPtr->pub.HasConnections()) ||
-      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+      this->dataPtr->imageEvent.ConnectionCount() > 0u ||
+      (this->dataPtr->infoPub && this->dataPtr->infoPub.HasConnections());
 }
