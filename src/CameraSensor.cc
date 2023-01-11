@@ -409,7 +409,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 
   if (!this->dataPtr->pub.HasConnections() &&
       this->dataPtr->imageEvent.ConnectionCount() <= 0 &&
-      !this->dataPtr->saveImage && !this->dataPtr->infoPub.HasConnections())
+      !this->dataPtr->saveImage)
   {
     if (this->dataPtr->generatingData)
     {
