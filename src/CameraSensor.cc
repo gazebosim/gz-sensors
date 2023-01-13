@@ -432,7 +432,6 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 
   if (this->HasImageConnections() || this->dataPtr->saveImage)
   {
-    ignerr << "Rendering color image\n"; 
     // generate sensor data
     this->Render();
     {
