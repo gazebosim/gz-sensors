@@ -427,7 +427,7 @@ bool ThermalCameraSensor::Update(
     // publish the camera info message
     this->PublishInfo(_now);
   }
-  
+
   if (!this->dataPtr->thermalPub.HasConnections() &&
       this->dataPtr->imageEvent.ConnectionCount() == 0u)
     return false;
