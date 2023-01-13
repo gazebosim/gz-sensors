@@ -535,7 +535,6 @@ bool DepthCameraSensor::Update(
 
   if(this->HasImageConnections())
   {
-    ignerr << "Rendering depth image\n";
     // generate sensor data
     this->Render();
 
