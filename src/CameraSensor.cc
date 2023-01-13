@@ -432,7 +432,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 
   if (this->HasImageConnections() || this->dataPtr->saveImage)
   {
-    ignerr << "Rendering color image\n";
+    ignerr << "Rendering color image\t save(mage ==" << this->dataPtr->saveImage << "\n"; 
     // generate sensor data
     this->Render();
     {
@@ -741,7 +741,7 @@ bool CameraSensor::HasConnections() const
 bool CameraSensor::HasImageConnections() const
 {
   return (this->dataPtr->pub && this->dataPtr->pub.HasConnections()) ||
-      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+         this->dataPtr->imageEvent.ConnectionCount() > 0u;
 }
 
 //////////////////////////////////////////////////

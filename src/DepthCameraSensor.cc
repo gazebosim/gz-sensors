@@ -535,6 +535,7 @@ bool DepthCameraSensor::Update(
 
   if(this->HasImageConnections())
   {
+    ignerr << "Rendering depth image\n";
     // generate sensor data
     this->Render();
 
@@ -652,6 +653,6 @@ bool DepthCameraSensor::HasConnections() const
 bool DepthCameraSensor::HasImageConnections() const
 {
   return (this->dataPtr->pub && this->dataPtr->pub.HasConnections()) ||
-      (this->dataPtr->pointPub && this->dataPtr->pointPub.HasConnections()) ||
-      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+         (this->dataPtr->pointPub && this->dataPtr->pointPub.HasConnections()) ||
+         this->dataPtr->imageEvent.ConnectionCount() > 0u;
 }
