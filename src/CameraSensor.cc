@@ -415,6 +415,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     {
       igndbg << "Disabling camera sensor: '" << this->Name() << "' data "
              << "generation. " << std::endl;
+             << "generation. " << std::endl;
       this->dataPtr->generatingData = false;
     }
 
@@ -425,6 +426,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     if (!this->dataPtr->generatingData)
     {
       igndbg << "Enabling camera sensor: '" << this->Name() << "' data "
+             << "generation." << std::endl;
              << "generation." << std::endl;
       this->dataPtr->generatingData = true;
     }
