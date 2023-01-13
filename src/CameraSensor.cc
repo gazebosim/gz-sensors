@@ -394,7 +394,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // move the camera to the current pose
   this->dataPtr->camera->SetLocalPose(this->Pose());
 
-  if (this->dataPtr->infoPub.HasConnections())
+  if (this->HasInfoConnections())
   {
     // publish the camera info message
     this->PublishInfo(_now);
@@ -430,10 +430,9 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     }
   }
 
-  if ((this->dataPtr->pub && this->dataPtr->pub.HasConnections()) ||
-       this->dataPtr->imageEvent.ConnectionCount() > 0u ||
-       this->dataPtr->saveImage)
+  if (this->HasImageConnections() || this->dataPtr->saveImage)
   {
+    ignerr << "Rendering color image\n";
     // generate sensor data
     this->Render();
     {
@@ -735,7 +734,18 @@ double CameraSensor::Baseline() const
 //////////////////////////////////////////////////
 bool CameraSensor::HasConnections() const
 {
+  return this->HasImageConnections() || this->HasInfoConnections();
+}
+
+//////////////////////////////////////////////////
+bool CameraSensor::HasImageConnections() const
+{
   return (this->dataPtr->pub && this->dataPtr->pub.HasConnections()) ||
-      this->dataPtr->imageEvent.ConnectionCount() > 0u ||
-      (this->dataPtr->infoPub && this->dataPtr->infoPub.HasConnections());
+      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+}
+
+//////////////////////////////////////////////////
+bool CameraSensor::HasInfoConnections() const
+{
+  return this->dataPtr->infoPub && this->dataPtr->infoPub.HasConnections();
 }

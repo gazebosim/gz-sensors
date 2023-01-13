@@ -162,6 +162,11 @@ namespace ignition
       /// \todo(iche033) Make this function virtual on Garden
       public: bool HasConnections() const;
 
+      /// \brief Check if there are any image subscribers
+      /// \return True if there are image subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Garden
+      public: bool HasImageConnections() const;
+
       /// \brief Create a camera in a scene
       /// \return True on success.
       private: bool CreateCamera();
