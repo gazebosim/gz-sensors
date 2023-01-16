@@ -475,7 +475,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       msg.set_width(width);
       msg.set_height(height);
       msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
-                  this->dataPtr->camera->ImageFormat()));
+                   this->dataPtr->camera->ImageFormat()));
       msg.set_pixel_format_type(msgsPixelFormat);
       *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
       auto frame = msg.mutable_header()->add_data();
