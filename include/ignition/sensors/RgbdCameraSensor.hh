@@ -97,17 +97,17 @@ namespace ignition
 
       /// \brief Check if there are color subscribers
       /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Garden
+      /// \todo(iche033) Make this function virtual on Harmonic
       public: bool HasColorConnections() const;
 
       /// \brief Check if there are depth subscribers
       /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Garden
+      /// \todo(iche033) Make this function virtual on Harmonic
       public: bool HasDepthConnections() const;
 
       /// \brief Check if there are point cloud subscribers
       /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Garden
+      /// \todo(iche033) Make this function virtual on Harmonic
       public: bool HasPointConnections() const;
 
       /// \brief Create an RGB camera and a depth camera.
