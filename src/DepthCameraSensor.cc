@@ -533,86 +533,88 @@ bool DepthCameraSensor::Update(
     this->PublishInfo(_now);
   }
 
-  if(this->HasImageConnections())
+  if(!this->HasImageConnections())
   {
-    // generate sensor data
-    this->Render();
+    return false;
+  }
 
-    unsigned int width = this->dataPtr->depthCamera->ImageWidth();
-    unsigned int height = this->dataPtr->depthCamera->ImageHeight();
+  // generate sensor data
+  this->Render();
 
-    auto msgsFormat = msgs::PixelFormatType::R_FLOAT32;
+  unsigned int width = this->dataPtr->depthCamera->ImageWidth();
+  unsigned int height = this->dataPtr->depthCamera->ImageHeight();
 
-    // create message
-    msgs::Image msg;
-    msg.set_width(width);
-    msg.set_height(height);
-    msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
-                rendering::PF_FLOAT32_R));
-    msg.set_pixel_format_type(msgsFormat);
-    *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
-    auto frame = msg.mutable_header()->add_data();
-    frame->set_key("frame_id");
-    frame->add_value(this->FrameId());
+  auto msgsFormat = msgs::PixelFormatType::R_FLOAT32;
 
-    std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-    msg.set_data(this->dataPtr->depthBuffer,
-        rendering::PixelUtil::MemorySize(rendering::PF_FLOAT32_R,
-        width, height));
+  // create message
+  msgs::Image msg;
+  msg.set_width(width);
+  msg.set_height(height);
+  msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
+              rendering::PF_FLOAT32_R));
+  msg.set_pixel_format_type(msgsFormat);
+  *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+  auto frame = msg.mutable_header()->add_data();
+  frame->set_key("frame_id");
+  frame->add_value(this->FrameId());
 
-    this->AddSequence(msg.mutable_header(), "default");
-    this->dataPtr->pub.Publish(msg);
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  msg.set_data(this->dataPtr->depthBuffer,
+      rendering::PixelUtil::MemorySize(rendering::PF_FLOAT32_R,
+      width, height));
+
+  this->AddSequence(msg.mutable_header(), "default");
+  this->dataPtr->pub.Publish(msg);
 
 
-    if (this->dataPtr->imageEvent.ConnectionCount() > 0u)
+  if (this->dataPtr->imageEvent.ConnectionCount() > 0u)
+  {
+    // Trigger callbacks.
+    try
     {
-      // Trigger callbacks.
-      try
-      {
-        this->dataPtr->imageEvent(msg);
-      }
-      catch(...)
-      {
-        ignerr << "Exception thrown in an image callback.\n";
-      }
+      this->dataPtr->imageEvent(msg);
+    }
+    catch(...)
+    {
+      ignerr << "Exception thrown in an image callback.\n";
+    }
+  }
+
+  if (this->dataPtr->pointPub.HasConnections() &&
+      this->dataPtr->pointCloudBuffer)
+  {
+    // Set the time stamp
+    *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
+      msgs::Convert(_now);
+    this->dataPtr->pointMsg.set_is_dense(true);
+
+    if (!this->dataPtr->xyzBuffer)
+      this->dataPtr->xyzBuffer = new float[width*height*3];
+
+    if (this->dataPtr->image.Width() != width
+        || this->dataPtr->image.Height() != height)
+    {
+      this->dataPtr->image =
+          rendering::Image(width, height, rendering::PF_R8G8B8);
     }
 
-    if (this->dataPtr->pointPub.HasConnections() &&
-        this->dataPtr->pointCloudBuffer)
-    {
-      // Set the time stamp
-      *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
-        msgs::Convert(_now);
-      this->dataPtr->pointMsg.set_is_dense(true);
+    // extract image data from point cloud data
+    this->dataPtr->pointsUtil.XYZFromPointCloud(
+        this->dataPtr->xyzBuffer,
+        this->dataPtr->pointCloudBuffer,
+        width, height);
 
-      if (!this->dataPtr->xyzBuffer)
-        this->dataPtr->xyzBuffer = new float[width*height*3];
+    // convert depth to grayscale rgb image
+    this->dataPtr->ConvertDepthToImage(this->dataPtr->depthBuffer,
+        this->dataPtr->image.Data<unsigned char>(), width, height);
 
-      if (this->dataPtr->image.Width() != width
-          || this->dataPtr->image.Height() != height)
-      {
-        this->dataPtr->image =
-            rendering::Image(width, height, rendering::PF_R8G8B8);
-      }
+    // fill the point cloud msg with data from xyz and rgb buffer
+    this->dataPtr->pointsUtil.FillMsg(this->dataPtr->pointMsg,
+        this->dataPtr->xyzBuffer,
+        this->dataPtr->image.Data<unsigned char>());
 
-      // extract image data from point cloud data
-      this->dataPtr->pointsUtil.XYZFromPointCloud(
-          this->dataPtr->xyzBuffer,
-          this->dataPtr->pointCloudBuffer,
-          width, height);
-
-      // convert depth to grayscale rgb image
-      this->dataPtr->ConvertDepthToImage(this->dataPtr->depthBuffer,
-          this->dataPtr->image.Data<unsigned char>(), width, height);
-
-      // fill the point cloud msg with data from xyz and rgb buffer
-      this->dataPtr->pointsUtil.FillMsg(this->dataPtr->pointMsg,
-          this->dataPtr->xyzBuffer,
-          this->dataPtr->image.Data<unsigned char>());
-
-      this->AddSequence(this->dataPtr->pointMsg.mutable_header(), "pointMsg");
-      this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
-    }
+    this->AddSequence(this->dataPtr->pointMsg.mutable_header(), "pointMsg");
+    this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
   }
   return true;
 }
