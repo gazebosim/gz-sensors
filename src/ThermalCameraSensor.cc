@@ -428,6 +428,7 @@ bool ThermalCameraSensor::Update(
     this->PublishInfo(_now);
   }
 
+  // don't render if there are no subscribers
   if (!this->dataPtr->thermalPub.HasConnections() &&
       this->dataPtr->imageEvent.ConnectionCount() == 0u)
     return false;
