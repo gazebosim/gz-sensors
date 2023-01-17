@@ -551,7 +551,7 @@ bool DepthCameraSensor::Update(
   msg.set_width(width);
   msg.set_height(height);
   msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
-              rendering::PF_FLOAT32_R));
+               rendering::PF_FLOAT32_R));
   msg.set_pixel_format_type(msgsFormat);
   *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
   auto frame = msg.mutable_header()->add_data();
