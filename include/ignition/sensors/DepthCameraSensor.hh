@@ -162,10 +162,15 @@ namespace ignition
       /// \todo(iche033) Make this function virtual on Garden
       public: bool HasConnections() const;
 
-      /// \brief Check if there are any image subscribers
-      /// \return True if there are image subscribers, false otherwise
+      /// \brief Check if there are any depth subscribers
+      /// \return True if there are subscribers, false otherwise
       /// \todo(iche033) Make this function virtual on Harmonic
-      public: bool HasImageConnections() const;
+      public: bool HasDepthConnections() const;
+
+      /// \brief Check if there are any point subscribers
+      /// \return True if there are subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Harmonic
+      public: bool HasPointConnections() const;
 
       /// \brief Create a camera in a scene
       /// \return True on success.
