@@ -422,7 +422,7 @@ bool ThermalCameraSensor::Update(
     return false;
   }
 
-  if(this->HasInfoConnections())
+  if (this->HasInfoConnections())
   {
     // publish the camera info message
     this->PublishInfo(_now);

@@ -466,14 +466,14 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     return false;
   }
 
-  if(this->HasInfoConnections())
+  if (this->HasInfoConnections())
   {
     // publish the camera info message
     this->PublishInfo(_now);
   }
 
   // don't render if there are no subscribers
-  if(!this->HasColorConnections() && !this->HasDepthConnections() &&
+  if (!this->HasColorConnections() && !this->HasDepthConnections() &&
     !this->HasPointConnections())
   {
     return false;

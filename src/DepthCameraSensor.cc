@@ -527,13 +527,13 @@ bool DepthCameraSensor::Update(
     return false;
   }
 
-  if(this->HasInfoConnections())
+  if (this->HasInfoConnections())
   {
     // publish the camera info message
     this->PublishInfo(_now);
   }
 
-  if(!this->HasImageConnections())
+  if (!this->HasImageConnections())
   {
     return false;
   }
