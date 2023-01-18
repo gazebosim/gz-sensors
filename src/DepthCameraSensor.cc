@@ -646,7 +646,7 @@ double DepthCameraSensor::NearClip() const
 //////////////////////////////////////////////////
 bool DepthCameraSensor::HasConnections() const
 {
-  return this->HasDepthConnections() || this->HasPointConnections()
+  return this->HasDepthConnections() || this->HasPointConnections() ||
       this->HasInfoConnections();
 }
 
@@ -660,5 +660,5 @@ bool DepthCameraSensor::HasDepthConnections() const
 //////////////////////////////////////////////////
 bool DepthCameraSensor::HasPointConnections() const
 {
-  return this->dataPtr->pointPub && this->dataPtr->pointPub.HasConnections()
+  return this->dataPtr->pointPub && this->dataPtr->pointPub.HasConnections();
 }
