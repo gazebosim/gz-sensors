@@ -394,7 +394,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // move the camera to the current pose
   this->dataPtr->camera->SetLocalPose(this->Pose());
 
-  if (this->dataPtr->infoPub.HasConnections())
+  if (this->HasInfoConnections())
   {
     // publish the camera info message
     this->PublishInfo(_now);
@@ -430,9 +430,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     }
   }
 
-  if ((this->dataPtr->pub && this->dataPtr->pub.HasConnections()) ||
-       this->dataPtr->imageEvent.ConnectionCount() > 0u ||
-       this->dataPtr->saveImage)
+  if (this->HasImageConnections() || this->dataPtr->saveImage)
   {
     // generate sensor data
     this->Render();
@@ -477,7 +475,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       msg.set_width(width);
       msg.set_height(height);
       msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
-                  this->dataPtr->camera->ImageFormat()));
+                   this->dataPtr->camera->ImageFormat()));
       msg.set_pixel_format_type(msgsPixelFormat);
       *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
       auto frame = msg.mutable_header()->add_data();
@@ -735,7 +733,18 @@ double CameraSensor::Baseline() const
 //////////////////////////////////////////////////
 bool CameraSensor::HasConnections() const
 {
+  return this->HasImageConnections() || this->HasInfoConnections();
+}
+
+//////////////////////////////////////////////////
+bool CameraSensor::HasImageConnections() const
+{
   return (this->dataPtr->pub && this->dataPtr->pub.HasConnections()) ||
-      this->dataPtr->imageEvent.ConnectionCount() > 0u ||
-      (this->dataPtr->infoPub && this->dataPtr->infoPub.HasConnections());
+         this->dataPtr->imageEvent.ConnectionCount() > 0u;
+}
+
+//////////////////////////////////////////////////
+bool CameraSensor::HasInfoConnections() const
+{
+  return this->dataPtr->infoPub && this->dataPtr->infoPub.HasConnections();
 }

@@ -422,6 +422,13 @@ bool ThermalCameraSensor::Update(
     return false;
   }
 
+  if (this->HasInfoConnections())
+  {
+    // publish the camera info message
+    this->PublishInfo(_now);
+  }
+
+  // don't render if there are no subscribers
   if (!this->dataPtr->thermalPub.HasConnections() &&
       this->dataPtr->imageEvent.ConnectionCount() == 0u)
     return false;
@@ -484,8 +491,6 @@ bool ThermalCameraSensor::Update(
         width, height));
   }
 
-  // publish the camera info message
-  this->PublishInfo(_now);
 
   this->dataPtr->thermalPub.Publish(this->dataPtr->thermalMsg);
 
@@ -656,5 +661,6 @@ bool ThermalCameraSensor::HasConnections() const
 {
   return (this->dataPtr->thermalPub &&
       this->dataPtr->thermalPub.HasConnections()) ||
-      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+      this->dataPtr->imageEvent.ConnectionCount() > 0u ||
+      this->HasInfoConnections();
 }
