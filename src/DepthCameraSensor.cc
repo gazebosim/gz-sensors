@@ -522,6 +522,17 @@ bool DepthCameraSensor::Update(
     return false;
   }
 
+  if (this->HasInfoConnections())
+  {
+    // publish the camera info message
+    this->PublishInfo(_now);
+  }
+
+  if (!this->HasDepthConnections() && !this->HasPointConnections())
+  {
+    return false;
+  }
+
   // generate sensor data
   this->Render();
 
@@ -550,8 +561,6 @@ bool DepthCameraSensor::Update(
   this->AddSequence(msg.mutable_header(), "default");
   this->dataPtr->pub.Publish(msg);
 
-  // publish the camera info message
-  this->PublishInfo(_now);
 
   if (this->dataPtr->imageEvent.ConnectionCount() > 0u)
   {
@@ -566,7 +575,7 @@ bool DepthCameraSensor::Update(
     }
   }
 
-  if (this->dataPtr->pointPub.HasConnections() &&
+  if (this->HasPointConnections() &&
       this->dataPtr->pointCloudBuffer)
   {
     // Set the time stamp
@@ -632,7 +641,19 @@ double DepthCameraSensor::NearClip() const
 //////////////////////////////////////////////////
 bool DepthCameraSensor::HasConnections() const
 {
-  return (this->dataPtr->pub && this->dataPtr->pub.HasConnections()) ||
-      (this->dataPtr->pointPub && this->dataPtr->pointPub.HasConnections()) ||
-      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+  return this->HasDepthConnections() || this->HasPointConnections() ||
+      this->HasInfoConnections();
+}
+
+//////////////////////////////////////////////////
+bool DepthCameraSensor::HasDepthConnections() const
+{
+  return (this->dataPtr->pub && this->dataPtr->pub.HasConnections())
+         || this->dataPtr->imageEvent.ConnectionCount() > 0u;
+}
+
+//////////////////////////////////////////////////
+bool DepthCameraSensor::HasPointConnections() const
+{
+  return this->dataPtr->pointPub && this->dataPtr->pointPub.HasConnections();
 }
