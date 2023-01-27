@@ -153,13 +153,11 @@ namespace gz
 
       /// \brief Check if there are any depth subscribers
       /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Harmonic
-      public: bool HasDepthConnections() const;
+      public: virtual bool HasDepthConnections() const;
 
       /// \brief Check if there are any point subscribers
       /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Harmonic
-      public: bool HasPointConnections() const;
+      public: virtual bool HasPointConnections() const;
 
       /// \brief Create a camera in a scene
       /// \return True on success.

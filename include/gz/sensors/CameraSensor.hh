@@ -137,13 +137,11 @@ namespace gz
 
       /// \brief Check if there are any image subscribers
       /// \return True if there are image subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Harmonic
-      public: bool HasImageConnections() const;
+      public: virtual bool HasImageConnections() const;
 
       /// \brief Check if there are any info subscribers
       /// \return True if there are info subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Harmonic
-      public: bool HasInfoConnections() const;
+      public: virtual bool HasInfoConnections() const;
 
       /// \brief Advertise camera info topic.
       /// \return True if successful.
