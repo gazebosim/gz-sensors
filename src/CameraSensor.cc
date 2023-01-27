@@ -489,6 +489,12 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // move the camera to the current pose
   this->dataPtr->camera->SetLocalPose(this->Pose());
 
+  if (this->HasInfoConnections())
+  {
+    // publish the camera info message
+    this->PublishInfo(_now);
+  }
+
   // render only if necessary
   if (this->dataPtr->isTriggeredCamera &&
       !this->dataPtr->isTriggered)
@@ -519,85 +525,85 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     }
   }
 
-  // generate sensor data
-  this->Render();
+  if (this->HasImageConnections() || this->dataPtr->saveImage)
   {
-    GZ_PROFILE("CameraSensor::Update Copy image");
-    this->dataPtr->camera->Copy(this->dataPtr->image);
-  }
-
-  unsigned int width = this->dataPtr->camera->ImageWidth();
-  unsigned int height = this->dataPtr->camera->ImageHeight();
-  unsigned char *data = this->dataPtr->image.Data<unsigned char>();
-
-  gz::common::Image::PixelFormatType
-      format{common::Image::UNKNOWN_PIXEL_FORMAT};
-  msgs::PixelFormatType msgsPixelFormat =
-    msgs::PixelFormatType::UNKNOWN_PIXEL_FORMAT;
-
-  switch (this->dataPtr->camera->ImageFormat())
-  {
-    case rendering::PF_R8G8B8:
-      format = common::Image::RGB_INT8;
-      msgsPixelFormat = msgs::PixelFormatType::RGB_INT8;
-      break;
-    case rendering::PF_L8:
-      format = common::Image::L_INT8;
-      msgsPixelFormat = msgs::PixelFormatType::L_INT8;
-      break;
-    case rendering::PF_L16:
-      format = common::Image::L_INT16;
-      msgsPixelFormat = msgs::PixelFormatType::L_INT16;
-      break;
-    default:
-      gzerr << "Unsupported pixel format ["
-        << this->dataPtr->camera->ImageFormat() << "]\n";
-      break;
-  }
-
-  // create message
-  msgs::Image msg;
-  {
-    GZ_PROFILE("CameraSensor::Update Message");
-    msg.set_width(width);
-    msg.set_height(height);
-    msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
-                 this->dataPtr->camera->ImageFormat()));
-    msg.set_pixel_format_type(msgsPixelFormat);
-    *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
-    auto frame = msg.mutable_header()->add_data();
-    frame->set_key("frame_id");
-    frame->add_value(this->dataPtr->opticalFrameId);
-    msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
-  }
-
-  // publish the image message
-  {
-    this->AddSequence(msg.mutable_header());
-    GZ_PROFILE("CameraSensor::Update Publish");
-    this->dataPtr->pub.Publish(msg);
-
-    // publish the camera info message
-    this->PublishInfo(_now);
-  }
-
-  // Trigger callbacks.
-  if (this->dataPtr->imageEvent.ConnectionCount() > 0)
-  {
-    try
+    // generate sensor data
+    this->Render();
     {
-      this->dataPtr->imageEvent(msg);
+      GZ_PROFILE("CameraSensor::Update Copy image");
+      this->dataPtr->camera->Copy(this->dataPtr->image);
     }
-    catch(...)
-    {
-      gzerr << "Exception thrown in an image callback.\n";
-    }
-  }
 
-  // Save image
-  if (this->dataPtr->saveImage)
-  {
-    this->dataPtr->SaveImage(data, width, height, format);
+    unsigned int width = this->dataPtr->camera->ImageWidth();
+    unsigned int height = this->dataPtr->camera->ImageHeight();
+    unsigned char *data = this->dataPtr->image.Data<unsigned char>();
+
+    gz::common::Image::PixelFormatType
+        format{common::Image::UNKNOWN_PIXEL_FORMAT};
+    msgs::PixelFormatType msgsPixelFormat =
+      msgs::PixelFormatType::UNKNOWN_PIXEL_FORMAT;
+
+    switch (this->dataPtr->camera->ImageFormat())
+    {
+      case rendering::PF_R8G8B8:
+        format = common::Image::RGB_INT8;
+        msgsPixelFormat = msgs::PixelFormatType::RGB_INT8;
+        break;
+      case rendering::PF_L8:
+        format = common::Image::L_INT8;
+        msgsPixelFormat = msgs::PixelFormatType::L_INT8;
+        break;
+      case rendering::PF_L16:
+        format = common::Image::L_INT16;
+        msgsPixelFormat = msgs::PixelFormatType::L_INT16;
+        break;
+      default:
+        gzerr << "Unsupported pixel format ["
+          << this->dataPtr->camera->ImageFormat() << "]\n";
+        break;
+    }
+
+    // create message
+    msgs::Image msg;
+    {
+      GZ_PROFILE("CameraSensor::Update Message");
+      msg.set_width(width);
+      msg.set_height(height);
+      msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
+                   this->dataPtr->camera->ImageFormat()));
+      msg.set_pixel_format_type(msgsPixelFormat);
+      *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+      auto frame = msg.mutable_header()->add_data();
+      frame->set_key("frame_id");
+      frame->add_value(this->dataPtr->opticalFrameId);
+      msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
+    }
+
+    // publish the image message
+    {
+      this->AddSequence(msg.mutable_header());
+      GZ_PROFILE("CameraSensor::Update Publish");
+      this->dataPtr->pub.Publish(msg);
+    }
+
+    // Trigger callbacks.
+    if (this->dataPtr->imageEvent.ConnectionCount() > 0)
+    {
+      try
+      {
+        this->dataPtr->imageEvent(msg);
+      }
+      catch(...)
+      {
+        ignerr << "Exception thrown in an image callback.\n";
+      }
+    }
+
+    // Save image
+    if (this->dataPtr->saveImage)
+    {
+      this->dataPtr->SaveImage(data, width, height, format);
+    }
   }
 
   if (this->dataPtr->isTriggeredCamera)
@@ -822,8 +828,20 @@ double CameraSensor::Baseline() const
 //////////////////////////////////////////////////
 bool CameraSensor::HasConnections() const
 {
+  return this->HasImageConnections() || this->HasInfoConnections();
+}
+
+//////////////////////////////////////////////////
+bool CameraSensor::HasImageConnections() const
+{
   return (this->dataPtr->pub && this->dataPtr->pub.HasConnections()) ||
-      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+         this->dataPtr->imageEvent.ConnectionCount() > 0u;
+}
+
+//////////////////////////////////////////////////
+bool CameraSensor::HasInfoConnections() const
+{
+  return this->dataPtr->infoPub && this->dataPtr->infoPub.HasConnections();
 }
 
 //////////////////////////////////////////////////
