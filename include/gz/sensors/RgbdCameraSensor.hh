@@ -93,6 +93,18 @@ namespace gz
       // Documentation inherited.
       public: virtual bool HasConnections() const override;
 
+      /// \brief Check if there are color subscribers
+      /// \return True if there are subscribers, false otherwise
+      public: virtual bool HasColorConnections() const;
+
+      /// \brief Check if there are depth subscribers
+      /// \return True if there are subscribers, false otherwise
+      public: virtual bool HasDepthConnections() const;
+
+      /// \brief Check if there are point cloud subscribers
+      /// \return True if there are subscribers, false otherwise
+      public: virtual bool HasPointConnections() const;
+
       /// \brief Create an RGB camera and a depth camera.
       /// \return True on success.
       private: bool CreateCameras();

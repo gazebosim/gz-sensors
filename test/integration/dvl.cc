@@ -149,6 +149,15 @@ class DopplerVelocityLogTest : public testing::Test,
   // Documentation inherited
   protected: void SetUp() override
   {
+    // Disable Ogre tests on windows. See
+    // https://github.com/gazebosim/gz-sensors/issues/284
+#ifdef _WIN32
+    if (strcmp(GetParam(), "ogre") == 0)
+    {
+      GTEST_SKIP() << "Ogre tests disabled on windows. See #284.";
+    }
+#endif
+
     common::Console::SetVerbosity(4);
     this->engine = rendering::engine(GetParam());
     if (!this->engine)

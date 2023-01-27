@@ -459,6 +459,19 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     return false;
   }
 
+  if (this->HasInfoConnections())
+  {
+    // publish the camera info message
+    this->PublishInfo(_now);
+  }
+
+  // don't render if there are no subscribers
+  if (!this->HasColorConnections() && !this->HasDepthConnections() &&
+    !this->HasPointConnections())
+  {
+    return false;
+  }
+
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
   unsigned int depthSamples = height * width;
@@ -467,7 +480,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   this->Render();
 
   // create and publish the depthmessage
-  if (this->dataPtr->depthPub.HasConnections())
+  if (this->HasDepthConnections())
   {
     msgs::Image msg;
     msg.set_width(width);
@@ -525,7 +538,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     }
 
     // publish point cloud msg
-    if (this->dataPtr->pointPub.HasConnections())
+    if (this->HasPointConnections())
     {
       // Set the time stamp
       *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
@@ -567,7 +580,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     }
 
     // publish the 2d image message
-    if (this->dataPtr->imagePub.HasConnections())
+    if (this->HasColorConnections())
     {
       if (!filledImgData)
       {
@@ -603,9 +616,6 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     }
   }
 
-  // publish the camera info message
-  this->PublishInfo(_now);
-
   return true;
 }
 
@@ -624,8 +634,24 @@ unsigned int RgbdCameraSensor::ImageHeight() const
 //////////////////////////////////////////////////
 bool RgbdCameraSensor::HasConnections() const
 {
-  return (this->dataPtr->imagePub &&
-      this->dataPtr->imagePub.HasConnections()) ||
-      (this->dataPtr->depthPub && this->dataPtr->depthPub.HasConnections()) ||
-      (this->dataPtr->pointPub && this->dataPtr->pointPub.HasConnections());
+  return this->HasColorConnections() || this->HasDepthConnections() ||
+         this->HasPointConnections() || this->HasInfoConnections();
+}
+
+//////////////////////////////////////////////////
+bool RgbdCameraSensor::HasColorConnections() const
+{
+  return this->dataPtr->imagePub && this->dataPtr->imagePub.HasConnections();
+}
+
+//////////////////////////////////////////////////
+bool RgbdCameraSensor::HasDepthConnections() const
+{
+  return this->dataPtr->depthPub && this->dataPtr->depthPub.HasConnections();
+}
+
+//////////////////////////////////////////////////
+bool RgbdCameraSensor::HasPointConnections() const
+{
+  return this->dataPtr->pointPub && this->dataPtr->pointPub.HasConnections();
 }
