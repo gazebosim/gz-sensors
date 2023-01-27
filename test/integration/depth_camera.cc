@@ -15,6 +15,7 @@
  *
 */
 
+#include <cstring>
 #include <gtest/gtest.h>
 
 #include <gz/msgs/camera_info.pb.h>
@@ -139,6 +140,18 @@ void OnPointCloud(const gz::msgs::PointCloudPacked &_msg)
 class DepthCameraSensorTest: public testing::Test,
   public testing::WithParamInterface<const char *>
 {
+  // Documentation inherited
+  protected: void SetUp() override
+  {
+    // Disable Ogre tests on windows. See
+    // https://github.com/gazebosim/gz-sensors/issues/284
+#ifdef _WIN32
+    if (strcmp(GetParam(), "ogre") == 0)
+    {
+      GTEST_SKIP() << "Ogre tests disabled on windows. See #284.";
+    }
+#endif
+  }
   // Create a Camera sensor from a SDF and gets a image message
   public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
 };
