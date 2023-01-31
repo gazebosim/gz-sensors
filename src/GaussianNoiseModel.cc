@@ -20,16 +20,16 @@
   #include <Winsock2.h>
 #endif
 
-#include "ignition/sensors/GaussianNoiseModel.hh"
-#include <ignition/math/Helpers.hh>
-#include <ignition/math/Rand.hh>
+#include "gz/sensors/GaussianNoiseModel.hh"
+#include <gz/math/Helpers.hh>
+#include <gz/math/Rand.hh>
 
-#include "ignition/common/Console.hh"
+#include "gz/common/Console.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
-class ignition::sensors::GaussianNoiseModelPrivate
+class gz::sensors::GaussianNoiseModelPrivate
 {
   /// \brief If type starts with GAUSSIAN, the mean of the distribution
   /// from which we sample when adding noise.

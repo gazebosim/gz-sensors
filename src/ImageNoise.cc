@@ -21,12 +21,12 @@
   #include <Winsock2.h>
 #endif
 
-#include "ignition/common/Console.hh"
+#include "gz/common/Console.hh"
 
-#include "ignition/sensors/ImageNoise.hh"
-#include "ignition/sensors/ImageGaussianNoiseModel.hh"
+#include "gz/sensors/ImageNoise.hh"
+#include "gz/sensors/ImageGaussianNoiseModel.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////

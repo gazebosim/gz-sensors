@@ -15,19 +15,19 @@
  *
 */
 
-#include "ignition/sensors/Manager.hh"
+#include "gz/sensors/Manager.hh"
 #include <memory>
 #include <unordered_map>
-#include <ignition/common/Profiler.hh>
-#include <ignition/common/SystemPaths.hh>
-#include <ignition/common/Console.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/common/SystemPaths.hh>
+#include <gz/common/Console.hh>
 
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/SensorFactory.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/SensorFactory.hh"
 
-using namespace ignition::sensors;
+using namespace gz::sensors;
 
-class ignition::sensors::ManagerPrivate
+class gz::sensors::ManagerPrivate
 {
   /// \brief Loaded sensors.
   public: std::map<SensorId, std::unique_ptr<Sensor>> sensors;

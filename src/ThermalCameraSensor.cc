@@ -20,7 +20,7 @@
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/image.pb.h>
+#include <gz/msgs/image.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
@@ -28,23 +28,23 @@
 #include <algorithm>
 #include <mutex>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Image.hh>
-#include <ignition/common/Profiler.hh>
-#include <ignition/common/SystemPaths.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Image.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/common/SystemPaths.hh>
 
-#include <ignition/math/Angle.hh>
-#include <ignition/math/Helpers.hh>
+#include <gz/math/Angle.hh>
+#include <gz/math/Helpers.hh>
 
-#include <ignition/transport/Node.hh>
+#include <gz/transport/Node.hh>
 
-#include "ignition/sensors/ThermalCameraSensor.hh"
-#include "ignition/sensors/ImageGaussianNoiseModel.hh"
-#include "ignition/sensors/RenderingEvents.hh"
-#include "ignition/sensors/SensorFactory.hh"
+#include "gz/sensors/ThermalCameraSensor.hh"
+#include "gz/sensors/ImageGaussianNoiseModel.hh"
+#include "gz/sensors/RenderingEvents.hh"
+#include "gz/sensors/SensorFactory.hh"
 
 /// \brief Private data for ThermalCameraSensor
-class ignition::sensors::ThermalCameraSensorPrivate
+class gz::sensors::ThermalCameraSensorPrivate
 {
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
@@ -56,7 +56,7 @@ class ignition::sensors::ThermalCameraSensorPrivate
   /// of the path was not possible.
   /// \sa ImageSaver
   public: bool SaveImage(const uint16_t *_data, unsigned int _width,
-    unsigned int _height, ignition::common::Image::PixelFormatType _format);
+    unsigned int _height, gz::common::Image::PixelFormatType _format);
 
   /// \brief Helper function to convert temperature data to thermal image
   /// \param[in] _data temperature data
@@ -73,7 +73,7 @@ class ignition::sensors::ThermalCameraSensorPrivate
   public: bool initialized = false;
 
   /// \brief Rendering camera
-  public: ignition::rendering::ThermalCameraPtr thermalCamera;
+  public: gz::rendering::ThermalCameraPtr thermalCamera;
 
   /// \brief Thermal data buffer.
   public: uint16_t *thermalBuffer = nullptr;
@@ -89,21 +89,21 @@ class ignition::sensors::ThermalCameraSensorPrivate
       math::Vector2i::Zero;
 
   /// \brief Pointer to an image to be published
-  public: ignition::rendering::Image image;
+  public: gz::rendering::Image image;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
 
   /// \brief Event that is used to trigger callbacks when a new image
   /// is generated
-  public: ignition::common::EventT<
-          void(const ignition::msgs::Image &)> imageEvent;
+  public: gz::common::EventT<
+          void(const gz::msgs::Image &)> imageEvent;
 
   /// \brief Connection from thermal camera with thermal data
-  public: ignition::common::ConnectionPtr thermalConnection;
+  public: gz::common::ConnectionPtr thermalConnection;
 
   /// \brief Connection to the Manager's scene change event.
-  public: ignition::common::ConnectionPtr sceneChangeConnection;
+  public: gz::common::ConnectionPtr sceneChangeConnection;
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
@@ -136,16 +136,16 @@ class ignition::sensors::ThermalCameraSensorPrivate
   public: float ambientRange = 0.0;
 
   /// \brief Min temperature the sensor can detect
-  public: float minTemp = -ignition::math::INF_F;
+  public: float minTemp = -gz::math::INF_F;
 
   /// \brief Max temperature the sensor can detect
-  public: float maxTemp = ignition::math::INF_F;
+  public: float maxTemp = gz::math::INF_F;
 
   /// \brief Linear resolution. Defaults to 10mK
   public: float resolution = 0.01f;
 };
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////
