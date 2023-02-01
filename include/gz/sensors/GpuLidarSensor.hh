@@ -69,7 +69,8 @@ namespace ignition
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) override;
+      public: virtual bool Update(
+        const std::chrono::steady_clock::duration &_now) override;
 
       /// \brief Initialize values in the sensor
       /// \return True on success
@@ -120,12 +121,23 @@ namespace ignition
       /// \return Vertical field of view.
       public: gz::math::Angle VFOV() const;
 
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Garden
+      public: bool HasConnections() const;
+
       /// \brief Connect function pointer to internal GpuRays callback
       /// \return gz::common::Connection pointer
       public: virtual gz::common::ConnectionPtr ConnectNewLidarFrame(
           std::function<void(const float *_scan, unsigned int _width,
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &/*_format*/)> _subscriber) override;
+
+      /// \brief Connect function pointer to internal GpuRays callback
+      /// \return ignition::common::Connection pointer
+      private: void OnNewLidarFrame(const float *_scan, unsigned int _width,
+                  unsigned int _heighti, unsigned int _channels,
+                  const std::string &_format);
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

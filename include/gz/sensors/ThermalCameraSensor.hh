@@ -24,9 +24,7 @@
 #include <sdf/sdf.hh>
 
 #include <gz/common/Event.hh>
-#include <gz/common/PluginMacros.hh>
 #include <gz/common/SuppressWarning.hh>
-#include <gz/common/Time.hh>
 
 #ifdef _WIN32
 #pragma warning(push)
@@ -96,7 +94,8 @@ namespace ignition
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) override;
+      public: virtual bool Update(
+        const std::chrono::steady_clock::duration &_now) override;
 
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
@@ -162,7 +161,12 @@ namespace ignition
       /// \param[in] resolution Temperature linear resolution
       public: virtual void SetLinearResolution(float _resolution);
 
-     /// \brief Create a camera in a scene
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Garden
+      public: bool HasConnections() const;
+
+      /// \brief Create a camera in a scene
       /// \return True on success.
       private: bool CreateCamera();
 

@@ -32,7 +32,6 @@
 #include <string>
 
 #include <gz/common/SuppressWarning.hh>
-#include <gz/common/Time.hh>
 #include <gz/math/Pose3.hh>
 #include <gz/sensors/config.hh>
 #include <gz/sensors/Export.hh>
@@ -76,6 +75,9 @@ namespace ignition
       public: virtual bool Load(sdf::ElementPtr _sdf);
 
       /// \brief Initialize values in the sensor
+      /// This will set the next update time to zero. This is particularly
+      /// useful if simulation time has jumped backward, for example during
+      /// a seek backward in a log file.
       public: virtual bool Init();
 
       /// \brief Force the sensor to generate data
@@ -91,10 +93,11 @@ namespace ignition
       /// \param[in] _now The current time
       /// \return true if the update was successfull
       /// \sa SetUpdateRate()
-      public: virtual bool Update(const common::Time &_now) = 0;
+      public: virtual bool Update(
+        const std::chrono::steady_clock::duration &_now) = 0;
 
       /// \brief Return the next time the sensor will generate data
-      public: common::Time NextUpdateTime() const;
+      public: std::chrono::steady_clock::duration NextDataUpdateTime() const;
 
       /// \brief Update the sensor.
       ///
@@ -105,11 +108,12 @@ namespace ignition
       /// \param[in] _force Force the update to happen even if it's not time
       /// \return True if the update was triggered (_force was true or _now
       /// >= next_update_time) and the sensor's
-      /// bool Sensor::Update(const common::Time &_now) function returned true.
+      /// bool Sensor::Update(std::chrono::steady_clock::time_point)
+      /// function returned true.
       /// False otherwise.
       /// \remarks If forced the NextUpdateTime() will be unchanged.
-      /// \sa virtual bool Update(const common::Time &_name) = 0
-      public: bool Update(const common::Time &_now, const bool _force);
+      public: bool Update(
+        const std::chrono::steady_clock::duration &_now, const bool _force);
 
       /// \brief Get the update rate of the sensor.
       ///
@@ -203,6 +207,19 @@ namespace ignition
       public: void PublishMetrics(
         const std::chrono::duration<double> &_now);
 
+      /// \brief Get whether the sensor is enabled or not
+      /// \return True if the sensor is active, false otherwise.
+      /// \sa SetActive
+      public: bool IsActive() const;
+
+      /// \brief Enable or disable the sensor. Disabled sensors will not
+      /// generate or publish data unless Update is called with the
+      /// '_force' argument set to true.
+      /// \param[in] _active True to set the sensor to be active,
+      /// false to disable the sensor.
+      /// \sa IsActive
+      public: void SetActive(bool _active);
+
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal
       /// \brief Data pointer for private data
@@ -212,5 +229,4 @@ namespace ignition
     }
   }
 }
-
 #endif

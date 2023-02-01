@@ -42,6 +42,9 @@ namespace ignition
     class GaussianNoiseModel;
     class ImageGaussianNoiseModel;
     class Noise;
+    class Distortion;
+    class BrownDistortionModel;
+    class ImageBrownDistortionModel;
     class Sensor;
 
     /// \def SensorPtr
@@ -67,6 +70,19 @@ namespace ignition
     /// \brief Shared pointer to Noise
     typedef std::shared_ptr<ImageGaussianNoiseModel>
         ImageGaussianNoiseModelPtr;
+
+    /// \def DistortionPtr
+    /// \brief Shared pointer to Distortion
+    typedef std::shared_ptr<Distortion> DistortionPtr;
+
+    /// \def DistortionPtr
+    /// \brief Shared pointer to Distortion
+    typedef std::shared_ptr<BrownDistortionModel> BrownDistortionModelPtr;
+
+    /// \def DistortionPtr
+    /// \brief Shared pointer to Distortion
+    typedef std::shared_ptr<ImageBrownDistortionModel>
+        ImageBrownDistortionModelPtr;
 
     /// \def Sensor_V
     /// \brief Vector of Sensor shared pointers
@@ -149,10 +165,75 @@ namespace ignition
       /// \sa Lidar
       LIDAR_NOISE = 14,
 
+      /// \brief Force body-frame X axis noise in N
+      /// \sa ForceTorqueSensor
+      FORCE_X_NOISE_N = 15,
+
+      /// \brief Force body-frame Y axis noise in N
+      /// \sa ForceTorqueSensor
+      FORCE_Y_NOISE_N = 16,
+
+      /// \brief Force body-frame Z axis noise in N
+      /// \sa ForceTorqueSensor
+      FORCE_Z_NOISE_N = 17,
+
+      /// \brief Torque body-frame X axis noise in Nm
+      /// \sa ForceTorqueSensor
+      TORQUE_X_NOISE_N_M = 18,
+
+      /// \brief Torque body-frame Y axis noise in Nm
+      /// \sa ForceTorqueSensor
+      TORQUE_Y_NOISE_N_M = 19,
+
+      /// \brief Torque body-frame Z axis noise in Nm
+      /// \sa ForceTorqueSensor
+      TORQUE_Z_NOISE_N_M = 20,
+
+      /// \brief Noise streams for the NavSat position sensor
+      /// \sa NavSat
+      NAVSAT_HORIZONTAL_POSITION_NOISE = 21,
+
+      /// \brief Noise streams for the NavSat position sensor
+      /// \sa NavSat
+      NAVSAT_VERTICAL_POSITION_NOISE = 22,
+
+      /// \brief Noise streams for the NavSat velocity sensor
+      /// \sa NavSat
+      NAVSAT_HORIZONTAL_VELOCITY_NOISE = 23,
+
+      /// \brief Noise streams for the NavSat velocity sensor
+      /// \sa NavSat
+      NAVSAT_VERTICAL_VELOCITY_NOISE = 24,
+
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not
       /// use this.
       SENSOR_NOISE_TYPE_END
+    };
+    /// \}
+
+
+    /// \def SensorDistortionType
+    /// \brief Eumeration of all sensor noise types
+    enum SensorDistortionType
+    {
+      /// \internal
+      /// \brief Indicator used to create an iterator over the enum. Do not
+      /// use this.
+      SENSOR_DISTORTION_TYPE_BEGIN = 0,
+
+      /// \brief Noise streams for the Camera sensor
+      /// \sa CameraSensor
+      NO_DISTORTION = SENSOR_DISTORTION_TYPE_BEGIN,
+
+      /// \brief Noise streams for the Camera sensor
+      /// \sa CameraSensor
+      CAMERA_DISTORTION = 1,
+
+      /// \internal
+      /// \brief Indicator used to create an iterator over the enum. Do not
+      /// use this.
+      SENSOR_DISTORTION_TYPE_END
     };
     /// \}
 

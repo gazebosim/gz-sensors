@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Open Source Robotics Foundation
+ * Copyright (C) 2021 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,27 @@
  * limitations under the License.
  *
 */
-#ifndef GZ_SENSORS_RGBDCAMERASENSOR_HH_
-#define GZ_SENSORS_RGBDCAMERASENSOR_HH_
+
+#ifndef IGNITION_SENSORS_SEGMENTATIONCAMERASENSOR_HH_
+#define IGNITION_SENSORS_SEGMENTATIONCAMERASENSOR_HH_
 
 #include <memory>
+#include <string>
 
+#include <ignition/common/Event.hh>
+#include <ignition/common/PluginMacros.hh>
+#include <ignition/common/SuppressWarning.hh>
+#include <ignition/common/Time.hh>
+#include <ignition/msgs.hh>
+#include <ignition/transport/Node.hh>
+#include <ignition/transport/Publisher.hh>
 #include <sdf/sdf.hh>
 
-#include <gz/common/SuppressWarning.hh>
+#include "ignition/sensors/CameraSensor.hh"
+#include "ignition/sensors/Export.hh"
+#include "ignition/sensors/Sensor.hh"
 
-#include "gz/sensors/CameraSensor.hh"
-#include "gz/sensors/config.hh"
-#include "gz/sensors/rgbd_camera/Export.hh"
-#include "gz/sensors/Export.hh"
+#include "ignition/sensors/segmentation_camera/Export.hh"
 
 namespace ignition
 {
@@ -35,27 +43,23 @@ namespace ignition
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     // forward declarations
-    class RgbdCameraSensorPrivate;
+    class SegmentationCameraSensorPrivate;
 
-    /// \brief RGBD camera sensor class.
+    /// \brief Segmentation camera sensor class.
     ///
-    /// This class creates a few types of sensor data from an ignition
-    /// rendering scene:
-    /// * RGB image (same as CameraSensor)
-    /// * Depth image (same as DepthCamera)
-    /// * (future / todo) Color point cloud
-    /// The scene  must be created in advance and given to Manager::Init().
+    /// This class creates segmentation images from an ignition rendering scene.
+    /// The scene must be created in advance and given to Manager::Init().
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-    class IGNITION_SENSORS_RGBD_CAMERA_VISIBLE RgbdCameraSensor
-      : public CameraSensor
+    class IGNITION_SENSORS_SEGMENTATION_CAMERA_VISIBLE
+      SegmentationCameraSensor : public CameraSensor
     {
       /// \brief constructor
-      public: RgbdCameraSensor();
+      public: SegmentationCameraSensor();
 
       /// \brief destructor
-      public: virtual ~RgbdCameraSensor();
+      public: virtual ~SegmentationCameraSensor();
 
       /// \brief Load the sensor based on data from an sdf::Sensor object.
       /// \param[in] _sdf SDF Sensor parameters.
@@ -77,10 +81,35 @@ namespace ignition
       public: virtual bool Update(
         const std::chrono::steady_clock::duration &_now) override;
 
+      /// \brief Get the rendering segmentation camera
+      /// \return Segmentation camera pointer
+      public: rendering::SegmentationCameraPtr SegmentationCamera() const;
+
+      /// \brief Segmentation data callback used to get the data from the sensor
+      /// \param[in] _data pointer to the data from the sensor
+      /// \param[in] _width width of the segmentation image
+      /// \param[in] _height height of the segmentation image
+      /// \param[in] _channels num of channels
+      /// \param[in] _format string with the format
+      public: void OnNewSegmentationFrame(const uint8_t * _data,
+        unsigned int _width, unsigned int _height, unsigned int _channels,
+        const std::string &_format);
+
+      /// \brief Set a callback to be called when image frame data is
+      /// generated.
+      /// \param[in] _callback This callback will be called every time the
+      /// camera produces image data. The Update function will be blocked
+      /// while the callbacks are executed.
+      /// \remark Do not block inside of the callback.
+      /// \return A connection pointer that must remain in scope. When the
+      /// connection pointer falls out of scope, the connection is broken.
+      public: ignition::common::ConnectionPtr ConnectImageCallback(
+                  std::function<void(const ignition::msgs::Image &)> _callback);
+
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
       public: virtual void SetScene(
-                  gz::rendering::ScenePtr _scene) override;
+                  ignition::rendering::ScenePtr _scene) override;
 
       /// \brief Get image width.
       /// \return width of the image
@@ -95,29 +124,14 @@ namespace ignition
       /// \todo(iche033) Make this function virtual on Garden
       public: bool HasConnections() const;
 
-      /// \brief Check if there are color subscribers
-      /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Harmonic
-      public: bool HasColorConnections() const;
-
-      /// \brief Check if there are depth subscribers
-      /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Harmonic
-      public: bool HasDepthConnections() const;
-
-      /// \brief Check if there are point cloud subscribers
-      /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Harmonic
-      public: bool HasPointConnections() const;
-
-      /// \brief Create an RGB camera and a depth camera.
+      /// \brief Create a camera in a scene
       /// \return True on success.
-      private: bool CreateCameras();
+      private: bool CreateCamera();
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
-      private: std::unique_ptr<RgbdCameraSensorPrivate> dataPtr;
+      private: std::unique_ptr<SegmentationCameraSensorPrivate> dataPtr;
       IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }

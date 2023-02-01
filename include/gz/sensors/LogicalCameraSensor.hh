@@ -23,9 +23,7 @@
 
 #include <sdf/sdf.hh>
 
-#include <gz/common/PluginMacros.hh>
 #include <gz/common/SuppressWarning.hh>
-#include <gz/common/Time.hh>
 
 #include <gz/math/Angle.hh>
 
@@ -80,7 +78,8 @@ namespace ignition
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) override;
+      public: virtual bool Update(
+        const std::chrono::steady_clock::duration &_now) override;
 
       /// \brief Get the near distance. This is the distance from the
       /// frustum's vertex to the closest plane.
@@ -106,6 +105,11 @@ namespace ignition
       /// of the near or far planes.
       /// \return The frustum's aspect ratio.
       public: double AspectRatio() const;
+
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Garden
+      public: bool HasConnections() const;
 
       /// \brief Get the latest image. An image is an instance of
       /// msgs::LogicalCameraImage, which contains a list of detected models.

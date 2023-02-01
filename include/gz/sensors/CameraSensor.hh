@@ -23,9 +23,7 @@
 
 #include <sdf/sdf.hh>
 
-#include <gz/common/PluginMacros.hh>
 #include <gz/common/SuppressWarning.hh>
-#include <gz/common/Time.hh>
 
 #ifdef _WIN32
 #pragma warning(push)
@@ -95,7 +93,8 @@ namespace ignition
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) override;
+      public: virtual bool Update(
+        const std::chrono::steady_clock::duration &_now) override;
 
       /// \brief Set a callback to be called when image frame data is
       /// generated.
@@ -139,6 +138,21 @@ namespace ignition
       /// \return The distance from the 1st camera, in meters.
       public: double Baseline() const;
 
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Garden
+      public: bool HasConnections() const;
+
+      /// \brief Check if there are any image subscribers
+      /// \return True if there are image subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Harmonic
+      public: bool HasImageConnections() const;
+
+      /// \brief Check if there are any info subscribers
+      /// \return True if there are info subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Harmonic
+      public: bool HasInfoConnections() const;
+
       /// \brief Advertise camera info topic.
       /// \return True if successful.
       protected: bool AdvertiseInfo();
@@ -157,7 +171,8 @@ namespace ignition
 
       /// \brief Publish camera info message.
       /// \param[in] _now The current time
-      protected: void PublishInfo(const gz::common::Time &_now);
+      protected: void PublishInfo(
+        const std::chrono::steady_clock::duration &_now);
 
       /// \brief Create a camera in a scene
       /// \return True on success.

@@ -15,5 +15,5 @@
  *
  */
 
-#include <gz/sensors/ImageBrownDistortionModel.hh>
+#include <gz/sensors/force_torque/Export.hh>
 #include <ignition/sensors/config.hh>

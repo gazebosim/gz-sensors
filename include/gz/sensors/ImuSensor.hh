@@ -22,7 +22,6 @@
 #include <sdf/sdf.hh>
 
 #include <gz/common/SuppressWarning.hh>
-#include <gz/common/Time.hh>
 #include <gz/math/Pose3.hh>
 
 #include <gz/sensors/config.hh>
@@ -34,9 +33,30 @@ namespace ignition
 {
   namespace sensors
   {
-    // Inline bracket to help doxygen filtering.
+    /// Inline bracket to help doxygen filtering.
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
-    //
+
+    /// \brief Reference frames enum
+    enum class IGNITION_SENSORS_VISIBLE WorldFrameEnumType
+    {
+      /// \brief NONE : To be used only when <localization>
+      /// reference orientation tag is empty.
+      NONE = 0,
+
+      /// \brief ENU (East-North-Up): x - East, y - North, z - Up.
+      ENU = 1,
+
+      /// \brief NED (North-East-Down): x - North, y - East, z - Down.
+      NED = 2,
+
+      /// \brief NWU (North-West-Up): x - North, y - West, z - Up.
+      NWU = 3,
+
+      /// \brief CUSTOM : The frame is described using custom_rpy tag.
+      CUSTOM = 4
+    };
+
+    ///
     /// \brief forward declarations
     class ImuSensorPrivate;
 
@@ -69,7 +89,8 @@ namespace ignition
       /// \brief Update the sensor and generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) override;
+      public: virtual bool Update(
+        const std::chrono::steady_clock::duration &_now) override;
 
       /// \brief Set the angular velocity of the imu
       /// \param[in] _angularVel Angular velocity of the imu in body frame
@@ -111,16 +132,42 @@ namespace ignition
       public: math::Quaterniond OrientationReference() const;
 
       /// \brief Get the orienation of the imu with respect to reference frame
-      /// \return Orientation in reference frame
+      /// \return Orientation in reference frame. If orientation is not
+      /// enabled, this will return the last computed orientation before
+      /// orientation is disabled or identity Quaternion if orientation has
+      /// never been enabled.
       public: math::Quaterniond Orientation() const;
 
       /// \brief Set the gravity vector
       /// \param[in] _gravity gravity vector in meters per second squared.
       public: void SetGravity(const math::Vector3d &_gravity);
 
+      /// \brief Set whether to output orientation. Not all imu's generate
+      /// orientation values as they use filters to produce orientation
+      /// estimates.
+      /// \param[in] _enabled True to publish orientation data, false to leave
+      /// the message field empty.
+      public: void SetOrientationEnabled(bool _enabled);
+
+      /// \brief Get whether or not orientation is enabled.
+      /// \return True if orientation is enabled, false otherwise.
+      public: bool OrientationEnabled() const;
+
       /// \brief Get the gravity vector
       /// \return Gravity vectory in meters per second squared.
       public: math::Vector3d Gravity() const;
+
+      /// \brief Specify the rotation offset of the coordinates of the World
+      /// frame relative to a geo-referenced frame
+      /// \param[in] _rot rotation offset
+      /// \param[in] _relativeTo world frame orientation, ENU by default
+      public: void SetWorldFrameOrientation(
+        const math::Quaterniond &_rot, WorldFrameEnumType _relativeTo);
+
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Garden
+      public: bool HasConnections() const;
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

@@ -57,7 +57,8 @@ namespace ignition
       /// \brief Force the sensor to generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) override;
+      public: virtual bool Update(
+        const std::chrono::steady_clock::duration &_now) override;
 
       /// \brief Apply noise to the laser buffer, if noise has been
       /// configured. This should be called before PublishLidarScan if you
@@ -67,7 +68,8 @@ namespace ignition
       /// \brief Publish LaserScan message
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool PublishLidarScan(const common::Time &_now);
+      public: virtual bool PublishLidarScan(
+        const std::chrono::steady_clock::duration &_now);
 
       /// \brief Load the sensor based on data from an sdf::Sensor object.
       /// \param[in] _sdf SDF Sensor parameters.
@@ -233,6 +235,15 @@ namespace ignition
 
       // Documentation inherited
       public: virtual bool IsActive() const;
+
+      /// \brief Check if there are any subscribers for sensor data
+      /// \return True if there are subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Garden
+      public: bool HasConnections() const;
+
+      /// \brief Get the visibility mask
+      /// \return Visibility mask
+      public: uint32_t VisibilityMask() const;
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Just a mutex for thread safety

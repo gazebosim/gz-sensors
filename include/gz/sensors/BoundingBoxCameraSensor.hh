@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Open Source Robotics Foundation
+ * Copyright (C) 2021 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,18 @@
  * limitations under the License.
  *
 */
-#ifndef GZ_SENSORS_RGBDCAMERASENSOR_HH_
-#define GZ_SENSORS_RGBDCAMERASENSOR_HH_
+
+#ifndef IGNITION_SENSORS_BOUNDINGBOXCAMERASENSOR_HH_
+#define IGNITION_SENSORS_BOUNDINGBOXCAMERASENSOR_HH_
 
 #include <memory>
+#include <vector>
 
-#include <sdf/sdf.hh>
+#include <ignition/rendering/BoundingBoxCamera.hh>
+#include <sdf/Sensor.hh>
 
-#include <gz/common/SuppressWarning.hh>
-
-#include "gz/sensors/CameraSensor.hh"
-#include "gz/sensors/config.hh"
-#include "gz/sensors/rgbd_camera/Export.hh"
-#include "gz/sensors/Export.hh"
+#include "ignition/sensors/CameraSensor.hh"
+#include "ignition/sensors/boundingbox_camera/Export.hh"
 
 namespace ignition
 {
@@ -35,27 +34,23 @@ namespace ignition
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
     // forward declarations
-    class RgbdCameraSensorPrivate;
+    class BoundingBoxCameraSensorPrivate;
 
-    /// \brief RGBD camera sensor class.
+    /// \brief BoundingBox camera sensor class.
     ///
-    /// This class creates a few types of sensor data from an ignition
-    /// rendering scene:
-    /// * RGB image (same as CameraSensor)
-    /// * Depth image (same as DepthCamera)
-    /// * (future / todo) Color point cloud
-    /// The scene  must be created in advance and given to Manager::Init().
+    /// This class creates a BoundingBox image from an ignition rendering scene.
+    /// The scene must be created in advance and given to Manager::Init().
     /// It offers both an ignition-transport interface and a direct C++ API
     /// to access the image data. The API works by setting a callback to be
     /// called with image data.
-    class IGNITION_SENSORS_RGBD_CAMERA_VISIBLE RgbdCameraSensor
-      : public CameraSensor
+    class IGNITION_SENSORS_BOUNDINGBOX_CAMERA_VISIBLE
+      BoundingBoxCameraSensor : public CameraSensor
     {
       /// \brief constructor
-      public: RgbdCameraSensor();
+      public: BoundingBoxCameraSensor();
 
       /// \brief destructor
-      public: virtual ~RgbdCameraSensor();
+      public: virtual ~BoundingBoxCameraSensor();
 
       /// \brief Load the sensor based on data from an sdf::Sensor object.
       /// \param[in] _sdf SDF Sensor parameters.
@@ -77,10 +72,20 @@ namespace ignition
       public: virtual bool Update(
         const std::chrono::steady_clock::duration &_now) override;
 
+      /// \brief Get the rendering BoundingBox camera
+      /// \return BoundingBox camera pointer
+      public: virtual rendering::BoundingBoxCameraPtr
+        BoundingBoxCamera() const;
+
+      /// \brief Callback on new bounding boxes from bounding boxes camera
+      /// \param[in] _boxes Detected bounding boxes from the camera
+      public: void OnNewBoundingBoxes(
+        const std::vector<rendering::BoundingBox> &_boxes);
+
       /// \brief Set the rendering scene.
       /// \param[in] _scene Pointer to the scene
       public: virtual void SetScene(
-                  gz::rendering::ScenePtr _scene) override;
+                  ignition::rendering::ScenePtr _scene) override;
 
       /// \brief Get image width.
       /// \return width of the image
@@ -95,29 +100,14 @@ namespace ignition
       /// \todo(iche033) Make this function virtual on Garden
       public: bool HasConnections() const;
 
-      /// \brief Check if there are color subscribers
-      /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Harmonic
-      public: bool HasColorConnections() const;
-
-      /// \brief Check if there are depth subscribers
-      /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Harmonic
-      public: bool HasDepthConnections() const;
-
-      /// \brief Check if there are point cloud subscribers
-      /// \return True if there are subscribers, false otherwise
-      /// \todo(iche033) Make this function virtual on Harmonic
-      public: bool HasPointConnections() const;
-
-      /// \brief Create an RGB camera and a depth camera.
+      /// \brief Create a camera in a scene
       /// \return True on success.
-      private: bool CreateCameras();
+      private: bool CreateCamera();
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
-      private: std::unique_ptr<RgbdCameraSensorPrivate> dataPtr;
+      private: std::unique_ptr<BoundingBoxCameraSensorPrivate> dataPtr;
       IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }

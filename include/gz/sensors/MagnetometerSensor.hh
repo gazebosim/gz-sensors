@@ -22,7 +22,6 @@
 #include <sdf/sdf.hh>
 
 #include <gz/common/SuppressWarning.hh>
-#include <gz/common/Time.hh>
 #include <gz/math/Pose3.hh>
 
 #include <gz/sensors/config.hh>
@@ -69,7 +68,8 @@ namespace ignition
       /// \brief Update the sensor and generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) override;
+      public: virtual bool Update(
+        const std::chrono::steady_clock::duration &_now) override;
 
       /// \brief Set the world pose of the sensor
       /// \param[in] _pose Pose in world frame
@@ -90,6 +90,11 @@ namespace ignition
       /// \brief Get the magnetic field vector in body frame
       /// \return Magnetic field vector in body frame
       public: math::Vector3d MagneticField() const;
+
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Garden
+      public: bool HasConnections() const;
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

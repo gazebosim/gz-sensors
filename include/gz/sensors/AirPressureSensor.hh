@@ -22,7 +22,6 @@
 #include <sdf/sdf.hh>
 
 #include <gz/common/SuppressWarning.hh>
-#include <gz/common/Time.hh>
 
 #include <gz/sensors/config.hh>
 #include <gz/sensors/air_pressure/Export.hh>
@@ -68,7 +67,8 @@ namespace ignition
       /// \brief Update the sensor and generate data
       /// \param[in] _now The current time
       /// \return true if the update was successfull
-      public: virtual bool Update(const common::Time &_now) override;
+      public: virtual bool Update(
+        const std::chrono::steady_clock::duration &_now) override;
 
       /// \brief Set the reference altitude.
       /// \param[in] _ref Verical reference position in meters
@@ -77,6 +77,11 @@ namespace ignition
       /// \brief Get the vertical reference altitude.
       /// \return Verical reference position in meters
       public: double ReferenceAltitude() const;
+
+      /// \brief Check if there are any subscribers
+      /// \return True if there are subscribers, false otherwise
+      /// \todo(iche033) Make this function virtual on Garden
+      public: bool HasConnections() const;
 
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

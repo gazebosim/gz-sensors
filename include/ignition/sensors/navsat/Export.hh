@@ -15,5 +15,5 @@
  *
  */
 
-#include <gz/sensors/ImageBrownDistortionModel.hh>
+#include <gz/sensors/navsat/Export.hh>
 #include <ignition/sensors/config.hh>
