@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Open Source Robotics Foundation
+ * Copyright (C) 2023 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
-#include <gz/msgs/fluid_pressure.pb.h>
+#include <gz/msgs/air_speed_sensor.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
@@ -41,7 +41,7 @@ using namespace sensors;
 static constexpr double kPressureOneAtmospherePascals = 101325.0;
 // static constexpr double kSeaLevelTempKelvin = 288.15;
 
-static constexpr auto DEFAULT_HOME_ALT_AMSL = 488.0f; // altitude AMSL at Irchel Park, Zurich, Switzerland [m]
+static constexpr auto DEFAULT_HOME_ALT_AMSL = 0.0f; // altitude AMSL see level [m]
 
 // international standard atmosphere (troposphere model - valid up to 11km) see [1]
 static constexpr auto TEMPERATURE_MSL = 288.15f; // temperature at MSL [K] (15 [C])
@@ -112,7 +112,7 @@ bool AirSpeedSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/air_speed");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<msgs::FluidPressure>(
+      this->dataPtr->node.Advertise<msgs::AirSpeedSensor>(
       this->Topic());
 
   if (!this->dataPtr->pub)
@@ -125,10 +125,10 @@ bool AirSpeedSensor::Load(const sdf::Sensor &_sdf)
          << this->Topic() << "]" << std::endl;
 
   // Load the noise parameters
-  if (_sdf.AirSpeedSensor()->SpeedNoise().Type() != sdf::NoiseType::NONE)
+  if (_sdf.AirSpeedSensor()->PressureNoise().Type() != sdf::NoiseType::NONE)
   {
     this->dataPtr->noises[AIR_SPEED_NOISE_PASCALS] =
-      NoiseFactory::NewNoiseModel(_sdf.AirSpeedSensor()->SpeedNoise());
+      NoiseFactory::NewNoiseModel(_sdf.AirSpeedSensor()->PressureNoise());
   }
 
   this->dataPtr->initialized = true;
@@ -154,7 +154,7 @@ bool AirSpeedSensor::Update(
     return false;
   }
 
-  msgs::FluidPressure msg;
+  msgs::AirSpeedSensor msg;
   *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
@@ -178,19 +178,10 @@ bool AirSpeedSensor::Update(
     diff_pressure =
       this->dataPtr->noises[AIR_SPEED_NOISE_PASCALS]->Apply(
           diff_pressure);
-
-    if (this->dataPtr->noises[AIR_SPEED_NOISE_PASCALS]->Type() ==
-        NoiseType::GAUSSIAN)
-    {
-     GaussianNoiseModelPtr gaussian =
-       std::dynamic_pointer_cast<GaussianNoiseModel>(
-           this->dataPtr->noises[AIR_SPEED_NOISE_PASCALS]);
-      msg.set_variance(sqrt(gaussian->StdDev()));
-    }
   }
 
-  msg.set_pressure(diff_pressure * 100);
-  msg.set_variance(temperature_local);
+  msg.set_diff_pressure(diff_pressure * 100);
+  msg.set_temperature(temperature_local);
 
   // publish
   this->AddSequence(msg.mutable_header());
