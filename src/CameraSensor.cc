@@ -65,6 +65,69 @@ class gz::sensors::CameraSensorPrivate
   public: bool SaveImage(const unsigned char *_data, unsigned int _width,
     unsigned int _height, gz::common::Image::PixelFormatType _format);
 
+  /// \brief Computes the OpenGL NDC matrix
+  /// \param[in] _left Left vertical clipping plane
+  /// \param[in] _right Right vertical clipping plane
+  /// \param[in] _bottom Bottom horizontal clipping plane
+  /// \param[in] _top Top horizontal clipping plane
+  /// \param[in] _near Distance to the nearer depth clipping plane
+  ///            This value is negative if the plane is to be behind
+  ///            the camera
+  /// \param[in] _far Distance to the farther depth clipping plane
+  ///            This value is negative if the plane is to be behind
+  ///            the camera
+  /// \return OpenGL NDC (Normalized Device Coordinates) matrix
+  public: static math::Matrix4d BuildNDCMatrix(
+          double _left, double _right,
+          double _bottom, double _top,
+          double _near, double _far);
+
+  /// \brief Computes the OpenGL perspective matrix
+  /// \param[in] _intrinsicsFx Horizontal focal length (in pixels)
+  /// \param[in] _intrinsicsFy Vertical focal length (in pixels)
+  /// \param[in] _intrinsicsCx X coordinate of principal point in pixels
+  /// \param[in] _intrinsicsCy Y coordinate of principal point in pixels
+  /// \param[in] _intrinsicsS Skew coefficient defining the angle between
+  ///            the x and y pixel axes
+  /// \param[in] _clipNear Distance to the nearer depth clipping plane
+  ///            This value is negative if the plane is to be behind
+  ///            the camera
+  /// \param[in] _clipFar Distance to the farther depth clipping plane
+  ///            This value is negative if the plane is to be behind
+  ///            the camera
+  /// \return OpenGL perspective matrix
+  public: static math::Matrix4d BuildPerspectiveMatrix(
+          double _intrinsicsFx, double _intrinsicsFy,
+          double _intrinsicsCx, double _intrinsicsCy,
+          double _intrinsicsS,
+          double _clipNear, double _clipFar);
+
+  /// \brief Computes the OpenGL projection matrix by multiplying
+  ///        the OpenGL Normalized Device Coordinates matrix (NDC) with
+  ///        the OpenGL perspective matrix
+  ///        openglProjectionMatrix = ndcMatrix * perspectiveMatrix
+  /// \param[in] _imageWidth Image width (in pixels)
+  /// \param[in] _imageHeight Image height (in pixels)
+  /// \param[in] _intrinsicsFx Horizontal focal length (in pixels)
+  /// \param[in] _intrinsicsFy Vertical focal length (in pixels)
+  /// \param[in] _intrinsicsCx X coordinate of principal point in pixels
+  /// \param[in] _intrinsicsCy Y coordinate of principal point in pixels
+  /// \param[in] _intrinsicsS Skew coefficient defining the angle between
+  ///             the x and y pixel axes
+  /// \param[in] _clipNear Distance to the nearer depth clipping plane
+  ///            This value is negative if the plane is to be behind
+  ///            the camera
+  /// \param[in] _clipFar Distance to the farther depth clipping plane
+  ///            This value is negative if the plane is to be behind
+  ///            the camera
+  /// \return OpenGL projection matrix
+  public: static math::Matrix4d BuildProjectionMatrix(
+          double _imageWidth, double _imageHeight,
+          double _intrinsicsFx, double _intrinsicsFy,
+          double _intrinsicsCx, double _intrinsicsCy,
+          double _intrinsicsS,
+          double _clipNear, double _clipFar);
+
   /// \brief node to create publisher
   public: transport::Node node;
 
@@ -225,18 +288,6 @@ bool CameraSensor::CreateCamera()
       break;
   }
 
-  this->dataPtr->image = this->dataPtr->camera->CreateImage();
-
-  this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);
-
-  // Create the directory to store frames
-  if (cameraSdf->SaveFrames())
-  {
-    this->dataPtr->saveImagePath = cameraSdf->SaveFramesPath();
-    this->dataPtr->saveImagePrefix = this->Name() + "_";
-    this->dataPtr->saveImage = true;
-  }
-
   // Update the DOM object intrinsics to have consistent
   // intrinsics between ogre camera and camera_info msg
   if(!cameraSdf->HasLensIntrinsics())
@@ -252,6 +303,34 @@ bool CameraSensor::CreateCamera()
     cameraSdf->SetLensIntrinsicsFy(intrinsicMatrix(1, 1));
     cameraSdf->SetLensIntrinsicsCx(intrinsicMatrix(0, 2));
     cameraSdf->SetLensIntrinsicsCy(intrinsicMatrix(1, 2));
+  }
+  // set custom projection matrix based on intrinsics param specified in sdf
+  else
+  {
+    double fx = cameraSdf->LensIntrinsicsFx();
+    double fy = cameraSdf->LensIntrinsicsFy();
+    double cx = cameraSdf->LensIntrinsicsCx();
+    double cy = cameraSdf->LensIntrinsicsCy();
+    double s = cameraSdf->LensIntrinsicsSkew();
+    auto projectionMatrix = CameraSensorPrivate::BuildProjectionMatrix(
+        this->dataPtr->camera->ImageWidth(),
+        this->dataPtr->camera->ImageHeight(),
+        fx, fy, cx, cy, s,
+        this->dataPtr->camera->NearClipPlane(),
+        this->dataPtr->camera->FarClipPlane());
+    this->dataPtr->camera->SetProjectionMatrix(projectionMatrix);
+  }
+
+  this->dataPtr->image = this->dataPtr->camera->CreateImage();
+
+  this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);
+
+  // Create the directory to store frames
+  if (cameraSdf->SaveFrames())
+  {
+    this->dataPtr->saveImagePath = cameraSdf->SaveFramesPath();
+    this->dataPtr->saveImagePrefix = this->Name() + "_";
+    this->dataPtr->saveImage = true;
   }
 
   // Populate camera info topic
@@ -410,6 +489,12 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // move the camera to the current pose
   this->dataPtr->camera->SetLocalPose(this->Pose());
 
+  if (this->HasInfoConnections())
+  {
+    // publish the camera info message
+    this->PublishInfo(_now);
+  }
+
   // render only if necessary
   if (this->dataPtr->isTriggeredCamera &&
       !this->dataPtr->isTriggered)
@@ -440,85 +525,85 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     }
   }
 
-  // generate sensor data
-  this->Render();
+  if (this->HasImageConnections() || this->dataPtr->saveImage)
   {
-    GZ_PROFILE("CameraSensor::Update Copy image");
-    this->dataPtr->camera->Copy(this->dataPtr->image);
-  }
-
-  unsigned int width = this->dataPtr->camera->ImageWidth();
-  unsigned int height = this->dataPtr->camera->ImageHeight();
-  unsigned char *data = this->dataPtr->image.Data<unsigned char>();
-
-  gz::common::Image::PixelFormatType
-      format{common::Image::UNKNOWN_PIXEL_FORMAT};
-  msgs::PixelFormatType msgsPixelFormat =
-    msgs::PixelFormatType::UNKNOWN_PIXEL_FORMAT;
-
-  switch (this->dataPtr->camera->ImageFormat())
-  {
-    case rendering::PF_R8G8B8:
-      format = common::Image::RGB_INT8;
-      msgsPixelFormat = msgs::PixelFormatType::RGB_INT8;
-      break;
-    case rendering::PF_L8:
-      format = common::Image::L_INT8;
-      msgsPixelFormat = msgs::PixelFormatType::L_INT8;
-      break;
-    case rendering::PF_L16:
-      format = common::Image::L_INT16;
-      msgsPixelFormat = msgs::PixelFormatType::L_INT16;
-      break;
-    default:
-      gzerr << "Unsupported pixel format ["
-        << this->dataPtr->camera->ImageFormat() << "]\n";
-      break;
-  }
-
-  // create message
-  msgs::Image msg;
-  {
-    GZ_PROFILE("CameraSensor::Update Message");
-    msg.set_width(width);
-    msg.set_height(height);
-    msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
-                 this->dataPtr->camera->ImageFormat()));
-    msg.set_pixel_format_type(msgsPixelFormat);
-    *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
-    auto frame = msg.mutable_header()->add_data();
-    frame->set_key("frame_id");
-    frame->add_value(this->dataPtr->opticalFrameId);
-    msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
-  }
-
-  // publish the image message
-  {
-    this->AddSequence(msg.mutable_header());
-    GZ_PROFILE("CameraSensor::Update Publish");
-    this->dataPtr->pub.Publish(msg);
-
-    // publish the camera info message
-    this->PublishInfo(_now);
-  }
-
-  // Trigger callbacks.
-  if (this->dataPtr->imageEvent.ConnectionCount() > 0)
-  {
-    try
+    // generate sensor data
+    this->Render();
     {
-      this->dataPtr->imageEvent(msg);
+      GZ_PROFILE("CameraSensor::Update Copy image");
+      this->dataPtr->camera->Copy(this->dataPtr->image);
     }
-    catch(...)
-    {
-      gzerr << "Exception thrown in an image callback.\n";
-    }
-  }
 
-  // Save image
-  if (this->dataPtr->saveImage)
-  {
-    this->dataPtr->SaveImage(data, width, height, format);
+    unsigned int width = this->dataPtr->camera->ImageWidth();
+    unsigned int height = this->dataPtr->camera->ImageHeight();
+    unsigned char *data = this->dataPtr->image.Data<unsigned char>();
+
+    gz::common::Image::PixelFormatType
+        format{common::Image::UNKNOWN_PIXEL_FORMAT};
+    msgs::PixelFormatType msgsPixelFormat =
+      msgs::PixelFormatType::UNKNOWN_PIXEL_FORMAT;
+
+    switch (this->dataPtr->camera->ImageFormat())
+    {
+      case rendering::PF_R8G8B8:
+        format = common::Image::RGB_INT8;
+        msgsPixelFormat = msgs::PixelFormatType::RGB_INT8;
+        break;
+      case rendering::PF_L8:
+        format = common::Image::L_INT8;
+        msgsPixelFormat = msgs::PixelFormatType::L_INT8;
+        break;
+      case rendering::PF_L16:
+        format = common::Image::L_INT16;
+        msgsPixelFormat = msgs::PixelFormatType::L_INT16;
+        break;
+      default:
+        gzerr << "Unsupported pixel format ["
+          << this->dataPtr->camera->ImageFormat() << "]\n";
+        break;
+    }
+
+    // create message
+    msgs::Image msg;
+    {
+      GZ_PROFILE("CameraSensor::Update Message");
+      msg.set_width(width);
+      msg.set_height(height);
+      msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
+                   this->dataPtr->camera->ImageFormat()));
+      msg.set_pixel_format_type(msgsPixelFormat);
+      *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+      auto frame = msg.mutable_header()->add_data();
+      frame->set_key("frame_id");
+      frame->add_value(this->dataPtr->opticalFrameId);
+      msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
+    }
+
+    // publish the image message
+    {
+      this->AddSequence(msg.mutable_header());
+      GZ_PROFILE("CameraSensor::Update Publish");
+      this->dataPtr->pub.Publish(msg);
+    }
+
+    // Trigger callbacks.
+    if (this->dataPtr->imageEvent.ConnectionCount() > 0)
+    {
+      try
+      {
+        this->dataPtr->imageEvent(msg);
+      }
+      catch(...)
+      {
+        ignerr << "Exception thrown in an image callback.\n";
+      }
+    }
+
+    // Save image
+    if (this->dataPtr->saveImage)
+    {
+      this->dataPtr->SaveImage(data, width, height, format);
+    }
   }
 
   if (this->dataPtr->isTriggeredCamera)
@@ -743,6 +828,89 @@ double CameraSensor::Baseline() const
 //////////////////////////////////////////////////
 bool CameraSensor::HasConnections() const
 {
+  return this->HasImageConnections() || this->HasInfoConnections();
+}
+
+//////////////////////////////////////////////////
+bool CameraSensor::HasImageConnections() const
+{
   return (this->dataPtr->pub && this->dataPtr->pub.HasConnections()) ||
-      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+         this->dataPtr->imageEvent.ConnectionCount() > 0u;
+}
+
+//////////////////////////////////////////////////
+bool CameraSensor::HasInfoConnections() const
+{
+  return this->dataPtr->infoPub && this->dataPtr->infoPub.HasConnections();
+}
+
+//////////////////////////////////////////////////
+math::Matrix4d CameraSensorPrivate::BuildProjectionMatrix(
+    double _imageWidth, double _imageHeight,
+    double _intrinsicsFx, double _intrinsicsFy,
+    double _intrinsicsCx, double _intrinsicsCy,
+    double _intrinsicsS,
+    double _clipNear, double _clipFar)
+{
+  return CameraSensorPrivate::BuildNDCMatrix(
+           0, _imageWidth, 0, _imageHeight, _clipNear, _clipFar) *
+           CameraSensorPrivate::BuildPerspectiveMatrix(
+             _intrinsicsFx, _intrinsicsFy,
+             _intrinsicsCx, _imageHeight - _intrinsicsCy,
+             _intrinsicsS, _clipNear, _clipFar);
+}
+
+//////////////////////////////////////////////////
+math::Matrix4d CameraSensorPrivate::BuildNDCMatrix(
+    double _left, double _right,
+    double _bottom, double _top,
+    double _near, double _far)
+{
+  double inverseWidth = 1.0 / (_right - _left);
+  double inverseHeight = 1.0 / (_top - _bottom);
+  double inverseDistance = 1.0 / (_far - _near);
+
+  return math::Matrix4d(
+           2.0 * inverseWidth,
+           0.0,
+           0.0,
+           -(_right + _left) * inverseWidth,
+           0.0,
+           2.0 * inverseHeight,
+           0.0,
+           -(_top + _bottom) * inverseHeight,
+           0.0,
+           0.0,
+           -2.0 * inverseDistance,
+           -(_far + _near) * inverseDistance,
+           0.0,
+           0.0,
+           0.0,
+           1.0);
+}
+
+//////////////////////////////////////////////////
+math::Matrix4d CameraSensorPrivate::BuildPerspectiveMatrix(
+    double _intrinsicsFx, double _intrinsicsFy,
+    double _intrinsicsCx, double _intrinsicsCy,
+    double _intrinsicsS,
+    double _clipNear, double _clipFar)
+{
+  return math::Matrix4d(
+           _intrinsicsFx,
+           _intrinsicsS,
+           -_intrinsicsCx,
+           0.0,
+           0.0,
+           _intrinsicsFy,
+           -_intrinsicsCy,
+           0.0,
+           0.0,
+           0.0,
+           _clipNear + _clipFar,
+           _clipNear * _clipFar,
+           0.0,
+           0.0,
+           -1.0,
+           0.0);
 }

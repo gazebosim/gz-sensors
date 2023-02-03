@@ -325,7 +325,7 @@ void Sensor::PublishMetrics(const std::chrono::duration<double> &_now)
 //////////////////////////////////////////////////
 void SensorPrivate::PublishMetrics(const std::chrono::duration<double> &_now)
 {
-  if(!this->performanceSensorMetricsPub)
+  if (!this->performanceSensorMetricsPub)
   {
     const auto validTopic = transport::TopicUtils::AsValidTopic(
       this->topic + "/performance_metrics");
@@ -349,7 +349,7 @@ void SensorPrivate::PublishMetrics(const std::chrono::duration<double> &_now)
   double realUpdateRate;
   const auto clockNow = std::chrono::steady_clock::now();
   // If lastUpdateTime == 0 means it wasn't initialized yet.
-  if(this->lastUpdateTime.count() > 0)
+  if (this->lastUpdateTime.count() > 0)
   {
     const double diffSimUpdate = _now.count() -
       this->lastUpdateTime.count();

@@ -443,6 +443,12 @@ bool SegmentationCameraSensor::Update(
     return false;
   }
 
+  if (this->HasInfoConnections())
+  {
+    // publish the camera info message
+    this->PublishInfo(_now);
+  }
+
   // don't render if there are no subscribers nor saving
   if (!this->dataPtr->coloredMapPublisher.HasConnections() &&
     !this->dataPtr->labelsMapPublisher.HasConnections() &&
@@ -508,7 +514,6 @@ bool SegmentationCameraSensor::Update(
       width, height));
 
   // Publish
-  this->PublishInfo(_now);
   this->dataPtr->coloredMapPublisher.Publish(this->dataPtr->coloredMapMsg);
   this->dataPtr->labelsMapPublisher.Publish(this->dataPtr->labelsMapMsg);
 
@@ -562,7 +567,8 @@ bool SegmentationCameraSensor::HasConnections() const
       this->dataPtr->coloredMapPublisher.HasConnections()) ||
       (this->dataPtr->labelsMapPublisher &&
       this->dataPtr->labelsMapPublisher.HasConnections()) ||
-      this->dataPtr->imageEvent.ConnectionCount() > 0u;
+      this->dataPtr->imageEvent.ConnectionCount() > 0u ||
+      this->HasInfoConnections();
 }
 
 //////////////////////////////////////////////////
