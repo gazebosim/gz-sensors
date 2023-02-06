@@ -16,11 +16,11 @@ wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
 sudo apt-get update
 ```
 
-1. Install Ignition Sensors
+1. Install Gazebo Sensors
 
 ```{.sh}
 # Change <#> to a version number, like 3 or 4
-sudo apt install libignition-sensors<#>-dev
+sudo apt install libgz-sensors<#>-dev
 ```
 
 ### macOS
@@ -31,9 +31,9 @@ On macOS, add OSRF packages:
   brew tap osrf/simulation
   ```
 
-Install Ignition Sensors:
+Install Gazebo Sensors:
   ```
-  brew install ignition-sensors<#>
+  brew install gz-sensors<#>
   ```
 
 Be sure to replace `<#>` with a number value, such as 5 or 6, depending on
@@ -50,14 +50,14 @@ necessary prerequisites followed by building from source.
 
 ### Prerequisites
 
-Ignition Sensors requires:
+Gazebo Sensors requires:
 
-  * [Ignition CMake](https://ignitionrobotics.org/libs/cmake)
-  * [Ignition Math](https://ignitionrobotics.org/libs/math)
-  * [Ignition Common](https://ignitionrobotics.org/libs/common)
-  * [Ignition Transport](https://ignitionrobotics.org/libs/transport)
-  * [Ignition Rendering](https://ignitionrobotics.org/libs/rendering)
-  * [Ignition Msgs](https://ignitionrobotics.org/libs/msgs)
+  * [Gazebo CMake](https://gazebosim.org/libs/cmake)
+  * [Gazebo Math](https://gazebosim.org/libs/math)
+  * [Gazebo Common](https://gazebosim.org/libs/common)
+  * [Gazebo Transport](https://gazebosim.org/libs/transport)
+  * [Gazebo Rendering](https://gazebosim.org/libs/rendering)
+  * [Gazebo Msgs](https://gazebosim.org/libs/msgs)
   * [SDFormat](https://github.com/osrf/sdformat)
   * [Protobuf3](https://developers.google.com/protocol-buffers/)
 
@@ -75,7 +75,7 @@ Ignition Sensors requires:
 
 4. Clone the repository
 ```{.sh}
-  git clone https://github.com/ignitionrobotics/ign-sensors
+  git clone https://github.com/gazebosim/gz-sensors
   ```
 
 5. Configure and build
@@ -92,7 +92,7 @@ Ignition Sensors requires:
 
 1. Clone the repository
   ```
-  git clone https://github.com/ignitionrobotics/ign-sensors -b ign-sensors<#>
+  git clone https://github.com/gazebosim/gz-sensors -b ign-sensors<#>
   ```
   Be sure to replace `<#>` with a number value, such as 5 or 6, depending on
   which version you need.
@@ -122,7 +122,7 @@ Ignition Sensors requires:
 
 #### Install Prerequisites
 
-First, follow the [ign-cmake](https://github.com/ignitionrobotics/ign-cmake) tutorial for installing Conda, Visual Studio, CMake, etc., prerequisites, and creating a Conda environment.
+First, follow the [ign-cmake](https://github.com/gazebosim/gz-cmake) tutorial for installing Conda, Visual Studio, CMake, etc., prerequisites, and creating a Conda environment.
 
 Navigate to `condabin` if necessary to use the `conda` command (i.e., if Conda is not in your `PATH` environment variable. You can find the location of `condabin` in Anaconda Prompt, `where conda`).
 
@@ -133,13 +133,13 @@ conda create -n ign-ws
 conda activate ign-ws
 ```
 
-Install Ignition dependencies, replacing `<#>` with the desired versions:
+Install Gazebo dependencies, replacing `<#>` with the desired versions:
 
 ```
 conda install libignition-cmake<#> libignition-common<#> libignition-math<#> libignition-transport<#> libignition-msgs<#> --channel conda-forge
 ```
 
-Before [ign-rendering](https://github.com/ignitionrobotics/ign-rendering) becomes available on conda-forge, follow its tutorial to build it from source.
+Before [ign-rendering](https://github.com/gazebosim/gz-rendering) becomes available on conda-forge, follow its tutorial to build it from source.
 
 #### Build from source
 
@@ -151,7 +151,7 @@ Before [ign-rendering](https://github.com/ignitionrobotics/ign-rendering) become
 1. Navigate to where you would like to build the library, and clone the repository.
   ```
   # Optionally, append `-b ign-sensors#` (replace # with a number) to check out a specific version
-  git clone https://github.com/ignitionrobotics/ign-sensors.git
+  git clone https://github.com/gazebosim/gz-sensors.git
   ```
 
 1. Configure and build
@@ -174,7 +174,7 @@ Before [ign-rendering](https://github.com/ignitionrobotics/ign-rendering) become
 
 # Documentation
 
-API and tutorials can be found at [https://ignitionrobotics.org/libs/sensors](https://ignitionrobotics.org/libs/sensors).
+API and tutorials can be found at [https://gazebosim.org/libs/sensors](https://gazebosim.org/libs/sensors).
 
 You can also generate the documentation from a clone of this repository by following these steps.
 
@@ -185,7 +185,7 @@ You can also generate the documentation from a clone of this repository by follo
 
 2. Clone the repository
   ```
-  git clone https://github.com/ignitionrobotics/ign-sensors
+  git clone https://github.com/gazebosim/gz-sensors
   ```
 
 3. Configure and build the documentation.

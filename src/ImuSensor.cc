@@ -19,24 +19,24 @@
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/imu.pb.h>
+#include <gz/msgs/imu.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
 
-#include <ignition/common/Profiler.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/transport/Node.hh>
 
-#include "ignition/sensors/ImuSensor.hh"
-#include "ignition/sensors/Noise.hh"
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/SensorTypes.hh"
+#include "gz/sensors/ImuSensor.hh"
+#include "gz/sensors/Noise.hh"
+#include "gz/sensors/SensorFactory.hh"
+#include "gz/sensors/SensorTypes.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for ImuSensor
-class ignition::sensors::ImuSensorPrivate
+class gz::sensors::ImuSensorPrivate
 {
   /// \brief node to create publisher
   public: transport::Node node;

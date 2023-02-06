@@ -17,10 +17,10 @@
 
 #include <gtest/gtest.h>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Filesystem.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/CameraSensor.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Filesystem.hh>
+#include <gz/sensors/Manager.hh>
+#include <gz/sensors/CameraSensor.hh>
 
 // TODO(WilliamLewww): Remove these pragmas once ign-rendering is disabling the
 // warnings
@@ -28,9 +28,9 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
-#include <ignition/rendering/RenderEngine.hh>
-#include <ignition/rendering/RenderingIface.hh>
-#include <ignition/rendering/Scene.hh>
+#include <gz/rendering/RenderEngine.hh>
+#include <gz/rendering/RenderingIface.hh>
+#include <gz/rendering/Scene.hh>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -54,7 +54,7 @@ class DistortionCameraSensorTest: public testing::Test,
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 
   // Create a Camera sensor from a SDF and gets a image message
@@ -65,7 +65,7 @@ void DistortionCameraSensorTest::ImagesWithBuiltinSDF(
     const std::string &_renderEngine)
 {
   // get the darn test data
-  std::string path = ignition::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "distortion_camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
@@ -86,7 +86,7 @@ void DistortionCameraSensorTest::ImagesWithBuiltinSDF(
   }
 
   // Setup ign-rendering with an empty scene
-  auto *engine = ignition::rendering::engine(_renderEngine);
+  auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
     igndbg << "Engine '" << _renderEngine
@@ -94,13 +94,13 @@ void DistortionCameraSensorTest::ImagesWithBuiltinSDF(
     return;
   }
 
-  ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
 
   // do the test
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
-  ignition::sensors::CameraSensor *sensor =
-      mgr.CreateSensor<ignition::sensors::CameraSensor>(sensorPtr);
+  gz::sensors::CameraSensor *sensor =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtr);
   ASSERT_NE(sensor, nullptr);
   sensor->SetScene(scene);
 
@@ -132,7 +132,7 @@ void DistortionCameraSensorTest::ImagesWithBuiltinSDF(
 
   // Clean up
   engine->DestroyScene(scene);
-  ignition::rendering::unloadEngine(engine->Name());
+  gz::rendering::unloadEngine(engine->Name());
 }
 
 //////////////////////////////////////////////////
@@ -142,12 +142,12 @@ TEST_P(DistortionCameraSensorTest, ImagesWithBuiltinSDF)
 }
 
 INSTANTIATE_TEST_CASE_P(DistortionCameraSensor, DistortionCameraSensorTest,
-    RENDER_ENGINE_VALUES, ignition::rendering::PrintToStringParam());
+    RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-  ignition::common::Console::SetVerbosity(4);
+  gz::common::Console::SetVerbosity(4);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

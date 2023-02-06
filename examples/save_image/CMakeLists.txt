@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(ignition-sensors-camera-demo)
 
-# Find the Ignition Libraries used directly by the example
+# Find the Gazebo Libraries used directly by the example
 find_package(ignition-rendering6 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
 find_package(ignition-sensors6 REQUIRED COMPONENTS rendering camera)
 

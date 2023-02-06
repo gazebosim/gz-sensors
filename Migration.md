@@ -63,7 +63,7 @@ release will remove the deprecated code.
    + ***Deprecation*** virtual bool PublishLidarScan(const ignition::common::Time &)
    + ***Replacement*** virtual bool PublishLidarScan(const std::chrono::steady_clock::duration &)
 
-## Ignition Sensors 2.X to 3.X
+## Gazebo Sensors 2.X to 3.X
 
 ### Additions
 
@@ -81,7 +81,7 @@ and header files. Similarly, noise models for rendering sensors need be created
 using the new ImageNoiseFactory class instead of NoiseFactory by including
 ImageNoise.hh.
 
-## Ignition Sensors 1.X to 2.X
+## Gazebo Sensors 1.X to 2.X
 
 ### Additions
 
@@ -100,16 +100,16 @@ ImageNoise.hh.
    + ***Replacement*** virtual void Load(const sdf::Noise &_sdf)
 
 1. **include/sensors/Events.hh**
-    + ***Deprecation:*** public: static ignition::common::ConnectionPtr ConnectSceneChangeCallback(std::function<void(const ignition::rendering::ScenePtr &)>)
+    + ***Deprecation:*** public: static gz::common::ConnectionPtr ConnectSceneChangeCallback(std::function<void(const gz::rendering::ScenePtr &)>)
     + ***Replacement:*** RenderingEvents::ConnectSceneChangeCallback
 
 1. **include/sensors/Manager.hh**
-    + ***Deprecation:*** public: bool Init(ignition::rendering::ScenePtr);
+    + ***Deprecation:*** public: bool Init(gz::rendering::ScenePtr);
     + ***Replacement:***  RenderingSensor::SetScene
-    + ***Deprecation:*** public: void SetRenderingScene(ignition::rendering::ScenePtr
+    + ***Deprecation:*** public: void SetRenderingScene(gz::rendering::ScenePtr
     + ***Replacement:***  RenderingSensor::SetScene
 
-    + ***Deprecation:*** public: ignition::rendering::ScenePtr RenderingScene() const
+    + ***Deprecation:*** public: gz::rendering::ScenePtr RenderingScene() const
     + ***Replacement:*** RenderingSensor::Scene()
 
 1. **include/sensors/Noise.hh**

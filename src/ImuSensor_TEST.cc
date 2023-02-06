@@ -19,7 +19,7 @@
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs.hh>
+#include <gz/msgs.hh>
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
@@ -27,14 +27,14 @@
 #include <gtest/gtest.h>
 #include <sdf/sdf.hh>
 
-#include <ignition/math/Helpers.hh>
+#include <gz/math/Helpers.hh>
 
-#include <ignition/common/Console.hh>
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/ImuSensor.hh>
-#include <ignition/sensors/Manager.hh>
+#include <gz/common/Console.hh>
+#include <gz/sensors/Export.hh>
+#include <gz/sensors/ImuSensor.hh>
+#include <gz/sensors/Manager.hh>
 
-using namespace ignition;
+using namespace gz;
 
 // Default values for use with ADIS16448 IMU
 // These values come from the Rotors default values:
