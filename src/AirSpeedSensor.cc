@@ -185,7 +185,7 @@ bool AirSpeedSensor::Update(
     diff_pressure =
       this->dataPtr->noises[AIR_SPEED_NOISE_PASCALS]->Apply(
           diff_pressure);
-    msg.set_pressure_noise(this->dataPtr->noises[AIR_SPEED_NOISE_PASCALS]);
+    msg.mutable_pressure_noise()->set_type(msgs::SensorNoise::GAUSSIAN);
   }
 
   msg.set_diff_pressure(diff_pressure * 100.0f);

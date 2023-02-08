@@ -15,6 +15,7 @@ set(dri_tests
 
 set(tests
   air_pressure.cc
+  air_speed.cc
   altimeter.cc
   force_torque.cc
   imu.cc
