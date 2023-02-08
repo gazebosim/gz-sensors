@@ -24,7 +24,7 @@
 #include <gz/utils/SuppressWarning.hh>
 
 #include <gz/sensors/config.hh>
-#include <gz/sensors/air_pressure/Export.hh>
+#include <gz/sensors/air_speed/Export.hh>
 
 #include "gz/sensors/Sensor.hh"
 
@@ -38,9 +38,9 @@ namespace gz
     /// \brief forward declarations
     class AirSpeedSensorPrivate;
 
-    /// \brief AirSensor Sensor Class
+    /// \brief AirSpeed Sensor Class
     ///
-    /// A sensor that reports air pressure readings.
+    /// A sensor that reports air speed through differential pressure readings.
     class AirSpeedSensor :
       public Sensor
     {

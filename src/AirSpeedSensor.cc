@@ -38,16 +38,17 @@
 using namespace gz;
 using namespace sensors;
 
-static constexpr double kPressureOneAtmospherePascals = 101325.0;
-// static constexpr double kSeaLevelTempKelvin = 288.15;
+static constexpr auto kDefaultHomeAltAmsl = 0.0f; // altitude AMSL see level [m]
 
-static constexpr auto DEFAULT_HOME_ALT_AMSL = 0.0f; // altitude AMSL see level [m]
-
-// international standard atmosphere (troposphere model - valid up to 11km) see [1]
-static constexpr auto TEMPERATURE_MSL = 288.15f; // temperature at MSL [K] (15 [C])
-static constexpr auto PRESSURE_MSL = 101325.0f; // pressure at MSL [Pa]
-static constexpr auto LAPSE_RATE = 0.0065f; // reduction in temperature with altitude for troposphere [K/m]
-static constexpr auto AIR_DENSITY_MSL = 1.225f; // air density at MSL [kg/m^3]
+// international standard atmosphere (troposphere model - valid up to 11km).
+// temperature at MSL [K] (15 [C])
+static constexpr auto kTemperaturMsl = 288.15f;
+// pressure at MSL [Pa]
+static constexpr auto kPressureMsl = 101325.0f;
+// reduction in temperature with altitude for troposphere [K/m]
+static constexpr auto kLapseRate = 0.0065f;
+// air density at MSL [kg/m^3]
+static constexpr auto kAirDensityMsl = 1.225f;
 
 /// \brief Private data for AirSpeedSensor
 class gz::sensors::AirSpeedSensorPrivate
@@ -55,7 +56,7 @@ class gz::sensors::AirSpeedSensorPrivate
   /// \brief node to create publisher
   public: transport::Node node;
 
-  /// \brief publisher to publish air pressure messages.
+  /// \brief publisher to publish air speed messages.
   public: transport::Node::Publisher pub;
 
   /// \brief true if Load() has been called and was successful
@@ -64,7 +65,7 @@ class gz::sensors::AirSpeedSensorPrivate
   /// \brief Pressure in pascals.
   public: double pressure = 0.0;
 
-  /// \brief Pose of the sensor
+  /// \brief Velocity of the air coming from the sensor
   public: gz::math::Vector3d vel;
 
   /// \brief Noise added to sensor data
@@ -160,16 +161,22 @@ bool AirSpeedSensor::Update(
   frame->set_key("frame_id");
   frame->add_value(this->FrameId());
 
-  const float alt_rel = static_cast<float>(this->Pose().Pos().Z()); // Z-component from ENU
-  const float alt_amsl = (float)DEFAULT_HOME_ALT_AMSL + alt_rel;
-  const float temperature_local = TEMPERATURE_MSL - LAPSE_RATE * alt_amsl;
-  const float density_ratio = powf(TEMPERATURE_MSL / temperature_local , 4.256f);
-  const float air_density = AIR_DENSITY_MSL / density_ratio;
+  // compute the air density at the local altitude / temperature
+  // Z-component from ENU
+  const float alt_rel = static_cast<float>(this->Pose().Pos().Z());
+  const float alt_amsl = kDefaultHomeAltAmsl + alt_rel;
+  const float temperature_local = kTemperaturMsl - kLapseRate * alt_amsl;
+  const float density_ratio = powf(kTemperaturMsl / temperature_local , 4.256f);
+  const float air_density = kAirDensityMsl / density_ratio;
 
-	gz::math::Vector3d wind_vel_{0, 0, 0};
-  gz::math::Quaterniond veh_q_world_to_body = this->Pose().Rot();
-	gz::math::Vector3d air_vel_in_body_ = this->dataPtr->vel - veh_q_world_to_body.RotateVectorReverse(wind_vel_);
-	double diff_pressure = gz::math::sgn(air_vel_in_body_.X()) * 0.005f * air_density  * air_vel_in_body_.X() * air_vel_in_body_.X();
+  math::Vector3d wind_vel_{0, 0, 0};
+  math::Quaterniond veh_q_world_to_body = this->Pose().Rot();
+
+  // calculate differential pressure + noise in hPa
+  math::Vector3d air_vel_in_body_ = this->dataPtr->vel -
+    veh_q_world_to_body.RotateVectorReverse(wind_vel_);
+  float diff_pressure = math::sgn(air_vel_in_body_.X()) * 0.005f * air_density
+    * air_vel_in_body_.X() * air_vel_in_body_.X();
 
   // Apply pressure noise
   if (this->dataPtr->noises.find(AIR_SPEED_NOISE_PASCALS) !=
@@ -178,9 +185,10 @@ bool AirSpeedSensor::Update(
     diff_pressure =
       this->dataPtr->noises[AIR_SPEED_NOISE_PASCALS]->Apply(
           diff_pressure);
+    msg.set_pressure_noise(this->dataPtr->noises[AIR_SPEED_NOISE_PASCALS]);
   }
 
-  msg.set_diff_pressure(diff_pressure * 100);
+  msg.set_diff_pressure(diff_pressure * 100.0f);
   msg.set_temperature(temperature_local);
 
   // publish
