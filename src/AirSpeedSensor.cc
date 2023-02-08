@@ -38,8 +38,8 @@
 using namespace gz;
 using namespace sensors;
 
-static constexpr auto kDefaultHomeAltAmsl = 0.0f; // altitude AMSL see level [m]
-
+// altitude AMSL see level [m]
+static constexpr auto kDefaultHomeAltAmsl = 0.0f;
 // international standard atmosphere (troposphere model - valid up to 11km).
 // temperature at MSL [K] (15 [C])
 static constexpr auto kTemperaturMsl = 288.15f;
