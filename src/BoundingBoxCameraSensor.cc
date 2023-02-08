@@ -384,6 +384,12 @@ bool BoundingBoxCameraSensor::Update(
     return false;
   }
 
+  if (this->HasInfoConnections())
+  {
+    // publish the camera info message
+    this->PublishInfo(_now);
+  }
+
   // don't render if there are no subscribers nor saving
   if (!this->dataPtr->imagePublisher.HasConnections() &&
     !this->dataPtr->boxesPublisher.HasConnections() &&
@@ -503,7 +509,6 @@ bool BoundingBoxCameraSensor::Update(
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   // Publish
-  this->PublishInfo(_now);
   if (this->dataPtr->type == rendering::BoundingBoxType::BBT_BOX3D)
   {
     this->AddSequence(boxes3DMsg.mutable_header(), "boundingboxes");
@@ -673,5 +678,6 @@ bool BoundingBoxCameraSensor::HasConnections() const
   return (this->dataPtr->imagePublisher &&
       this->dataPtr->imagePublisher.HasConnections()) ||
       (this->dataPtr->boxesPublisher &&
-      this->dataPtr->boxesPublisher.HasConnections());
+      this->dataPtr->boxesPublisher.HasConnections()) ||
+      this->HasInfoConnections();
 }
