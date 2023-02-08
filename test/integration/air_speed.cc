@@ -244,7 +244,7 @@ TEST_F(AirSpeedSensorTest, Topic)
 
     EXPECT_EQ("/topic_with_spaces/characters", airSpeed->Topic());
   }
-  
+
   // Invalid topic
   {
     const std::string topic = "@@@";
