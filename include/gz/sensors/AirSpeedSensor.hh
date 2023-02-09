@@ -41,7 +41,7 @@ namespace gz
     /// \brief AirSpeed Sensor Class
     ///
     /// A sensor that reports air speed through differential pressure readings.
-    class AirSpeedSensor :
+    class GZ_SENSORS_AIR_SPEED_VISIBLE AirSpeedSensor :
       public Sensor
     {
       /// \brief constructor

@@ -26,7 +26,7 @@
 #include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
-/// \brief Helper function to create an air pressure sdf element
+/// \brief Helper function to create an air speed sdf element
 sdf::ElementPtr AirSpeedToSdf(const std::string &_name,
     const gz::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
@@ -58,7 +58,7 @@ sdf::ElementPtr AirSpeedToSdf(const std::string &_name,
     ->GetElement("sensor");
 }
 
-/// \brief Helper function to create an air pressure sdf element with noise
+/// \brief Helper function to create an air speed sdf element with noise
 sdf::ElementPtr AirSpeedToSdfWithNoise(const std::string &_name,
     const gz::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
@@ -99,7 +99,7 @@ sdf::ElementPtr AirSpeedToSdfWithNoise(const std::string &_name,
     ->GetElement("sensor");
 }
 
-/// \brief Test air pressure sensor
+/// \brief Test air speed sensor
 class AirSpeedSensorTest: public testing::Test
 {
   // Documentation inherited
