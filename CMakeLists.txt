@@ -84,7 +84,7 @@ endif()
 
 #--------------------------------------
 # Find gz-msgs
-gz_find_package(gz-msgs9 REQUIRED)
+gz_find_package(gz-msgs9 REQUIRED VERSION 9.3)
 set(GZ_MSGS_VER ${gz-msgs9_VERSION_MAJOR})
 
 #--------------------------------------
