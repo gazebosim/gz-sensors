@@ -356,6 +356,24 @@ bool CameraSensor::CreateCamera()
     cameraSdf->SetLensProjectionCx(intrinsicMatrix(0, 2));
     cameraSdf->SetLensProjectionCy(intrinsicMatrix(1, 2));
   }
+  // set custom projection matrix based on projection param specified in sdf
+  else
+  {
+    // tx and ty are not used
+    double fx = cameraSdf->LensProjectionFx();
+    double fy = cameraSdf->LensProjectionFy();
+    double cx = cameraSdf->LensProjectionCx();
+    double cy = cameraSdf->LensProjectionCy();
+    double s = 0;
+
+    auto projectionMatrix = CameraSensorPrivate::BuildProjectionMatrix(
+        this->dataPtr->camera->ImageWidth(),
+        this->dataPtr->camera->ImageHeight(),
+        fx, fy, cx, cy, s,
+        this->dataPtr->camera->NearClipPlane(),
+        this->dataPtr->camera->FarClipPlane());
+    this->dataPtr->camera->SetProjectionMatrix(projectionMatrix);
+  }
 
   // Populate camera info topic
   this->PopulateInfo(cameraSdf);
