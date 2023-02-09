@@ -703,12 +703,7 @@ void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
   unsigned int g3Sum = 0u;
   unsigned int b3Sum = 0u;
   unsigned int step = width * bpp;
-
-  ignition::common::Image i1;
-  i1.SetFromData(img1, width, height,
-    ignition::common::Image::RGB_INT8);
-  i1.SavePNG("img1.png");
-
+  
   // get sum of each color channel
   // all cameras should just see blue colors
   for (unsigned int i = 0u; i < height; ++i)
