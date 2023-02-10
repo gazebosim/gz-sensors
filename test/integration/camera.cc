@@ -659,35 +659,35 @@ void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
   // Camera sensor without projection tag
   // account for error converting gl projection values back to
   // cv projection values
-  double error = 1;
+  double error = 1.0;
   EXPECT_EQ(camera1Info.width(), width);
   EXPECT_EQ(camera1Info.height(), width);
   EXPECT_NEAR(camera1Info.projection().p(0), 866.23, error);
   EXPECT_NEAR(camera1Info.projection().p(5), 866.23, error);
-  EXPECT_DOUBLE_EQ(camera1Info.projection().p(2), 500);
-  EXPECT_DOUBLE_EQ(camera1Info.projection().p(6), 500);
-  EXPECT_DOUBLE_EQ(camera1Info.projection().p(3), 0);
-  EXPECT_DOUBLE_EQ(camera1Info.projection().p(7), 0);
+  EXPECT_DOUBLE_EQ(camera1Info.projection().p(2), 500.0);
+  EXPECT_DOUBLE_EQ(camera1Info.projection().p(6), 500.0);
+  EXPECT_DOUBLE_EQ(camera1Info.projection().p(3), 0.0);
+  EXPECT_DOUBLE_EQ(camera1Info.projection().p(7), 0.0);
 
   // Camera sensor with projection tag
   EXPECT_EQ(camera2Info.width(), height);
   EXPECT_EQ(camera2Info.height(), height);
   EXPECT_DOUBLE_EQ(camera2Info.projection().p(0), 866.23);
   EXPECT_DOUBLE_EQ(camera2Info.projection().p(5), 866.23);
-  EXPECT_DOUBLE_EQ(camera2Info.projection().p(2), 500);
-  EXPECT_DOUBLE_EQ(camera2Info.projection().p(6), 500);
-  EXPECT_DOUBLE_EQ(camera2Info.projection().p(3), 300);
-  EXPECT_DOUBLE_EQ(camera2Info.projection().p(7), 200);
+  EXPECT_DOUBLE_EQ(camera2Info.projection().p(2), 500.0);
+  EXPECT_DOUBLE_EQ(camera2Info.projection().p(6), 500.0);
+  EXPECT_DOUBLE_EQ(camera2Info.projection().p(3), 300.0);
+  EXPECT_DOUBLE_EQ(camera2Info.projection().p(7), 200.0);
 
   // Camera sensor with different projection tag
   EXPECT_EQ(camera3Info.width(), width);
   EXPECT_EQ(camera3Info.height(), height);
-  EXPECT_DOUBLE_EQ(camera3Info.projection().p(0), 900);
-  EXPECT_DOUBLE_EQ(camera3Info.projection().p(5), 900);
-  EXPECT_DOUBLE_EQ(camera3Info.projection().p(2), 501);
-  EXPECT_DOUBLE_EQ(camera3Info.projection().p(6), 501);
-  EXPECT_DOUBLE_EQ(camera3Info.projection().p(3), 0);
-  EXPECT_DOUBLE_EQ(camera3Info.projection().p(7), 0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(0), 900.0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(5), 900.0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(2), 501.0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(6), 501.0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(3), 0.0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(7), 0.0);
 
   unsigned int r1Sum = 0u;
   unsigned int g1Sum = 0u;
