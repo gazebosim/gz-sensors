@@ -353,12 +353,12 @@ cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(image-listener)
 
 # Find the Gazebo Libraries used directly by the example
-find_package(gz-msgs9 REQUIRED)
-find_package(gz-transport12 REQUIRED)
+find_package(gz-msgs10 REQUIRED)
+find_package(gz-transport13 REQUIRED)
 
 add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} PUBLIC gz-msgs9 gz-transport12)
-target_include_directories(${PROJECT_NAME} PUBLIC ${gz_msgs9_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PUBLIC gz-msgs10 gz-transport13)
+target_include_directories(${PROJECT_NAME} PUBLIC ${gz_msgs10_INCLUDE_DIRS})
 ```
 
 Although most of the code above is described in the comments, let's go over the key points again:
