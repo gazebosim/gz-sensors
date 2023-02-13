@@ -78,6 +78,12 @@ namespace gz
       public: ~SensorFactory();
 
       /// \brief Create a sensor from a SDF DOM object with a known sensor type.
+      ///
+      ///   This creates sensors by looking at the given SDF DOM object.
+      ///   Sensors created with this API offer an gz-transport interface.
+      ///   If you need a direct C++ interface to the data, you must get the
+      ///   sensor pointer and cast to the correct type.
+      ///
       /// \sa Sensor()
       /// \param[in] _sdf SDF Sensor DOM object.
       /// \tparam SensorType Sensor type
@@ -157,6 +163,12 @@ namespace gz
               }
 
       /// \brief Create a sensor from SDF without a known sensor type.
+      ///
+      ///   This creates sensors by looking at the given sdf element.
+      ///   Sensors created with this API offer an gz-transport interface.
+      ///   If you need a direct C++ interface to the data, you must get the
+      ///   sensor pointer and cast to the correct type.
+      ///
       /// \sa Sensor()
       /// \param[in] _sdf pointer to the sdf element
       /// \return Null, as the function is deprecated.
