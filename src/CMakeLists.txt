@@ -154,6 +154,10 @@ gz_add_component(altimeter SOURCES ${altimeter_sources} GET_TARGET_NAME altimete
 
 set(air_pressure_sources AirPressureSensor.cc)
 gz_add_component(air_pressure SOURCES ${air_pressure_sources} GET_TARGET_NAME air_pressure_target)
+
+set(air_speed_sources AirSpeedSensor.cc)
+gz_add_component(air_speed SOURCES ${air_speed_sources} GET_TARGET_NAME air_speed_target)
+
 set(force_torque_sources ForceTorqueSensor.cc)
 gz_add_component(force_torque SOURCES ${force_torque_sources} GET_TARGET_NAME force_torque_target)
 
@@ -222,4 +226,3 @@ gz_build_tests(TYPE UNIT SOURCES ${gtest_sources} LIB_DEPS ${rendering_target})
 gz_build_tests(TYPE UNIT SOURCES Lidar_TEST.cc LIB_DEPS ${lidar_target})
 gz_build_tests(TYPE UNIT SOURCES Camera_TEST.cc LIB_DEPS ${camera_target})
 gz_build_tests(TYPE UNIT SOURCES ImuSensor_TEST.cc LIB_DEPS ${imu_target})
-

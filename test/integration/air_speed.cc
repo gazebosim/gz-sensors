@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Open Source Robotics Foundation
+ * Copyright (C) 2023 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@
 #include <sdf/sdf.hh>
 
 #include <gz/math/Helpers.hh>
-#include <gz/sensors/AirPressureSensor.hh>
+#include <gz/sensors/AirSpeedSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 
 #include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
-/// \brief Helper function to create an air pressure sdf element
-sdf::ElementPtr AirPressureToSdf(const std::string &_name,
+/// \brief Helper function to create an air speed sdf element
+sdf::ElementPtr AirSpeedToSdf(const std::string &_name,
     const gz::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
     const bool _visualize)
@@ -38,7 +38,7 @@ sdf::ElementPtr AirPressureToSdf(const std::string &_name,
     << "<sdf version='1.6'>"
     << " <model name='m1'>"
     << "  <link name='link1'>"
-    << "    <sensor name='" << _name << "' type='air_pressure'>"
+    << "    <sensor name='" << _name << "' type='air_speed'>"
     << "      <pose>" << _pose << "</pose>"
     << "      <topic>" << _topic << "</topic>"
     << "      <update_rate>"<< _updateRate <<"</update_rate>"
@@ -58,8 +58,8 @@ sdf::ElementPtr AirPressureToSdf(const std::string &_name,
     ->GetElement("sensor");
 }
 
-/// \brief Helper function to create an air pressure sdf element with noise
-sdf::ElementPtr AirPressureToSdfWithNoise(const std::string &_name,
+/// \brief Helper function to create an air speed sdf element with noise
+sdf::ElementPtr AirSpeedToSdfWithNoise(const std::string &_name,
     const gz::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
     const bool _visualize, double _mean, double _stddev, double _bias)
@@ -70,13 +70,13 @@ sdf::ElementPtr AirPressureToSdfWithNoise(const std::string &_name,
     << "<sdf version='1.6'>"
     << " <model name='m1'>"
     << "  <link name='link1'>"
-    << "    <sensor name='" << _name << "' type='air_pressure'>"
+    << "    <sensor name='" << _name << "' type='air_speed'>"
     << "      <pose>" << _pose << "</pose>"
     << "      <topic>" << _topic << "</topic>"
     << "      <update_rate>"<< _updateRate <<"</update_rate>"
     << "      <alwaysOn>" << _alwaysOn <<"</alwaysOn>"
     << "      <visualize>" << _visualize << "</visualize>"
-    << "      <air_pressure>"
+    << "      <air_speed>"
     << "        <pressure>"
     << "          <noise type='gaussian'>"
     << "            <mean>" << _mean << "</mean>"
@@ -84,7 +84,7 @@ sdf::ElementPtr AirPressureToSdfWithNoise(const std::string &_name,
     << "            <bias_mean>" << _bias << "</bias_mean>"
     << "          </noise>"
     << "        </pressure>"
-    << "      </air_pressure>"
+    << "      </air_speed>"
     << "    </sensor>"
     << "  </link>"
     << " </model>"
@@ -99,8 +99,8 @@ sdf::ElementPtr AirPressureToSdfWithNoise(const std::string &_name,
     ->GetElement("sensor");
 }
 
-/// \brief Test air pressure sensor
-class AirPressureSensorTest: public testing::Test
+/// \brief Test air speed sensor
+class AirSpeedSensorTest: public testing::Test
 {
   // Documentation inherited
   protected: void SetUp() override
@@ -110,12 +110,12 @@ class AirPressureSensorTest: public testing::Test
 };
 
 /////////////////////////////////////////////////
-TEST_F(AirPressureSensorTest, CreateAirPressure)
+TEST_F(AirSpeedSensorTest, CreateAirSpeed)
 {
   // Create SDF describing an air_pressure sensor
-  const std::string name = "TestAirPressure";
-  const std::string topic = "/gz/sensors/test/air_pressure";
-  const std::string topicNoise = "/gz/sensors/test/air_pressure_noise";
+  const std::string name = "TestAirSpeed";
+  const std::string topic = "/gz/sensors/test/air_speed";
+  const std::string topicNoise = "/gz/sensors/test/air_speed_noise";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
@@ -123,25 +123,25 @@ TEST_F(AirPressureSensorTest, CreateAirPressure)
   // Create sensor SDF
   gz::math::Pose3d sensorPose(gz::math::Vector3d(0.25, 0.0, 0.5),
       gz::math::Quaterniond::Identity);
-  sdf::ElementPtr airPressureSdf = AirPressureToSdf(name, sensorPose,
+  sdf::ElementPtr airSpeedSdf = AirSpeedToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
-  sdf::ElementPtr airPressureSdfNoise = AirPressureToSdfWithNoise(name,
+  sdf::ElementPtr airSpeedSdfNoise = AirSpeedToSdfWithNoise(name,
       sensorPose, updateRate, topicNoise, alwaysOn, visualize, 1.0, 0.2, 10.0);
 
   // create the sensor using sensor factory
   gz::sensors::SensorFactory sf;
-  std::unique_ptr<gz::sensors::AirPressureSensor> sensor =
-      sf.CreateSensor<gz::sensors::AirPressureSensor>(airPressureSdf);
+  std::unique_ptr<gz::sensors::AirSpeedSensor> sensor =
+      sf.CreateSensor<gz::sensors::AirSpeedSensor>(airSpeedSdf);
   ASSERT_NE(nullptr, sensor);
 
   EXPECT_EQ(name, sensor->Name());
   EXPECT_EQ(topic, sensor->Topic());
   EXPECT_DOUBLE_EQ(updateRate, sensor->UpdateRate());
 
-  std::unique_ptr<gz::sensors::AirPressureSensor> sensorNoise =
-      sf.CreateSensor<gz::sensors::AirPressureSensor>(
-          airPressureSdfNoise);
+  std::unique_ptr<gz::sensors::AirSpeedSensor> sensorNoise =
+      sf.CreateSensor<gz::sensors::AirSpeedSensor>(
+          airSpeedSdfNoise);
   ASSERT_NE(nullptr, sensorNoise);
 
   EXPECT_EQ(name, sensorNoise->Name());
@@ -150,10 +150,10 @@ TEST_F(AirPressureSensorTest, CreateAirPressure)
 }
 
 /////////////////////////////////////////////////
-TEST_F(AirPressureSensorTest, SensorReadings)
+TEST_F(AirSpeedSensorTest, SensorReadings)
 {
   // Create SDF describing an air_pressure sensor
-  const std::string name = "TestAirPressure";
+  const std::string name = "TestAirSpeed";
   const std::string topic = "/gz/sensors/test/air_pressure";
   const std::string topicNoise = "/gz/sensors/test/air_pressure_noise";
   const double updateRate = 30;
@@ -163,53 +163,39 @@ TEST_F(AirPressureSensorTest, SensorReadings)
   // Create sensor SDF
   gz::math::Pose3d sensorPose(gz::math::Vector3d(0.25, 0.0, 0.5),
       gz::math::Quaterniond::Identity);
-  sdf::ElementPtr airPressureSdf = AirPressureToSdf(name, sensorPose,
+  sdf::ElementPtr airSpeedSdf = AirSpeedToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
-  sdf::ElementPtr airPressureSdfNoise = AirPressureToSdfWithNoise(name,
+  sdf::ElementPtr airSpeedSdfNoise = AirSpeedToSdfWithNoise(name,
       sensorPose, updateRate, topicNoise, alwaysOn, visualize, 1.0, 0.2, 10.0);
 
   // create the sensor using sensor factory
-  // try creating without specifying the sensor type and then cast it
   gz::sensors::SensorFactory sf;
-  auto sensor = sf.CreateSensor<gz::sensors::AirPressureSensor>(
-      airPressureSdf);
+  auto sensor = sf.CreateSensor<gz::sensors::AirSpeedSensor>(
+      airSpeedSdf);
   ASSERT_NE(nullptr, sensor);
   EXPECT_FALSE(sensor->HasConnections());
 
-  auto sensorNoise = sf.CreateSensor<gz::sensors::AirPressureSensor>(
-      airPressureSdfNoise);
+  auto sensorNoise = sf.CreateSensor<gz::sensors::AirSpeedSensor>(
+      airSpeedSdfNoise);
   ASSERT_NE(nullptr, sensorNoise);
-
-  // verify initial readings
-  EXPECT_DOUBLE_EQ(0.0, sensor->ReferenceAltitude());
-
-  // verify initial readings
-  EXPECT_DOUBLE_EQ(0.0, sensorNoise->ReferenceAltitude());
-
-  // set state and verify readings
-  double vertRef = 1.0;
-  sensor->SetReferenceAltitude(vertRef);
-  sensorNoise->SetReferenceAltitude(vertRef);
-  EXPECT_DOUBLE_EQ(vertRef, sensor->ReferenceAltitude());
-  EXPECT_DOUBLE_EQ(vertRef, sensorNoise->ReferenceAltitude());
 
   sensor->SetPose(
       gz::math::Pose3d(0, 0, 1.5, 0, 0, 0) * sensorNoise->Pose());
 
   // verify msg received on the topic
-  WaitForMessageTestHelper<gz::msgs::FluidPressure> msgHelper(topic);
+  WaitForMessageTestHelper<gz::msgs::AirSpeedSensor> msgHelper(topic);
   EXPECT_TRUE(sensor->HasConnections());
   sensor->Update(std::chrono::steady_clock::duration(std::chrono::seconds(1)));
   EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
   auto msg = msgHelper.Message();
   EXPECT_EQ(1, msg.header().stamp().sec());
   EXPECT_EQ(0, msg.header().stamp().nsec());
-  EXPECT_DOUBLE_EQ(101288.9657925308, msg.pressure());
-  EXPECT_DOUBLE_EQ(0.0, msg.variance());
+  EXPECT_DOUBLE_EQ(0.0, msg.diff_pressure());
+  EXPECT_DOUBLE_EQ(288.1369934082031, msg.temperature());
 
   // verify msg with noise received on the topic
-  WaitForMessageTestHelper<gz::msgs::FluidPressure>
+  WaitForMessageTestHelper<gz::msgs::AirSpeedSensor>
     msgHelperNoise(topicNoise);
   sensorNoise->Update(std::chrono::steady_clock::duration(
       std::chrono::seconds(1)), false);
@@ -217,14 +203,14 @@ TEST_F(AirPressureSensorTest, SensorReadings)
   auto msgNoise = msgHelperNoise.Message();
   EXPECT_EQ(1, msg.header().stamp().sec());
   EXPECT_EQ(0, msg.header().stamp().nsec());
-  EXPECT_FALSE(gz::math::equal(101288.9657925308, msgNoise.pressure()));
-  EXPECT_DOUBLE_EQ(sqrt(0.2), msgNoise.variance());
+  EXPECT_FALSE(gz::math::equal(0.0, msgNoise.diff_pressure()));
+  EXPECT_DOUBLE_EQ(288.14675903320312, msgNoise.temperature());
 }
 
 /////////////////////////////////////////////////
-TEST_F(AirPressureSensorTest, Topic)
+TEST_F(AirSpeedSensorTest, Topic)
 {
-  const std::string name = "TestAirPressure";
+  const std::string name = "TestAirSpeed";
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
@@ -236,37 +222,37 @@ TEST_F(AirPressureSensorTest, Topic)
   // Default topic
   {
     const std::string topic;
-    auto airPressureSdf = AirPressureToSdf(name, sensorPose,
+    auto airSpeedSdf = AirSpeedToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto airPressure = factory.CreateSensor<
-        gz::sensors::AirPressureSensor>(airPressureSdf);
-    ASSERT_NE(nullptr, airPressure);
+    auto airSpeed = factory.CreateSensor<
+        gz::sensors::AirSpeedSensor>(airSpeedSdf);
+    ASSERT_NE(nullptr, airSpeed);
 
-    EXPECT_EQ("/air_pressure", airPressure->Topic());
+    EXPECT_EQ("/air_speed", airSpeed->Topic());
   }
 
   // Convert to valid topic
   {
     const std::string topic = "/topic with spaces/@~characters//";
-    auto airPressureSdf = AirPressureToSdf(name, sensorPose,
+    auto airSpeedSdf = AirSpeedToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
-    auto airPressure = factory.CreateSensor<
-        gz::sensors::AirPressureSensor>(airPressureSdf);
-    ASSERT_NE(nullptr, airPressure);
+    auto airSpeed = factory.CreateSensor<
+        gz::sensors::AirSpeedSensor>(airSpeedSdf);
+    ASSERT_NE(nullptr, airSpeed);
 
-    EXPECT_EQ("/topic_with_spaces/characters", airPressure->Topic());
+    EXPECT_EQ("/topic_with_spaces/characters", airSpeed->Topic());
   }
 
   // Invalid topic
   {
     const std::string topic = "@@@";
-    auto airPressureSdf = AirPressureToSdf(name, sensorPose,
+    auto airSpeedSdf = AirSpeedToSdf(name, sensorPose,
           updateRate, topic, alwaysOn, visualize);
 
     auto sensor = factory.CreateSensor<
-        gz::sensors::AirPressureSensor>(airPressureSdf);
+        gz::sensors::AirSpeedSensor>(airSpeedSdf);
     ASSERT_EQ(nullptr, sensor);
   }
 }
