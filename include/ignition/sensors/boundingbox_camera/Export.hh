@@ -15,5 +15,5 @@
  *
  */
 
-#include <gz/sensors/GaussianNoiseModel.hh>
+#include <gz/sensors/boundingbox_camera/Export.hh>
 #include <ignition/sensors/config.hh>

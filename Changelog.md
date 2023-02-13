@@ -385,6 +385,26 @@
 
 ## Gazebo Sensors 3
 
+### Gazebo Sensors 3.5.0 (2022-11-30)
+
+1. Add missing DEPENDS_ON_COMPONENTS parameters.
+    * [Pull request #262](https://github.com/gazebosim/gz-sensors/pull/262)
+
+1. Improved coverage Lidar.
+    * [Pull request #277](https://github.com/gazebosim/gz-sensors/pull/277)
+
+1. Improved noise coverage.
+    * [Pull request #278](https://github.com/gazebosim/gz-sensors/pull/278)
+
+1. Camera: configure projection matrix from SDFormat.
+    * [Pull request #249](https://github.com/gazebosim/gz-sensors/pull/249)
+
+1. RgbdCameraSensor.cc: fix include.
+    * [Pull request #280](https://github.com/gazebosim/gz-sensors/pull/280)
+
+1. Ignition to Gazebo header migration.
+    * [Pull request #260](https://github.com/gazebosim/gz-sensors/pull/260)
+
 ### Gazebo Sensors 3.4.0 (2022-08-16)
 
 1. Remove redundant namespace references
@@ -492,6 +512,14 @@
     * [BitBucket pull request 88](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/88)
 
 ## Gazebo Sensors 2
+
+### Gazebo Sensors 2.9.1 (2020-12-23)
+
+1. Fix version numbers in config.hh
+    * [Pull Request 42](https://github.com/gazebosim/gz-sensors/pull/42)
+
+1. Resolve codecheck issues
+    * [Pull Request 57](https://github.com/gazebosim/gz-sensors/pull/57)
 
 ### Gazebo Sensors 2.9.0 (2020-08-07)
 
