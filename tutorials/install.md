@@ -9,6 +9,7 @@ The source install instructions should be used if you need the very latest softw
 ### Ubuntu
 
 1. Setup your computer to accept software from packages.osrfoundation.org:
+
 ```{.sh}
 sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
 wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -

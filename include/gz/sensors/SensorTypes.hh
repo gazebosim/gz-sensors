@@ -205,6 +205,10 @@ namespace gz
       /// \sa NavSat
       NAVSAT_VERTICAL_VELOCITY_NOISE = 24,
 
+      /// \brief Air speed noise streams for the air speed sensor
+      /// \sa AirSpeedSensor
+      AIR_SPEED_NOISE_PASCALS = 25,
+
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not
       /// use this.

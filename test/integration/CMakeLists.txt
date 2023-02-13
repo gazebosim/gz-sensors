@@ -16,6 +16,7 @@ set(dri_tests
 
 set(tests
   air_pressure.cc
+  air_speed.cc
   altimeter.cc
   force_torque.cc
   imu.cc
@@ -59,6 +60,7 @@ gz_build_tests(TYPE INTEGRATION
     ${tests}
   LIB_DEPS
     ${PROJECT_LIBRARY_TARGET_NAME}-air_pressure
+    ${PROJECT_LIBRARY_TARGET_NAME}-air_speed
     ${PROJECT_LIBRARY_TARGET_NAME}-altimeter
     ${PROJECT_LIBRARY_TARGET_NAME}-force_torque
     ${PROJECT_LIBRARY_TARGET_NAME}-imu
@@ -66,4 +68,3 @@ gz_build_tests(TYPE INTEGRATION
     ${PROJECT_LIBRARY_TARGET_NAME}-magnetometer
     ${PROJECT_LIBRARY_TARGET_NAME}-navsat
 )
-

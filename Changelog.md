@@ -4,7 +4,65 @@
 
 ## Gazebo Sensors 7
 
-### Gazebo Sensors 7.0.0
+### Gazebo Sensors 7.1.0 (2023-02-09)
+
+1. Added airspeed sensor
+    * [Pull request #305](https://github.com/gazebosim/gz-sensors/pull/305)
+
+1. Add HasInfoConnections() method to expose infoPub.HasConnections() to child of CameraSensor class
+    * [Pull request #310](https://github.com/gazebosim/gz-sensors/pull/310)
+
+1. CameraInfo is now published when there's a CameraSensor subscriber
+    * [Pull request #308](https://github.com/gazebosim/gz-sensors/pull/308)
+
+1. Disable ogre tests on windows
+    * [Pull request #303](https://github.com/gazebosim/gz-sensors/pull/303)
+
+1. Add and Revert DopplerVelocityLog sensor
+    * [Pull request #302](https://github.com/gazebosim/gz-sensors/pull/302)
+    * [Pull request #290](https://github.com/gazebosim/gz-sensors/pull/290)
+
+1. Set custom projection matrix based on intrinsics params from SDF
+    * [Pull request #293](https://github.com/gazebosim/gz-sensors/pull/293)
+
+1. Renamed `ignition_frame_id` to `gz_frame_id` and fix warning
+    * [Pull request #296](https://github.com/gazebosim/gz-sensors/pull/296)
+
+1. Fix navsat frame id
+    * [Pull request #295](https://github.com/gazebosim/gz-sensors/pull/295)
+
+1. Fix compile time warning
+    * [Pull request #297](https://github.com/gazebosim/gz-sensors/pull/297)
+
+1. Update Camera Intrinsics in camera_info topic
+    * [Pull request #281](https://github.com/gazebosim/gz-sensors/pull/281)
+
+1. RgbdCameraSensor.cc: fix include
+    * [Pull request #280](https://github.com/gazebosim/gz-sensors/pull/280)
+
+1. Camera: configure projection matrix from SDFormat
+    * [Pull request #249](https://github.com/gazebosim/gz-sensors/pull/249)
+
+1. Improved noise coverage
+    * [Pull request #278](https://github.com/gazebosim/gz-sensors/pull/278)
+
+1. Improved coverage Lidar
+    * [Pull request #277](https://github.com/gazebosim/gz-sensors/pull/277)
+
+1. Add support for 16 bit image format
+    * [Pull request #276](https://github.com/gazebosim/gz-sensors/pull/276)
+
+1. Add optional optical frame id to camera sensors
+    * [Pull request #259](https://github.com/gazebosim/gz-sensors/pull/259)
+
+1. Add missing DEPENDS_ON_COMPONENTS parameters
+    * [Pull request #262](https://github.com/gazebosim/gz-sensors/pull/262)
+
+1. Remove redundant namespace references
+    * [Pull request #258](https://github.com/gazebosim/gz-sensors/pull/258)
+
+
+### Gazebo Sensors 7.0.0 (2022-09-27)
 
 1. Clear scene before exiting wide_angle_camera_test
     * [Pull request #266](https://github.com/gazebosim/ign-sensors/pull/266)
@@ -329,6 +387,26 @@
 
 ## Gazebo Sensors 3
 
+### Gazebo Sensors 3.5.0 (2022-11-30)
+
+1. Add missing DEPENDS_ON_COMPONENTS parameters.
+    * [Pull request #262](https://github.com/gazebosim/gz-sensors/pull/262)
+
+1. Improved coverage Lidar.
+    * [Pull request #277](https://github.com/gazebosim/gz-sensors/pull/277)
+
+1. Improved noise coverage.
+    * [Pull request #278](https://github.com/gazebosim/gz-sensors/pull/278)
+
+1. Camera: configure projection matrix from SDFormat.
+    * [Pull request #249](https://github.com/gazebosim/gz-sensors/pull/249)
+
+1. RgbdCameraSensor.cc: fix include.
+    * [Pull request #280](https://github.com/gazebosim/gz-sensors/pull/280)
+
+1. Ignition to Gazebo header migration.
+    * [Pull request #260](https://github.com/gazebosim/gz-sensors/pull/260)
+
 ### Gazebo Sensors 3.4.0 (2022-08-16)
 
 1. Remove redundant namespace references
@@ -436,6 +514,14 @@
     * [BitBucket pull request 88](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/88)
 
 ## Gazebo Sensors 2
+
+### Gazebo Sensors 2.9.1 (2020-12-23)
+
+1. Fix version numbers in config.hh
+    * [Pull Request 42](https://github.com/gazebosim/gz-sensors/pull/42)
+
+1. Resolve codecheck issues
+    * [Pull Request 57](https://github.com/gazebosim/gz-sensors/pull/57)
 
 ### Gazebo Sensors 2.9.0 (2020-08-07)
 
