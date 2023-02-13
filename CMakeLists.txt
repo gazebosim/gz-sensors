@@ -15,7 +15,7 @@ find_package(ignition-cmake2 2.13 REQUIRED)
 #============================================================================
 ign_configure_project(
   REPLACE_IGNITION_INCLUDE_PATH gz/sensors
-  VERSION_SUFFIX pre1
+  VERSION_SUFFIX
 )
 
 #============================================================================
