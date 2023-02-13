@@ -1,16 +1,39 @@
-## Ignition Sensors 6
+## Gazebo Sensors 6
 
-### Ignition Sensors 6.6.0 (2022-06-17)
+### Gazebo Sensors 6.7.0 (2023-02-13)
+
+1. Disable thermal camera test on MacOS.
+    * [Pull request #243](https://github.com/gazebosim/gz-sensors/pull/243)
+
+1. Add optional optical frame id to camera sensors.
+    * [Pull request #259](https://github.com/gazebosim/gz-sensors/pull/259)
+
+1. Add support for 16 bit image format.
+    * [Pull request #276](https://github.com/gazebosim/gz-sensors/pull/276)
+
+1. Fix navsat frame id.
+    * [Pull request #298](https://github.com/gazebosim/gz-sensors/pull/298)
+
+1. CameraInfo is now published when there's a CameraSensor subscriber.
+    * [Pull request #308](https://github.com/gazebosim/gz-sensors/pull/308)
+
+1. Add HasInfoConnections() method to expose infoPub.HasConnections() to
+   child of CameraSensor class.
+    * [Pull request #310](https://github.com/gazebosim/gz-sensors/pull/310)
+
+1. Forward port 3.5.0.
+
+### Gazebo Sensors 6.6.0 (2022-06-17)
 
 1. Add BoundingBox Sensor
     * [Pull request #136](https://github.com/gazebosim/gz-sensors/pull/136)
 
-### Ignition Sensors 6.5.0 (2022-05-24)
+### Gazebo Sensors 6.5.0 (2022-05-24)
 
 1. Add HasConnections function
     * [Pull request #222](https://github.com/ignitionrobotics/ign-sensors/pull/222)
 
-### Ignition Sensors 6.4.0 (2022-05-13)
+### Gazebo Sensors 6.4.0 (2022-05-13)
 
 1. Set lidar visibility mask
     * [Pull request #224](https://github.com/ignitionrobotics/ign-sensors/pull/224)
@@ -24,7 +47,7 @@
 1. Fix `<ignition_frame_id>` not working for GpuLidarSensor
     * [Pull request #218](https://github.com/ignitionrobotics/ign-sensors/pull/218)
 
-### Ignition Sensors 6.3.0 (2022-04-04)
+### Gazebo Sensors 6.3.0 (2022-04-04)
 
 1. IMU custom_rpy parent_frame should be set to 'world'
     * [Pull request #212](https://github.com/ignitionrobotics/ign-sensors/pull/212)
@@ -35,7 +58,7 @@
 1. Check if noise or distortion render pass is null
     * [Pull request #211](https://github.com/ignitionrobotics/ign-sensors/pull/211)
 
-### Ignition Sensors 6.2.0 (2022-03-29)
+### Gazebo Sensors 6.2.0 (2022-03-29)
 
 1. Distortion Camera Sensor
     * [Pull request #192](https://github.com/ignitionrobotics/ign-sensors/pull/192)
@@ -61,7 +84,7 @@
 1. Fix compiler warnings (CMP0072 and copy elision)
     * [Pull request #188](https://github.com/ignitionrobotics/ign-sensors/pull/188)
 
-### Ignition Sensors 6.1.0 (2022-01-04)
+### Gazebo Sensors 6.1.0 (2022-01-04)
 
 1. Add NavSat (GPS) sensor
     * [Pull request #177](https://github.com/ignitionrobotics/ign-sensors/pull/177)
@@ -72,7 +95,7 @@
 1. IMU ``custom_rpy``  tag parsing added
     * [Pull request #178](https://github.com/ignitionrobotics/ign-sensors/pull/178)
 
-### Ignition Sensors 6.0.1 (2021-11-12)
+### Gazebo Sensors 6.0.1 (2021-11-12)
 
 1. Disable GPU lidar tests on macOS
     * [Pull request #163](https://github.com/ignitionrobotics/ign-sensors/pull/163)
@@ -83,7 +106,7 @@
 1. Destroy rendering sensors when sensor is removed.
     * [Pull request #169](https://github.com/ignitionrobotics/ign-sensors/pull/169)
 
-### Ignition Sensors 6.0.0 (2021-09-30)
+### Gazebo Sensors 6.0.0 (2021-09-30)
 
 1. Trivial tutorial typo correction in Custom Sensors tutorial
     * [Pull request #160](https://github.com/ignitionrobotics/ign-sensors/pull/160)
@@ -112,11 +135,11 @@
 1. Joint Force-Torque Sensor
     * [Pull request #144](https://github.com/ignitionrobotics/ign-sensors/pull/144)
 
-## Ignition Sensors 5
+## Gazebo Sensors 5
 
-### Ignition Sensors 5.X.X
+### Gazebo Sensors 5.X.X
 
-### Ignition Sensors 5.1.0 (2021-10-15)
+### Gazebo Sensors 5.1.0 (2021-10-15)
 
 1. Depend on ign-msgs 7.2 and libSDFormat 11.3
     * [Pull request #154](https://github.com/ignitionrobotics/ign-sensors/pull/154)
@@ -145,7 +168,7 @@
 1. 👩‍🌾 Disable tests that consistently fail on macOS
     * [Pull request #121](https://github.com/ignitionrobotics/ign-sensors/pull/121)
 
-### Ignition Sensors 5.0.0 (2021-03-30)
+### Gazebo Sensors 5.0.0 (2021-03-30)
 
 1. Bump in edifice: ign-common4
     * [Pull request #85](https://github.com/ignitionrobotics/ign-sensors/pull/85)
@@ -162,11 +185,11 @@
 1. Documentation updates
     * [Pull request #116](https://github.com/ignitionrobotics/ign-sensors/pull/116)
 
-## Ignition Sensors 4
+## Gazebo Sensors 4
 
-### Ignition Sensors 4.X.X
+### Gazebo Sensors 4.X.X
 
-### Ignition Sensors 4.2.0 (2021-07-12)
+### Gazebo Sensors 4.2.0 (2021-07-12)
 
 1. Add API for enabling / disabling IMU orientation
     * [Pull request #142](https://github.com/ignitionrobotics/ign-sensors/pull/142)
@@ -201,7 +224,7 @@
 1. Removed issue & PR templates
     * [Pull request #99](https://github.com/ignitionrobotics/ign-sensors/pull/99)
 
-### Ignition Sensors 4.1.0 (2021-02-10)
+### Gazebo Sensors 4.1.0 (2021-02-10)
 
 1. Added issue and PR templates.
     * [Pull request 91](https://github.com/ignitionrobotics/ign-sensors/pull/91)
@@ -214,7 +237,7 @@
 
 1. All features up to version 3.2.0.
 
-### Ignition Sensors 4.0.0 (2020-09-30)
+### Gazebo Sensors 4.0.0 (2020-09-30)
 
 1. Fix link in README.md
     * [Pull request 51](https://github.com/ignitionrobotics/ign-sensors/pull/51)
