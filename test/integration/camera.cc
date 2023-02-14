@@ -489,12 +489,16 @@ void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
   auto linkPtr = modelPtr->GetElement("link");
   ASSERT_TRUE(linkPtr->HasElement("sensor"));
 
-  // Camera sensor without intrinsics tag
-  auto cameraWithoutIntrinsicsTag = linkPtr->GetElement("sensor");
+  // Camera sensor without projection tag
+  auto cameraWithoutProjectionsTag = linkPtr->GetElement("sensor");
 
-  // Camera sensor with intrinsics tag
-  auto cameraWithIntrinsicsTag =
+  // Camera sensor with projection tag
+  auto cameraWithProjectionsTag =
       linkPtr->GetElement("sensor")->GetNextElement();
+
+  // Camera sensor with different projection tag
+  auto cameraWithDiffProjectionsTag =
+      cameraWithProjectionsTag->GetNextElement();
 
   // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
@@ -506,27 +510,60 @@ void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
+  scene->SetAmbientLight(1.0, 1.0, 1.0);
+
+  gz::rendering::VisualPtr root = scene->RootVisual();
+  ASSERT_NE(nullptr, root);
+
+  // create blue material
+  gz::rendering::MaterialPtr blue = scene->CreateMaterial();
+  blue->SetAmbient(0.0, 0.0, 0.3);
+  blue->SetDiffuse(0.0, 0.0, 0.8);
+  blue->SetSpecular(0.5, 0.5, 0.5);
+
+  // create box visual
+  gz::rendering::VisualPtr box = scene->CreateVisual("box");
+  ASSERT_NE(nullptr, box);
+  box->AddGeometry(scene->CreateBox());
+  box->SetOrigin(0.0, 0.0, 0.0);
+  box->SetLocalPosition(gz::math::Vector3d(4.0, 1, 0.5));
+  box->SetLocalRotation(0, 0, 0);
+  box->SetMaterial(blue);
+  root->AddChild(box);
 
   // Do the test
   gz::sensors::Manager mgr;
 
   auto *sensor1 =
-      mgr.CreateSensor<gz::sensors::CameraSensor>(cameraWithoutIntrinsicsTag);
+      mgr.CreateSensor<gz::sensors::CameraSensor>(cameraWithoutProjectionsTag);
   auto *sensor2 =
-      mgr.CreateSensor<gz::sensors::CameraSensor>(cameraWithIntrinsicsTag);
+      mgr.CreateSensor<gz::sensors::CameraSensor>(cameraWithProjectionsTag);
+  auto *sensor3 =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(cameraWithDiffProjectionsTag);
+
   ASSERT_NE(sensor1, nullptr);
   ASSERT_NE(sensor2, nullptr);
+  ASSERT_NE(sensor3, nullptr);
+  std::string imgTopic1 = "/camera1/image";
+  std::string imgTopic2 = "/camera2/image";
+  std::string imgTopic3 = "/camera3/image";
   sensor1->SetScene(scene);
   sensor2->SetScene(scene);
+  sensor3->SetScene(scene);
 
   std::string infoTopic1 = "/camera1/camera_info";
   std::string infoTopic2 = "/camera2/camera_info";
+  std::string infoTopic3 = "/camera3/camera_info";
   WaitForMessageTestHelper<gz::msgs::Image> helper1("/camera1/image");
   WaitForMessageTestHelper<gz::msgs::CameraInfo> helper2(infoTopic1);
   WaitForMessageTestHelper<gz::msgs::Image> helper3("/camera2/image");
   WaitForMessageTestHelper<gz::msgs::CameraInfo> helper4(infoTopic2);
+  WaitForMessageTestHelper<gz::msgs::Image> helper5(imgTopic3);
+  WaitForMessageTestHelper<gz::msgs::CameraInfo> helper6(infoTopic3);
+
   EXPECT_TRUE(sensor1->HasConnections());
   EXPECT_TRUE(sensor2->HasConnections());
+  EXPECT_TRUE(sensor3->HasConnections());
 
   // Update once to create image
   mgr.RunOnce(std::chrono::steady_clock::duration::zero());
@@ -535,28 +572,72 @@ void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
   EXPECT_TRUE(helper2.WaitForMessage()) << helper2;
   EXPECT_TRUE(helper3.WaitForMessage()) << helper3;
   EXPECT_TRUE(helper4.WaitForMessage()) << helper4;
+  EXPECT_TRUE(helper5.WaitForMessage()) << helper5;
+  EXPECT_TRUE(helper6.WaitForMessage()) << helper6;
 
   // Subscribe to the camera info topic
-  gz::msgs::CameraInfo camera1Info, camera2Info;
-  unsigned int camera1Counter = 0;
-  unsigned int camera2Counter = 0;
+  gz::msgs::CameraInfo camera1Info, camera2Info, camera3Info;
+  unsigned int camera1Counter = 0u;
+  unsigned int camera2Counter = 0u;
+  unsigned int camera3Counter = 0u;
 
   std::function<void(const gz::msgs::CameraInfo&)> camera1InfoCallback =
-      [&camera1Info, &camera1Counter](const gz::msgs::CameraInfo& _msg) {
-        camera1Info = _msg;
-        camera1Counter++;
+      [&camera1Info, &camera1Counter](const gz::msgs::CameraInfo& _msg)
+  {
+    camera1Info = _msg;
+    camera1Counter++;
+  };
+  std::function<void(const gz::msgs::CameraInfo&)> camera2InfoCallback =
+      [&camera2Info, &camera2Counter](const gz::msgs::CameraInfo& _msg)
+  {
+    camera2Info = _msg;
+    camera2Counter++;
+  };
+  std::function<void(const gz::msgs::CameraInfo&)> camera3InfoCallback =
+      [&camera3Info, &camera3Counter](const gz::msgs::CameraInfo& _msg)
+  {
+    camera3Info = _msg;
+    camera3Counter++;
   };
 
-  std::function<void(const gz::msgs::CameraInfo&)> camera2InfoCallback =
-      [&camera2Info, &camera2Counter](const gz::msgs::CameraInfo& _msg) {
-        camera2Info = _msg;
-        camera2Counter++;
+  unsigned int height = 1000u;
+  unsigned int width = 1000u;
+  unsigned int bpp = 3u;
+  unsigned int imgBufferSize = width * height * bpp;
+  unsigned char* img1 = new unsigned char[imgBufferSize];
+  unsigned char* img2 = new unsigned char[imgBufferSize];
+  unsigned char* img3 = new unsigned char[imgBufferSize];
+  unsigned int camera1DataCounter = 0u;
+  unsigned int camera2DataCounter = 0u;
+  unsigned int camera3DataCounter = 0u;
+  std::function<void(const gz::msgs::Image &)> camera1Callback =
+      [&img1, &camera1DataCounter, &imgBufferSize](const gz::msgs::Image & _msg)
+  {
+    memcpy(img1, _msg.data().c_str(), imgBufferSize);
+    camera1DataCounter++;
+  };
+
+  std::function<void(const gz::msgs::Image &)> camera2Callback =
+      [&img2, &camera2DataCounter, &imgBufferSize](const gz::msgs::Image & _msg)
+  {
+    memcpy(img2, _msg.data().c_str(), imgBufferSize);
+    camera2DataCounter++;
+  };
+  std::function<void(const gz::msgs::Image &)> camera3Callback =
+      [&img3, &camera3DataCounter, &imgBufferSize](const gz::msgs::Image & _msg)
+  {
+    memcpy(img3, _msg.data().c_str(), imgBufferSize);
+    camera3DataCounter++;
   };
 
   // Subscribe to the camera topic
   gz::transport::Node node;
   node.Subscribe(infoTopic1, camera1InfoCallback);
   node.Subscribe(infoTopic2, camera2InfoCallback);
+  node.Subscribe(infoTopic3, camera3InfoCallback);
+  node.Subscribe(imgTopic1, camera1Callback);
+  node.Subscribe(imgTopic2, camera2Callback);
+  node.Subscribe(imgTopic3, camera3Callback);
 
   // Wait for a few camera frames
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
@@ -568,31 +649,109 @@ void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
   while (!done && sleep++ < maxSleep)
   {
     std::lock_guard<std::mutex> lock(g_mutex);
-    done = (camera1Counter > 0 && camera2Counter > 0);
+    done = (camera1Counter > 0u && camera2Counter > 0u && camera3Counter > 0u &&
+        camera1DataCounter > 0u && camera2DataCounter > 0u &&
+        camera3DataCounter > 0u);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
   // Image size, focal length and optical center
   // Camera sensor without projection tag
-  double error = 1e-1;
-  EXPECT_EQ(camera1Info.width(), 1000u);
-  EXPECT_EQ(camera1Info.height(), 1000u);
-  EXPECT_NEAR(camera1Info.projection().p(0), 863.22975158691406, error);
-  EXPECT_NEAR(camera1Info.projection().p(5), 863.22975158691406, error);
-  EXPECT_DOUBLE_EQ(camera1Info.projection().p(2), 500);
-  EXPECT_DOUBLE_EQ(camera1Info.projection().p(6), 500);
-  EXPECT_DOUBLE_EQ(camera1Info.projection().p(3), 0);
-  EXPECT_DOUBLE_EQ(camera1Info.projection().p(7), 0);
+  // account for error converting gl projection values back to
+  // cv projection values
+  double error = 1.0;
+  EXPECT_EQ(camera1Info.width(), width);
+  EXPECT_EQ(camera1Info.height(), width);
+  EXPECT_NEAR(camera1Info.projection().p(0), 866.23, error);
+  EXPECT_NEAR(camera1Info.projection().p(5), 866.23, error);
+  EXPECT_DOUBLE_EQ(camera1Info.projection().p(2), 500.0);
+  EXPECT_DOUBLE_EQ(camera1Info.projection().p(6), 500.0);
+  EXPECT_DOUBLE_EQ(camera1Info.projection().p(3), 0.0);
+  EXPECT_DOUBLE_EQ(camera1Info.projection().p(7), 0.0);
 
   // Camera sensor with projection tag
-  EXPECT_EQ(camera2Info.width(), 1000u);
-  EXPECT_EQ(camera2Info.height(), 1000u);
+  EXPECT_EQ(camera2Info.width(), height);
+  EXPECT_EQ(camera2Info.height(), height);
   EXPECT_DOUBLE_EQ(camera2Info.projection().p(0), 866.23);
-  EXPECT_DOUBLE_EQ(camera2Info.projection().p(5), 966.23);
-  EXPECT_DOUBLE_EQ(camera2Info.projection().p(2), 500);
-  EXPECT_DOUBLE_EQ(camera2Info.projection().p(6), 400);
-  EXPECT_DOUBLE_EQ(camera2Info.projection().p(3), 300);
-  EXPECT_DOUBLE_EQ(camera2Info.projection().p(7), 200);
+  EXPECT_DOUBLE_EQ(camera2Info.projection().p(5), 866.23);
+  EXPECT_DOUBLE_EQ(camera2Info.projection().p(2), 500.0);
+  EXPECT_DOUBLE_EQ(camera2Info.projection().p(6), 500.0);
+  EXPECT_DOUBLE_EQ(camera2Info.projection().p(3), 300.0);
+  EXPECT_DOUBLE_EQ(camera2Info.projection().p(7), 200.0);
+
+  // Camera sensor with different projection tag
+  EXPECT_EQ(camera3Info.width(), width);
+  EXPECT_EQ(camera3Info.height(), height);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(0), 900.0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(5), 900.0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(2), 501.0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(6), 501.0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(3), 0.0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(7), 0.0);
+
+  unsigned int r1Sum = 0u;
+  unsigned int g1Sum = 0u;
+  unsigned int b1Sum = 0u;
+  unsigned int r2Sum = 0u;
+  unsigned int g2Sum = 0u;
+  unsigned int b2Sum = 0u;
+  unsigned int r3Sum = 0u;
+  unsigned int g3Sum = 0u;
+  unsigned int b3Sum = 0u;
+  unsigned int step = width * bpp;
+
+  // get sum of each color channel
+  // all cameras should just see blue colors
+  for (unsigned int i = 0u; i < height; ++i)
+  {
+    for (unsigned int j = 0u; j < step; j+=bpp)
+    {
+      unsigned int idx = i * step + j;
+      unsigned int r1 = img1[idx];
+      unsigned int g1 = img1[idx+1];
+      unsigned int b1 = img1[idx+2];
+      r1Sum += r1;
+      g1Sum += g1;
+      b1Sum += b1;
+
+      unsigned int r2 = img2[idx];
+      unsigned int g2 = img2[idx+1];
+      unsigned int b2 = img2[idx+2];
+      r2Sum += r2;
+      g2Sum += g2;
+      b2Sum += b2;
+
+      unsigned int r3 = img3[idx];
+      unsigned int g3 = img3[idx+1];
+      unsigned int b3 = img3[idx+2];
+      r3Sum += r3;
+      g3Sum += g3;
+      b3Sum += b3;
+    }
+  }
+
+  // images from camera1 without projections params and
+  // camera2 with default projection params should be the same
+  EXPECT_EQ(0u, r1Sum);
+  EXPECT_EQ(0u, g1Sum);
+  EXPECT_LT(0u, b1Sum);
+  EXPECT_EQ(r1Sum, r2Sum);
+  EXPECT_EQ(g1Sum, g2Sum);
+  EXPECT_EQ(b1Sum, b2Sum);
+
+  // images from camera2 and camera3 that have different projections params
+  // should be different. Both cameras should still see the blue box but
+  // sum of blue pixels should be slightly different
+  EXPECT_EQ(0u, r3Sum);
+  EXPECT_EQ(0u, g3Sum);
+  EXPECT_LT(0u, b3Sum);
+  EXPECT_EQ(r2Sum, r3Sum);
+  EXPECT_EQ(g2Sum, g3Sum);
+  EXPECT_NE(b2Sum, b3Sum);
+
+  delete []  img1;
+  delete []  img2;
+  delete []  img3;
 
   // Clean up
   engine->DestroyScene(scene);
