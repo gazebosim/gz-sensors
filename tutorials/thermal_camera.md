@@ -1,14 +1,14 @@
-\page thermalcameraigngazebo Thermal Camera in Ignition Gazebo
+\page thermalcameraigngazebo Thermal Camera in Gazebo Sim
 
-In this tutorial, we will discuss how to use a thermal camera sensor in [Ignition Gazebo](https://ignitionrobotics.org/libs/gazebo).
+In this tutorial, we will discuss how to use a thermal camera sensor in [Gazebo Sim](https://gazebosim.org/libs/gazebo).
 
 There are currently a few limitations with the thermal camera, which will be mentioned at the end of the tutorial.
 
 ## Requirements
 
-Since this tutorial will show how to use a thermal camera sensor in Ignition Gazebo, you'll need to have Ignition Gazebo installed.
-We recommend installing all Ignition libraries, using version Citadel or newer (the thermal camera is not available in Ignition versions prior to Citadel).
-If you need to install Ignition, [pick the version you'd like to use](https://ignitionrobotics.org/docs) and then follow the installation instructions.
+Since this tutorial will show how to use a thermal camera sensor in Gazebo Sim, you'll need to have Gazebo Sim installed.
+We recommend installing all Gazebo libraries, using version Citadel or newer (the thermal camera is not available in Gazebo versions prior to Citadel).
+If you need to install Gazebo, [pick the version you'd like to use](https://gazebosim.org/docs) and then follow the installation instructions.
 
 ## Setting up the thermal camera
 
@@ -83,10 +83,10 @@ As we can see, we define a sensor with the following SDF elements:
     - `<image>`: The image size, in pixels.
     - `<clip>`: The near and far clip planes. Objects are only rendered if they're within these planes.
 * `<always_on>`: Whether the sensor will always be updated (indicated by `1`) or not (indicated by `0`).
-This is currently unused by Ignition Gazebo.
+This is currently unused by Gazebo Sim.
 * `<update_rate>`: The sensor's update rate, in Hz.
 * `<visualize>`: Whether the sensor should be visualized in the GUI (indicated by `true`) or not (indicated by `false`).
-This is currently unused by Ignition Gazebo.
+This is currently unused by Gazebo Sim.
 * `<topic>`: The name of the topic where sensor data is published. This is needed for visualization.
 
 ## Assigning a temperature to a model
@@ -132,7 +132,7 @@ Here's an example of a box model that has a temperature assigned to it:
       </material>
       <plugin
         filename="ignition-gazebo-thermal-system"
-        name="ignition::gazebo::systems::Thermal">
+        name="gz::sim::systems::Thermal">
         <temperature>200.0</temperature>
       </plugin>
     </visual>
@@ -145,7 +145,7 @@ Most of the code above is for the model - here's the key piece for temperature a
 ```xml
 <plugin
   filename="ignition-gazebo-thermal-system"
-  name="ignition::gazebo::systems::Thermal">
+  name="gz::sim::systems::Thermal">
   <temperature>200.0</temperature>
 </plugin>
 ```
@@ -167,7 +167,7 @@ You should see something similar to this:
 @image html files/thermal_camera/thermal_camera_demo.png
 
 The window in the top-left corner shows the thermal camera's output.
-Taking a look at the [SDF file](https://github.com/ignitionrobotics/ign-gazebo/blob/c3391b1b664d1ec2b931d9a4ac757bde33b2a27b/examples/worlds/thermal_camera.sdf) for this example shows that the shapes were assigned the following temperatures:
+Taking a look at the [SDF file](https://github.com/gazebosim/gz-gazebo/blob/c3391b1b664d1ec2b931d9a4ac757bde33b2a27b/examples/worlds/thermal_camera.sdf) for this example shows that the shapes were assigned the following temperatures:
 * sphere: 600 Kelvin
 * box: 200 Kelvin
 * cylinder: 400 Kelvin
@@ -183,7 +183,7 @@ An easy way to move objects in the world is by using `Transform Control`:
 
 ## Processing the thermal camera's output
 
-In the example above, the thermal camera publishes an [image message](https://github.com/ignitionrobotics/ign-msgs/blob/46a08597e6b6037adc98025cdc09dfbf0f4467a6/proto/ignition/msgs/image.proto) to the `/thermal_camera` topic whenever the camera has a new image.
+In the example above, the thermal camera publishes an [image message](https://github.com/gazebosim/gz-msgs/blob/46a08597e6b6037adc98025cdc09dfbf0f4467a6/proto/ignition/msgs/image.proto) to the `/thermal_camera` topic whenever the camera has a new image.
 We can observe the contents of a single message by running the following command:
 
 ```
@@ -205,14 +205,14 @@ Here's an example thermal camera subscriber that performs this conversion:
 #include <cstdint>
 
 #include <ignition/msgs.hh>
-#include <ignition/transport.hh>
+#include <gz/transport.hh>
 
 // used to set the proper resolution of the camera's output (10mK)
 double linearResolution = 0.01;
 
 // a callback function that is triggered whenever the thermal camera
 // topic receives a new image message
-void OnImage(const ignition::msgs::Image &_msg)
+void OnImage(const gz::msgs::Image &_msg)
 {
   // convert the serialized image data to 16 bit temperature values
   unsigned int thermalSamples = _msg.width() * _msg.height();
@@ -240,14 +240,14 @@ void OnImage(const ignition::msgs::Image &_msg)
 
 int main(int argc, char **argv)
 {
-  ignition::transport::Node node;
+  gz::transport::Node node;
   if (!node.Subscribe("/thermal_camera", &OnImage))
   {
     std::cerr << "Error subscribing to the thermal camera topic" << std::endl;
     return -1;
   }
 
-  ignition::transport::waitForShutdown();
+  gz::transport::waitForShutdown();
 }
 ```
 

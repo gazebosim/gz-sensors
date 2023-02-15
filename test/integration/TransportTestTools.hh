@@ -22,7 +22,7 @@
 #include <mutex>
 #include <string>
 
-#include <ignition/transport.hh>
+#include <gz/transport.hh>
 
 /// \brief class which simplifies waiting for a message to be received
 template <typename M>
@@ -71,7 +71,7 @@ class WaitForMessageTestHelper
   }
 
   /// \brief Node to subscribe to topics
-  public: ignition::transport::Node node;
+  public: gz::transport::Node node;
 
   /// \brief True if subscription was created
   public: bool subscriptionCreated = false;

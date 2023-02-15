@@ -15,22 +15,22 @@
  *
 */
 
-#ifndef IGNITION_SENSORS_POINTCLOUDUTIL_HH_
-#define IGNITION_SENSORS_POINTCLOUDUTIL_HH_
+#ifndef GZ_SENSORS_POINTCLOUDUTIL_HH_
+#define GZ_SENSORS_POINTCLOUDUTIL_HH_
 
 #if defined(_MSC_VER)
   #pragma warning(push)
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/pointcloud_packed.pb.h>
+#include <gz/msgs/pointcloud_packed.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
-#include <ignition/math/Angle.hh>
+#include <gz/math/Angle.hh>
 
-#include "ignition/sensors/config.hh"
-#include "ignition/sensors/Export.hh"
+#include "gz/sensors/config.hh"
+#include "gz/sensors/Export.hh"
 
 #ifndef _WIN32
 #  define PointCloudUtil_EXPORTS_API

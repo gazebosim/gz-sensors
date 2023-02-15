@@ -20,21 +20,21 @@
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs/fluid_pressure.pb.h>
+#include <gz/msgs/fluid_pressure.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
 
-#include <ignition/common/Profiler.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/transport/Node.hh>
 
-#include "ignition/sensors/GaussianNoiseModel.hh"
-#include "ignition/sensors/Noise.hh"
-#include "ignition/sensors/SensorTypes.hh"
-#include "ignition/sensors/SensorFactory.hh"
-#include "ignition/sensors/AirPressureSensor.hh"
+#include "gz/sensors/GaussianNoiseModel.hh"
+#include "gz/sensors/Noise.hh"
+#include "gz/sensors/SensorTypes.hh"
+#include "gz/sensors/SensorFactory.hh"
+#include "gz/sensors/AirPressureSensor.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 // Constants. These constants from from RotorS:
@@ -51,7 +51,7 @@ static constexpr double kAirConstantDimensionless = kGravityMagnitude *
         (kGasConstantNmPerKmolKelvin * -kTempLapseKelvinPerMeter);
 
 /// \brief Private data for AirPressureSensor
-class ignition::sensors::AirPressureSensorPrivate
+class gz::sensors::AirPressureSensorPrivate
 {
   /// \brief node to create publisher
   public: transport::Node node;

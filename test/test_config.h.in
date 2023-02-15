@@ -1,5 +1,5 @@
-#ifndef IGNITION_SENSORS_TEST_CONFIG_HH_
-#define IGNITION_SENSORS_TEST_CONFIG_HH_
+#ifndef GZ_SENSORS_TEST_CONFIG_HH_
+#define GZ_SENSORS_TEST_CONFIG_HH_
 
 #define PROJECT_SOURCE_PATH "${PROJECT_SOURCE_DIR}"
 #define PROJECT_BUILD_PATH "${PROJECT_BINARY_DIR}"
@@ -7,7 +7,7 @@
 
 /// \brief Helper macro to instantiate gtest for different engines
 #define RENDER_ENGINE_VALUES ::testing::ValuesIn(\
-    ignition::rendering::TestValues())
+    gz::rendering::TestValues())
 
 // Configure tests based on installed render engines
 #define WITH_OGRE_AND_NO_OGRE2 (WITH_OGRE && !WITH_OGRE2)
@@ -36,7 +36,7 @@ static const std::vector<const char *> kRenderEngineTestValues{"none"};
 #endif
 
 #include <vector>
-#include <ignition/common/Util.hh>
+#include <gz/common/Util.hh>
 
 namespace ignition
 {

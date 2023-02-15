@@ -17,9 +17,9 @@
 #include <gtest/gtest.h>
 #include <sdf/sdf.hh>
 
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/CameraSensor.hh>
-#include <ignition/sensors/Manager.hh>
+#include <gz/sensors/Export.hh>
+#include <gz/sensors/CameraSensor.hh>
+#include <gz/sensors/Manager.hh>
 
 sdf::ElementPtr cameraToBadSdf()
 {
@@ -139,21 +139,21 @@ class Camera_TEST : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
 //////////////////////////////////////////////////
 TEST(Camera_TEST, CreateCamera)
 {
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
   sdf::ElementPtr camSdf = CameraToSdf("camera", "my_camera", 60.0,
     "/cam", "my_camera/camera_info", true, true);
 
   // Create a CameraSensor
-  ignition::sensors::CameraSensor *cam =
-    mgr.CreateSensor<ignition::sensors::CameraSensor>(camSdf);
+  gz::sensors::CameraSensor *cam =
+    mgr.CreateSensor<gz::sensors::CameraSensor>(camSdf);
 
   // Make sure the above dynamic cast worked.
   ASSERT_NE(nullptr, cam);
@@ -164,7 +164,7 @@ TEST(Camera_TEST, CreateCamera)
 
   // however camera is not loaded because a rendering scene is missing so
   // updates will not be successful and image size will be 0
-  EXPECT_FALSE(cam->Update(ignition::common::Time()));
+  EXPECT_FALSE(cam->Update(gz::common::Time()));
   EXPECT_EQ(0u, cam->ImageWidth());
   EXPECT_EQ(0u, cam->ImageHeight());
 
@@ -172,8 +172,8 @@ TEST(Camera_TEST, CreateCamera)
   sdf::ElementPtr camBadSdf = cameraToBadSdf();
 
   // Create a CameraSensor
-  ignition::sensors::CameraSensor *badCam =
-    mgr.CreateSensor<ignition::sensors::CameraSensor>(camBadSdf);
+  gz::sensors::CameraSensor *badCam =
+    mgr.CreateSensor<gz::sensors::CameraSensor>(camBadSdf);
   EXPECT_TRUE(badCam == nullptr);
 }
 
@@ -187,7 +187,7 @@ TEST(Camera_TEST, Topic)
   const bool visualize = 1;
 
   // Factory
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
   // Default topic
   {
@@ -197,12 +197,12 @@ TEST(Camera_TEST, Topic)
       alwaysOn, visualize);
 
     auto sensorId = mgr.CreateSensor(cameraSdf);
-    EXPECT_NE(ignition::sensors::NO_SENSOR, sensorId);
+    EXPECT_NE(gz::sensors::NO_SENSOR, sensorId);
 
     auto sensor = mgr.Sensor(sensorId);
     EXPECT_NE(nullptr, sensor);
 
-    auto camera = dynamic_cast<ignition::sensors::CameraSensor *>(sensor);
+    auto camera = dynamic_cast<gz::sensors::CameraSensor *>(sensor);
     ASSERT_NE(nullptr, camera);
 
     EXPECT_EQ("/camera", camera->Topic());
@@ -216,12 +216,12 @@ TEST(Camera_TEST, Topic)
         visualize);
 
     auto sensorId = mgr.CreateSensor(cameraSdf);
-    EXPECT_NE(ignition::sensors::NO_SENSOR, sensorId);
+    EXPECT_NE(gz::sensors::NO_SENSOR, sensorId);
 
     auto sensor = mgr.Sensor(sensorId);
     EXPECT_NE(nullptr, sensor);
 
-    auto camera = dynamic_cast<ignition::sensors::CameraSensor *>(sensor);
+    auto camera = dynamic_cast<gz::sensors::CameraSensor *>(sensor);
     ASSERT_NE(nullptr, camera);
 
     EXPECT_EQ("/topic_with_spaces/characters", camera->Topic());
@@ -235,7 +235,7 @@ TEST(Camera_TEST, Topic)
         visualize);
 
     auto sensorId = mgr.CreateSensor(cameraSdf);
-    EXPECT_EQ(ignition::sensors::NO_SENSOR, sensorId);
+    EXPECT_EQ(gz::sensors::NO_SENSOR, sensorId);
   }
 }
 

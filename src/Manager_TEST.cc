@@ -16,7 +16,7 @@
 */
 
 #include <gtest/gtest.h>
-#include <ignition/sensors/Manager.hh>
+#include <gz/sensors/Manager.hh>
 
 /// \brief Test sensor manager
 class Manager_TEST : public ::testing::Test
@@ -24,33 +24,33 @@ class Manager_TEST : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
 //////////////////////////////////////////////////
 TEST(Manager, construct)
 {
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
   EXPECT_TRUE(mgr.Init());
 
   sdf::ElementPtr ptr;
-  ignition::sensors::SensorId id = mgr.CreateSensor(ptr);
-  EXPECT_EQ(id, ignition::sensors::NO_SENSOR);
+  gz::sensors::SensorId id = mgr.CreateSensor(ptr);
+  EXPECT_EQ(id, gz::sensors::NO_SENSOR);
 
-  ignition::sensors::Sensor *sensor = mgr.Sensor(0);
+  gz::sensors::Sensor *sensor = mgr.Sensor(0);
   EXPECT_EQ(sensor, nullptr);
 
-  EXPECT_FALSE(mgr.Remove(ignition::sensors::NO_SENSOR));
+  EXPECT_FALSE(mgr.Remove(gz::sensors::NO_SENSOR));
 }
 
 //////////////////////////////////////////////////
 TEST(Manager, removeSensor)
 {
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
   EXPECT_TRUE(mgr.Init());
 
-  EXPECT_FALSE(mgr.Remove(ignition::sensors::NO_SENSOR));
+  EXPECT_FALSE(mgr.Remove(gz::sensors::NO_SENSOR));
 
   // \todo(nkoenig) Add a sensor, then remove it
 }

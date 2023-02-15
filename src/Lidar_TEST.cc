@@ -19,19 +19,21 @@
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
-#include <ignition/msgs.hh>
+#include <gz/msgs.hh>
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
 #include <gtest/gtest.h>
 #include <sdf/sdf.hh>
 
-#include <ignition/math/Angle.hh>
-#include <ignition/math/Helpers.hh>
+#include <gz/math/Angle.hh>
+#include <gz/math/Helpers.hh>
 
-#include <ignition/sensors/Export.hh>
-#include <ignition/sensors/Manager.hh>
-#include <ignition/sensors/Lidar.hh>
+#include <gz/sensors/Export.hh>
+#include <gz/sensors/Manager.hh>
+#include <gz/sensors/Lidar.hh>
+
+using namespace ignition;
 
 sdf::ElementPtr LidarToSDF(const std::string &name, double update_rate,
     const std::string &topic, double horz_samples, double horz_resolution,
@@ -102,7 +104,7 @@ class Lidar_TEST : public ::testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
@@ -111,11 +113,11 @@ class Lidar_TEST : public ::testing::Test
 TEST(Lidar_TEST, CreateLaser)
 {
   // Create a sensor manager
-  ignition::sensors::Manager mgr;
+  gz::sensors::Manager mgr;
 
   // Create SDF describing a camera sensor
   const std::string name = "TestLidar";
-  const std::string topic = "/ignition/sensors/test/lidar";
+  const std::string topic = "/gz/sensors/test/lidar";
   const double update_rate = 30;
   const double horz_samples = 640;
   const double horz_resolution = 1;
@@ -137,7 +139,7 @@ TEST(Lidar_TEST, CreateLaser)
     range_resolution, range_min, range_max, always_on, visualize);
 
   // Create a CameraSensor
-  ignition::sensors::Lidar *sensor = mgr.CreateSensor<ignition::sensors::Lidar>(
+  gz::sensors::Lidar *sensor = mgr.CreateSensor<gz::sensors::Lidar>(
       lidarSDF);
 
   EXPECT_FALSE(sensor->CreateLidar());
@@ -147,8 +149,8 @@ TEST(Lidar_TEST, CreateLaser)
 
   double angleRes = (sensor->AngleMax() - sensor->AngleMin()).Radian() /
                     sensor->RayCount();
-  EXPECT_EQ(sensor->AngleMin(), ignition::math::Angle(-1.396263));
-  EXPECT_EQ(sensor->AngleMax(), ignition::math::Angle(1.396263));
+  EXPECT_EQ(sensor->AngleMin(), gz::math::Angle(-1.396263));
+  EXPECT_EQ(sensor->AngleMax(), gz::math::Angle(1.396263));
   EXPECT_NEAR(sensor->RangeMin(), 0.08, 1e-6);
   EXPECT_NEAR(sensor->RangeMax(), 10.0, 1e-6);
   EXPECT_NEAR(sensor->AngleResolution(), angleRes, 1e-3);
@@ -170,7 +172,7 @@ TEST(Lidar_TEST, CreateLaserFailures)
   sdfSensor.SetType(sdf::SensorType::CAMERA);
   sdf::Lidar sdfLidarSensor;
 
-  ignition::sensors::Lidar sensor;
+  gz::sensors::Lidar sensor;
   EXPECT_FALSE(sensor.Load(sdfSensor));
 
   EXPECT_DOUBLE_EQ(0.0, sensor.Range(-1));
@@ -193,12 +195,12 @@ TEST(Lidar_TEST, CreateLaserFailures)
   sdfSensor.SetType(sdf::SensorType::LIDAR);
   sdfSensor.SetLidarSensor(sdfLidarSensor);
 
-  ignition::sensors::Lidar sensor2;
+  gz::sensors::Lidar sensor2;
 
   EXPECT_TRUE(sensor2.Load(sdfSensor));
   EXPECT_FALSE(sensor2.Load(sdfSensor));
 
-  ignition::sensors::Lidar sensor3;
+  gz::sensors::Lidar sensor3;
 
   sdfLidarSensor.SetHorizontalScanSamples(0);
   sdfSensor.SetLidarSensor(sdfLidarSensor);
@@ -216,16 +218,16 @@ TEST(Lidar_TEST, CreateLaserFailures)
 
   sdfLidarSensor.SetLidarNoise(noise);
   sdfSensor.SetLidarSensor(sdfLidarSensor);
-  ignition::sensors::Lidar sensor4;
+  sensors::Lidar sensor4;
   EXPECT_TRUE(sensor4.Load(sdfSensor));
 
   noise.SetType(sdf::NoiseType::GAUSSIAN_QUANTIZED);
   sdfLidarSensor.SetLidarNoise(noise);
   sdfSensor.SetLidarSensor(sdfLidarSensor);
-  ignition::sensors::Lidar sensor5;
+  sensors::Lidar sensor5;
   EXPECT_TRUE(sensor5.Load(sdfSensor));
 
-  sensor.Update(ignition::common::Time(0.1));
+  sensor.Update(common::Time(0.1));
 }
 
 //////////////////////////////////////////////////

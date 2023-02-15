@@ -19,15 +19,15 @@
 
 #include <sdf/sdf.hh>
 
-#include <ignition/sensors/MagnetometerSensor.hh>
-#include <ignition/sensors/SensorFactory.hh>
+#include <gz/sensors/MagnetometerSensor.hh>
+#include <gz/sensors/SensorFactory.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
 /// \brief Helper function to create an magnetometer sdf element
 sdf::ElementPtr MagnetometerToSdf(const std::string &_name,
-    const ignition::math::Pose3d &_pose, const double _updateRate,
+    const gz::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
     const bool _visualize)
 {
@@ -59,7 +59,7 @@ sdf::ElementPtr MagnetometerToSdf(const std::string &_name,
 
 /// \brief Helper function to create an magnetometer sdf element
 sdf::ElementPtr MagnetometerToSdfWithNoise(const std::string &_name,
-    const ignition::math::Pose3d &_pose, const double _updateRate,
+    const gz::math::Pose3d &_pose, const double _updateRate,
     const std::string &_topic, const bool _alwaysOn,
     const bool _visualize, double _mean, double _stddev, double _bias)
 {
@@ -118,7 +118,7 @@ class MagnetometerSensorTest: public testing::Test
   // Documentation inherited
   protected: void SetUp() override
   {
-    ignition::common::Console::SetVerbosity(4);
+    gz::common::Console::SetVerbosity(4);
   }
 };
 
@@ -134,8 +134,8 @@ TEST_F(MagnetometerSensorTest, CreateMagnetometer)
   const bool visualize = 1;
 
   // Create sensor SDF
-  ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
-      ignition::math::Quaterniond::Identity);
+  gz::math::Pose3d sensorPose(gz::math::Vector3d(0.25, 0.0, 0.5),
+      gz::math::Quaterniond::Identity);
   sdf::ElementPtr magnetometerSdf = MagnetometerToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
 
@@ -143,13 +143,13 @@ TEST_F(MagnetometerSensorTest, CreateMagnetometer)
       sensorPose, updateRate, noiseTopic, alwaysOn, visualize, 1.0, 0.2, 10.0);
 
   // create the sensor using sensor factory
-  ignition::sensors::SensorFactory sf;
-  std::unique_ptr<ignition::sensors::MagnetometerSensor> sensor =
-      sf.CreateSensor<ignition::sensors::MagnetometerSensor>(magnetometerSdf);
+  gz::sensors::SensorFactory sf;
+  std::unique_ptr<gz::sensors::MagnetometerSensor> sensor =
+      sf.CreateSensor<gz::sensors::MagnetometerSensor>(magnetometerSdf);
   ASSERT_NE(nullptr, sensor);
 
-  std::unique_ptr<ignition::sensors::MagnetometerSensor> sensorNoise =
-    sf.CreateSensor<ignition::sensors::MagnetometerSensor>(
+  std::unique_ptr<gz::sensors::MagnetometerSensor> sensorNoise =
+    sf.CreateSensor<gz::sensors::MagnetometerSensor>(
         magnetometerNoiseSdf);
   ASSERT_NE(nullptr, sensorNoise);
 
@@ -173,8 +173,8 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   const bool visualize = 1;
 
   // Create sensor SDF
-  ignition::math::Pose3d sensorPose(ignition::math::Vector3d(0.25, 0.0, 0.5),
-      ignition::math::Quaterniond::Identity);
+  gz::math::Pose3d sensorPose(gz::math::Vector3d(0.25, 0.0, 0.5),
+      gz::math::Quaterniond::Identity);
   sdf::ElementPtr magnetometerSdf = MagnetometerToSdf(name, sensorPose,
         updateRate, topic, alwaysOn, visualize);
   sdf::ElementPtr magnetometerSdfNoise = MagnetometerToSdfWithNoise(name,
@@ -182,71 +182,71 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
 
   // create the sensor using sensor factory
   // try creating without specifying the sensor type and then cast it
-  ignition::sensors::SensorFactory sf;
-  std::unique_ptr<ignition::sensors::Sensor> s =
+  gz::sensors::SensorFactory sf;
+  std::unique_ptr<gz::sensors::Sensor> s =
       sf.CreateSensor(magnetometerSdf);
-  std::unique_ptr<ignition::sensors::MagnetometerSensor> sensor(
-      dynamic_cast<ignition::sensors::MagnetometerSensor *>(s.release()));
+  std::unique_ptr<gz::sensors::MagnetometerSensor> sensor(
+      dynamic_cast<gz::sensors::MagnetometerSensor *>(s.release()));
 
-  std::unique_ptr<ignition::sensors::Sensor> sNoise =
+  std::unique_ptr<gz::sensors::Sensor> sNoise =
       sf.CreateSensor(magnetometerSdfNoise);
-  std::unique_ptr<ignition::sensors::MagnetometerSensor> sensorNoise(
-      dynamic_cast<ignition::sensors::MagnetometerSensor *>(sNoise.release()));
+  std::unique_ptr<gz::sensors::MagnetometerSensor> sensorNoise(
+      dynamic_cast<gz::sensors::MagnetometerSensor *>(sNoise.release()));
 
   // Make sure the above dynamic cast worked.
   ASSERT_NE(nullptr, sensor);
   ASSERT_NE(nullptr, sensorNoise);
 
   // subscribe to the topic
-  WaitForMessageTestHelper<ignition::msgs::Magnetometer> msgHelper(topic);
+  WaitForMessageTestHelper<gz::msgs::Magnetometer> msgHelper(topic);
 
   // subscribe to the topic
-  WaitForMessageTestHelper<ignition::msgs::Magnetometer> msgHelperNoise(
+  WaitForMessageTestHelper<gz::msgs::Magnetometer> msgHelperNoise(
       noiseTopic);
 
   // verify initial readings
-  EXPECT_EQ(ignition::math::Pose3d::Zero, sensor->WorldPose());
-  EXPECT_EQ(ignition::math::Vector3d::Zero, sensor->WorldMagneticField());
-  EXPECT_EQ(ignition::math::Vector3d::Zero, sensor->MagneticField());
+  EXPECT_EQ(gz::math::Pose3d::Zero, sensor->WorldPose());
+  EXPECT_EQ(gz::math::Vector3d::Zero, sensor->WorldMagneticField());
+  EXPECT_EQ(gz::math::Vector3d::Zero, sensor->MagneticField());
 
   // verify initial readings
-  EXPECT_EQ(ignition::math::Pose3d::Zero, sensorNoise->WorldPose());
-  EXPECT_EQ(ignition::math::Vector3d::Zero, sensorNoise->WorldMagneticField());
-  EXPECT_EQ(ignition::math::Vector3d::Zero, sensorNoise->MagneticField());
+  EXPECT_EQ(gz::math::Pose3d::Zero, sensorNoise->WorldPose());
+  EXPECT_EQ(gz::math::Vector3d::Zero, sensorNoise->WorldMagneticField());
+  EXPECT_EQ(gz::math::Vector3d::Zero, sensorNoise->MagneticField());
 
   // set magnetic field and verify
-  ignition::math::Vector3d worldField(1, 2, -4);
+  gz::math::Vector3d worldField(1, 2, -4);
   sensor->SetWorldMagneticField(worldField);
   EXPECT_EQ(worldField, sensor->WorldMagneticField());
 
-  ignition::math::Vector3d worldFieldNoise(2, 1, -2);
+  gz::math::Vector3d worldFieldNoise(2, 1, -2);
   sensorNoise->SetWorldMagneticField(worldFieldNoise);
   EXPECT_EQ(worldFieldNoise, sensorNoise->WorldMagneticField());
 
   // set world pose and verify
-  ignition::math::Vector3d position(1, 0, 3);
-  ignition::math::Quaterniond orientation =
-      ignition::math::Quaterniond::Identity;
-  ignition::math::Pose3d pose(position, orientation);
+  gz::math::Vector3d position(1, 0, 3);
+  gz::math::Quaterniond orientation =
+      gz::math::Quaterniond::Identity;
+  gz::math::Pose3d pose(position, orientation);
   sensor->SetWorldPose(pose);
   EXPECT_EQ(pose, sensor->WorldPose());
 
-  ignition::math::Vector3d positionNoise(10, 20, 30);
-  ignition::math::Quaterniond orientationNoise =
-      ignition::math::Quaterniond::Identity;
-  ignition::math::Pose3d poseNoise(positionNoise, orientationNoise);
+  gz::math::Vector3d positionNoise(10, 20, 30);
+  gz::math::Quaterniond orientationNoise =
+      gz::math::Quaterniond::Identity;
+  gz::math::Pose3d poseNoise(positionNoise, orientationNoise);
   sensorNoise->SetWorldPose(poseNoise);
   EXPECT_EQ(poseNoise, sensorNoise->WorldPose());
 
   // update sensor and verify new readings
   // there are not sensor rotations so the magnetic fields in body frame and
   // world frame should be the same
-  EXPECT_TRUE(sensor->Update(ignition::common::Time(1, 0)));
+  EXPECT_TRUE(sensor->Update(gz::common::Time(1, 0)));
   EXPECT_EQ(pose, sensor->WorldPose());
   EXPECT_EQ(worldField, sensor->WorldMagneticField());
   EXPECT_EQ(worldField, sensor->MagneticField());
 
-  EXPECT_TRUE(sensorNoise->Update(ignition::common::Time(1, 0)));
+  EXPECT_TRUE(sensorNoise->Update(gz::common::Time(1, 0)));
   EXPECT_EQ(poseNoise, sensorNoise->WorldPose());
   EXPECT_EQ(worldFieldNoise, sensorNoise->WorldMagneticField());
   // There should be noise in the MagneticField
@@ -257,7 +257,7 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   auto msg = msgHelper.Message();
   EXPECT_EQ(1, msg.header().stamp().sec());
   EXPECT_EQ(0, msg.header().stamp().nsec());
-  EXPECT_EQ(worldField, ignition::msgs::Convert(msg.field_tesla()));
+  EXPECT_EQ(worldField, gz::msgs::Convert(msg.field_tesla()));
 
   // verify msg received on the noiseTopic
   EXPECT_TRUE(msgHelperNoise.WaitForMessage()) << msgHelperNoise;
@@ -265,18 +265,18 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   EXPECT_EQ(1, msgNoise.header().stamp().sec());
   EXPECT_EQ(0, msgNoise.header().stamp().nsec());
   EXPECT_TRUE(worldFieldNoise !=
-      ignition::msgs::Convert(msgNoise.field_tesla()));
+      gz::msgs::Convert(msgNoise.field_tesla()));
 
   // Rotate the magnetometer
-  ignition::math::Quaterniond newOrientation(0, 3.14, 1.57);
-  ignition::math::Pose3d newPose(position, newOrientation);
+  gz::math::Quaterniond newOrientation(0, 3.14, 1.57);
+  gz::math::Pose3d newPose(position, newOrientation);
   sensor->SetWorldPose(newPose);
   EXPECT_EQ(newPose, sensor->WorldPose());
 
   // update sensor and verify new readings
-  EXPECT_TRUE(sensor->Update(ignition::common::Time(2, 0)));
+  EXPECT_TRUE(sensor->Update(gz::common::Time(2, 0)));
   EXPECT_EQ(worldField, sensor->WorldMagneticField());
-  ignition::math::Vector3d localField =
+  gz::math::Vector3d localField =
       newOrientation.RotateVectorReverse(worldField);
   EXPECT_EQ(localField, sensor->MagneticField());
 
@@ -285,7 +285,7 @@ TEST_F(MagnetometerSensorTest, SensorReadings)
   msg = msgHelper.Message();
   EXPECT_EQ(2, msg.header().stamp().sec());
   EXPECT_EQ(0, msg.header().stamp().nsec());
-  EXPECT_EQ(localField, ignition::msgs::Convert(msg.field_tesla()));
+  EXPECT_EQ(localField, gz::msgs::Convert(msg.field_tesla()));
 }
 
 /////////////////////////////////////////////////
@@ -295,10 +295,10 @@ TEST_F(MagnetometerSensorTest, Topic)
   const double updateRate = 30;
   const bool alwaysOn = 1;
   const bool visualize = 1;
-  auto sensorPose = ignition::math::Pose3d();
+  auto sensorPose = gz::math::Pose3d();
 
   // Factory
-  ignition::sensors::SensorFactory factory;
+  gz::sensors::SensorFactory factory;
 
   // Default topic
   {
@@ -310,7 +310,7 @@ TEST_F(MagnetometerSensorTest, Topic)
     EXPECT_NE(nullptr, sensor);
 
     auto magnetometer =
-        dynamic_cast<ignition::sensors::MagnetometerSensor *>(sensor.release());
+        dynamic_cast<gz::sensors::MagnetometerSensor *>(sensor.release());
     ASSERT_NE(nullptr, magnetometer);
 
     EXPECT_EQ("/magnetometer", magnetometer->Topic());
@@ -326,7 +326,7 @@ TEST_F(MagnetometerSensorTest, Topic)
     EXPECT_NE(nullptr, sensor);
 
     auto magnetometer =
-        dynamic_cast<ignition::sensors::MagnetometerSensor *>(sensor.release());
+        dynamic_cast<gz::sensors::MagnetometerSensor *>(sensor.release());
     ASSERT_NE(nullptr, magnetometer);
 
     EXPECT_EQ("/topic_with_spaces/characters", magnetometer->Topic());

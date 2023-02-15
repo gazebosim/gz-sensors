@@ -15,15 +15,15 @@
  *
 */
 
-#include <ignition/common/PluginLoader.hh>
-#include <ignition/common/SystemPaths.hh>
-#include <ignition/common/Console.hh>
-#include "ignition/sensors/config.hh"
+#include <gz/common/PluginLoader.hh>
+#include <gz/common/SystemPaths.hh>
+#include <gz/common/Console.hh>
+#include "gz/sensors/config.hh"
 
-#include "ignition/sensors/SensorFactory.hh"
+#include "gz/sensors/SensorFactory.hh"
 
 /// \brief Private data class for SensorFactory
-class ignition::sensors::SensorFactoryPrivate
+class gz::sensors::SensorFactoryPrivate
 {
   /// \brief Constructor
   public: SensorFactoryPrivate();
@@ -32,13 +32,13 @@ class ignition::sensors::SensorFactoryPrivate
   public: std::map<std::string, std::shared_ptr<SensorPlugin>> sensorPlugins;
 
   /// \brief Stores paths to search for on file system
-  public: ignition::common::SystemPaths systemPaths;
+  public: gz::common::SystemPaths systemPaths;
 
   /// \brief For loading plugins
-  public: ignition::common::PluginLoader pluginLoader;
+  public: gz::common::PluginLoader pluginLoader;
 };
 
-using namespace ignition;
+using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////
