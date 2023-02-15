@@ -48,7 +48,8 @@ sdf::ElementPtr cameraToBadSdf()
 
 sdf::ElementPtr CameraToSdf(const std::string &_type,
     const std::string &_name, double _updateRate,
-    const std::string &_topic, bool _alwaysOn, bool _visualize)
+    const std::string &_topic, const std::string &_cameraInfoTopic,
+    bool _alwaysOn, bool _visualize)
 {
   std::ostringstream stream;
   stream
@@ -58,6 +59,7 @@ sdf::ElementPtr CameraToSdf(const std::string &_type,
     << "  <link name='link1'>"
     << "    <sensor name='" << _name << "' type='" << _type << "'>"
     << "      <topic>" << _topic << "</topic>"
+    << "      <topic>" << _cameraInfoTopic << "</topic>"
     << "      <update_rate>"<< _updateRate <<"</update_rate>"
     << "      <always_on>"<< _alwaysOn <<"</always_on>"
     << "      <visualize>" << _visualize << "</visualize>"
@@ -146,8 +148,8 @@ TEST(Camera_TEST, CreateCamera)
 {
   gz::sensors::Manager mgr;
 
-  sdf::ElementPtr camSdf = CameraToSdf("camera", "my_camera", 60.0, "/cam",
-      true, true);
+  sdf::ElementPtr camSdf = CameraToSdf("camera", "my_camera", 60.0,
+    "/cam", "my_camera/camera_info", true, true);
 
   // Create a CameraSensor
   gz::sensors::CameraSensor *cam =
@@ -190,8 +192,9 @@ TEST(Camera_TEST, Topic)
   // Default topic
   {
     const std::string topic;
-    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
-        visualize);
+    const std::string cameraInfoTopic;
+    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, cameraInfoTopic,
+      alwaysOn, visualize);
 
     auto sensorId = mgr.CreateSensor(cameraSdf);
     EXPECT_NE(gz::sensors::NO_SENSOR, sensorId);
@@ -203,12 +206,13 @@ TEST(Camera_TEST, Topic)
     ASSERT_NE(nullptr, camera);
 
     EXPECT_EQ("/camera", camera->Topic());
+    EXPECT_EQ("/camera_info", camera->InfoTopic());
   }
 
   // Convert to valid topic
   {
     const std::string topic = "/topic with spaces/@~characters//";
-    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
+    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, "", alwaysOn,
         visualize);
 
     auto sensorId = mgr.CreateSensor(cameraSdf);
@@ -221,12 +225,13 @@ TEST(Camera_TEST, Topic)
     ASSERT_NE(nullptr, camera);
 
     EXPECT_EQ("/topic_with_spaces/characters", camera->Topic());
+    EXPECT_EQ("/topic_with_spaces/camera_info", camera->InfoTopic());
   }
 
   // Invalid topic
   {
     const std::string topic = "@@@";
-    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
+    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, "", alwaysOn,
         visualize);
 
     auto sensorId = mgr.CreateSensor(cameraSdf);
