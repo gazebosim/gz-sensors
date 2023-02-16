@@ -39,10 +39,6 @@ using namespace sensors;
 
 class gz::sensors::BoundingBoxCameraSensorPrivate
 {
-  /// \brief Callback for triggered subscription
-  /// \param[in] _msg Boolean message
-  public: void OnTrigger(const msgs::Boolean &_msg);
-
   /// \brief Save an image of rgb camera
   public: void SaveImage();
 
@@ -249,7 +245,7 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
     }
 
     this->dataPtr->node.Subscribe(this->dataPtr->triggerTopic,
-        &BoundingBoxCameraSensorPrivate::OnTrigger, this->dataPtr.get());
+        &BoundingBoxCameraSensor::OnTrigger, this);
 
     gzdbg << "Camera trigger messages for [" << this->Name() << "] subscribed"
            << " on [" << this->dataPtr->triggerTopic << "]" << std::endl;
@@ -595,10 +591,10 @@ unsigned int BoundingBoxCameraSensor::ImageWidth() const
 }
 
 //////////////////////////////////////////////////
-void BoundingBoxCameraSensorPrivate::OnTrigger(const gz::msgs::Boolean &/*_msg*/)
+void BoundingBoxCameraSensor::OnTrigger(const gz::msgs::Boolean &/*_msg*/)
 {
-  std::lock_guard<std::mutex> lock(this->mutex);
-  this->isTriggered = true;
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  this->dataPtr->isTriggered = true;
 }
 
 //////////////////////////////////////////////////

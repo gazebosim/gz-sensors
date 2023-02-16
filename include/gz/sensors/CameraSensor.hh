@@ -22,6 +22,7 @@
 #include <string>
 
 #include <gz/msgs/image.pb.h>
+#include <gz/msgs/boolean.pb.h>
 
 #include <sdf/sdf.hh>
 
@@ -174,6 +175,10 @@ namespace gz
       /// the Manager.
       /// \param[in] _scene Pointer to the new scene.
       private: void OnSceneChange(gz::rendering::ScenePtr /*_scene*/);
+
+      /// \brief Callback for triggered subscription
+      /// \param[in] _msg Boolean message
+      private: virtual void OnTrigger(const gz::msgs::Boolean &/*_msg*/);
 
       GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
