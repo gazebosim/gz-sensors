@@ -21,8 +21,8 @@
 #include <memory>
 #include <string>
 
-#include <gz/msgs/image.pb.h>
 #include <gz/msgs/boolean.pb.h>
+#include <gz/msgs/image.pb.h>
 
 #include <sdf/sdf.hh>
 

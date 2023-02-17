@@ -86,13 +86,13 @@ class gz::sensors::BoundingBoxCameraSensorPrivate
   public: std::mutex mutex;
 
   /// \brief True if camera is triggered by a topic
-  public: bool isTriggeredCamera = false;
+  public: bool isTriggeredCamera{false};
 
   /// \brief True if camera has been triggered by a topic
-  public: bool isTriggered = false;
+  public: bool isTriggered{false};
 
   /// \brief Topic for camera trigger
-  public: std::string triggerTopic = "";
+  public: std::string triggerTopic{""};
 
   /// \brief BoundingBoxes type
   public: rendering::BoundingBoxType type
@@ -239,7 +239,7 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
 
       if (this->dataPtr->triggerTopic.empty())
       {
-        gzerr << "Invalid trigger topic name" << std::endl;
+        gzerr << "Invalid trigger topic name [" << this->dataPtr->triggerTopic << "]" << std::endl;
         return false;
       }
     }
@@ -248,7 +248,7 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
         &BoundingBoxCameraSensor::OnTrigger, this);
 
     gzdbg << "Camera trigger messages for [" << this->Name() << "] subscribed"
-           << " on [" << this->dataPtr->triggerTopic << "]" << std::endl;
+          << " on [" << this->dataPtr->triggerTopic << "]" << std::endl;
     this->dataPtr->isTriggeredCamera = true;
   }
 
