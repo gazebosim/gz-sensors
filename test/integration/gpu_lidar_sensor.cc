@@ -278,6 +278,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
 
   // Clean up
   c.reset();
+  mgr.Remove(sensor->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }
@@ -416,8 +417,11 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   EXPECT_FALSE(pointMsgs.back().is_dense());
   EXPECT_EQ(32u * horzSamples * vertSamples, pointMsgs.back().data().size());
 
+  // Clean up rendering ptrs
+  visualBox1.reset();
+
   // Clean up
-  //
+  mgr.Remove(sensor->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }
@@ -573,7 +577,14 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   for (unsigned int i = 0; i < sensor1->RayCount(); ++i)
     EXPECT_DOUBLE_EQ(sensor2->Range(i), gz::math::INF_D);
 
+  // Clean up rendering ptrs
+  visualBox1.reset();
+  visualBox2.reset();
+  visualBox3.reset();
+
   // Clean up
+  mgr.Remove(sensor1->Id());
+  mgr.Remove(sensor2->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }
@@ -693,7 +704,11 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
     }
   }
 
+  // Clean up rendering ptrs
+  visualBox1.reset();
+
   // Clean up
+  mgr.Remove(sensor->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }
@@ -819,8 +834,12 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   EXPECT_DOUBLE_EQ(sensor2->Range(last), gz::math::INF_D);
 #endif
 
+  // Clean up rendering ptrs
+  visualBox1.reset();
+
   // Clean up
-  //
+  mgr.Remove(sensor1->Id());
+  mgr.Remove(sensor2->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }
@@ -858,7 +877,6 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
 
   // Create a GpuLidarSensor
   gz::sensors::Manager mgr;
-
 
   // Default topic
   {
