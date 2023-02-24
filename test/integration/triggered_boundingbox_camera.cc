@@ -112,7 +112,8 @@ void BuildScene(gz::rendering::ScenePtr _scene)
   root->AddChild(box2);
 }
 
-void TriggeredBoundingBoxCameraTest::BoxesWithBuiltinSDF(const std::string &_renderEngine)
+void TriggeredBoundingBoxCameraTest::BoxesWithBuiltinSDF(
+  const std::string &_renderEngine)
 {
   std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "triggered_boundingbox_camera_sensor_builtin.sdf");
@@ -169,13 +170,13 @@ void TriggeredBoundingBoxCameraTest::BoxesWithBuiltinSDF(const std::string &_ren
   // subscribe to the BoundingBox camera topic
   gz::transport::Node node;
   std::string boxTopic =
-      "/test/integration/TriggeredBoundingBoxCameraPlugin_imagesWithBuiltinSDF";
+      "/test/integration/TriggeredBBCameraPlugin_imagesWithBuiltinSDF";
   node.Subscribe(boxTopic, &OnNewBoundingBoxes);
 
   // we should not have image before trigger
   {
     std::string imageTopic =
-        "/test/integration/TriggeredBoundingBoxCameraPlugin_imagesWithBuiltinSDF_image";
+        "/test/integration/TriggeredBBCameraPlugin_imagesWithBuiltinSDF_image";
     WaitForMessageTestHelper<gz::msgs::Image> helper(imageTopic);
     mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
     EXPECT_FALSE(helper.WaitForMessage(1s)) << helper;
@@ -186,7 +187,7 @@ void TriggeredBoundingBoxCameraTest::BoxesWithBuiltinSDF(const std::string &_ren
 
   // trigger camera through topic
   std::string triggerTopic =
-      "/test/integration/TriggeredBoundingBoxCameraPlugin_imagesWithBuiltinSDF/trigger";
+      "/test/integration/TriggeredBBCameraPlugin_imagesWithBuiltinSDF/trigger";
 
   auto pub = node.Advertise<gz::msgs::Boolean>(triggerTopic);
   gz::msgs::Boolean msg;
@@ -196,7 +197,7 @@ void TriggeredBoundingBoxCameraTest::BoxesWithBuiltinSDF(const std::string &_ren
   // we should receive images and boxes after trigger
   {
     std::string imageTopic =
-        "/test/integration/TriggeredBoundingBoxCameraPlugin_imagesWithBuiltinSDF_image";
+        "/test/integration/TriggeredBBCameraPlugin_imagesWithBuiltinSDF_image";
     WaitForMessageTestHelper<gz::msgs::Image> helper(imageTopic);
     mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
     EXPECT_TRUE(helper.WaitForMessage(10s)) << helper;
@@ -216,7 +217,8 @@ TEST_P(TriggeredBoundingBoxCameraTest, BoxesWithBuiltinSDF)
   BoxesWithBuiltinSDF(GetParam());
 }
 
-INSTANTIATE_TEST_SUITE_P(BoundingBoxCameraSensor, TriggeredBoundingBoxCameraTest,
+INSTANTIATE_TEST_SUITE_P(BoundingBoxCameraSensor, 
+    TriggeredBoundingBoxCameraTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 
 //////////////////////////////////////////////////

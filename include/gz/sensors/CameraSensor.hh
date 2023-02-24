@@ -178,7 +178,7 @@ namespace gz
 
       /// \brief Callback for triggered subscription
       /// \param[in] _msg Boolean message
-      private: virtual void OnTrigger(const gz::msgs::Boolean &/*_msg*/);
+      private: void OnTrigger(const gz::msgs::Boolean &/*_msg*/);
 
       GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
