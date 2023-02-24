@@ -156,7 +156,7 @@ void TriggeredBoundingBoxCameraTest::BoxesWithBuiltinSDF(
 
   std::string type = sdfSensor.TypeStr();
   EXPECT_EQ(type, "boundingbox_camera");
-  
+
   gz::sensors::BoundingBoxCameraSensor *sensor =
       mgr.CreateSensor<gz::sensors::BoundingBoxCameraSensor>(sdfSensor);
   ASSERT_NE(sensor, nullptr);
@@ -217,7 +217,7 @@ TEST_P(TriggeredBoundingBoxCameraTest, BoxesWithBuiltinSDF)
   BoxesWithBuiltinSDF(GetParam());
 }
 
-INSTANTIATE_TEST_SUITE_P(BoundingBoxCameraSensor, 
+INSTANTIATE_TEST_SUITE_P(BoundingBoxCameraSensor,
     TriggeredBoundingBoxCameraTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
 

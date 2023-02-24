@@ -239,7 +239,7 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
 
       if (this->dataPtr->triggerTopic.empty())
       {
-        gzerr << "Invalid trigger topic name [" << 
+        gzerr << "Invalid trigger topic name [" <<
         this->dataPtr->triggerTopic << "]" << std::endl;
         return false;
       }
