@@ -49,10 +49,6 @@ using namespace sensors;
 /// \brief Private data for CameraSensor
 class gz::sensors::CameraSensorPrivate
 {
-  /// \brief Callback for triggered subscription
-  /// \param[in] _msg Boolean message
-  public: void OnTrigger(const msgs::Boolean &_msg);
-
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
   /// \param[in] _width width of image in pixels
@@ -459,7 +455,7 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
     }
 
     this->dataPtr->node.Subscribe(this->dataPtr->triggerTopic,
-        &CameraSensorPrivate::OnTrigger, this->dataPtr.get());
+        &CameraSensor::OnTrigger, this);
 
     gzdbg << "Camera trigger messages for [" << this->Name() << "] subscribed"
            << " on [" << this->dataPtr->triggerTopic << "]" << std::endl;
@@ -657,10 +653,10 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 }
 
 //////////////////////////////////////////////////
-void CameraSensorPrivate::OnTrigger(const gz::msgs::Boolean &/*_msg*/)
+void CameraSensor::OnTrigger(const gz::msgs::Boolean &/*_msg*/)
 {
-  std::lock_guard<std::mutex> lock(this->mutex);
-  this->isTriggered = true;
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  this->dataPtr->isTriggered = true;
 }
 
 //////////////////////////////////////////////////
