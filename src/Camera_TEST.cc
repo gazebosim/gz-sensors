@@ -63,7 +63,8 @@ sdf::ElementPtr CameraToSdf(const std::string &_type,
     << "      <always_on>"<< _alwaysOn <<"</always_on>"
     << "      <visualize>" << _visualize << "</visualize>"
     << "      <camera>"
-    << "        <camera_info_topic>" << _cameraInfoTopic << "</camera_info_topic>"
+    << "        <camera_info_topic>" << _cameraInfoTopic
+                                     << "</camera_info_topic>"
     << "        <horizontal_fov>.75</horizontal_fov>"
     << "        <image>"
     << "          <width>640</width>"
