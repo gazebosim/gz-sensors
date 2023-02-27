@@ -59,11 +59,12 @@ sdf::ElementPtr CameraToSdf(const std::string &_type,
     << "  <link name='link1'>"
     << "    <sensor name='" << _name << "' type='" << _type << "'>"
     << "      <topic>" << _topic << "</topic>"
-    << "      <topic>" << _cameraInfoTopic << "</topic>"
     << "      <update_rate>"<< _updateRate <<"</update_rate>"
     << "      <always_on>"<< _alwaysOn <<"</always_on>"
     << "      <visualize>" << _visualize << "</visualize>"
     << "      <camera>"
+    << "        <camera_info_topic>" << _cameraInfoTopic
+                                     << "</camera_info_topic>"
     << "        <horizontal_fov>.75</horizontal_fov>"
     << "        <image>"
     << "          <width>640</width>"
@@ -160,7 +161,7 @@ TEST(Camera_TEST, CreateCamera)
 
   // Check topics
   EXPECT_EQ("/cam", cam->Topic());
-  EXPECT_EQ("/camera_info", cam->InfoTopic());
+  EXPECT_EQ("my_camera/camera_info", cam->InfoTopic());
 
   // however camera is not loaded because a rendering scene is missing so
   // updates will not be successful and image size will be 0
