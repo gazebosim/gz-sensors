@@ -427,10 +427,13 @@ bool BoundingBoxCameraSensor::Update(
   }
 
   // render only if necessary
-  if (this->dataPtr->isTriggeredCamera &&
-      !this->dataPtr->isTriggered)
   {
-    return true;
+    std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+    if (this->dataPtr->isTriggeredCamera &&
+        !this->dataPtr->isTriggered)
+    {
+      return true;
+    }
   }
 
   // don't render if there are no subscribers nor saving

@@ -193,12 +193,13 @@ void TriggeredBoundingBoxCameraTest::BoxesWithBuiltinSDF(
   gz::msgs::Boolean msg;
   msg.set_data(true);
   pub.Publish(msg);
+  // sleep to wait for trigger msg to be received before calling mgr.RunOnce
+  std::this_thread::sleep_for(2s);
 
   // we should receive images and boxes after trigger
   {
-    std::string imageTopic =
-        "/test/integration/TriggeredBBCameraPlugin_imagesWithBuiltinSDF_image";
-    WaitForMessageTestHelper<gz::msgs::Image> helper(imageTopic);
+    WaitForMessageTestHelper<gz::msgs::AnnotatedAxisAligned2DBox_V>
+        helper(boxTopic);
     mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
     EXPECT_TRUE(helper.WaitForMessage(10s)) << helper;
     g_mutex.lock();
