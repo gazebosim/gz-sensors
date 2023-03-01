@@ -47,7 +47,7 @@ RenderingSensor::RenderingSensor() :
 //////////////////////////////////////////////////
 RenderingSensor::~RenderingSensor()
 {
-  if (!this->dataPtr->scene)
+  if (!this->dataPtr->scene || !this->dataPtr->scene->IsInitialized())
     return;
   for (auto &s : this->dataPtr->sensors)
   {

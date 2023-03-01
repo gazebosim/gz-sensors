@@ -248,6 +248,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   box->SetLocalRotation(0, 0, 0);
   box->SetLocalScale(unitBoxSize, unitBoxSize, unitBoxSize);
   box->SetMaterial(blue);
+  scene->DestroyMaterial(blue);
   root->AddChild(box);
 
   // do the test
@@ -535,11 +536,9 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   g_imgMutex.unlock();
 
   // Check that for a box really close it returns -inf
-  root->RemoveChild(box);
   math::Vector3d boxPositionNear(
       unitBoxSize * 0.5 + near_ * 0.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionNear);
-  root->AddChild(box);
 
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
   for (int sleep = 0; sleep < 300 &&
@@ -641,11 +640,9 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   g_pcMutex.unlock();
 
   // Check that for a box really far it returns inf
-  root->RemoveChild(box);
   math::Vector3d boxPositionFar(
       unitBoxSize * 0.5 + far_ * 1.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionFar);
-  root->AddChild(box);
 
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
   for (int sleep = 0; sleep < 300 &&
@@ -746,7 +743,12 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   g_imgMutex.unlock();
   g_pcMutex.unlock();
 
+  // Clean up rendering ptrs
+  box.reset();
+  blue.reset();
+
   // Clean up
+  mgr.Remove(rgbdSensor->Id());
   engine->DestroyScene(scene);
   rendering::unloadEngine(engine->Name());
 }

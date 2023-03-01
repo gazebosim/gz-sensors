@@ -240,6 +240,7 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
   box->SetLocalPosition(gz::math::Vector3d(4.0, 1, 0.5));
   box->SetLocalRotation(0, 0, 0);
   box->SetMaterial(blue);
+  scene->DestroyMaterial(blue);
   root->AddChild(box);
 
   // Do the test
@@ -462,7 +463,14 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
   delete []  img2;
   delete []  img3;
 
+  // Clean up rendering ptrs
+  box.reset();
+  blue.reset();
+
   // Clean up
+  mgr.Remove(sensor1->Id());
+  mgr.Remove(sensor2->Id());
+  mgr.Remove(sensor3->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }
@@ -529,6 +537,7 @@ void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
   box->SetLocalPosition(gz::math::Vector3d(4.0, 1, 0.5));
   box->SetLocalRotation(0, 0, 0);
   box->SetMaterial(blue);
+  scene->DestroyMaterial(blue);
   root->AddChild(box);
 
   // Do the test
@@ -753,7 +762,14 @@ void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
   delete []  img2;
   delete []  img3;
 
+  // Clean up rendering ptrs
+  box.reset();
+  blue.reset();
+
   // Clean up
+  mgr.Remove(sensor1->Id());
+  mgr.Remove(sensor2->Id());
+  mgr.Remove(sensor3->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }

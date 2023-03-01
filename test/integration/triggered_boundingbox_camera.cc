@@ -208,6 +208,7 @@ void TriggeredBoundingBoxCameraTest::BoxesWithBuiltinSDF(
   }
 
   // Clean up
+  mgr.Remove(sensor->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }
