@@ -423,6 +423,11 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
   if (this->Topic().empty())
     this->SetTopic("/camera");
 
+  if (!_sdf.CameraSensor()->CameraInfoTopic().empty())
+  {
+    this->dataPtr->infoTopic = _sdf.CameraSensor()->CameraInfoTopic();
+  }
+
   this->dataPtr->pub =
       this->dataPtr->node.Advertise<gz::msgs::Image>(
           this->Topic());
@@ -714,17 +719,17 @@ std::string CameraSensor::InfoTopic() const
 //////////////////////////////////////////////////
 bool CameraSensor::AdvertiseInfo()
 {
-  // TODO(anyone) Make info topic configurable from SDF
-  // Info topic must be at same level as image topic
-  auto parts = common::Split(this->Topic(), '/');
-  parts.pop_back();
-
-  for (const auto &part : parts)
+  if (this->dataPtr->infoTopic.empty())
   {
-    if (!part.empty())
-      this->dataPtr->infoTopic += "/" + part;
+    auto parts = common::Split(this->Topic(), '/');
+    parts.pop_back();
+    for (const auto &part : parts)
+    {
+      if (!part.empty())
+        this->dataPtr->infoTopic += "/" + part;
+    }
+    this->dataPtr->infoTopic += "/camera_info";
   }
-  this->dataPtr->infoTopic += "/camera_info";
 
   return this->AdvertiseInfo(this->dataPtr->infoTopic);
 }
