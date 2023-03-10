@@ -141,6 +141,29 @@
 
 ## Gazebo Sensors 6
 
+### Gazebo Sensors 6.7.0 (2023-02-13)
+
+1. Disable thermal camera test on MacOS.
+    * [Pull request #243](https://github.com/gazebosim/gz-sensors/pull/243)
+
+1. Add optional optical frame id to camera sensors.
+    * [Pull request #259](https://github.com/gazebosim/gz-sensors/pull/259)
+
+1. Add support for 16 bit image format.
+    * [Pull request #276](https://github.com/gazebosim/gz-sensors/pull/276)
+
+1. Fix navsat frame id.
+    * [Pull request #298](https://github.com/gazebosim/gz-sensors/pull/298)
+
+1. CameraInfo is now published when there's a CameraSensor subscriber.
+    * [Pull request #308](https://github.com/gazebosim/gz-sensors/pull/308)
+
+1. Add HasInfoConnections() method to expose infoPub.HasConnections() to
+   child of CameraSensor class.
+    * [Pull request #310](https://github.com/gazebosim/gz-sensors/pull/310)
+
+1. Forward port 3.5.0.
+
 ### Gazebo Sensors 6.6.0 (2022-06-17)
 
 1. Add BoundingBox Sensor
