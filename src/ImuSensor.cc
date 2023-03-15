@@ -29,6 +29,7 @@
 #include <gz/transport/Node.hh>
 
 #include "gz/sensors/ImuSensor.hh"
+#include "gz/sensors/GaussianNoiseModel.hh"
 #include "gz/sensors/Noise.hh"
 #include "gz/sensors/SensorFactory.hh"
 #include "gz/sensors/SensorTypes.hh"
@@ -254,6 +255,41 @@ bool ImuSensor::Update(const std::chrono::steady_clock::duration &_now)
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->FrameId());
+
+  // Populate covariance
+  for (int i = 0; i < 9; ++i) {
+    msg.mutable_linear_acceleration_covariance()->add_data(0);
+    msg.mutable_angular_velocity_covariance()->add_data(0);
+    msg.mutable_orientation_covariance()->add_data(0);
+  }
+
+  auto getCov = [&](SensorNoiseType noiseType) -> float{
+    if (this->dataPtr->noises.find(noiseType) != this->dataPtr->noises.end()) {
+      GaussianNoiseModelPtr gaussian =
+        std::dynamic_pointer_cast<GaussianNoiseModel>(
+            this->dataPtr->noises[noiseType]);
+      return (float) (gaussian->StdDev() * gaussian->StdDev());
+    }
+    return 0.001f;
+  };
+
+  {
+    msg.mutable_linear_acceleration_covariance()->set_data(
+        0, getCov(ACCELEROMETER_X_NOISE_M_S_S));
+    msg.mutable_linear_acceleration_covariance()->set_data(
+        4, getCov(ACCELEROMETER_Y_NOISE_M_S_S));
+    msg.mutable_linear_acceleration_covariance()->set_data(
+        8, getCov(ACCELEROMETER_Z_NOISE_M_S_S));
+    msg.mutable_angular_velocity_covariance()->set_data(
+        0, getCov(GYROSCOPE_X_NOISE_RAD_S));
+    msg.mutable_angular_velocity_covariance()->set_data(
+        4, getCov(GYROSCOPE_Y_NOISE_RAD_S));
+    msg.mutable_angular_velocity_covariance()->set_data(
+        8, getCov(GYROSCOPE_Z_NOISE_RAD_S));
+    msg.mutable_orientation_covariance()->set_data( 0, 0.001);
+    msg.mutable_orientation_covariance()->set_data( 4, 0.001);
+    msg.mutable_orientation_covariance()->set_data( 8, 0.001);
+  }
 
   if (this->dataPtr->orientationEnabled)
   {
