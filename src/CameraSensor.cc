@@ -43,6 +43,12 @@
 
 #include "gz/rendering/Utils.hh"
 
+
+//teju
+#include <iostream>
+//teju
+
+
 using namespace gz;
 using namespace sensors;
 
@@ -277,6 +283,9 @@ bool CameraSensor::CreateCamera()
       break;
     case sdf::PixelFormatType::L_INT16:
       this->dataPtr->camera->SetImageFormat(rendering::PF_L16);
+      break;
+    case sdf::PixelFormatType::BAYER_RGGB8:
+      this->dataPtr->camera->SetImageFormat(rendering::PF_BAYER_RGGB8);
       break;
     default:
       gzerr << "Unsupported pixel format ["
@@ -571,21 +580,36 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   if (this->HasImageConnections() || this->dataPtr->saveImage)
   {
     // generate sensor data
+    //teju
+    std::cout << "check1\n";
+    //teju
     this->Render();
     {
       GZ_PROFILE("CameraSensor::Update Copy image");
+      // teju
+      std::cout << "check2\n";
+      //teju
       this->dataPtr->camera->Copy(this->dataPtr->image);
     }
 
+    //teju
+    std::cout << "check 3\n";
+    //teju
     unsigned int width = this->dataPtr->camera->ImageWidth();
     unsigned int height = this->dataPtr->camera->ImageHeight();
     unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
+    //teju
+    std::cout << "check4\n";
+    //teju
     gz::common::Image::PixelFormatType
         format{common::Image::UNKNOWN_PIXEL_FORMAT};
     msgs::PixelFormatType msgsPixelFormat =
       msgs::PixelFormatType::UNKNOWN_PIXEL_FORMAT;
 
+    //teju
+    std::cout << "check5\n";
+    //teju
     switch (this->dataPtr->camera->ImageFormat())
     {
       case rendering::PF_R8G8B8:
@@ -600,15 +624,24 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
         format = common::Image::L_INT16;
         msgsPixelFormat = msgs::PixelFormatType::L_INT16;
         break;
+      case rendering::PF_BAYER_RGGB8:
+        format = common::Image::BAYER_RGGB8;
+        msgsPixelFormat = msgs::PixelFormatType::BAYER_RGGB8;
+        break;
       default:
         gzerr << "Unsupported pixel format ["
           << this->dataPtr->camera->ImageFormat() << "]\n";
         break;
     }
 
+    //teju
+    std::cout << "check6\n";
+    //teju
     // create message
     msgs::Image msg;
     {
+      //teju
+      std::cout << "check7\n";
       GZ_PROFILE("CameraSensor::Update Message");
       msg.set_width(width);
       msg.set_height(height);
@@ -620,21 +653,35 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       frame->set_key("frame_id");
       frame->add_value(this->dataPtr->opticalFrameId);
       msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
+      //teju
+      std::cout << "check8\n";
     }
 
     // publish the image message
     {
+      //teju
+      std::cout << "check9\n";
+      //teju
       this->AddSequence(msg.mutable_header());
       GZ_PROFILE("CameraSensor::Update Publish");
       this->dataPtr->pub.Publish(msg);
+      //teju
+      std::cout << "check10\n";
+      //teju
     }
 
+    //teju
+    std::cout << "check11\n";
+    //teju
     // Trigger callbacks.
     if (this->dataPtr->imageEvent.ConnectionCount() > 0)
     {
       try
       {
         this->dataPtr->imageEvent(msg);
+        //teju
+        std::cout << "check12\n";
+        //teju
       }
       catch(...)
       {
@@ -646,6 +693,9 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     if (this->dataPtr->saveImage)
     {
       this->dataPtr->SaveImage(data, width, height, format);
+      //teju
+        std::cout << "check13\n";
+        //teju
     }
   }
 
