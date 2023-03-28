@@ -43,7 +43,6 @@
 
 #include "gz/rendering/Utils.hh"
 
-
 using namespace gz;
 using namespace sensors;
 
