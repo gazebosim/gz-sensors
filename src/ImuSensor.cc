@@ -286,9 +286,9 @@ bool ImuSensor::Update(const std::chrono::steady_clock::duration &_now)
         4, getCov(GYROSCOPE_Y_NOISE_RAD_S));
     msg.mutable_angular_velocity_covariance()->set_data(
         8, getCov(GYROSCOPE_Z_NOISE_RAD_S));
-    msg.mutable_orientation_covariance()->set_data( 0, 0.001);
-    msg.mutable_orientation_covariance()->set_data( 4, 0.001);
-    msg.mutable_orientation_covariance()->set_data( 8, 0.001);
+    msg.mutable_orientation_covariance()->set_data(0, 0.001);
+    msg.mutable_orientation_covariance()->set_data(4, 0.001);
+    msg.mutable_orientation_covariance()->set_data(8, 0.001);
   }
 
   if (this->dataPtr->orientationEnabled)
