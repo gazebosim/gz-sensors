@@ -2,6 +2,38 @@
 
 ### Gazebo Sensors 7.X.X
 
+### Gazebo Sensors 7.1.0 (2023-04-13)
+
+1. Cleanup resources in CameraSensor destructor
+    * [Pull request #340](https://github.com/gazebosim/gz-sensors/pull/340)
+
+1. CI workflow: use checkout v3
+    * [Pull request #335](https://github.com/gazebosim/gz-sensors/pull/335)
+
+1. Rename COPYING to LICENSE
+    * [Pull request #334](https://github.com/gazebosim/gz-sensors/pull/334)
+
+1. Fix links in Changelog
+    * [Pull request #330](https://github.com/gazebosim/gz-sensors/pull/330)
+
+1. Fix flaky triggered bounding box camera test
+    * [Pull request #329](https://github.com/gazebosim/gz-sensors/pull/329)
+
+1. Fix Camera info test
+    * [Pull request #326](https://github.com/gazebosim/gz-sensors/pull/326)
+
+1. Added trigger to BoundingBoxCamera
+    * [Pull request #322](https://github.com/gazebosim/gz-sensors/pull/322)
+
+1. clean up rendering resources
+    * [Pull request #324](https://github.com/gazebosim/gz-sensors/pull/324)
+
+1. Added Camera Info topic support for cameras
+    * [Pull request #285](https://github.com/gazebosim/gz-sensors/pull/285)
+
+1. ign -> gz Migrate Ignition Headers : gz-sensors
+    * [Pull request #260](https://github.com/gazebosim/gz-sensors/pull/260)
+
 ### Gazebo Sensors 7.1.0 (2023-02-09)
 
 1. Added airspeed sensor
