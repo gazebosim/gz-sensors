@@ -398,6 +398,10 @@ CameraSensor::CameraSensor()
 //////////////////////////////////////////////////
 CameraSensor::~CameraSensor()
 {
+  if (this->Scene() && this->dataPtr->camera)
+  {
+    this->Scene()->DestroySensor(this->dataPtr->camera);
+  }
 }
 
 //////////////////////////////////////////////////
