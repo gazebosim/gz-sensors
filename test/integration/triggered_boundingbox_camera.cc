@@ -303,8 +303,6 @@ TEST_P(TriggeredBoundingBoxCameraTest, BoxesWithBuiltinSDF)
   BoxesWithBuiltinSDF(GetParam());
 }
 
-
-
 //////////////////////////////////////////////////
 TEST_P(TriggeredBoundingBoxCameraTest, EmptyTriggerTopic)
 {
