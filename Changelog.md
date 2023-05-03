@@ -2,7 +2,7 @@
 
 ### Gazebo Sensors 7.X.X
 
-### Gazebo Sensors 7.1.0 (2023-04-13)
+### Gazebo Sensors 7.2.0 (2023-04-13)
 
 1. Cleanup resources in CameraSensor destructor
     * [Pull request #340](https://github.com/gazebosim/gz-sensors/pull/340)
