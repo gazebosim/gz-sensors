@@ -63,6 +63,9 @@ class TriggeredCameraTest: public testing::Test,
 
   // Create a Camera sensor from a SDF and gets a image message
   public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
+
+  // Create a Camera sensor from a SDF with empty trigger topic
+  public: void EmptyTriggerTopic(const std::string &_renderEngine);
 };
 
 void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
@@ -128,6 +131,9 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   msg.set_data(true);
   pub.Publish(msg);
 
+  // sleep to wait for trigger msg to be received before calling mgr.RunOnce
+  std::this_thread::sleep_for(2s);
+
   // check camera image after trigger
   {
     std::string imageTopic =
@@ -154,11 +160,82 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   gz::rendering::unloadEngine(engine->Name());
 }
 
+void TriggeredCameraTest::EmptyTriggerTopic(const std::string &_renderEngine)
+{
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+      "sdf", "triggered_camera_sensor_topic_builtin.sdf");
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  ASSERT_NE(nullptr, doc->Root());
+  ASSERT_TRUE(doc->Root()->HasElement("model"));
+  auto modelPtr = doc->Root()->GetElement("model");
+  ASSERT_TRUE(modelPtr->HasElement("link"));
+  auto linkPtr = modelPtr->GetElement("link");
+  ASSERT_TRUE(linkPtr->HasElement("sensor"));
+  auto sensorPtr = linkPtr->GetElement("sensor");
+
+  // Setup gz-rendering with an empty scene
+  auto *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    gzdbg << "Engine '" << _renderEngine
+           << "' is not supported" << std::endl;
+    return;
+  }
+
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
+
+  gz::sensors::Manager mgr;
+
+  gz::sensors::CameraSensor *sensor =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtr);
+  ASSERT_NE(sensor, nullptr);
+  EXPECT_FALSE(sensor->HasConnections());
+  sensor->SetScene(scene);
+
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(sensorPtr);
+  EXPECT_EQ(true, sdfSensor.CameraSensor()->Triggered());
+
+  // trigger camera through default generated topic
+  gz::transport::Node triggerNode;
+  std::string triggerTopic =
+      "/test/integration/triggered_camera/trigger";
+
+  auto pub = triggerNode.Advertise<gz::msgs::Boolean>(triggerTopic);
+  gz::msgs::Boolean msg;
+  msg.set_data(true);
+  pub.Publish(msg);
+
+  // check camera image after trigger
+  {
+    std::string imageTopic =
+        "/test/integration/triggered_camera";
+    WaitForMessageTestHelper<gz::msgs::Image> helper(imageTopic);
+    mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+    EXPECT_TRUE(helper.WaitForMessage(10s)) << helper;
+  }
+
+  // Clean up
+  auto sensorId = sensor->Id();
+  EXPECT_TRUE(mgr.Remove(sensorId));
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
 //////////////////////////////////////////////////
 TEST_P(TriggeredCameraTest, ImagesWithBuiltinSDF)
 {
   gz::common::Console::SetVerbosity(4);
   ImagesWithBuiltinSDF(GetParam());
+}
+
+//////////////////////////////////////////////////
+TEST_P(TriggeredCameraTest, EmptyTriggerTopic)
+{
+  gz::common::Console::SetVerbosity(4);
+  EmptyTriggerTopic(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(CameraSensor, TriggeredCameraTest,
