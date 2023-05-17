@@ -208,6 +208,9 @@ void TriggeredCameraTest::EmptyTriggerTopic(const std::string &_renderEngine)
   msg.set_data(true);
   pub.Publish(msg);
 
+  // sleep to wait for trigger msg to be received before calling mgr.RunOnce
+  std::this_thread::sleep_for(2s);
+
   // check camera image after trigger
   {
     std::string imageTopic =
