@@ -466,7 +466,8 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
     else
     {
       this->dataPtr->triggerTopic =
-          transport::TopicUtils::AsValidTopic(this->dataPtr->triggerTopic);
+          transport::TopicUtils::AsValidTopic(
+          this->Topic() + "/trigger");
 
       if (this->dataPtr->triggerTopic.empty())
       {
