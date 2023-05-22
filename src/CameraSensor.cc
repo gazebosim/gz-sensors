@@ -278,6 +278,18 @@ bool CameraSensor::CreateCamera()
     case sdf::PixelFormatType::L_INT16:
       this->dataPtr->camera->SetImageFormat(rendering::PF_L16);
       break;
+    case sdf::PixelFormatType::BAYER_RGGB8:
+      this->dataPtr->camera->SetImageFormat(rendering::PF_BAYER_RGGB8);
+      break;
+    case sdf::PixelFormatType::BAYER_BGGR8:
+      this->dataPtr->camera->SetImageFormat(rendering::PF_BAYER_BGGR8);
+      break;
+    case sdf::PixelFormatType::BAYER_GBRG8:
+      this->dataPtr->camera->SetImageFormat(rendering::PF_BAYER_GBRG8);
+      break;
+    case sdf::PixelFormatType::BAYER_GRBG8:
+      this->dataPtr->camera->SetImageFormat(rendering::PF_BAYER_GRBG8);
+      break;
     default:
       gzerr << "Unsupported pixel format ["
         << static_cast<int>(pixelFormat) << "]\n";
@@ -604,6 +616,22 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       case rendering::PF_L16:
         format = common::Image::L_INT16;
         msgsPixelFormat = msgs::PixelFormatType::L_INT16;
+        break;
+      case rendering::PF_BAYER_RGGB8:
+        format = common::Image::BAYER_RGGB8;
+        msgsPixelFormat = msgs::PixelFormatType::BAYER_RGGB8;
+        break;
+      case rendering::PF_BAYER_BGGR8:
+        format = common::Image::BAYER_BGGR8;
+        msgsPixelFormat = msgs::PixelFormatType::BAYER_BGGR8;
+        break;
+      case rendering::PF_BAYER_GBRG8:
+        format = common::Image::BAYER_GBRG8;
+        msgsPixelFormat = msgs::PixelFormatType::BAYER_GBRG8;
+        break;
+      case rendering::PF_BAYER_GRBG8:
+        format = common::Image::BAYER_GRBG8;
+        msgsPixelFormat = msgs::PixelFormatType::BAYER_GRBG8;
         break;
       default:
         gzerr << "Unsupported pixel format ["
