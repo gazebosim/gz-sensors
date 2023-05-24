@@ -48,7 +48,8 @@ sdf::ElementPtr cameraToBadSdf()
 
 sdf::ElementPtr CameraToSdf(const std::string &_type,
     const std::string &_name, double _updateRate,
-    const std::string &_topic, bool _alwaysOn, bool _visualize)
+    const std::string &_topic, const std::string &_cameraInfoTopic,
+    bool _alwaysOn, bool _visualize)
 {
   std::ostringstream stream;
   stream
@@ -62,6 +63,8 @@ sdf::ElementPtr CameraToSdf(const std::string &_type,
     << "      <always_on>"<< _alwaysOn <<"</always_on>"
     << "      <visualize>" << _visualize << "</visualize>"
     << "      <camera>"
+    << "        <camera_info_topic>" << _cameraInfoTopic
+                                     << "</camera_info_topic>"
     << "        <horizontal_fov>.75</horizontal_fov>"
     << "        <image>"
     << "          <width>640</width>"
@@ -146,8 +149,8 @@ TEST(Camera_TEST, CreateCamera)
 {
   gz::sensors::Manager mgr;
 
-  sdf::ElementPtr camSdf = CameraToSdf("camera", "my_camera", 60.0, "/cam",
-      true, true);
+  sdf::ElementPtr camSdf = CameraToSdf("camera", "my_camera", 60.0,
+    "/cam", "my_camera/camera_info", true, true);
 
   // Create a CameraSensor
   gz::sensors::CameraSensor *cam =
@@ -158,7 +161,7 @@ TEST(Camera_TEST, CreateCamera)
 
   // Check topics
   EXPECT_EQ("/cam", cam->Topic());
-  EXPECT_EQ("/camera_info", cam->InfoTopic());
+  EXPECT_EQ("my_camera/camera_info", cam->InfoTopic());
 
   // however camera is not loaded because a rendering scene is missing so
   // updates will not be successful and image size will be 0
@@ -190,19 +193,21 @@ TEST(Camera_TEST, Topic)
   // Default topic
   {
     const std::string topic;
-    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
-        visualize);
+    const std::string cameraInfoTopic;
+    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, cameraInfoTopic,
+      alwaysOn, visualize);
 
     auto camera = mgr.CreateSensor<gz::sensors::CameraSensor>(cameraSdf);
     ASSERT_NE(nullptr, camera);
     EXPECT_NE(gz::sensors::NO_SENSOR, camera->Id());
     EXPECT_EQ("/camera", camera->Topic());
+    EXPECT_EQ("/camera_info", camera->InfoTopic());
   }
 
   // Convert to valid topic
   {
     const std::string topic = "/topic with spaces/@~characters//";
-    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
+    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, "", alwaysOn,
         visualize);
 
     auto camera = mgr.CreateSensor<gz::sensors::CameraSensor>(cameraSdf);
@@ -210,12 +215,13 @@ TEST(Camera_TEST, Topic)
     EXPECT_NE(gz::sensors::NO_SENSOR, camera->Id());
 
     EXPECT_EQ("/topic_with_spaces/characters", camera->Topic());
+    EXPECT_EQ("/topic_with_spaces/camera_info", camera->InfoTopic());
   }
 
   // Invalid topic
   {
     const std::string topic = "@@@";
-    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, alwaysOn,
+    auto cameraSdf = CameraToSdf(type, name, updateRate, topic, "", alwaysOn,
         visualize);
 
     auto sensor = mgr.CreateSensor<gz::sensors::CameraSensor>(cameraSdf);

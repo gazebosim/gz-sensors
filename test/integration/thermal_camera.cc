@@ -288,11 +288,9 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_EQ(9, infoMsg.rectification_matrix().size());
 
   // Check that for a box really close it returns box temperature
-  root->RemoveChild(box);
   gz::math::Vector3d boxPositionNear(
       unitBoxSize * 0.5 + near_ * 0.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionNear);
-  root->AddChild(box);
 
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
   for (int sleep = 0;
@@ -322,11 +320,9 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   g_mutex.unlock();
 
   // Check that for a box really far it returns ambient temperature
-  root->RemoveChild(box);
   gz::math::Vector3d boxPositionFar(
       unitBoxSize * 0.5 + far_ * 1.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionFar);
-  root->AddChild(box);
 
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
   for (int sleep = 0;
@@ -358,7 +354,11 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   delete [] g_thermalBuffer;
   g_thermalBuffer = nullptr;
 
+  // Clean up rendering ptrs
+  box.reset();
+
   // Clean up
+  mgr.Remove(thermalSensor->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }
@@ -549,11 +549,9 @@ void ThermalCameraSensorTest::Images8BitWithBuiltinSDF(
   EXPECT_EQ(9, infoMsg.rectification_matrix().size());
 
   // Check that for a box really close it returns box temperature
-  root->RemoveChild(box);
   gz::math::Vector3d boxPositionNear(
       unitBoxSize * 0.5 + near_ * 0.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionNear);
-  root->AddChild(box);
 
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
   for (int sleep = 0;
@@ -584,11 +582,9 @@ void ThermalCameraSensorTest::Images8BitWithBuiltinSDF(
   g_mutex.unlock();
 
   // Check that for a box really far it returns ambient temperature
-  root->RemoveChild(box);
   gz::math::Vector3d boxPositionFar(
       unitBoxSize * 0.5 + far_ * 1.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionFar);
-  root->AddChild(box);
 
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
   for (int sleep = 0;
@@ -620,7 +616,11 @@ void ThermalCameraSensorTest::Images8BitWithBuiltinSDF(
   delete [] g_thermalBuffer8Bit;
   g_thermalBuffer8Bit = nullptr;
 
+  // Clean up rendering ptrs
+  box.reset();
+
   // Clean up
+  mgr.Remove(thermalSensor->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }

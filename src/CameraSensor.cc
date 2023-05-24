@@ -49,10 +49,6 @@ using namespace sensors;
 /// \brief Private data for CameraSensor
 class gz::sensors::CameraSensorPrivate
 {
-  /// \brief Callback for triggered subscription
-  /// \param[in] _msg Boolean message
-  public: void OnTrigger(const msgs::Boolean &_msg);
-
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
   /// \param[in] _width width of image in pixels
@@ -282,6 +278,18 @@ bool CameraSensor::CreateCamera()
     case sdf::PixelFormatType::L_INT16:
       this->dataPtr->camera->SetImageFormat(rendering::PF_L16);
       break;
+    case sdf::PixelFormatType::BAYER_RGGB8:
+      this->dataPtr->camera->SetImageFormat(rendering::PF_BAYER_RGGB8);
+      break;
+    case sdf::PixelFormatType::BAYER_BGGR8:
+      this->dataPtr->camera->SetImageFormat(rendering::PF_BAYER_BGGR8);
+      break;
+    case sdf::PixelFormatType::BAYER_GBRG8:
+      this->dataPtr->camera->SetImageFormat(rendering::PF_BAYER_GBRG8);
+      break;
+    case sdf::PixelFormatType::BAYER_GRBG8:
+      this->dataPtr->camera->SetImageFormat(rendering::PF_BAYER_GRBG8);
+      break;
     default:
       gzerr << "Unsupported pixel format ["
         << static_cast<int>(pixelFormat) << "]\n";
@@ -356,6 +364,24 @@ bool CameraSensor::CreateCamera()
     cameraSdf->SetLensProjectionCx(intrinsicMatrix(0, 2));
     cameraSdf->SetLensProjectionCy(intrinsicMatrix(1, 2));
   }
+  // set custom projection matrix based on projection param specified in sdf
+  else
+  {
+    // tx and ty are not used
+    double fx = cameraSdf->LensProjectionFx();
+    double fy = cameraSdf->LensProjectionFy();
+    double cx = cameraSdf->LensProjectionCx();
+    double cy = cameraSdf->LensProjectionCy();
+    double s = 0;
+
+    auto projectionMatrix = CameraSensorPrivate::BuildProjectionMatrix(
+        this->dataPtr->camera->ImageWidth(),
+        this->dataPtr->camera->ImageHeight(),
+        fx, fy, cx, cy, s,
+        this->dataPtr->camera->NearClipPlane(),
+        this->dataPtr->camera->FarClipPlane());
+    this->dataPtr->camera->SetProjectionMatrix(projectionMatrix);
+  }
 
   // Populate camera info topic
   this->PopulateInfo(cameraSdf);
@@ -372,6 +398,10 @@ CameraSensor::CameraSensor()
 //////////////////////////////////////////////////
 CameraSensor::~CameraSensor()
 {
+  if (this->Scene() && this->dataPtr->camera)
+  {
+    this->Scene()->DestroySensor(this->dataPtr->camera);
+  }
 }
 
 //////////////////////////////////////////////////
@@ -409,6 +439,11 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
   if (this->Topic().empty())
     this->SetTopic("/camera");
 
+  if (!_sdf.CameraSensor()->CameraInfoTopic().empty())
+  {
+    this->dataPtr->infoTopic = _sdf.CameraSensor()->CameraInfoTopic();
+  }
+
   this->dataPtr->pub =
       this->dataPtr->node.Advertise<gz::msgs::Image>(
           this->Topic());
@@ -431,7 +466,8 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
     else
     {
       this->dataPtr->triggerTopic =
-          transport::TopicUtils::AsValidTopic(this->dataPtr->triggerTopic);
+          transport::TopicUtils::AsValidTopic(
+          this->Topic() + "/trigger");
 
       if (this->dataPtr->triggerTopic.empty())
       {
@@ -441,7 +477,7 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
     }
 
     this->dataPtr->node.Subscribe(this->dataPtr->triggerTopic,
-        &CameraSensorPrivate::OnTrigger, this->dataPtr.get());
+        &CameraSensor::OnTrigger, this);
 
     gzdbg << "Camera trigger messages for [" << this->Name() << "] subscribed"
            << " on [" << this->dataPtr->triggerTopic << "]" << std::endl;
@@ -581,6 +617,22 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
         format = common::Image::L_INT16;
         msgsPixelFormat = msgs::PixelFormatType::L_INT16;
         break;
+      case rendering::PF_BAYER_RGGB8:
+        format = common::Image::BAYER_RGGB8;
+        msgsPixelFormat = msgs::PixelFormatType::BAYER_RGGB8;
+        break;
+      case rendering::PF_BAYER_BGGR8:
+        format = common::Image::BAYER_BGGR8;
+        msgsPixelFormat = msgs::PixelFormatType::BAYER_BGGR8;
+        break;
+      case rendering::PF_BAYER_GBRG8:
+        format = common::Image::BAYER_GBRG8;
+        msgsPixelFormat = msgs::PixelFormatType::BAYER_GBRG8;
+        break;
+      case rendering::PF_BAYER_GRBG8:
+        format = common::Image::BAYER_GRBG8;
+        msgsPixelFormat = msgs::PixelFormatType::BAYER_GRBG8;
+        break;
       default:
         gzerr << "Unsupported pixel format ["
           << this->dataPtr->camera->ImageFormat() << "]\n";
@@ -639,10 +691,10 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 }
 
 //////////////////////////////////////////////////
-void CameraSensorPrivate::OnTrigger(const gz::msgs::Boolean &/*_msg*/)
+void CameraSensor::OnTrigger(const gz::msgs::Boolean &/*_msg*/)
 {
-  std::lock_guard<std::mutex> lock(this->mutex);
-  this->isTriggered = true;
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  this->dataPtr->isTriggered = true;
 }
 
 //////////////////////////////////////////////////
@@ -700,17 +752,17 @@ std::string CameraSensor::InfoTopic() const
 //////////////////////////////////////////////////
 bool CameraSensor::AdvertiseInfo()
 {
-  // TODO(anyone) Make info topic configurable from SDF
-  // Info topic must be at same level as image topic
-  auto parts = common::Split(this->Topic(), '/');
-  parts.pop_back();
-
-  for (const auto &part : parts)
+  if (this->dataPtr->infoTopic.empty())
   {
-    if (!part.empty())
-      this->dataPtr->infoTopic += "/" + part;
+    auto parts = common::Split(this->Topic(), '/');
+    parts.pop_back();
+    for (const auto &part : parts)
+    {
+      if (!part.empty())
+        this->dataPtr->infoTopic += "/" + part;
+    }
+    this->dataPtr->infoTopic += "/camera_info";
   }
-  this->dataPtr->infoTopic += "/camera_info";
 
   return this->AdvertiseInfo(this->dataPtr->infoTopic);
 }

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="m1">
+    <link name="link1">
+      <sensor name="boundingbox_camera" type="boundingbox_camera">
+        <update_rate>10</update_rate>
+        <topic>/test/integration/TriggeredBBCameraPlugin_imagesWithBuiltinSDF</topic>
+        <camera>
+          <triggered>true</triggered>
+          <trigger_topic>/test/integration/TriggeredBBCameraPlugin_imagesWithBuiltinSDF/trigger</trigger_topic>
+          <horizontal_fov>1.05</horizontal_fov>
+          <image>
+            <width>320</width>
+            <height>240</height>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>10.0</far>
+          </clip>
+        </camera>
+      </sensor>
+    </link>
+  </model>
+</sdf>

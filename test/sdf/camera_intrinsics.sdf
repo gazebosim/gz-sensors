@@ -47,7 +47,7 @@
       </sensor>
       <sensor name="camera_with_diff_intrinsics_tag" type="camera">
         <update_rate>10</update_rate>
-        <ignition_frame_id>base_camera</ignition_frame_id>
+        <gz_frame_id>base_camera</gz_frame_id>
         <topic>/camera3/image</topic>
         <camera>
           <horizontal_fov>1.0472</horizontal_fov>
