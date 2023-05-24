@@ -181,6 +181,7 @@ class DopplerVelocityLogTest : public testing::Test,
     seabed->SetLocalPose(seabedPose);
     seabed->SetLocalScale(math::Vector3d(1e3, 1e3, 0.0));
     seabed->SetMaterial(sand);
+    scene->DestroyMaterial(sand);
     root->AddChild(seabed);
 
     constexpr uint64_t seabedEntity = 100u;
@@ -237,6 +238,7 @@ class DopplerVelocityLogTest : public testing::Test,
   {
     engine->DestroyScene(scene);
     rendering::unloadEngine(engine->Name());
+    std::cerr << " ============= tear down " << std::endl;
   }
 
   rendering::RenderEngine *engine{nullptr};
@@ -263,6 +265,7 @@ TEST_P(DopplerVelocityLogTest, CreateSensor)
 /////////////////////////////////////////////////
 TEST_P(DopplerVelocityLogTest, BottomTrackingWhileStatic)
 {
+  std::cerr << " ============= beg of test " << std::endl;
   // Add DVL sensor
   DVLConfig config;
   config.bottomTrackingMode = "always";
@@ -299,6 +302,8 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileStatic)
   deviceState.pose = devicePose;
   sensor->SetWorldState(this->worldState);
 
+  std::cerr << " ============= before update " << std::endl;
+
   const auto now = (
     std::chrono::seconds(100) +
     std::chrono::nanoseconds(100));
@@ -306,6 +311,8 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileStatic)
   sensor->Update(now);
   this->scene->PostRender();
   sensor->PostUpdate(now);
+
+  std::cerr << " ============= post update " << std::endl;
 
   EXPECT_TRUE(msgHelper.WaitForMessage(std::chrono::seconds(10)));
 
@@ -336,12 +343,15 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileStatic)
     EXPECT_NEAR(estimatedTiltAngle, config.tiltAngle,
                 config.apertureAngle / 2);
 
+  std::cerr << " ============= verify readings " << std::endl;
+
     EXPECT_EQ(velocityReference, message.beams(i).velocity().reference());
     EXPECT_TRUE(math::Vector3d::Zero.Equal(
       msgs::Convert(message.beams(i).velocity().mean()),
       4 * config.trackingNoise));
   }
   EXPECT_EQ(0, message.status());
+  std::cerr << " ============= end of test " << std::endl;
 }
 
 /////////////////////////////////////////////////
