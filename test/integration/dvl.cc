@@ -181,7 +181,6 @@ class DopplerVelocityLogTest : public testing::Test,
     seabed->SetLocalPose(seabedPose);
     seabed->SetLocalScale(math::Vector3d(1e3, 1e3, 0.0));
     seabed->SetMaterial(sand);
-    scene->DestroyMaterial(sand);
     root->AddChild(seabed);
 
     constexpr uint64_t seabedEntity = 100u;
