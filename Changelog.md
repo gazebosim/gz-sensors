@@ -4,6 +4,38 @@
 
 ## Gazebo Sensors 7
 
+### Gazebo Sensors 7.2.0 (2023-04-13)
+
+1. Cleanup resources in CameraSensor destructor
+    * [Pull request #340](https://github.com/gazebosim/gz-sensors/pull/340)
+
+1. CI workflow: use checkout v3
+    * [Pull request #335](https://github.com/gazebosim/gz-sensors/pull/335)
+
+1. Rename COPYING to LICENSE
+    * [Pull request #334](https://github.com/gazebosim/gz-sensors/pull/334)
+
+1. Fix links in Changelog
+    * [Pull request #330](https://github.com/gazebosim/gz-sensors/pull/330)
+
+1. Fix flaky triggered bounding box camera test
+    * [Pull request #329](https://github.com/gazebosim/gz-sensors/pull/329)
+
+1. Fix Camera info test
+    * [Pull request #326](https://github.com/gazebosim/gz-sensors/pull/326)
+
+1. Added trigger to BoundingBoxCamera
+    * [Pull request #322](https://github.com/gazebosim/gz-sensors/pull/322)
+
+1. clean up rendering resources
+    * [Pull request #324](https://github.com/gazebosim/gz-sensors/pull/324)
+
+1. Added Camera Info topic support for cameras
+    * [Pull request #285](https://github.com/gazebosim/gz-sensors/pull/285)
+
+1. ign -> gz Migrate Ignition Headers : gz-sensors
+    * [Pull request #260](https://github.com/gazebosim/gz-sensors/pull/260)
+
 ### Gazebo Sensors 7.1.0 (2023-02-09)
 
 1. Added airspeed sensor
@@ -143,6 +175,29 @@
 
 ## Gazebo Sensors 6
 
+### Gazebo Sensors 6.7.0 (2023-02-13)
+
+1. Disable thermal camera test on MacOS.
+    * [Pull request #243](https://github.com/gazebosim/gz-sensors/pull/243)
+
+1. Add optional optical frame id to camera sensors.
+    * [Pull request #259](https://github.com/gazebosim/gz-sensors/pull/259)
+
+1. Add support for 16 bit image format.
+    * [Pull request #276](https://github.com/gazebosim/gz-sensors/pull/276)
+
+1. Fix navsat frame id.
+    * [Pull request #298](https://github.com/gazebosim/gz-sensors/pull/298)
+
+1. CameraInfo is now published when there's a CameraSensor subscriber.
+    * [Pull request #308](https://github.com/gazebosim/gz-sensors/pull/308)
+
+1. Add HasInfoConnections() method to expose infoPub.HasConnections() to
+   child of CameraSensor class.
+    * [Pull request #310](https://github.com/gazebosim/gz-sensors/pull/310)
+
+1. Forward port 3.5.0.
+
 ### Gazebo Sensors 6.6.0 (2022-06-17)
 
 1. Add BoundingBox Sensor
@@ -231,7 +286,7 @@
 1. Trivial tutorial typo correction in Custom Sensors tutorial
     * [Pull request #160](https://github.com/gazebosim/gz-sensors/pull/160)
 
-1. Bumps in fortress: gz-sensors6
+1. Bumps in fortress: ign-sensors6
     * [Pull request #120](https://github.com/gazebosim/gz-sensors/pull/120)
 
 1. Port codecov to new configuration
@@ -261,7 +316,7 @@
 
 ### Gazebo Sensors 5.1.0 (2021-10-15)
 
-1. Depend on gz-msgs 7.2 and libSDFormat 11.3
+1. Depend on ign-msgs 7.2 and libSDFormat 11.3
     * [Pull request #154](https://github.com/gazebosim/gz-sensors/pull/154)
 
 1. 👩‍🌾 Print debug messages when sensors advertise topics
@@ -290,16 +345,16 @@
 
 ### Gazebo Sensors 5.0.0 (2021-03-30)
 
-1. Bump in edifice: gz-common4
+1. Bump in edifice: ign-common4
     * [Pull request #85](https://github.com/gazebosim/gz-sensors/pull/85)
 
 1. Bump in edifice: sdformat11
     * [Pull request #78](https://github.com/gazebosim/gz-sensors/pull/78)
 
-1. Bump in edifice: gz-msgs7
+1. Bump in edifice: ign-msgs7
     * [Pull request #75](https://github.com/gazebosim/gz-sensors/pull/75)
 
-1. Bump in edifice: gz-rendering5
+1. Bump in edifice: ign-rendering5
     * [Pull request #55](https://github.com/gazebosim/gz-sensors/pull/55)
 
 1. Documentation updates
@@ -365,13 +420,13 @@
 1. Move installation instructions from README.md to Installation tutorial
     * [Pull request 50](https://github.com/gazebosim/gz-sensors/pull/50)
 
-1. Bump gz-math to 6.6
+1. Bump ign-math to 6.6
     * [Pull request 48](https://github.com/gazebosim/gz-sensors/pull/48)
 
 1. Replaced common::Time with std::chrono
     * [Pull request 41](https://github.com/gazebosim/gz-sensors/pull/41)
 
-1. Depend on gz-msgs6, gz-transport9, sdf10
+1. Depend on ign-msgs6, ign-transport9, sdf10
     * [Pull request 31](https://github.com/gazebosim/gz-sensors/pull/31)
 
 1. GitHub migration
@@ -382,7 +437,7 @@
 1. Set camera sensor visibility mask
     * [BitBucket pull request 115](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/115)
 
-1. Depend on gz-rendering4
+1. Depend on ign-rendering4
     * [BitBucket pull request 111](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/111)
 
 ## Gazebo Sensors 3
@@ -491,13 +546,13 @@
 1. Add support for sdformat frame semantics
     * [BitBucket pull request 104](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/104)
 
-1. Remove deprecations in gz-sensors3
+1. Remove deprecations in ign-sensors3
     * [BitBucket pull request 103](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/103)
 
 1. Break out image noise classes
     * [BitBucket pull request 102](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/102)
 
-1. Depend on gz-transport8, gz-msgs5, sdformat9
+1. Depend on ign-transport8, ign-msgs5, sdformat9
     * [BitBucket pull request 101](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/101)
     * [BitBucket pull request 105](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/105)
 
@@ -510,7 +565,7 @@
 1. Removed deprecations from Manager.
     * [BitBucket pull request 99](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/99)
 
-1. Depend on gz-rendering3
+1. Depend on ign-rendering3
     * [BitBucket pull request 88](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/88)
 
 ## Gazebo Sensors 2
@@ -551,7 +606,7 @@
 
 ### Gazebo Sensors 2.6.0 (2019-08-27)
 
-1. Update depth and rgbd camera sensor to output point cloud data generated by gz-rendering DepthCamera
+1. Update depth and rgbd camera sensor to output point cloud data generated by ign-rendering DepthCamera
     * [BitBucket pull request 91](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/91)
 
 ### Gazebo Sensors 2.5.1 (2019-08-12)
@@ -561,7 +616,7 @@
 
 ### Gazebo Sensors 2.5.0
 
-1. Add `GZ_PROFILER_ENABLE` cmake option for enabling the gz-common profiler.
+1. Add `IGN_PROFILER_ENABLE` cmake option for enabling the ign-common profiler.
     * [BitBucket pull request 82](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/82)
 
 1. Deduplicate `frame_ids` from sensor message headers
