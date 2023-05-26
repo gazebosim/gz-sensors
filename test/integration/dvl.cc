@@ -342,6 +342,8 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileStatic)
       4 * config.trackingNoise));
   }
   EXPECT_EQ(0, message.status());
+
+  this->manager.Remove(sensor->Id());
 }
 
 /////////////////////////////////////////////////
