@@ -19,7 +19,9 @@
 
 #include <gz/msgs/image.pb.h>
 #include <gz/msgs/annotated_axis_aligned_2d_box.pb.h>
+#include <gz/msgs/annotated_axis_aligned_2d_box_v.pb.h>
 #include <gz/msgs/annotated_oriented_3d_box.pb.h>
+#include <gz/msgs/annotated_oriented_3d_box_v.pb.h>
 
 #include <gz/common/Console.hh>
 #include <gz/common/Image.hh>
@@ -494,9 +496,9 @@ bool BoundingBoxCameraSensor::Update(
 
       auto axisAlignedBox = annotatedBox->mutable_box();
       msgs::Set(axisAlignedBox->mutable_min_corner(),
-          {minCorner.X(), minCorner.Y()});
+          gz::math::Vector2d{minCorner.X(), minCorner.Y()});
       msgs::Set(axisAlignedBox->mutable_max_corner(),
-          {maxCorner.X(), maxCorner.Y()});
+          gz::math::Vector2d{maxCorner.X(), maxCorner.Y()});
     }
     // time stamp
     auto stampBoxes = boxes2DMsg.mutable_header()->mutable_stamp();

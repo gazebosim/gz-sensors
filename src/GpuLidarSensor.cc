@@ -26,7 +26,8 @@
 
 #include <gz/common/Console.hh>
 #include <gz/common/Profiler.hh>
-#include <gz/msgs/Utility.hh>
+#include <gz/msgs/convert/StdTypes.hh>
+#include <gz/msgs/PointCloudPackedUtils.hh>
 #include <gz/transport/Node.hh>
 
 #include "gz/sensors/GpuLidarSensor.hh"

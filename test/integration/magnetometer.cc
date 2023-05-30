@@ -22,6 +22,8 @@
 #include <gz/sensors/MagnetometerSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 
+#include <gz/msgs/magnetometer.pb.h>
+
 #include "test_config.hh"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 

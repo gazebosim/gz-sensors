@@ -20,6 +20,7 @@
 
 #include <gz/msgs/camera_info.pb.h>
 #include <gz/msgs/image.pb.h>
+#include <gz/msgs/PointCloudPackedUtils.hh>
 
 #include <gz/common/Filesystem.hh>
 #include <gz/common/Event.hh>

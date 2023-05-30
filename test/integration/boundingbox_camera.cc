@@ -18,7 +18,9 @@
 #include <gtest/gtest.h>
 
 #include <gz/msgs/annotated_axis_aligned_2d_box.pb.h>
+#include <gz/msgs/annotated_axis_aligned_2d_box_v.pb.h>
 #include <gz/msgs/annotated_oriented_3d_box.pb.h>
+#include <gz/msgs/annotated_oriented_3d_box_v.pb.h>
 
 #include <gz/common/Filesystem.hh>
 #include <gz/sensors/Manager.hh>
