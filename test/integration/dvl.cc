@@ -342,6 +342,8 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileStatic)
       4 * config.trackingNoise));
   }
   EXPECT_EQ(0, message.status());
+
+  this->manager.Remove(sensor->Id());
 }
 
 /////////////////////////////////////////////////
@@ -431,6 +433,8 @@ TEST_P(DopplerVelocityLogTest, WaterMassTrackingWhileStatic)
     EXPECT_EQ(velocityReference, message.beams(i).velocity().reference());
   }
   EXPECT_EQ(0, message.status());
+
+  this->manager.Remove(sensor->Id());
 }
 
 /////////////////////////////////////////////////
@@ -512,6 +516,8 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileInMotion)
     EXPECT_EQ(velocityReference, message.beams(i).velocity().reference());
   }
   EXPECT_EQ(0, message.status());
+
+  this->manager.Remove(sensor->Id());
 }
 
 INSTANTIATE_TEST_SUITE_P(DopplerVelocityLogTests, DopplerVelocityLogTest,
