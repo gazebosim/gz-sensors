@@ -105,12 +105,12 @@ namespace gz
                     const std::string &/*_format*/);
 
       /// \brief Point cloud data callback used to get the data from the sensor
-      /// \param[in] _data pointer to the data from the sensor
+      /// \param[in] _scan pointer to the data from the sensor
       /// \param[in] _width width of the point cloud image
       /// \param[in] _height height of the point cloud image
       /// \param[in] _channel bytes used for the point cloud data
       /// \param[in] _format string with the format
-      public: void OnNewRgbPointCloud(const float *_data,
+      public: void OnNewRgbPointCloud(const float *_scan,
                     unsigned int _width, unsigned int _height,
                     unsigned int /*_channels*/,
                     const std::string &/*_format*/);
