@@ -12,6 +12,7 @@ set(dri_tests
   thermal_camera.cc
   triggered_camera.cc
   wide_angle_camera.cc
+  triggered_boundingbox_camera.cc
 )
 
 set(tests

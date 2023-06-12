@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Open Source Robotics Foundation
+ * Copyright (C) 2023 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
 
 #include <gz/common/Console.hh>
 #include <gz/common/Filesystem.hh>
-#include <gz/sensors/CameraSensor.hh>
+#include <gz/sensors/BoundingBoxCameraSensor.hh>
 #include <gz/sensors/Manager.hh>
 
 // TODO(louise) Remove these pragmas once gz-rendering is disabling the
@@ -44,7 +44,7 @@
 
 using namespace std::chrono_literals;
 
-class TriggeredCameraTest: public testing::Test,
+class TriggeredBoundingBoxCameraTest: public testing::Test,
   public testing::WithParamInterface<const char *>
 {
   // Documentation inherited
@@ -61,17 +61,64 @@ class TriggeredCameraTest: public testing::Test,
     gz::common::Console::SetVerbosity(4);
   }
 
-  // Create a Camera sensor from a SDF and gets a image message
-  public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
+  // Create a BoundingBox Camera sensor from a SDF and gets a boxes message
+  public: void BoxesWithBuiltinSDF(const std::string &_renderEngine);
 
-  // Create a Camera sensor from a SDF with empty trigger topic
+  // Create a BoundingBox Camera sensor from a SDF with empty trigger topic
   public: void EmptyTriggerTopic(const std::string &_renderEngine);
 };
 
-void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
+/// \brief mutex for thread safety
+std::mutex g_mutex;
+
+/// \brief bounding boxes from the camera
+std::vector<gz::msgs::AnnotatedAxisAligned2DBox> g_boxes;
+
+/// \brief callback to receive 2d boxes from the camera
+void OnNewBoundingBoxes(const gz::msgs::AnnotatedAxisAligned2DBox_V &_boxes)
+{
+  g_mutex.lock();
+  g_boxes.clear();
+
+  int size = _boxes.annotated_box_size();
+  for (int i = 0; i < size; ++i)
+  {
+    auto annotated_box = _boxes.annotated_box(i);
+    g_boxes.push_back(annotated_box);
+  }
+  g_mutex.unlock();
+}
+
+/// \brief Build a scene with 2 visible boxes
+void BuildScene(gz::rendering::ScenePtr _scene)
+{
+  gz::math::Vector3d box1Position(1, -1, 0);
+  gz::math::Vector3d box2Position(1, 1, 0);
+
+  gz::rendering::VisualPtr root = _scene->RootVisual();
+
+  gz::rendering::VisualPtr box1 = _scene->CreateVisual();
+  box1->AddGeometry(_scene->CreateBox());
+  box1->SetOrigin(0.0, 0.0, 0.0);
+  box1->SetLocalPosition(box1Position);
+  box1->SetLocalRotation(0, 0, 0);
+  box1->SetUserData("label", 1);
+  root->AddChild(box1);
+
+  gz::rendering::VisualPtr box2 = _scene->CreateVisual();
+  box2->AddGeometry(_scene->CreateBox());
+  box2->SetOrigin(0.0, 0.0, 0.0);
+  box2->SetLocalPosition(box2Position);
+  box2->SetLocalRotation(0, 0, 0);
+  box2->SetUserData("label", 2);
+  root->AddChild(box2);
+}
+
+void TriggeredBoundingBoxCameraTest::BoxesWithBuiltinSDF(
+  const std::string &_renderEngine)
 {
   std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
-      "sdf", "triggered_camera_sensor_builtin.sdf");
+      "sdf", "triggered_boundingbox_camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
   ASSERT_TRUE(sdf::readFile(path, doc));
@@ -83,6 +130,14 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   ASSERT_TRUE(linkPtr->HasElement("sensor"));
   auto sensorPtr = linkPtr->GetElement("sensor");
 
+    // Skip unsupported engines
+  if (_renderEngine != "ogre2")
+  {
+    gzdbg << "Engine '" << _renderEngine
+           << "' doesn't support bounding box cameras" << std::endl;
+    return;
+  }
+
   // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
@@ -93,77 +148,78 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
+  ASSERT_NE(nullptr, scene);
+  BuildScene(scene);
 
   gz::sensors::Manager mgr;
 
-  gz::sensors::CameraSensor *sensor =
-      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtr);
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(sensorPtr);
+
+  std::string type = sdfSensor.TypeStr();
+  EXPECT_EQ(type, "boundingbox_camera");
+
+  gz::sensors::BoundingBoxCameraSensor *sensor =
+      mgr.CreateSensor<gz::sensors::BoundingBoxCameraSensor>(sdfSensor);
   ASSERT_NE(sensor, nullptr);
   EXPECT_FALSE(sensor->HasConnections());
   sensor->SetScene(scene);
 
-  sdf::Sensor sdfSensor;
-  sdfSensor.Load(sensorPtr);
+  EXPECT_EQ(320u, sensor->ImageWidth());
+  EXPECT_EQ(240u, sensor->ImageHeight());
   EXPECT_EQ(true, sdfSensor.CameraSensor()->Triggered());
 
-  ASSERT_NE(sensor->RenderingCamera(), nullptr);
-  EXPECT_NE(sensor->Id(), sensor->RenderingCamera()->Id());
-  EXPECT_EQ(256u, sensor->ImageWidth());
-  EXPECT_EQ(257u, sensor->ImageHeight());
+  // subscribe to the BoundingBox camera topic
+  gz::transport::Node node;
+  std::string boxTopic =
+      "/test/integration/TriggeredBBCameraPlugin_imagesWithBuiltinSDF";
+  node.Subscribe(boxTopic, &OnNewBoundingBoxes);
 
-  // check camera image before trigger
+  // we should not have image before trigger
   {
     std::string imageTopic =
-        "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF";
+        "/test/integration/TriggeredBBCameraPlugin_imagesWithBuiltinSDF_image";
     WaitForMessageTestHelper<gz::msgs::Image> helper(imageTopic);
-    EXPECT_TRUE(sensor->HasConnections());
     mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
     EXPECT_FALSE(helper.WaitForMessage(1s)) << helper;
+    g_mutex.lock();
+    EXPECT_EQ(g_boxes.size(), size_t(0));
+    g_mutex.unlock();
   }
 
   // trigger camera through topic
-  gz::transport::Node triggerNode;
   std::string triggerTopic =
-      "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF/trigger";
+      "/test/integration/TriggeredBBCameraPlugin_imagesWithBuiltinSDF/trigger";
 
-  auto pub = triggerNode.Advertise<gz::msgs::Boolean>(triggerTopic);
+  auto pub = node.Advertise<gz::msgs::Boolean>(triggerTopic);
   gz::msgs::Boolean msg;
   msg.set_data(true);
   pub.Publish(msg);
-
   // sleep to wait for trigger msg to be received before calling mgr.RunOnce
   std::this_thread::sleep_for(2s);
 
-  // check camera image after trigger
+  // we should receive images and boxes after trigger
   {
-    std::string imageTopic =
-        "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF";
-    WaitForMessageTestHelper<gz::msgs::Image> helper(imageTopic);
+    WaitForMessageTestHelper<gz::msgs::AnnotatedAxisAligned2DBox_V>
+        helper(boxTopic);
     mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
     EXPECT_TRUE(helper.WaitForMessage(10s)) << helper;
+    g_mutex.lock();
+    EXPECT_EQ(g_boxes.size(), size_t(2));
+    g_mutex.unlock();
   }
 
-  // test removing sensor
-  // first make sure the sensor objects do exist
-  auto sensorId = sensor->Id();
-  auto cameraId = sensor->RenderingCamera()->Id();
-  EXPECT_EQ(sensor, mgr.Sensor(sensorId));
-  EXPECT_EQ(sensor->RenderingCamera(), scene->SensorById(cameraId));
-  // remove and check sensor objects no longer exist in both sensors and
-  // rendering
-  EXPECT_TRUE(mgr.Remove(sensorId));
-  EXPECT_EQ(nullptr, mgr.Sensor(sensorId));
-  EXPECT_EQ(nullptr, scene->SensorById(cameraId));
-
   // Clean up
+  mgr.Remove(sensor->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }
 
-void TriggeredCameraTest::EmptyTriggerTopic(const std::string &_renderEngine)
+void TriggeredBoundingBoxCameraTest::EmptyTriggerTopic(
+  const std::string &_renderEngine)
 {
   std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
-      "sdf", "triggered_camera_sensor_topic_builtin.sdf");
+      "sdf", "triggered_boundingbox_camera_sensor_topic_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
   ASSERT_TRUE(sdf::readFile(path, doc));
@@ -175,6 +231,14 @@ void TriggeredCameraTest::EmptyTriggerTopic(const std::string &_renderEngine)
   ASSERT_TRUE(linkPtr->HasElement("sensor"));
   auto sensorPtr = linkPtr->GetElement("sensor");
 
+    // Skip unsupported engines
+  if (_renderEngine != "ogre2")
+  {
+    gzdbg << "Engine '" << _renderEngine
+           << "' doesn't support bounding box cameras" << std::endl;
+    return;
+  }
+
   // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
@@ -185,61 +249,74 @@ void TriggeredCameraTest::EmptyTriggerTopic(const std::string &_renderEngine)
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
+  ASSERT_NE(nullptr, scene);
+  BuildScene(scene);
 
   gz::sensors::Manager mgr;
 
-  gz::sensors::CameraSensor *sensor =
-      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtr);
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(sensorPtr);
+
+  std::string type = sdfSensor.TypeStr();
+  EXPECT_EQ(type, "boundingbox_camera");
+
+  gz::sensors::BoundingBoxCameraSensor *sensor =
+      mgr.CreateSensor<gz::sensors::BoundingBoxCameraSensor>(sdfSensor);
   ASSERT_NE(sensor, nullptr);
   EXPECT_FALSE(sensor->HasConnections());
   sensor->SetScene(scene);
 
-  sdf::Sensor sdfSensor;
-  sdfSensor.Load(sensorPtr);
-  EXPECT_EQ(true, sdfSensor.CameraSensor()->Triggered());
-
-  // trigger camera through default generated topic
-  gz::transport::Node triggerNode;
+  // trigger camera through topic
   std::string triggerTopic =
-      "/test/integration/triggered_camera/trigger";
+      "/test/integration/triggered_bbcamera/trigger";
 
-  auto pub = triggerNode.Advertise<gz::msgs::Boolean>(triggerTopic);
+  gz::transport::Node node;
+  auto pub = node.Advertise<gz::msgs::Boolean>(triggerTopic);
   gz::msgs::Boolean msg;
   msg.set_data(true);
   pub.Publish(msg);
-
   // sleep to wait for trigger msg to be received before calling mgr.RunOnce
   std::this_thread::sleep_for(2s);
 
-  // check camera image after trigger
+  // we should receive images and boxes after trigger
   {
-    std::string imageTopic =
-        "/test/integration/triggered_camera";
-    WaitForMessageTestHelper<gz::msgs::Image> helper(imageTopic);
+    std::string boxTopic =
+        "/test/integration/triggered_bbcamera";
+    WaitForMessageTestHelper<gz::msgs::AnnotatedAxisAligned2DBox_V>
+        helper(boxTopic);
     mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
     EXPECT_TRUE(helper.WaitForMessage(10s)) << helper;
+    g_mutex.lock();
+    EXPECT_EQ(g_boxes.size(), size_t(2));
+    g_mutex.unlock();
   }
 
   // Clean up
-  auto sensorId = sensor->Id();
-  EXPECT_TRUE(mgr.Remove(sensorId));
+  mgr.Remove(sensor->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }
 
 //////////////////////////////////////////////////
-TEST_P(TriggeredCameraTest, ImagesWithBuiltinSDF)
+TEST_P(TriggeredBoundingBoxCameraTest, BoxesWithBuiltinSDF)
 {
-  gz::common::Console::SetVerbosity(4);
-  ImagesWithBuiltinSDF(GetParam());
+  BoxesWithBuiltinSDF(GetParam());
 }
 
 //////////////////////////////////////////////////
-TEST_P(TriggeredCameraTest, EmptyTriggerTopic)
+TEST_P(TriggeredBoundingBoxCameraTest, EmptyTriggerTopic)
 {
-  gz::common::Console::SetVerbosity(4);
   EmptyTriggerTopic(GetParam());
 }
 
-INSTANTIATE_TEST_SUITE_P(CameraSensor, TriggeredCameraTest,
+INSTANTIATE_TEST_SUITE_P(BoundingBoxCameraSensor,
+    TriggeredBoundingBoxCameraTest,
     RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
+
+//////////////////////////////////////////////////
+int main(int argc, char **argv)
+{
+  gz::common::Console::SetVerbosity(4);
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

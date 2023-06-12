@@ -346,7 +346,11 @@ void BoundingBoxCameraSensorTest::BoxesWithBuiltinSDF(
 
   g_mutex.unlock();
 
+  // Clean up rendering ptrs
+  camera.reset();
+
   // Clean up
+  mgr.Remove(sensor->Id());
   engine->DestroyScene(scene);
   rendering::unloadEngine(engine->Name());
 }
@@ -467,7 +471,11 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
 
   g_mutex.unlock();
 
+  // Clean up rendering ptrs
+  camera.reset();
+
   // Clean up
+  mgr.Remove(sensor->Id());
   engine->DestroyScene(scene);
   rendering::unloadEngine(engine->Name());
 }

@@ -345,7 +345,11 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
     }
   }
 
+  // Clean up rendering ptrs
+  camera.reset();
+
   // Clean up
+  mgr.Remove(sensor->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }

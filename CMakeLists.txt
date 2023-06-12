@@ -100,7 +100,7 @@ gz_msgs_generate_messages(
 
 #--------------------------------------
 # Find SDFormat
-gz_find_package(sdformat13 REQUIRED)
+gz_find_package(sdformat13 VERSION 13.3 REQUIRED)
 set(SDF_VER ${sdformat13_VERSION_MAJOR})
 
 #--------------------------------------
