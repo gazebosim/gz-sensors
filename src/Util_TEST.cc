@@ -18,12 +18,12 @@
 #include <gtest/gtest.h>
 #include <gz/common/Console.hh>
 #include <gz/common/Filesystem.hh>
+#include <gz/common/testing/TestPaths.hh>
 #include <sdf/Root.hh>
 #include <sdf/Link.hh>
 #include <sdf/Model.hh>
 #include <sdf/World.hh>
 
-#include "test_config.hh"  // NOLINT(build/include)
 #include "gz/sensors/Util.hh"
 
 /// \brief Test Util functions
@@ -42,8 +42,7 @@ using namespace sensors;
 //////////////////////////////////////////////////
 TEST_F(Util_TEST, customType)
 {
-  auto sdfFile = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
-      "sdf", "custom_sensors.sdf");
+  auto sdfFile = gz::common::testing::TestFile("sdf", "custom_sensors.sdf");
 
   sdf::Root root;
   auto errors = root.Load(sdfFile);
