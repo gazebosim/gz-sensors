@@ -38,11 +38,9 @@ message(STATUS "\n\n-- ====== Finding Dependencies ======")
 
 #--------------------------------------
 # Find Protobuf
-set(REQ_PROTOBUF_VER 3)
 gz_find_package(GzProtobuf
-                 VERSION ${REQ_PROTOBUF_VER}
-                 REQUIRED
-                 PRETTY Protobuf)
+                REQUIRED
+                PRETTY Protobuf)
 
 #--------------------------------------
 # Find gz-math
