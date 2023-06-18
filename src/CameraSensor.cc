@@ -671,7 +671,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       }
       catch(...)
       {
-        ignerr << "Exception thrown in an image callback.\n";
+        gzerr << "Exception thrown in an image callback.\n";
       }
     }
 

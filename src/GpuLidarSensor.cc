@@ -239,7 +239,7 @@ bool GpuLidarSensor::CreateLidar()
 }
 
 /////////////////////////////////////////////////
-void GpuLidarSensor::OnNewLidarFrame(const float *_data,
+void GpuLidarSensor::OnNewLidarFrame(const float *_scan,
     unsigned int _width, unsigned int _height, unsigned int _channels,
     const std::string &_format)
 {
@@ -251,11 +251,11 @@ void GpuLidarSensor::OnNewLidarFrame(const float *_data,
   if (!this->laserBuffer)
     this->laserBuffer = new float[samples];
 
-  memcpy(this->laserBuffer, _data, lidarBufferSize);
+  memcpy(this->laserBuffer, _scan, lidarBufferSize);
 
   if (this->dataPtr->lidarEvent.ConnectionCount() > 0)
   {
-    this->dataPtr->lidarEvent(_data, _width, _height, _channels, _format);
+    this->dataPtr->lidarEvent(_scan, _width, _height, _channels, _format);
   }
 }
 
