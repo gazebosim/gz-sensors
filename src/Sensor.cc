@@ -345,8 +345,8 @@ void SensorPrivate::PublishMetrics(const std::chrono::duration<double> &_now)
   }
 
   // Computes simulation update rate and real update rate.
-  double simUpdateRate;
-  double realUpdateRate;
+  double simUpdateRate = 0;
+  double realUpdateRate = 0;
   const auto clockNow = std::chrono::steady_clock::now();
   // If lastUpdateTime == 0 means it wasn't initialized yet.
   if (this->lastUpdateTime.count() > 0)

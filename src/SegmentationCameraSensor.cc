@@ -406,12 +406,12 @@ rendering::SegmentationCameraPtr SegmentationCameraSensor::SegmentationCamera()
 
 /////////////////////////////////////////////////
 void SegmentationCameraSensor::OnNewSegmentationFrame(const uint8_t * _data,
-  unsigned int _width, unsigned int _height, unsigned int _channles,
+  unsigned int _width, unsigned int _height, unsigned int _channels,
   const std::string &/*_format*/)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-  unsigned int bufferSize = _width * _height * _channles;
+  unsigned int bufferSize = _width * _height * _channels;
 
   if (!this->dataPtr->segmentationColoredBuffer)
     this->dataPtr->segmentationColoredBuffer = new uint8_t[bufferSize];
