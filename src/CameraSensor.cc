@@ -932,7 +932,7 @@ math::Matrix4d CameraSensorPrivate::BuildProjectionMatrix(
            0, _imageWidth, 0, _imageHeight, _clipNear, _clipFar) *
            CameraSensorPrivate::BuildPerspectiveMatrix(
              _intrinsicsFx, _intrinsicsFy,
-             _intrinsicsCx, _intrinsicsCy,
+             _intrinsicsCx, _imageHeight - _intrinsicsCy,
              _intrinsicsS, _clipNear, _clipFar);
 }
 
