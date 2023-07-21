@@ -257,7 +257,8 @@ bool CameraSensor::CreateCamera()
   this->dataPtr->camera->SetAspectRatio(static_cast<double>(width)/height);
   this->dataPtr->camera->SetHFOV(angle);
 
-  if (cameraSdf->Element() != nullptr && cameraSdf->Element()->HasElement("distortion")) {
+  if (cameraSdf->Element() != nullptr &&
+      cameraSdf->Element()->HasElement("distortion")) {
     this->dataPtr->distortion =
         ImageDistortionFactory::NewDistortionModel(*cameraSdf, "camera");
     this->dataPtr->distortion->Load(*cameraSdf);
