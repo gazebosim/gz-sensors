@@ -89,51 +89,6 @@ namespace gz
                 return result;
               }
 
-      /// \brief Create a sensor from SDF without a known sensor type.
-      ///
-      ///   This creates sensors by looking at the given sdf element.
-      ///   Sensors created with this API offer an gz-transport interface.
-      ///   If you need a direct C++ interface to the data, you must get the
-      ///   sensor pointer and cast to the correct type.
-      ///
-      ///   A <sensor> tag may have multiple <plugin> tags. A SensorId will be
-      ///   returned for each plugin that is described in SDF.
-      ///   If there are no <plugin> tags then one of the plugins shipped with
-      ///   this library will be loaded. For example, a <sensor> tag with
-      ///   <camera> but no <plugin> will load a CameraSensor from
-      ///   gz-sensors-camera.
-      /// \sa Sensor()
-      /// \param[in] _sdf pointer to the sdf element
-      /// \return A sensor id that refers to the created sensor. NO_SENSOR
-      /// is returned on erro.
-      /// \deprecated Sensor registration is deprecated, so it's necessary to
-      /// provide the specific sensor type to create it. Use the templated
-      /// `CreateSensor` function.
-      public: gz::sensors::SensorId GZ_DEPRECATED(6) CreateSensor(
-          sdf::ElementPtr _sdf);
-
-      /// \brief Create a sensor from SDF without a known sensor type.
-      ///
-      ///   This creates sensors by looking at the given sdf element.
-      ///   Sensors created with this API offer an gz-transport interface.
-      ///   If you need a direct C++ interface to the data, you must get the
-      ///   sensor pointer and cast to the correct type.
-      ///
-      ///   A <sensor> tag may have multiple <plugin> tags. A SensorId will be
-      ///   returned for each plugin that is described in SDF.
-      ///   If there are no <plugin> tags then one of the plugins shipped with
-      ///   this library will be loaded. For example, a <sensor> tag with
-      ///   <camera> but no <plugin> will load a CameraSensor from
-      ///   gz-sensors-camera.
-      /// \sa Sensor()
-      /// \param[in] _sdf SDF sensor DOM object
-      /// \return A sensor id that refers to the created sensor. NO_SENSOR
-      /// is returned on erro.
-      /// \deprecated Sensor registration is deprecated, so it's necessary to
-      /// provide the specific sensor type to create it. Use the templated
-      /// `CreateSensor` function.
-      public: gz::sensors::SensorId GZ_DEPRECATED(6) CreateSensor(
-          const sdf::Sensor &_sdf);
 
       /// \brief Add a sensor for this manager to manage.
       /// \sa Sensor()
@@ -159,9 +114,6 @@ namespace gz
       ///        a sensor will update based on it's Hz rate.
       public: void RunOnce(const std::chrono::steady_clock::duration &_time,
                   bool _force = false);
-
-      /// \brief Adds colon delimited paths sensor plugins may be
-      public: void GZ_DEPRECATED(6) AddPluginPaths(const std::string &_path);
 
       GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief private data pointer

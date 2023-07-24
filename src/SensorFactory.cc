@@ -28,13 +28,6 @@ using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////
-void SensorFactory::AddPluginPaths(const std::string &)
-{
-  gzwarn << "Trying to add plugin paths, but Gazebo Sensors doesn't support"
-          << " plugins anymore." << std::endl;
-}
-
-//////////////////////////////////////////////////
 SensorFactory::SensorFactory() : dataPtr(new SensorFactoryPrivate)
 {
 }
@@ -42,22 +35,4 @@ SensorFactory::SensorFactory() : dataPtr(new SensorFactoryPrivate)
 //////////////////////////////////////////////////
 SensorFactory::~SensorFactory()
 {
-}
-
-/////////////////////////////////////////////////
-std::unique_ptr<Sensor> SensorFactory::CreateSensor(const sdf::Sensor &)
-{
-  gzwarn << "Trying to create sensor without providing sensor type. Gazebo"
-          << " Sensors doesn't support sensor registration anymore. Use the"
-          << " templated `CreateSensor` function instead." << std::endl;
-  return nullptr;
-}
-
-/////////////////////////////////////////////////
-std::unique_ptr<Sensor> SensorFactory::CreateSensor(sdf::ElementPtr)
-{
-  gzwarn << "Trying to create sensor without providing sensor type. Gazebo"
-          << " Sensors doesn't support sensor registration anymore. Use the"
-          << " templated `CreateSensor` function instead." << std::endl;
-  return nullptr;
 }

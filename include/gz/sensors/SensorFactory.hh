@@ -39,30 +39,6 @@ namespace gz
     // forward declaration
     class SensorFactoryPrivate;
 
-    /// \brief Base sensor plugin interface
-    /// \deprecated Sensor plugins are deprecated. Instantiate sensor objects
-    /// instead.
-    class GZ_SENSORS_VISIBLE SensorPlugin
-    {
-      /// \brief Instantiate new sensor
-      /// \return New sensor
-      public: virtual Sensor GZ_DEPRECATED(6) * New() = 0;
-    };
-
-    /// \brief Templated class for instantiating sensors of the specified type
-    /// \tparam Type of sensor being instantiated.
-    /// \deprecated Sensor plugins are deprecated. Instantiate sensor objects
-    /// instead.
-    template<class SensorType>
-    class SensorTypePlugin : public SensorPlugin
-    {
-      // Documentation inherited
-      public: SensorType GZ_DEPRECATED(6) * New() override
-              {
-                return new SensorType();
-              };
-    };
-
     /// \brief A factory class for creating sensors
     /// This class instantiates sensor objects based on the sensor type and
     /// makes sure they're initialized correctly.
@@ -161,46 +137,6 @@ namespace gz
 
                 return sensor;
               }
-
-      /// \brief Create a sensor from SDF without a known sensor type.
-      ///
-      ///   This creates sensors by looking at the given sdf element.
-      ///   Sensors created with this API offer an gz-transport interface.
-      ///   If you need a direct C++ interface to the data, you must get the
-      ///   sensor pointer and cast to the correct type.
-      ///
-      /// \sa Sensor()
-      /// \param[in] _sdf pointer to the sdf element
-      /// \return Null, as the function is deprecated.
-      /// \deprecated Sensor registration is deprecated, so it's necessary to
-      /// provide the specific sensor type to create it. Use the templated
-      /// `CreateSensor` function.
-      public: std::unique_ptr<Sensor> GZ_DEPRECATED(6) CreateSensor(
-          sdf::ElementPtr _sdf);
-
-      /// \brief Create a sensor from an SDF Sensor DOM object without a known
-      /// sensor type.
-      ///
-      ///   This creates sensors by looking at the given SDF Sensor DOM
-      ///   object.
-      ///   Sensors created with this API offer a gz-transport interface.
-      ///   If you need a direct C++ interface to the data, you must get the
-      ///   sensor pointer and cast to the correct type.
-      ///
-      /// \sa Sensor()
-      /// \param[in] _sdf SDF Sensor DOM object.
-      /// \return A sensor id that refers to the created sensor. Null is
-      /// is returned on error.
-      /// \deprecated Sensor registration is deprecated, so it's necessary to
-      /// provide the specific sensor type to create it. Use the templated
-      /// `CreateSensor` function.
-      public: std::unique_ptr<Sensor> GZ_DEPRECATED(6) CreateSensor(
-          const sdf::Sensor &_sdf);
-
-      /// \brief Add additional path to search for sensor plugins
-      /// \param[in] _path Search path
-      /// \deprecated Sensor plugins aren't supported anymore.
-      public: void GZ_DEPRECATED(6) AddPluginPaths(const std::string &_path);
 
       GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief private data pointer

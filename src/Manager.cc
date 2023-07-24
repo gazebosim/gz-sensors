@@ -60,13 +60,6 @@ gz::sensors::Sensor *Manager::Sensor(
 }
 
 //////////////////////////////////////////////////
-void Manager::AddPluginPaths(const std::string &)
-{
-  gzwarn << "Trying to add plugin paths, but Gazebo Sensors doesn't support"
-          << " plugins anymore." << std::endl;
-}
-
-//////////////////////////////////////////////////
 bool Manager::Remove(const gz::sensors::SensorId _id)
 {
   return this->dataPtr->sensors.erase(_id) > 0;
@@ -81,33 +74,4 @@ void Manager::RunOnce(
   {
     s.second->Update(_time, _force);
   }
-}
-
-/////////////////////////////////////////////////
-SensorId Manager::AddSensor(
-  std::unique_ptr<sensors::Sensor> _sensor)
-{
-  if (!_sensor)
-    return NO_SENSOR;
-  SensorId id = _sensor->Id();
-  this->dataPtr->sensors[id] = std::move(_sensor);
-  return id;
-}
-
-/////////////////////////////////////////////////
-gz::sensors::SensorId Manager::CreateSensor(const sdf::Sensor &)
-{
-  gzwarn << "Trying to create sensor without providing sensor type. Gazebo"
-          << " Sensors doesn't support sensor registration anymore. Use the"
-          << " templated `CreateSensor` function instead." << std::endl;
-  return NO_SENSOR;
-}
-
-/////////////////////////////////////////////////
-gz::sensors::SensorId Manager::CreateSensor(sdf::ElementPtr)
-{
-  gzwarn << "Trying to create sensor without providing sensor type. Gazebo"
-          << " Sensors doesn't support sensor registration anymore. Use the"
-          << " templated `CreateSensor` function instead." << std::endl;
-  return NO_SENSOR;
 }
