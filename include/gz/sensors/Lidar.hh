@@ -86,7 +86,7 @@ namespace gz
       public: virtual bool Init() override;
 
       /// \brief Initialize values in the sensor
-      /// \return True on success
+      /// \param[in] _parent Name of parent
       public: void SetParent(const std::string &_parent) override;
 
       /// \brief Create Lidar sensor
@@ -173,14 +173,14 @@ namespace gz
       ///         it's possible that the Ray will update in the middle of
       ///         your access loop. This means some data will come from one
       ///         scan, and some from another scan. You can solve this
-      ///         problem by using SetActive(false) <your accessor loop>
+      ///         problem by using SetActive(false) `<your accessor loop>`
       ///         SetActive(true).
       /// \param[in] _index Index of specific ray
       /// \return Returns RangeMax for no detection.
       public: double Range(const int _index) const;
 
       /// \brief Get all the ranges
-      /// \param[out] _range A vector that will contain all the range data
+      /// \param[out] _ranges A vector that will contain all the range data
       public: void Ranges(std::vector<double> &_ranges) const;
 
       /// \brief Get detected retro (intensity) value for a ray.
@@ -188,7 +188,7 @@ namespace gz
       ///         it's possible that the Ray will update in the middle of
       ///         your access loop. This means some data will come from one
       ///         scan, and some from another scan. You can solve this
-      ///         problem by using SetActive(false) <your accessor loop>
+      ///         problem by using SetActive(false) `<your accessor loop>`
       ///         SetActive(true).
       /// \param[in] _index Index of specific ray
       /// \return Intensity value of ray
@@ -199,7 +199,7 @@ namespace gz
       ///         it's possible that the Ray will update in the middle of
       ///         your access loop. This means some data will come from one
       ///         scan, and some from another scan. You can solve this
-      ///         problem by using SetActive(false) <your accessor loop>
+      ///         problem by using SetActive(false) `<your accessor loop>`
       ///         SetActive(true).
       /// \param[in] _index Index of specific ray
       /// \return Fiducial value of ray
@@ -256,7 +256,7 @@ namespace gz
       public: bool initialized = false;
 
       /// \brief Set a callback to be called when data is generated.
-      /// \param[in] _callback This callback will be called every time the
+      /// \param[in] _subscriber This callback will be called every time the
       /// sensor generates data. The Update function will be blocked while the
       /// callbacks are executed.
       /// \remark Do not block inside of the callback.

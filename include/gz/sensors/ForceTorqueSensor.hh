@@ -100,7 +100,7 @@ namespace gz
 
       /// \brief Set the rotation of the joint parent relative to the sensor
       /// frame.
-      /// \param[in] _rotParentInSensorRotation of parent in sensor frame.
+      /// \param[in] _rotParentInSensor Rotation of parent in sensor frame.
       public: void SetRotationParentInSensor(
                   const math::Quaterniond &_rotParentInSensor);
 

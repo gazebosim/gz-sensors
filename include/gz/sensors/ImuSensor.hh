@@ -39,7 +39,7 @@ namespace gz
     /// \brief Reference frames enum
     enum class GZ_SENSORS_VISIBLE WorldFrameEnumType
     {
-      /// \brief NONE : To be used only when <localization>
+      /// \brief NONE : To be used only when `<localization>`
       /// reference orientation tag is empty.
       NONE = 0,
 
@@ -125,7 +125,7 @@ namespace gz
       /// \brief Set the orientation reference, i.e. initial imu
       /// orientation. Imu orientation data generated will be relative to this
       /// reference frame.
-      /// \param[in] _orientation Reference orientation
+      /// \param[in] _orient Reference orientation
       public: void SetOrientationReference(
           const math::Quaterniond &_orient);
 
