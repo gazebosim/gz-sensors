@@ -65,6 +65,17 @@ bool Manager::Remove(const gz::sensors::SensorId _id)
   return this->dataPtr->sensors.erase(_id) > 0;
 }
 
+/////////////////////////////////////////////////
+SensorId Manager::AddSensor(
+  std::unique_ptr<sensors::Sensor> _sensor)
+{
+  if (!_sensor)
+    return NO_SENSOR;
+  SensorId id = _sensor->Id();
+  this->dataPtr->sensors[id] = std::move(_sensor);
+  return id;
+}
+
 //////////////////////////////////////////////////
 void Manager::RunOnce(
   const std::chrono::steady_clock::duration &_time, bool _force)
