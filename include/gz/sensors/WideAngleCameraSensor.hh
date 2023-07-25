@@ -97,7 +97,7 @@ namespace gz
       /// \param[in] _data pointer to the data from the sensor
       /// \param[in] _width width of the image
       /// \param[in] _height height of the image
-      /// \param[in] _channel bytes used for the image data
+      /// \param[in] _channels bytes used for the image data
       /// \param[in] _format string with the format
       public: void OnNewWideAngleFrame(const unsigned char *_data,
                     unsigned int _width, unsigned int _height,

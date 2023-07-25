@@ -63,7 +63,7 @@ namespace gz
     /// \brief Shared pointer to Noise
     typedef std::shared_ptr<Noise> NoisePtr;
 
-    /// \def GaussianNoisePtr
+    /// \def GaussianNoiseModelPtr
     /// \brief Shared pointer to Noise
     typedef std::shared_ptr<GaussianNoiseModel> GaussianNoiseModelPtr;
 
@@ -214,7 +214,6 @@ namespace gz
       /// use this.
       SENSOR_NOISE_TYPE_END
     };
-    /// \}
 
 
     /// \def SensorDistortionType
@@ -239,7 +238,6 @@ namespace gz
       /// use this.
       SENSOR_DISTORTION_TYPE_END
     };
-    /// \}
 
     /// \brief SensorCategory is used to categorize sensors. This is used to
     /// put sensors into different threads.

@@ -53,9 +53,9 @@ namespace gz
 
     /// \brief a base sensor class
     ///
-    ///   This class is a base for all sensor classes. It parses some common
-    ///   SDF elements in the <sensor> tag and is responsible for making sure
-    ///   sensors update at the right time.
+    /// This class is a base for all sensor classes. It parses some common
+    /// SDF elements in the `<sensor>` tag and is responsible for making sure
+    /// sensors update at the right time.
     class GZ_SENSORS_VISIBLE Sensor
     {
       /// \brief constructor
@@ -65,12 +65,12 @@ namespace gz
       public: virtual ~Sensor();
 
       /// \brief Load the sensor based on data from an sdf::Sensor object.
-      /// \param[in] _sdf SDF <sensor> or <plugin> inside of <sensor>
+      /// \param[in] _sdf SDF `<sensor>` or `<plugin>` inside of `<sensor>`
       /// \return true if loading was successful
       public: virtual bool Load(const sdf::Sensor &_sdf);
 
       /// \brief Load the sensor with SDF parameters.
-      /// \param[in] _sdf SDF <sensor> or <plugin> inside of <sensor>
+      /// \param[in] _sdf SDF `<sensor>` or `<plugin>` inside of `<sensor>`
       /// \return true if loading was successful
       public: virtual bool Load(sdf::ElementPtr _sdf);
 
@@ -131,7 +131,7 @@ namespace gz
 
       /// \brief Set the update rate of the sensor. An update rate of zero means
       /// that the sensor is updated every cycle. It's zero by default.
-      /// \detail Negative rates become zero.
+      /// \details Negative rates become zero.
       /// \param[in] _hz Update rate of sensor in Hertz.
       public: void SetUpdateRate(const double _hz);
 
