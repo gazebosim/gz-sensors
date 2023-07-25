@@ -73,7 +73,7 @@ namespace gz
         const std::chrono::steady_clock::duration &_now) override;
 
       /// \brief Set the vertical reference position of the altimeter
-      /// \param[in] _ref Verical reference position in meters
+      /// \param[in] _reference Verical reference position in meters
       public: void SetVerticalReference(double _reference);
 
       /// \brief Get the vertical reference position of the altimeter

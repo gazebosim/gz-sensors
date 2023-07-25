@@ -97,7 +97,7 @@ namespace gz
       /// \param[in] _scan pointer to the data from the sensor
       /// \param[in] _width width of the thermal image
       /// \param[in] _height height of the thermal image
-      /// \param[in] _channel bytes used for the thermal data
+      /// \param[in] _channels bytes used for the thermal data
       /// \param[in] _format string with the format
       public: void OnNewThermalFrame(const uint16_t *_scan,
                     unsigned int _width, unsigned int _height,
@@ -149,7 +149,7 @@ namespace gz
       /// returned will be temperature in kelvin / resolution.
       /// Typical values are 0.01 (10mK), 0.1 (100mK), or 0.04 to simulate
       /// 14 bit format.
-      /// \param[in] resolution Temperature linear resolution
+      /// \param[in] _resolution Temperature linear resolution
       public: virtual void SetLinearResolution(float _resolution);
 
       // Documentation inherited.

@@ -73,7 +73,7 @@ namespace gz
         const std::chrono::steady_clock::duration &_now) override;
 
       /// \brief Set the reference altitude.
-      /// \param[in] _ref Verical reference position in meters
+      /// \param[in] _reference Verical reference position in meters
       public: void SetReferenceAltitude(double _reference);
 
       /// \brief Get the vertical reference altitude.

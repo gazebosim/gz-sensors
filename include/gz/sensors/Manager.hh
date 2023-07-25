@@ -47,7 +47,7 @@ namespace gz
     ///   The primary interface through which to load a sensor is LoadSensor().
     ///   This takes an sdf element pointer that should be configured with
     ///   everything the sensor will need. Custom sensors configuration must
-    ///   be in the <plugin> tag of the sdf::Element. The manager will
+    ///   be in the `<plugin>` tag of the sdf::Element. The manager will
     ///   dynamically load the sensor library and update it.
     /// \remarks This class is not thread safe.
     class GZ_SENSORS_VISIBLE Manager
@@ -104,7 +104,7 @@ namespace gz
                   gz::sensors::SensorId _id);
 
       /// \brief Remove a sensor by ID
-      /// \param[in] _sensorId ID of the sensor to remove
+      /// \param[in] _id ID of the sensor to remove
       /// \return True if the sensor exists and removed.
       public: bool Remove(const gz::sensors::SensorId _id);
 
