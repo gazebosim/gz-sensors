@@ -1,0 +1,53 @@
+/*
+ * Copyright (C) 2022 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+*/
+
+syntax = "proto3";
+package gz.msgs;
+option java_package = "com.gz.msgs";
+option java_outer_classname = "DVLKinematicEstimateProtos";
+
+/// \ingroup gz.msgs
+/// \interface DVLKinematicEstimate
+/// \brief Kinematic quantity (e.g. position, velocity, etc.) estimate in some reference
+/// frame, as reported by a Doppler Velocity Log sensor. This estimate is characterized by
+/// mean and covariance of some implicit multivariate distribution (typically a multivariate
+/// normal distribution).
+
+import "gz/msgs/vector3d.proto";
+
+message DVLKinematicEstimate
+{
+  /// \brief Frames of reference (incl. conventions)
+  enum ReferenceType
+  {
+     /// \brief Unspecific frame of reference.
+     DVL_REFERENCE_UNSPECIFIED = 0;
+     /// \brief Earth bound frame of reference (typically ENU).
+     DVL_REFERENCE_EARTH = 1;
+     /// \brief Ship bound frame of reference (typically FSK).
+     DVL_REFERENCE_SHIP = 2;
+  };
+  /// \brief Estimate frame of reference (incl. conventions).
+  ReferenceType reference = 1;
+
+  /// \brief Estimate mean.
+  Vector3d mean = 2;
+
+  /// \brief Estimate covariance matrix.
+  /// A 3 x 3 row-major matrix using a flat contiguous layout.
+  repeated double covariance = 3;
+}

@@ -56,7 +56,7 @@ set(GZ_COMMON_VER ${gz-common5_VERSION_MAJOR})
 
 #--------------------------------------
 # Find gz-transport
-gz_find_package(gz-transport13 REQUIRED)
+gz_find_package(gz-transport13 REQUIRED COMPONENTS msgs)
 set(GZ_TRANSPORT_VER ${gz-transport13_VERSION_MAJOR})
 
 #--------------------------------------
@@ -103,6 +103,8 @@ gz_configure_build(QUIT_IF_BUILD_ERRORS)
 # Create package information
 #============================================================================
 gz_create_packages()
+
+add_subdirectory(proto)
 
 #============================================================================
 # Configure documentation

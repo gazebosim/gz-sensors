@@ -25,6 +25,7 @@
 #include <gz/common/Profiler.hh>
 #include <gz/common/Util.hh>
 #include <gz/msgs/Utility.hh>
+#include <gz/msgs/PointCloudPackedUtils.hh>
 #include <gz/rendering/SegmentationCamera.hh>
 #include <gz/transport/Node.hh>
 #include <gz/transport/Publisher.hh>

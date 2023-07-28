@@ -23,6 +23,10 @@
 #include <gz/math/Quaternion.hh>
 #include <gz/math/Vector3.hh>
 
+#include <gz/msgs/dvl_kinematic_estimate.pb.h>
+#include <gz/msgs/dvl_velocity_tracking.pb.h>
+#include <gz/msgs/Utility.hh>
+
 #include <gz/rendering/Material.hh>
 #include <gz/rendering/RenderEngine.hh>
 #include <gz/rendering/RenderingIface.hh>

@@ -49,6 +49,7 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   PRIVATE
     gz-common${GZ_COMMON_VER}::profiler
     gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
+    gz-sensors${PROJECT_VERSION_MAJOR}-msgs
 )
 target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME} PUBLIC DepthPoints_EXPORTS)
 
@@ -56,6 +57,7 @@ gz_add_component(rendering SOURCES ${rendering_sources} GET_TARGET_NAME renderin
 target_link_libraries(${rendering_target}
   PUBLIC
     gz-rendering${GZ_RENDERING_VER}::gz-rendering${GZ_RENDERING_VER}
+    gz-sensors${PROJECT_VERSION_MAJOR}-msgs
 )
 
 set(camera_sources CameraSensor.cc)
@@ -71,8 +73,8 @@ target_link_libraries(${camera_target}
   PUBLIC
     ${rendering_target}
   PRIVATE
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
     gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
+    gz-sensors${PROJECT_VERSION_MAJOR}-msgs
 )
 
 set(depth_camera_sources DepthCameraSensor.cc)
@@ -85,8 +87,8 @@ target_compile_definitions(${depth_camera_target} PUBLIC DepthCameraSensor_EXPOR
 target_link_libraries(${depth_camera_target}
   PRIVATE
     ${camera_target}
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
     gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
+    gz-sensors${PROJECT_VERSION_MAJOR}-msgs
 )
 
 set(dvl_sources DopplerVelocityLog.cc)
@@ -102,7 +104,7 @@ target_link_libraries(${dvl_target}
   PRIVATE
     gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
     gz-math${GZ_MATH_VER}::gz-math${GZ_MATH_VER}
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
+    gz-sensors${PROJECT_VERSION_MAJOR}-msgs
     gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER})
 
 set(lidar_sources Lidar.cc)
@@ -116,7 +118,7 @@ target_link_libraries(${lidar_target}
   PUBLIC
     ${rendering_target}
   PRIVATE
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
+    gz-sensors${PROJECT_VERSION_MAJOR}-msgs
     gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
 )
 
@@ -129,7 +131,7 @@ gz_add_component(gpu_lidar
 target_compile_definitions(${gpu_lidar_target} PUBLIC GpuLidarSensor_EXPORTS)
 target_link_libraries(${gpu_lidar_target}
   PRIVATE
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
+    gz-sensors${PROJECT_VERSION_MAJOR}-msgs
     gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
     ${lidar_target}
 )
@@ -139,30 +141,37 @@ gz_add_component(logical_camera SOURCES ${logical_camera_sources} GET_TARGET_NAM
 target_compile_definitions(${logical_camera_target} PUBLIC LogicalCameraSensor_EXPORTS)
 target_link_libraries(${logical_camera_target}
   PRIVATE
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
+    gz-sensors${PROJECT_VERSION_MAJOR}-msgs
     gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
 )
 
 set(magnetometer_sources MagnetometerSensor.cc)
 gz_add_component(magnetometer SOURCES ${magnetometer_sources} GET_TARGET_NAME magnetometer_target)
+target_link_libraries(${magnetometer_target} PRIVATE ${PROJECT_LIBRARY_TARGET_NAME}-msgs)
 
 set(imu_sources ImuSensor.cc)
 gz_add_component(imu SOURCES ${imu_sources} GET_TARGET_NAME imu_target)
+target_link_libraries(${imu_target} PRIVATE ${PROJECT_LIBRARY_TARGET_NAME}-msgs)
 
 set(altimeter_sources AltimeterSensor.cc)
 gz_add_component(altimeter SOURCES ${altimeter_sources} GET_TARGET_NAME altimeter_target)
+target_link_libraries(${altimeter_target} PRIVATE ${PROJECT_LIBRARY_TARGET_NAME}-msgs)
 
 set(air_pressure_sources AirPressureSensor.cc)
 gz_add_component(air_pressure SOURCES ${air_pressure_sources} GET_TARGET_NAME air_pressure_target)
+target_link_libraries(${air_pressure_target} PRIVATE ${PROJECT_LIBRARY_TARGET_NAME}-msgs)
 
 set(air_speed_sources AirSpeedSensor.cc)
 gz_add_component(air_speed SOURCES ${air_speed_sources} GET_TARGET_NAME air_speed_target)
+target_link_libraries(${air_speed_target} PRIVATE ${PROJECT_LIBRARY_TARGET_NAME}-msgs)
 
 set(force_torque_sources ForceTorqueSensor.cc)
 gz_add_component(force_torque SOURCES ${force_torque_sources} GET_TARGET_NAME force_torque_target)
+target_link_libraries(${force_torque_target} PRIVATE ${PROJECT_LIBRARY_TARGET_NAME}-msgs)
 
 set(navsat_sources NavSatSensor.cc)
 gz_add_component(navsat SOURCES ${navsat_sources} GET_TARGET_NAME navsat_target)
+target_link_libraries(${navsat_target} PRIVATE ${PROJECT_LIBRARY_TARGET_NAME}-msgs)
 
 set(rgbd_camera_sources RgbdCameraSensor.cc)
 gz_add_component(rgbd_camera
@@ -174,7 +183,7 @@ target_compile_definitions(${rgbd_camera_target} PUBLIC RgbdCameraSensor_EXPORTS
 target_link_libraries(${rgbd_camera_target}
   PRIVATE
     ${camera_target}
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
+    gz-sensors${PROJECT_VERSION_MAJOR}-msgs
     gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
 )
 
@@ -187,7 +196,7 @@ gz_add_component(thermal_camera
 target_link_libraries(${thermal_camera_target}
   PRIVATE
     ${camera_target}
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
+    gz-sensors${PROJECT_VERSION_MAJOR}-msgs
     gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
 )
 
@@ -196,7 +205,7 @@ gz_add_component(boundingbox_camera SOURCES ${boundingbox_camera_sources} GET_TA
 target_link_libraries(${boundingbox_camera_target}
   PRIVATE
     ${camera_target}
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
+    gz-sensors${PROJECT_VERSION_MAJOR}-msgs
     gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
 )
 
@@ -206,7 +215,7 @@ target_compile_definitions(${segmentation_camera_target} PUBLIC SegmentationCame
 target_link_libraries(${segmentation_camera_target}
   PRIVATE
     ${camera_target}
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
+    gz-sensors${PROJECT_VERSION_MAJOR}-msgs
     gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
 )
 
@@ -215,12 +224,13 @@ gz_add_component(wide_angle_camera SOURCES ${wide_angle_camera_sources} GET_TARG
 target_link_libraries(${wide_angle_camera_target}
   PRIVATE
     ${camera_target}
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
+    gz-sensors${PROJECT_VERSION_MAJOR}-msgs
     gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
 )
 
 # Build the unit tests.
 gz_build_tests(TYPE UNIT SOURCES ${gtest_sources} LIB_DEPS ${rendering_target})
+
 
 # Build the unit tests that depend on components.
 gz_build_tests(TYPE UNIT SOURCES Lidar_TEST.cc LIB_DEPS ${lidar_target})

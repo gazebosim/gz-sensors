@@ -53,6 +53,7 @@ if (DRI_TESTS)
       ${PROJECT_LIBRARY_TARGET_NAME}-thermal_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-wide_angle_camera
       ${PROJECT_LIBRARY_TARGET_NAME}-dvl
+      gz-sensors${PROJECT_VERSION_MAJOR}-msgs
   )
 endif()
 
@@ -68,4 +69,6 @@ gz_build_tests(TYPE INTEGRATION
     ${PROJECT_LIBRARY_TARGET_NAME}-logical_camera
     ${PROJECT_LIBRARY_TARGET_NAME}-magnetometer
     ${PROJECT_LIBRARY_TARGET_NAME}-navsat
+    gz-sensors${PROJECT_VERSION_MAJOR}-msgs
+
 )

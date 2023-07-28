@@ -29,6 +29,7 @@
 #include <gz/math/Helpers.hh>
 
 #include <gz/msgs/Utility.hh>
+#include <gz/msgs/PointCloudPackedUtils.hh>
 #include <gz/transport/Node.hh>
 
 #include "gz/sensors/DepthCameraSensor.hh"

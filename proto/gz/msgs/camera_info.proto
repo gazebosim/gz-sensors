@@ -1,0 +1,156 @@
+/*
+ * Copyright (C) 2019 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+*/
+
+syntax = "proto3";
+package gz.msgs;
+option java_package = "com.gz.msgs";
+option java_outer_classname = "CameraInfoProtos";
+
+/// \ingroup gz.msgs
+/// \interface CameraInfo
+/// \brief Information about a camera
+
+import "gz/msgs/header.proto";
+
+/// \brief Meta information about a camera and the images produced by the
+/// camera. This data is typically published alongside a camera image stream
+/// on a topic called "camera_info".
+///
+/// Format of this message as heavily borrowed from:
+/// http://docs.ros.org/melodic/api/sensor_msgs/html/msg/CameraInfo.html
+message CameraInfo
+{
+  /// The distortion model used by the camera.
+  message Distortion
+  {
+    /// \brief Types of distortion models.
+    enum DistortionModelType
+    {
+      /// \brief Plumb bob distortion model.
+      PLUMB_BOB = 0;
+
+      /// \brief Rational polynomial distortion model.
+      RATIONAL_POLYNOMIAL = 1;
+
+      /// \brief Equidistant distortion model.
+      EQUIDISTANT = 2;
+    }
+
+    /// \brief The distortion model used.
+    DistortionModelType model = 1;
+
+    /// \brief Distortion coefficients. The meaning of the coefficients changes
+    /// according to the distortion model:
+    ///
+    /// PLUMP_BOB: 5 parameters, in this order:
+    ///   * k1: radial distortion coefficient k1
+    ///   * k2: radial distortion coefficient k2
+    ///   * t1: tangential distortion coefficient t1
+    ///   * t2: tangential distortion coefficient t2
+    ///   * k3: radial distortion coefficient k3
+    ///
+    /// RATIONAL_POLYNOMIAL: 8 parameters
+    ///
+    /// EQUIDISTANT: 4 parameters, described in this paper:
+    /// http://www.ee.oulu.fi/~jkannala/publications/tpami2006.pdf
+    repeated double k = 2;
+  };
+
+  /// \brief Intrinsic camera matrix for the raw (distorted) images can be
+  /// generated using the fx, fy, cx, and cy parameters contained in this
+  /// message. For example the intrinsic camera matrix K would be:
+  ///     [fx  s cx]
+  /// K = [ 0 fy cy]
+  ///     [ 0  0  1]
+  /// Projects 3D points in the camera coordinate frame to 2D pixel
+  /// coordinates using the focal lengths (fx, fy) and principal point
+  /// (cx, cy).
+  message Intrinsics
+  {
+    /// \brief 3x3 row-major matrix
+    repeated double k = 1;
+  };
+
+  /// \brief The projection/camera matrix can be generated using the values in
+  /// this message. For example, the projection matrix P would be:
+  ///
+  ///     [fx   s cx tx]
+  /// P = [ 0  fy cy ty]
+  ///     [ 0   0  1  0]
+  ///
+  /// Where:
+  /// * fx is the X Focal length
+  /// * fy is the Y Focal length
+  /// * cx is the X principal point
+  /// * cy is the Y principal point
+  /// * tx is the X position of the second camera in this camera's frame.
+  /// * ty is the Y position of the second camera in this camera's frame.
+  /// * s is the axis skew.
+  ///
+  /// By convention, this matrix specifies the intrinsic (camera) matrix
+  ///  of the processed (rectified) image. That is, the left 3x3 portion
+  ///  is the normal camera intrinsic matrix for the rectified image.
+  /// It projects 3D points in the camera coordinate frame to 2D pixel
+  ///  coordinates using the focal lengths (fx, fy) and principal point
+  ///  (cx, cy) - these may differ from the values in the Intrinsics message.
+  /// For monocular cameras, tx = ty = 0. Normally, monocular cameras will
+  ///  also have R = the identity and P[1:3,1:3] = K.
+  /// For a stereo pair, tx  and ty are related to the
+  ///  position of the optical center of the second camera in the first
+  ///  camera's frame. We assume both cameras are in the same
+  ///  stereo image plane. The first camera always has tx = ty = 0. For
+  ///  the right (second) camera of a horizontal stereo pair, ty = 0 and
+  ///  tx = -fx * B, where B is the baseline between the cameras.
+  /// Given a 3D point [X Y Z]', the projection (x, y) of the point onto
+  ///  the rectified image is given by:
+  ///  [u v w]' = P * [X Y Z 1]'
+  ///         x = u / w
+  ///         y = v / w
+  ///  This holds for both images of a stereo pair.
+  message Projection
+  {
+    /// \brief 3x4 row-major matrix
+    repeated double p = 1;
+  };
+
+  /// \brief Header data. The header timestamp is the time of image
+  /// acquisition. The header data map should have a 'frame_id' key with a
+  /// value that is the camera coordinate frame ID.
+  Header header = 1;
+
+  /// \brief Width of the image produced by a camera in pixels.
+  uint32 width = 2;
+
+  /// \brief Height of the image produced by a camera in pixels.
+  uint32 height = 3;
+
+  /// \brief Distortion information for the camera images.
+  Distortion distortion = 4;
+
+  /// \brief Camera intrinsics.
+  Intrinsics intrinsics = 5;
+
+  /// \brief Camera projection information.
+  Projection projection = 6;
+
+  /// \brief Rectification matrix (stereo cameras only).
+  /// A rotation matrix aligning the camera coordinate system to the ideal
+  /// stereo image plane so that epipolar lines in both stereo images are
+  /// parallel.
+  /// This field should be treated as a 3x3 row-major matrix.
+  repeated double rectification_matrix = 7[packed=true];
+};

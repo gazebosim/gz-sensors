@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include <gz/msgs/camera_info.pb.h>
 #include <gz/msgs/image.pb.h>
 
 #include <gz/common/Filesystem.hh>
