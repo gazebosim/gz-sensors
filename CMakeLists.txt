@@ -87,8 +87,8 @@ set(GZ_MSGS_VER ${gz-msgs10_VERSION_MAJOR})
 
 #--------------------------------------
 # Find SDFormat
-gz_find_package(sdformat13 VERSION 13.3 REQUIRED)
-set(SDF_VER ${sdformat13_VERSION_MAJOR})
+gz_find_package(sdformat14 REQUIRED)
+set(SDF_VER ${sdformat14_VERSION_MAJOR})
 
 #--------------------------------------
 # Find Eigen3
