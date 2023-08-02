@@ -8,7 +8,7 @@ project(gz-sensors8 VERSION 8.0.0)
 #============================================================================
 # Find gz-cmake
 #============================================================================
-find_package(gz-cmake4 REQUIRED)
+find_package(gz-cmake3 REQUIRED)
 
 #============================================================================
 # Configure the project
@@ -44,15 +44,15 @@ gz_find_package(GzProtobuf
 
 #--------------------------------------
 # Find gz-math
-gz_find_package(gz-math8 REQUIRED)
-set(GZ_MATH_VER ${gz-math8_VERSION_MAJOR})
+gz_find_package(gz-math7 REQUIRED)
+set(GZ_MATH_VER ${gz-math7_VERSION_MAJOR})
 
 #--------------------------------------
 # Find gz-common
-gz_find_package(gz-common6
+gz_find_package(gz-common5
                  COMPONENTS profiler
                  REQUIRED)
-set(GZ_COMMON_VER ${gz-common6_VERSION_MAJOR})
+set(GZ_COMMON_VER ${gz-common5_VERSION_MAJOR})
 
 #--------------------------------------
 # Find gz-transport
