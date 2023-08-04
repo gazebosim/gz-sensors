@@ -5,5 +5,5 @@ libgz-msgs10-dev
 libgz-rendering8-dev
 libgz-tools2-dev
 libgz-transport13-dev
-libsdformat13-dev
+libsdformat14-dev
 xvfb
