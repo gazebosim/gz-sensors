@@ -268,7 +268,9 @@ bool ImuSensor::Update(const std::chrono::steady_clock::duration &_now)
       GaussianNoiseModelPtr gaussian =
         std::dynamic_pointer_cast<GaussianNoiseModel>(
             this->dataPtr->noises[noiseType]);
-      return (float) (gaussian->StdDev() * gaussian->StdDev());
+      if (gaussian) {
+        return static_cast<float>(gaussian->StdDev() * gaussian->StdDev());
+      }
     }
     return 0.001f;
   };
