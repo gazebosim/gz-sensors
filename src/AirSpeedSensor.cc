@@ -20,7 +20,7 @@
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
-#include <gz/msgs/air_speed_sensor.pb.h>
+#include <gz/msgs/air_speed.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
@@ -113,7 +113,7 @@ bool AirSpeedSensor::Load(const sdf::Sensor &_sdf)
     this->SetTopic("/air_speed");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<msgs::AirSpeedSensor>(
+      this->dataPtr->node.Advertise<msgs::AirSpeed>(
       this->Topic());
 
   if (!this->dataPtr->pub)
@@ -155,7 +155,7 @@ bool AirSpeedSensor::Update(
     return false;
   }
 
-  msgs::AirSpeedSensor msg;
+  msgs::AirSpeed msg;
   *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
@@ -185,7 +185,6 @@ bool AirSpeedSensor::Update(
     diff_pressure =
       this->dataPtr->noises[AIR_SPEED_NOISE_PASCALS]->Apply(
           diff_pressure);
-    msg.mutable_pressure_noise()->set_type(msgs::SensorNoise::GAUSSIAN);
   }
 
   msg.set_diff_pressure(diff_pressure * 100.0f);
