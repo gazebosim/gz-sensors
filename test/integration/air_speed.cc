@@ -184,7 +184,7 @@ TEST_F(AirSpeedSensorTest, SensorReadings)
       gz::math::Pose3d(0, 0, 1.5, 0, 0, 0) * sensorNoise->Pose());
 
   // verify msg received on the topic
-  WaitForMessageTestHelper<gz::msgs::AirSpeedSensor> msgHelper(topic);
+  WaitForMessageTestHelper<gz::msgs::AirSpeed> msgHelper(topic);
   EXPECT_TRUE(sensor->HasConnections());
   sensor->Update(std::chrono::steady_clock::duration(std::chrono::seconds(1)));
   EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
@@ -195,7 +195,7 @@ TEST_F(AirSpeedSensorTest, SensorReadings)
   EXPECT_DOUBLE_EQ(288.1369934082031, msg.temperature());
 
   // verify msg with noise received on the topic
-  WaitForMessageTestHelper<gz::msgs::AirSpeedSensor>
+  WaitForMessageTestHelper<gz::msgs::AirSpeed>
     msgHelperNoise(topicNoise);
   sensorNoise->Update(std::chrono::steady_clock::duration(
       std::chrono::seconds(1)), false);
