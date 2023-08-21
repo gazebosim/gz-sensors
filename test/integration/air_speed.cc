@@ -20,6 +20,9 @@
 #include <sdf/sdf.hh>
 
 #include <gz/math/Helpers.hh>
+
+#include <gz/msgs/air_speed.pb.h>
+
 #include <gz/sensors/AirSpeedSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 

@@ -20,6 +20,9 @@
 #include <sdf/sdf.hh>
 
 #include <gz/math/Helpers.hh>
+
+#include <gz/msgs/altimeter.pb.h>
+
 #include <gz/sensors/AltimeterSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 

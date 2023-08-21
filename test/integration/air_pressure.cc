@@ -19,6 +19,8 @@
 
 #include <sdf/sdf.hh>
 
+#include <gz/msgs/fluid_pressure.pb.h>
+
 #include <gz/math/Helpers.hh>
 #include <gz/sensors/AirPressureSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
