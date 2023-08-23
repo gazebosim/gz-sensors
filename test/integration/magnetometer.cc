@@ -19,6 +19,8 @@
 
 #include <sdf/sdf.hh>
 
+#include <gz/msgs/magnetometer.pb.h>
+
 #include <gz/sensors/MagnetometerSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 
