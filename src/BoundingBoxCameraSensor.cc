@@ -17,6 +17,7 @@
 
 #include <mutex>
 
+#include <gz/msgs/boolean.pb.h>
 #include <gz/msgs/image.pb.h>
 #include <gz/msgs/annotated_axis_aligned_2d_box.pb.h>
 #include <gz/msgs/annotated_axis_aligned_2d_box_v.pb.h>
