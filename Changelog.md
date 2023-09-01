@@ -1,5 +1,28 @@
 ## Gazebo Sensors 6
 
+### Gazebo Sensors 6.7.1 (2023-09-01)
+
+1. Support protobuf >= 22
+    * [Pull request #351](https://github.com/gazebosim/gz-sensors/pull/351)
+
+1. Infrastructure
+    * [Pull request #335](https://github.com/gazebosim/gz-sensors/pull/335)
+
+1. Rename COPYING to LICENSE
+    * [Pull request #334](https://github.com/gazebosim/gz-sensors/pull/334)
+
+1. Fix links in Changelog
+    * [Pull request #330](https://github.com/gazebosim/gz-sensors/pull/330)
+
+1. Fix Camera info test
+    * [Pull request #326](https://github.com/gazebosim/gz-sensors/pull/326)
+
+1. clean up rendering resources
+    * [Pull request #324](https://github.com/gazebosim/gz-sensors/pull/324)
+
+1. Added Camera Info topic support for cameras
+    * [Pull request #285](https://github.com/gazebosim/gz-sensors/pull/285)
+
 ### Gazebo Sensors 6.7.0 (2023-02-13)
 
 1. Disable thermal camera test on MacOS.
