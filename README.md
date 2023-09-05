@@ -16,7 +16,7 @@ Windows       | [![Build Status](https://build.osrfoundation.org/job/ign_sensors
 
 Gazebo Sensors, a component of [Gazebo](https://gazebosim.org),
 provides numerous sensor models
-designed to generate realistic data from simulation environments. Gazebo Sensors is used in conjunction with [Gazebo Libraries](https://gazebosim/libs), and especially relies on the rendering capabilities from [Gazebo Rendering](https://gazebosim.org/libs/rendering) and physics simulation from [Gazebo Physics](https://gazebosim.org/libs/physics).
+designed to generate realistic data from simulation environments. Gazebo Sensors is used in conjunction with [Gazebo Libraries](https://gazebosim.org/libs), and especially relies on the rendering capabilities from [Gazebo Rendering](https://gazebosim.org/libs/rendering) and physics simulation from [Gazebo Physics](https://gazebosim.org/libs/physics).
 
 # Table of Contents
 
@@ -49,7 +49,7 @@ See the [installation tutorial](https://gazebosim.org/api/sensors/7.0/installati
 
 # Usage
 
-Please refer to the [examples directory](https://github.com/gazebosim/gz-sensors/raw/main/examples/).
+Please refer to the [examples directory](https://github.com/gazebosim/gz-sensors/tree/main/examples).
 
 # Folder Structure
 
