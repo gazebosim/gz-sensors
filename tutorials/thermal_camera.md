@@ -253,7 +253,7 @@ You should see something similar to this:
 
 Taking a look at the [SDF file](https://github.com/gazebosim/gz-sim/blob/e647570f25f962d63af75cf669ff72731d57bd5e/examples/worlds/thermal_camera.sdf) for this example shows that the box was assigned a temperature of 285 Kelvin.
 
-If we take a look at the Rescue Randy and Samsung J8 [fuel models](https://app.gazebosim.org/dashboard), we see that they have the following temperature range (the SDF file we are using with these models has an [ambient temperature of 300 Kelvin](https://github.com/gazebosim/gz-sim/blob/e647570f25f962d63af75cf669ff72731d57bd5e/examples/worlds/thermal_camera.sdf#L135-L144)):
+If we take a look at the [Rescue Randy](https://app.gazebosim.org/OpenRobotics/fuel/models/Rescue%20Randy) and [Samsung J8](https://app.gazebosim.org/OpenRobotics/fuel/models/Samsung%20J8%20Black) Fuel models, we see that they have the following temperature range (the SDF file we are using with these models has an [ambient temperature of 300 Kelvin](https://github.com/gazebosim/gz-sim/blob/e647570f25f962d63af75cf669ff72731d57bd5e/examples/worlds/thermal_camera.sdf#L135-L144)):
 * Rescue Randy: 300 Kelvin to 310 Kelvin
 * Samsung J8: 298.75 Kelvin to 300 Kelvin
 
@@ -262,12 +262,12 @@ The object with the highest temperature in the camera's view will always have wh
 If you move the object with the highest temperature out of the camera's view, the object with second highest temperature now becomes white.
 
 You can move the position of the objects and/or camera around in the world to see the effect it has on the camera's output (the different "camera outputs" are how they are visualized in the GUI).
-An easy way to move objects in the world is by using `Transform Control`:
+An easy way to move objects in the world is by using the `Transform Control` tool:
 
 @image html files/thermal_camera/thermal_camera_demo_2.png
 
 Another thing that you can do is modify the temperature ranges for objects with a heat signature.
-For example, if you go to the fuel cache on your machine (located at `~/.gz/fuel/` by default) and then modify Rescue Randy's `model.sdf` to have `min_temp` be `200`, and `max_temp` be `500`, you should see output similar to this (be sure to re-start the simulator by killing the current simulator (`ctrl-c` will do) and then re-running `gz sim -r thermal_camera.sdf`):
+For example, if you go to the fuel cache on your machine (located at `~/.gz/fuel/` by default) and then modify Rescue Randy's `model.sdf` to have `min_temp` be `200`, and `max_temp` be `500`, you should see output similar to this (be sure to re-start the simulator by closing the current simulator and then re-running `gz sim -r thermal_camera.sdf`):
 
 @image html files/thermal_camera/thermal_camera_demo_3.png
 
