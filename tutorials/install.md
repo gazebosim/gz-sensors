@@ -85,14 +85,14 @@ Gazebo Sensors requires:
 
 1. Clone the repository
   ```
-  git clone https://github.com/gazebosim/gz-sensors -b ign-sensors<#>
+  git clone https://github.com/gazebosim/gz-sensors -b gz-sensors<#>
   ```
   Be sure to replace `<#>` with a number value, such as 5 or 6, depending on
   which version you need.
 
 2. Install dependencies
   ```
-  brew install --only-dependencies ignition-sensors<#>
+  brew install --only-dependencies gz-sensors<#>
   ```
   Be sure to replace `<#>` with a number value, such as 5 or 6, depending on
   which version you need.
@@ -143,7 +143,7 @@ Before [gz-rendering](https://github.com/gazebosim/gz-rendering) becomes availab
 
 2. Navigate to where you would like to build the library, and clone the repository.
   ```
-  # Optionally, append `-b ign-sensors#` (replace # with a number) to check out a specific version
+  # Optionally, append `-b gz-sensors#` (replace # with a number) to check out a specific version
   git clone https://github.com/gazebosim/gz-sensors.git
   ```
 
@@ -154,9 +154,9 @@ Before [gz-rendering](https://github.com/gazebosim/gz-rendering) becomes availab
   cd build
   ```
 
-4. Before `gz-rendering` becomes available on conda-forge, we need to build it from source and specify the path containing `gz-rendering-config.cmake` in `CMAKE_PREFIX_PATH`, for cmake to find `gz-rendering`. That path could be `gz-rendering-install-path\lib\cmake\gz-rendering4`, for example.
+4. Before `gz-rendering` becomes available on conda-forge, we need to build it from source and specify the path containing `gz-rendering-config.cmake` in `CMAKE_PREFIX_PATH`, for cmake to find `gz-rendering`. That path could be `gz-rendering-install-path\lib\cmake\gz-rendering8`, for example.
   ```
-  cmake .. -DBUILD_TESTING=OFF -DCMAKE_PREFIX_PATH=path\containing\ignition-rendering-config  # Optionally, -DCMAKE_INSTALL_PREFIX=path\to\install
+  cmake .. -DBUILD_TESTING=OFF -DCMAKE_PREFIX_PATH=path\containing\gz-rendering-config  # Optionally, -DCMAKE_INSTALL_PREFIX=path\to\install
   cmake --build . --config Release
   ```
 
