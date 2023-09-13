@@ -18,7 +18,7 @@ sudo apt-get update
 
 2. Install Gazebo Sensors
 ```{.sh}
-# Change <#> to a version number, like 3 or 4
+# Change <#> to a version number, like 7 or 8
 sudo apt install libgz-sensors<#>-dev
 ```
 
@@ -35,7 +35,7 @@ sudo apt install libgz-sensors<#>-dev
   brew install gz-sensors<#>
   ```
 
-Be sure to replace `<#>` with a number value, such as 5 or 6, depending on
+Be sure to replace `<#>` with a number value, such as 7 or 8, depending on
 which version you need.
 
 ### Windows
