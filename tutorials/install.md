@@ -40,7 +40,27 @@ which version you need.
 
 ### Windows
 
-Binary install is pending `gz-rendering` and `gz-sensors` being added to conda-forge.
+#### Install Prerequisites
+
+First, follow the [gz-cmake](https://github.com/gazebosim/gz-cmake) tutorial for installing Conda, Visual Studio, CMake, etc., prerequisites, and creating a Conda environment.
+
+Navigate to `condabin` if necessary to use the `conda` command (i.e., if Conda is not in your `PATH` environment variable. You can find the location of `condabin` in Anaconda Prompt, `where conda`).
+
+Create if necessary, and activate a Conda environment:
+
+```
+conda create -n gz-ws
+conda activate gz-ws
+```
+
+#### Binary Installation
+
+```
+conda install libgz-sensors<#> --channel conda-forge
+```
+
+Be sure to replace `<#>` with a number value, such as 7 or 8, depending on
+which version you need.
 
 ## Source Install
 
@@ -113,32 +133,19 @@ Gazebo Sensors requires:
 
 ### Windows
 
-#### Install Prerequisites
+This assumes you have created and activated a Conda environment while [installing the Prerequisites](#install-prerequisites).
 
-First, follow the [gz-cmake](https://github.com/gazebosim/gz-cmake) tutorial for installing Conda, Visual Studio, CMake, etc., prerequisites, and creating a Conda environment.
+1. Install Gazebo dependencies:
 
-Navigate to `condabin` if necessary to use the `conda` command (i.e., if Conda is not in your `PATH` environment variable. You can find the location of `condabin` in Anaconda Prompt, `where conda`).
-
-Create if necessary, and activate a Conda environment:
-
-```
-conda create -n gz-ws
-conda activate gz-ws
-```
-
-Install Gazebo dependencies, replacing `<#>` with the desired versions:
-
-```
-conda install libgz-cmake<#> libgz-common<#> libgz-math<#> libgz-transport<#> libgz-msgs<#> --channel conda-forge
-```
-
-Before [gz-rendering](https://github.com/gazebosim/gz-rendering) becomes available on conda-forge, follow its tutorial to build it from source.
-
-#### Build from source
-
-1. Activate the Conda environment created in the prerequisites:
+  You can view available versions and their dependencies:
   ```
-  conda activate gz-ws
+  conda search libgz-sensors* --channel conda-forge --info
+  ```
+
+  Install dependencies, replacing `<#>` with the desired versions:
+
+  ```
+  conda install libgz-cmake<#> libgz-common<#> libgz-math<#> libgz-transport<#> libgz-msgs<#> libgz-rendering<#> --channel conda-forge
   ```
 
 2. Navigate to where you would like to build the library, and clone the repository.
@@ -154,13 +161,7 @@ Before [gz-rendering](https://github.com/gazebosim/gz-rendering) becomes availab
   cd build
   ```
 
-4. Before `gz-rendering` becomes available on conda-forge, we need to build it from source and specify the path containing `gz-rendering-config.cmake` in `CMAKE_PREFIX_PATH`, for cmake to find `gz-rendering`. That path could be `gz-rendering-install-path\lib\cmake\gz-rendering8`, for example.
-  ```
-  cmake .. -DBUILD_TESTING=OFF -DCMAKE_PREFIX_PATH=path\containing\gz-rendering-config  # Optionally, -DCMAKE_INSTALL_PREFIX=path\to\install
-  cmake --build . --config Release
-  ```
-
-5. Optionally, install. You will likely need to run a terminal with admin privileges for this call to succeed.
+4. Optionally, install. You will likely need to run a terminal with admin privileges for this call to succeed.
   ```
   cmake --install . --config Release
   ```
