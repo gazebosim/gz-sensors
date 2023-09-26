@@ -4,6 +4,38 @@
 
 ## Gazebo Sensors 7
 
+### Gazebo Sensors 7.3.0 (2023-09-26)
+
+1. Infrastructure
+    * [Pull request #372](https://github.com/gazebosim/gz-sensors/pull/372)
+    * [Pull request #371](https://github.com/gazebosim/gz-sensors/pull/371)
+
+1. Expose optical frame in CameraSensor so it can be set in DepthCameraSensor
+    * [Pull request #362](https://github.com/gazebosim/gz-sensors/pull/362)
+
+1. Fix CameraSensor to check if element is null before access
+    * [Pull request #361](https://github.com/gazebosim/gz-sensors/pull/361)
+
+1. Support protobuf >= 22
+    * [Pull request #351](https://github.com/gazebosim/gz-sensors/pull/351)
+
+1. Minor cleanup - lint, typos
+    * [Pull request #352](https://github.com/gazebosim/gz-sensors/pull/352)
+    * [Pull request #344](https://github.com/gazebosim/gz-sensors/pull/344)
+
+1. Fix frame_id for depth camera point cloud
+    * [Pull request #350](https://github.com/gazebosim/gz-sensors/pull/350)
+
+1. Add support for bayer images to camera sensor
+    * [Pull request #336](https://github.com/gazebosim/gz-sensors/pull/336)
+
+1. Fix flaky trigger camera test
+    * [Pull request #346](https://github.com/gazebosim/gz-sensors/pull/346)
+
+1. Generate default trigger topic name if empty
+    * [Pull request #343](https://github.com/gazebosim/gz-sensors/pull/343)
+
+
 ### Gazebo Sensors 7.2.0 (2023-04-13)
 
 1. Cleanup resources in CameraSensor destructor
