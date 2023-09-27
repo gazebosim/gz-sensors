@@ -2,6 +2,64 @@
 
 ### Gazebo Sensors 8.0.0 (202X-XX-XX)
 
+1. Documentation fixes
+    * [Pull request #385](https://github.com/gazebosim/gz-sensors/pull/385)
+    * [Pull request #382](https://github.com/gazebosim/gz-sensors/pull/382)
+    * [Pull request #379](https://github.com/gazebosim/gz-sensors/pull/379)
+    * [Pull request #380](https://github.com/gazebosim/gz-sensors/pull/380)
+    * [Pull request #381](https://github.com/gazebosim/gz-sensors/pull/381)
+    * [Pull request #378](https://github.com/gazebosim/gz-sensors/pull/378)
+    * [Pull request #344](https://github.com/gazebosim/gz-sensors/pull/344)
+
+1. populate the covariance fields using the noise models
+    * [Pull request #333](https://github.com/gazebosim/gz-sensors/pull/333)
+
+1. Tests need to include message types they are using
+    * [Pull request #375](https://github.com/gazebosim/gz-sensors/pull/375)
+
+1. Update air sensor with air_speed.proto
+    * [Pull request #374](https://github.com/gazebosim/gz-sensors/pull/374)
+
+1. Bumps in harmonic : sdformat14, rendering8, transport13
+    * [Pull request #367](https://github.com/gazebosim/gz-sensors/pull/367)
+    * [Pull request #316](https://github.com/gazebosim/gz-sensors/pull/316)
+
+1. ign -> gz
+    * [Pull request #366](https://github.com/gazebosim/gz-sensors/pull/366)
+
+1. Remove deprecations
+    * [Pull request #365](https://github.com/gazebosim/gz-sensors/pull/365)
+
+1. Infrastructure
+    * [Pull request #364](https://github.com/gazebosim/gz-sensors/pull/364)
+
+1. Support protobuf >= 22
+    * [Pull request #351](https://github.com/gazebosim/gz-sensors/pull/351)
+
+1. Minor cleanup - lint, typos
+    * [Pull request #352](https://github.com/gazebosim/gz-sensors/pull/352)
+
+1. Fix frame_id for depth camera point cloud
+    * [Pull request #350](https://github.com/gazebosim/gz-sensors/pull/350)
+
+1. Fix dvl integration test
+    * [Pull request #348](https://github.com/gazebosim/gz-sensors/pull/348)
+
+1. Add support for bayer images to camera sensor
+    * [Pull request #336](https://github.com/gazebosim/gz-sensors/pull/336)
+
+1. Fix flaky trigger camera test
+    * [Pull request #346](https://github.com/gazebosim/gz-sensors/pull/346)
+
+1. Generate default trigger topic name if empty
+    * [Pull request #343](https://github.com/gazebosim/gz-sensors/pull/343)
+
+1. Add DopplerVelocityLog sensor
+    * [Pull request #290](https://github.com/gazebosim/gz-sensors/pull/290)
+
+1. ⬆️  Bump main to 8.0.0~pre1
+    * [Pull request #254](https://github.com/gazebosim/gz-sensors/pull/254)
+
 ## Gazebo Sensors 7
 
 ### Gazebo Sensors 7.3.0 (2023-09-26)
