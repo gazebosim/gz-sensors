@@ -30,13 +30,15 @@
 
 #include <sdf/Sensor.hh>
 
-#include "CameraSensorUtil.hh"
 #include "gz/sensors/ImageGaussianNoiseModel.hh"
 #include "gz/sensors/ImageNoise.hh"
 #include "gz/sensors/RgbdCameraSensor.hh"
 #include "gz/sensors/RenderingEvents.hh"
 #include "gz/sensors/SensorFactory.hh"
 
+#include "gz/rendering/Utils.hh"
+
+#include "CameraSensorUtil.hh"
 #include "PointCloudUtil.hh"
 
 /// \brief Private data for RgbdCameraSensor

@@ -31,7 +31,6 @@
 #include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 
-#include "CameraSensorUtil.hh"
 #include "gz/sensors/DepthCameraSensor.hh"
 #include "gz/sensors/Manager.hh"
 #include "gz/sensors/SensorFactory.hh"
@@ -39,6 +38,9 @@
 #include "gz/sensors/ImageNoise.hh"
 #include "gz/sensors/RenderingEvents.hh"
 
+#include "gz/rendering/Utils.hh"
+
+#include "CameraSensorUtil.hh"
 #include "PointCloudUtil.hh"
 
 // undefine near and far macros from windows.h
