@@ -31,6 +31,7 @@
 #include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 
+#include "CameraSensorUtil.hh"
 #include "gz/sensors/DepthCameraSensor.hh"
 #include "gz/sensors/Manager.hh"
 #include "gz/sensors/SensorFactory.hh"
@@ -325,7 +326,7 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
 //////////////////////////////////////////////////
 bool DepthCameraSensor::CreateCamera()
 {
-  const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
+  sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
 
   if (!cameraSdf)
   {
@@ -338,8 +339,6 @@ bool DepthCameraSensor::CreateCamera()
 
   double far = cameraSdf->FarClip();
   double near = cameraSdf->NearClip();
-
-  this->PopulateInfo(cameraSdf);
 
   this->dataPtr->depthCamera = this->Scene()->CreateDepthCamera(
       this->Name());
@@ -392,6 +391,36 @@ bool DepthCameraSensor::CreateCamera()
   }
   this->dataPtr->depthCamera->SetAspectRatio(static_cast<double>(width)/height);
   this->dataPtr->depthCamera->SetHFOV(angle);
+
+  // Update the DOM object intrinsics to have consistent
+  // intrinsics between ogre camera and camera_info msg
+  if (!cameraSdf->HasLensIntrinsics()) {
+    auto intrinsicMatrix = gz::rendering::projectionToCameraIntrinsic(
+        this->dataPtr->depthCamera->ProjectionMatrix(),
+        this->dataPtr->depthCamera->ImageWidth(),
+        this->dataPtr->depthCamera->ImageHeight());
+
+    cameraSdf->SetLensIntrinsicsFx(intrinsicMatrix(0, 0));
+    cameraSdf->SetLensIntrinsicsFy(intrinsicMatrix(1, 1));
+    cameraSdf->SetLensIntrinsicsCx(intrinsicMatrix(0, 2));
+    cameraSdf->SetLensIntrinsicsCy(intrinsicMatrix(1, 2));
+  }
+  // set custom projection matrix based on intrinsics param specified in sdf
+  else {
+    double fx = cameraSdf->LensIntrinsicsFx();
+    double fy = cameraSdf->LensIntrinsicsFy();
+    double cx = cameraSdf->LensIntrinsicsCx();
+    double cy = cameraSdf->LensIntrinsicsCy();
+    double s = cameraSdf->LensIntrinsicsSkew();
+    auto projectionMatrix = BuildProjectionMatrix(
+        this->dataPtr->depthCamera->ImageWidth(),
+        this->dataPtr->depthCamera->ImageHeight(), fx, fy, cx, cy, s,
+        this->dataPtr->depthCamera->NearClipPlane(),
+        this->dataPtr->depthCamera->FarClipPlane());
+    this->dataPtr->depthCamera->SetProjectionMatrix(projectionMatrix);
+  }
+
+  this->PopulateInfo(cameraSdf);
 
   // Create depth texture when the camera is reconfigured from default values
   this->dataPtr->depthCamera->CreateDepthTexture();

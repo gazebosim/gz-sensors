@@ -1,5 +1,6 @@
 set (sources
   BrownDistortionModel.cc
+  CameraSensorUtil.cc
   Distortion.cc
   EnvironmentalData.cc
   GaussianNoiseModel.cc
