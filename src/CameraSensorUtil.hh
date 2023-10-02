@@ -87,7 +87,6 @@ math::Matrix4d BuildProjectionMatrix(double _imageWidth, double _imageHeight,
                                      double _intrinsicsCx, double _intrinsicsCy,
                                      double _intrinsicsS, double _clipNear,
                                      double _clipFar);
-
 }
 }
 }
