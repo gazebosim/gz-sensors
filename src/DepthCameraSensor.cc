@@ -29,6 +29,7 @@
 #include <gz/math/Helpers.hh>
 
 #include <gz/msgs/Utility.hh>
+#include <gz/rendering/Utils.hh>
 #include <gz/transport/Node.hh>
 
 #include "gz/sensors/DepthCameraSensor.hh"
@@ -37,8 +38,6 @@
 #include "gz/sensors/ImageGaussianNoiseModel.hh"
 #include "gz/sensors/ImageNoise.hh"
 #include "gz/sensors/RenderingEvents.hh"
-
-#include "gz/rendering/Utils.hh"
 
 #include "CameraSensorUtil.hh"
 #include "PointCloudUtil.hh"

@@ -26,6 +26,7 @@
 #include <gz/rendering/DepthCamera.hh>
 
 #include <gz/msgs/Utility.hh>
+#include <gz/rendering/Utils.hh>
 #include <gz/transport/Node.hh>
 
 #include <sdf/Sensor.hh>
@@ -35,8 +36,6 @@
 #include "gz/sensors/RgbdCameraSensor.hh"
 #include "gz/sensors/RenderingEvents.hh"
 #include "gz/sensors/SensorFactory.hh"
-
-#include "gz/rendering/Utils.hh"
 
 #include "CameraSensorUtil.hh"
 #include "PointCloudUtil.hh"
