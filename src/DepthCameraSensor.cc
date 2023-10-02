@@ -407,8 +407,9 @@ bool DepthCameraSensor::CreateCamera()
     cameraSdf->SetLensIntrinsicsCx(intrinsicMatrix(0, 2));
     cameraSdf->SetLensIntrinsicsCy(intrinsicMatrix(1, 2));
   }
-  // set custom projection matrix based on intrinsics param specified in sdf
-  else {
+  else
+  {
+    // set custom projection matrix based on intrinsics param specified in sdf
     double fx = cameraSdf->LensIntrinsicsFx();
     double fy = cameraSdf->LensIntrinsicsFy();
     double cx = cameraSdf->LensIntrinsicsCx();
@@ -417,6 +418,48 @@ bool DepthCameraSensor::CreateCamera()
     auto projectionMatrix = BuildProjectionMatrix(
         this->dataPtr->depthCamera->ImageWidth(),
         this->dataPtr->depthCamera->ImageHeight(), fx, fy, cx, cy, s,
+        this->dataPtr->depthCamera->NearClipPlane(),
+        this->dataPtr->depthCamera->FarClipPlane());
+    this->dataPtr->depthCamera->SetProjectionMatrix(projectionMatrix);
+  }
+
+  // Update the DOM object intrinsics to have consistent
+  // projection matrix values between ogre camera and camera_info msg
+  // If these values are not defined in the SDF then we need to update
+  // these values to something reasonable. The projection matrix is
+  // the cumulative effect of intrinsic and extrinsic parameters
+  if(!cameraSdf->HasLensProjection())
+  {
+    // Note that the matrix from Ogre via camera->ProjectionMatrix() has a
+    // different format than the projection matrix used in SDFormat.
+    // This is why they are converted using projectionToCameraIntrinsic.
+    // The resulting matrix is the intrinsic matrix, but since the user has
+    // not overridden the values, this is also equal to the projection matrix.
+    auto intrinsicMatrix =
+      gz::rendering::projectionToCameraIntrinsic(
+        this->dataPtr->depthCamera->ProjectionMatrix(),
+        this->dataPtr->depthCamera->ImageWidth(),
+        this->dataPtr->depthCamera->ImageHeight()
+      );
+    cameraSdf->SetLensProjectionFx(intrinsicMatrix(0, 0));
+    cameraSdf->SetLensProjectionFy(intrinsicMatrix(1, 1));
+    cameraSdf->SetLensProjectionCx(intrinsicMatrix(0, 2));
+    cameraSdf->SetLensProjectionCy(intrinsicMatrix(1, 2));
+  }
+  else
+  {
+    // set custom projection matrix based on projection param specified in sdf
+    // tx and ty are not used
+    double fx = cameraSdf->LensProjectionFx();
+    double fy = cameraSdf->LensProjectionFy();
+    double cx = cameraSdf->LensProjectionCx();
+    double cy = cameraSdf->LensProjectionCy();
+    double s = 0;
+
+    auto projectionMatrix = BuildProjectionMatrix(
+        this->dataPtr->depthCamera->ImageWidth(),
+        this->dataPtr->depthCamera->ImageHeight(),
+        fx, fy, cx, cy, s,
         this->dataPtr->depthCamera->NearClipPlane(),
         this->dataPtr->depthCamera->FarClipPlane());
     this->dataPtr->depthCamera->SetProjectionMatrix(projectionMatrix);
