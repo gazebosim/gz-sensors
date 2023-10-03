@@ -703,7 +703,7 @@ void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
   unsigned int g3Sum = 0u;
   unsigned int b3Sum = 0u;
   unsigned int step = width * bpp;
-  
+
   // get sum of each color channel
   // all cameras should just see blue colors
   for (unsigned int i = 0u; i < height; ++i)
