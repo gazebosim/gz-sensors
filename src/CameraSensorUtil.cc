@@ -20,7 +20,7 @@
 #include <gz/math/Matrix4.hh>
 
 //////////////////////////////////////////////////
-gz::math::Matrix4d gz::sensors::BuildNDCMatrix(
+gz::math::Matrix4d gz::sensors::buildNDCMatrix(
     double _left, double _right,
     double _bottom, double _top,
     double _near, double _far)
@@ -49,7 +49,7 @@ gz::math::Matrix4d gz::sensors::BuildNDCMatrix(
 }
 
 //////////////////////////////////////////////////
-gz::math::Matrix4d gz::sensors::BuildPerspectiveMatrix(
+gz::math::Matrix4d gz::sensors::buildPerspectiveMatrix(
     double _intrinsicsFx, double _intrinsicsFy,
     double _intrinsicsCx, double _intrinsicsCy,
     double _intrinsicsS,
@@ -75,16 +75,16 @@ gz::math::Matrix4d gz::sensors::BuildPerspectiveMatrix(
 }
 
 //////////////////////////////////////////////////
-gz::math::Matrix4d gz::sensors::BuildProjectionMatrix(
+gz::math::Matrix4d gz::sensors::buildProjectionMatrix(
     double _imageWidth, double _imageHeight,
     double _intrinsicsFx, double _intrinsicsFy,
     double _intrinsicsCx, double _intrinsicsCy,
     double _intrinsicsS,
     double _clipNear, double _clipFar)
 {
-  return BuildNDCMatrix(
+  return buildNDCMatrix(
            0, _imageWidth, 0, _imageHeight, _clipNear, _clipFar) *
-         BuildPerspectiveMatrix(
+         buildPerspectiveMatrix(
            _intrinsicsFx, _intrinsicsFy,
            _intrinsicsCx, _imageHeight - _intrinsicsCy,
            _intrinsicsS, _clipNear, _clipFar);

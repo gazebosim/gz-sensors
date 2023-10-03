@@ -258,7 +258,7 @@ bool CameraSensor::CreateCamera()
     double cx = cameraSdf->LensIntrinsicsCx();
     double cy = cameraSdf->LensIntrinsicsCy();
     double s = cameraSdf->LensIntrinsicsSkew();
-    auto projectionMatrix = BuildProjectionMatrix(
+    auto projectionMatrix = buildProjectionMatrix(
         this->dataPtr->camera->ImageWidth(),
         this->dataPtr->camera->ImageHeight(),
         fx, fy, cx, cy, s,
@@ -312,7 +312,7 @@ bool CameraSensor::CreateCamera()
     double cy = cameraSdf->LensProjectionCy();
     double s = 0;
 
-    auto projectionMatrix = BuildProjectionMatrix(
+    auto projectionMatrix = buildProjectionMatrix(
         this->dataPtr->camera->ImageWidth(),
         this->dataPtr->camera->ImageHeight(),
         fx, fy, cx, cy, s,

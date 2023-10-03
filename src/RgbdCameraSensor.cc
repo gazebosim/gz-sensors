@@ -380,7 +380,7 @@ bool RgbdCameraSensor::CreateCameras()
     double cx = cameraSdf->LensIntrinsicsCx();
     double cy = cameraSdf->LensIntrinsicsCy();
     double s = cameraSdf->LensIntrinsicsSkew();
-    auto projectionMatrix = BuildProjectionMatrix(
+    auto projectionMatrix = buildProjectionMatrix(
         this->dataPtr->depthCamera->ImageWidth(),
         this->dataPtr->depthCamera->ImageHeight(), fx, fy, cx, cy, s,
         this->dataPtr->depthCamera->NearClipPlane(),
@@ -421,7 +421,7 @@ bool RgbdCameraSensor::CreateCameras()
     double cy = cameraSdf->LensProjectionCy();
     double s = 0;
 
-    auto projectionMatrix = BuildProjectionMatrix(
+    auto projectionMatrix = buildProjectionMatrix(
         this->dataPtr->depthCamera->ImageWidth(),
         this->dataPtr->depthCamera->ImageHeight(),
         fx, fy, cx, cy, s,

@@ -41,7 +41,7 @@ inline namespace GZ_SENSORS_VERSION_NAMESPACE {
 ///            This value is negative if the plane is to be behind
 ///            the camera
 /// \return OpenGL NDC (Normalized Device Coordinates) matrix
-math::Matrix4d BuildNDCMatrix(double _left, double _right, double _bottom,
+math::Matrix4d buildNDCMatrix(double _left, double _right, double _bottom,
                               double _top, double _near, double _far);
 
 /// \brief Computes the OpenGL perspective matrix
@@ -58,7 +58,7 @@ math::Matrix4d BuildNDCMatrix(double _left, double _right, double _bottom,
 ///            This value is negative if the plane is to be behind
 ///            the camera
 /// \return OpenGL perspective matrix
-math::Matrix4d BuildPerspectiveMatrix(
+math::Matrix4d buildPerspectiveMatrix(
     double _intrinsicsFx, double _intrinsicsFy, double _intrinsicsCx,
     double _intrinsicsCy, double _intrinsicsS, double _clipNear,
     double _clipFar);
@@ -82,7 +82,7 @@ math::Matrix4d BuildPerspectiveMatrix(
 ///            This value is negative if the plane is to be behind
 ///            the camera
 /// \return OpenGL projection matrix
-math::Matrix4d BuildProjectionMatrix(double _imageWidth, double _imageHeight,
+math::Matrix4d buildProjectionMatrix(double _imageWidth, double _imageHeight,
                                      double _intrinsicsFx, double _intrinsicsFy,
                                      double _intrinsicsCx, double _intrinsicsCy,
                                      double _intrinsicsS, double _clipNear,
