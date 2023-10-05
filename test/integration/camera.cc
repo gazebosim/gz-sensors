@@ -243,6 +243,7 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
   box->SetLocalPosition(gz::math::Vector3d(4.0, 1, 0.5));
   box->SetLocalRotation(0, 0, 0);
   box->SetMaterial(blue);
+  scene->DestroyMaterial(blue);
   root->AddChild(box);
 
   // Do the test
@@ -465,7 +466,14 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
   delete []  img2;
   delete []  img3;
 
+  // Clean up rendering ptrs
+  box.reset();
+  blue.reset();
+
   // Clean up
+  mgr.Remove(sensor1->Id());
+  mgr.Remove(sensor2->Id());
+  mgr.Remove(sensor3->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }
@@ -476,7 +484,6 @@ TEST_P(CameraSensorTest, CameraIntrinsics)
   gz::common::Console::SetVerbosity(2);
   CameraIntrinsics(GetParam());
 }
-
 
 //////////////////////////////////////////////////
 void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
@@ -533,6 +540,7 @@ void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
   box->SetLocalPosition(gz::math::Vector3d(4.0, 1, 0.5));
   box->SetLocalRotation(0, 0, 0);
   box->SetMaterial(blue);
+  scene->DestroyMaterial(blue);
   root->AddChild(box);
 
   // Do the test
@@ -663,35 +671,35 @@ void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
   // Camera sensor without projection tag
   // account for error converting gl projection values back to
   // cv projection values
-  double error = 1;
+  double error = 1.0;
   EXPECT_EQ(camera1Info.width(), width);
   EXPECT_EQ(camera1Info.height(), width);
   EXPECT_NEAR(camera1Info.projection().p(0), 866.23, error);
   EXPECT_NEAR(camera1Info.projection().p(5), 866.23, error);
-  EXPECT_DOUBLE_EQ(camera1Info.projection().p(2), 500);
-  EXPECT_DOUBLE_EQ(camera1Info.projection().p(6), 500);
-  EXPECT_DOUBLE_EQ(camera1Info.projection().p(3), 0);
-  EXPECT_DOUBLE_EQ(camera1Info.projection().p(7), 0);
+  EXPECT_DOUBLE_EQ(camera1Info.projection().p(2), 500.0);
+  EXPECT_DOUBLE_EQ(camera1Info.projection().p(6), 500.0);
+  EXPECT_DOUBLE_EQ(camera1Info.projection().p(3), 0.0);
+  EXPECT_DOUBLE_EQ(camera1Info.projection().p(7), 0.0);
 
   // Camera sensor with projection tag
   EXPECT_EQ(camera2Info.width(), height);
   EXPECT_EQ(camera2Info.height(), height);
   EXPECT_DOUBLE_EQ(camera2Info.projection().p(0), 866.23);
   EXPECT_DOUBLE_EQ(camera2Info.projection().p(5), 866.23);
-  EXPECT_DOUBLE_EQ(camera2Info.projection().p(2), 500);
-  EXPECT_DOUBLE_EQ(camera2Info.projection().p(6), 500);
-  EXPECT_DOUBLE_EQ(camera2Info.projection().p(3), 300);
-  EXPECT_DOUBLE_EQ(camera2Info.projection().p(7), 200);
+  EXPECT_DOUBLE_EQ(camera2Info.projection().p(2), 500.0);
+  EXPECT_DOUBLE_EQ(camera2Info.projection().p(6), 500.0);
+  EXPECT_DOUBLE_EQ(camera2Info.projection().p(3), 300.0);
+  EXPECT_DOUBLE_EQ(camera2Info.projection().p(7), 200.0);
 
   // Camera sensor with different projection tag
   EXPECT_EQ(camera3Info.width(), width);
   EXPECT_EQ(camera3Info.height(), height);
-  EXPECT_DOUBLE_EQ(camera3Info.projection().p(0), 900);
-  EXPECT_DOUBLE_EQ(camera3Info.projection().p(5), 900);
-  EXPECT_DOUBLE_EQ(camera3Info.projection().p(2), 501);
-  EXPECT_DOUBLE_EQ(camera3Info.projection().p(6), 501);
-  EXPECT_DOUBLE_EQ(camera3Info.projection().p(3), 0);
-  EXPECT_DOUBLE_EQ(camera3Info.projection().p(7), 0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(0), 900.0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(5), 900.0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(2), 501.0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(6), 501.0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(3), 0.0);
+  EXPECT_DOUBLE_EQ(camera3Info.projection().p(7), 0.0);
 
   unsigned int r1Sum = 0u;
   unsigned int g1Sum = 0u;
@@ -757,7 +765,14 @@ void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
   delete []  img2;
   delete []  img3;
 
+  // Clean up rendering ptrs
+  box.reset();
+  blue.reset();
+
   // Clean up
+  mgr.Remove(sensor1->Id());
+  mgr.Remove(sensor2->Id());
+  mgr.Remove(sensor3->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
 }
