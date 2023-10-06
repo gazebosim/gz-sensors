@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="m1">
+    <link name="link1">
+      <sensor name="camera_without_projection_tag" type="camera">
+        <update_rate>10</update_rate>
+        <gz_frame_id>base_camera</gz_frame_id>
+        <topic>/camera1/image</topic>
+        <camera>
+          <horizontal_fov>1.0472</horizontal_fov>
+          <image>
+            <width>1000</width>
+            <height>1000</height>
+            <format>R8G8B8</format>
+          </image>
+        </camera>
+      </sensor>
+      <sensor name="camera_with_projection_tag" type="camera">
+        <update_rate>10</update_rate>
+        <gz_frame_id>base_camera</gz_frame_id>
+        <topic>/camera2/image</topic>
+        <camera>
+          <horizontal_fov>1.0472</horizontal_fov>
+          <image>
+            <width>1000</width>
+            <height>1000</height>
+            <format>R8G8B8</format>
+          </image>
+          <lens>
+            <projection>
+              <p_fx>866.23</p_fx>
+              <p_fy>866.23</p_fy>
+              <p_cx>500</p_cx>
+              <p_cy>500</p_cy>
+              <tx>300</tx>
+              <ty>200</ty>
+            </projection>
+          </lens>
+        </camera>
+      </sensor>
+      <sensor name="camera_with_diff_projection_tag" type="camera">
+        <update_rate>10</update_rate>
+        <gz_frame_id>base_camera</gz_frame_id>
+        <topic>/camera3/image</topic>
+        <camera>
+          <horizontal_fov>1.0472</horizontal_fov>
+          <image>
+            <width>1000</width>
+            <height>1000</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>100</far>
+          </clip>
+          <lens>
+            <projection>
+              <p_fx>900</p_fx>
+              <p_fy>900</p_fy>
+              <p_cx>501</p_cx>
+              <p_cy>501</p_cy>
+              <tx>0</tx>
+              <ty>0</ty>
+            </projection>
+          </lens>
+        </camera>
+      </sensor>
+    </link>
+  </model>
+</sdf>

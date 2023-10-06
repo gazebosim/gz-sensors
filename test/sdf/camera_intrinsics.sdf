@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="m1">
+    <link name="link1">
+      <sensor name="camera_without_intrinsics_tag" type="camera">
+        <update_rate>10</update_rate>
+        <ignition_frame_id>base_camera</ignition_frame_id>
+        <topic>/camera1/image</topic>
+        <camera>
+          <horizontal_fov>1.0472</horizontal_fov>
+          <image>
+            <width>1000</width>
+            <height>1000</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>100</far>
+          </clip>
+        </camera>
+      </sensor>
+      <sensor name="camera_with_intrinsics_tag" type="camera">
+        <update_rate>10</update_rate>
+        <ignition_frame_id>base_camera</ignition_frame_id>
+        <topic>/camera2/image</topic>
+        <camera>
+          <horizontal_fov>1.0472</horizontal_fov>
+          <image>
+            <width>1000</width>
+            <height>1000</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>100</far>
+          </clip>
+          <lens>
+            <intrinsics>
+              <fx>866.23</fx>
+              <fy>866.23</fy>
+              <cx>500</cx>
+              <cy>500</cy>
+              <s>0</s>
+            </intrinsics>
+          </lens>
+        </camera>
+      </sensor>
+      <sensor name="camera_with_diff_intrinsics_tag" type="camera">
+        <update_rate>10</update_rate>
+        <gz_frame_id>base_camera</gz_frame_id>
+        <topic>/camera3/image</topic>
+        <camera>
+          <horizontal_fov>1.0472</horizontal_fov>
+          <image>
+            <width>1000</width>
+            <height>1000</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>100</far>
+          </clip>
+          <lens>
+            <intrinsics>
+              <fx>900</fx>
+              <fy>900</fy>
+              <cx>501</cx>
+              <cy>501</cy>
+              <s>0</s>
+            </intrinsics>
+          </lens>
+        </camera>
+      </sensor>
+
+    </link>
+  </model>
+</sdf>

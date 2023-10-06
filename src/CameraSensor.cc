@@ -45,6 +45,8 @@
 #include "gz/sensors/SensorFactory.hh"
 #include "gz/sensors/SensorTypes.hh"
 
+#include <gz/rendering/Utils.hh>
+
 using namespace gz;
 using namespace sensors;
 
@@ -66,6 +68,69 @@ class gz::sensors::CameraSensorPrivate
   /// \sa ImageSaver
   public: bool SaveImage(const unsigned char *_data, unsigned int _width,
     unsigned int _height, common::Image::PixelFormatType _format);
+
+  /// \brief Computes the OpenGL NDC matrix
+  /// \param[in] _left Left vertical clipping plane
+  /// \param[in] _right Right vertical clipping plane
+  /// \param[in] _bottom Bottom horizontal clipping plane
+  /// \param[in] _top Top horizontal clipping plane
+  /// \param[in] _near Distance to the nearer depth clipping plane
+  ///            This value is negative if the plane is to be behind
+  ///            the camera
+  /// \param[in] _far Distance to the farther depth clipping plane
+  ///            This value is negative if the plane is to be behind
+  ///            the camera
+  /// \return OpenGL NDC (Normalized Device Coordinates) matrix
+  public: static math::Matrix4d BuildNDCMatrix(
+          double _left, double _right,
+          double _bottom, double _top,
+          double _near, double _far);
+
+  /// \brief Computes the OpenGL perspective matrix
+  /// \param[in] _intrinsicsFx Horizontal focal length (in pixels)
+  /// \param[in] _intrinsicsFy Vertical focal length (in pixels)
+  /// \param[in] _intrinsicsCx X coordinate of principal point in pixels
+  /// \param[in] _intrinsicsCy Y coordinate of principal point in pixels
+  /// \param[in] _intrinsicsS Skew coefficient defining the angle between
+  ///            the x and y pixel axes
+  /// \param[in] _clipNear Distance to the nearer depth clipping plane
+  ///            This value is negative if the plane is to be behind
+  ///            the camera
+  /// \param[in] _clipFar Distance to the farther depth clipping plane
+  ///            This value is negative if the plane is to be behind
+  ///            the camera
+  /// \return OpenGL perspective matrix
+  public: static math::Matrix4d BuildPerspectiveMatrix(
+          double _intrinsicsFx, double _intrinsicsFy,
+          double _intrinsicsCx, double _intrinsicsCy,
+          double _intrinsicsS,
+          double _clipNear, double _clipFar);
+
+  /// \brief Computes the OpenGL projection matrix by multiplying
+  ///        the OpenGL Normalized Device Coordinates matrix (NDC) with
+  ///        the OpenGL perspective matrix
+  ///        openglProjectionMatrix = ndcMatrix * perspectiveMatrix
+  /// \param[in] _imageWidth Image width (in pixels)
+  /// \param[in] _imageHeight Image height (in pixels)
+  /// \param[in] _intrinsicsFx Horizontal focal length (in pixels)
+  /// \param[in] _intrinsicsFy Vertical focal length (in pixels)
+  /// \param[in] _intrinsicsCx X coordinate of principal point in pixels
+  /// \param[in] _intrinsicsCy Y coordinate of principal point in pixels
+  /// \param[in] _intrinsicsS Skew coefficient defining the angle between
+  ///             the x and y pixel axes
+  /// \param[in] _clipNear Distance to the nearer depth clipping plane
+  ///            This value is negative if the plane is to be behind
+  ///            the camera
+  /// \param[in] _clipFar Distance to the farther depth clipping plane
+  ///            This value is negative if the plane is to be behind
+  ///            the camera
+  /// \return OpenGL projection matrix
+  public: static math::Matrix4d BuildProjectionMatrix(
+          double _imageWidth, double _imageHeight,
+          double _intrinsicsFx, double _intrinsicsFy,
+          double _intrinsicsCx, double _intrinsicsCy,
+          double _intrinsicsS,
+          double _clipNear, double _clipFar);
 
   /// \brief node to create publisher
   public: transport::Node node;
@@ -145,14 +210,12 @@ class gz::sensors::CameraSensorPrivate
 //////////////////////////////////////////////////
 bool CameraSensor::CreateCamera()
 {
-  const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
+  sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
   if (!cameraSdf)
   {
     ignerr << "Unable to access camera SDF element.\n";
     return false;
   }
-
-  this->PopulateInfo(cameraSdf);
 
   unsigned int width = cameraSdf->ImageWidth();
   unsigned int height = cameraSdf->ImageHeight();
@@ -229,6 +292,39 @@ bool CameraSensor::CreateCamera()
       break;
   }
 
+  // Update the DOM object intrinsics to have consistent
+  // intrinsics between ogre camera and camera_info msg
+  if(!cameraSdf->HasLensIntrinsics())
+  {
+    auto intrinsicMatrix =
+      gz::rendering::projectionToCameraIntrinsic(
+        this->dataPtr->camera->ProjectionMatrix(),
+        this->dataPtr->camera->ImageWidth(),
+        this->dataPtr->camera->ImageHeight()
+      );
+
+    cameraSdf->SetLensIntrinsicsFx(intrinsicMatrix(0, 0));
+    cameraSdf->SetLensIntrinsicsFy(intrinsicMatrix(1, 1));
+    cameraSdf->SetLensIntrinsicsCx(intrinsicMatrix(0, 2));
+    cameraSdf->SetLensIntrinsicsCy(intrinsicMatrix(1, 2));
+  }
+  // set custom projection matrix based on intrinsics param specified in sdf
+  else
+  {
+    double fx = cameraSdf->LensIntrinsicsFx();
+    double fy = cameraSdf->LensIntrinsicsFy();
+    double cx = cameraSdf->LensIntrinsicsCx();
+    double cy = cameraSdf->LensIntrinsicsCy();
+    double s = cameraSdf->LensIntrinsicsSkew();
+    auto projectionMatrix = CameraSensorPrivate::BuildProjectionMatrix(
+        this->dataPtr->camera->ImageWidth(),
+        this->dataPtr->camera->ImageHeight(),
+        fx, fy, cx, cy, s,
+        this->dataPtr->camera->NearClipPlane(),
+        this->dataPtr->camera->FarClipPlane());
+    this->dataPtr->camera->SetProjectionMatrix(projectionMatrix);
+  }
+
   this->dataPtr->image = this->dataPtr->camera->CreateImage();
 
   this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);
@@ -240,6 +336,51 @@ bool CameraSensor::CreateCamera()
     this->dataPtr->saveImagePrefix = this->Name() + "_";
     this->dataPtr->saveImage = true;
   }
+
+  // Update the DOM object intrinsics to have consistent
+  // projection matrix values between ogre camera and camera_info msg
+  // If these values are not defined in the SDF then we need to update
+  // these values to something reasonable. The projection matrix is
+  // the cumulative effect of intrinsic and extrinsic parameters
+  if(!cameraSdf->HasLensProjection())
+  {
+    // Note that the matrix from Ogre via camera->ProjectionMatrix() has a
+    // different format than the projection matrix used in SDFormat.
+    // This is why they are converted using projectionToCameraIntrinsic.
+    // The resulting matrix is the intrinsic matrix, but since the user has
+    // not overridden the values, this is also equal to the projection matrix.
+    auto intrinsicMatrix =
+      gz::rendering::projectionToCameraIntrinsic(
+        this->dataPtr->camera->ProjectionMatrix(),
+        this->dataPtr->camera->ImageWidth(),
+        this->dataPtr->camera->ImageHeight()
+      );
+    cameraSdf->SetLensProjectionFx(intrinsicMatrix(0, 0));
+    cameraSdf->SetLensProjectionFy(intrinsicMatrix(1, 1));
+    cameraSdf->SetLensProjectionCx(intrinsicMatrix(0, 2));
+    cameraSdf->SetLensProjectionCy(intrinsicMatrix(1, 2));
+  }
+  // set custom projection matrix based on projection param specified in sdf
+  else
+  {
+    // tx and ty are not used
+    double fx = cameraSdf->LensProjectionFx();
+    double fy = cameraSdf->LensProjectionFy();
+    double cx = cameraSdf->LensProjectionCx();
+    double cy = cameraSdf->LensProjectionCy();
+    double s = 0;
+
+    auto projectionMatrix = CameraSensorPrivate::BuildProjectionMatrix(
+        this->dataPtr->camera->ImageWidth(),
+        this->dataPtr->camera->ImageHeight(),
+        fx, fy, cx, cy, s,
+        this->dataPtr->camera->NearClipPlane(),
+        this->dataPtr->camera->FarClipPlane());
+    this->dataPtr->camera->SetProjectionMatrix(projectionMatrix);
+  }
+
+  // Populate camera info topic
+  this->PopulateInfo(cameraSdf);
 
   return true;
 }
@@ -752,4 +893,75 @@ bool CameraSensor::HasImageConnections() const
 bool CameraSensor::HasInfoConnections() const
 {
   return this->dataPtr->infoPub && this->dataPtr->infoPub.HasConnections();
+}
+
+//////////////////////////////////////////////////
+math::Matrix4d CameraSensorPrivate::BuildProjectionMatrix(
+    double _imageWidth, double _imageHeight,
+    double _intrinsicsFx, double _intrinsicsFy,
+    double _intrinsicsCx, double _intrinsicsCy,
+    double _intrinsicsS,
+    double _clipNear, double _clipFar)
+{
+  return CameraSensorPrivate::BuildNDCMatrix(
+           0, _imageWidth, 0, _imageHeight, _clipNear, _clipFar) *
+           CameraSensorPrivate::BuildPerspectiveMatrix(
+             _intrinsicsFx, _intrinsicsFy,
+             _intrinsicsCx, _imageHeight - _intrinsicsCy,
+             _intrinsicsS, _clipNear, _clipFar);
+}
+
+//////////////////////////////////////////////////
+math::Matrix4d CameraSensorPrivate::BuildNDCMatrix(
+    double _left, double _right,
+    double _bottom, double _top,
+    double _near, double _far)
+{
+  double inverseWidth = 1.0 / (_right - _left);
+  double inverseHeight = 1.0 / (_top - _bottom);
+  double inverseDistance = 1.0 / (_far - _near);
+
+  return math::Matrix4d(
+           2.0 * inverseWidth,
+           0.0,
+           0.0,
+           -(_right + _left) * inverseWidth,
+           0.0,
+           2.0 * inverseHeight,
+           0.0,
+           -(_top + _bottom) * inverseHeight,
+           0.0,
+           0.0,
+           -2.0 * inverseDistance,
+           -(_far + _near) * inverseDistance,
+           0.0,
+           0.0,
+           0.0,
+           1.0);
+}
+
+//////////////////////////////////////////////////
+math::Matrix4d CameraSensorPrivate::BuildPerspectiveMatrix(
+    double _intrinsicsFx, double _intrinsicsFy,
+    double _intrinsicsCx, double _intrinsicsCy,
+    double _intrinsicsS,
+    double _clipNear, double _clipFar)
+{
+  return math::Matrix4d(
+           _intrinsicsFx,
+           _intrinsicsS,
+           -_intrinsicsCx,
+           0.0,
+           0.0,
+           _intrinsicsFy,
+           -_intrinsicsCy,
+           0.0,
+           0.0,
+           0.0,
+           _clipNear + _clipFar,
+           _clipNear * _clipFar,
+           0.0,
+           0.0,
+           -1.0,
+           0.0);
 }
