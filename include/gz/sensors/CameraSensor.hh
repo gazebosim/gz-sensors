@@ -144,6 +144,10 @@ namespace gz
       /// \return True if there are info subscribers, false otherwise
       public: virtual bool HasInfoConnections() const;
 
+      /// \brief Get the camera optical frame
+      /// \return The camera optical frame
+      public: const std::string& OpticalFrameId() const;
+
       /// \brief Advertise camera info topic.
       /// \return True if successful.
       protected: bool AdvertiseInfo();
