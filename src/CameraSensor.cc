@@ -858,3 +858,9 @@ bool CameraSensor::HasInfoConnections() const
 {
   return this->dataPtr->infoPub && this->dataPtr->infoPub.HasConnections();
 }
+
+//////////////////////////////////////////////////
+const std::string& CameraSensor::OpticalFrameId() const
+{
+  return this->dataPtr->opticalFrameId;
+}
