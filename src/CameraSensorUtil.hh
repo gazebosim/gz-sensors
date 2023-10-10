@@ -82,7 +82,7 @@ math::Matrix4d buildPerspectiveMatrix(
 ///            This value is negative if the plane is to be behind
 ///            the camera
 /// \return OpenGL projection matrix
-math::Matrix4d buildProjectionMatrix(double _imageWidth, double _imageHeight,
+math::Matrix4d GZ_SENSORS_VISIBLE buildProjectionMatrix(double _imageWidth, double _imageHeight,
                                      double _intrinsicsFx, double _intrinsicsFy,
                                      double _intrinsicsCx, double _intrinsicsCy,
                                      double _intrinsicsS, double _clipNear,
