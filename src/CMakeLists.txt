@@ -1,6 +1,5 @@
 set (sources
   BrownDistortionModel.cc
-  CameraSensorUtil.cc
   Distortion.cc
   EnvironmentalData.cc
   GaussianNoiseModel.cc
@@ -59,7 +58,7 @@ target_link_libraries(${rendering_target}
     gz-rendering${GZ_RENDERING_VER}::gz-rendering${GZ_RENDERING_VER}
 )
 
-set(camera_sources CameraSensor.cc)
+set(camera_sources CameraSensor.cc CameraSensorUtil.cc)
 gz_add_component(camera
   SOURCES ${camera_sources}
   DEPENDS_ON_COMPONENTS rendering
@@ -76,7 +75,7 @@ target_link_libraries(${camera_target}
     gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
 )
 
-set(depth_camera_sources DepthCameraSensor.cc)
+set(depth_camera_sources DepthCameraSensor.cc CameraSensorUtil.cc)
 gz_add_component(depth_camera
   SOURCES ${depth_camera_sources}
   DEPENDS_ON_COMPONENTS camera
