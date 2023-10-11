@@ -164,7 +164,7 @@ gz_add_component(force_torque SOURCES ${force_torque_sources} GET_TARGET_NAME fo
 set(navsat_sources NavSatSensor.cc)
 gz_add_component(navsat SOURCES ${navsat_sources} GET_TARGET_NAME navsat_target)
 
-set(rgbd_camera_sources RgbdCameraSensor.cc)
+set(rgbd_camera_sources RgbdCameraSensor.cc CameraSensorUtil.cc)
 gz_add_component(rgbd_camera
   SOURCES ${rgbd_camera_sources}
   DEPENDS_ON_COMPONENTS camera
