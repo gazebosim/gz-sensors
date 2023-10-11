@@ -1,3 +1,7 @@
+## Gazebo Sensors 9
+
+### Gazebo Sensors 9.0.0 (2023-XX-XX)
+
 ## Gazebo Sensors 8
 
 ### Gazebo Sensors 8.0.0 (2023-09-29)

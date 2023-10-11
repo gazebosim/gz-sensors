@@ -45,7 +45,7 @@ models into sensor streams.
 
 # Install
 
-See the [installation tutorial](https://gazebosim.org/api/sensors/8/installation.html).
+See the [installation tutorial](https://gazebosim.org/api/sensors/9/installation.html).
 
 # Usage
 
