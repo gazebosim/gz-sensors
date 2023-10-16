@@ -8,7 +8,7 @@ project(gz-sensors9 VERSION 9.0.0)
 #============================================================================
 # Find gz-cmake
 #============================================================================
-find_package(gz-cmake3 REQUIRED)
+find_package(gz-cmake4 REQUIRED)
 
 #============================================================================
 # Configure the project
@@ -49,15 +49,15 @@ set(GZ_MATH_VER ${gz-math7_VERSION_MAJOR})
 
 #--------------------------------------
 # Find gz-common
-gz_find_package(gz-common5
+gz_find_package(gz-common6
                  COMPONENTS profiler
                  REQUIRED)
-set(GZ_COMMON_VER ${gz-common5_VERSION_MAJOR})
+set(GZ_COMMON_VER ${gz-common6_VERSION_MAJOR})
 
 #--------------------------------------
 # Find gz-transport
-gz_find_package(gz-transport13 REQUIRED)
-set(GZ_TRANSPORT_VER ${gz-transport13_VERSION_MAJOR})
+gz_find_package(gz-transport14 REQUIRED)
+set(GZ_TRANSPORT_VER ${gz-transport14_VERSION_MAJOR})
 
 #--------------------------------------
 # Find gz-rendering
@@ -67,8 +67,8 @@ if ((NOT ${CMAKE_VERSION} VERSION_LESS 3.11) AND (NOT OpenGL_GL_PREFERENCE))
   set(OpenGL_GL_PREFERENCE "GLVND")
 endif()
 
-gz_find_package(gz-rendering8 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
-set(GZ_RENDERING_VER ${gz-rendering8_VERSION_MAJOR})
+gz_find_package(gz-rendering9 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
+set(GZ_RENDERING_VER ${gz-rendering9_VERSION_MAJOR})
 
 if (TARGET gz-rendering${GZ_RENDERING_VER}::ogre)
   set(HAVE_OGRE TRUE)
@@ -82,13 +82,13 @@ endif()
 
 #--------------------------------------
 # Find gz-msgs
-gz_find_package(gz-msgs10 REQUIRED)
-set(GZ_MSGS_VER ${gz-msgs10_VERSION_MAJOR})
+gz_find_package(gz-msgs11 REQUIRED)
+set(GZ_MSGS_VER ${gz-msgs11_VERSION_MAJOR})
 
 #--------------------------------------
 # Find SDFormat
-gz_find_package(sdformat14 REQUIRED)
-set(SDF_VER ${sdformat14_VERSION_MAJOR})
+gz_find_package(sdformat15 REQUIRED)
+set(SDF_VER ${sdformat15_VERSION_MAJOR})
 
 #--------------------------------------
 # Find Eigen3
