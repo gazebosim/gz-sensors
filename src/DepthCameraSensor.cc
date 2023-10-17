@@ -405,7 +405,7 @@ bool DepthCameraSensor::CreateCamera()
     double cx = cameraSdf->LensIntrinsicsCx();
     double cy = cameraSdf->LensIntrinsicsCy();
     double s = cameraSdf->LensIntrinsicsSkew();
-    auto projectionMatrix = buildProjectionMatrix(
+    auto projectionMatrix = gz::sensors::buildProjectionMatrix(
         this->dataPtr->depthCamera->ImageWidth(),
         this->dataPtr->depthCamera->ImageHeight(), fx, fy, cx, cy, s,
         this->dataPtr->depthCamera->NearClipPlane(),
@@ -446,7 +446,7 @@ bool DepthCameraSensor::CreateCamera()
     double cy = cameraSdf->LensProjectionCy();
     double s = 0;
 
-    auto projectionMatrix = buildProjectionMatrix(
+    auto projectionMatrix = gz::sensors::buildProjectionMatrix(
         this->dataPtr->depthCamera->ImageWidth(),
         this->dataPtr->depthCamera->ImageHeight(),
         fx, fy, cx, cy, s,
