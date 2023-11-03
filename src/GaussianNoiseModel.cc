@@ -87,7 +87,10 @@ void GaussianNoiseModel::Load(const sdf::Noise &_sdf)
   double biasStdDev = 0;
   biasMean = _sdf.BiasMean();
   biasStdDev = _sdf.BiasStdDev();
-  this->dataPtr->bias = math::Rand::DblNormal(biasMean, biasStdDev);
+  if (biasStdDev > 0.0)
+    this->dataPtr->bias = math::Rand::DblNormal(biasMean, biasStdDev);
+  else
+    this->dataPtr->bias = biasMean;
 
   // With equal probability, we pick a negative bias (by convention,
   // rateBiasMean should be positive, though it would work fine if
@@ -108,8 +111,9 @@ void GaussianNoiseModel::Load(const sdf::Noise &_sdf)
 double GaussianNoiseModel::ApplyImpl(double _in, double _dt)
 {
   // Generate independent (uncorrelated) Gaussian noise to each input value.
-  double whiteNoise = math::Rand::DblNormal(
-      this->dataPtr->mean, this->dataPtr->stdDev);
+  double whiteNoise = this->dataPtr->stdDev > 0.0 ?
+      math::Rand::DblNormal(this->dataPtr->mean, this->dataPtr->stdDev) :
+      this->dataPtr->mean;
 
   // Generate varying (correlated) bias to each input value.
   // This implementation is based on the one available in Rotors:
