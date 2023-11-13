@@ -32,16 +32,6 @@
 #include "gz/sensors/config.hh"
 #include "gz/sensors/Export.hh"
 
-#ifndef _WIN32
-#  define PointCloudUtil_EXPORTS_API
-#else
-#  if (defined(DepthPoints_EXPORTS))
-#    define PointCloudUtil_EXPORTS_API __declspec(dllexport)
-#  else
-#    define PointCloudUtil_EXPORTS_API __declspec(dllimport)
-#  endif
-#endif
-
 namespace gz
 {
   namespace sensors
@@ -52,7 +42,7 @@ namespace gz
     /// \brief Helper class that fills a msgs::PointCloudPacked message using
     /// image and depth data. The RgbdCameraSensor and DepthCameraSensor
     /// class use this.
-    class PointCloudUtil_EXPORTS_API PointCloudUtil
+    class GZ_SENSORS_VISIBLE PointCloudUtil
     {
       /// \brief Fill a msgs::PointCloudPacked.
       /// \param[in,out] _msg Point cloud message to fill. This message
