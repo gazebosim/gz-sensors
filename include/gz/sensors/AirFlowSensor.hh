@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef GZ_SENSORS_AIRSPEEDSENSOR_HH_
-#define GZ_SENSORS_AIRSPEEDSENSOR_HH_
+#ifndef GZ_SENSORS_AirFlowSensor_HH_
+#define GZ_SENSORS_AirFlowSensor_HH_
 
 #include <memory>
 
@@ -24,7 +24,7 @@
 #include <gz/utils/SuppressWarning.hh>
 
 #include <gz/sensors/config.hh>
-#include <gz/sensors/air_speed/Export.hh>
+#include <gz/sensors/air_flow/Export.hh>
 
 #include "gz/sensors/Sensor.hh"
 
@@ -36,19 +36,19 @@ namespace gz
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief forward declarations
-    class AirSpeedSensorPrivate;
+    class AirFlowSensorPrivate;
 
-    /// \brief AirSpeed Sensor Class
+    /// \brief AirFlow Sensor Class
     ///
     /// A sensor that reports air speed through differential pressure readings.
-    class GZ_SENSORS_AIR_SPEED_VISIBLE AirSpeedSensor :
+    class GZ_SENSORS_air_flow_VISIBLE AirFlowSensor :
       public Sensor
     {
       /// \brief constructor
-      public: AirSpeedSensor();
+      public: AirFlowSensor();
 
       /// \brief destructor
-      public: virtual ~AirSpeedSensor();
+      public: virtual ~AirFlowSensor();
 
       /// \brief Load the sensor based on data from an sdf::Sensor object.
       /// \param[in] _sdf SDF Sensor parameters.
@@ -86,7 +86,7 @@ namespace gz
       GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data
       /// \internal
-      private: std::unique_ptr<AirSpeedSensorPrivate> dataPtr;
+      private: std::unique_ptr<AirFlowSensorPrivate> dataPtr;
       GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
     };
     }

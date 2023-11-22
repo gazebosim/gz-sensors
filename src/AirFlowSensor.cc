@@ -20,7 +20,7 @@
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
-#include <gz/msgs/air_speed_sensor.pb.h>
+#include <gz/msgs/air_flow_sensor.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
@@ -33,7 +33,7 @@
 #include "gz/sensors/Noise.hh"
 #include "gz/sensors/SensorTypes.hh"
 #include "gz/sensors/SensorFactory.hh"
-#include "gz/sensors/AirSpeedSensor.hh"
+#include "gz/sensors/AirFlowSensor.hh"
 
 using namespace gz;
 using namespace sensors;
@@ -50,8 +50,8 @@ static constexpr auto kLapseRate = 0.0065f;
 // air density at MSL [kg/m^3]
 static constexpr auto kAirDensityMsl = 1.225f;
 
-/// \brief Private data for AirSpeedSensor
-class gz::sensors::AirSpeedSensorPrivate
+/// \brief Private data for AirFlowSensor
+class gz::sensors::AirFlowSensorPrivate
 {
   /// \brief node to create publisher
   public: transport::Node node;
@@ -73,47 +73,47 @@ class gz::sensors::AirSpeedSensorPrivate
 };
 
 //////////////////////////////////////////////////
-AirSpeedSensor::AirSpeedSensor()
-  : dataPtr(new AirSpeedSensorPrivate())
+AirFlowSensor::AirFlowSensor()
+  : dataPtr(new AirFlowSensorPrivate())
 {
 }
 
 //////////////////////////////////////////////////
-AirSpeedSensor::~AirSpeedSensor()
+AirFlowSensor::~AirFlowSensor()
 {
 }
 
 //////////////////////////////////////////////////
-bool AirSpeedSensor::Init()
+bool AirFlowSensor::Init()
 {
   return this->Sensor::Init();
 }
 
 //////////////////////////////////////////////////
-bool AirSpeedSensor::Load(const sdf::Sensor &_sdf)
+bool AirFlowSensor::Load(const sdf::Sensor &_sdf)
 {
   if (!Sensor::Load(_sdf))
     return false;
 
-  if (_sdf.Type() != sdf::SensorType::AIR_SPEED)
+  if (_sdf.Type() != sdf::SensorType::air_flow)
   {
-    gzerr << "Attempting to a load an AirSpeed sensor, but received "
+    gzerr << "Attempting to a load an AirFlow sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
     return false;
   }
 
-  if (_sdf.AirSpeedSensor() == nullptr)
+  if (_sdf.AirFlowSensor() == nullptr)
   {
-    gzerr << "Attempting to a load an AirSpeed sensor, but received "
+    gzerr << "Attempting to a load an AirFlow sensor, but received "
       << "a null sensor." << std::endl;
     return false;
   }
 
   if (this->Topic().empty())
-    this->SetTopic("/air_speed");
+    this->SetTopic("/air_flow");
 
   this->dataPtr->pub =
-      this->dataPtr->node.Advertise<msgs::AirSpeedSensor>(
+      this->dataPtr->node.Advertise<msgs::AirFlowSensor>(
       this->Topic());
 
   if (!this->dataPtr->pub)
@@ -126,10 +126,10 @@ bool AirSpeedSensor::Load(const sdf::Sensor &_sdf)
          << this->Topic() << "]" << std::endl;
 
   // Load the noise parameters
-  if (_sdf.AirSpeedSensor()->PressureNoise().Type() != sdf::NoiseType::NONE)
+  if (_sdf.AirFlowSensor()->PressureNoise().Type() != sdf::NoiseType::NONE)
   {
-    this->dataPtr->noises[AIR_SPEED_NOISE_PASCALS] =
-      NoiseFactory::NewNoiseModel(_sdf.AirSpeedSensor()->PressureNoise());
+    this->dataPtr->noises[air_flow_NOISE_PASCALS] =
+      NoiseFactory::NewNoiseModel(_sdf.AirFlowSensor()->PressureNoise());
   }
 
   this->dataPtr->initialized = true;
@@ -137,7 +137,7 @@ bool AirSpeedSensor::Load(const sdf::Sensor &_sdf)
 }
 
 //////////////////////////////////////////////////
-bool AirSpeedSensor::Load(sdf::ElementPtr _sdf)
+bool AirFlowSensor::Load(sdf::ElementPtr _sdf)
 {
   sdf::Sensor sdfSensor;
   sdfSensor.Load(_sdf);
@@ -145,17 +145,17 @@ bool AirSpeedSensor::Load(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool AirSpeedSensor::Update(
+bool AirFlowSensor::Update(
   const std::chrono::steady_clock::duration &_now)
 {
-  GZ_PROFILE("AirSpeedSensor::Update");
+  GZ_PROFILE("AirFlowSensor::Update");
   if (!this->dataPtr->initialized)
   {
     gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
-  msgs::AirSpeedSensor msg;
+  msgs::AirFlowSensor msg;
   *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
@@ -179,11 +179,11 @@ bool AirSpeedSensor::Update(
     * air_vel_in_body_.X() * air_vel_in_body_.X();
 
   // Apply pressure noise
-  if (this->dataPtr->noises.find(AIR_SPEED_NOISE_PASCALS) !=
+  if (this->dataPtr->noises.find(air_flow_NOISE_PASCALS) !=
       this->dataPtr->noises.end())
   {
     diff_pressure =
-      this->dataPtr->noises[AIR_SPEED_NOISE_PASCALS]->Apply(
+      this->dataPtr->noises[air_flow_NOISE_PASCALS]->Apply(
           diff_pressure);
     msg.mutable_pressure_noise()->set_type(msgs::SensorNoise::GAUSSIAN);
   }
@@ -199,19 +199,19 @@ bool AirSpeedSensor::Update(
 }
 
 //////////////////////////////////////////////////
-gz::math::Vector3d AirSpeedSensor::Velocity() const
+gz::math::Vector3d AirFlowSensor::Velocity() const
 {
   return this->dataPtr->vel;
 }
 
 //////////////////////////////////////////////////
-void AirSpeedSensor::SetVelocity(const gz::math::Vector3d &_vel)
+void AirFlowSensor::SetVelocity(const gz::math::Vector3d &_vel)
 {
   this->dataPtr->vel = _vel;
 }
 
 //////////////////////////////////////////////////
-bool AirSpeedSensor::HasConnections() const
+bool AirFlowSensor::HasConnections() const
 {
   return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
 }
