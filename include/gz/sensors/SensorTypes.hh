@@ -209,6 +209,14 @@ namespace gz
       /// \sa AirSpeedSensor
       AIR_SPEED_NOISE_PASCALS = 25,
 
+      /// \brief Air flow noise streams for the air flow sensor
+      /// \sa AirFlowSensor
+      AIR_FLOW_SPEED_NOISE = 26,
+
+      /// \brief Air flow noise streams for the air flow sensor
+      /// \sa AirFlowSensor
+      AIR_FLOW_DIR_NOISE = 27,
+
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not
       /// use this.

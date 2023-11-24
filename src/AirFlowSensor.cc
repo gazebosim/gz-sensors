@@ -38,18 +38,6 @@
 using namespace gz;
 using namespace sensors;
 
-// altitude AMSL see level [m]
-static constexpr auto kDefaultHomeAltAmsl = 0.0f;
-// international standard atmosphere (troposphere model - valid up to 11km).
-// temperature at MSL [K] (15 [C])
-static constexpr auto kTemperaturMsl = 288.15f;
-// pressure at MSL [Pa]
-static constexpr auto kPressureMsl = 101325.0f;
-// reduction in temperature with altitude for troposphere [K/m]
-static constexpr auto kLapseRate = 0.0065f;
-// air density at MSL [kg/m^3]
-static constexpr auto kAirDensityMsl = 1.225f;
-
 /// \brief Private data for AirFlowSensor
 class gz::sensors::AirFlowSensorPrivate
 {
@@ -65,11 +53,20 @@ class gz::sensors::AirFlowSensorPrivate
   /// \brief Pressure in pascals.
   public: double pressure = 0.0;
 
+  /// \brief Resolution of: [deg]
+  public: double direction_resolution = 0.0;
+
+  /// \brief Pressure in pascals.
+  public: double speed_resolution = 0.0;
+
   /// \brief Velocity of the air coming from the sensor
   public: gz::math::Vector3d vel;
 
-  /// \brief Noise added to sensor data
-  public: std::map<SensorNoiseType, NoisePtr> noises;
+  /// \brief Noise added to speed measurement
+  public: std::map<SensorNoiseType, NoisePtr> speed_noises;
+  
+  /// \brief Noise added to directional measurement
+  public: std::map<SensorNoiseType, NoisePtr> dir_noises;
 };
 
 //////////////////////////////////////////////////
@@ -122,14 +119,20 @@ bool AirFlowSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  gzdbg << "Air speed for [" << this->Name() << "] advertised on ["
+  gzdbg << "Airflow for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
   // Load the noise parameters
-  if (_sdf.AirFlowSensor()->PressureNoise().Type() != sdf::NoiseType::NONE)
+  if (_sdf.AirFlowSensor()->SpeedNoise().Type() != sdf::NoiseType::NONE)
   {
-    this->dataPtr->noises[air_flow_NOISE_PASCALS] =
-      NoiseFactory::NewNoiseModel(_sdf.AirFlowSensor()->PressureNoise());
+    this->dataPtr->speed_noises[AIR_FLOW_SPEED_NOISE_PASCALS] =
+      NoiseFactory::NewNoiseModel(_sdf.AirFlowSensor()->SpeedNoise());
+  }
+
+  if (_sdf.AirFlowSensor()->DirectionNoise().Type() != sdf::NoiseType::NONE)
+  {
+    this->dataPtr->dir_noises[AIR_FLOW_DIR_NOISE_PASCALS] =
+      NoiseFactory::NewNoiseModel(_sdf.AirFlowSensor()->DirectionNoise());
   }
 
   this->dataPtr->initialized = true;
@@ -161,35 +164,48 @@ bool AirFlowSensor::Update(
   frame->set_key("frame_id");
   frame->add_value(this->FrameId());
 
-  // compute the air density at the local altitude / temperature
-  // Z-component from ENU
-  const float alt_rel = static_cast<float>(this->Pose().Pos().Z());
-  const float alt_amsl = kDefaultHomeAltAmsl + alt_rel;
-  const float temperature_local = kTemperaturMsl - kLapseRate * alt_amsl;
-  const float density_ratio = powf(kTemperaturMsl / temperature_local , 4.256f);
-  const float air_density = kAirDensityMsl / density_ratio;
-
   math::Vector3d wind_vel_{0, 0, 0};
   math::Quaterniond veh_q_world_to_body = this->Pose().Rot();
 
   // calculate differential pressure + noise in hPa
   math::Vector3d air_vel_in_body_ = this->dataPtr->vel -
     veh_q_world_to_body.RotateVectorReverse(wind_vel_);
-  float diff_pressure = math::sgn(air_vel_in_body_.X()) * 0.005f * air_density
-    * air_vel_in_body_.X() * air_vel_in_body_.X();
 
-  // Apply pressure noise
-  if (this->dataPtr->noises.find(air_flow_NOISE_PASCALS) !=
-      this->dataPtr->noises.end())
+  double airflow_direction_in_xy_plane = atan2f(air_vel_in_body_.Y(),
+                                              air_vel_in_body_.X());
+
+  // Apply noise
+  if (this->dataPtr->dir_noises.find(air_flow_dir_NOISE_PASCALS) !=
+      this->dataPtr->dir_noises.end())
   {
-    diff_pressure =
-      this->dataPtr->noises[air_flow_NOISE_PASCALS]->Apply(
-          diff_pressure);
-    msg.mutable_pressure_noise()->set_type(msgs::SensorNoise::GAUSSIAN);
+    airflow_direction_in_xy_plane =
+      this->dataPtr->dir_noises[air_flow_dir_NOISE_PASCALS]->Apply(
+          airflow_direction_in_xy_plane);
+    msg.mutable_direction_noise()->set_type(msgs::SensorNoise::GAUSSIAN);
   }
 
-  msg.set_diff_pressure(diff_pressure * 100.0f);
-  msg.set_temperature(temperature_local);
+  // apply resolution to sensor measurement
+
+
+  air_vel_in_body_.Z() = 0;
+  double airflow_speed =  air_vel_in_body.Length();
+
+  // Apply noise
+  if (this->dataPtr->speed_noises.find(air_flow_speed_NOISE_PASCALS) !=
+      this->dataPtr->speed_noises.end())
+  {
+    airflow_speed =
+      this->dataPtr->speed_noises[air_flow_speed_NOISE_PASCALS]->Apply(
+          airflow_direction_in_xy_plane);
+    msg.mutable_speed_noise()->set_type(msgs::SensorNoise::GAUSSIAN);
+  }
+
+  // apply resolution to sensor measurement
+
+
+
+  msg.set_xy_speed(airflow_direction_in_xy_plane);
+  msg.set_xy_direction(airflow_speed);
 
   // publish
   this->AddSequence(msg.mutable_header());
