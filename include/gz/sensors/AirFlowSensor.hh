@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef GZ_SENSORS_AirFlowSensor_HH_
-#define GZ_SENSORS_AirFlowSensor_HH_
+#ifndef GZ_SENSORS_AIRFLOWSENSOR_HH_
+#define GZ_SENSORS_AIRFLOWSENSOR_HH_
 
 #include <memory>
 
@@ -41,7 +41,7 @@ namespace gz
     /// \brief AirFlow Sensor Class
     ///
     /// A sensor that reports air speed through differential pressure readings.
-    class GZ_SENSORS_air_flow_VISIBLE AirFlowSensor :
+    class GZ_SENSORS_AIR_FLOW_VISIBLE AirFlowSensor :
       public Sensor
     {
       /// \brief constructor

@@ -95,7 +95,7 @@ bool AirFlowSensor::Load(const sdf::Sensor &_sdf)
   if (!Sensor::Load(_sdf))
     return false;
 
-  if (_sdf.Type() != sdf::SensorType::air_flow)
+  if (_sdf.Type() != sdf::SensorType::AIR_FLOW)
   {
     gzerr << "Attempting to a load an AirFlow sensor, but received "
       << "a " << _sdf.TypeStr() << std::endl;
@@ -128,13 +128,13 @@ bool AirFlowSensor::Load(const sdf::Sensor &_sdf)
   // Load the noise parameters
   if (_sdf.AirFlowSensor()->SpeedNoise().Type() != sdf::NoiseType::NONE)
   {
-    this->dataPtr->speed_noises[AIR_FLOW_SPEED_NOISE_PASCALS] =
+    this->dataPtr->speed_noises[AIR_FLOW_SPEED_NOISE] =
       NoiseFactory::NewNoiseModel(_sdf.AirFlowSensor()->SpeedNoise());
   }
 
   if (_sdf.AirFlowSensor()->DirectionNoise().Type() != sdf::NoiseType::NONE)
   {
-    this->dataPtr->dir_noises[AIR_FLOW_DIR_NOISE_PASCALS] =
+    this->dataPtr->dir_noises[AIR_FLOW_DIR_NOISE] =
       NoiseFactory::NewNoiseModel(_sdf.AirFlowSensor()->DirectionNoise());
   }
 
@@ -167,7 +167,7 @@ bool AirFlowSensor::Update(
   frame->set_key("frame_id");
   frame->add_value(this->FrameId());
 
-  math::Vector3d wind_vel_ = this-dataPtr->wind_vel;
+  math::Vector3d wind_vel_ = this->dataPtr->wind_vel;
   math::Quaterniond veh_q_world_to_body = this->Pose().Rot();
 
   // calculate differential pressure + noise in hPa
@@ -178,11 +178,11 @@ bool AirFlowSensor::Update(
                                               air_vel_in_body_.X());
 
   // Apply noise
-  if (this->dataPtr->dir_noises.find(air_flow_dir_NOISE_PASCALS) !=
+  if (this->dataPtr->dir_noises.find(AIR_FLOW_DIR_NOISE) !=
       this->dataPtr->dir_noises.end())
   {
     airflow_direction_in_xy_plane =
-      this->dataPtr->dir_noises[air_flow_dir_NOISE_PASCALS]->Apply(
+      this->dataPtr->dir_noises[AIR_FLOW_DIR_NOISE]->Apply(
           airflow_direction_in_xy_plane);
     msg.mutable_direction_noise()->set_type(msgs::SensorNoise::GAUSSIAN);
   }
@@ -191,14 +191,14 @@ bool AirFlowSensor::Update(
 
 
   air_vel_in_body_.Z() = 0;
-  double airflow_speed =  air_vel_in_body.Length();
+  double airflow_speed =  air_vel_in_body_.Length();
 
   // Apply noise
-  if (this->dataPtr->speed_noises.find(air_flow_speed_NOISE_PASCALS) !=
+  if (this->dataPtr->speed_noises.find(AIR_FLOW_SPEED_NOISE) !=
       this->dataPtr->speed_noises.end())
   {
     airflow_speed =
-      this->dataPtr->speed_noises[air_flow_speed_NOISE_PASCALS]->Apply(
+      this->dataPtr->speed_noises[AIR_FLOW_SPEED_NOISE]->Apply(
           airflow_direction_in_xy_plane);
     msg.mutable_speed_noise()->set_type(msgs::SensorNoise::GAUSSIAN);
   }
