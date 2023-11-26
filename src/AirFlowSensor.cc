@@ -62,6 +62,9 @@ class gz::sensors::AirFlowSensorPrivate
   /// \brief Velocity of the air coming from the sensor
   public: gz::math::Vector3d vel;
 
+  /// \brief Velocity of the wind
+  public: gz::math::Vector3d wind_vel;
+
   /// \brief Noise added to speed measurement
   public: std::map<SensorNoiseType, NoisePtr> speed_noises;
   
@@ -164,7 +167,7 @@ bool AirFlowSensor::Update(
   frame->set_key("frame_id");
   frame->add_value(this->FrameId());
 
-  math::Vector3d wind_vel_{0, 0, 0};
+  math::Vector3d wind_vel_ = this-dataPtr->wind_vel;
   math::Quaterniond veh_q_world_to_body = this->Pose().Rot();
 
   // calculate differential pressure + noise in hPa
@@ -224,6 +227,11 @@ gz::math::Vector3d AirFlowSensor::Velocity() const
 void AirFlowSensor::SetVelocity(const gz::math::Vector3d &_vel)
 {
   this->dataPtr->vel = _vel;
+}
+
+void AirFlowSensor::SetWindVelocity(const gz::math::Vector3d &_vel)
+{
+  this->dataPtr->wind_vel = _vel;
 }
 
 //////////////////////////////////////////////////
