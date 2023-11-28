@@ -174,8 +174,10 @@ bool AirFlowSensor::Update(
   math::Vector3d air_vel_in_body_ = this->dataPtr->vel -
     veh_q_world_to_body.RotateVectorReverse(wind_vel_);
 
+  // airflow flowing in to the sensor is measured as 0. Hense the substraction
+  // of M_2_PI.
   double airflow_direction_in_xy_plane = atan2f(air_vel_in_body_.Y(),
-                                              air_vel_in_body_.X());
+                                              air_vel_in_body_.X()) - M_PI_2;
 
   // Apply noise
   if (this->dataPtr->dir_noises.find(AIR_FLOW_DIR_NOISE) !=
@@ -187,9 +189,6 @@ bool AirFlowSensor::Update(
     msg.mutable_direction_noise()->set_type(msgs::SensorNoise::GAUSSIAN);
   }
 
-  // apply resolution to sensor measurement
-
-
   air_vel_in_body_.Z() = 0;
   double airflow_speed =  air_vel_in_body_.Length();
 
@@ -199,16 +198,12 @@ bool AirFlowSensor::Update(
   {
     airflow_speed =
       this->dataPtr->speed_noises[AIR_FLOW_SPEED_NOISE]->Apply(
-          airflow_direction_in_xy_plane);
+          airflow_speed);
     msg.mutable_speed_noise()->set_type(msgs::SensorNoise::GAUSSIAN);
   }
 
-  // apply resolution to sensor measurement
-
-
-
-  msg.set_xy_speed(airflow_direction_in_xy_plane);
-  msg.set_xy_direction(airflow_speed);
+  msg.set_xy_direction(airflow_direction_in_xy_plane);
+  msg.set_xy_speed(airflow_speed);
 
   // publish
   this->AddSequence(msg.mutable_header());
