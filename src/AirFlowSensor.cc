@@ -50,16 +50,7 @@ class gz::sensors::AirFlowSensorPrivate
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
 
-  /// \brief Pressure in pascals.
-  public: double pressure = 0.0;
-
-  /// \brief Resolution of: [deg]
-  public: double direction_resolution = 0.0;
-
-  /// \brief Pressure in pascals.
-  public: double speed_resolution = 0.0;
-
-  /// \brief Velocity of the air coming from the sensor
+  /// \brief Velocity of the sensor
   public: gz::math::Vector3d vel;
 
   /// \brief Velocity of the wind
@@ -67,7 +58,7 @@ class gz::sensors::AirFlowSensorPrivate
 
   /// \brief Noise added to speed measurement
   public: std::map<SensorNoiseType, NoisePtr> speed_noises;
-  
+
   /// \brief Noise added to directional measurement
   public: std::map<SensorNoiseType, NoisePtr> dir_noises;
 };

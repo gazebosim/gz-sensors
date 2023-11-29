@@ -35,7 +35,7 @@ sdf::ElementPtr AirFlowToSdf(const std::string &_name,
   std::ostringstream stream;
   stream
     << "<?xml version='1.0'?>"
-    << "<sdf version='1.6'>"
+    << "<sdf version='1.10'>"
     << " <model name='m1'>"
     << "  <link name='link1'>"
     << "    <sensor name='" << _name << "' type='air_flow'>"
@@ -67,7 +67,7 @@ sdf::ElementPtr AirFlowToSdfWithNoise(const std::string &_name,
   std::ostringstream stream;
   stream
     << "<?xml version='1.0'?>"
-    << "<sdf version='1.6'>"
+    << "<sdf version='1.10'>"
     << " <model name='m1'>"
     << "  <link name='link1'>"
     << "    <sensor name='" << _name << "' type='air_flow'>"
