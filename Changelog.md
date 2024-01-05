@@ -1,5 +1,30 @@
 ## Gazebo Sensors 3
 
+### Gazebo Sensors 3.6.0 (2024-01-05)
+
+1. Update github action workflows
+    * [Pull request #401](https://github.com/gazebosim/gz-sensors/pull/401)
+    * [Pull request #335](https://github.com/gazebosim/gz-sensors/pull/335)
+    * [Pull request #334](https://github.com/gazebosim/gz-sensors/pull/334)
+
+1. Clean up rendering resources
+    * [Pull request #324](https://github.com/gazebosim/gz-sensors/pull/324)
+
+1. Destroy rendering sensors when sensor is removed
+    * [Pull request #169](https://github.com/gazebosim/gz-sensors/pull/169)
+
+1. Support protobuf >= 22
+    * [Pull request #351](https://github.com/gazebosim/gz-sensors/pull/351)
+
+1. Fix links in Changelog
+    * [Pull request #330](https://github.com/gazebosim/gz-sensors/pull/330)
+
+1. Fix Camera info test
+    * [Pull request #326](https://github.com/gazebosim/gz-sensors/pull/326)
+
+1. Added Camera Info topic support for cameras
+    * [Pull request #285](https://github.com/gazebosim/gz-sensors/pull/285)
+
 ### Gazebo Sensors 3.5.0 (2022-11-30)
 
 1. Add missing DEPENDS_ON_COMPONENTS parameters.
