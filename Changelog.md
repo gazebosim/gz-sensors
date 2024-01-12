@@ -1,5 +1,16 @@
 ## Gazebo Sensors 6
 
+### Gazebo Sensors 6.8.0 (2024-01-12)
+
+1. Allow specifying gz_frame_id as an alternative to ignition_frame_id
+    * [Pull request #409](https://github.com/gazebosim/gz-sensors/pull/409)
+
+1. [backport fortress] camera info topic published with the right data
+    * [Pull request #383](https://github.com/gazebosim/gz-sensors/pull/383)
+
+1. Infrastructure
+    * [Pull request #401](https://github.com/gazebosim/gz-sensors/pull/401)
+
 ### Gazebo Sensors 6.7.1 (2023-09-01)
 
 1. Support protobuf >= 22
