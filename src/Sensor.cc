@@ -148,6 +148,18 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
     if (element->HasElement("ignition_frame_id"))
     {
       this->frame_id = element->Get<std::string>("ignition_frame_id");
+      // Warn if both ignition_frame_id and gz_frame_id are specified
+      if (element->HasElement("gz_frame_id"))
+      {
+        ignwarn << "Found both `ignition_frame_id` and `gz_frame_id` in sensor"
+                << this->name << ". Only `ignition_frame_id` will be used\n";
+      }
+    }
+    else if (element->HasElement("gz_frame_id"))
+    {
+      // Also read gz_frame_id to support SDF that's compatible with newer
+      // versions of Gazebo.
+      this->frame_id = element->Get<std::string>("gz_frame_id");
     }
     else
     {
