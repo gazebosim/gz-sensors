@@ -350,6 +350,61 @@ TEST(Sensor_TEST, SetRateZeroService)
 }
 
 //////////////////////////////////////////////////
+TEST(Sensor_TEST, FrameIdFromSdf)
+{
+  auto loadSensorWithSdfParam =
+      [](TestSensor &_testSensor, const std::string &_sensorParam)
+  {
+    const std::string sensorSdf = R"(
+    <sdf version="1.9">
+      <model name="m1">
+        <link name="link1">
+          <sensor name="test" type="imu">)" +
+                                  _sensorParam + R"(
+          </sensor>
+        </link>
+      </model>
+    </sdf>
+    )";
+    sdf::Root root;
+    sdf::Errors errors = root.LoadSdfString(sensorSdf);
+    ASSERT_TRUE(errors.empty()) << errors;
+    auto *model = root.Model();
+    ASSERT_NE(model, nullptr);
+    auto *link = model->LinkByIndex(0);
+    ASSERT_NE(link, nullptr);
+    auto *sensor = link->SensorByIndex(0);
+    ASSERT_NE(sensor, nullptr);
+
+    _testSensor.Load(*sensor);
+  };
+
+  {
+    TestSensor testSensor;
+    loadSensorWithSdfParam(testSensor, "");
+    EXPECT_EQ("test", testSensor.FrameId());
+  }
+  {
+    TestSensor testSensor;
+    loadSensorWithSdfParam(
+        testSensor, "<ignition_frame_id>custom_frame_id</ignition_frame_id>");
+    EXPECT_EQ("custom_frame_id", testSensor.FrameId());
+  }
+  {
+    TestSensor testSensor;
+    loadSensorWithSdfParam(testSensor,
+                           "<gz_frame_id>custom_frame_id</gz_frame_id>");
+    EXPECT_EQ("custom_frame_id", testSensor.FrameId());
+  }
+  {
+    TestSensor testSensor;
+    loadSensorWithSdfParam(testSensor, R"(
+      <ignition_frame_id>custom_frame_id</ignition_frame_id>
+      <gz_frame_id>other_custom_frame_id</gz_frame_id>)");
+    EXPECT_EQ("other_custom_frame_id", testSensor.FrameId());
+  }
+}
+//////////////////////////////////////////////////
 TEST_F(SensorUpdate, NextDataUpdateTime)
 {
   // Create sensor.
