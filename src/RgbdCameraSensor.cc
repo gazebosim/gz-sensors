@@ -375,13 +375,6 @@ bool RgbdCameraSensor::CreateCameras()
         std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
         std::placeholders::_4, std::placeholders::_5));
 
-  this->dataPtr->pointCloudConnection =
-      this->dataPtr->depthCamera->ConnectNewRgbPointCloud(
-        std::bind(&RgbdCameraSensorPrivate::OnNewRgbPointCloud,
-        this->dataPtr.get(),
-        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-        std::placeholders::_4, std::placeholders::_5));
-
   // Set the values of the point message based on the camera information.
   this->dataPtr->pointMsg.set_width(this->ImageWidth());
   this->dataPtr->pointMsg.set_height(this->ImageHeight());
@@ -470,6 +463,22 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     !this->HasPointConnections())
   {
     return false;
+  }
+
+  if ((this->HasPointConnections() || HasColorConnections()) &&
+      !this->dataPtr->pointCloudConnection)
+  {
+    this->dataPtr->pointCloudConnection =
+        this->dataPtr->depthCamera->ConnectNewRgbPointCloud(
+        std::bind(&RgbdCameraSensorPrivate::OnNewRgbPointCloud,
+        this->dataPtr.get(),
+        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5));
+  }
+  else if (!this->HasPointConnections() && !this->HasColorConnections() &&
+      this->dataPtr->pointCloudConnection)
+  {
+    this->dataPtr->pointCloudConnection.reset();
   }
 
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
