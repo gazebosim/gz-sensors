@@ -407,12 +407,6 @@ bool DepthCameraSensor::CreateCamera()
         std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
         std::placeholders::_4, std::placeholders::_5));
 
-  this->dataPtr->pointCloudConnection =
-      this->dataPtr->depthCamera->ConnectNewRgbPointCloud(
-      std::bind(&DepthCameraSensor::OnNewRgbPointCloud, this,
-        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-        std::placeholders::_4, std::placeholders::_5));
-
   // Initialize the point message.
   // \todo(anyone) The true value in the following function call forces
   // the xyz and rgb fields to be aligned to memory boundaries. This is need
@@ -534,6 +528,19 @@ bool DepthCameraSensor::Update(
   if (!this->HasDepthConnections() && !this->HasPointConnections())
   {
     return false;
+  }
+
+  if (this->HasPointConnections() && !this->dataPtr->pointCloudConnection)
+  {
+    this->dataPtr->pointCloudConnection =
+        this->dataPtr->depthCamera->ConnectNewRgbPointCloud(
+        std::bind(&DepthCameraSensor::OnNewRgbPointCloud, this,
+          std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+          std::placeholders::_4, std::placeholders::_5));
+  }
+  else if (!this->HasPointConnections() && this->dataPtr->pointCloudConnection)
+  {
+    this->dataPtr->pointCloudConnection.reset();
   }
 
   // generate sensor data
