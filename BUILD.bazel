@@ -1,0 +1,129 @@
+load(
+    "@gz//bazel/skylark:build_defs.bzl",
+    "GZ_FEATURES",
+    "GZ_ROOT",
+    "GZ_VISIBILITY",
+    "gz_configure_header",
+    "gz_export_header",
+    "gz_include_header",
+)
+
+package(
+    default_visibility = GZ_VISIBILITY,
+    features = GZ_FEATURES,
+)
+
+licenses(["notice"])  # Apache-2.0
+
+exports_files(["LICENSE"])
+
+gz_configure_header(
+    name = "sensors_config_hh",
+    src = "include/gz/sensors/config.hh.in",
+    cmakelists = ["CMakeLists.txt"],
+    package = "sensors",
+)
+
+gz_export_header(
+    name = "include/gz/sensors/Export.hh",
+    export_base = "GZ_SENSORS",
+    lib_name = "gz-sensors",
+    visibility = ["//visibility:private"],
+)
+
+sensors_to_generate = [
+    "altimeter",
+    "camera",
+    "force_torque",
+    "gpu_lidar",
+    "imu",
+    "lidar",
+    "magnetometer",
+    "navsat",
+    "air_pressure",
+    "logical_camera",
+    "wide_angle_camera",
+    "rgbd_camera",
+    "air_speed",
+    "thermal_camera",
+    "rendering",
+    "depth_camera",
+    "boundingbox_camera",
+    "segmentation_camera",
+]
+
+[
+    gz_export_header(
+        name = "include/gz/sensors/%s/Export.hh" % sensor,
+        export_base = "GZ_SENSORS_%s" % sensor.upper(),
+        lib_name = "gz-sensors-%s" % sensor,
+        visibility = ["//visibility:private"],
+    )
+    for sensor in sensors_to_generate
+]
+
+export_headers = ["include/gz/sensors/%s/Export.hh" % sensor for sensor in sensors_to_generate]
+
+public_headers_no_gen = glob([
+    "include/gz/sensors/*.hh",
+])
+
+sources = glob(
+    [
+        "src/*.cc",
+        "src/*.hh",
+    ],
+    exclude = [
+        "src/*_TEST.cc",
+    ],
+)
+
+gz_include_header(
+    name = "sensors_hh_genrule",
+    out = "include/gz/sensors.hh",
+    hdrs = public_headers_no_gen + [
+        "include/gz/sensors/config.hh",
+        "include/gz/sensors/Export.hh",
+    ] + export_headers,
+)
+
+public_headers = public_headers_no_gen + [
+    "include/gz/sensors/config.hh",
+    "include/gz/sensors/Export.hh",
+] + export_headers
+
+cc_library(
+    name = "sensors",
+    srcs = sources,
+    hdrs = public_headers,
+    includes = ["include"],
+    deps = [
+        GZ_ROOT + "msgs",
+        GZ_ROOT + "rendering",
+        GZ_ROOT + "sdformat",
+        GZ_ROOT + "transport",
+        GZ_ROOT + "common/profiler",
+    ],
+)
+
+test_sources = glob(
+    include = ["src/*_TEST.cc"],
+)
+
+[cc_test(
+    name = src.replace("/", "_").replace(".cc", "").replace("src_", ""),
+    srcs = [src],
+    env = {
+        "GZ_BAZEL": "1",
+        "GZ_BAZEL_PATH": "sensors",
+    },
+    data = glob([
+        "test/sdf/*.sdf"
+    ]),
+    deps = [
+        ":sensors",
+        GZ_ROOT + "common/testing",
+        "@gtest",
+        "@gtest//:gtest_main",
+    ],
+) for src in test_sources]
