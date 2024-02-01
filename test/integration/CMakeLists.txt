@@ -15,6 +15,7 @@ set(dri_tests
 )
 
 set(tests
+  air_flow.cc
   air_pressure.cc
   air_speed.cc
   altimeter.cc
@@ -58,6 +59,7 @@ gz_build_tests(TYPE INTEGRATION
   SOURCES
     ${tests}
   LIB_DEPS
+    ${PROJECT_LIBRARY_TARGET_NAME}-air_flow
     ${PROJECT_LIBRARY_TARGET_NAME}-air_pressure
     ${PROJECT_LIBRARY_TARGET_NAME}-air_speed
     ${PROJECT_LIBRARY_TARGET_NAME}-altimeter
