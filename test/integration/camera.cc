@@ -20,11 +20,13 @@
 
 #include <gz/msgs/camera_info.pb.h>
 #include <gz/msgs/image.pb.h>
+#include <gz/common/Image.hh>
 
 #include <gz/common/Console.hh>
 #include <gz/common/Filesystem.hh>
 #include <gz/sensors/Manager.hh>
 #include <gz/sensors/CameraSensor.hh>
+#include <gz/rendering/Utils.hh>
 
 // TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
