@@ -134,7 +134,7 @@ bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
   // by ROS1: https://github.com/ros/common_msgs/pull/77. Ideally, memory
   // alignment should be configured. This same problem is in the
   // RgbdCameraSensor.
-  msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->Name(), true,
+  msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->FrameId(), true,
       {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
       {"intensity", msgs::PointCloudPacked::Field::FLOAT32},
       {"ring", msgs::PointCloudPacked::Field::UINT16}});
