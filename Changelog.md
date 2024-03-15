@@ -1,6 +1,9 @@
 ## Gazebo Sensors 8
 
-### Gazebo Sensors 8.0.1 (2024-03-14)
+### Gazebo Sensors 8.0.1 (2024-03-15)
+
+1. Avoid calling DblNormal with invalid standard deviation
+    * [Pull request #396](https://github.com/gazebosim/gz-sensors/pull/396)
 
 1. DepthCamera and RGBDCamera - optimize RGB point cloud connection
     * [Pull request #413](https://github.com/gazebosim/gz-sensors/pull/413)
