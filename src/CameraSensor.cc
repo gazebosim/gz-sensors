@@ -42,7 +42,7 @@
 #include "gz/sensors/SensorFactory.hh"
 #include "gz/sensors/SensorTypes.hh"
 
-#include "gz/rendering/Utils.hh"
+#include <gz/rendering/Utils.hh>
 
 using namespace gz;
 using namespace sensors;

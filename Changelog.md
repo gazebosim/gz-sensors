@@ -269,6 +269,40 @@
 
 ## Gazebo Sensors 6
 
+### Gazebo Sensors 6.8.0 (2024-01-12)
+
+1. Allow specifying gz_frame_id as an alternative to ignition_frame_id
+    * [Pull request #409](https://github.com/gazebosim/gz-sensors/pull/409)
+
+1. [backport fortress] camera info topic published with the right data
+    * [Pull request #383](https://github.com/gazebosim/gz-sensors/pull/383)
+
+1. Infrastructure
+    * [Pull request #401](https://github.com/gazebosim/gz-sensors/pull/401)
+
+### Gazebo Sensors 6.7.1 (2023-09-01)
+
+1. Support protobuf >= 22
+    * [Pull request #351](https://github.com/gazebosim/gz-sensors/pull/351)
+
+1. Infrastructure
+    * [Pull request #335](https://github.com/gazebosim/gz-sensors/pull/335)
+
+1. Rename COPYING to LICENSE
+    * [Pull request #334](https://github.com/gazebosim/gz-sensors/pull/334)
+
+1. Fix links in Changelog
+    * [Pull request #330](https://github.com/gazebosim/gz-sensors/pull/330)
+
+1. Fix Camera info test
+    * [Pull request #326](https://github.com/gazebosim/gz-sensors/pull/326)
+
+1. clean up rendering resources
+    * [Pull request #324](https://github.com/gazebosim/gz-sensors/pull/324)
+
+1. Added Camera Info topic support for cameras
+    * [Pull request #285](https://github.com/gazebosim/gz-sensors/pull/285)
+
 ### Gazebo Sensors 6.7.0 (2023-02-13)
 
 1. Disable thermal camera test on MacOS.
@@ -535,6 +569,31 @@
     * [BitBucket pull request 111](https://osrf-migration.github.io/ignition-gh-pages/#!/ignitionrobotics/ign-sensors/pull-requests/111)
 
 ## Gazebo Sensors 3
+
+### Gazebo Sensors 3.6.0 (2024-01-05)
+
+1. Update github action workflows
+    * [Pull request #401](https://github.com/gazebosim/gz-sensors/pull/401)
+    * [Pull request #335](https://github.com/gazebosim/gz-sensors/pull/335)
+    * [Pull request #334](https://github.com/gazebosim/gz-sensors/pull/334)
+
+1. Clean up rendering resources
+    * [Pull request #324](https://github.com/gazebosim/gz-sensors/pull/324)
+
+1. Destroy rendering sensors when sensor is removed
+    * [Pull request #169](https://github.com/gazebosim/gz-sensors/pull/169)
+
+1. Support protobuf >= 22
+    * [Pull request #351](https://github.com/gazebosim/gz-sensors/pull/351)
+
+1. Fix links in Changelog
+    * [Pull request #330](https://github.com/gazebosim/gz-sensors/pull/330)
+
+1. Fix Camera info test
+    * [Pull request #326](https://github.com/gazebosim/gz-sensors/pull/326)
+
+1. Added Camera Info topic support for cameras
+    * [Pull request #285](https://github.com/gazebosim/gz-sensors/pull/285)
 
 ### Gazebo Sensors 3.5.0 (2022-11-30)
 
