@@ -6,7 +6,7 @@
   <description>Gazebo Sensors : Sensor models for simulation</description>
   <maintainer email="ichen@openrobotics.org">Ian Chen</maintainer>
   <license>Apache License 2.0</license>
-  <url type="website">https://github.com/gazebosim/gz-fuel-tools</url>
+  <url type="website">https://github.com/gazebosim/gz-sensors</url>
 
   <buildtool_depend>cmake</buildtool_depend>
 
