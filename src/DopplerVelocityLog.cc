@@ -1258,7 +1258,7 @@ namespace gz
         // Iterate over the beam solid angle in camera coordinates
         for (auto v = beamScanPatch.YMin(); v < beamScanPatch.YMax(); ++v)
         {
-          (void) _height; // Supress unused warning in variable used below
+          (void) _height;  // Supress unused warning in variable used below
           assert(v >= 0 && v < static_cast<int>(_height));
           const gz::math::Angle inclination =
               v * intrinsics.step.Y() + intrinsics.offset.Y();
