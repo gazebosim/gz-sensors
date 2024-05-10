@@ -111,13 +111,15 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   EXPECT_EQ(256u, sensor->ImageWidth());
   EXPECT_EQ(257u, sensor->ImageHeight());
 
-  // check camera image before trigger
+  // Check camera image before trigger. Image should not be published since
+  // the camera has not been triggered yet.
   {
     std::string imageTopic =
         "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF";
     WaitForMessageTestHelper<gz::msgs::Image> helper(imageTopic);
     EXPECT_TRUE(sensor->HasConnections());
-    mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+    std::chrono::steady_clock::duration now = std::chrono::seconds(1);
+    mgr.RunOnce(now, /*_force=*/false);
     EXPECT_FALSE(helper.WaitForMessage(1s)) << helper;
   }
 
@@ -139,7 +141,8 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
     std::string imageTopic =
         "/test/integration/TriggeredCameraPlugin_imagesWithBuiltinSDF";
     WaitForMessageTestHelper<gz::msgs::Image> helper(imageTopic);
-    mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+    std::chrono::steady_clock::duration now = std::chrono::seconds(2);
+    mgr.RunOnce(now, /*_force=*/false);
     EXPECT_TRUE(helper.WaitForMessage(10s)) << helper;
   }
 
@@ -216,7 +219,8 @@ void TriggeredCameraTest::EmptyTriggerTopic(const std::string &_renderEngine)
     std::string imageTopic =
         "/test/integration/triggered_camera";
     WaitForMessageTestHelper<gz::msgs::Image> helper(imageTopic);
-    mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+    std::chrono::steady_clock::duration now = std::chrono::seconds(1);
+    mgr.RunOnce(now, /*_force=*/false);
     EXPECT_TRUE(helper.WaitForMessage(10s)) << helper;
   }
 
