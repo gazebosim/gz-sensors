@@ -223,6 +223,17 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
     << "] advertised on [" << this->Topic()
     << this->dataPtr->topicLabelsMapSuffix << "]\n";
 
+  if (_sdf.CameraSensor()->Triggered())
+  {
+    std::string triggerTopic = _sdf.CameraSensor()->TriggerTopic();
+    if (triggerTopic.empty())
+    {
+      triggerTopic = transport::TopicUtils::AsValidTopic(this->Topic() +
+                                                         "/trigger");
+    }
+    this->EnableTriggered(triggerTopic);
+  }
+
   // TODO(anyone) Access the info topic from the parent class
   if (!this->AdvertiseInfo(this->Topic() + "/camera_info"))
     return false;

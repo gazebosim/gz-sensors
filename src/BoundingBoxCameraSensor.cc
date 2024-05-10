@@ -16,6 +16,8 @@
 */
 
 #include <mutex>
+#include <ostream>
+#include <string>
 
 #include <gz/msgs/boolean.pb.h>
 #include <gz/msgs/image.pb.h>
@@ -32,6 +34,7 @@
 #include <gz/rendering/BoundingBoxCamera.hh>
 #include <gz/transport/Node.hh>
 #include <gz/transport/Publisher.hh>
+#include <gz/transport/TopicUtils.hh>
 
 #include "gz/sensors/BoundingBoxCameraSensor.hh"
 #include "gz/sensors/RenderingEvents.hh"
@@ -87,15 +90,6 @@ class gz::sensors::BoundingBoxCameraSensorPrivate
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
-
-  /// \brief True if camera is triggered by a topic
-  public: bool isTriggeredCamera{false};
-
-  /// \brief True if camera has been triggered by a topic
-  public: bool isTriggered{false};
-
-  /// \brief Topic for camera trigger
-  public: std::string triggerTopic{""};
 
   /// \brief BoundingBoxes type
   public: rendering::BoundingBoxType type
@@ -231,30 +225,13 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
 
   if (_sdf.CameraSensor()->Triggered())
   {
-    if (!_sdf.CameraSensor()->TriggerTopic().empty())
+    std::string triggerTopic = _sdf.CameraSensor()->TriggerTopic();
+    if (triggerTopic.empty())
     {
-      this->dataPtr->triggerTopic = _sdf.CameraSensor()->TriggerTopic();
+      triggerTopic = transport::TopicUtils::AsValidTopic(this->Topic() +
+                                                         "/trigger");
     }
-    else
-    {
-      this->dataPtr->triggerTopic =
-          transport::TopicUtils::AsValidTopic(
-          this->Topic() + "/trigger");
-
-      if (this->dataPtr->triggerTopic.empty())
-      {
-        gzerr << "Invalid trigger topic name [" <<
-        this->dataPtr->triggerTopic << "]" << std::endl;
-        return false;
-      }
-    }
-
-    this->dataPtr->node.Subscribe(this->dataPtr->triggerTopic,
-        &BoundingBoxCameraSensor::OnTrigger, this);
-
-    gzdbg << "Camera trigger messages for [" << this->Name() << "] subscribed"
-          << " on [" << this->dataPtr->triggerTopic << "]" << std::endl;
-    this->dataPtr->isTriggeredCamera = true;
+    this->EnableTriggered(triggerTopic);
   }
 
   if (!this->AdvertiseInfo())
@@ -430,16 +407,6 @@ bool BoundingBoxCameraSensor::Update(
     this->PublishInfo(_now);
   }
 
-  // render only if necessary
-  {
-    std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-    if (this->dataPtr->isTriggeredCamera &&
-        !this->dataPtr->isTriggered)
-    {
-      return true;
-    }
-  }
-
   // don't render if there are no subscribers nor saving
   if (!this->dataPtr->imagePublisher.HasConnections() &&
     !this->dataPtr->boxesPublisher.HasConnections() &&
@@ -578,11 +545,6 @@ bool BoundingBoxCameraSensor::Update(
     ++this->dataPtr->saveCounter;
   }
 
-  if (this->dataPtr->isTriggeredCamera)
-  {
-    return this->dataPtr->isTriggered = false;
-  }
-
   return true;
 }
 
@@ -596,13 +558,6 @@ unsigned int BoundingBoxCameraSensor::ImageHeight() const
 unsigned int BoundingBoxCameraSensor::ImageWidth() const
 {
   return this->dataPtr->rgbCamera->ImageWidth();
-}
-
-//////////////////////////////////////////////////
-void BoundingBoxCameraSensor::OnTrigger(const gz::msgs::Boolean &/*_msg*/)
-{
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  this->dataPtr->isTriggered = true;
 }
 
 //////////////////////////////////////////////////

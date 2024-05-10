@@ -29,6 +29,7 @@
 
 #include <chrono>
 #include <memory>
+#include <optional>
 #include <string>
 
 #include <gz/utils/SuppressWarning.hh>
@@ -230,6 +231,30 @@ namespace gz
       /// \brief Check if there are any subscribers
       /// \return True if there are subscribers, false otherwise
       public: virtual bool HasConnections() const;
+
+      /// \brief Set the sensor in triggered mode. In this mode,
+      /// - the sensor will only update if a new message has been published to
+      ///    the passed _trigger_topic since the last update,
+      /// - until the next message is published on _trigger_topic, all Update
+      ///   calls will return false, and
+      /// - update_rate is forced to zero.
+      /// \param[in] _trigger_topic The topic on which the sensor will listen
+      /// for trigger messages.
+      /// \return True if the sensor was successfully set to triggered mode.
+      public: bool EnableTriggered(const std::string &_trigger_topic);
+
+      /// \brief Disable triggered mode. The sensor will update as per the set
+      /// update rate.
+      /// \param[in] _update_rate_hz Optional update rate of sensor in Hertz. If
+      /// std::nullopt is passed, the rate parsed from the SDF will be used if
+      /// it is available, otherwise the update rate will be set to zero.
+      public: void DisableTriggered(
+        const std::optional<double> &_update_rate_hz);
+
+      /// \brief Whether the sensor has a pending trigger.
+      /// \return True if the sensor is in trigger mode and has a pending
+      /// trigger.
+      public: bool HasPendingTrigger() const;
 
       GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal

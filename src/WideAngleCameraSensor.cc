@@ -185,6 +185,17 @@ bool WideAngleCameraSensor::Load(const sdf::Sensor &_sdf)
   gzdbg << "Wide angle camera images for [" << this->Name()
          << "] advertised on [" << this->Topic() << "]" << std::endl;
 
+  if (_sdf.CameraSensor()->Triggered())
+  {
+    std::string triggerTopic = _sdf.CameraSensor()->TriggerTopic();
+    if (triggerTopic.empty())
+    {
+      triggerTopic = transport::TopicUtils::AsValidTopic(this->Topic() +
+                                                         "/trigger");
+    }
+    this->EnableTriggered(triggerTopic);
+  }
+
   if (!this->AdvertiseInfo())
     return false;
 

@@ -20,6 +20,8 @@
 #include <gz/msgs/image.pb.h>
 
 #include <mutex>
+#include <ostream>
+#include <string>
 
 #include <gz/common/Console.hh>
 #include <gz/common/Event.hh>
@@ -30,6 +32,7 @@
 #include <gz/math/Helpers.hh>
 #include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
+#include <gz/transport/TopicUtils.hh>
 
 #include "gz/sensors/CameraSensor.hh"
 #include "gz/sensors/ImageBrownDistortionModel.hh"
@@ -158,15 +161,6 @@ class gz::sensors::CameraSensorPrivate
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
-
-  /// \brief True if camera is triggered by a topic
-  public: bool isTriggeredCamera = false;
-
-  /// \brief True if camera has been triggered by a topic
-  public: bool isTriggered = false;
-
-  /// \brief Topic for camera trigger
-  public: std::string triggerTopic = "";
 
   /// \brief True to save images
   public: bool saveImage = false;
@@ -460,29 +454,13 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
 
   if (_sdf.CameraSensor()->Triggered())
   {
-    if (!_sdf.CameraSensor()->TriggerTopic().empty())
+    std::string triggerTopic = _sdf.CameraSensor()->TriggerTopic();
+    if (triggerTopic.empty())
     {
-      this->dataPtr->triggerTopic = _sdf.CameraSensor()->TriggerTopic();
+      triggerTopic = transport::TopicUtils::AsValidTopic(this->Topic() +
+                                                         "/trigger");
     }
-    else
-    {
-      this->dataPtr->triggerTopic =
-          transport::TopicUtils::AsValidTopic(
-          this->Topic() + "/trigger");
-
-      if (this->dataPtr->triggerTopic.empty())
-      {
-        gzerr << "Invalid trigger topic name" << std::endl;
-        return false;
-      }
-    }
-
-    this->dataPtr->node.Subscribe(this->dataPtr->triggerTopic,
-        &CameraSensor::OnTrigger, this);
-
-    gzdbg << "Camera trigger messages for [" << this->Name() << "] subscribed"
-           << " on [" << this->dataPtr->triggerTopic << "]" << std::endl;
-    this->dataPtr->isTriggeredCamera = true;
+    this->EnableTriggered(triggerTopic);
   }
 
   if (!this->AdvertiseInfo())
@@ -554,13 +532,6 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     // publish the camera info message
     this->PublishInfo(_now);
-  }
-
-  // render only if necessary
-  if (this->dataPtr->isTriggeredCamera &&
-      !this->dataPtr->isTriggered)
-  {
-    return true;
   }
 
   if (!this->dataPtr->pub.HasConnections() &&
@@ -683,19 +654,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     }
   }
 
-  if (this->dataPtr->isTriggeredCamera)
-  {
-    return this->dataPtr->isTriggered = false;
-  }
-
   return true;
-}
-
-//////////////////////////////////////////////////
-void CameraSensor::OnTrigger(const gz::msgs::Boolean &/*_msg*/)
-{
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  this->dataPtr->isTriggered = true;
 }
 
 //////////////////////////////////////////////////
