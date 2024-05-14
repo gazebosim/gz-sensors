@@ -16,6 +16,7 @@
 */
 
 #include <cstring>
+#include <string>
 #include <gtest/gtest.h>
 
 #include <gz/msgs/camera_info.pb.h>
