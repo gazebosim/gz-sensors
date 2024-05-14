@@ -154,7 +154,7 @@ namespace gz
       /// camera SDF will be updated with intrinsic and projection values
       /// computed manually from current camera intrinsic properties.
       /// \param[in] _camera Camera to set intrinsic and projection params.
-      /// \param[in/out] _cameraSdf Camera sdf with intrinisc and projection
+      /// \param[in,out] _cameraSdf Camera sdf with intrinisc and projection
       /// parameters.
       public: void UpdateLensIntrinsicsAndProjection(
           rendering::CameraPtr _camera, sdf::Camera &_cameraSdf);
