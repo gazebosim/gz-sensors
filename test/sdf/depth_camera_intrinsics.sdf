@@ -11,7 +11,6 @@
           <image>
             <width>1000</width>
             <height>1000</height>
-            <format>R8G8B8</format>
           </image>
           <clip>
             <near>0.1</near>
@@ -28,7 +27,6 @@
           <image>
             <width>1000</width>
             <height>1000</height>
-            <format>R8G8B8</format>
           </image>
           <clip>
             <near>0.1</near>
@@ -54,7 +52,6 @@
           <image>
             <width>1000</width>
             <height>1000</height>
-            <format>R8G8B8</format>
           </image>
           <clip>
             <near>0.1</near>
