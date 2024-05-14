@@ -148,6 +148,17 @@ namespace gz
       /// \return The camera optical frame
       public: const std::string& OpticalFrameId() const;
 
+      /// \brief Set camera lens intrinsics and projection based on
+      /// values from SDF. If the camera SDF does not contain intrinsic or
+      /// projection parameters, the camera will not be updated. Instead, the
+      /// camera SDF will be updated with intrinsic and projection values
+      /// computed manually from current camera intrinsic properties.
+      /// \param[in] _camera Camera to set intrinsic and projection params.
+      /// \param[in/out] _cameraSdf Camera sdf with intrinisc and projection
+      /// parameters.
+      public: void UpdateLensIntrinsicsAndProjection(
+          rendering::CameraPtr _camera, sdf::Camera &_cameraSdf);
+
       /// \brief Advertise camera info topic.
       /// \return True if successful.
       protected: bool AdvertiseInfo();

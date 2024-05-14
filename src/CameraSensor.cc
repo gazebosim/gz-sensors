@@ -297,38 +297,8 @@ bool CameraSensor::CreateCamera()
       break;
   }
 
-  // Update the DOM object intrinsics to have consistent
-  // intrinsics between ogre camera and camera_info msg
-  if(!cameraSdf->HasLensIntrinsics())
-  {
-    auto intrinsicMatrix =
-      gz::rendering::projectionToCameraIntrinsic(
-        this->dataPtr->camera->ProjectionMatrix(),
-        this->dataPtr->camera->ImageWidth(),
-        this->dataPtr->camera->ImageHeight()
-      );
-
-    cameraSdf->SetLensIntrinsicsFx(intrinsicMatrix(0, 0));
-    cameraSdf->SetLensIntrinsicsFy(intrinsicMatrix(1, 1));
-    cameraSdf->SetLensIntrinsicsCx(intrinsicMatrix(0, 2));
-    cameraSdf->SetLensIntrinsicsCy(intrinsicMatrix(1, 2));
-  }
-  // set custom projection matrix based on intrinsics param specified in sdf
-  else
-  {
-    double fx = cameraSdf->LensIntrinsicsFx();
-    double fy = cameraSdf->LensIntrinsicsFy();
-    double cx = cameraSdf->LensIntrinsicsCx();
-    double cy = cameraSdf->LensIntrinsicsCy();
-    double s = cameraSdf->LensIntrinsicsSkew();
-    auto projectionMatrix = CameraSensorPrivate::BuildProjectionMatrix(
-        this->dataPtr->camera->ImageWidth(),
-        this->dataPtr->camera->ImageHeight(),
-        fx, fy, cx, cy, s,
-        this->dataPtr->camera->NearClipPlane(),
-        this->dataPtr->camera->FarClipPlane());
-    this->dataPtr->camera->SetProjectionMatrix(projectionMatrix);
-  }
+  this->UpdateLensIntrinsicsAndProjection(this->dataPtr->camera,
+      *cameraSdf);
 
   this->dataPtr->image = this->dataPtr->camera->CreateImage();
 
@@ -340,48 +310,6 @@ bool CameraSensor::CreateCamera()
     this->dataPtr->saveImagePath = cameraSdf->SaveFramesPath();
     this->dataPtr->saveImagePrefix = this->Name() + "_";
     this->dataPtr->saveImage = true;
-  }
-
-  // Update the DOM object intrinsics to have consistent
-  // projection matrix values between ogre camera and camera_info msg
-  // If these values are not defined in the SDF then we need to update
-  // these values to something reasonable. The projection matrix is
-  // the cumulative effect of intrinsic and extrinsic parameters
-  if(!cameraSdf->HasLensProjection())
-  {
-    // Note that the matrix from Ogre via camera->ProjectionMatrix() has a
-    // different format than the projection matrix used in SDFormat.
-    // This is why they are converted using projectionToCameraIntrinsic.
-    // The resulting matrix is the intrinsic matrix, but since the user has
-    // not overridden the values, this is also equal to the projection matrix.
-    auto intrinsicMatrix =
-      gz::rendering::projectionToCameraIntrinsic(
-        this->dataPtr->camera->ProjectionMatrix(),
-        this->dataPtr->camera->ImageWidth(),
-        this->dataPtr->camera->ImageHeight()
-      );
-    cameraSdf->SetLensProjectionFx(intrinsicMatrix(0, 0));
-    cameraSdf->SetLensProjectionFy(intrinsicMatrix(1, 1));
-    cameraSdf->SetLensProjectionCx(intrinsicMatrix(0, 2));
-    cameraSdf->SetLensProjectionCy(intrinsicMatrix(1, 2));
-  }
-  // set custom projection matrix based on projection param specified in sdf
-  else
-  {
-    // tx and ty are not used
-    double fx = cameraSdf->LensProjectionFx();
-    double fy = cameraSdf->LensProjectionFy();
-    double cx = cameraSdf->LensProjectionCx();
-    double cy = cameraSdf->LensProjectionCy();
-    double s = 0;
-
-    auto projectionMatrix = CameraSensorPrivate::BuildProjectionMatrix(
-        this->dataPtr->camera->ImageWidth(),
-        this->dataPtr->camera->ImageHeight(),
-        fx, fy, cx, cy, s,
-        this->dataPtr->camera->NearClipPlane(),
-        this->dataPtr->camera->FarClipPlane());
-    this->dataPtr->camera->SetProjectionMatrix(projectionMatrix);
   }
 
   // Populate camera info topic
@@ -925,6 +853,86 @@ bool CameraSensor::HasInfoConnections() const
 const std::string& CameraSensor::OpticalFrameId() const
 {
   return this->dataPtr->opticalFrameId;
+}
+
+//////////////////////////////////////////////////
+void CameraSensor::UpdateLensIntrinsicsAndProjection(
+  rendering::CameraPtr _camera, sdf::Camera &_cameraSdf)
+{
+  // Update the DOM object intrinsics to have consistent
+  // intrinsics between ogre camera and camera_info msg
+  if(!_cameraSdf.HasLensIntrinsics())
+  {
+    auto intrinsicMatrix =
+      gz::rendering::projectionToCameraIntrinsic(
+        _camera->ProjectionMatrix(),
+        _camera->ImageWidth(),
+        _camera->ImageHeight()
+      );
+
+    _cameraSdf.SetLensIntrinsicsFx(intrinsicMatrix(0, 0));
+    _cameraSdf.SetLensIntrinsicsFy(intrinsicMatrix(1, 1));
+    _cameraSdf.SetLensIntrinsicsCx(intrinsicMatrix(0, 2));
+    _cameraSdf.SetLensIntrinsicsCy(intrinsicMatrix(1, 2));
+  }
+  // set custom projection matrix based on intrinsics param specified in sdf
+  else
+  {
+    double fx = _cameraSdf.LensIntrinsicsFx();
+    double fy = _cameraSdf.LensIntrinsicsFy();
+    double cx = _cameraSdf.LensIntrinsicsCx();
+    double cy = _cameraSdf.LensIntrinsicsCy();
+    double s = _cameraSdf.LensIntrinsicsSkew();
+    auto projectionMatrix = CameraSensorPrivate::BuildProjectionMatrix(
+        _camera->ImageWidth(),
+        _camera->ImageHeight(),
+        fx, fy, cx, cy, s,
+        _camera->NearClipPlane(),
+        _camera->FarClipPlane());
+    _camera->SetProjectionMatrix(projectionMatrix);
+  }
+
+  // Update the DOM object intrinsics to have consistent
+  // projection matrix values between ogre camera and camera_info msg
+  // If these values are not defined in the SDF then we need to update
+  // these values to something reasonable. The projection matrix is
+  // the cumulative effect of intrinsic and extrinsic parameters
+  if(!_cameraSdf.HasLensProjection())
+  {
+    // Note that the matrix from Ogre via camera->ProjectionMatrix() has a
+    // different format than the projection matrix used in SDFormat.
+    // This is why they are converted using projectionToCameraIntrinsic.
+    // The resulting matrix is the intrinsic matrix, but since the user has
+    // not overridden the values, this is also equal to the projection matrix.
+    auto intrinsicMatrix =
+      gz::rendering::projectionToCameraIntrinsic(
+        _camera->ProjectionMatrix(),
+        _camera->ImageWidth(),
+        _camera->ImageHeight()
+      );
+    _cameraSdf.SetLensProjectionFx(intrinsicMatrix(0, 0));
+    _cameraSdf.SetLensProjectionFy(intrinsicMatrix(1, 1));
+    _cameraSdf.SetLensProjectionCx(intrinsicMatrix(0, 2));
+    _cameraSdf.SetLensProjectionCy(intrinsicMatrix(1, 2));
+  }
+  // set custom projection matrix based on projection param specified in sdf
+  else
+  {
+    // tx and ty are not used
+    double fx = _cameraSdf.LensProjectionFx();
+    double fy = _cameraSdf.LensProjectionFy();
+    double cx = _cameraSdf.LensProjectionCx();
+    double cy = _cameraSdf.LensProjectionCy();
+    double s = 0;
+
+    auto projectionMatrix = CameraSensorPrivate::BuildProjectionMatrix(
+        _camera->ImageWidth(),
+        _camera->ImageHeight(),
+        fx, fy, cx, cy, s,
+        _camera->NearClipPlane(),
+        _camera->FarClipPlane());
+    _camera->SetProjectionMatrix(projectionMatrix);
+  }
 }
 
 //////////////////////////////////////////////////
