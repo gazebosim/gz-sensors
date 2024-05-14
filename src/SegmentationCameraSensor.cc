@@ -393,7 +393,6 @@ bool SegmentationCameraSensor::CreateCamera()
   // Camera Info Msg
   this->PopulateInfo(sdfCamera);
 
-
   // Connection to receive the segmentation buffer
   this->dataPtr->newSegmentationConnection =
       this->dataPtr->camera->ConnectNewSegmentationFrame(
