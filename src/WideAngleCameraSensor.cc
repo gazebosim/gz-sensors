@@ -193,7 +193,7 @@ bool WideAngleCameraSensor::Load(const sdf::Sensor &_sdf)
       triggerTopic = transport::TopicUtils::AsValidTopic(this->Topic() +
                                                          "/trigger");
     }
-    this->EnableTriggered(triggerTopic);
+    this->SetTriggered(true, triggerTopic);
   }
 
   if (!this->AdvertiseInfo())

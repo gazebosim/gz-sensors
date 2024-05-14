@@ -478,8 +478,8 @@ TEST(Sensor_TEST, Trigger)
   EXPECT_DOUBLE_EQ(kUpdateRate, sensor.UpdateRate());
 
   constexpr char kTriggerTopic[] = "/trigger";
-  EXPECT_TRUE(sensor.EnableTriggered(kTriggerTopic));
-  EXPECT_DOUBLE_EQ(0, sensor.UpdateRate());
+  EXPECT_TRUE(sensor.SetTriggered(true, kTriggerTopic));
+  EXPECT_FALSE(sensor.HasPendingTrigger());
 
   transport::Node node;
   transport::Node::Publisher triggerPub =
@@ -509,7 +509,7 @@ TEST(Sensor_TEST, Trigger)
     EXPECT_EQ(preUpdateCount + 1, sensor.updateCount);
   }
 
-  sensor.DisableTriggered(kUpdateRate);
+  sensor.SetTriggered(false);
   EXPECT_DOUBLE_EQ(kUpdateRate, sensor.UpdateRate());
   EXPECT_FALSE(sensor.HasPendingTrigger());
   {

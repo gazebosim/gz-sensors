@@ -69,10 +69,10 @@ class gz::sensors::SensorPrivate
   public: void SetRate(const gz::msgs::Double &_rate);
 
   /// \brief Set the sensor in triggered mode.
-  /// \param[in] _trigger_topic The topic on which the sensor will listen
+  /// \param[in] _topic The topic on which the sensor will listen
   /// for trigger messages.
   /// \return True if the sensor was successfully set to triggered mode.
-  public: bool EnableTriggered(const std::string &_topic);
+  public: bool SetTriggerTopic(const std::string &_topic);
 
   /// \brief Whether the sensor is triggered by a topic.
   /// \return True if sensor is triggered by a topic.
@@ -83,8 +83,7 @@ class gz::sensors::SensorPrivate
   public: void OnTrigger(const gz::msgs::Boolean &_msg);
 
   /// \brief Disable triggered mode.
-  /// \param[in] _update_rate_hz Optional update rate of sensor in Hertz.
-  public: void DisableTriggered(const std::optional<double> &_update_rate);
+  public: void DisableTriggered();
 
   /// \brief id given to sensor when constructed
   public: SensorId id;
@@ -114,9 +113,6 @@ class gz::sensors::SensorPrivate
   /// \brief How many times the sensor will generate data per second (currently
   /// used value).
   public: double updateRate = 0.0;
-
-  /// \brief Mutex to synchronize concurrent writes to updateRate.
-  public: std::mutex updateRateMutex;
 
   /// \brief What sim time should this sensor update at
   public: std::chrono::steady_clock::duration nextUpdateTime
@@ -407,12 +403,6 @@ void SensorPrivate::PublishMetrics(const std::chrono::duration<double> &_now)
 //////////////////////////////////////////////////
 void SensorPrivate::SetRate(const gz::msgs::Double &_rate)
 {
-  if (this->IsTriggered()) {
-    gzwarn << "Sensor [" << this->name << "] is set to be triggered, update"
-           << " rate will be ignored." << std::endl;
-    return;
-  }
-
   auto rate = _rate.data();
   if (rate < 0.0)
     rate = 0.0;
@@ -443,7 +433,6 @@ void SensorPrivate::SetRate(const gz::msgs::Double &_rate)
   gzdbg << "Setting update rate of sensor " << this->name << " to " << rate
          << " Hz" << std::endl;
 
-  std::lock_guard<std::mutex> lock(this->updateRateMutex);
   this->updateRate = rate;
 }
 
@@ -480,13 +469,14 @@ double Sensor::UpdateRate() const
 //////////////////////////////////////////////////
 void Sensor::SetUpdateRate(const double _hz)
 {
-  if (this->dataPtr->IsTriggered()) {
-    gzwarn << "Sensor [" << this->Name() << "] is set to be triggered, update"
-           << " rate will be ignored." << std::endl;
-    return;
+  if (_hz < 0)
+  {
+    this->dataPtr->updateRate = 0;
   }
-  std::lock_guard<std::mutex> lock(this->dataPtr->updateRateMutex);
-  this->dataPtr->updateRate = std::fmax(_hz, 0);
+  else
+  {
+    this->dataPtr->updateRate = _hz;
+  }
 }
 
 //////////////////////////////////////////////////
@@ -509,7 +499,6 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
   }
 
   // Check if it's time to update
-  std::lock_guard<std::mutex> lock(this->dataPtr->updateRateMutex);
   if (_now < this->dataPtr->nextUpdateTime && !force &&
       this->dataPtr->updateRate > 0)
   {
@@ -610,12 +599,20 @@ bool Sensor::HasConnections() const
 }
 
 //////////////////////////////////////////////////
-bool Sensor::EnableTriggered(const std::string &_trigger_topic) {
-  return this->dataPtr->EnableTriggered(_trigger_topic);
+bool Sensor::SetTriggered(bool _triggered, const std::string &_triggerTopic) {
+  if (_triggered)
+  {
+    return this->dataPtr->SetTriggerTopic(_triggerTopic);
+  }
+  else
+  {
+    this->dataPtr->DisableTriggered();
+    return true;
+  }
 }
 
 //////////////////////////////////////////////////
-bool SensorPrivate::EnableTriggered(const std::string &_topic) {
+bool SensorPrivate::SetTriggerTopic(const std::string &_topic) {
   if (_topic.empty())
   {
     gzwarn << "Trigger topic is empty for sensor [" << this->name << "]"
@@ -630,13 +627,8 @@ bool SensorPrivate::EnableTriggered(const std::string &_topic) {
   }
   this->triggerTopic = _topic;
 
-  // Set update rate to 0 so that sensor will update immediately on pending
-  // trigger.
-  std::lock_guard<std::mutex> lock(this->updateRateMutex);
-  this->updateRate = 0.0;
-
   gzmsg << "Sensor trigger messages for [" << name << "] subscribed"
-        << " on [" << this->triggerTopic << "]" << std::endl;
+          << " on [" << this->triggerTopic << "]" << std::endl;
   return true;
 }
 
@@ -652,21 +644,7 @@ void SensorPrivate::OnTrigger(const gz::msgs::Boolean &/*_msg*/) {
 }
 
 //////////////////////////////////////////////////
-void Sensor::DisableTriggered(const std::optional<double> &_update_rate_hz) {
-  this->dataPtr->DisableTriggered(_update_rate_hz);
-}
-
-//////////////////////////////////////////////////
-void SensorPrivate::DisableTriggered(
-    const std::optional<double> &_update_rate_hz) {
-  std::lock_guard<std::mutex> updateRateLock(this->updateRateMutex);
-  if (_update_rate_hz.has_value()) {
-    this->updateRate = std::fmax(0, _update_rate_hz.value());
-  } else {
-    gzmsg << "Setting update rate from sdf since no value was passed."
-          << std::endl;
-    this->updateRate = this->sdfUpdateRate;
-  }
+void SensorPrivate::DisableTriggered() {
   gzmsg << "Disabled triggered mode for sensor [" << this->name
         << "]. Sensor will update at " << this->updateRate << "Hz."
         << std::endl;

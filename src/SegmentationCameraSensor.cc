@@ -231,7 +231,7 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
       triggerTopic = transport::TopicUtils::AsValidTopic(this->Topic() +
                                                          "/trigger");
     }
-    this->EnableTriggered(triggerTopic);
+    this->SetTriggered(true, triggerTopic);
   }
 
   // TODO(anyone) Access the info topic from the parent class
