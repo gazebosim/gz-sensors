@@ -29,14 +29,10 @@
 
 #include "gz/sensors/Sensor.hh"
 
-#include <algorithm>
 #include <chrono>
-#include <cmath>
 #include <map>
 #include <mutex>
-#include <optional>
 #include <ostream>
-#include <vector>
 #include <string>
 
 #include <gz/common/Console.hh>
