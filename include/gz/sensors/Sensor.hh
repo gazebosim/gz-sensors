@@ -113,8 +113,8 @@ namespace gz
       ///   subclasses' Update() method will be called.
       /// \param[in] _now The current time
       /// \param[in] _force Force the update to happen even if it's not time
-      /// \return True if the update was triggered (_force was true or _now
-      /// >= next_update_time) and the sensor's
+      /// \return True if the update was performed (_force was true or _now
+      /// >= next_update_time or sensor had a pending trigger) and the sensor's
       /// bool Sensor::Update(std::chrono::steady_clock::time_point)
       /// function returned true.
       /// False otherwise.
@@ -230,6 +230,28 @@ namespace gz
       /// \brief Check if there are any subscribers
       /// \return True if there are subscribers, false otherwise
       public: virtual bool HasConnections() const;
+
+      /// \brief Enable or disable triggered mode. In this mode,
+      /// - the sensor will only update if a new message has been published to
+      ///   the passed _triggerTopic since the last update,
+      /// - until the next message is published on _triggerTopic, all Update
+      ///   calls will return false, and
+      /// - if the sensor has a pending trigger, the next Update call will
+      ///   ignore the sensor's update rate and try generate data immediately.
+      /// \param[in] _triggered Sets triggered mode if true and disables it if
+      /// false.
+      /// \param[in] _triggerTopic The topic on which the sensor will listen
+      /// for trigger messages in triggered mode. If _triggered is true, this
+      /// value should not be empty. If _triggered is false, this value is
+      /// ignored.
+      /// \return True if the operation succeeded.
+      public: bool SetTriggered(bool _triggered,
+                                const std::string &_triggerTopic = "");
+
+      /// \brief Whether the sensor has a pending trigger.
+      /// \return True if the sensor is in trigger mode and has a pending
+      /// trigger.
+      public: bool HasPendingTrigger() const;
 
       GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal
