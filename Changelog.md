@@ -1,5 +1,16 @@
 ## Gazebo Sensors 8
 
+### Gazebo Sensors 8.1.0 (2024-05-16)
+
+1. Set camera projection matrix based on lens params for other types of cameras
+    * [Pull request #432](https://github.com/gazebosim/gz-sensors/pull/432)
+
+1. Move trigger logic to base Sensor class and enable trigger for all camera sensors
+    * [Pull request #431](https://github.com/gazebosim/gz-sensors/pull/431)
+
+1. Add package.xml
+    * [Pull request #422](https://github.com/gazebosim/gz-sensors/pull/422)
+
 ### Gazebo Sensors 8.0.1 (2024-03-15)
 
 1. Avoid calling DblNormal with invalid standard deviation
