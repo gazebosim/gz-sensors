@@ -280,9 +280,6 @@ bool BoundingBoxCameraSensor::CreateCamera()
     return false;
   }
 
-  // Camera Info Msg
-  this->PopulateInfo(sdfCamera);
-
   if (!this->dataPtr->rgbCamera)
   {
     // Create rendering camera
@@ -332,6 +329,14 @@ bool BoundingBoxCameraSensor::CreateCamera()
   // Add the rendering sensors to handle its render
   this->AddSensor(this->dataPtr->boundingboxCamera);
   this->AddSensor(this->dataPtr->rgbCamera);
+
+  this->UpdateLensIntrinsicsAndProjection(this->dataPtr->rgbCamera,
+      *sdfCamera);
+  this->UpdateLensIntrinsicsAndProjection(this->dataPtr->boundingboxCamera,
+      *sdfCamera);
+
+  // Camera Info Msg
+  this->PopulateInfo(sdfCamera);
 
   // Create the directory to store frames
   if (sdfCamera->SaveFrames())

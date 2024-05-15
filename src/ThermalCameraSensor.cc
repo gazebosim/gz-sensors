@@ -247,7 +247,7 @@ bool ThermalCameraSensor::Load(const sdf::Sensor &_sdf)
 //////////////////////////////////////////////////
 bool ThermalCameraSensor::CreateCamera()
 {
-  const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
+  sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
 
   if (!cameraSdf)
   {
@@ -262,8 +262,6 @@ bool ThermalCameraSensor::CreateCamera()
 
   double farPlane = cameraSdf->FarClip();
   double nearPlane = cameraSdf->NearClip();
-
-  this->PopulateInfo(cameraSdf);
 
   this->dataPtr->thermalCamera = this->Scene()->CreateThermalCamera(
       this->Name());
@@ -345,6 +343,11 @@ bool ThermalCameraSensor::CreateCamera()
   // This->dataPtr->distortion->Load(this->sdf->GetElement("distortion"));
 
   this->Scene()->RootVisual()->AddChild(this->dataPtr->thermalCamera);
+
+  this->UpdateLensIntrinsicsAndProjection(this->dataPtr->thermalCamera,
+      *cameraSdf);
+
+  this->PopulateInfo(cameraSdf);
 
   // Create the directory to store frames
   if (cameraSdf->SaveFrames())

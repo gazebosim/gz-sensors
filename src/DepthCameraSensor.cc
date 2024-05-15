@@ -327,7 +327,7 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
 //////////////////////////////////////////////////
 bool DepthCameraSensor::CreateCamera()
 {
-  const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
+  sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
 
   if (!cameraSdf)
   {
@@ -341,7 +341,6 @@ bool DepthCameraSensor::CreateCamera()
   double far = cameraSdf->FarClip();
   double near = cameraSdf->NearClip();
 
-  this->PopulateInfo(cameraSdf);
 
   this->dataPtr->depthCamera = this->Scene()->CreateDepthCamera(
       this->Name());
@@ -404,6 +403,9 @@ bool DepthCameraSensor::CreateCamera()
 
   this->Scene()->RootVisual()->AddChild(this->dataPtr->depthCamera);
 
+  this->UpdateLensIntrinsicsAndProjection(this->dataPtr->depthCamera,
+      *cameraSdf);
+
   // Create the directory to store frames
   if (cameraSdf->SaveFrames())
   {
@@ -411,6 +413,8 @@ bool DepthCameraSensor::CreateCamera()
     this->dataPtr->saveImagePrefix = this->Name() + "_";
     this->dataPtr->saveImage = true;
   }
+
+  this->PopulateInfo(cameraSdf);
 
   this->dataPtr->depthConnection =
       this->dataPtr->depthCamera->ConnectNewDepthFrame(

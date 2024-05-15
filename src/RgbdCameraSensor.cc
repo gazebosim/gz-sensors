@@ -277,15 +277,13 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
 //////////////////////////////////////////////////
 bool RgbdCameraSensor::CreateCameras()
 {
-  const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
+  sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
 
   if (!cameraSdf)
   {
     gzerr << "Unable to access camera SDF element\n";
     return false;
   }
-
-  this->PopulateInfo(cameraSdf);
 
   int width = cameraSdf->ImageWidth();
   int height = cameraSdf->ImageHeight();
@@ -378,6 +376,11 @@ bool RgbdCameraSensor::CreateCameras()
   // This->dataPtr->distortion->Load(this->dataPtr->sdf->GetElement("distortion"));
 
   this->Scene()->RootVisual()->AddChild(this->dataPtr->depthCamera);
+
+  this->UpdateLensIntrinsicsAndProjection(this->dataPtr->depthCamera,
+      *cameraSdf);
+
+  this->PopulateInfo(cameraSdf);
 
   this->dataPtr->depthConnection =
       this->dataPtr->depthCamera->ConnectNewDepthFrame(
