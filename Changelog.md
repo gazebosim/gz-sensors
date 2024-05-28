@@ -4,6 +4,41 @@
 
 ## Gazebo Sensors 8
 
+### Gazebo Sensors 8.1.0 (2024-05-16)
+
+1. Set camera projection matrix based on lens params for other types of cameras
+    * [Pull request #432](https://github.com/gazebosim/gz-sensors/pull/432)
+
+1. Move trigger logic to base Sensor class and enable trigger for all camera sensors
+    * [Pull request #431](https://github.com/gazebosim/gz-sensors/pull/431)
+
+1. Add package.xml
+    * [Pull request #422](https://github.com/gazebosim/gz-sensors/pull/422)
+
+### Gazebo Sensors 8.0.1 (2024-03-15)
+
+1. Avoid calling DblNormal with invalid standard deviation
+    * [Pull request #396](https://github.com/gazebosim/gz-sensors/pull/396)
+
+1. DepthCamera and RGBDCamera - optimize RGB point cloud connection
+    * [Pull request #413](https://github.com/gazebosim/gz-sensors/pull/413)
+
+1. Update CI badges to point to release branch job
+    * [Pull request #406](https://github.com/gazebosim/gz-sensors/pull/406)
+    * [Pull request #405](https://github.com/gazebosim/gz-sensors/pull/405)
+
+1. Infrastructure
+    * [Pull request #401](https://github.com/gazebosim/gz-sensors/pull/401)
+
+1. Clean up rendering resources
+    * [Pull request #324](https://github.com/gazebosim/gz-sensors/pull/324)
+
+1. Destroy rendering sensors when sensor is removed
+    * [Pull request #169](https://github.com/gazebosim/gz-sensors/pull/169)
+
+1. Support protobuf >= 22
+    * [Pull request #351](https://github.com/gazebosim/gz-sensors/pull/351)
+
 ### Gazebo Sensors 8.0.0 (2023-09-29)
 
 1. Documentation fixes

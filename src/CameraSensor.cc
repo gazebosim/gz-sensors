@@ -20,6 +20,8 @@
 #include <gz/msgs/image.pb.h>
 
 #include <mutex>
+#include <ostream>
+#include <string>
 
 #include <gz/common/Console.hh>
 #include <gz/common/Event.hh>
@@ -30,6 +32,7 @@
 #include <gz/math/Helpers.hh>
 #include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
+#include <gz/transport/TopicUtils.hh>
 
 #include "CameraSensorUtil.hh"
 #include "gz/sensors/CameraSensor.hh"
@@ -96,15 +99,6 @@ class gz::sensors::CameraSensorPrivate
 
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
-
-  /// \brief True if camera is triggered by a topic
-  public: bool isTriggeredCamera = false;
-
-  /// \brief True if camera has been triggered by a topic
-  public: bool isTriggered = false;
-
-  /// \brief Topic for camera trigger
-  public: std::string triggerTopic = "";
 
   /// \brief True to save images
   public: bool saveImage = false;
@@ -235,38 +229,8 @@ bool CameraSensor::CreateCamera()
       break;
   }
 
-  // Update the DOM object intrinsics to have consistent
-  // intrinsics between ogre camera and camera_info msg
-  if(!cameraSdf->HasLensIntrinsics())
-  {
-    auto intrinsicMatrix =
-      gz::rendering::projectionToCameraIntrinsic(
-        this->dataPtr->camera->ProjectionMatrix(),
-        this->dataPtr->camera->ImageWidth(),
-        this->dataPtr->camera->ImageHeight()
-      );
-
-    cameraSdf->SetLensIntrinsicsFx(intrinsicMatrix(0, 0));
-    cameraSdf->SetLensIntrinsicsFy(intrinsicMatrix(1, 1));
-    cameraSdf->SetLensIntrinsicsCx(intrinsicMatrix(0, 2));
-    cameraSdf->SetLensIntrinsicsCy(intrinsicMatrix(1, 2));
-  }
-  // set custom projection matrix based on intrinsics param specified in sdf
-  else
-  {
-    double fx = cameraSdf->LensIntrinsicsFx();
-    double fy = cameraSdf->LensIntrinsicsFy();
-    double cx = cameraSdf->LensIntrinsicsCx();
-    double cy = cameraSdf->LensIntrinsicsCy();
-    double s = cameraSdf->LensIntrinsicsSkew();
-    auto projectionMatrix = gz::sensors::buildProjectionMatrix(
-        this->dataPtr->camera->ImageWidth(),
-        this->dataPtr->camera->ImageHeight(),
-        fx, fy, cx, cy, s,
-        this->dataPtr->camera->NearClipPlane(),
-        this->dataPtr->camera->FarClipPlane());
-    this->dataPtr->camera->SetProjectionMatrix(projectionMatrix);
-  }
+  this->UpdateLensIntrinsicsAndProjection(this->dataPtr->camera,
+      *cameraSdf);
 
   this->dataPtr->image = this->dataPtr->camera->CreateImage();
 
@@ -278,48 +242,6 @@ bool CameraSensor::CreateCamera()
     this->dataPtr->saveImagePath = cameraSdf->SaveFramesPath();
     this->dataPtr->saveImagePrefix = this->Name() + "_";
     this->dataPtr->saveImage = true;
-  }
-
-  // Update the DOM object intrinsics to have consistent
-  // projection matrix values between ogre camera and camera_info msg
-  // If these values are not defined in the SDF then we need to update
-  // these values to something reasonable. The projection matrix is
-  // the cumulative effect of intrinsic and extrinsic parameters
-  if(!cameraSdf->HasLensProjection())
-  {
-    // Note that the matrix from Ogre via camera->ProjectionMatrix() has a
-    // different format than the projection matrix used in SDFormat.
-    // This is why they are converted using projectionToCameraIntrinsic.
-    // The resulting matrix is the intrinsic matrix, but since the user has
-    // not overridden the values, this is also equal to the projection matrix.
-    auto intrinsicMatrix =
-      gz::rendering::projectionToCameraIntrinsic(
-        this->dataPtr->camera->ProjectionMatrix(),
-        this->dataPtr->camera->ImageWidth(),
-        this->dataPtr->camera->ImageHeight()
-      );
-    cameraSdf->SetLensProjectionFx(intrinsicMatrix(0, 0));
-    cameraSdf->SetLensProjectionFy(intrinsicMatrix(1, 1));
-    cameraSdf->SetLensProjectionCx(intrinsicMatrix(0, 2));
-    cameraSdf->SetLensProjectionCy(intrinsicMatrix(1, 2));
-  }
-  // set custom projection matrix based on projection param specified in sdf
-  else
-  {
-    // tx and ty are not used
-    double fx = cameraSdf->LensProjectionFx();
-    double fy = cameraSdf->LensProjectionFy();
-    double cx = cameraSdf->LensProjectionCx();
-    double cy = cameraSdf->LensProjectionCy();
-    double s = 0;
-
-    auto projectionMatrix = gz::sensors::buildProjectionMatrix(
-        this->dataPtr->camera->ImageWidth(),
-        this->dataPtr->camera->ImageHeight(),
-        fx, fy, cx, cy, s,
-        this->dataPtr->camera->NearClipPlane(),
-        this->dataPtr->camera->FarClipPlane());
-    this->dataPtr->camera->SetProjectionMatrix(projectionMatrix);
   }
 
   // Populate camera info topic
@@ -398,29 +320,13 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
 
   if (_sdf.CameraSensor()->Triggered())
   {
-    if (!_sdf.CameraSensor()->TriggerTopic().empty())
+    std::string triggerTopic = _sdf.CameraSensor()->TriggerTopic();
+    if (triggerTopic.empty())
     {
-      this->dataPtr->triggerTopic = _sdf.CameraSensor()->TriggerTopic();
+      triggerTopic = transport::TopicUtils::AsValidTopic(this->Topic() +
+                                                         "/trigger");
     }
-    else
-    {
-      this->dataPtr->triggerTopic =
-          transport::TopicUtils::AsValidTopic(
-          this->Topic() + "/trigger");
-
-      if (this->dataPtr->triggerTopic.empty())
-      {
-        gzerr << "Invalid trigger topic name" << std::endl;
-        return false;
-      }
-    }
-
-    this->dataPtr->node.Subscribe(this->dataPtr->triggerTopic,
-        &CameraSensor::OnTrigger, this);
-
-    gzdbg << "Camera trigger messages for [" << this->Name() << "] subscribed"
-           << " on [" << this->dataPtr->triggerTopic << "]" << std::endl;
-    this->dataPtr->isTriggeredCamera = true;
+    this->SetTriggered(true, triggerTopic);
   }
 
   if (!this->AdvertiseInfo())
@@ -492,13 +398,6 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     // publish the camera info message
     this->PublishInfo(_now);
-  }
-
-  // render only if necessary
-  if (this->dataPtr->isTriggeredCamera &&
-      !this->dataPtr->isTriggered)
-  {
-    return true;
   }
 
   if (!this->dataPtr->pub.HasConnections() &&
@@ -621,19 +520,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     }
   }
 
-  if (this->dataPtr->isTriggeredCamera)
-  {
-    return this->dataPtr->isTriggered = false;
-  }
-
   return true;
-}
-
-//////////////////////////////////////////////////
-void CameraSensor::OnTrigger(const gz::msgs::Boolean &/*_msg*/)
-{
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  this->dataPtr->isTriggered = true;
 }
 
 //////////////////////////////////////////////////
@@ -863,4 +750,84 @@ bool CameraSensor::HasInfoConnections() const
 const std::string& CameraSensor::OpticalFrameId() const
 {
   return this->dataPtr->opticalFrameId;
+}
+
+//////////////////////////////////////////////////
+void CameraSensor::UpdateLensIntrinsicsAndProjection(
+  rendering::CameraPtr _camera, sdf::Camera &_cameraSdf)
+{
+  // Update the DOM object intrinsics to have consistent
+  // intrinsics between ogre camera and camera_info msg
+  if(!_cameraSdf.HasLensIntrinsics())
+  {
+    auto intrinsicMatrix =
+      gz::rendering::projectionToCameraIntrinsic(
+        _camera->ProjectionMatrix(),
+        _camera->ImageWidth(),
+        _camera->ImageHeight()
+      );
+
+    _cameraSdf.SetLensIntrinsicsFx(intrinsicMatrix(0, 0));
+    _cameraSdf.SetLensIntrinsicsFy(intrinsicMatrix(1, 1));
+    _cameraSdf.SetLensIntrinsicsCx(intrinsicMatrix(0, 2));
+    _cameraSdf.SetLensIntrinsicsCy(intrinsicMatrix(1, 2));
+  }
+  // set custom projection matrix based on intrinsics param specified in sdf
+  else
+  {
+    double fx = _cameraSdf.LensIntrinsicsFx();
+    double fy = _cameraSdf.LensIntrinsicsFy();
+    double cx = _cameraSdf.LensIntrinsicsCx();
+    double cy = _cameraSdf.LensIntrinsicsCy();
+    double s = _cameraSdf.LensIntrinsicsSkew();
+    auto projectionMatrix = buildProjectionMatrix(
+        _camera->ImageWidth(),
+        _camera->ImageHeight(),
+        fx, fy, cx, cy, s,
+        _camera->NearClipPlane(),
+        _camera->FarClipPlane());
+    _camera->SetProjectionMatrix(projectionMatrix);
+  }
+
+  // Update the DOM object intrinsics to have consistent
+  // projection matrix values between ogre camera and camera_info msg
+  // If these values are not defined in the SDF then we need to update
+  // these values to something reasonable. The projection matrix is
+  // the cumulative effect of intrinsic and extrinsic parameters
+  if(!_cameraSdf.HasLensProjection())
+  {
+    // Note that the matrix from Ogre via camera->ProjectionMatrix() has a
+    // different format than the projection matrix used in SDFormat.
+    // This is why they are converted using projectionToCameraIntrinsic.
+    // The resulting matrix is the intrinsic matrix, but since the user has
+    // not overridden the values, this is also equal to the projection matrix.
+    auto intrinsicMatrix =
+      gz::rendering::projectionToCameraIntrinsic(
+        _camera->ProjectionMatrix(),
+        _camera->ImageWidth(),
+        _camera->ImageHeight()
+      );
+    _cameraSdf.SetLensProjectionFx(intrinsicMatrix(0, 0));
+    _cameraSdf.SetLensProjectionFy(intrinsicMatrix(1, 1));
+    _cameraSdf.SetLensProjectionCx(intrinsicMatrix(0, 2));
+    _cameraSdf.SetLensProjectionCy(intrinsicMatrix(1, 2));
+  }
+  // set custom projection matrix based on projection param specified in sdf
+  else
+  {
+    // tx and ty are not used
+    double fx = _cameraSdf.LensProjectionFx();
+    double fy = _cameraSdf.LensProjectionFy();
+    double cx = _cameraSdf.LensProjectionCx();
+    double cy = _cameraSdf.LensProjectionCy();
+    double s = 0;
+
+    auto projectionMatrix = buildProjectionMatrix(
+        _camera->ImageWidth(),
+        _camera->ImageHeight(),
+        fx, fy, cx, cy, s,
+        _camera->NearClipPlane(),
+        _camera->FarClipPlane());
+    _camera->SetProjectionMatrix(projectionMatrix);
+  }
 }

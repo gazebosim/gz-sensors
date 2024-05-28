@@ -216,6 +216,17 @@ bool ThermalCameraSensor::Load(const sdf::Sensor &_sdf)
   gzdbg << "Thermal images for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
+  if (_sdf.CameraSensor()->Triggered())
+  {
+    std::string triggerTopic = _sdf.CameraSensor()->TriggerTopic();
+    if (triggerTopic.empty())
+    {
+      triggerTopic = transport::TopicUtils::AsValidTopic(this->Topic() +
+                                                         "/trigger");
+    }
+    this->SetTriggered(true, triggerTopic);
+  }
+
   if (!this->AdvertiseInfo())
     return false;
 
@@ -236,7 +247,7 @@ bool ThermalCameraSensor::Load(const sdf::Sensor &_sdf)
 //////////////////////////////////////////////////
 bool ThermalCameraSensor::CreateCamera()
 {
-  const sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
+  sdf::Camera *cameraSdf = this->dataPtr->sdfSensor.CameraSensor();
 
   if (!cameraSdf)
   {
@@ -251,8 +262,6 @@ bool ThermalCameraSensor::CreateCamera()
 
   double farPlane = cameraSdf->FarClip();
   double nearPlane = cameraSdf->NearClip();
-
-  this->PopulateInfo(cameraSdf);
 
   this->dataPtr->thermalCamera = this->Scene()->CreateThermalCamera(
       this->Name());
@@ -334,6 +343,11 @@ bool ThermalCameraSensor::CreateCamera()
   // This->dataPtr->distortion->Load(this->sdf->GetElement("distortion"));
 
   this->Scene()->RootVisual()->AddChild(this->dataPtr->thermalCamera);
+
+  this->UpdateLensIntrinsicsAndProjection(this->dataPtr->thermalCamera,
+      *cameraSdf);
+
+  this->PopulateInfo(cameraSdf);
 
   // Create the directory to store frames
   if (cameraSdf->SaveFrames())
