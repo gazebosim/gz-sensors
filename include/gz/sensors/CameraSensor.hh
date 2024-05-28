@@ -148,6 +148,17 @@ namespace gz
       /// \return The camera optical frame
       public: const std::string& OpticalFrameId() const;
 
+      /// \brief Set camera lens intrinsics and projection based on
+      /// values from SDF. If the camera SDF does not contain intrinsic or
+      /// projection parameters, the camera will not be updated. Instead, the
+      /// camera SDF will be updated with intrinsic and projection values
+      /// computed manually from current camera intrinsic properties.
+      /// \param[in] _camera Camera to set intrinsic and projection params.
+      /// \param[in,out] _cameraSdf Camera sdf with intrinisc and projection
+      /// parameters.
+      public: void UpdateLensIntrinsicsAndProjection(
+          rendering::CameraPtr _camera, sdf::Camera &_cameraSdf);
+
       /// \brief Advertise camera info topic.
       /// \return True if successful.
       protected: bool AdvertiseInfo();
@@ -177,10 +188,6 @@ namespace gz
       /// the Manager.
       /// \param[in] _scene Pointer to the new scene.
       private: void OnSceneChange(gz::rendering::ScenePtr /*_scene*/);
-
-      /// \brief Callback for triggered subscription
-      /// \param[in] _msg Boolean message
-      private: void OnTrigger(const gz::msgs::Boolean &/*_msg*/);
 
       GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

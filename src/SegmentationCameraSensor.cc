@@ -223,6 +223,17 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
     << "] advertised on [" << this->Topic()
     << this->dataPtr->topicLabelsMapSuffix << "]\n";
 
+  if (_sdf.CameraSensor()->Triggered())
+  {
+    std::string triggerTopic = _sdf.CameraSensor()->TriggerTopic();
+    if (triggerTopic.empty())
+    {
+      triggerTopic = transport::TopicUtils::AsValidTopic(this->Topic() +
+                                                         "/trigger");
+    }
+    this->SetTriggered(true, triggerTopic);
+  }
+
   // TODO(anyone) Access the info topic from the parent class
   if (!this->AdvertiseInfo(this->Topic() + "/camera_info"))
     return false;
@@ -264,7 +275,7 @@ void SegmentationCameraSensor::SetScene(
 /////////////////////////////////////////////////
 bool SegmentationCameraSensor::CreateCamera()
 {
-  const auto sdfCamera = this->dataPtr->sdfSensor.CameraSensor();
+  auto sdfCamera = this->dataPtr->sdfSensor.CameraSensor();
   if (!sdfCamera)
   {
     gzerr << "Unable to access camera SDF element\n";
@@ -292,9 +303,6 @@ bool SegmentationCameraSensor::CreateCamera()
       return false;
     }
   }
-
-  // Camera Info Msg
-  this->PopulateInfo(sdfCamera);
 
   // Save frames properties
   if (sdfCamera->SaveFrames())
@@ -368,6 +376,9 @@ bool SegmentationCameraSensor::CreateCamera()
   // Add the rendering sensor to handle its render
   this->AddSensor(this->dataPtr->camera);
 
+  this->UpdateLensIntrinsicsAndProjection(this->dataPtr->camera,
+      *sdfCamera);
+
   // Add the rgb camera only if we want to generate dataset / save samples
   if (this->dataPtr->saveSamples)
   {
@@ -385,7 +396,13 @@ bool SegmentationCameraSensor::CreateCamera()
     this->Scene()->RootVisual()->AddChild(this->dataPtr->rgbCamera);
     this->AddSensor(this->dataPtr->rgbCamera);
     this->dataPtr->image = this->dataPtr->rgbCamera->CreateImage();
+
+    this->UpdateLensIntrinsicsAndProjection(this->dataPtr->rgbCamera,
+      *sdfCamera);
   }
+
+  // Camera Info Msg
+  this->PopulateInfo(sdfCamera);
 
   // Connection to receive the segmentation buffer
   this->dataPtr->newSegmentationConnection =

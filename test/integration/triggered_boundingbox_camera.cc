@@ -182,7 +182,8 @@ void TriggeredBoundingBoxCameraTest::BoxesWithBuiltinSDF(
     std::string imageTopic =
         "/test/integration/TriggeredBBCameraPlugin_imagesWithBuiltinSDF_image";
     WaitForMessageTestHelper<gz::msgs::Image> helper(imageTopic);
-    mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+    std::chrono::steady_clock::duration now = std::chrono::seconds(1);
+    mgr.RunOnce(now, /*_force=*/false);
     EXPECT_FALSE(helper.WaitForMessage(1s)) << helper;
     g_mutex.lock();
     EXPECT_EQ(g_boxes.size(), size_t(0));
@@ -204,7 +205,8 @@ void TriggeredBoundingBoxCameraTest::BoxesWithBuiltinSDF(
   {
     WaitForMessageTestHelper<gz::msgs::AnnotatedAxisAligned2DBox_V>
         helper(boxTopic);
-    mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+    std::chrono::steady_clock::duration now = std::chrono::seconds(2);
+    mgr.RunOnce(now, /*_force=*/false);
     EXPECT_TRUE(helper.WaitForMessage(10s)) << helper;
     g_mutex.lock();
     EXPECT_EQ(g_boxes.size(), size_t(2));
@@ -286,7 +288,8 @@ void TriggeredBoundingBoxCameraTest::EmptyTriggerTopic(
         "/test/integration/triggered_bbcamera";
     WaitForMessageTestHelper<gz::msgs::AnnotatedAxisAligned2DBox_V>
         helper(boxTopic);
-    mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+    std::chrono::steady_clock::duration now = std::chrono::seconds(1);
+    mgr.RunOnce(now, /*_force=*/false);
     EXPECT_TRUE(helper.WaitForMessage(10s)) << helper;
     g_mutex.lock();
     EXPECT_EQ(g_boxes.size(), size_t(2));

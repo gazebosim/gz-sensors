@@ -19,13 +19,16 @@
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
+#include <gz/msgs/boolean.pb.h>
 #include <gz/msgs/performance_sensor_metrics.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
 
 #include <atomic>
+#include <chrono>
 #include <memory>
+#include <thread>
 
 #include <gtest/gtest.h>
 
@@ -460,5 +463,63 @@ TEST_F(SensorUpdate, NextDataUpdateTime)
     // The next update should be the first dt past the current time
     std::chrono::steady_clock::duration newNext = std::chrono::seconds(6);
     EXPECT_EQ(newNext.count(), sensor->NextDataUpdateTime().count());
+  }
+}
+
+//////////////////////////////////////////////////
+TEST(Sensor_TEST, Trigger)
+{
+  TestSensor sensor;
+  constexpr char kSensorTopic[] = "/topic";
+  EXPECT_TRUE(sensor.SetTopic(kSensorTopic));
+
+  constexpr double kUpdateRate = 5;
+  sensor.SetUpdateRate(5);
+  EXPECT_DOUBLE_EQ(kUpdateRate, sensor.UpdateRate());
+
+  constexpr char kTriggerTopic[] = "/trigger";
+  EXPECT_TRUE(sensor.SetTriggered(true, kTriggerTopic));
+  EXPECT_FALSE(sensor.HasPendingTrigger());
+
+  transport::Node node;
+  transport::Node::Publisher triggerPub =
+      node.Advertise<msgs::Boolean>(kTriggerTopic);
+
+  {
+    // Before triggering, sensor should not update
+    std::chrono::steady_clock::duration now = std::chrono::seconds(2);
+    std::chrono::steady_clock::duration next = std::chrono::seconds(1);
+    sensor.SetNextDataUpdateTime(next);
+    unsigned int preUpdateCount = sensor.updateCount;
+    EXPECT_FALSE(sensor.Sensor::Update(now, /*_force=*/false));
+    EXPECT_EQ(preUpdateCount, sensor.updateCount);
+  }
+  {
+    // After triggering, sensor should update
+    msgs::Boolean triggerMsg;
+    EXPECT_TRUE(triggerPub.Publish(triggerMsg));
+    while (!sensor.HasPendingTrigger()) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+    std::chrono::steady_clock::duration now = std::chrono::seconds(3);
+    std::chrono::steady_clock::duration next = std::chrono::seconds(1);
+    sensor.SetNextDataUpdateTime(next);
+    unsigned int preUpdateCount = sensor.updateCount;
+    EXPECT_TRUE(sensor.Sensor::Update(now, /*_force=*/false));
+    EXPECT_EQ(preUpdateCount + 1, sensor.updateCount);
+  }
+
+  sensor.SetTriggered(false);
+  EXPECT_DOUBLE_EQ(kUpdateRate, sensor.UpdateRate());
+  EXPECT_FALSE(sensor.HasPendingTrigger());
+  {
+    // Sensor should update according to update rate.
+    std::chrono::steady_clock::duration now = std::chrono::seconds(4);
+    std::chrono::steady_clock::duration next = std::chrono::seconds(1);
+    sensor.SetNextDataUpdateTime(next);
+    unsigned int preUpdateCount = sensor.updateCount;
+    EXPECT_TRUE(sensor.Sensor::Update(now, /*_force=*/false));
+    EXPECT_EQ(preUpdateCount + 1, sensor.updateCount);
+    EXPECT_GE(sensor.NextDataUpdateTime(), now);
   }
 }
