@@ -194,9 +194,6 @@ bool GpuLidarSensor::CreateLidar()
     return false;
   }
 
-  this->dataPtr->gpuRays->SetWorldPosition(this->Pose().Pos());
-  this->dataPtr->gpuRays->SetWorldRotation(this->Pose().Rot());
-
   this->dataPtr->gpuRays->SetNearClipPlane(this->RangeMin());
   this->dataPtr->gpuRays->SetFarClipPlane(this->RangeMax());
 
@@ -214,6 +211,7 @@ bool GpuLidarSensor::CreateLidar()
   this->dataPtr->gpuRays->SetRayCount(this->RayCount());
   this->dataPtr->gpuRays->SetVerticalRayCount(
       this->VerticalRayCount());
+  this->dataPtr->gpuRays->SetLocalPose(this->Pose());
 
   this->Scene()->RootVisual()->AddChild(
       this->dataPtr->gpuRays);

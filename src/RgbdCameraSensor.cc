@@ -326,6 +326,8 @@ bool RgbdCameraSensor::CreateCameras()
   }
 
   this->dataPtr->depthCamera->SetVisibilityMask(cameraSdf->VisibilityMask());
+  this->dataPtr->depthCamera->SetLocalPose(
+      this->Pose() * cameraSdf->RawPose());
 
   this->AddSensor(this->dataPtr->depthCamera);
 
