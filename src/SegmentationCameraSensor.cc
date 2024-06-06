@@ -369,7 +369,7 @@ bool SegmentationCameraSensor::CreateCamera()
   this->dataPtr->camera->SetFarClipPlane(sdfCamera->FarClip());
   this->dataPtr->camera->SetAspectRatio(aspectRatio);
   this->dataPtr->camera->SetHFOV(angle);
-  this->dataPtr->camera->SetLocalPose(this->Pose() * sdfCamera->RawPose());
+  this->dataPtr->camera->SetLocalPose(this->Pose());
 
   // Add the camera to the scene
   this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);

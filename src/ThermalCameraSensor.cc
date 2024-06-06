@@ -300,8 +300,7 @@ bool ThermalCameraSensor::CreateCamera()
   this->dataPtr->thermalCamera->SetMinTemperature(this->dataPtr->minTemp);
   this->dataPtr->thermalCamera->SetMaxTemperature(this->dataPtr->maxTemp);
   this->dataPtr->thermalCamera->SetLinearResolution(this->dataPtr->resolution);
-  this->dataPtr->thermalCamera->SetLocalPose(
-      this->Pose() * cameraSdf->RawPose());
+  this->dataPtr->thermalCamera->SetLocalPose(this->Pose());
   this->AddSensor(this->dataPtr->thermalCamera);
 
   const std::map<SensorNoiseType, sdf::Noise> noises = {

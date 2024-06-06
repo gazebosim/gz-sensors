@@ -212,7 +212,7 @@ bool CameraSensor::CreateCamera()
   this->dataPtr->camera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->camera->SetFarClipPlane(cameraSdf->FarClip());
   this->dataPtr->camera->SetVisibilityMask(cameraSdf->VisibilityMask());
-  this->dataPtr->camera->SetLocalPose(this->Pose() * cameraSdf->RawPose());
+  this->dataPtr->camera->SetLocalPose(this->Pose());
   this->AddSensor(this->dataPtr->camera);
 
   const std::map<SensorNoiseType, sdf::Noise> noises = {

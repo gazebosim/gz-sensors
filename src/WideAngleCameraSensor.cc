@@ -240,7 +240,7 @@ bool WideAngleCameraSensor::CreateCamera()
   this->dataPtr->camera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->camera->SetFarClipPlane(cameraSdf->FarClip());
   this->dataPtr->camera->SetVisibilityMask(cameraSdf->VisibilityMask());
-  this->dataPtr->camera->SetLocalPose(this->Pose() * cameraSdf->RawPose());
+  this->dataPtr->camera->SetLocalPose(this->Pose());
 
   rendering::CameraLens lens;
   std::string lensType = cameraSdf->LensType();
