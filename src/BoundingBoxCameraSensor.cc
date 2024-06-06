@@ -321,6 +321,7 @@ bool BoundingBoxCameraSensor::CreateCamera()
   this->dataPtr->boundingboxCamera->SetVisibilityMask(
     sdfCamera->VisibilityMask());
   this->dataPtr->boundingboxCamera->SetBoundingBoxType(this->dataPtr->type);
+  this->dataPtr->boundingboxCamera->SetLocalPose(this->Pose());
 
   // Add the camera to the scene
   this->Scene()->RootVisual()->AddChild(this->dataPtr->rgbCamera);
