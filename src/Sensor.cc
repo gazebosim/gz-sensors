@@ -653,10 +653,17 @@ void SensorPrivate::DisableTriggered() {
 }
 
 //////////////////////////////////////////////////
-bool Sensor::HasPendingTrigger() const {
+bool Sensor::HasPendingTrigger() const
+{
   if (!this->dataPtr->IsTriggered())
     return false;
 
   std::lock_guard<std::mutex> triggerLock(this->dataPtr->triggerMutex);
   return this->dataPtr->pendingTrigger;
+}
+
+//////////////////////////////////////////////////
+bool Sensor::IsTriggered() const
+{
+  return this->dataPtr->IsTriggered();
 }
