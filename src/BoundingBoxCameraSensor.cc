@@ -338,7 +338,7 @@ bool BoundingBoxCameraSensor::CreateCamera()
       sdfCameraCopy);
   this->UpdateLensIntrinsicsAndProjection(this->dataPtr->boundingboxCamera,
       *sdfCamera);
-    // Camera Info Msg
+  // Camera Info Msg
   this->PopulateInfo(sdfCamera);
 
   // Create the directory to store frames
