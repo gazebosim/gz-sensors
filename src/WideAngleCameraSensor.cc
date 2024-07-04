@@ -240,6 +240,7 @@ bool WideAngleCameraSensor::CreateCamera()
   this->dataPtr->camera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->camera->SetFarClipPlane(cameraSdf->FarClip());
   this->dataPtr->camera->SetVisibilityMask(cameraSdf->VisibilityMask());
+  this->dataPtr->camera->SetLocalPose(this->Pose());
 
   rendering::CameraLens lens;
   std::string lensType = cameraSdf->LensType();
@@ -412,9 +413,6 @@ bool WideAngleCameraSensor::Update(
     gzerr << "WideAngleCamera doesn't exist.\n";
     return false;
   }
-
-  // move the camera to the current pose
-  this->dataPtr->camera->SetLocalPose(this->Pose());
 
   // render only if necessary
   if (!this->dataPtr->pub.HasConnections() &&
