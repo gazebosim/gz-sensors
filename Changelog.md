@@ -4,6 +4,14 @@
 
 ## Gazebo Sensors 8
 
+### Gazebo Sensors 8.2.0 (2024-06-14)
+
+1. Add API to check if sensor is in trigger mode
+    * [Pull request #441](https://github.com/gazebosim/gz-sensors/pull/441)
+
+1. Set rendering sensor pose
+    * [Pull request #439](https://github.com/gazebosim/gz-sensors/pull/439)
+
 ### Gazebo Sensors 8.1.0 (2024-05-16)
 
 1. Set camera projection matrix based on lens params for other types of cameras

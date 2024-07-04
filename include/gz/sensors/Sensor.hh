@@ -253,6 +253,10 @@ namespace gz
       /// trigger.
       public: bool HasPendingTrigger() const;
 
+      /// \brief Whether the sensor trigger mode is enabled.
+      /// \return True if the sensor is in trigger mode, false otherwise
+      public: bool IsTriggered() const;
+
       GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \internal
       /// \brief Data pointer for private data
