@@ -302,6 +302,9 @@ bool RgbdCameraSensor::CreateCameras()
   // To make this configurable the user has the option to set an optical frame.
   // If the user has set <optical_frame_id> in the cameraSdf use it,
   // otherwise fall back to the sensor frame.
+  // \todo(iche033 sdf::Camera::OpticalFrameId is deprecated.
+  // Remove this if statement when gz-sensors is updated to use sdformat16
+  GZ_UTILS_WARN_IGNORE__DEPRECATED_DECLARATION
   if (cameraSdf->OpticalFrameId().empty())
   {
    this->dataPtr->opticalFrameId = this->FrameId();
@@ -310,6 +313,7 @@ bool RgbdCameraSensor::CreateCameras()
   {
    this->dataPtr->opticalFrameId = cameraSdf->OpticalFrameId();
   }
+  GZ_UTILS_WARN_RESUME__DEPRECATED_DECLARATION
 
   // Depth camera clip params are new and only override the camera clip
   // params if specified.

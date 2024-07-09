@@ -138,7 +138,7 @@ class gz::sensors::SensorPrivate
   public: std::map<std::string, uint64_t> sequences;
 
   /// \brief frame id
-  public: std::string frame_id;
+  public: std::string frameId;
 
   /// \brief If sensor is active or not.
   public: bool active = true;
@@ -161,9 +161,6 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
 {
   this->sdfSensor = _sdf;
 
-  // All SDF code gets auto converted to latest version. This code is
-  // written assuming sdformat 1.7 is the latest
-
   // \todo(nkoenig) what to do with <always_on>? SDFormat docs seem
   // to say if true
   //  then the update_rate will be obeyed. Gazebo seems to use it as if
@@ -174,7 +171,6 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
   // sensor data. Whether or not that data should be visualized seems to
   // be outside the scope of this library
 
-  // \todo(nkoenig) how to use frame?
   this->name = _sdf.Name();
   if (!_sdf.Topic().empty())
   {
@@ -182,16 +178,22 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
       return false;
   }
 
-  sdf::ElementPtr element = _sdf.Element();
-  if (element)
+  this->frameId = _sdf.FrameId();
+  if (this->frameId.empty())
   {
-    if (element->HasElement("gz_frame_id"))
+    sdf::ElementPtr element = _sdf.Element();
+    if (element)
     {
-      this->frame_id = element->Get<std::string>("gz_frame_id");
-    }
-    else
-    {
-      this->frame_id = this->name;
+      if (element->HasElement("gz_frame_id"))
+      {
+        gzwarn << "//sensor/gz_frame_id is deprecated. "
+               << "Please use //sensor/frame_id instead. " << std::endl;
+        this->frameId = element->Get<std::string>("gz_frame_id");
+      }
+      else
+      {
+        this->frameId = this->name;
+      }
     }
   }
 
@@ -288,13 +290,13 @@ std::string Sensor::Name() const
 //////////////////////////////////////////////////
 std::string Sensor::FrameId() const
 {
-  return this->dataPtr->frame_id;
+  return this->dataPtr->frameId;
 }
 
 //////////////////////////////////////////////////
 void Sensor::SetFrameId(const std::string &_frameId)
 {
-  this->dataPtr->frame_id = _frameId;
+  this->dataPtr->frameId = _frameId;
 }
 
 //////////////////////////////////////////////////

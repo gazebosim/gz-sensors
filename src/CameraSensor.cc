@@ -689,6 +689,9 @@ void CameraSensor::PopulateInfo(const sdf::Camera *_cameraSdf)
   // To make this configurable the user has the option to set an optical frame.
   // If the user has set <optical_frame_id> in the cameraSdf use it,
   // otherwise fall back to the sensor frame.
+  // \todo(iche033 sdf::Camera::OpticalFrameId is deprecated.
+  // Remove this if statement when gz-sensors is updated to use sdformat16
+  GZ_UTILS_WARN_IGNORE__DEPRECATED_DECLARATION
   if (_cameraSdf->OpticalFrameId().empty())
   {
    this->dataPtr->opticalFrameId = this->FrameId();
@@ -697,6 +700,8 @@ void CameraSensor::PopulateInfo(const sdf::Camera *_cameraSdf)
   {
    this->dataPtr->opticalFrameId = _cameraSdf->OpticalFrameId();
   }
+  GZ_UTILS_WARN_RESUME__DEPRECATED_DECLARATION
+
   auto infoFrame = this->dataPtr->infoMsg.mutable_header()->add_data();
   infoFrame->set_key("frame_id");
   infoFrame->add_value(this->dataPtr->opticalFrameId);

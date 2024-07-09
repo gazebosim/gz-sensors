@@ -390,15 +390,17 @@ TEST(Sensor_TEST, FrameIdFromSdf)
   {
     TestSensor testSensor;
     loadSensorWithSdfParam(testSensor,
-                           "<gz_frame_id>custom_frame_id</gz_frame_id>");
+                           "<frame_id>custom_frame_id</frame_id>");
     EXPECT_EQ("custom_frame_id", testSensor.FrameId());
   }
+  // todo(iche033)
+  // Remove when gz-sensors is updated to use sdformat16
   {
     TestSensor testSensor;
     loadSensorWithSdfParam(testSensor, R"(
-      <ignition_frame_id>custom_frame_id</ignition_frame_id>
+      <frame_id>custom_frame_id</frame_id>
       <gz_frame_id>other_custom_frame_id</gz_frame_id>)");
-    EXPECT_EQ("other_custom_frame_id", testSensor.FrameId());
+    EXPECT_EQ("custom_frame_id", testSensor.FrameId());
   }
 }
 //////////////////////////////////////////////////
