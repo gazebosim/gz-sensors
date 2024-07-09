@@ -150,6 +150,7 @@ bool CameraSensor::CreateCamera()
   this->dataPtr->camera->SetNearClipPlane(cameraSdf->NearClip());
   this->dataPtr->camera->SetFarClipPlane(cameraSdf->FarClip());
   this->dataPtr->camera->SetVisibilityMask(cameraSdf->VisibilityMask());
+  this->dataPtr->camera->SetLocalPose(this->Pose());
   this->AddSensor(this->dataPtr->camera);
 
   const std::map<SensorNoiseType, sdf::Noise> noises = {
@@ -390,9 +391,6 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   }
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-
-  // move the camera to the current pose
-  this->dataPtr->camera->SetLocalPose(this->Pose());
 
   if (this->HasInfoConnections())
   {

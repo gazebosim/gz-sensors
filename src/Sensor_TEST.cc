@@ -479,8 +479,10 @@ TEST(Sensor_TEST, Trigger)
   sensor.SetUpdateRate(5);
   EXPECT_DOUBLE_EQ(kUpdateRate, sensor.UpdateRate());
 
+  EXPECT_FALSE(sensor.IsTriggered());
   constexpr char kTriggerTopic[] = "/trigger";
   EXPECT_TRUE(sensor.SetTriggered(true, kTriggerTopic));
+  EXPECT_TRUE(sensor.IsTriggered());
   EXPECT_FALSE(sensor.HasPendingTrigger());
 
   transport::Node node;
