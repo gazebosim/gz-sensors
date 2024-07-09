@@ -138,7 +138,7 @@ class gz::sensors::SensorPrivate
   public: std::map<std::string, uint64_t> sequences;
 
   /// \brief frame id
-  public: std::string frame_id;
+  public: std::string frameId;
 
   /// \brief If sensor is active or not.
   public: bool active = true;
@@ -187,11 +187,11 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
   {
     if (element->HasElement("gz_frame_id"))
     {
-      this->frame_id = element->Get<std::string>("gz_frame_id");
+      this->frameId = element->Get<std::string>("gz_frame_id");
     }
     else
     {
-      this->frame_id = this->name;
+      this->frameId = this->name;
     }
   }
 
@@ -288,13 +288,13 @@ std::string Sensor::Name() const
 //////////////////////////////////////////////////
 std::string Sensor::FrameId() const
 {
-  return this->dataPtr->frame_id;
+  return this->dataPtr->frameId;
 }
 
 //////////////////////////////////////////////////
 void Sensor::SetFrameId(const std::string &_frameId)
 {
-  this->dataPtr->frame_id = _frameId;
+  this->dataPtr->frameId = _frameId;
 }
 
 //////////////////////////////////////////////////
