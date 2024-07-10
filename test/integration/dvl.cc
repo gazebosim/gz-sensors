@@ -45,6 +45,7 @@ using DopplerVelocityLog = sensors::DopplerVelocityLog;
 struct DVLConfig
 {
   std::string name = "dvl";
+  std::string frameId = "dvl_frame";
   std::string topic = "/gz/sensors/test/dvl";
   double updateRate = 30;  // Hz
 
@@ -75,6 +76,7 @@ sdf::ElementPtr MakeDVLSdf(const DVLConfig &_config)
     << " <model name='model'>"
     << "  <link name='link'>"
     << "   <sensor name='" << _config.name << "' type='custom' gz:type='dvl'>"
+    << "    <gz_frame_id>" << _config.frameId << "</gz_frame_id>"
     << "    <always_on>" << _config.alwaysOn << "</always_on>"
     << "    <update_rate>" << _config.updateRate << "</update_rate>"
     << "    <topic>" << _config.topic << "</topic>"
@@ -345,6 +347,13 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileStatic)
   }
   EXPECT_EQ(0, message.status());
 
+  // check frame id
+  EXPECT_TRUE(message.has_header());
+  EXPECT_LT(1, message.header().data().size());
+  EXPECT_EQ("frame_id", message.header().data(0).key());
+  ASSERT_EQ(1, message.header().data(0).value().size());
+  EXPECT_EQ("dvl_frame", message.header().data(0).value(0));
+
   this->manager.Remove(sensor->Id());
 }
 
@@ -436,6 +445,13 @@ TEST_P(DopplerVelocityLogTest, WaterMassTrackingWhileStatic)
   }
   EXPECT_EQ(0, message.status());
 
+  // check frame id
+  EXPECT_TRUE(message.has_header());
+  EXPECT_LT(1, message.header().data().size());
+  EXPECT_EQ("frame_id", message.header().data(0).key());
+  ASSERT_EQ(1, message.header().data(0).value().size());
+  EXPECT_EQ("dvl_frame", message.header().data(0).value(0));
+
   this->manager.Remove(sensor->Id());
 }
 
@@ -518,6 +534,13 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileInMotion)
     EXPECT_EQ(velocityReference, message.beams(i).velocity().reference());
   }
   EXPECT_EQ(0, message.status());
+
+  // check frame id
+  EXPECT_TRUE(message.has_header());
+  EXPECT_LT(1, message.header().data().size());
+  EXPECT_EQ("frame_id", message.header().data(0).key());
+  ASSERT_EQ(1, message.header().data(0).value().size());
+  EXPECT_EQ("dvl_frame", message.header().data(0).value(0));
 
   this->manager.Remove(sensor->Id());
 }

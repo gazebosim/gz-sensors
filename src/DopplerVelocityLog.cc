@@ -1945,6 +1945,9 @@ namespace gz
         if (this->dataPtr->publishingEstimates)
         {
           auto * headerMessage = bottomModeMessage.mutable_header();
+          auto frame = headerMessage->add_data();
+          frame->set_key("frame_id");
+          frame->add_value(this->FrameId());
           this->AddSequence(headerMessage, "doppler_velocity_log");
           this->dataPtr->pub.Publish(bottomModeMessage);
         }
@@ -1964,6 +1967,9 @@ namespace gz
         if (this->dataPtr->publishingEstimates)
         {
           auto * headerMessage = waterMassModeMessage.mutable_header();
+          auto frame = headerMessage->add_data();
+          frame->set_key("frame_id");
+          frame->add_value(this->FrameId());
           this->AddSequence(headerMessage, "doppler_velocity_log");
           this->dataPtr->pub.Publish(waterMassModeMessage);
         }

@@ -65,7 +65,7 @@ sdf::ElementPtr GpuLidarToSdf(const std::string &name,
     const double vertResolution, const double vertMinAngle,
     const double vertMaxAngle, const double rangeResolution,
     const double rangeMin, const double rangeMax, const bool alwaysOn,
-    const bool visualize)
+    const bool visualize, const std::string &frameId)
 {
   std::ostringstream stream;
   stream
@@ -74,6 +74,7 @@ sdf::ElementPtr GpuLidarToSdf(const std::string &name,
     << " <model name='m1'>"
     << "  <link name='link1'>"
     << "    <sensor name='" << name << "' type='gpu_lidar'>"
+    << "      <gz_frame_id>" << frameId << "</gz_frame_id>"
     << "      <pose>" << pose << "</pose>"
     << "      <topic>" << topic << "</topic>"
     << "      <updateRate>"<< updateRate <<"</updateRate>"
@@ -194,6 +195,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   const double rangeMax = 10.0;
   const bool alwaysOn = 1;
   const bool visualize = 1;
+  const std::string frameId = "TestGpuLidar_frame";
 
   // Create sensor description in SDF
   gz::math::Pose3d testPose(gz::math::Vector3d(0, 0, 0.1),
@@ -201,7 +203,7 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   sdf::ElementPtr lidarSdf = GpuLidarToSdf(name, testPose, updateRate, topic,
     horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
     vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
-    rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+    rangeResolution, rangeMin, rangeMax, alwaysOn, visualize, frameId);
 
   // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
@@ -313,6 +315,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   const double rangeMax = 10.0;
   const bool alwaysOn = 1;
   const bool visualize = 1;
+  const std::string frameId = "TestGpuLidar_frame";
 
   // Create sensor SDF
   gz::math::Pose3d testPose(gz::math::Vector3d(0.0, 0.0, 0.1),
@@ -320,7 +323,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   sdf::ElementPtr lidarSdf = GpuLidarToSdf(name, testPose, updateRate, topic,
     horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
     vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
-    rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+    rangeResolution, rangeMin, rangeMax, alwaysOn, visualize, frameId);
 
   // Create and populate scene
   gz::rendering::RenderEngine *engine =
@@ -399,7 +402,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
       LASER_TOL);
   EXPECT_DOUBLE_EQ(laserMsgs.back().ranges(last), gz::math::INF_D);
 
-  EXPECT_EQ(laserMsgs.back().frame(), name);
+  EXPECT_EQ(laserMsgs.back().frame(), frameId);
   EXPECT_NEAR(laserMsgs.back().angle_min(), horzMinAngle, 1e-4);
   EXPECT_NEAR(laserMsgs.back().angle_max(), horzMaxAngle, 1e-4);
   EXPECT_NEAR(laserMsgs.back().count(), horzSamples, 1e-4);
@@ -424,6 +427,12 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   EXPECT_EQ(32u * horzSamples, pointMsgs.back().row_step());
   EXPECT_FALSE(pointMsgs.back().is_dense());
   EXPECT_EQ(32u * horzSamples * vertSamples, pointMsgs.back().data().size());
+
+  EXPECT_TRUE(pointMsgs.back().has_header());
+  EXPECT_LT(1, pointMsgs.back().header().data().size());
+  EXPECT_EQ("frame_id", pointMsgs.back().header().data(0).key());
+  ASSERT_EQ(1, pointMsgs.back().header().data(0).value().size());
+  EXPECT_EQ(frameId, pointMsgs.back().header().data(0).value(0));
 
   // Clean up rendering ptrs
   visualBox1.reset();
@@ -462,6 +471,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   const double rangeMax = 10.0;
   const bool alwaysOn = 1;
   const bool visualize = 1;
+  const std::string frameId = "TestGpuLidar_frame";
 
   // Create sensor SDF
   gz::math::Pose3d testPose1(gz::math::Vector3d(0, 0, 0.1),
@@ -469,7 +479,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   sdf::ElementPtr lidarSdf1 = GpuLidarToSdf(name1, testPose1, updateRate,
       topic1, horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
       vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
-      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize, frameId);
 
   // Create a second sensor SDF rotated
   gz::math::Pose3d testPose2(gz::math::Vector3d(0, 0, 0.1),
@@ -477,7 +487,7 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
   sdf::ElementPtr lidarSdf2 = GpuLidarToSdf(name2, testPose2, updateRate,
       topic2, horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
       vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
-      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize, frameId);
 
   // Create and populate scene
   gz::rendering::RenderEngine *engine =
@@ -618,6 +628,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   const double rangeMax = 10.0;
   const bool alwaysOn = 1;
   const bool visualize = 1;
+  const std::string frameId = "TestGpuLidar_frame";
 
   // Create sensor SDF
   gz::math::Pose3d testPose(gz::math::Vector3d(0.25, 0.0, 0.5),
@@ -625,7 +636,7 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
   sdf::ElementPtr lidarSdf = GpuLidarToSdf(name, testPose, updateRate, topic,
     horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
     vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
-    rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+    rangeResolution, rangeMin, rangeMax, alwaysOn, visualize, frameId);
 
   // Create and populate scene
   gz::rendering::RenderEngine *engine =
@@ -745,6 +756,7 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   const double rangeMax = 10.0;
   const bool alwaysOn = 1;
   const bool visualize = 1;
+  const std::string frameId = "TestGpuLidar_frame";
 
   // Create sensor SDF
   gz::math::Pose3d testPose1(gz::math::Vector3d(0, 0, 0.1),
@@ -752,7 +764,7 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   sdf::ElementPtr lidarSdf1 = GpuLidarToSdf(name1, testPose1, updateRate,
       topic1, horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
       vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
-      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize, frameId);
 
   // Create a second sensor SDF at an xy offset of 1
   gz::math::Pose3d testPose2(gz::math::Vector3d(1, 1, 0.1),
@@ -760,7 +772,7 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
   sdf::ElementPtr lidarSdf2 = GpuLidarToSdf(name2, testPose2, updateRate,
       topic2, horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
       vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
-      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize, frameId);
 
   // Create and populate scene
   gz::rendering::RenderEngine *engine =
@@ -871,6 +883,7 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
   const bool alwaysOn = 1;
   const bool visualize = 1;
   auto testPose = gz::math::Pose3d();
+  const std::string frameId = "TestGpuLidar_frame";
 
   // Scene
   auto engine = gz::rendering::engine(_renderEngine);
@@ -892,7 +905,7 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
     auto lidarSdf = GpuLidarToSdf(name, testPose, updateRate, topic,
       horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
       vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
-      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize, frameId);
 
     auto lidar = mgr.CreateSensor<gz::sensors::GpuLidarSensor>(lidarSdf);
     ASSERT_NE(nullptr, lidar);
@@ -906,7 +919,7 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
     auto lidarSdf = GpuLidarToSdf(name, testPose, updateRate, topic,
       horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
       vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
-      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize, frameId);
 
     auto lidar = mgr.CreateSensor<gz::sensors::GpuLidarSensor>(lidarSdf);
     ASSERT_NE(nullptr, lidar);
@@ -921,7 +934,7 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
     auto lidarSdf = GpuLidarToSdf(name, testPose, updateRate, topic,
       horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
       vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
-      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize);
+      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize, frameId);
 
     auto sensor = mgr.CreateSensor<gz::sensors::GpuLidarSensor>(lidarSdf);
     EXPECT_EQ(nullptr, sensor);
