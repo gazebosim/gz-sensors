@@ -217,12 +217,7 @@ void Lidar::ApplyNoise()
         int index = j * this->RayCount() + i;
         double range = this->laserBuffer[index*3];
         range = this->dataPtr->noises[LIDAR_NOISE]->Apply(range);
-        if (std::isfinite(range))
-        {
-          range = gz::math::clamp(range,
-            this->RangeMin(), this->RangeMax());
-        }
-        this->laserBuffer[index*3] = range;
+        this->laserBuffer[index*3] = this->Clamp(range);
       }
     }
   }
@@ -232,6 +227,12 @@ void Lidar::ApplyNoise()
 bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
 {
   GZ_PROFILE("Lidar::PublishLidarScan");
+
+  if (!this->dataPtr->pub.HasConnections())
+  {
+    return false;
+  }
+
   if (!this->laserBuffer)
     return false;
 
@@ -246,7 +247,7 @@ bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
   // keeping here the sensor name instead of frame_id because the visualizeLidar
   // plugin relies on this value to get the position of the lidar.
   // the ros_gz plugin is using the laserscan.proto 'frame' field
-  frame->add_value(this->Name());
+  frame->add_value(this->FrameId());
   this->dataPtr->laserMsg.set_frame(this->FrameId());
 
   // Store the latest laser scans into laserMsg
@@ -266,14 +267,15 @@ bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
     }
   }
 
+  // \todo(iche033) interpolate if ray count != range count, i.e. resolution > 1
   for (unsigned int j = 0; j < this->VerticalRangeCount(); ++j)
   {
     for (unsigned int i = 0; i < this->RangeCount(); ++i)
     {
       int index = j * this->RangeCount() + i;
-      double range = this->laserBuffer[index*3];
+      double range = this->laserBuffer[index * 3];
 
-      range = gz::math::isnan(range) ? this->RangeMax() : range;
+      range = this->Clamp(range);
       this->dataPtr->laserMsg.set_ranges(index, range);
       this->dataPtr->laserMsg.set_intensities(index,
           this->laserBuffer[index * 3 + 1]);
@@ -420,10 +422,19 @@ void Lidar::SetVerticalAngleMax(const double _angle)
 void Lidar::Ranges(std::vector<double> &_ranges) const
 {
   std::lock_guard<std::mutex> lock(this->lidarMutex);
+  if (!this->laserBuffer)
+  {
+    gzwarn << "Lidar ranges not available" << std::endl;
+    return;
+  }
 
-  _ranges.resize(this->dataPtr->laserMsg.ranges_size());
-  memcpy(&_ranges[0], this->dataPtr->laserMsg.ranges().data(),
-         sizeof(_ranges[0]) * this->dataPtr->laserMsg.ranges_size());
+  // \todo(iche033) interpolate if ray count != range count, i.e. resolution > 1
+  unsigned int size = this->RayCount() * this->VerticalRayCount();
+  _ranges.resize(size);
+
+  unsigned int channels = 3u;
+  for (unsigned int i = 0; i < size; ++i)
+    _ranges[i] = this->Clamp(this->laserBuffer[i * channels]);
 }
 
 //////////////////////////////////////////////////
@@ -431,24 +442,32 @@ double Lidar::Range(const int _index) const
 {
   std::lock_guard<std::mutex> lock(this->lidarMutex);
 
-  if (this->dataPtr->laserMsg.ranges_size() == 0)
+  // \todo(iche033) interpolate if ray count != range count, i.e. resolution > 1
+  unsigned int channels = 3u;
+  if (!this->laserBuffer || _index >=
+      static_cast<int>(this->RayCount() * this->VerticalRayCount() * channels))
   {
-    gzwarn << "ranges not constructed yet (zero sized)\n";
-    return 0.0;
-  }
-  if (_index < 0 || _index > this->dataPtr->laserMsg.ranges_size())
-  {
-    gzerr << "Invalid range index[" << _index << "]\n";
+    gzwarn << "Lidar range not available for index: " << _index << std::endl;
     return 0.0;
   }
 
-  return this->dataPtr->laserMsg.ranges(_index);
+  return this->Clamp(this->laserBuffer[_index * channels]);
 }
 
 //////////////////////////////////////////////////
-double Lidar::Retro(const int /*_index*/) const
+double Lidar::Retro(const int _index) const
 {
-  return 0.0;
+  std::lock_guard<std::mutex> lock(this->lidarMutex);
+
+  // \todo(iche033) interpolate if ray count != range count, i.e. resolution > 1
+  unsigned int channels = 3u;
+  if (!this->laserBuffer || _index >=
+      static_cast<int>(this->RayCount() * this->VerticalRayCount() * channels))
+  {
+    gzwarn << "Lidar range not available for index: " << _index << std::endl;
+    return 0.0;
+  }
+  return this->laserBuffer[_index * channels + 1];
 }
 
 //////////////////////////////////////////////////
@@ -475,4 +494,18 @@ bool Lidar::IsActive() const
 bool Lidar::HasConnections() const
 {
   return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
+}
+
+//////////////////////////////////////////////////
+double Lidar::Clamp(double _range) const
+{
+  if (gz::math::isnan(_range))
+    return this->RangeMax();
+
+  if (std::isfinite(_range))
+  {
+    return gz::math::clamp(_range, this->RangeMin(), this->RangeMax());
+  }
+
+  return _range;
 }
