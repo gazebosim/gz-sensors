@@ -56,6 +56,9 @@ class gz::sensors::LidarPrivate
 
   /// \brief Sdf sensor.
   public: sdf::Lidar sdfLidar;
+
+  /// \brief Number of channels of the raw lidar buffer
+  public: const unsigned int kChannelCount = 3u;
 };
 
 //////////////////////////////////////////////////
@@ -215,9 +218,10 @@ void Lidar::ApplyNoise()
       for (unsigned int i = 0; i < this->RayCount(); ++i)
       {
         int index = j * this->RayCount() + i;
-        double range = this->laserBuffer[index*3];
+        double range = this->laserBuffer[index * this->dataPtr->kChannelCount];
         range = this->dataPtr->noises[LIDAR_NOISE]->Apply(range);
-        this->laserBuffer[index*3] = this->Clamp(range);
+        this->laserBuffer[index * this->dataPtr->kChannelCount] =
+            this->Clamp(range);
       }
     }
   }
@@ -273,12 +277,12 @@ bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
     for (unsigned int i = 0; i < this->RangeCount(); ++i)
     {
       int index = j * this->RangeCount() + i;
-      double range = this->laserBuffer[index * 3];
+      double range = this->laserBuffer[index * this->dataPtr->kChannelCount];
 
       range = this->Clamp(range);
       this->dataPtr->laserMsg.set_ranges(index, range);
       this->dataPtr->laserMsg.set_intensities(index,
-          this->laserBuffer[index * 3 + 1]);
+          this->laserBuffer[index * this->dataPtr->kChannelCount + 1]);
     }
   }
 
@@ -432,9 +436,11 @@ void Lidar::Ranges(std::vector<double> &_ranges) const
   unsigned int size = this->RayCount() * this->VerticalRayCount();
   _ranges.resize(size);
 
-  unsigned int channels = 3u;
   for (unsigned int i = 0; i < size; ++i)
-    _ranges[i] = this->Clamp(this->laserBuffer[i * channels]);
+  {
+    _ranges[i] = this->Clamp(
+    this->laserBuffer[i * this->dataPtr->kChannelCount]);
+  }
 }
 
 //////////////////////////////////////////////////
@@ -443,15 +449,14 @@ double Lidar::Range(const int _index) const
   std::lock_guard<std::mutex> lock(this->lidarMutex);
 
   // \todo(iche033) interpolate if ray count != range count, i.e. resolution > 1
-  unsigned int channels = 3u;
-  if (!this->laserBuffer || _index >=
-      static_cast<int>(this->RayCount() * this->VerticalRayCount() * channels))
+  if (!this->laserBuffer || _index >= static_cast<int>(
+      this->RayCount() * this->VerticalRayCount() * this->dataPtr->kChannelCount))
   {
     gzwarn << "Lidar range not available for index: " << _index << std::endl;
     return 0.0;
   }
 
-  return this->Clamp(this->laserBuffer[_index * channels]);
+  return this->Clamp(this->laserBuffer[_index * this->dataPtr->kChannelCount]);
 }
 
 //////////////////////////////////////////////////
@@ -460,14 +465,13 @@ double Lidar::Retro(const int _index) const
   std::lock_guard<std::mutex> lock(this->lidarMutex);
 
   // \todo(iche033) interpolate if ray count != range count, i.e. resolution > 1
-  unsigned int channels = 3u;
-  if (!this->laserBuffer || _index >=
-      static_cast<int>(this->RayCount() * this->VerticalRayCount() * channels))
+  if (!this->laserBuffer || _index >= static_cast<int>(
+      this->RayCount() * this->VerticalRayCount() * this->dataPtr->kChannelCount))
   {
-    gzwarn << "Lidar range not available for index: " << _index << std::endl;
+    gzwarn << "Lidar retro not available for index: " << _index << std::endl;
     return 0.0;
   }
-  return this->laserBuffer[_index * channels + 1];
+  return this->laserBuffer[_index * this->dataPtr->kChannelCount + 1];
 }
 
 //////////////////////////////////////////////////
@@ -503,9 +507,7 @@ double Lidar::Clamp(double _range) const
     return this->RangeMax();
 
   if (std::isfinite(_range))
-  {
     return gz::math::clamp(_range, this->RangeMin(), this->RangeMax());
-  }
 
   return _range;
 }
