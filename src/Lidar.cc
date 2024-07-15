@@ -14,6 +14,9 @@
  * limitations under the License.
  *
 */
+
+#include <algorithm>
+
 #if defined(_MSC_VER)
   #pragma warning(push)
   #pragma warning(disable: 4005)
@@ -450,7 +453,8 @@ double Lidar::Range(const int _index) const
 
   // \todo(iche033) interpolate if ray count != range count, i.e. resolution > 1
   if (!this->laserBuffer || _index >= static_cast<int>(
-      this->RayCount() * this->VerticalRayCount() * this->dataPtr->kChannelCount))
+      this->RayCount() * this->VerticalRayCount() *
+      this->dataPtr->kChannelCount))
   {
     gzwarn << "Lidar range not available for index: " << _index << std::endl;
     return 0.0;
@@ -466,7 +470,8 @@ double Lidar::Retro(const int _index) const
 
   // \todo(iche033) interpolate if ray count != range count, i.e. resolution > 1
   if (!this->laserBuffer || _index >= static_cast<int>(
-      this->RayCount() * this->VerticalRayCount() * this->dataPtr->kChannelCount))
+      this->RayCount() * this->VerticalRayCount() *
+      this->dataPtr->kChannelCount))
   {
     gzwarn << "Lidar retro not available for index: " << _index << std::endl;
     return 0.0;
@@ -507,7 +512,7 @@ double Lidar::Clamp(double _range) const
     return this->RangeMax();
 
   if (std::isfinite(_range))
-    return gz::math::clamp(_range, this->RangeMin(), this->RangeMax());
+    return std::clamp(_range, this->RangeMin(), this->RangeMax());
 
   return _range;
 }
