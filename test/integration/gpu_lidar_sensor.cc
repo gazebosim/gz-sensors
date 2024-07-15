@@ -337,6 +337,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   visualBox1->AddGeometry(scene->CreateBox());
   visualBox1->SetLocalPosition(box01Pose.Pos());
   visualBox1->SetLocalRotation(box01Pose.Rot());
+  visualBox1->SetUserData("laser_retro", 123);
   root->AddChild(visualBox1);
 
   // Create a sensor manager
@@ -369,6 +370,7 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   // Sensor 1 should see TestBox1
   EXPECT_DOUBLE_EQ(sensor->Range(0), gz::math::INF_D);
   EXPECT_NEAR(sensor->Range(mid), expectedRangeAtMidPointBox1, LASER_TOL);
+  EXPECT_NEAR(123, sensor->Retro(mid), 1e-1);
   EXPECT_DOUBLE_EQ(sensor->Range(last), gz::math::INF_D);
 
   // Make sure to wait to receive the message
@@ -401,6 +403,12 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   EXPECT_NEAR(laserMsgs.back().vertical_count(), vertSamples, 1e-4);
   EXPECT_NEAR(laserMsgs.back().range_min(), rangeMin, 1e-4);
   EXPECT_NEAR(laserMsgs.back().range_max(), rangeMax, 1e-4);
+
+  EXPECT_TRUE(laserMsgs.back().has_header());
+  EXPECT_LT(1, laserMsgs.back().header().data().size());
+  EXPECT_EQ("frame_id", laserMsgs.back().header().data(0).key());
+  ASSERT_EQ(1, laserMsgs.back().header().data(0).value().size());
+  EXPECT_EQ(frameId, laserMsgs.back().header().data(0).value(0));
 
   ASSERT_TRUE(!pointMsgs.empty());
   EXPECT_EQ(5, pointMsgs.back().field_size());
