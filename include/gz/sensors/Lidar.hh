@@ -245,6 +245,13 @@ namespace ignition
       /// \return Visibility mask
       public: uint32_t VisibilityMask() const;
 
+      /// \brief Clamp a finite range value to min / max range.
+      /// +/-inf values will not be clamped because they mean lidar returns are
+      /// outside the detectable range.
+      /// NAN values will be clamped to max range.
+      /// \return Clamped range value.
+      private: double Clamp(double _range) const;
+
       IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Just a mutex for thread safety
       public: mutable std::mutex lidarMutex;
