@@ -26,6 +26,8 @@
 
 #include <gz/math/Pose3.hh>
 
+#include <gz/msgs/wrench.pb.h>
+
 #include <gz/sensors/config.hh>
 #include <gz/sensors/force_torque/Export.hh>
 
@@ -92,6 +94,11 @@ namespace gz
       /// applied on the child (parent-to-child)
       /// \param[in] _torque torque vector in newton.
       public: void SetTorque(const math::Vector3d &_torque);
+
+      /// \brief Get the most recent wrench measurement. This matches the data
+      /// published over the gz-transport topic.
+      /// \return The most recent wrench measurement.
+      public: const msgs::Wrench &MeasuredWrench() const;
 
       /// \brief Set the rotation of the joint parent relative to the sensor
       /// frame.

@@ -55,6 +55,9 @@ class gz::sensors::ForceTorqueSensorPrivate
   /// \brief Noise free torque as set by SetTorque
   public: gz::math::Vector3d torque{0, 0, 0};
 
+  /// \brief Most recent wrench measurement.
+  public: gz::msgs::Wrench measuredWrench;
+
   /// \brief Frame in which we return the measured force torque info.
   public: sdf::ForceTorqueFrame measureFrame;
 
@@ -247,7 +250,7 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
   applyNoise(TORQUE_Y_NOISE_N_M, measuredTorque.Y());
   applyNoise(TORQUE_Z_NOISE_N_M, measuredTorque.Z());
 
-  msgs::Wrench msg;
+  msgs::Wrench &msg = this->dataPtr->measuredWrench;
   *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
@@ -286,6 +289,12 @@ math::Vector3d ForceTorqueSensor::Torque() const
 void ForceTorqueSensor::SetTorque(const math::Vector3d &_torque)
 {
   this->dataPtr->torque = _torque;
+}
+
+//////////////////////////////////////////////////
+const msgs::Wrench &ForceTorqueSensor::MeasuredWrench() const
+{
+  return this->dataPtr->measuredWrench;
 }
 
 //////////////////////////////////////////////////
