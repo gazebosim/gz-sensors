@@ -95,6 +95,10 @@ class gz::sensors::ForceTorqueSensorPrivate
 ForceTorqueSensor::ForceTorqueSensor()
   : dataPtr(std::make_unique<ForceTorqueSensorPrivate>())
 {
+  // measuredWrench is reused, so allocate the first header data-value pair
+  auto frame = this->dataPtr->measuredWrench.mutable_header()->add_data();
+  frame->set_key("frame_id");
+  frame->add_value("");
 }
 
 //////////////////////////////////////////////////
@@ -252,9 +256,10 @@ bool ForceTorqueSensor::Update(const std::chrono::steady_clock::duration &_now)
 
   msgs::Wrench &msg = this->dataPtr->measuredWrench;
   *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
-  auto frame = msg.mutable_header()->add_data();
-  frame->set_key("frame_id");
-  frame->add_value(this->FrameId());
+  auto frame = msg.mutable_header()->mutable_data(0);
+  // header.data[0].key is already set to "frame_id" in the constructor
+  // header.data[0].value[0] is already allocated in the constructor
+  frame->set_value(0, this->FrameId());
 
   msgs::Set(msg.mutable_force(), measuredForce);
   msgs::Set(msg.mutable_torque(), measuredTorque);
