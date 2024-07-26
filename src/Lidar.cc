@@ -172,8 +172,16 @@ bool Lidar::Load(const sdf::Sensor &_sdf)
   {
     if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
     {
-      this->dataPtr->noises[noiseType] =
-        NoiseFactory::NewNoiseModel(noiseSdf);
+      // Skip applying noise if gaussian noise params are all 0s
+      if (!math::equal(noiseSdf.Mean(), 0.0) ||
+          !math::equal(noiseSdf.StdDev(), 0.0) ||
+          !math::equal(noiseSdf.BiasMean(), 0.0) ||
+          !math::equal(noiseSdf.DynamicBiasStdDev(), 0.0) ||
+          !math::equal(noiseSdf.DynamicBiasCorrelationTime(), 0.0))
+      {
+        this->dataPtr->noises[noiseType] =
+          NoiseFactory::NewNoiseModel(noiseSdf);
+      }
     }
     else if (noiseSdf.Type() != sdf::NoiseType::NONE)
     {
