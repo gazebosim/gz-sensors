@@ -15,6 +15,7 @@
  *
 */
 
+#include <google/protobuf/util/message_differencer.h>
 #include <gtest/gtest.h>
 
 #include <sdf/ForceTorque.hh>
@@ -245,6 +246,9 @@ TEST_P(ForceTorqueSensorTest, SensorReadings)
   sensor->Update(dt, false);
   EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
   auto msg = msgHelper.Message();
+  EXPECT_TRUE(
+      google::protobuf::util::MessageDifferencer::Equals(
+          msg, sensor->MeasuredWrench()));
   EXPECT_EQ(1, msg.header().stamp().sec());
   EXPECT_EQ(0, msg.header().stamp().nsec());
 
