@@ -162,12 +162,20 @@ bool CameraSensor::CreateCamera()
     // Add gaussian noise to camera sensor
     if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
     {
-      this->dataPtr->noises[noiseType] =
-        ImageNoiseFactory::NewNoiseModel(noiseSdf, "camera");
+      // Skip applying noise if mean and stddev are 0 - this avoids
+      // doing an extra render pass in gz-rendering
+      // Note ImageGaussianNoiseModel only uses mean and stddev and does not
+      // use bias parameters.
+      if (!math::equal(noiseSdf.Mean(), 0.0) ||
+          !math::equal(noiseSdf.StdDev(), 0.0))
+      {
+        this->dataPtr->noises[noiseType] =
+          ImageNoiseFactory::NewNoiseModel(noiseSdf, "camera");
 
-      std::dynamic_pointer_cast<ImageGaussianNoiseModel>(
-           this->dataPtr->noises[noiseType])->SetCamera(
-             this->dataPtr->camera);
+        std::dynamic_pointer_cast<ImageGaussianNoiseModel>(
+             this->dataPtr->noises[noiseType])->SetCamera(
+               this->dataPtr->camera);
+      }
     }
     else if (noiseSdf.Type() != sdf::NoiseType::NONE)
     {
@@ -191,13 +199,22 @@ bool CameraSensor::CreateCamera()
   this->dataPtr->camera->SetHFOV(angle);
 
   if (cameraSdf->Element() != nullptr &&
-      cameraSdf->Element()->HasElement("distortion")) {
-    this->dataPtr->distortion =
-        ImageDistortionFactory::NewDistortionModel(*cameraSdf, "camera");
-    this->dataPtr->distortion->Load(*cameraSdf);
+      cameraSdf->Element()->HasElement("distortion"))
+  {
+    // Skip distortion of all coefficients are 0s
+    if (!math::equal(cameraSdf->DistortionK1(), 0.0) ||
+        !math::equal(cameraSdf->DistortionK2(), 0.0) ||
+        !math::equal(cameraSdf->DistortionK3(), 0.0) ||
+        !math::equal(cameraSdf->DistortionP1(), 0.0) ||
+        !math::equal(cameraSdf->DistortionP2(), 0.0))
+    {
+      this->dataPtr->distortion =
+          ImageDistortionFactory::NewDistortionModel(*cameraSdf, "camera");
+      this->dataPtr->distortion->Load(*cameraSdf);
 
-    std::dynamic_pointer_cast<ImageBrownDistortionModel>(
-        this->dataPtr->distortion)->SetCamera(this->dataPtr->camera);
+      std::dynamic_pointer_cast<ImageBrownDistortionModel>(
+          this->dataPtr->distortion)->SetCamera(this->dataPtr->camera);
+    }
   }
 
   sdf::PixelFormatType pixelFormat = cameraSdf->PixelFormat();
