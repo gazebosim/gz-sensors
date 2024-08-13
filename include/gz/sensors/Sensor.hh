@@ -161,6 +161,10 @@ namespace gz
       /// \return Topic sensor publishes data to
       public: std::string Topic() const;
 
+      /// \brief Get topic where sensor data is published.
+      /// \return Topic sensor publishes data to
+      public: std::string Topic_logic() const;
+
       /// \brief Set topic where sensor data is published.
       /// \param[in] _topic Topic sensor publishes data to.
       /// \return True if a valid topic was set.

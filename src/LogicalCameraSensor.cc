@@ -36,8 +36,12 @@ class gz::sensors::LogicalCameraSensorPrivate
   /// \brief node to create publisher
   public: transport::Node node;
 
+  public: transport::Node node_logic;
+
   /// \brief publisher to publish logical camera messages.
   public: transport::Node::Publisher pub;
+
+  public: transport::Node::Publisher pub_logic;
 
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
@@ -56,6 +60,8 @@ class gz::sensors::LogicalCameraSensorPrivate
 
   /// \brief Msg containg info on models detected by logical camera
   msgs::LogicalCameraImage msg;
+
+  msgs::LogicalCameraSensor msg_logic;
 };
 
 //////////////////////////////////////////////////
@@ -104,13 +110,23 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
     return false;
 
   if (this->Topic().empty())
-    this->SetTopic("/logical_camera");
+    this->SetTopic("/camera/logical");
 
   this->dataPtr->pub =
       this->dataPtr->node.Advertise<msgs::LogicalCameraImage>(
       this->Topic());
 
+  this->dataPtr->pub_logic =
+      this->dataPtr->node_logic.Advertise<msgs::LogicalCameraSensor>(
+      this->Topic() + "/frustum");
+
   if (!this->dataPtr->pub)
+  {
+    gzerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
+    return false;
+  }
+
+  if (!this->dataPtr->pub_logic)
   {
     gzerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
     return false;
@@ -166,9 +182,22 @@ bool LogicalCameraSensor::Update(
   frame->set_key("frame_id");
   frame->add_value(this->FrameId());
 
+  *this->dataPtr->msg_logic.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+  this->dataPtr->msg_logic.mutable_header()->clear_data();
+  auto frame_log = this->dataPtr->msg_logic.mutable_header()->add_data();
+
+  frame_log->set_key("frame_id");
+  frame_log->add_value(this->FrameId());
+
   // publish
+  this->dataPtr->msg_logic.set_near_clip(this->dataPtr->frustum.Near());
+  this->dataPtr->msg_logic.set_far_clip(this->dataPtr->frustum.Far());
+  this->dataPtr->msg_logic.set_horizontal_fov(this->dataPtr->frustum.FOV().Radian());
+  this->dataPtr->msg_logic.set_aspect_ratio(this->dataPtr->frustum.AspectRatio());
   this->AddSequence(this->dataPtr->msg.mutable_header());
+
   this->dataPtr->pub.Publish(this->dataPtr->msg);
+  this->dataPtr->pub_logic.Publish(this->dataPtr->msg_logic);
 
   return true;
 }
@@ -207,6 +236,6 @@ msgs::LogicalCameraImage LogicalCameraSensor::Image() const
 //////////////////////////////////////////////////
 bool LogicalCameraSensor::HasConnections() const
 {
-  return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
+  return this->dataPtr->pub_logic && this->dataPtr->pub_logic.HasConnections();
 }
 
