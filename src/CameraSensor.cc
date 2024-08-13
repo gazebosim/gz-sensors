@@ -896,6 +896,12 @@ bool CameraSensor::HasInfoConnections() const
 }
 
 //////////////////////////////////////////////////
+const std::string& CameraSensor::OpticalFrameId() const
+{
+  return this->dataPtr->opticalFrameId;
+}
+
+//////////////////////////////////////////////////
 math::Matrix4d CameraSensorPrivate::BuildProjectionMatrix(
     double _imageWidth, double _imageHeight,
     double _intrinsicsFx, double _intrinsicsFy,
