@@ -309,10 +309,13 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
   // the xyz and rgb fields to be aligned to memory boundaries. This is need
   // by ROS1: https://github.com/ros/common_msgs/pull/77. Ideally, memory
   // alignment should be configured.
-  msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->FrameId(), true,
+  msgs::InitPointCloudPacked(
+      this->dataPtr->pointMsg,
+      this->OpticalFrameId(),
+      true,
       {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
        {"rgb", msgs::PointCloudPacked::Field::FLOAT32}});
-
+  
   if (this->Scene())
   {
     this->CreateCamera();
@@ -554,9 +557,10 @@ bool DepthCameraSensor::Update(
                rendering::PF_FLOAT32_R));
   msg.set_pixel_format_type(msgsFormat);
   *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+
   auto frame = msg.mutable_header()->add_data();
   frame->set_key("frame_id");
-  frame->add_value(this->FrameId());
+  frame->add_value(this->OpticalFrameId());
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   msg.set_data(this->dataPtr->depthBuffer,

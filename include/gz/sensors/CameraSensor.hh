@@ -153,6 +153,10 @@ namespace ignition
       /// \todo(iche033) Make this function virtual on Harmonic
       public: bool HasInfoConnections() const;
 
+      /// \brief Get the camera optical frame
+      /// \return The camera optical frame
+      public: const std::string& OpticalFrameId() const;
+
       /// \brief Advertise camera info topic.
       /// \return True if successful.
       protected: bool AdvertiseInfo();
