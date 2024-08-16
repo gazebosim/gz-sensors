@@ -61,12 +61,6 @@ set(GZ_TRANSPORT_VER ${gz-transport14_VERSION_MAJOR})
 
 #--------------------------------------
 # Find gz-rendering
-
-# See CMP0072 for more details (cmake --help-policy CMP0072)
-if (NOT OpenGL_GL_PREFERENCE)
-  set(OpenGL_GL_PREFERENCE "GLVND")
-endif()
-
 gz_find_package(gz-rendering9 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
 set(GZ_RENDERING_VER ${gz-rendering9_VERSION_MAJOR})
 
