@@ -1683,9 +1683,6 @@ namespace gz
           }
         }
 
-        const gz::math::Vector3d beamAxisInWorldFrame =
-            sensorStateInWorldFrame.pose.Rot() * beamAxisInSensorFrame;
-
         const gz::math::Vector3d beamAxisInReferenceFrame =
             this->referenceFrameRotation * beamAxisInSensorFrame;
 
