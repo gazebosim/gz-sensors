@@ -386,7 +386,8 @@ bool RgbdCameraSensor::CreateCameras()
   // the xyz and rgb fields to be aligned to memory boundaries. This is need
   // by ROS1: https://github.com/ros/common_msgs/pull/77. Ideally, memory
   // alignment should be configured.
-  msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->OpticalFrameId(), true,
+  msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->OpticalFrameId(),
+      true,
       {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
        {"rgb", msgs::PointCloudPacked::Field::FLOAT32}});
 
