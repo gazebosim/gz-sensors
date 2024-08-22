@@ -32,14 +32,12 @@
 1. Avoid calling DblNormal with invalid standard deviation
     * [Pull request #396](https://github.com/gazebosim/gz-sensors/pull/396)
 
-1. Bumps in ionic : ci_matching_branch/bump_ionic_gz-sensors9
-    * [Pull request #399](https://github.com/gazebosim/gz-sensors/pull/399)
-
 1. Fix unresolved external symbols on Windows
     * [Pull request #392](https://github.com/gazebosim/gz-sensors/pull/392)
 
 1. Bumps in Ionic: gz-sensors9
     * [Pull request #394](https://github.com/gazebosim/gz-sensors/pull/394)
+    * [Pull request #399](https://github.com/gazebosim/gz-sensors/pull/399)
 
 1. Set lens intrinsics in Depth and Rgbd camera sensors
     * [Pull request #390](https://github.com/gazebosim/gz-sensors/pull/390)
