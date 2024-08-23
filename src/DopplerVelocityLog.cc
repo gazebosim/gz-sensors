@@ -1731,7 +1731,7 @@ namespace gz
               samplePointInSensorFrame;
 
           // Transform sample point to the environmental data frame
-          std::optional<gz::math::CoordinateVector3>
+          const std::optional<gz::math::CoordinateVector3>
               samplePointInDataFrameCoordVec =
               this->worldState->origin.PositionTransform(
                   gz::math::CoordinateVector3::Metric(samplePointInWorldFrame),
