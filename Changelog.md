@@ -1,6 +1,52 @@
 ## Gazebo Sensors 9
 
-### Gazebo Sensors 9.0.0 (2023-XX-XX)
+### Gazebo Sensors 9.0.0 (2024-09-XX)
+
+1. Fix SphericalCoordinate deprecation warning in DVL sensor
+    * [Pull request #460](https://github.com/gazebosim/gz-sensors/pull/460)
+
+1. Fix frame_id in rgbd_camera
+    * [Pull request #458](https://github.com/gazebosim/gz-sensors/pull/458)
+
+1. Enable Ubuntu Noble github actions, require cmake 3.22.1
+    * [Pull request #457](https://github.com/gazebosim/gz-sensors/pull/457)
+
+1. Fixed unused variable warning in DVL
+    * [Pull request #456](https://github.com/gazebosim/gz-sensors/pull/456)
+
+1. ForceTorqueSensor: add API for newest measurement
+    * [Pull request #449](https://github.com/gazebosim/gz-sensors/pull/449)
+
+1. Skip apply noise / distortion if parameters are 0s
+    * [Pull request #450](https://github.com/gazebosim/gz-sensors/pull/450)
+
+1. Publish lidar scan only if there are lidar scan connections
+    * [Pull request #447](https://github.com/gazebosim/gz-sensors/pull/447)
+
+1. Use //sensor/frame_id sdf element
+    * [Pull request #444](https://github.com/gazebosim/gz-sensors/pull/444)
+
+1. Fix boundingbox_camera integration test
+    * [Pull request #443](https://github.com/gazebosim/gz-sensors/pull/443)
+
+1. Suppress unused variable warning
+    * [Pull request #429](https://github.com/gazebosim/gz-sensors/pull/429)
+
+1. Remove HIDE_SYMBOLS_BY_DEFAULT: replace by a default configuration in gz-cmake.
+    * [Pull request #408](https://github.com/gazebosim/gz-sensors/pull/408)
+
+1. Avoid calling DblNormal with invalid standard deviation
+    * [Pull request #396](https://github.com/gazebosim/gz-sensors/pull/396)
+
+1. Fix unresolved external symbols on Windows
+    * [Pull request #392](https://github.com/gazebosim/gz-sensors/pull/392)
+
+1. Bumps in Ionic: gz-sensors9
+    * [Pull request #394](https://github.com/gazebosim/gz-sensors/pull/394)
+    * [Pull request #399](https://github.com/gazebosim/gz-sensors/pull/399)
+
+1. Set lens intrinsics in Depth and Rgbd camera sensors
+    * [Pull request #390](https://github.com/gazebosim/gz-sensors/pull/390)
 
 ## Gazebo Sensors 8
 
