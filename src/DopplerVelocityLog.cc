@@ -1731,11 +1731,33 @@ namespace gz
               samplePointInSensorFrame;
 
           // Transform sample point to the environmental data frame
-          const gz::math::Vector3d samplePointInDataFrame =
+          const std::optional<gz::math::CoordinateVector3>
+              samplePointInDataFrameCoordVec =
               this->worldState->origin.PositionTransform(
-                  samplePointInWorldFrame,
+                  gz::math::CoordinateVector3::Metric(samplePointInWorldFrame),
                   gz::math::SphericalCoordinates::GLOBAL,
                   this->waterVelocityReference);
+
+          if (!samplePointInDataFrameCoordVec.has_value())
+            continue;
+
+          gz::math::Vector3d samplePointInDataFrame;
+          if (samplePointInDataFrameCoordVec->IsSpherical())
+          {
+            samplePointInDataFrame.Set(
+                samplePointInDataFrameCoordVec->Lat()->Radian(),
+                samplePointInDataFrameCoordVec->Lon()->Radian(),
+                *samplePointInDataFrameCoordVec->Z());
+          }
+          else if (samplePointInDataFrameCoordVec->IsMetric())
+          {
+            samplePointInDataFrame =
+                *samplePointInDataFrameCoordVec->AsMetricVector();
+          }
+          else
+          {
+            continue;
+          }
 
           // Sample water velocity in the world frame at sample point
           const gz::math::Vector3d sampledVelocityInWorldFrame =
