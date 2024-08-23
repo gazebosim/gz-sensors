@@ -2,6 +2,12 @@
 
 ### Gazebo Sensors 9.0.0 (2024-09-XX)
 
+1. Fix SphericalCoordinate deprecation warning in DVL sensor
+    * [Pull request #460](https://github.com/gazebosim/gz-sensors/pull/460)
+
+1. Fix frame_id in rgbd_camera
+    * [Pull request #458](https://github.com/gazebosim/gz-sensors/pull/458)
+
 1. Enable Ubuntu Noble github actions, require cmake 3.22.1
     * [Pull request #457](https://github.com/gazebosim/gz-sensors/pull/457)
 
