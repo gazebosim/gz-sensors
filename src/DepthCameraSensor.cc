@@ -28,6 +28,7 @@
 #include <gz/math/Angle.hh>
 #include <gz/math/Helpers.hh>
 
+#include <gz/msgs/PointCloudPackedUtils.hh>
 #include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 
