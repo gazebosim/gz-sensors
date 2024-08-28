@@ -1,4 +1,4 @@
-# Bounding Box Camera in Gazebo Sim
+\page boundingbox_camera  Bounding Box Camera in Gazebo
 In this tutorial, we will discuss how to use a bounding box camera sensor in Gazebo Sim.
 
 ## Requirements
