@@ -4,6 +4,9 @@
 
 1. **Baseline:** this includes all changes from 8.2.0 and earlier.
 
+1. Add boundingbox_camera tutorial to the tutorials list
+    * [Pull request #466](https://github.com/gazebosim/gz-sensors/pull/466)
+
 1. Update badges to point to gz-sensors9
     * [Pull request #463](https://github.com/gazebosim/gz-sensors/pull/463)
 
