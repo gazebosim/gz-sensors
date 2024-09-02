@@ -30,7 +30,7 @@ designed to generate realistic data from simulation environments. Gazebo Sensors
 
 [Code of Conduct](#code-of-conduct)
 
-[Contributing](#code-of-contributing)
+[Contributing](#contributing)
 
 [Versioning](#versioning)
 
