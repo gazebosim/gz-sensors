@@ -1,5 +1,7 @@
 \page segmentationcamera_igngazebo Segmentation Camera in Gazebo
 
+Next Tutorial: \ref boundingbox_camera
+
 In this tutorial, we will discuss how to use a segmentation camera sensor in Gazebo.
 
 ## Requirements

@@ -1,5 +1,7 @@
 \page installation Installation
 
+Next Tutorial: \ref custom_sensors
+
 We recommend following the binary install instructions to get up and running as quickly and painlessly as possible.
 
 The source install instructions should be used if you need the very latest software improvements, you need to modify the code, or you plan to make a contribution.
