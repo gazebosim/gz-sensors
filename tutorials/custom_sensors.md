@@ -1,5 +1,7 @@
 \page custom_sensors Custom sensors
 
+Next Tutorial: \ref thermalcameraigngazebo
+
 Gazebo Sensors comes with various built-in sensor types ready to be used.
 Users aren't limited to those sensor types though. This tutorial will go over
 the process of implementing a custom sensor that leverages Gazebo Sensors
