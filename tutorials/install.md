@@ -161,8 +161,8 @@ This assumes you have created and activated a Conda environment while [installin
   cd gz-sensors
   mkdir build
   cd build
-  cmake ..
-  cmake --build .
+  cmake .. -DBUILD_TESTING=OFF  # Optionally, -DCMAKE_INSTALL_PREFIX=path\to\install
+  cmake --build . --config Release
   ```
 
 4. Optionally, install. You will likely need to run a terminal with admin privileges for this call to succeed.
