@@ -1,5 +1,7 @@
 \page segmentationcamera_igngazebo Segmentation Camera in Gazebo
 
+Next Tutorial: \ref boundingbox_camera
+
 In this tutorial, we will discuss how to use a segmentation camera sensor in Gazebo.
 
 ## Requirements
@@ -376,14 +378,14 @@ For panoptic/instance segmentation, to parse the `labels_map`, click on any pixe
 
 ## Processing the segmentation sensor via gz-transport
 It's possible to process the segmentation data in real time via `gz-transport`.
-You will need to which topics to subscribe to in order to receive this information.
+You will need to know which topics to subscribe to in order to receive this information.
 
 Consider the following SDF snippet from the segmentation camera:
 ```xml
-    <topic>segmentation</topic>
+    <topic>semantic</topic>
 ```
 
-In this scenario, the sensor data will publish the label map data to `segmentation/labels_map`, and the colored map data to `segmentation/colored_map`.
+In this scenario, the sensor data will publish the label map data to `semantic/labels_map`, and the colored map data to `semantic/colored_map`.
 We can write some c++ code that subscribes to these topics:
 
 ```cpp
@@ -443,10 +445,10 @@ int main(int argc, char **argv)
 {
   gz::transport::Node node;
 
-  if (!node.Subscribe("/segmentation/colored_map", &OnNewColoredMap) ||
-    !node.Subscribe("/segmentation/labels_map", &OnNewLabelMap))
+  if (!node.Subscribe("/semantic/colored_map", &OnNewColoredMap) ||
+    !node.Subscribe("/semantic/labels_map", &OnNewLabelMap))
   {
-    std::cerr << "Error subscribing to the boundingbox camera topic"
+    std::cerr << "Error subscribing to the semantic camera topic"
               << std::endl;
     return -1;
   }
@@ -457,4 +459,4 @@ int main(int argc, char **argv)
 ```
 
 If you'd like to gain a better understanding of how the subscriber code works,
-you can go through the [gz-transport tutorials](https://gazebosim.org/api/transport/11.0/tutorials.html).
+you can go through the [gz-transport tutorials](https://gazebosim.org/api/transport/14.0/tutorials.html).

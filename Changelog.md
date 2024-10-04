@@ -1,6 +1,23 @@
 ## Gazebo Sensors 9
 
-### Gazebo Sensors 9.0.0 (2024-09-XX)
+### Gazebo Sensors 9.0.0 (2024-09-25)
+
+1. **Baseline:** this includes all changes from 8.2.0 and earlier.
+
+1. Miscellaneous documentation fixes
+    * [Pull request #471](https://github.com/gazebosim/gz-sensors/pull/471)
+    * [Pull request #470](https://github.com/gazebosim/gz-sensors/pull/470)
+    * [Pull request #469](https://github.com/gazebosim/gz-sensors/pull/469)
+    * [Pull request #468](https://github.com/gazebosim/gz-sensors/pull/468)
+
+1. Add boundingbox_camera tutorial to the tutorials list
+    * [Pull request #466](https://github.com/gazebosim/gz-sensors/pull/466)
+
+1. Update badges to point to gz-sensors9
+    * [Pull request #463](https://github.com/gazebosim/gz-sensors/pull/463)
+
+1. Update changelog
+    * [Pull request #459](https://github.com/gazebosim/gz-sensors/pull/459)
 
 1. Fix SphericalCoordinate deprecation warning in DVL sensor
     * [Pull request #460](https://github.com/gazebosim/gz-sensors/pull/460)

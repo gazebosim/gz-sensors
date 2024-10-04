@@ -1,5 +1,7 @@
 \page installation Installation
 
+Next Tutorial: \ref custom_sensors
+
 We recommend following the binary install instructions to get up and running as quickly and painlessly as possible.
 
 The source install instructions should be used if you need the very latest software improvements, you need to modify the code, or you plan to make a contribution.
@@ -42,7 +44,7 @@ which version you need.
 
 #### Install Prerequisites
 
-First, follow the [gz-cmake](https://github.com/gazebosim/gz-cmake) tutorial for installing Conda, Visual Studio, CMake, etc., prerequisites, and creating a Conda environment.
+First, follow the [source installation](https://gazebosim.org/docs/ionic/install_windows_src/) tutorial until step 5 included for installing Conda, Visual Studio, CMake, etc., prerequisites, and creating a Conda environment.
 
 Navigate to `condabin` if necessary to use the `conda` command (i.e., if Conda is not in your `PATH` environment variable. You can find the location of `condabin` in Anaconda Prompt, `where conda`).
 
@@ -159,6 +161,8 @@ This assumes you have created and activated a Conda environment while [installin
   cd gz-sensors
   mkdir build
   cd build
+  cmake .. -DBUILD_TESTING=OFF  # Optionally, -DCMAKE_INSTALL_PREFIX=path\to\install
+  cmake --build . --config Release
   ```
 
 4. Optionally, install. You will likely need to run a terminal with admin privileges for this call to succeed.
