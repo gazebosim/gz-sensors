@@ -1,5 +1,19 @@
 ## Gazebo Sensors 6
 
+### Gazebo Sensors 6.8.1 (2024-10-04)
+
+1. Fix optical frame id in depth and rgbd camera
+    * [Pull request #461](https://github.com/gazebosim/gz-sensors/pull/461)
+
+1. Backport frame id fixes
+    * [Pull request #446](https://github.com/gazebosim/gz-sensors/pull/446)
+
+1. Publish lidar scan only if there are lidar scan connections
+    * [Pull request #447](https://github.com/gazebosim/gz-sensors/pull/447)
+
+1. Fix frames set to Name instead of FrameId for pointclouds
+    * [Pull request #417](https://github.com/gazebosim/gz-sensors/pull/417)
+
 ### Gazebo Sensors 6.8.0 (2024-01-12)
 
 1. Allow specifying gz_frame_id as an alternative to ignition_frame_id
