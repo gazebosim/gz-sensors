@@ -1,6 +1,19 @@
 ## Gazebo Sensors 7
 
-### Gazebo Sensors 7.X.X
+### Gazebo Sensors 7.3.1 (2024-11-07)
+
+1. Update github action workflows
+    * [Pull request #401](https://github.com/gazebosim/gz-sensors/pull/401)
+
+1. clean up rendering resources
+    * [Pull request #324](https://github.com/gazebosim/gz-sensors/pull/324)
+
+1. Destroy rendering sensors when sensor is removed
+    * [Pull request #169](https://github.com/gazebosim/gz-sensors/pull/169)
+
+1. Support protobuf >= 22
+    * [Pull request #351](https://github.com/gazebosim/gz-sensors/pull/351)
+
 
 ### Gazebo Sensors 7.3.0 (2023-09-26)
 
