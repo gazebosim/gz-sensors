@@ -1,5 +1,28 @@
 ## Gazebo Sensors 8
 
+### Gazebo Sensors 8.2.1 (2024-11-08)
+
+1. RgbdCameraSensor: add missing include
+    * [Pull request #464](https://github.com/gazebosim/gz-sensors/pull/464)
+
+1. Fix frame_id in rgbd_camera
+    * [Pull request #458](https://github.com/gazebosim/gz-sensors/pull/458)
+
+1. Remove unused variable in DopplerVelocityLog
+    * [Pull request #453](https://github.com/gazebosim/gz-sensors/pull/453)
+
+1. Skip apply noise / distortion if parameters are 0s
+    * [Pull request #450](https://github.com/gazebosim/gz-sensors/pull/450)
+
+1. Publish lidar scan only if there are lidar scan connections
+    * [Pull request #447](https://github.com/gazebosim/gz-sensors/pull/447)
+
+1. Backport frame id fixes
+    * [Pull request #446](https://github.com/gazebosim/gz-sensors/pull/446)
+
+1. Fix boundingbox_camera integration test
+    * [Pull request #443](https://github.com/gazebosim/gz-sensors/pull/443)
+
 ### Gazebo Sensors 8.2.0 (2024-06-14)
 
 1. Add API to check if sensor is in trigger mode
