@@ -353,6 +353,13 @@ bool SegmentationCameraSensor::CreateCamera()
   auto width = sdfCamera->ImageWidth();
   auto height = sdfCamera->ImageHeight();
 
+  if (width == 0u || height == 0u)
+  {
+    gzerr << "Unable to create a segmentation camera sensor with 0 width or "
+          << "height." << std::endl;
+    return false;
+  }
+
   math::Angle angle = sdfCamera->HorizontalFov();
   if (angle < 0.01 || angle > GZ_PI*2)
   {

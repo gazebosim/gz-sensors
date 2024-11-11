@@ -228,6 +228,13 @@ bool WideAngleCameraSensor::CreateCamera()
   unsigned int width = cameraSdf->ImageWidth();
   unsigned int height = cameraSdf->ImageHeight();
 
+  if (width == 0u || height == 0u)
+  {
+    gzerr << "Unable to create a wide angle camera sensor with 0 width or "
+          << "height." << std::endl;
+    return false;
+  }
+
   this->dataPtr->camera = this->Scene()->CreateWideAngleCamera(this->Name());
 
   if (!this->dataPtr->camera)
