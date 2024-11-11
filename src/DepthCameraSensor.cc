@@ -329,8 +329,15 @@ bool DepthCameraSensor::CreateCamera()
     return false;
   }
 
-  int width = cameraSdf->ImageWidth();
-  int height = cameraSdf->ImageHeight();
+  unsigned int width = cameraSdf->ImageWidth();
+  unsigned int height = cameraSdf->ImageHeight();
+
+  if (width == 0u || height == 0u)
+  {
+    ignerr << "Unable to create a depth camera sensor with 0 width or height."
+          << std::endl;
+    return false;
+  }
 
   double far = cameraSdf->FarClip();
   double near = cameraSdf->NearClip();
