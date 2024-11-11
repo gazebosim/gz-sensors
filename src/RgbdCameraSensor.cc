@@ -272,12 +272,8 @@ bool RgbdCameraSensor::CreateCameras()
     return false;
   }
 
-<<<<<<< HEAD
   this->PopulateInfo(cameraSdf);
 
-  int width = cameraSdf->ImageWidth();
-  int height = cameraSdf->ImageHeight();
-=======
   unsigned int width = cameraSdf->ImageWidth();
   unsigned int height = cameraSdf->ImageHeight();
 
@@ -287,7 +283,6 @@ bool RgbdCameraSensor::CreateCameras()
           << std::endl;
     return false;
   }
->>>>>>> aaef365 (Check camera resolution (#480))
 
   this->dataPtr->depthCamera =
       this->Scene()->CreateDepthCamera(this->Name());
