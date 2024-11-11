@@ -272,10 +272,22 @@ bool RgbdCameraSensor::CreateCameras()
     return false;
   }
 
+<<<<<<< HEAD
   this->PopulateInfo(cameraSdf);
 
   int width = cameraSdf->ImageWidth();
   int height = cameraSdf->ImageHeight();
+=======
+  unsigned int width = cameraSdf->ImageWidth();
+  unsigned int height = cameraSdf->ImageHeight();
+
+  if (width == 0u || height == 0u)
+  {
+    gzerr << "Unable to create an RGBD camera sensor with 0 width or height."
+          << std::endl;
+    return false;
+  }
+>>>>>>> aaef365 (Check camera resolution (#480))
 
   this->dataPtr->depthCamera =
       this->Scene()->CreateDepthCamera(this->Name());
