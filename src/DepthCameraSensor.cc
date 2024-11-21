@@ -54,6 +54,10 @@
 /// \brief Private data for DepthCameraSensor
 class gz::sensors::DepthCameraSensorPrivate
 {
+  /// \brief Callback for triggered subscription
+  /// \param[in] _msg Boolean message
+  public: void OnTrigger(const msgs::Boolean &_msg);
+
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
   /// \param[in] _width width of image in pixels
@@ -121,6 +125,15 @@ class gz::sensors::DepthCameraSensorPrivate
   /// \brief Just a mutex for thread safety
   public: std::mutex mutex;
 
+  /// \brief True if camera is triggered by a topic
+  public: bool isTriggeredCamera = false;
+
+  /// \brief True if camera has been triggered by a topic
+  public: bool isTriggered = false;
+
+  /// \brief Topic for camera trigger
+  public: std::string triggerTopic = "";
+
   /// \brief True to save images
   public: bool saveImage = false;
 
@@ -173,6 +186,13 @@ bool DepthCameraSensorPrivate::ConvertDepthToImage(
     _imageBuffer[j * 3 + 2] = d;
   }
   return true;
+}
+
+//////////////////////////////////////////////////
+void DepthCameraSensorPrivate::OnTrigger(const msgs::Boolean &/*_msg*/)
+{
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->isTriggered = true;
 }
 
 //////////////////////////////////////////////////
@@ -286,6 +306,32 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
 
   igndbg << "Depth images for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
+
+  if (_sdf.CameraSensor()->Triggered())
+  {
+    if (!_sdf.CameraSensor()->TriggerTopic().empty())
+    {
+      this->dataPtr->triggerTopic = _sdf.CameraSensor()->TriggerTopic();
+    }
+    else
+    {
+      this->dataPtr->triggerTopic =
+          transport::TopicUtils::AsValidTopic(this->dataPtr->triggerTopic);
+
+      if (this->dataPtr->triggerTopic.empty())
+      {
+        ignerr << "Invalid trigger topic name" << std::endl;
+        return false;
+      }
+    }
+
+    this->dataPtr->node.Subscribe(this->dataPtr->triggerTopic,
+        &DepthCameraSensorPrivate::OnTrigger, this->dataPtr.get());
+
+    igndbg << "Camera trigger messages for [" << this->Name() << "] subscribed"
+           << " on [" << this->dataPtr->triggerTopic << "]" << std::endl;
+    this->dataPtr->isTriggeredCamera = true;
+  }
 
   if (!this->AdvertiseInfo())
     return false;
@@ -543,6 +589,13 @@ bool DepthCameraSensor::Update(
     this->PublishInfo(_now);
   }
 
+  // render only if necessary
+  if (this->dataPtr->isTriggeredCamera &&
+      !this->dataPtr->isTriggered)
+  {
+    return true;
+  }
+
   if (!this->HasDepthConnections() && !this->HasPointConnections())
   {
     return false;
@@ -627,6 +680,12 @@ bool DepthCameraSensor::Update(
     this->AddSequence(this->dataPtr->pointMsg.mutable_header(), "pointMsg");
     this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
   }
+
+  if (this->dataPtr->isTriggeredCamera)
+  {
+    return this->dataPtr->isTriggered = false;
+  }
+
   return true;
 }
 
