@@ -28,7 +28,7 @@ namespace ignition
 namespace sensors
 {
 // Inline bracket to help doxygen filtering.
-inline namespace GZ_SENSORS_VERSION_NAMESPACE {
+inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
 /// \brief Computes the OpenGL NDC matrix
 /// \param[in] _left Left vertical clipping plane
 /// \param[in] _right Right vertical clipping plane
