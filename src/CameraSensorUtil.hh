@@ -23,7 +23,7 @@
 #include "gz/sensors/config.hh"
 #include "gz/sensors/Export.hh"
 
-namespace gz
+namespace ignition
 {
 namespace sensors
 {

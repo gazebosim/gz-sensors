@@ -33,11 +33,8 @@
 #include <gz/rendering/Camera.hh>
 #include <gz/rendering/DepthCamera.hh>
 
-<<<<<<< HEAD
-=======
 #include <gz/msgs/Utility.hh>
 #include <gz/rendering/Utils.hh>
->>>>>>> bd695b2 (Set lens intrinsics in Depth and Rgbd camera sensors (#390))
 #include <gz/transport/Node.hh>
 
 #include <sdf/Sensor.hh>
@@ -278,11 +275,8 @@ bool RgbdCameraSensor::CreateCameras()
     return false;
   }
 
-<<<<<<< HEAD
-  this->PopulateInfo(cameraSdf);
-
-  unsigned int width = cameraSdf->ImageWidth();
-  unsigned int height = cameraSdf->ImageHeight();
+  int width = cameraSdf->ImageWidth();
+  int height = cameraSdf->ImageHeight();
 
   if (width == 0u || height == 0u)
   {
@@ -290,10 +284,6 @@ bool RgbdCameraSensor::CreateCameras()
           << std::endl;
     return false;
   }
-=======
-  int width = cameraSdf->ImageWidth();
-  int height = cameraSdf->ImageHeight();
->>>>>>> bd695b2 (Set lens intrinsics in Depth and Rgbd camera sensors (#390))
 
   this->dataPtr->depthCamera =
       this->Scene()->CreateDepthCamera(this->Name());

@@ -34,11 +34,8 @@
 #include <gz/math/Angle.hh>
 #include <gz/math/Helpers.hh>
 
-<<<<<<< HEAD
-=======
 #include <gz/msgs/Utility.hh>
 #include <gz/rendering/Utils.hh>
->>>>>>> bd695b2 (Set lens intrinsics in Depth and Rgbd camera sensors (#390))
 #include <gz/transport/Node.hh>
 
 #include "gz/sensors/DepthCameraSensor.hh"

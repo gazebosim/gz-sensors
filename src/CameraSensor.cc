@@ -839,83 +839,9 @@ bool CameraSensor::HasInfoConnections() const
 {
   return this->dataPtr->infoPub && this->dataPtr->infoPub.HasConnections();
 }
-<<<<<<< HEAD
 
 //////////////////////////////////////////////////
 const std::string &CameraSensor::OpticalFrameId() const
 {
   return this->dataPtr->opticalFrameId;
 }
-
-//////////////////////////////////////////////////
-math::Matrix4d CameraSensorPrivate::BuildProjectionMatrix(
-    double _imageWidth, double _imageHeight,
-    double _intrinsicsFx, double _intrinsicsFy,
-    double _intrinsicsCx, double _intrinsicsCy,
-    double _intrinsicsS,
-    double _clipNear, double _clipFar)
-{
-  return CameraSensorPrivate::BuildNDCMatrix(
-           0, _imageWidth, 0, _imageHeight, _clipNear, _clipFar) *
-           CameraSensorPrivate::BuildPerspectiveMatrix(
-             _intrinsicsFx, _intrinsicsFy,
-             _intrinsicsCx, _imageHeight - _intrinsicsCy,
-             _intrinsicsS, _clipNear, _clipFar);
-}
-
-//////////////////////////////////////////////////
-math::Matrix4d CameraSensorPrivate::BuildNDCMatrix(
-    double _left, double _right,
-    double _bottom, double _top,
-    double _near, double _far)
-{
-  double inverseWidth = 1.0 / (_right - _left);
-  double inverseHeight = 1.0 / (_top - _bottom);
-  double inverseDistance = 1.0 / (_far - _near);
-
-  return math::Matrix4d(
-           2.0 * inverseWidth,
-           0.0,
-           0.0,
-           -(_right + _left) * inverseWidth,
-           0.0,
-           2.0 * inverseHeight,
-           0.0,
-           -(_top + _bottom) * inverseHeight,
-           0.0,
-           0.0,
-           -2.0 * inverseDistance,
-           -(_far + _near) * inverseDistance,
-           0.0,
-           0.0,
-           0.0,
-           1.0);
-}
-
-//////////////////////////////////////////////////
-math::Matrix4d CameraSensorPrivate::BuildPerspectiveMatrix(
-    double _intrinsicsFx, double _intrinsicsFy,
-    double _intrinsicsCx, double _intrinsicsCy,
-    double _intrinsicsS,
-    double _clipNear, double _clipFar)
-{
-  return math::Matrix4d(
-           _intrinsicsFx,
-           _intrinsicsS,
-           -_intrinsicsCx,
-           0.0,
-           0.0,
-           _intrinsicsFy,
-           -_intrinsicsCy,
-           0.0,
-           0.0,
-           0.0,
-           _clipNear + _clipFar,
-           _clipNear * _clipFar,
-           0.0,
-           0.0,
-           -1.0,
-           0.0);
-}
-=======
->>>>>>> bd695b2 (Set lens intrinsics in Depth and Rgbd camera sensors (#390))
