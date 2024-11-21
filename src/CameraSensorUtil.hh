@@ -23,6 +23,17 @@
 #include "gz/sensors/config.hh"
 #include "gz/sensors/Export.hh"
 
+#ifndef _WIN32
+#  define CameraSensorUtil_EXPORTS_API
+#else
+#  if (defined(CameraSensorUtil_EXPORTS))
+#    define CameraSensorUtil_EXPORTS_API __declspec(dllexport)
+#  else
+#    define CameraSensorUtil_EXPORTS_API __declspec(dllimport)
+#  endif
+#endif
+
+
 namespace ignition
 {
 namespace sensors
@@ -41,6 +52,7 @@ inline namespace IGNITION_SENSORS_VERSION_NAMESPACE {
 ///            This value is negative if the plane is to be behind
 ///            the camera
 /// \return OpenGL NDC (Normalized Device Coordinates) matrix
+CameraSensorUtil_EXPORTS_API
 math::Matrix4d buildNDCMatrix(double _left, double _right, double _bottom,
                               double _top, double _near, double _far);
 
@@ -58,6 +70,7 @@ math::Matrix4d buildNDCMatrix(double _left, double _right, double _bottom,
 ///            This value is negative if the plane is to be behind
 ///            the camera
 /// \return OpenGL perspective matrix
+CameraSensorUtil_EXPORTS_API
 math::Matrix4d buildPerspectiveMatrix(
     double _intrinsicsFx, double _intrinsicsFy, double _intrinsicsCx,
     double _intrinsicsCy, double _intrinsicsS, double _clipNear,
@@ -82,6 +95,7 @@ math::Matrix4d buildPerspectiveMatrix(
 ///            This value is negative if the plane is to be behind
 ///            the camera
 /// \return OpenGL projection matrix
+CameraSensorUtil_EXPORTS_API
 math::Matrix4d buildProjectionMatrix(double _imageWidth, double _imageHeight,
                                      double _intrinsicsFx, double _intrinsicsFy,
                                      double _intrinsicsCx, double _intrinsicsCy,
