@@ -110,7 +110,7 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
     return false;
 
   if (this->Topic().empty())
-    this->SetTopic("/camera/logical");
+    this->SetTopic("/logical_camera");
 
   this->dataPtr->pub =
       this->dataPtr->node.Advertise<msgs::LogicalCameraImage>(
@@ -236,6 +236,17 @@ msgs::LogicalCameraImage LogicalCameraSensor::Image() const
 //////////////////////////////////////////////////
 bool LogicalCameraSensor::HasConnections() const
 {
-  return this->dataPtr->pub_logic && this->dataPtr->pub_logic.HasConnections();
+  return this->HasImageConnections() || this->HasFrustumConnections();
 }
 
+//////////////////////////////////////////////////
+bool LogicalCameraSensor::HasImageConnections() const
+{
+  return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
+}
+
+//////////////////////////////////////////////////
+bool LogicalCameraSensor::HasFrustumConnections() const
+{
+  return this->dataPtr->pub_logic && this->dataPtr->pub_logic.HasConnections();
+}
