@@ -1,5 +1,6 @@
 set (sources
   BrownDistortionModel.cc
+  CameraSensorUtil.cc
   Distortion.cc
   GaussianNoiseModel.cc
   Manager.cc
@@ -49,7 +50,7 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
     ignition-common${IGN_COMMON_VER}::profiler
     ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
 )
-target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME} PUBLIC DepthPoints_EXPORTS)
+target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME} PUBLIC DepthPoints_EXPORTS CameraSensorUtil_EXPORTS)
 
 ign_add_component(rendering SOURCES ${rendering_sources} GET_TARGET_NAME rendering_target)
 target_link_libraries(${rendering_target}
