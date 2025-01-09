@@ -376,7 +376,7 @@ void WideAngleCameraSensor::OnNewWideAngleFrame(
   unsigned int bytesPerChannel = rendering::PixelUtil::BytesPerChannel(
       this->dataPtr->camera->ImageFormat());
   unsigned int len = _width * _height * _channels * bytesPerChannel;
-  unsigned int bufferSize = len * sizeof(unsigned char) ;
+  unsigned int bufferSize = len * sizeof(unsigned char);
 
   if (!this->dataPtr->imageBuffer)
     this->dataPtr->imageBuffer = new unsigned char[len];
