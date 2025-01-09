@@ -333,6 +333,12 @@ bool WideAngleCameraSensor::CreateCamera()
     case sdf::PixelFormatType::RGB_INT8:
       this->dataPtr->camera->SetImageFormat(gz::rendering::PF_R8G8B8);
       break;
+    case sdf::PixelFormatType::L_INT8:
+      this->dataPtr->camera->SetImageFormat(gz::rendering::PF_L8);
+      break;
+    case sdf::PixelFormatType::L_INT16:
+      this->dataPtr->camera->SetImageFormat(gz::rendering::PF_L16);
+      break;
     default:
       gzerr << "Unsupported pixel format ["
         << static_cast<int>(pixelFormat) << "]\n";
@@ -367,8 +373,10 @@ void WideAngleCameraSensor::OnNewWideAngleFrame(
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-  unsigned int len = _width * _height * _channels;
-  unsigned int bufferSize = len * sizeof(unsigned char);
+  unsigned int bytesPerChannel = rendering::PixelUtil::BytesPerChannel(
+      this->dataPtr->camera->ImageFormat());
+  unsigned int len = _width * _height * _channels * bytesPerChannel;
+  unsigned int bufferSize = len * sizeof(unsigned char) ;
 
   if (!this->dataPtr->imageBuffer)
     this->dataPtr->imageBuffer = new unsigned char[len];
@@ -466,6 +474,12 @@ bool WideAngleCameraSensor::Update(
     case gz::rendering::PF_R8G8B8:
       format = gz::common::Image::RGB_INT8;
       msgsPixelFormat = msgs::PixelFormatType::RGB_INT8;
+      break;
+    case gz::rendering::PF_L8:
+      msgsPixelFormat = msgs::PixelFormatType::L_INT8;
+      break;
+    case gz::rendering::PF_L16:
+      msgsPixelFormat = msgs::PixelFormatType::L_INT16;
       break;
     default:
       gzerr << "Unsupported pixel format ["
