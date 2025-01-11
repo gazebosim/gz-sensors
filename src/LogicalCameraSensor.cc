@@ -182,7 +182,8 @@ bool LogicalCameraSensor::Update(
   frame->set_key("frame_id");
   frame->add_value(this->FrameId());
 
-  *this->dataPtr->msg_logic.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+  *this->dataPtr->msg_logic.mutable_header()->mutable_stamp() =
+    msgs::Convert(_now);
   this->dataPtr->msg_logic.mutable_header()->clear_data();
   auto frame_log = this->dataPtr->msg_logic.mutable_header()->add_data();
 
@@ -192,8 +193,10 @@ bool LogicalCameraSensor::Update(
   // publish
   this->dataPtr->msg_logic.set_near_clip(this->dataPtr->frustum.Near());
   this->dataPtr->msg_logic.set_far_clip(this->dataPtr->frustum.Far());
-  this->dataPtr->msg_logic.set_horizontal_fov(this->dataPtr->frustum.FOV().Radian());
-  this->dataPtr->msg_logic.set_aspect_ratio(this->dataPtr->frustum.AspectRatio());
+  this->dataPtr->msg_logic.set_horizontal_fov(
+    this->dataPtr->frustum.FOV().Radian());
+  this->dataPtr->msg_logic.set_aspect_ratio(
+    this->dataPtr->frustum.AspectRatio());
   this->AddSequence(this->dataPtr->msg.mutable_header());
 
   this->dataPtr->pub.Publish(this->dataPtr->msg);
