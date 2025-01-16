@@ -36,12 +36,14 @@ class gz::sensors::LogicalCameraSensorPrivate
   /// \brief node to create publisher
   public: transport::Node node;
 
-  public: transport::Node node_logic;
+  /// \brief node to create publisher for frustum
+  public: transport::Node nodeLogic;
 
   /// \brief publisher to publish logical camera messages.
   public: transport::Node::Publisher pub;
 
-  public: transport::Node::Publisher pub_logic;
+  /// \brief Publisher to publish logical camera frustum information
+  public: transport::Node::Publisher pubLogic;
 
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
@@ -59,9 +61,10 @@ class gz::sensors::LogicalCameraSensorPrivate
   public: std::map<std::string, math::Pose3d> models;
 
   /// \brief Msg containg info on models detected by logical camera
-  msgs::LogicalCameraImage msg;
+  public: msgs::LogicalCameraImage msg;
 
-  msgs::LogicalCameraSensor msg_logic;
+  /// \brief Msg containing logical camera frustum info
+  public: msgs::LogicalCameraSensor msgLogic;
 };
 
 //////////////////////////////////////////////////
@@ -116,8 +119,8 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
       this->dataPtr->node.Advertise<msgs::LogicalCameraImage>(
       this->Topic());
 
-  this->dataPtr->pub_logic =
-      this->dataPtr->node_logic.Advertise<msgs::LogicalCameraSensor>(
+  this->dataPtr->pubLogic =
+      this->dataPtr->nodeLogic.Advertise<msgs::LogicalCameraSensor>(
       this->Topic() + "/frustum");
 
   if (!this->dataPtr->pub)
@@ -126,9 +129,9 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
     return false;
   }
 
-  if (!this->dataPtr->pub_logic)
+  if (!this->dataPtr->pubLogic)
   {
-    gzerr << "Unable to create publisher on topic[" << this->Topic() << "].\n";
+    gzerr << "Unable to create publisher on topic[" << this->Topic() << "/frustum].\n";
     return false;
   }
 
@@ -182,25 +185,25 @@ bool LogicalCameraSensor::Update(
   frame->set_key("frame_id");
   frame->add_value(this->FrameId());
 
-  *this->dataPtr->msg_logic.mutable_header()->mutable_stamp() =
+  *this->dataPtr->msgLogic.mutable_header()->mutable_stamp() =
     msgs::Convert(_now);
-  this->dataPtr->msg_logic.mutable_header()->clear_data();
-  auto frame_log = this->dataPtr->msg_logic.mutable_header()->add_data();
+  this->dataPtr->msgLogic.mutable_header()->clear_data();
+  auto frame_log = this->dataPtr->msgLogic.mutable_header()->add_data();
 
   frame_log->set_key("frame_id");
   frame_log->add_value(this->FrameId());
 
   // publish
-  this->dataPtr->msg_logic.set_near_clip(this->dataPtr->frustum.Near());
-  this->dataPtr->msg_logic.set_far_clip(this->dataPtr->frustum.Far());
-  this->dataPtr->msg_logic.set_horizontal_fov(
+  this->dataPtr->msgLogic.set_near_clip(this->dataPtr->frustum.Near());
+  this->dataPtr->msgLogic.set_far_clip(this->dataPtr->frustum.Far());
+  this->dataPtr->msgLogic.set_horizontal_fov(
     this->dataPtr->frustum.FOV().Radian());
-  this->dataPtr->msg_logic.set_aspect_ratio(
+  this->dataPtr->msgLogic.set_aspect_ratio(
     this->dataPtr->frustum.AspectRatio());
   this->AddSequence(this->dataPtr->msg.mutable_header());
 
   this->dataPtr->pub.Publish(this->dataPtr->msg);
-  this->dataPtr->pub_logic.Publish(this->dataPtr->msg_logic);
+  this->dataPtr->pubLogic.Publish(this->dataPtr->msgLogic);
 
   return true;
 }
@@ -251,5 +254,5 @@ bool LogicalCameraSensor::HasImageConnections() const
 //////////////////////////////////////////////////
 bool LogicalCameraSensor::HasFrustumConnections() const
 {
-  return this->dataPtr->pub_logic && this->dataPtr->pub_logic.HasConnections();
+  return this->dataPtr->pubLogic && this->dataPtr->pubLogic.HasConnections();
 }
