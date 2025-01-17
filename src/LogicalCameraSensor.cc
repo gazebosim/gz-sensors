@@ -131,7 +131,8 @@ bool LogicalCameraSensor::Load(sdf::ElementPtr _sdf)
 
   if (!this->dataPtr->pubLogic)
   {
-    gzerr << "Unable to create publisher on topic[" << this->Topic() << "/frustum].\n";
+    gzerr << "Unable to create publisher on topic[" << this->Topic()
+          << "/frustum].\n";
     return false;
   }
 
