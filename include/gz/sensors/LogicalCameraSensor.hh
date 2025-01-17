@@ -104,6 +104,14 @@ namespace gz
       /// \return True if there are subscribers, false otherwise
       public: virtual bool HasConnections() const override;
 
+      /// \brief Check if there are any image subscribers
+      /// \return True if there are image subscribers, false otherwise
+      public: virtual bool HasImageConnections() const;
+
+      /// \brief Check if there are any frustum subscribers
+      /// \return True if there are info subscribers, false otherwise
+      public: virtual bool HasFrustumConnections() const;
+
       /// \brief Get the latest image. An image is an instance of
       /// msgs::LogicalCameraImage, which contains a list of detected models.
       /// \return List of detected models.
