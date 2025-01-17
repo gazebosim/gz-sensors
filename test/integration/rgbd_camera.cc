@@ -475,7 +475,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   {
     // init the point cloud msg to be filled
     msgs::PointCloudPacked pointsMsg;
-    msgs::InitPointCloudPacked(pointsMsg, "depth2Image", true,
+    msgs::InitPointCloudPacked(pointsMsg, "depth2Image", false,
         {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
          {"rgb", msgs::PointCloudPacked::Field::FLOAT32}});
     pointsMsg.set_width(rgbdSensor->ImageWidth());
