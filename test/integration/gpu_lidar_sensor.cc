@@ -431,10 +431,10 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   EXPECT_EQ(static_cast<uint32_t>(vertSamples), pointMsgs.back().height());
   EXPECT_EQ(static_cast<uint32_t>(horzSamples), pointMsgs.back().width());
   EXPECT_FALSE(pointMsgs.back().is_bigendian());
-  EXPECT_EQ(32u, pointMsgs.back().point_step());
-  EXPECT_EQ(32u * horzSamples, pointMsgs.back().row_step());
+  EXPECT_EQ(18u, pointMsgs.back().point_step());
+  EXPECT_EQ(18u * horzSamples, pointMsgs.back().row_step());
   EXPECT_FALSE(pointMsgs.back().is_dense());
-  EXPECT_EQ(32u * horzSamples * vertSamples, pointMsgs.back().data().size());
+  EXPECT_EQ(18u * horzSamples * vertSamples, pointMsgs.back().data().size());
 
   EXPECT_TRUE(pointMsgs.back().has_header());
   EXPECT_LT(1, pointMsgs.back().header().data().size());
