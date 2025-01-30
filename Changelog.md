@@ -1,5 +1,10 @@
 ## Gazebo Sensors 8
 
+### Gazebo Sensors 8.2.2 (2025-01-30)
+
+1. Check camera resolution (#480)
+    * [Pull request #483](https://github.com/gazebosim/gz-sensors/pull/483)
+
 ### Gazebo Sensors 8.2.1 (2024-11-08)
 
 1. RgbdCameraSensor: add missing include
