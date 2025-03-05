@@ -51,7 +51,7 @@ See the [installation tutorial](https://gazebosim.org/api/sensors/9/installation
 
 Please refer to the [examples directory](https://github.com/gazebosim/gz-sensors/tree/main/examples).
 
-A list of sensors and SDF examples can be found in the [SDF specification](http://sdformat.org/spec?ver=1.9&elem=sensor)
+A list of sensors and SDF examples can be found in the [SDF specification](http://sdformat.org/spec?ver=1.12&elem=sensor)
 
 # Folder Structure
 
