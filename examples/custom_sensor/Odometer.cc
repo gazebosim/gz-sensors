@@ -53,7 +53,7 @@ bool Odometer::Load(const sdf::Sensor &_sdf)
   }
 
   // Load custom sensor params
-  auto customElem = _sdf.Element()->GetElement("gz:odometer");
+  auto customElem = _sdf.Element()->FindElement("gz:odometer");
 
   if (!customElem->HasElement("noise"))
   {
@@ -62,7 +62,7 @@ bool Odometer::Load(const sdf::Sensor &_sdf)
   }
 
   sdf::Noise noiseSdf;
-  noiseSdf.Load(customElem->GetElement("noise"));
+  noiseSdf.Load(customElem->FindElement("noise"));
   this->noise = gz::sensors::NoiseFactory::NewNoiseModel(noiseSdf);
   if (nullptr == this->noise)
   {
