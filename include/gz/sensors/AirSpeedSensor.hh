@@ -71,6 +71,9 @@ namespace gz
       /// \brief Update the velocity of the sensor
       public: void SetVelocity(const gz::math::Vector3d &_vel);
 
+      /// \brief Update the wind velocity
+      public: void SetWindVelocity(const gz::math::Vector3d &_windVel);
+
       using Sensor::Update;
 
       /// \brief Update the sensor and generate data
