@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
-  <name>gz-sensors10</name>
+  <name>gz-sensors</name>
   <version>10.0.0</version>
   <description>Gazebo Sensors : Sensor models for simulation</description>
   <maintainer email="ichen@openrobotics.org">Ian Chen</maintainer>
