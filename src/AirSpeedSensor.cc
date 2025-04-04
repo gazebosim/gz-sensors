@@ -68,6 +68,9 @@ class gz::sensors::AirSpeedSensorPrivate
   /// \brief Velocity of the air coming from the sensor
   public: gz::math::Vector3d vel;
 
+  /// \brief Velocity of the wind coming from the sensor
+  public: gz::math::Vector3d windVel;
+
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
 };
@@ -169,12 +172,10 @@ bool AirSpeedSensor::Update(
   const float density_ratio = powf(kTemperaturMsl / temperature_local , 4.256f);
   const float air_density = kAirDensityMsl / density_ratio;
 
-  math::Vector3d wind_vel_{0, 0, 0};
   math::Quaterniond veh_q_world_to_body = this->Pose().Rot();
-
   // calculate differential pressure + noise in hPa
   math::Vector3d air_vel_in_body_ = this->dataPtr->vel -
-    veh_q_world_to_body.RotateVectorReverse(wind_vel_);
+    veh_q_world_to_body.RotateVectorReverse(this->dataPtr->windVel);
   float diff_pressure = math::sgn(air_vel_in_body_.X()) * 0.005f * air_density
     * air_vel_in_body_.X() * air_vel_in_body_.X();
 
@@ -207,6 +208,12 @@ gz::math::Vector3d AirSpeedSensor::Velocity() const
 void AirSpeedSensor::SetVelocity(const gz::math::Vector3d &_vel)
 {
   this->dataPtr->vel = _vel;
+}
+
+//////////////////////////////////////////////////
+void AirSpeedSensor::SetWindVelocity(const gz::math::Vector3d &_windVel)
+{
+  this->dataPtr->windVel = _windVel;
 }
 
 //////////////////////////////////////////////////
