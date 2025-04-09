@@ -4,6 +4,17 @@
 
 ## Gazebo Sensors 9
 
+### Gazebo Sensors 9.1.0 (2025-02-12)
+
+1. Enable packing w/o padding for pointclouds
+    * [Pull request #493](https://github.com/gazebosim/gz-sensors/pull/493)
+
+1. Add support for L8 and L16 image formats in WideAngleCameraSensor
+    * [Pull request #494](https://github.com/gazebosim/gz-sensors/pull/494)
+
+1. Check camera resolution
+    * [Pull request #480](https://github.com/gazebosim/gz-sensors/pull/480)
+
 ### Gazebo Sensors 9.0.0 (2024-09-25)
 
 1. **Baseline:** this includes all changes from 8.2.0 and earlier.
