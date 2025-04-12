@@ -356,10 +356,10 @@ project(image-listener)
 
 # Find the Gazebo Libraries used directly by the example
 find_package(gz-msgs11 REQUIRED)
-find_package(gz-transport14 REQUIRED)
+find_package(gz-transport REQUIRED)
 
 add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} PUBLIC gz-msgs11 gz-transport14)
+target_link_libraries(${PROJECT_NAME} PUBLIC gz-msgs11 gz-transport)
 target_include_directories(${PROJECT_NAME} PUBLIC ${gz_msgs11_INCLUDE_DIRS})
 ```
 
