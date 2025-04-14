@@ -44,7 +44,7 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC
     gz-math${GZ_MATH_VER}::gz-math${GZ_MATH_VER}
     gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
-    gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
+    gz-transport::gz-transport
     sdformat${SDF_VER}::sdformat${SDF_VER}
   PRIVATE
     gz-common${GZ_COMMON_VER}::profiler
