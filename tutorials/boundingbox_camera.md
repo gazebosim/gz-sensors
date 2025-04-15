@@ -241,7 +241,7 @@ gz sim boundingbox_camera.sdf
 
 you will find that the dataset is saved in the given path
 
-#### Dataset Demo
+### Dataset Demo
 
 ![dataset_generation](files/boundingbox_camera/object_detection_dataset.gif)
 
