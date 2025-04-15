@@ -96,7 +96,7 @@ As we can see, we define a sensor with the following SDF elements:
 * `<visualize>`: Whether the sensor should be visualized in the GUI (indicated by true) or not (indicated by false). This is currently unused by Gazebo.
 * `<topic>`: The name of the topic which will be used to publish the sensor data.
 
-#### Label map & Colored map
+### Label map & Colored map
 The segmentation sensor creates 2 maps (or images):
 
 - The `label map`: For semantic segmentation, each pixel contains the object's label. For panoptic segmentation, each pixel contains the label and object's instance count.
@@ -271,7 +271,7 @@ To save the output of the sensor as segmentation dataset samples, we add the `<s
 In the example world we just ran (`segmentation_camera.sdf`), you'll notice that the panoptic camera is saving data to `segmentation_data/instance_camera`, while the semenatic camera is saving data to
 `segmentation_data/semantic_camera` (these are relative paths).
 
-#### Dataset Demo
+### Dataset Demo
 
 Up to this point, we have left simulation paused.
 Go ahead and start simulation by pressing the play button at the bottom-left part of the GUI.
