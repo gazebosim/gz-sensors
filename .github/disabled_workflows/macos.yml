@@ -6,7 +6,7 @@ jobs:
   build:
 
     env:
-      PACKAGE: gz-sensors9
+      PACKAGE: gz-sensors10
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
