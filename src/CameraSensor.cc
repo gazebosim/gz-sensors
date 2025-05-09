@@ -258,7 +258,7 @@ bool CameraSensor::CreateCamera()
   this->dataPtr->camera->SetAntiAliasing(cameraSdf->AntiAliasingValue());
 
   math::Angle angle = cameraSdf->HorizontalFov();
-  if (angle < 0.01 || angle > GZ_PI*2)
+  if (angle < 0.001 || angle > GZ_PI*2)
   {
     gzerr << "Invalid horizontal field of view [" << angle << "]\n";
 
