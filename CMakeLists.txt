@@ -8,7 +8,7 @@ project(gz-sensors VERSION 10.0.0)
 #============================================================================
 # Find gz-cmake
 #============================================================================
-find_package(gz-cmake4 REQUIRED)
+find_package(gz-cmake REQUIRED)
 
 #============================================================================
 # Configure the project
@@ -44,15 +44,13 @@ gz_find_package(GzProtobuf
 
 #--------------------------------------
 # Find gz-math
-gz_find_package(gz-math8 REQUIRED)
-set(GZ_MATH_VER ${gz-math8_VERSION_MAJOR})
+gz_find_package(gz-math REQUIRED)
 
 #--------------------------------------
 # Find gz-common
-gz_find_package(gz-common6
+gz_find_package(gz-common
                  COMPONENTS profiler
                  REQUIRED)
-set(GZ_COMMON_VER ${gz-common6_VERSION_MAJOR})
 
 #--------------------------------------
 # Find gz-transport
@@ -60,28 +58,25 @@ gz_find_package(gz-transport REQUIRED)
 
 #--------------------------------------
 # Find gz-rendering
-gz_find_package(gz-rendering9 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
-set(GZ_RENDERING_VER ${gz-rendering9_VERSION_MAJOR})
+gz_find_package(gz-rendering REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
 
-if (TARGET gz-rendering${GZ_RENDERING_VER}::ogre)
+if (TARGET gz-rendering::ogre)
   set(HAVE_OGRE TRUE)
   add_definitions(-DWITH_OGRE)
 endif()
 
-if (TARGET gz-rendering${GZ_RENDERING_VER}::ogre2)
+if (TARGET gz-rendering::ogre2)
   set(HAVE_OGRE2 TRUE)
   add_definitions(-DWITH_OGRE2)
 endif()
 
 #--------------------------------------
 # Find gz-msgs
-gz_find_package(gz-msgs11 REQUIRED)
-set(GZ_MSGS_VER ${gz-msgs11_VERSION_MAJOR})
+gz_find_package(gz-msgs REQUIRED)
 
 #--------------------------------------
 # Find SDFormat
-gz_find_package(sdformat15 REQUIRED)
-set(SDF_VER ${sdformat15_VERSION_MAJOR})
+gz_find_package(sdformat REQUIRED)
 
 #--------------------------------------
 # Find Eigen3
