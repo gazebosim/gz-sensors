@@ -147,11 +147,11 @@ namespace gz
 
       /// \brief Get name.
       /// \return Name of sensor.
-      public: std::string Name() const;
+      public: const std::string& Name() const;
 
       /// \brief FrameId.
       /// \return FrameId of sensor.
-      public: std::string FrameId() const;
+      public: const std::string& FrameId() const;
 
       /// \brief Set Frame ID of the sensor
       /// \param[in] _frameId Frame ID of the sensor
@@ -159,7 +159,7 @@ namespace gz
 
       /// \brief Get topic where sensor data is published.
       /// \return Topic sensor publishes data to
-      public: std::string Topic() const;
+      public: const std::string& Topic() const;
 
       /// \brief Set topic where sensor data is published.
       /// \param[in] _topic Topic sensor publishes data to.
@@ -176,7 +176,7 @@ namespace gz
 
       /// \brief Get parent link of the sensor.
       /// \return Parent link of sensor.
-      public: std::string Parent() const;
+      public: const std::string& Parent() const;
 
       /// \brief Get the sensor's ID.
       /// \return The sensor's ID.

@@ -122,7 +122,7 @@ namespace gz
 
       /// \brief Topic where camera info is published.
       /// \return Camera info topic.
-      public: std::string InfoTopic() const;
+      public: const std::string& InfoTopic() const;
 
       /// \brief Set baseline for stereo cameras. This is used to populate the
       /// projection matrix in the camera info message.

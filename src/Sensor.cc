@@ -282,13 +282,13 @@ SensorId Sensor::Id() const
 }
 
 //////////////////////////////////////////////////
-std::string Sensor::Name() const
+const std::string& Sensor::Name() const
 {
   return this->dataPtr->name;
 }
 
 //////////////////////////////////////////////////
-std::string Sensor::FrameId() const
+const std::string& Sensor::FrameId() const
 {
   return this->dataPtr->frameId;
 }
@@ -300,7 +300,7 @@ void Sensor::SetFrameId(const std::string &_frameId)
 }
 
 //////////////////////////////////////////////////
-std::string Sensor::Topic() const
+const std::string& Sensor::Topic() const
 {
   return this->dataPtr->topic;
 }
@@ -441,7 +441,7 @@ gz::math::Pose3d Sensor::Pose() const
 }
 
 //////////////////////////////////////////////////
-std::string Sensor::Parent() const
+const std::string& Sensor::Parent() const
 {
   return this->dataPtr->parent;
 }

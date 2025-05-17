@@ -592,7 +592,7 @@ rendering::CameraPtr CameraSensor::RenderingCamera() const
 }
 
 //////////////////////////////////////////////////
-std::string CameraSensor::InfoTopic() const
+const std::string& CameraSensor::InfoTopic() const
 {
   return this->dataPtr->infoTopic;
 }
