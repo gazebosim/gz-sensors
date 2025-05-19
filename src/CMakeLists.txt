@@ -42,20 +42,20 @@ endif()
 gz_create_core_library(SOURCES ${sources})
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC
-    gz-math${GZ_MATH_VER}::gz-math${GZ_MATH_VER}
-    gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
+    gz-math::gz-math
+    gz-common::gz-common
     gz-transport::gz-transport
-    sdformat${SDF_VER}::sdformat${SDF_VER}
+    sdformat::sdformat
   PRIVATE
-    gz-common${GZ_COMMON_VER}::profiler
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
+    gz-common::profiler
+    gz-msgs::gz-msgs
 )
 target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME} PUBLIC DepthPoints_EXPORTS)
 
 gz_add_component(rendering SOURCES ${rendering_sources} GET_TARGET_NAME rendering_target)
 target_link_libraries(${rendering_target}
   PUBLIC
-    gz-rendering${GZ_RENDERING_VER}::gz-rendering${GZ_RENDERING_VER}
+    gz-rendering::gz-rendering
 )
 
 set(camera_sources CameraSensor.cc CameraSensorUtil.cc)
@@ -71,8 +71,8 @@ target_link_libraries(${camera_target}
   PUBLIC
     ${rendering_target}
   PRIVATE
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
-    gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
+    gz-msgs::gz-msgs
+    gz-transport::gz-transport
 )
 
 set(depth_camera_sources DepthCameraSensor.cc CameraSensorUtil.cc)
@@ -85,8 +85,8 @@ target_compile_definitions(${depth_camera_target} PUBLIC DepthCameraSensor_EXPOR
 target_link_libraries(${depth_camera_target}
   PRIVATE
     ${camera_target}
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
-    gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
+    gz-msgs::gz-msgs
+    gz-transport::gz-transport
 )
 
 set(dvl_sources DopplerVelocityLog.cc)
@@ -100,10 +100,10 @@ target_link_libraries(${dvl_target}
     ${rendering_target}
     Eigen3::Eigen
   PRIVATE
-    gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
-    gz-math${GZ_MATH_VER}::gz-math${GZ_MATH_VER}
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
-    gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER})
+    gz-common::gz-common
+    gz-math::gz-math
+    gz-msgs::gz-msgs
+    gz-transport::gz-transport)
 
 set(lidar_sources Lidar.cc)
 gz_add_component(lidar
@@ -116,8 +116,8 @@ target_link_libraries(${lidar_target}
   PUBLIC
     ${rendering_target}
   PRIVATE
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
-    gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
+    gz-msgs::gz-msgs
+    gz-transport::gz-transport
 )
 
 set(gpu_lidar_sources GpuLidarSensor.cc)
@@ -129,8 +129,8 @@ gz_add_component(gpu_lidar
 target_compile_definitions(${gpu_lidar_target} PUBLIC GpuLidarSensor_EXPORTS)
 target_link_libraries(${gpu_lidar_target}
   PRIVATE
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
-    gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
+    gz-msgs::gz-msgs
+    gz-transport::gz-transport
     ${lidar_target}
 )
 
@@ -139,8 +139,8 @@ gz_add_component(logical_camera SOURCES ${logical_camera_sources} GET_TARGET_NAM
 target_compile_definitions(${logical_camera_target} PUBLIC LogicalCameraSensor_EXPORTS)
 target_link_libraries(${logical_camera_target}
   PRIVATE
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
-    gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
+    gz-msgs::gz-msgs
+    gz-transport::gz-transport
 )
 
 set(magnetometer_sources MagnetometerSensor.cc)
@@ -174,8 +174,8 @@ target_compile_definitions(${rgbd_camera_target} PUBLIC RgbdCameraSensor_EXPORTS
 target_link_libraries(${rgbd_camera_target}
   PRIVATE
     ${camera_target}
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
-    gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
+    gz-msgs::gz-msgs
+    gz-transport::gz-transport
 )
 
 set(thermal_camera_sources ThermalCameraSensor.cc)
@@ -187,8 +187,8 @@ gz_add_component(thermal_camera
 target_link_libraries(${thermal_camera_target}
   PRIVATE
     ${camera_target}
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
-    gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
+    gz-msgs::gz-msgs
+    gz-transport::gz-transport
 )
 
 set(boundingbox_camera_sources BoundingBoxCameraSensor.cc)
@@ -196,8 +196,8 @@ gz_add_component(boundingbox_camera SOURCES ${boundingbox_camera_sources} GET_TA
 target_link_libraries(${boundingbox_camera_target}
   PRIVATE
     ${camera_target}
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
-    gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
+    gz-msgs::gz-msgs
+    gz-transport::gz-transport
 )
 
 set(segmentation_camera_sources SegmentationCameraSensor.cc)
@@ -206,8 +206,8 @@ target_compile_definitions(${segmentation_camera_target} PUBLIC SegmentationCame
 target_link_libraries(${segmentation_camera_target}
   PRIVATE
     ${camera_target}
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
-    gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
+    gz-msgs::gz-msgs
+    gz-transport::gz-transport
 )
 
 set(wide_angle_camera_sources WideAngleCameraSensor.cc)
@@ -215,8 +215,8 @@ gz_add_component(wide_angle_camera SOURCES ${wide_angle_camera_sources} GET_TARG
 target_link_libraries(${wide_angle_camera_target}
   PRIVATE
     ${camera_target}
-    gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
-    gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
+    gz-msgs::gz-msgs
+    gz-transport::gz-transport
 )
 
 # Build the unit tests.
