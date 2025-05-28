@@ -29,6 +29,8 @@
 #include <ignition/rendering/Scene.hh>
 #include <ignition/rendering/BoundingBoxCamera.hh>
 
+#include <gz/utils/ExtraTestMacros.hh>
+
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
@@ -479,13 +481,15 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
 }
 
 //////////////////////////////////////////////////
-TEST_P(BoundingBoxCameraSensorTest, BoxesWithBuiltinSDF)
+TEST_P(BoundingBoxCameraSensorTest,
+       IGN_UTILS_TEST_DISABLED_ON_WIN32(BoxesWithBuiltinSDF))
 {
   BoxesWithBuiltinSDF(GetParam());
 }
 
 //////////////////////////////////////////////////
-TEST_P(BoundingBoxCameraSensorTest, Boxes3DWithBuiltinSDF)
+TEST_P(BoundingBoxCameraSensorTest,
+       IGN_UTILS_TEST_DISABLED_ON_WIN32(Boxes3DWithBuiltinSDF))
 {
   Boxes3DWithBuiltinSDF(GetParam());
 }

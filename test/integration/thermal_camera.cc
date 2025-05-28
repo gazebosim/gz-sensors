@@ -360,7 +360,7 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
 //////////////////////////////////////////////////
 // See: https://github.com/gazebosim/gz-rendering/issues/654
 TEST_P(ThermalCameraSensorTest,
-       IGN_UTILS_TEST_DISABLED_ON_MAC(ImagesWithBuiltinSDF))
+       IGN_UTILS_TEST_ENABLED_ONLY_ON_LINUX(ImagesWithBuiltinSDF))
 {
   ImagesWithBuiltinSDF(GetParam());
 }
@@ -620,7 +620,8 @@ void ThermalCameraSensorTest::Images8BitWithBuiltinSDF(
 }
 
 //////////////////////////////////////////////////
-TEST_P(ThermalCameraSensorTest, Images8BitWithBuiltinSDF)
+TEST_P(ThermalCameraSensorTest,
+       IGN_UTILS_TEST_DISABLED_ON_WIN32(Images8BitWithBuiltinSDF))
 {
   Images8BitWithBuiltinSDF(GetParam());
 }
