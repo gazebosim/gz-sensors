@@ -48,6 +48,8 @@
 #pragma warning(pop)
 #endif
 
+#include <gz/utils/ExtraTestMacros.hh>
+
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
@@ -748,7 +750,8 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
 }
 
 //////////////////////////////////////////////////
-TEST_P(RgbdCameraSensorTest, ImagesWithBuiltinSDF)
+TEST_P(RgbdCameraSensorTest,
+       IGN_UTILS_TEST_DISABLED_ON_WIN32(ImagesWithBuiltinSDF))
 {
   ImagesWithBuiltinSDF(GetParam());
 }

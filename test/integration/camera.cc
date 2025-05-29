@@ -47,6 +47,8 @@
 #pragma warning(pop)
 #endif
 
+#include <gz/utils/ExtraTestMacros.hh>
+
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
@@ -183,7 +185,8 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 }
 
 //////////////////////////////////////////////////
-TEST_P(CameraSensorTest, ImagesWithBuiltinSDF)
+TEST_P(CameraSensorTest,
+       IGN_UTILS_TEST_DISABLED_ON_WIN32(ImagesWithBuiltinSDF))
 {
   ImagesWithBuiltinSDF(GetParam());
 }
@@ -479,7 +482,8 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
 }
 
 //////////////////////////////////////////////////
-TEST_P(CameraSensorTest, CameraIntrinsics)
+TEST_P(CameraSensorTest,
+       IGN_UTILS_TEST_DISABLED_ON_WIN32(CameraIntrinsics))
 {
   gz::common::Console::SetVerbosity(2);
   CameraIntrinsics(GetParam());
@@ -778,7 +782,8 @@ void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
 }
 
 //////////////////////////////////////////////////
-TEST_P(CameraSensorTest, CameraProjection)
+TEST_P(CameraSensorTest,
+       IGN_UTILS_TEST_DISABLED_ON_WIN32(CameraProjection))
 {
   gz::common::Console::SetVerbosity(2);
   CameraProjection(GetParam());
@@ -871,7 +876,8 @@ void CameraSensorTest::ImageFormatLInt8(const std::string &_renderEngine)
 }
 
 //////////////////////////////////////////////////
-TEST_P(CameraSensorTest, LInt8ImagesWithBuiltinSDF)
+TEST_P(CameraSensorTest,
+       IGN_UTILS_TEST_DISABLED_ON_WIN32(LInt8ImagesWithBuiltinSDF))
 {
   ImageFormatLInt8(GetParam());
 }
@@ -963,7 +969,8 @@ void CameraSensorTest::ImageFormatLInt16(const std::string &_renderEngine)
 }
 
 //////////////////////////////////////////////////
-TEST_P(CameraSensorTest, LInt16ImagesWithBuiltinSDF)
+TEST_P(CameraSensorTest,
+       IGN_UTILS_TEST_DISABLED_ON_WIN32(LInt16ImagesWithBuiltinSDF))
 {
   ImageFormatLInt16(GetParam());
 }

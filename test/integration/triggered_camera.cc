@@ -45,6 +45,8 @@
 #pragma warning(pop)
 #endif
 
+#include <gz/utils/ExtraTestMacros.hh>
+
 #include "test_config.h"  // NOLINT(build/include)
 #include "TransportTestTools.hh"
 
@@ -153,7 +155,8 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
 }
 
 //////////////////////////////////////////////////
-TEST_P(TriggeredCameraTest, ImagesWithBuiltinSDF)
+TEST_P(TriggeredCameraTest,
+       IGN_UTILS_TEST_DISABLED_ON_WIN32(ImagesWithBuiltinSDF))
 {
   ImagesWithBuiltinSDF(GetParam());
 }

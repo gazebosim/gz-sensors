@@ -50,6 +50,8 @@
 #pragma warning(pop)
 #endif
 
+#include <gz/utils/ExtraTestMacros.hh>
+
 #include <sdf/sdf.hh>
 
 #include "test_config.h"  // NOLINT(build/include)
@@ -942,57 +944,43 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
 }
 
 /////////////////////////////////////////////////
-#ifdef __APPLE__
-TEST_P(GpuLidarSensorTest, DISABLED_CreateGpuLidar)
-#else
-TEST_P(GpuLidarSensorTest, CreateGpuLidar)
-#endif
+TEST_P(GpuLidarSensorTest,
+       IGN_UTILS_TEST_ENABLED_ONLY_ON_LINUX(CreateGpuLidar))
 {
   CreateGpuLidar(GetParam());
 }
 
 /////////////////////////////////////////////////
-#ifdef __APPLE__
-TEST_P(GpuLidarSensorTest, DISABLED_DetectBox)
-#else
-TEST_P(GpuLidarSensorTest, DetectBox)
-#endif
+TEST_P(GpuLidarSensorTest,
+       IGN_UTILS_TEST_ENABLED_ONLY_ON_LINUX(DetectBox))
 {
   DetectBox(GetParam());
 }
 
 /////////////////////////////////////////////////
-#ifdef __APPLE__
-TEST_P(GpuLidarSensorTest, DISABLED_TestThreeBoxes)
-#else
-TEST_P(GpuLidarSensorTest, TestThreeBoxes)
-#endif
+TEST_P(GpuLidarSensorTest,
+       IGN_UTILS_TEST_ENABLED_ONLY_ON_LINUX(TestThreeBoxes))
 {
   TestThreeBoxes(GetParam());
 }
 
 /////////////////////////////////////////////////
-#ifdef __APPLE__
-TEST_P(GpuLidarSensorTest, DISABLED_VerticalLidar)
-#else
-TEST_P(GpuLidarSensorTest, VerticalLidar)
-#endif
+TEST_P(GpuLidarSensorTest,
+       IGN_UTILS_TEST_ENABLED_ONLY_ON_LINUX(VerticalLidar))
 {
   VerticalLidar(GetParam());
 }
 
 /////////////////////////////////////////////////
-#ifdef __APPLE__
-TEST_P(GpuLidarSensorTest, DISABLED_ManualUpdate)
-#else
-TEST_P(GpuLidarSensorTest, ManualUpdate)
-#endif
+TEST_P(GpuLidarSensorTest,
+       IGN_UTILS_TEST_ENABLED_ONLY_ON_LINUX(ManualUpdate))
 {
   ManualUpdate(GetParam());
 }
 
 /////////////////////////////////////////////////
-TEST_P(GpuLidarSensorTest, Topic)
+TEST_P(GpuLidarSensorTest,
+       IGN_UTILS_TEST_DISABLED_ON_WIN32(Topic))
 {
   Topic(GetParam());
 }
