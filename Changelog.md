@@ -1,5 +1,28 @@
 ## Gazebo Sensors 9
 
+### Gazebo Sensors 9.2.0 (2026-06-26)
+
+1. **Baseline:** this includes all changes from 9.1.0 and earlier.
+
+1. Add bazel build support
+    * [Pull request #529](https://github.com/gazebosim/gz-sensors/pull/529)
+
+1. Update CameraSensor.cc - Allow min HFOV of 0.001 rad
+    * [Pull request #520](https://github.com/gazebosim/gz-sensors/pull/520)
+
+1. ci.yml: check doxygen on 24.04
+    * [Pull request #519](https://github.com/gazebosim/gz-sensors/pull/519)
+
+1. Fix airspeed calculation under wind influence by wind triangle
+    * [Pull request #512 ](https://github.com/gazebosim/gz-sensors/pull/512)
+    * Contributor: Ching-Hsiang Wu
+
+1. Add list of supported sensors with API and SDF links to README
+    * [Pull request #511](https://github.com/gazebosim/gz-sensors/pull/511)
+
+1. Update README.md - Link to SDF Spec
+    * [Pull request #505](https://github.com/gazebosim/gz-sensors/pull/505)
+
 ### Gazebo Sensors 9.1.0 (2025-02-12)
 
 1. Enable packing w/o padding for pointclouds
