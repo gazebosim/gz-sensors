@@ -371,6 +371,7 @@ void WideAngleCameraSensor::OnNewWideAngleFrame(
     unsigned int _channels,
     const std::string &/*_format*/)
 {
+  GZ_PROFILE("WideAngleCameraSensor::OnNewWideAngleFrame");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   unsigned int bytesPerChannel = rendering::PixelUtil::BytesPerChannel(
@@ -436,8 +437,8 @@ bool WideAngleCameraSensor::Update(
   {
     if (this->dataPtr->generatingData)
     {
-      gzdbg << "Disabling camera sensor: '" << this->Name() << "' data "
-             << "generation. " << std::endl;;
+      gzdbg << "Disabling camera sensor: '" << this->Name()
+            << "' data  generation. " << std::endl;
       this->dataPtr->generatingData = false;
     }
 
@@ -447,8 +448,8 @@ bool WideAngleCameraSensor::Update(
   {
     if (!this->dataPtr->generatingData)
     {
-      gzdbg << "Enabling camera sensor: '" << this->Name() << "' data "
-             << "generation." << std::endl;;
+      gzdbg << "Enabling camera sensor: '" << this->Name()
+            << "' data generation." << std::endl;
       this->dataPtr->generatingData = true;
     }
   }

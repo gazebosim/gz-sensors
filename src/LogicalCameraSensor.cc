@@ -194,7 +194,6 @@ bool LogicalCameraSensor::Update(
   frame_log->set_key("frame_id");
   frame_log->add_value(this->FrameId());
 
-  // publish
   this->dataPtr->msgLogic.set_near_clip(this->dataPtr->frustum.Near());
   this->dataPtr->msgLogic.set_far_clip(this->dataPtr->frustum.Far());
   this->dataPtr->msgLogic.set_horizontal_fov(
@@ -203,8 +202,12 @@ bool LogicalCameraSensor::Update(
     this->dataPtr->frustum.AspectRatio());
   this->AddSequence(this->dataPtr->msg.mutable_header());
 
-  this->dataPtr->pub.Publish(this->dataPtr->msg);
-  this->dataPtr->pubLogic.Publish(this->dataPtr->msgLogic);
+  // publish
+  {
+    GZ_PROFILE("LogicalCameraSensor::Update Publish");
+    this->dataPtr->pub.Publish(this->dataPtr->msg);
+    this->dataPtr->pubLogic.Publish(this->dataPtr->msgLogic);
+  }
 
   return true;
 }
