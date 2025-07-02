@@ -379,6 +379,7 @@ void ThermalCameraSensor::OnNewThermalFrame(const uint16_t *_scan,
                     unsigned int /*_channels*/,
                     const std::string &/*_format*/)
 {
+  GZ_PROFILE("ThermalCameraSensor::OnNewThermalFrame");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   unsigned int samples = _width * _height;
@@ -505,8 +506,10 @@ bool ThermalCameraSensor::Update(
         width, height));
   }
 
-
-  this->dataPtr->thermalPub.Publish(this->dataPtr->thermalMsg);
+  {
+    GZ_PROFILE("ThermalCameraSensor::Update Publish");
+    this->dataPtr->thermalPub.Publish(this->dataPtr->thermalMsg);
+  }
 
   // Trigger callbacks.
   try

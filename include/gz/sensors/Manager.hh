@@ -17,11 +17,10 @@
 #ifndef GZ_SENSORS_MANAGER_HH_
 #define GZ_SENSORS_MANAGER_HH_
 
+#include <chrono>
 #include <memory>
-#include <string>
 #include <utility>
 #include <type_traits>
-#include <vector>
 #include <sdf/sdf.hh>
 #include <gz/utils/SuppressWarning.hh>
 #include <gz/common/Console.hh>
@@ -42,7 +41,7 @@ namespace gz
     /// \brief Loads and runs sensors
     ///
     ///   This class is responsible for loading and running sensors, and
-    ///   providing sensors with common environments to generat data from.
+    ///   providing sensors with common environments to generate data from.
     ///
     ///   The primary interface through which to load a sensor is LoadSensor().
     ///   This takes an sdf element pointer that should be configured with
@@ -62,7 +61,7 @@ namespace gz
       /// \return True if successfully initialized, false if not
       public: bool Init();
 
-      /// \brief Create a sensor from an SDF ovject with a known sensor type.
+      /// \brief Create a sensor from an SDF object with a known sensor type.
       /// \sa Sensor()
       /// \param[in] _sdf An SDF element or DOM object.
       /// \tparam SensorType Sensor type
