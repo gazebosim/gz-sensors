@@ -465,6 +465,7 @@ void DepthCameraSensor::OnNewDepthFrame(const float *_scan,
                     unsigned int /*_channels*/,
                     const std::string &_format)
 {
+  GZ_PROFILE("DepthCameraSensor::OnNewDepthFrame");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   unsigned int depthSamples = _width * _height;
@@ -492,6 +493,7 @@ void DepthCameraSensor::OnNewRgbPointCloud(const float *_scan,
                     unsigned int _channels,
                     const std::string &/*_format*/)
 {
+  GZ_PROFILE("DepthCameraSensor::OnNewRgbPointCloud");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   unsigned int pointCloudSamples = _width * _height;
@@ -599,10 +601,12 @@ bool DepthCameraSensor::Update(
   msg.set_data(this->dataPtr->depthBuffer,
       rendering::PixelUtil::MemorySize(rendering::PF_FLOAT32_R,
       width, height));
-
   this->AddSequence(msg.mutable_header(), "default");
-  this->dataPtr->pub.Publish(msg);
 
+  {
+    GZ_PROFILE("DepthCameraSensor::Update Publish");
+    this->dataPtr->pub.Publish(msg);
+  }
 
   if (this->dataPtr->imageEvent.ConnectionCount() > 0u)
   {

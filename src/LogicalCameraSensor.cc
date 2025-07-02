@@ -166,9 +166,13 @@ bool LogicalCameraSensor::Update(
   frame->set_key("frame_id");
   frame->add_value(this->FrameId());
 
-  // publish
   this->AddSequence(this->dataPtr->msg.mutable_header());
-  this->dataPtr->pub.Publish(this->dataPtr->msg);
+
+  // publish
+  {
+    GZ_PROFILE("LogicalCameraSensor::Update Publish");
+    this->dataPtr->pub.Publish(this->dataPtr->msg);
+  }
 
   return true;
 }

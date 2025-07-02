@@ -15,7 +15,6 @@
  *
 */
 
-#include <gz/msgs/boolean.pb.h>
 #include <gz/msgs/camera_info.pb.h>
 #include <gz/msgs/image.pb.h>
 
@@ -490,8 +489,8 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     if (this->dataPtr->generatingData)
     {
-      gzdbg << "Disabling camera sensor: '" << this->Name() << "' data "
-             << "generation. " << std::endl;;
+      gzdbg << "Disabling camera sensor: '" << this->Name()
+            << "' data generation. " << std::endl;
       this->dataPtr->generatingData = false;
     }
 
@@ -501,8 +500,8 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     if (!this->dataPtr->generatingData)
     {
-      gzdbg << "Enabling camera sensor: '" << this->Name() << "' data "
-             << "generation." << std::endl;;
+      gzdbg << "Enabling camera sensor: '" << this->Name()
+            << "' data generation." << std::endl;
       this->dataPtr->generatingData = true;
     }
   }
