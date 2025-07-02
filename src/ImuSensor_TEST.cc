@@ -508,7 +508,7 @@ TEST(ImuSensor_TEST, CustomRpyParentFrame)
 }
 
 sdf::ElementPtr sensorWithLocalization(
-  std::string _orientationLocalization)
+  const std::string &_orientationLocalization)
 {
   std::ostringstream stream;
   stream

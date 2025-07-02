@@ -72,7 +72,7 @@ int main(int argc,  char **argv)
       {
         auto sensor = link->SensorByIndex(s);
 
-        gz::sensors::Sensor *sensorPtr;
+        gz::sensors::Sensor *sensorPtr{};
         if (sensor->Type() == sdf::SensorType::ALTIMETER)
         {
           sensorPtr = mgr.CreateSensor<gz::sensors::AltimeterSensor>(
