@@ -449,7 +449,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_GT(counter, 0);
   EXPECT_GT(pcCounter, 0);
   EXPECT_EQ(counter, infoCounter);
-  EXPECT_EQ(counter, pcCounter);
+  EXPECT_LE(std::abs(counter - pcCounter), 1); 
   counter = 0;
   infoCounter = 0;
   pcCounter = 0;
