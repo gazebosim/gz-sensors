@@ -450,7 +450,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_GT(pcCounter, 0);
   EXPECT_EQ(counter, infoCounter);
   // Allow counter diff of 1 due to async timing and race conditions
-  EXPECT_LE(std::abs(counter - pcCounter), 1); 
+  EXPECT_LE(std::abs(counter - pcCounter), 1);
   counter = 0;
   infoCounter = 0;
   pcCounter = 0;
