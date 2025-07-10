@@ -25,6 +25,7 @@
 #include <gz/rendering/Camera.hh>
 #include <gz/rendering/DepthCamera.hh>
 
+#include <gz/msgs/PointCloudPackedUtils.hh>
 #include <gz/msgs/Utility.hh>
 #include <gz/rendering/Utils.hh>
 #include <gz/transport/Node.hh>
