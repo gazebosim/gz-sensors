@@ -7,3 +7,6 @@ build
 
 # Version control generated files
 *.orig
+
+# Bazel generated files
+bazel-*

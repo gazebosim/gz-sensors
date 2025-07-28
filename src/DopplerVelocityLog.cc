@@ -20,8 +20,8 @@
 #include <vector>
 
 // TODO(hidmic): implement SVD in gazebo?
-#include <eigen3/Eigen/Core>
-#include <eigen3/Eigen/SVD>
+#include <Eigen/Core>
+#include <Eigen/SVD>
 
 #include <gz/common/Console.hh>
 #include <gz/common/Event.hh>

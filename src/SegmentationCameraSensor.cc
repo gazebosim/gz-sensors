@@ -434,6 +434,7 @@ void SegmentationCameraSensor::OnNewSegmentationFrame(const uint8_t * _data,
   unsigned int _width, unsigned int _height, unsigned int _channels,
   const std::string &/*_format*/)
 {
+  GZ_PROFILE("SegmentationCameraSensor::OnNewSegmentationFrame");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   unsigned int bufferSize = _width * _height * _channels;
@@ -539,8 +540,11 @@ bool SegmentationCameraSensor::Update(
       width, height));
 
   // Publish
-  this->dataPtr->coloredMapPublisher.Publish(this->dataPtr->coloredMapMsg);
-  this->dataPtr->labelsMapPublisher.Publish(this->dataPtr->labelsMapMsg);
+  {
+    GZ_PROFILE("SegmentationCameraSensor::Update Publish");
+    this->dataPtr->coloredMapPublisher.Publish(this->dataPtr->coloredMapMsg);
+    this->dataPtr->labelsMapPublisher.Publish(this->dataPtr->labelsMapMsg);
+  }
 
   // Trigger callbacks.
   if (this->dataPtr->imageEvent.ConnectionCount() > 0u)
