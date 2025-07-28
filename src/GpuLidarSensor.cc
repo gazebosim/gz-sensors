@@ -26,6 +26,7 @@
 
 #include <gz/common/Console.hh>
 #include <gz/common/Profiler.hh>
+#include <gz/msgs/PointCloudPackedUtils.hh>
 #include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 
@@ -236,6 +237,7 @@ void GpuLidarSensor::OnNewLidarFrame(const float *_scan,
     unsigned int _width, unsigned int _height, unsigned int _channels,
     const std::string &_format)
 {
+  GZ_PROFILE("GpuLidarSensor::OnNewLidarFrame");
   std::lock_guard<std::mutex> lock(this->lidarMutex);
 
   unsigned int samples = _width * _height * _channels;

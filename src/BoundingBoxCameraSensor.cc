@@ -393,10 +393,9 @@ rendering::BoundingBoxCameraPtr
 void BoundingBoxCameraSensor::OnNewBoundingBoxes(
   const std::vector<rendering::BoundingBox> &_boxes)
 {
+  GZ_PROFILE("BoundingBoxCameraSensor::OnNewBoundingBoxes");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  this->dataPtr->boundingBoxes.clear();
-  for (const auto &box : _boxes)
-    this->dataPtr->boundingBoxes.push_back(box);
+  this->dataPtr->boundingBoxes = _boxes;
 }
 
 //////////////////////////////////////////////////

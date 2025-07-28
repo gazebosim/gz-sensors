@@ -1,0 +1,613 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+load("@rules_gazebo//gazebo:headers.bzl", "gz_configure_header", "gz_export_header", "gz_include_header")
+load("@rules_license//rules:license.bzl", "license")
+load("//bazel:gz_sensor_library.bzl", "gz_sensor_library")
+
+package(
+    default_applicable_licenses = [":license"],
+    features = [
+        "layering_check",
+        "parse_headers",
+    ],
+)
+
+license(
+    name = "license",
+    package_name = "gz-sensors",
+)
+
+licenses(["notice"])
+
+exports_files([
+    "package.xml",
+    "LICENSE",
+    "MODULE.bazel",
+])
+
+gz_configure_header(
+    name = "Config",
+    src = "include/gz/sensors/config.hh.in",
+    package_xml = "package.xml",
+)
+
+gz_export_header(
+    name = "Export",
+    out = "include/gz/sensors/Export.hh",
+    export_base = "GZ_SENSORS",
+    lib_name = "gz-sensors",
+)
+
+# Note to maintainers: The bazel setup for gz-sensors is different from other
+# gz packages which use globbed sources and header files as far possible.
+# Instead, the target layout here matches that in the cmake build where a
+# core `gz-sensors` library is provided along side individual sensor libraries.
+# A top level `sensors.hh` header is provided through the `gz-sensors-all`
+# library target which also adds a transitive dependency on all sensors provided
+# by this package.
+
+core_public_headers_no_gen = [
+    "include/gz/sensors/BrownDistortionModel.hh",
+    "include/gz/sensors/Distortion.hh",
+    "include/gz/sensors/EnvironmentalData.hh",
+    "include/gz/sensors/GaussianNoiseModel.hh",
+    "include/gz/sensors/Manager.hh",
+    "include/gz/sensors/Noise.hh",
+    "include/gz/sensors/Sensor.hh",
+    "include/gz/sensors/SensorFactory.hh",
+    "include/gz/sensors/SensorTypes.hh",
+    "include/gz/sensors/Util.hh",
+]
+
+core_public_headers = core_public_headers_no_gen + [
+    "include/gz/sensors/config.hh",
+    "include/gz/sensors/Export.hh",
+]
+
+core_sources = [
+    "src/BrownDistortionModel.cc",
+    "src/Distortion.cc",
+    "src/EnvironmentalData.cc",
+    "src/GaussianNoiseModel.cc",
+    "src/Manager.cc",
+    "src/Noise.cc",
+    "src/PointCloudUtil.hh",
+    "src/PointCloudUtil.cc",
+    "src/Sensor.cc",
+    "src/SensorFactory.cc",
+    "src/SensorTypes.cc",
+    "src/Util.cc",
+]
+
+cc_library(
+    name = "gz-sensors",
+    srcs = core_sources,
+    hdrs = core_public_headers,
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@gz-common",
+        "@gz-common//io",
+        "@gz-common//profiler",
+        "@gz-math",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-transport",
+        "@gz-utils//:ImplPtr",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+core_test_sources = [
+    "src/Manager_TEST.cc",
+    "src/Noise_TEST.cc",
+    "src/Sensor_TEST.cc",
+    "src/Util_TEST.cc",
+]
+
+[
+    cc_test(
+        name = src.replace("/", "_").replace(".cc", "").replace("src_", ""),
+        srcs = [src],
+        data = ["//test:sdf"],
+        deps = [
+            ":gz-sensors",
+            "//test:Config",
+            "@googletest//:gtest",
+            "@googletest//:gtest_main",
+            "@gz-common",
+            "@gz-math",
+            "@gz-msgs//:gzmsgs_cc_proto",
+            "@gz-transport",
+            "@sdformat",
+        ],
+    )
+    for src in core_test_sources
+]
+
+gz_sensor_library(
+    name = "air_pressure",
+    srcs = ["src/AirPressureSensor.cc"],
+    hdrs = ["include/gz/sensors/AirPressureSensor.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":gz-sensors",
+        "@gz-common//profiler",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "air_speed",
+    srcs = ["src/AirSpeedSensor.cc"],
+    hdrs = ["include/gz/sensors/AirSpeedSensor.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":gz-sensors",
+        "@gz-common//profiler",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "altimeter",
+    srcs = ["src/AltimeterSensor.cc"],
+    hdrs = ["include/gz/sensors/AltimeterSensor.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":gz-sensors",
+        "@gz-common//profiler",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "boundingbox_camera",
+    srcs = ["src/BoundingBoxCameraSensor.cc"],
+    hdrs = ["include/gz/sensors/BoundingBoxCameraSensor.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":camera",
+        ":gz-sensors",
+        ":rendering",
+        "@gz-common",
+        "@gz-common//graphics",
+        "@gz-common//profiler",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-rendering",
+        "@gz-transport",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "camera",
+    srcs = [
+        "src/CameraSensor.cc",
+        "src/CameraSensorUtil.cc",
+        "src/CameraSensorUtil.hh",
+    ],
+    hdrs = ["include/gz/sensors/CameraSensor.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":gz-sensors",
+        ":rendering",
+        "@gz-common",
+        "@gz-common//events",
+        "@gz-common//graphics",
+        "@gz-common//profiler",
+        "@gz-math",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-rendering",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+cc_test(
+    name = "Camera_TEST",
+    srcs = ["src/Camera_TEST.cc"],
+    deps = [
+        ":camera",
+        ":gz-sensors",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+        "@gz-common",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "depth_camera",
+    srcs = ["src/DepthCameraSensor.cc"],
+    hdrs = ["include/gz/sensors/DepthCameraSensor.hh"],
+    features = [
+        "-layering_check",  # Needs private headers from :gz-sensors and :camera
+    ],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":camera",
+        ":gz-sensors",
+        ":rendering",
+        "@gz-common",
+        "@gz-common//events",
+        "@gz-common//graphics",
+        "@gz-common//profiler",
+        "@gz-math",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-rendering",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "dvl",
+    srcs = ["src/DopplerVelocityLog.cc"],
+    hdrs = ["include/gz/sensors/DopplerVelocityLog.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":gz-sensors",
+        ":rendering",
+        "@eigen",
+        "@gz-common",
+        "@gz-common//events",
+        "@gz-common//profiler",
+        "@gz-math",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-rendering",
+        "@gz-transport",
+    ],
+)
+
+gz_sensor_library(
+    name = "force_torque",
+    srcs = ["src/ForceTorqueSensor.cc"],
+    hdrs = ["include/gz/sensors/ForceTorqueSensor.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":gz-sensors",
+        "@gz-common//profiler",
+        "@gz-math",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "gpu_lidar",
+    srcs = ["src/GpuLidarSensor.cc"],
+    hdrs = ["include/gz/sensors/GpuLidarSensor.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":gz-sensors",
+        ":lidar",
+        ":rendering",
+        "@gz-common",
+        "@gz-common//profiler",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-rendering",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "imu",
+    srcs = ["src/ImuSensor.cc"],
+    hdrs = ["include/gz/sensors/ImuSensor.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":gz-sensors",
+        "@gz-common//profiler",
+        "@gz-math",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+cc_test(
+    name = "ImuSensor_TEST",
+    srcs = ["src/ImuSensor_TEST.cc"],
+    deps = [
+        ":gz-sensors",
+        ":imu",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+        "@gz-common",
+        "@gz-math",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "lidar",
+    srcs = ["src/Lidar.cc"],
+    hdrs = ["include/gz/sensors/Lidar.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":gz-sensors",
+        ":rendering",
+        "@gz-common",
+        "@gz-common//events",
+        "@gz-common//profiler",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+cc_test(
+    name = "Lidar_TEST",
+    srcs = ["src/Lidar_TEST.cc"],
+    deps = [
+        ":gz-sensors",
+        ":lidar",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+        "@gz-math",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "logical_camera",
+    srcs = ["src/LogicalCameraSensor.cc"],
+    hdrs = ["include/gz/sensors/LogicalCameraSensor.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":gz-sensors",
+        "@gz-common",
+        "@gz-common//profiler",
+        "@gz-math",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "magnetometer",
+    srcs = ["src/MagnetometerSensor.cc"],
+    hdrs = ["include/gz/sensors/MagnetometerSensor.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":gz-sensors",
+        "@gz-common//profiler",
+        "@gz-math",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "navsat",
+    srcs = ["src/NavSatSensor.cc"],
+    hdrs = ["include/gz/sensors/NavSatSensor.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":gz-sensors",
+        "@gz-common//profiler",
+        "@gz-math",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "rendering",
+    srcs = [
+        "src/ImageBrownDistortionModel.cc",
+        "src/ImageDistortion.cc",
+        "src/ImageGaussianNoiseModel.cc",
+        "src/ImageNoise.cc",
+        "src/RenderingEvents.cc",
+        "src/RenderingSensor.cc",
+    ],
+    hdrs = [
+        "include/gz/sensors/ImageBrownDistortionModel.hh",
+        "include/gz/sensors/ImageDistortion.hh",
+        "include/gz/sensors/ImageGaussianNoiseModel.hh",
+        "include/gz/sensors/ImageNoise.hh",
+        "include/gz/sensors/RenderingEvents.hh",
+        "include/gz/sensors/RenderingSensor.hh",
+    ],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":gz-sensors",
+        "@gz-common",
+        "@gz-common//events",
+        "@gz-common//profiler",
+        "@gz-rendering",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "rgbd_camera",
+    srcs = [
+        "src/RgbdCameraSensor.cc",
+    ],
+    hdrs = ["include/gz/sensors/RgbdCameraSensor.hh"],
+    features = [
+        "-layering_check",  # Needs private headers from :gz-sensors and :camera
+    ],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":camera",
+        ":gz-sensors",
+        ":rendering",
+        "@gz-common",
+        "@gz-common//graphics",
+        "@gz-common//profiler",
+        "@gz-math",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-rendering",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "segmentation_camera",
+    srcs = ["src/SegmentationCameraSensor.cc"],
+    hdrs = ["include/gz/sensors/SegmentationCameraSensor.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":camera",
+        ":gz-sensors",
+        ":rendering",
+        "@gz-common",
+        "@gz-common//events",
+        "@gz-common//graphics",
+        "@gz-common//profiler",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-rendering",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "thermal_camera",
+    srcs = ["src/ThermalCameraSensor.cc"],
+    hdrs = ["include/gz/sensors/ThermalCameraSensor.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":camera",
+        ":gz-sensors",
+        ":rendering",
+        "@gz-common",
+        "@gz-common//events",
+        "@gz-common//graphics",
+        "@gz-common//profiler",
+        "@gz-math",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-rendering",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "wide_angle_camera",
+    srcs = ["src/WideAngleCameraSensor.cc"],
+    hdrs = ["include/gz/sensors/WideAngleCameraSensor.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":camera",
+        ":gz-sensors",
+        ":rendering",
+        "@gz-common",
+        "@gz-common//events",
+        "@gz-common//graphics",
+        "@gz-common//profiler",
+        "@gz-math",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-rendering",
+        "@gz-transport",
+        "@gz-utils//:SuppressWarning",
+        "@sdformat",
+    ],
+)
+
+gz_include_header(
+    name = "Include",
+    out = "include/gz/sensors.hh",
+    hdrs = glob(["include/gz/sensors/**/*.hh"]) + [
+        "include/gz/sensors/config.hh",
+    ],
+)
+
+cc_library(
+    name = "gz-sensors-all",
+    hdrs = ["include/gz/sensors.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":air_pressure",
+        ":air_speed",
+        ":altimeter",
+        ":boundingbox_camera",
+        ":camera",
+        ":depth_camera",
+        ":dvl",
+        ":force_torque",
+        ":gpu_lidar",
+        ":gz-sensors",
+        ":imu",
+        ":lidar",
+        ":logical_camera",
+        ":magnetometer",
+        ":navsat",
+        ":rendering",
+        ":rgbd_camera",
+        ":segmentation_camera",
+        ":thermal_camera",
+        ":wide_angle_camera",
+    ],
+)

@@ -25,6 +25,7 @@
 #include <gz/rendering/Camera.hh>
 #include <gz/rendering/DepthCamera.hh>
 
+#include <gz/msgs/PointCloudPackedUtils.hh>
 #include <gz/msgs/Utility.hh>
 #include <gz/rendering/Utils.hh>
 #include <gz/transport/Node.hh>
@@ -410,6 +411,7 @@ void RgbdCameraSensorPrivate::OnNewDepthFrame(const float *_scan,
                     unsigned int /*_channels*/,
                     const std::string &/*_format*/)
 {
+  GZ_PROFILE("RgbdCameraSensorPrivate::OnNewDepthFrame");
   std::lock_guard<std::mutex> lock(this->mutex);
 
   unsigned int depthSamples = _width * _height;
@@ -427,6 +429,7 @@ void RgbdCameraSensorPrivate::OnNewRgbPointCloud(const float *_scan,
                     unsigned int _channels,
                     const std::string &/*_format*/)
 {
+  GZ_PROFILE("RgbdCameraSensorPrivate::OnNewRgbPointCloud");
   std::lock_guard<std::mutex> lock(this->mutex);
 
   unsigned int pointCloudSamples = _width * _height;
@@ -492,7 +495,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // generate sensor data
   this->Render();
 
-  // create and publish the depthmessage
+  // create and publish the depth message
   if (this->HasDepthConnections())
   {
     msgs::Image msg;
