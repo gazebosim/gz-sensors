@@ -21,6 +21,7 @@
 #include <gz/msgs/camera_info.pb.h>
 #include <gz/msgs/image.pb.h>
 
+#include <gz/msgs/Utility.hh>
 #include <gz/common/Filesystem.hh>
 #include <gz/common/Event.hh>
 #include <gz/sensors/Manager.hh>

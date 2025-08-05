@@ -24,6 +24,7 @@
 
 #include <gz/msgs/wrench.pb.h>
 
+#include <gz/msgs/Utility.hh>
 #include <gz/sensors/ForceTorqueSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 

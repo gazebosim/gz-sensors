@@ -21,6 +21,7 @@
 
 #include <gz/msgs/imu.pb.h>
 
+#include <gz/msgs/Utility.hh>
 #include <gz/sensors/ImuSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 
