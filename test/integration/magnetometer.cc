@@ -21,6 +21,7 @@
 
 #include <gz/msgs/magnetometer.pb.h>
 
+#include <gz/msgs/Utility.hh>
 #include <gz/sensors/MagnetometerSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 
