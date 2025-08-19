@@ -1,6 +1,56 @@
 ## Gazebo Sensors 10
 
-### Gazebo Sensors 10.0.0 (20XX-XX-XX)
+### Gazebo Sensors 10.0.0 (2025-09-XX)
+
+1. **Baseline:** this includes all changes from 9.2.0 and earlier.
+
+1. Add missing includes
+    * [Pull request #544](https://github.com/gazebosim/gz-sensors/pull/544)
+
+1. [Bazel] Fix downstream build errors with -Werror
+    * [Pull request #537](https://github.com/gazebosim/gz-sensors/pull/537)
+
+1. Fix flaky test in DepthCameraSensorTest::ImagesWithBuiltinSDF
+    * [Pull request #536](https://github.com/gazebosim/gz-sensors/pull/536)
+
+1. [Bazel] Remove rendering from core and force-torque targets
+    * [Pull request #535](https://github.com/gazebosim/gz-sensors/pull/535)
+
+1. Better GZ_PROFILE instrumentation for rendering sensors
+    * [Pull request #532](https://github.com/gazebosim/gz-sensors/pull/532)
+
+1. Bump gz-cmake and others in jetty
+    * [Pull request #525](https://github.com/gazebosim/gz-sensors/pull/525)
+
+1. Update API to return const references to strings
+    * [Pull request #526](https://github.com/gazebosim/gz-sensors/pull/526)
+
+1. Clarify min and max temperature of thermal camera
+    * [Pull request #523](https://github.com/gazebosim/gz-sensors/pull/523)
+
+1. Update CameraSensor.cc - Allow min HFOV of 0.001 rad
+    * [Pull request #520](https://github.com/gazebosim/gz-sensors/pull/520)
+
+1. Bump gz-transport and others in jetty
+    * [Pull request #515](https://github.com/gazebosim/gz-sensors/pull/515)
+
+1. ci.yml: use noble, disable jammy
+    * [Pull request #516](https://github.com/gazebosim/gz-sensors/pull/516)
+
+1. Remove major version from package name
+    * [Pull request #513](https://github.com/gazebosim/gz-sensors/pull/513)
+
+1. Replace calls to Getlement wit FindElement in examples/cutom_sensor/Odometer.cc
+    * [Pull request #508](https://github.com/gazebosim/gz-sensors/pull/508)
+
+1. Check camera resolution
+    * [Pull request #480](https://github.com/gazebosim/gz-sensors/pull/480)
+
+1. Bump main to sensors 10.0.0~pre1
+    * [Pull request #476](https://github.com/gazebosim/gz-sensors/pull/476)
+
+1. RgbdCameraSensor: add missing include
+    * [Pull request #464](https://github.com/gazebosim/gz-sensors/pull/464)
 
 ## Gazebo Sensors 9
 
