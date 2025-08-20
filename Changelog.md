@@ -28,9 +28,6 @@
 1. Clarify min and max temperature of thermal camera
     * [Pull request #523](https://github.com/gazebosim/gz-sensors/pull/523)
 
-1. Update CameraSensor.cc - Allow min HFOV of 0.001 rad
-    * [Pull request #520](https://github.com/gazebosim/gz-sensors/pull/520)
-
 1. Bump gz-transport and others in jetty
     * [Pull request #515](https://github.com/gazebosim/gz-sensors/pull/515)
 
@@ -43,14 +40,8 @@
 1. Replace calls to Getlement wit FindElement in examples/cutom_sensor/Odometer.cc
     * [Pull request #508](https://github.com/gazebosim/gz-sensors/pull/508)
 
-1. Check camera resolution
-    * [Pull request #480](https://github.com/gazebosim/gz-sensors/pull/480)
-
 1. Bump main to sensors 10.0.0~pre1
     * [Pull request #476](https://github.com/gazebosim/gz-sensors/pull/476)
-
-1. RgbdCameraSensor: add missing include
-    * [Pull request #464](https://github.com/gazebosim/gz-sensors/pull/464)
 
 ## Gazebo Sensors 9
 
