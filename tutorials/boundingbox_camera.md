@@ -216,7 +216,7 @@ You will see output like this:
 To visualize the output from different SDF file, you can include the model of the sensor in any SDF file then run it via gz sim and open the `Image Display` plugin and select the topic you specified in the `<topic>` tag.
 
 
-Taking a look at the [SDF](https://github.com/gazebosim/gz-sim/blob/main/examples/worlds/boundingbox_camera.sdf) file for this example.
+Taking a look at the [SDF](https://github.com/gazebosim/gz-sim/blob/gz-sensors10/examples/worlds/boundingbox_camera.sdf) file for this example.
 
 
 ## Object Detection Dataset Generation
