@@ -47,9 +47,9 @@ Let's go over the creation of a custom
 the total distance travelled by a robot.
 
 This example is located at
-[gz-sensors/examples/custom_sensor](https://github.com/gazebosim/gz-sensors/tree/main/examples/custom_sensor),
+[gz-sensors/examples/custom_sensor](https://github.com/gazebosim/gz-sensors/tree/gz-sensors10/examples/custom_sensor),
 and the integration with Gazebo is at
-[gz-sim/examples/plugins/custom_sensor_system](https://github.com/gazebosim/gz-sim/tree/main/examples/plugin/custom_sensor_system).
+[gz-sim/examples/plugins/custom_sensor_system](https://github.com/gazebosim/gz-sim/tree/gz-sensors10/examples/plugin/custom_sensor_system).
 
 Wherever "odometer" is used, that can be substituted for any other custom sensor
 type. Seismometer? Breathalyzer? Just adapt the logic to your needs.
@@ -86,7 +86,7 @@ The sensor consists of a class, `Odometer`, which inherits from
 `gz::sensors::Sensor`.
 
 Take a look at
-[gz-sensors/examples/custom_sensor](https://github.com/gazebosim/gz-sensors/tree/main/examples/custom_sensor)
+[gz-sensors/examples/custom_sensor](https://github.com/gazebosim/gz-sensors/tree/gz-sensors10/examples/custom_sensor)
 for the full code. Here are some important pointers:
 
 * Be sure to link your sensor to Gazebo Sensors
@@ -105,7 +105,7 @@ plugin that instantiates the sensor and updates it periodically with data from
 simulation.
 
 Take a look at
-[gz-sim/examples/plugins/custom_sensor_system](https://github.com/gazebosim/gz-sim/tree/main/examples/plugin/custom_sensor_system).
+[gz-sim/examples/plugins/custom_sensor_system](https://github.com/gazebosim/gz-sim/tree/gz-sensors10/examples/plugin/custom_sensor_system).
 for the full code. Here are some important pointers:
 
 * Check for new entities that have `gz::sim::components::CustomSensor`
