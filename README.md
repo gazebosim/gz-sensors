@@ -9,10 +9,10 @@
 
 Build | Status
 -- | --
-Test coverage | [![codecov](https://codecov.io/gh/gazebosim/gz-sensors/tree/main/graph/badge.svg)](https://codecov.io/gh/gazebosim/gz-sensors/tree/main)
-Ubuntu Noble | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=gz_sensors-ci-main-noble-amd64)](https://build.osrfoundation.org/job/gz_sensors-ci-main-noble-amd64)
-Homebrew      | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=gz_sensors-ci-main-homebrew-amd64)](https://build.osrfoundation.org/job/gz_sensors-ci-main-homebrew-amd64)
-Windows       | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=gz_sensors-main-clowin)](https://build.osrfoundation.org/job/gz_sensors-main-clowin/)
+Test coverage | [![codecov](https://codecov.io/gh/gazebosim/gz-sensors/tree/gz-sensors9/graph/badge.svg)](https://codecov.io/gh/gazebosim/gz-sensors/tree/gz-sensors9)
+Ubuntu Noble | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=gz_sensors-ci-gz-sensors9-noble-amd64)](https://build.osrfoundation.org/job/gz_sensors-ci-gz-sensors9-noble-amd64)
+Homebrew      | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=gz_sensors-ci-gz-sensors9-homebrew-amd64)](https://build.osrfoundation.org/job/gz_sensors-ci-gz-sensors9-homebrew-amd64)
+Windows       | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=gz_sensors-9-cnlwin)](https://build.osrfoundation.org/job/gz_sensors-9-cnlwin/)
 
 Gazebo Sensors, a component of [Gazebo](https://gazebosim.org),
 provides numerous sensor models
@@ -67,11 +67,11 @@ models into sensor streams.
 
 # Install
 
-See the [installation tutorial](https://gazebosim.org/api/sensors/9/installation.html).
+See the [installation tutorial](https://gazebosim.org/api/sensors/10/installation.html).
 
 # Usage
 
-Please refer to the [examples directory](https://github.com/gazebosim/gz-sensors/tree/main/examples).
+Please refer to the [examples directory](https://github.com/gazebosim/gz-sensors/tree/gz-sensors10/examples).
 
 A list of sensors and SDF examples can be found in the [SDF specification](http://sdformat.org/spec?ver=1.12&elem=sensor)
 
