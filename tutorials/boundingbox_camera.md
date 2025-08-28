@@ -369,15 +369,15 @@ def euler_to_rotation(theta) :
 """
 This matrix are specific for the camera configuration in the SDF world
 
-    <horizontal_fov>1.57</horizontal_fov>
+    <horizontal_fov>1.047</horizontal_fov>
     <width>800</width>
     <height>600</height>
 
 If any of them is changed, you have to change the projection matrix
 """
 projMatrix = np.array([
-    [0.99975, 0, 0, 0],
-    [0, 1.333, 0, 0 ],
+    [1.732, 0, 0, 0],
+    [0, 2.309, 0, 0 ],
     [0, 0, -1.00002, -0.02],
     [0, 0, -1, 0]
 ])
