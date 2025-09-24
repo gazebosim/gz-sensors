@@ -1,6 +1,6 @@
 ## Gazebo Sensors 10
 
-### Gazebo Sensors 10.0.0 (2025-09-XX)
+### Gazebo Sensors 10.0.0 (2025-09-30)
 
 1. **Baseline:** this includes all changes from 9.2.0 and earlier.
 
