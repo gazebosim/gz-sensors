@@ -4,6 +4,12 @@
 
 1. **Baseline:** this includes all changes from 9.2.0 and earlier.
 
+1. Update boundingbox_camera.md with the proper projection matrix
+    * [Pull request #552](https://github.com/gazebosim/gz-sensors/pull/552)
+
+1. Update bazel module to use jetty release branches
+    * [Pull request #551](https://github.com/gazebosim/gz-sensors/pull/551)
+
 1. Add missing includes
     * [Pull request #544](https://github.com/gazebosim/gz-sensors/pull/544)
 
