@@ -1572,8 +1572,8 @@ namespace gz
       {
         // Enough rows for a unique least squares solution
         const auto svdDecomposition =
-            beamBasis.topRows(numBeamsLocked).jacobiSvd<
-                Eigen::ComputeThinU | Eigen::ComputeThinV>();
+          beamBasis.topRows(numBeamsLocked).template jacobiSvd<
+            Eigen::ComputeThinU | Eigen::ComputeThinV>();
 
         // Estimate DVL velocity mean and covariance in the reference frame
         const Eigen::Vector3d velocityMeanInReferenceFrame =
@@ -1822,8 +1822,8 @@ namespace gz
       {
         // Enough rows for a unique least squares solution
         const auto svdDecomposition =
-            beamBasis.topRows(numBeamsLocked).jacobiSvd<
-                Eigen::ComputeThinU | Eigen::ComputeThinV>();
+          beamBasis.topRows(numBeamsLocked).template jacobiSvd<
+            Eigen::ComputeThinU | Eigen::ComputeThinV>();
 
         // Estimate DVL velocity mean and covariance in the reference frame
         const Eigen::Vector3d velocityMeanInReferenceFrame =
