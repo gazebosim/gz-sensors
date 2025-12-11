@@ -1,3 +1,7 @@
+"""
+Rules for sensor libraries.
+"""
+
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_gazebo//gazebo:headers.bzl", "gz_export_header")
 
