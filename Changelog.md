@@ -1,6 +1,6 @@
-## Gz Sensors 11.x
+## Gazebo Sensors 11.x
 
-### Gz Sensors 11.0.0 (20XX-XX-XX)
+### Gazebo Sensors 11.0.0 (20XX-XX-XX)
 
 ## Gazebo Sensors 10
 
