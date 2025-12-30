@@ -5,6 +5,10 @@ Deprecated code produces compile-time warnings. These warning serve as
 notification to users that their code should be upgraded. The next major
 release will remove the deprecated code.
 
+
+## Gz Sensors 10.X to 11.X
+
+
 ## Gazebo Sensors 6.X to 7.X
 
 1. The `ignition` namespace is deprecated and will be removed in future versions.  Use `gz` instead.
