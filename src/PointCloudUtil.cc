@@ -191,7 +191,6 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
       float x = _pointCloudData[pcIndex];
       float y = _pointCloudData[pcIndex + 1];
       float z = _pointCloudData[pcIndex + 2];
- 
       // Validate Depth/Radius and update pointcloud density flag
       if (isDense)
       {
