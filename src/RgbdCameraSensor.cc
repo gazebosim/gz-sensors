@@ -580,7 +580,6 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       // Set the time stamp
       *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
         msgs::Convert(_now);
-      this->dataPtr->pointMsg.set_is_dense(true);
 
       if ((this->dataPtr->hasDepthNearClip || this->dataPtr->hasDepthFarClip)
           && this->dataPtr->depthBuffer)
