@@ -8,7 +8,7 @@ project(gz-sensors VERSION 10.0.0)
 #============================================================================
 # Find gz-cmake
 #============================================================================
-find_package(gz-cmake REQUIRED)
+find_package(gz-cmake 5 REQUIRED)
 
 #============================================================================
 # Configure the project
@@ -44,21 +44,21 @@ gz_find_package(GzProtobuf
 
 #--------------------------------------
 # Find gz-math
-gz_find_package(gz-math REQUIRED)
+gz_find_package(gz-math VERSION 9 REQUIRED)
 
 #--------------------------------------
 # Find gz-common
-gz_find_package(gz-common
+gz_find_package(gz-common VERSION 7
                  COMPONENTS profiler
                  REQUIRED)
 
 #--------------------------------------
 # Find gz-transport
-gz_find_package(gz-transport REQUIRED)
+gz_find_package(gz-transport VERSION 15 REQUIRED)
 
 #--------------------------------------
 # Find gz-rendering
-gz_find_package(gz-rendering REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
+gz_find_package(gz-rendering VERSION 10 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
 
 if (TARGET gz-rendering::ogre)
   set(HAVE_OGRE TRUE)
@@ -72,11 +72,11 @@ endif()
 
 #--------------------------------------
 # Find gz-msgs
-gz_find_package(gz-msgs REQUIRED)
+gz_find_package(gz-msgs VERSION 12 REQUIRED)
 
 #--------------------------------------
 # Find SDFormat
-gz_find_package(sdformat REQUIRED)
+gz_find_package(sdformat VERSION 16 REQUIRED)
 
 #--------------------------------------
 # Find Eigen3
