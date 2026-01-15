@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #include <cstring>
 #include <string>
@@ -31,7 +31,7 @@
 // warnings
 #ifdef _WIN32
 #pragma warning(push)
-#pragma warning(disable: 4251)
+#pragma warning(disable : 4251)
 #endif
 #include <gz/rendering/Material.hh>
 #include <gz/rendering/RenderEngine.hh>
@@ -64,7 +64,7 @@ float *g_pointsXYZBuffer = nullptr;
 unsigned char *g_pointsRGBBuffer = nullptr;
 
 void UnpackPointCloudMsg(const gz::msgs::PointCloudPacked &_msg,
-  float *_xyzBuffer, unsigned char *_rgbBuffer)
+                         float *_xyzBuffer, unsigned char *_rgbBuffer)
 {
   std::string msgBuffer = _msg.data();
   char *msgBufferIndex = msgBuffer.data();
@@ -74,14 +74,14 @@ void UnpackPointCloudMsg(const gz::msgs::PointCloudPacked &_msg,
     for (uint32_t i = 0; i < _msg.width(); ++i)
     {
       int fieldIndex = 0;
-      int pointIndex = j*_msg.width()*3 + i*3;
+      int pointIndex = j * _msg.width() * 3 + i * 3;
 
-      _xyzBuffer[pointIndex] =  *reinterpret_cast<float *>(
-        msgBufferIndex + _msg.field(fieldIndex++).offset());
+      _xyzBuffer[pointIndex] = *reinterpret_cast<float *>(
+          msgBufferIndex + _msg.field(fieldIndex++).offset());
       _xyzBuffer[pointIndex + 1] = *reinterpret_cast<float *>(
-        msgBufferIndex + _msg.field(fieldIndex++).offset());
+          msgBufferIndex + _msg.field(fieldIndex++).offset());
       _xyzBuffer[pointIndex + 2] = *reinterpret_cast<float *>(
-        msgBufferIndex + _msg.field(fieldIndex++).offset());
+          msgBufferIndex + _msg.field(fieldIndex++).offset());
 
       int fieldOffset = _msg.field(fieldIndex).offset();
       if (_msg.is_bigendian())
@@ -101,7 +101,7 @@ void UnpackPointCloudMsg(const gz::msgs::PointCloudPacked &_msg,
   }
 }
 
-void OnCameraInfo(const gz::msgs::CameraInfo & _msg)
+void OnCameraInfo(const gz::msgs::CameraInfo &_msg)
 {
   g_infoMutex.lock();
   g_infoCounter++;
@@ -138,11 +138,12 @@ void OnPointCloud(const gz::msgs::PointCloudPacked &_msg)
   g_pcMutex.unlock();
 }
 
-class DepthCameraSensorTest: public testing::Test,
-  public testing::WithParamInterface<const char *>
+class DepthCameraSensorTest : public testing::Test,
+                              public testing::WithParamInterface<const char *>
 {
   // Documentation inherited
-  protected: void SetUp() override
+protected:
+  void SetUp() override
   {
     // Disable Ogre tests on windows. See
     // https://github.com/gazebosim/gz-sensors/issues/284
@@ -154,21 +155,28 @@ class DepthCameraSensorTest: public testing::Test,
 #endif
   }
   // Create a Camera sensor from a SDF and gets a image message
-  public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
+public:
+  void ImagesWithBuiltinSDF(const std::string &_renderEngine);
 
   // Create depth camera sensors and verify camera intrinsics
-  public: void DepthCameraIntrinsics(const std::string &_renderEngine);
+public:
+  void DepthCameraIntrinsics(const std::string &_renderEngine);
 
   // Create depth camera sensors and verify camera projection
-  public: void DepthCameraProjection(const std::string &_renderEngine);
+public:
+  void DepthCameraProjection(const std::string &_renderEngine);
+
+  // Test custom point cloud frame ID
+public:
+  void CustomPointCloudFrameId(const std::string &_renderEngine);
 };
 
 void DepthCameraSensorTest::ImagesWithBuiltinSDF(
     const std::string &_renderEngine)
 {
   // get the darn test data
-  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
-      "sdf", "depth_camera_sensor_builtin.sdf");
+  std::string path = gz::common::joinPaths(
+    PROJECT_SOURCE_PATH, "test", "sdf", "depth_camera_sensor_builtin.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
   ASSERT_TRUE(sdf::readFile(path, doc));
@@ -199,7 +207,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
       (_renderEngine.compare("ogre2") != 0))
   {
     gzdbg << "Engine '" << _renderEngine
-              << "' doesn't support depth cameras" << std::endl;
+          << "' doesn't support depth cameras" << std::endl;
     return;
   }
 
@@ -208,7 +216,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   if (!engine)
   {
     gzdbg << "Engine '" << _renderEngine
-              << "' is not supported" << std::endl;
+          << "' is not supported" << std::endl;
     return;
   }
 
@@ -252,17 +260,17 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_NEAR(depthSensor->NearClip(), near_, DOUBLE_TOL);
 
   std::string topic =
-    "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/image";
+      "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/image";
   WaitForMessageTestHelper<gz::msgs::Image> helper(topic);
   EXPECT_TRUE(depthSensor->HasConnections());
 
   std::string pointsTopic =
-    "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/image/points";
+      "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/image/points";
   WaitForMessageTestHelper<gz::msgs::PointCloudPacked>
-    pointsHelper(pointsTopic);
+      pointsHelper(pointsTopic);
 
   std::string infoTopic =
-    "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/camera_info";
+      "/test/integration/DepthCameraPlugin_imagesWithBuiltinSDF/camera_info";
   WaitForMessageTestHelper<gz::msgs::CameraInfo> infoHelper(infoTopic);
 
   // Update once to create image
@@ -287,11 +295,11 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
 
   int midWidth = static_cast<int>(depthSensor->ImageWidth() * 0.5);
   int midHeight = static_cast<int>(depthSensor->ImageHeight() * 0.5);
-  int mid = midHeight * depthSensor->ImageWidth() + midWidth -1;
+  int mid = midHeight * depthSensor->ImageWidth() + midWidth - 1;
   double expectedRangeAtMidPoint = boxPosition.X() - unitBoxSize * 0.5;
 
-  auto waitTime = std::chrono::duration_cast< std::chrono::milliseconds >(
-      std::chrono::duration< double >(0.001));
+  auto waitTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::duration<double>(0.001));
   int counter = 0;
   int infoCounter = 0;
   int pcCounter = 0;
@@ -327,7 +335,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   // The left and right side of the depth frame should be inf
   int left = midHeight * depthSensor->ImageWidth();
   EXPECT_DOUBLE_EQ(g_depthBuffer[left], gz::math::INF_D);
-  int right = (midHeight+1) * depthSensor->ImageWidth() - 1;
+  int right = (midHeight + 1) * depthSensor->ImageWidth() - 1;
   EXPECT_DOUBLE_EQ(g_depthBuffer[right], gz::math::INF_D);
   g_infoMutex.unlock();
   g_mutex.unlock();
@@ -340,7 +348,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_EQ("camera1", infoMsg.header().data(0).value(0));
   EXPECT_TRUE(infoMsg.has_distortion());
   EXPECT_EQ(gz::msgs::CameraInfo::Distortion::PLUMB_BOB,
-      infoMsg.distortion().model());
+            infoMsg.distortion().model());
   EXPECT_EQ(5, infoMsg.distortion().k().size());
   EXPECT_TRUE(infoMsg.has_intrinsics());
   EXPECT_EQ(9, infoMsg.intrinsics().k().size());
@@ -415,7 +423,6 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   g_infoMutex.unlock();
   g_mutex.unlock();
 
-
   // Check that the depth values for a box do not warp.
   gz::math::Vector3d boxPositionFillFrame(
       unitBoxSize * 0.5 + 0.2, 0.0, 0.0);
@@ -461,7 +468,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
     // all points should have the same depth
     for (unsigned int i = 0; i < depthSensor->ImageHeight(); ++i)
     {
-      unsigned int step = i*depthSensor->ImageWidth();
+      unsigned int step = i * depthSensor->ImageWidth();
       for (unsigned int j = 0; j < depthSensor->ImageWidth(); ++j)
       {
         float d = g_depthBuffer[step + j];
@@ -474,10 +481,10 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
     // all points should have the same X value
     for (unsigned int i = 0; i < depthSensor->ImageHeight(); ++i)
     {
-      unsigned int step = i*depthSensor->ImageWidth()*3;
+      unsigned int step = i * depthSensor->ImageWidth() * 3;
       for (unsigned int j = 0; j < depthSensor->ImageWidth(); ++j)
       {
-        float x = g_pointsXYZBuffer[step + j*3];
+        float x = g_pointsXYZBuffer[step + j * 3];
         EXPECT_NEAR(expectedDepth, x, DOUBLE_TOL);
       }
     }
@@ -486,15 +493,15 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
     // all points should be the same
     for (unsigned int i = 0; i < depthSensor->ImageHeight(); ++i)
     {
-      unsigned int step = i*depthSensor->ImageWidth()*3;
+      unsigned int step = i * depthSensor->ImageWidth() * 3;
       for (unsigned int j = 0; j < depthSensor->ImageWidth(); ++j)
       {
         unsigned int r =
-            static_cast<unsigned int>(g_pointsRGBBuffer[step + j*3]);
+            static_cast<unsigned int>(g_pointsRGBBuffer[step + j * 3]);
         unsigned int g =
-            static_cast<unsigned int>(g_pointsRGBBuffer[step + j*3 + 1]);
+            static_cast<unsigned int>(g_pointsRGBBuffer[step + j * 3 + 1]);
         unsigned int b =
-            static_cast<unsigned int>(g_pointsRGBBuffer[step + j*3 + 2]);
+            static_cast<unsigned int>(g_pointsRGBBuffer[step + j * 3 + 2]);
         EXPECT_EQ(g, r);
         EXPECT_EQ(b, g);
       }
@@ -526,8 +533,9 @@ TEST_P(DepthCameraSensorTest, ImagesWithBuiltinSDF)
 void DepthCameraSensorTest::DepthCameraIntrinsics(
     const std::string &_renderEngine)
 {
-  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
-      "sdf", "depth_camera_intrinsics.sdf");
+  std::string path = gz::common::joinPaths(
+    PROJECT_SOURCE_PATH, "test", "sdf", "depth_camera_intrinsics.sdf");
+
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
   ASSERT_TRUE(sdf::readFile(path, doc));
@@ -627,20 +635,20 @@ void DepthCameraSensorTest::DepthCameraIntrinsics(
   unsigned int camera2Counter = 0u;
   unsigned int camera3Counter = 0u;
 
-  std::function<void(const gz::msgs::CameraInfo&)> camera1InfoCallback =
-      [&camera1Info, &camera1Counter](const gz::msgs::CameraInfo& _msg)
+  std::function<void(const gz::msgs::CameraInfo &)> camera1InfoCallback =
+      [&camera1Info, &camera1Counter](const gz::msgs::CameraInfo &_msg)
   {
     camera1Info = _msg;
     camera1Counter++;
   };
-  std::function<void(const gz::msgs::CameraInfo&)> camera2InfoCallback =
-      [&camera2Info, &camera2Counter](const gz::msgs::CameraInfo& _msg)
+  std::function<void(const gz::msgs::CameraInfo &)> camera2InfoCallback =
+      [&camera2Info, &camera2Counter](const gz::msgs::CameraInfo &_msg)
   {
     camera2Info = _msg;
     camera2Counter++;
   };
-  std::function<void(const gz::msgs::CameraInfo&)> camera3InfoCallback =
-      [&camera3Info, &camera3Counter](const gz::msgs::CameraInfo& _msg)
+  std::function<void(const gz::msgs::CameraInfo &)> camera3InfoCallback =
+      [&camera3Info, &camera3Counter](const gz::msgs::CameraInfo &_msg)
   {
     camera3Info = _msg;
     camera3Counter++;
@@ -715,8 +723,9 @@ TEST_P(DepthCameraSensorTest, CameraIntrinsics)
 void DepthCameraSensorTest::DepthCameraProjection(
     const std::string &_renderEngine)
 {
-  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
-      "sdf", "depth_camera_projection.sdf");
+  std::string path = gz::common::joinPaths(
+    PROJECT_SOURCE_PATH, "test", "sdf", "depth_camera_projection.sdf");
+
   sdf::SDFPtr doc(new sdf::SDF());
   sdf::init(doc);
   ASSERT_TRUE(sdf::readFile(path, doc));
@@ -810,20 +819,20 @@ void DepthCameraSensorTest::DepthCameraProjection(
   unsigned int camera2Counter = 0u;
   unsigned int camera3Counter = 0u;
 
-  std::function<void(const gz::msgs::CameraInfo&)> camera1InfoCallback =
-      [&camera1Info, &camera1Counter](const gz::msgs::CameraInfo& _msg)
+  std::function<void(const gz::msgs::CameraInfo &)> camera1InfoCallback =
+      [&camera1Info, &camera1Counter](const gz::msgs::CameraInfo &_msg)
   {
     camera1Info = _msg;
     camera1Counter++;
   };
-  std::function<void(const gz::msgs::CameraInfo&)> camera2InfoCallback =
-      [&camera2Info, &camera2Counter](const gz::msgs::CameraInfo& _msg)
+  std::function<void(const gz::msgs::CameraInfo &)> camera2InfoCallback =
+      [&camera2Info, &camera2Counter](const gz::msgs::CameraInfo &_msg)
   {
     camera2Info = _msg;
     camera2Counter++;
   };
-  std::function<void(const gz::msgs::CameraInfo&)> camera3InfoCallback =
-      [&camera3Info, &camera3Counter](const gz::msgs::CameraInfo& _msg)
+  std::function<void(const gz::msgs::CameraInfo &)> camera3InfoCallback =
+      [&camera3Info, &camera3Counter](const gz::msgs::CameraInfo &_msg)
   {
     camera3Info = _msg;
     camera3Counter++;
@@ -903,5 +912,98 @@ TEST_P(DepthCameraSensorTest, CameraProjection)
   DepthCameraProjection(GetParam());
 }
 
-INSTANTIATE_TEST_SUITE_P(DepthCameraSensor, DepthCameraSensorTest,
-    RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());
+//////////////////////////////////////////////////
+void DepthCameraSensorTest::CustomPointCloudFrameId(
+    const std::string &_renderEngine)
+{
+  if ((_renderEngine.compare("ogre") != 0) &&
+      (_renderEngine.compare("ogre2") != 0))
+  {
+    gzdbg << "Engine '" << _renderEngine
+          << "' doesn't support depth cameras" << std::endl;
+    return;
+  }
+
+  auto *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    gzdbg << "Engine '" << _renderEngine
+          << "' is not supported" << std::endl;
+    return;
+  }
+
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
+  ASSERT_NE(nullptr, scene);
+
+  std::string path = gz::common::joinPaths(
+    PROJECT_SOURCE_PATH, "test", "sdf", "depth_camera_points_frame_id.sdf");
+
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  ASSERT_NE(nullptr, doc->Root());
+  ASSERT_TRUE(doc->Root()->HasElement("model"));
+  auto modelPtr = doc->Root()->GetElement("model");
+  ASSERT_TRUE(modelPtr->HasElement("link"));
+  auto linkPtr = modelPtr->GetElement("link");
+  ASSERT_TRUE(linkPtr->HasElement("sensor"));
+
+  auto sensorPtr1 = linkPtr->GetElement("sensor");
+  auto sensorPtr2 =
+      linkPtr->GetElement("sensor")->GetNextElement();
+
+  gz::sensors::Manager mgr;
+  gz::sensors::DepthCameraSensor *cameraWithoutPclFrameId
+    = mgr.CreateSensor<gz::sensors::DepthCameraSensor>(sensorPtr1);
+  gz::sensors::DepthCameraSensor *cameraWithPclFrameId
+    = mgr.CreateSensor<gz::sensors::DepthCameraSensor>(sensorPtr2);
+
+  ASSERT_NE(nullptr, cameraWithoutPclFrameId);
+  ASSERT_NE(nullptr, cameraWithPclFrameId);
+
+  cameraWithoutPclFrameId->SetScene(scene);
+  cameraWithPclFrameId->SetScene(scene);
+
+  WaitForMessageTestHelper<gz::msgs::PointCloudPacked>
+      pointsHelper1("/camera1/image/points");
+  WaitForMessageTestHelper<gz::msgs::PointCloudPacked>
+      pointsHelper2("/camera2/image/points");
+  WaitForMessageTestHelper<gz::msgs::Image>
+      imageHelper1("/camera1/image");
+  WaitForMessageTestHelper<gz::msgs::Image>
+      imageHelper2("/camera2/image");
+
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
+  EXPECT_TRUE(pointsHelper1.WaitForMessage()) << pointsHelper1;
+  EXPECT_TRUE(pointsHelper2.WaitForMessage()) << pointsHelper2;
+  EXPECT_TRUE(imageHelper1.WaitForMessage()) << imageHelper1;
+  EXPECT_TRUE(imageHelper2.WaitForMessage()) << imageHelper2;
+
+  auto pointsMsg1 = pointsHelper1.Message();
+  auto pointsMsg2 = pointsHelper2.Message();
+  auto imageMsg1 = imageHelper1.Message();
+  auto imageMsg2 = imageHelper2.Message();
+
+  EXPECT_EQ("optical_frame", pointsMsg1.header().data(0).value(0));
+  EXPECT_EQ("points_frame", pointsMsg2.header().data(0).value(0));
+  EXPECT_EQ("optical_frame", imageMsg1.header().data(0).value(0));
+  EXPECT_EQ("optical_frame", imageMsg2.header().data(0).value(0));
+
+  mgr.Remove(cameraWithoutPclFrameId->Id());
+  mgr.Remove(cameraWithPclFrameId->Id());
+
+  // Clean up
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+TEST_P(DepthCameraSensorTest, CustomPointCloudFrameId)
+{
+  gz::common::Console::SetVerbosity(4);
+  CustomPointCloudFrameId(GetParam());
+}
+
+INSTANTIATE_TEST_SUITE_P(
+  DepthCameraSensor, DepthCameraSensorTest,
+  RENDER_ENGINE_VALUES, gz::rendering::PrintToStringParam());

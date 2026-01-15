@@ -175,6 +175,9 @@ class RgbdCameraSensorTest: public testing::Test,
 
   // Create a Camera sensor from a SDF and gets a image message
   public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
+
+  // Test custom point cloud frame ID
+  public: void CustomPointCloudFrameId(const std::string &_renderEngine);
 };
 
 void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
@@ -759,6 +762,110 @@ TEST_P(RgbdCameraSensorTest, ImagesWithBuiltinSDF)
 {
   common::Console::SetVerbosity(4);
   ImagesWithBuiltinSDF(GetParam());
+}
+
+//////////////////////////////////////////////////
+void RgbdCameraSensorTest::CustomPointCloudFrameId(
+    const std::string &_renderEngine)
+{
+  if ((_renderEngine.compare("ogre") != 0) &&
+      (_renderEngine.compare("ogre2") != 0))
+  {
+    gzdbg << "Engine '" << _renderEngine
+          << "' doesn't support depth cameras" << std::endl;
+    return;
+  }
+
+  auto *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    gzdbg << "Engine '" << _renderEngine
+          << "' is not supported" << std::endl;
+    return;
+  }
+
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
+  ASSERT_NE(nullptr, scene);
+
+  std::string path = gz::common::joinPaths(
+    PROJECT_SOURCE_PATH, "test", "sdf", "rgbd_camera_points_frame_id.sdf");
+
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  ASSERT_NE(nullptr, doc->Root());
+  ASSERT_TRUE(doc->Root()->HasElement("model"));
+  auto modelPtr = doc->Root()->GetElement("model");
+  ASSERT_TRUE(modelPtr->HasElement("link"));
+  auto linkPtr = modelPtr->GetElement("link");
+  ASSERT_TRUE(linkPtr->HasElement("sensor"));
+
+  auto sensorPtr1 = linkPtr->GetElement("sensor");
+  auto sensorPtr2 =
+      linkPtr->GetElement("sensor")->GetNextElement();
+
+  gz::sensors::Manager mgr;
+  auto* cameraWithoutPclFrameId
+    = mgr.CreateSensor<gz::sensors::RgbdCameraSensor>(sensorPtr1);
+  auto* cameraWithPclFrameId
+    = mgr.CreateSensor<gz::sensors::RgbdCameraSensor>(sensorPtr2);
+  ASSERT_NE(nullptr, cameraWithoutPclFrameId);
+  ASSERT_NE(nullptr, cameraWithPclFrameId);
+
+  cameraWithoutPclFrameId->SetScene(scene);
+  cameraWithPclFrameId->SetScene(scene);
+
+  WaitForMessageTestHelper<gz::msgs::PointCloudPacked>
+      pointsHelper1("/camera1/image/points");
+  WaitForMessageTestHelper<gz::msgs::PointCloudPacked>
+      pointsHelper2("/camera2/image/points");
+  WaitForMessageTestHelper<gz::msgs::Image>
+      imageHelper1("/camera1/image/image");
+  WaitForMessageTestHelper<gz::msgs::Image>
+      imageHelper2("/camera2/image/image");
+  WaitForMessageTestHelper<gz::msgs::Image>
+      depthImageHelper1("/camera1/image/depth_image");
+  WaitForMessageTestHelper<gz::msgs::Image>
+      depthImageHelper2("/camera2/image/depth_image");
+
+  EXPECT_TRUE(cameraWithoutPclFrameId->HasConnections());
+  EXPECT_TRUE(cameraWithPclFrameId->HasConnections());
+
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
+  EXPECT_TRUE(pointsHelper1.WaitForMessage()) << pointsHelper1;
+  EXPECT_TRUE(pointsHelper2.WaitForMessage()) << pointsHelper2;
+  EXPECT_TRUE(depthImageHelper1.WaitForMessage()) << depthImageHelper1;
+  EXPECT_TRUE(depthImageHelper2.WaitForMessage()) << depthImageHelper2;
+  EXPECT_TRUE(imageHelper1.WaitForMessage()) << imageHelper1;
+  EXPECT_TRUE(imageHelper2.WaitForMessage()) << imageHelper2;
+
+  auto pointsMsg1 = pointsHelper1.Message();
+  auto pointsMsg2 = pointsHelper2.Message();
+  auto imageMsg1 = imageHelper1.Message();
+  auto imageMsg2 = imageHelper2.Message();
+  auto depthImageMsg1 = depthImageHelper1.Message();
+  auto depthImageMsg2 = depthImageHelper2.Message();
+
+  EXPECT_EQ("optical_frame", pointsMsg1.header().data(0).value(0));
+  EXPECT_EQ("points_frame", pointsMsg2.header().data(0).value(0));
+  EXPECT_EQ("optical_frame", imageMsg1.header().data(0).value(0));
+  EXPECT_EQ("optical_frame", imageMsg2.header().data(0).value(0));
+  EXPECT_EQ("optical_frame", depthImageMsg1.header().data(0).value(0));
+  EXPECT_EQ("optical_frame", depthImageMsg2.header().data(0).value(0));
+
+  mgr.Remove(cameraWithoutPclFrameId->Id());
+  mgr.Remove(cameraWithPclFrameId->Id());
+
+  // Clean up
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+TEST_P(RgbdCameraSensorTest, CustomPointCloudFrameId)
+{
+  common::Console::SetVerbosity(4);
+  CustomPointCloudFrameId(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(RgbdCameraSensor, RgbdCameraSensorTest,

@@ -143,6 +143,10 @@ class gz::sensors::DepthCameraSensorPrivate
 
   /// \brief publisher to publish point cloud
   public: transport::Node::Publisher pointPub;
+
+  /// \brief Custom frame ID for point cloud messages. If empty, uses the
+  /// optical frame ID.
+  public: std::string pointCloudFrameId;
 };
 
 using namespace gz;
@@ -313,6 +317,16 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
   gzdbg << "Points for [" << this->Name() << "] advertised on ["
          << this->Topic() << "/points]" << std::endl;
 
+  // Check for custom point cloud frame ID
+  if (_sdf.Element() != nullptr &&
+      _sdf.Element()->HasElement("points_frame_id"))
+  {
+    this->dataPtr->pointCloudFrameId =
+        _sdf.Element()->Get<std::string>("points_frame_id");
+    gzdbg << "Using custom point cloud frame ID: "
+          << this->dataPtr->pointCloudFrameId << std::endl;
+  }
+
   if (this->Scene())
   {
     this->CreateCamera();
@@ -440,9 +454,12 @@ bool DepthCameraSensor::CreateCamera()
         std::placeholders::_4, std::placeholders::_5));
 
   // Initialize the point message.
+  // Use custom frame ID if specified, otherwise use optical frame ID
+  const std::string frameId = this->dataPtr->pointCloudFrameId.empty() ?
+      this->OpticalFrameId() : this->dataPtr->pointCloudFrameId;
   msgs::InitPointCloudPacked(
         this->dataPtr->pointMsg,
-        this->OpticalFrameId(),
+        frameId,
         false,
         {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
          {"rgb", msgs::PointCloudPacked::Field::FLOAT32}});
