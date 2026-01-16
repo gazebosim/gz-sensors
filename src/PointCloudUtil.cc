@@ -37,6 +37,9 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
   msgBuffer->resize(_msg.row_step() * _msg.height());
   char *msgBufferIndex = msgBuffer->data();
 
+  // Set Pointcloud as dense. Change if invalid points are found.
+  bool isDense { true };
+
   // For depth calculation from image
   double fl = width / (2.0 * std::tan(_hfov.Radian() / 2.0));
 
@@ -53,6 +56,10 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
 
       // Current point depth
       float depth = _depthData[j * width + i];
+
+      // Validate Depth/Radius and update pointcloud density flag
+      if (isDense)
+        isDense = !(gz::math::isnan(depth) || std::isinf(depth));
 
       float yAngle = 0.0;
       if (fl > 0 && width > 1)
@@ -87,6 +94,7 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
       msgBufferIndex += _msg.point_step();
     }
   }
+  _msg.set_is_dense(isDense);
 }
 
 //////////////////////////////////////////////////
@@ -100,6 +108,9 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
   msgBuffer->resize(_msg.row_step() * _msg.height());
   char *msgBufferIndex = msgBuffer->data();
 
+  // Set Pointcloud as dense. Change if invalid points are found.
+  bool isDense { true };
+
   // Iterate over scan and populate point cloud
   for (uint32_t j = 0; j < height; ++j)
   {
@@ -110,6 +121,14 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
       float x = _xyzData[index];
       float y = _xyzData[index + 1];
       float z = _xyzData[index + 2];
+
+      // Validate Depth/Radius and update pointcloud density flag
+      if (isDense)
+      {
+        isDense = !(gz::math::isnan(x) || std::isinf(x) ||
+                    gz::math::isnan(y) || std::isinf(y) ||
+                    gz::math::isnan(z) || std::isinf(z));
+      }
 
       int fieldIndex = 0;
       *reinterpret_cast<float*>(msgBufferIndex +
@@ -142,6 +161,7 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
       msgBufferIndex += _msg.point_step();
     }
   }
+  _msg.set_is_dense(isDense);
 }
 
 //////////////////////////////////////////////////
@@ -157,6 +177,9 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
   msgBuffer->resize(_msg.row_step() * _msg.height());
   char *msgBufferIndex = msgBuffer->data();
 
+  // Set Pointcloud as dense. Change if invalid points are found.
+  bool isDense { true };
+
   // Iterate over scan and populate point cloud
   for (uint32_t j = 0; j < height; ++j)
   {
@@ -168,6 +191,14 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
       float x = _pointCloudData[pcIndex];
       float y = _pointCloudData[pcIndex + 1];
       float z = _pointCloudData[pcIndex + 2];
+      // Validate Depth/Radius and update pointcloud density flag
+      if (isDense)
+      {
+        isDense = !(gz::math::isnan(x) || std::isinf(x) ||
+                    gz::math::isnan(y) || std::isinf(y) ||
+                    gz::math::isnan(z) || std::isinf(z));
+      }
+
       float rgba = _pointCloudData[pcIndex + 3];
 
       int fieldIndex = 0;
@@ -218,6 +249,7 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
       }
     }
   }
+  _msg.set_is_dense(isDense);
 }
 
 
