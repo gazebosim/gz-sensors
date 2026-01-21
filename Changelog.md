@@ -2,23 +2,17 @@
 
 ### Gazebo Sensors 10.0.1 (2026-01-20)
 
-1. [bazel] Fix CI on MacOS
-    * [Pull request #583](https://github.com/gazebosim/gz-sensors/pull/583)
-
 1. Find jetty packages with explicit version
     * [Pull request #581](https://github.com/gazebosim/gz-sensors/pull/581)
 
 1. Added invalid point checking to RGBD and Depth Camera plugins to set `is_dense` flag accordingly
     * [Pull request #575](https://github.com/gazebosim/gz-sensors/pull/575)
 
-1. [bazel/infra] Disable windows CI
-    * [Pull request #568](https://github.com/gazebosim/gz-sensors/pull/568)
-
-1. [bazel/infra] Add manual BCR release workflow
-    * [Pull request #567](https://github.com/gazebosim/gz-sensors/pull/567)
-
-1. Bazel updates: prep for BCR release automation
+1. Bazel updates
     * [Pull request #562](https://github.com/gazebosim/gz-sensors/pull/562)
+    * [Pull request #567](https://github.com/gazebosim/gz-sensors/pull/567)
+    * [Pull request #568](https://github.com/gazebosim/gz-sensors/pull/568)
+    * [Pull request #583](https://github.com/gazebosim/gz-sensors/pull/583)
 
 1. Fix: updated jacobi as template
     * [Pull request #560](https://github.com/gazebosim/gz-sensors/pull/560)
