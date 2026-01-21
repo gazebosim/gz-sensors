@@ -1,5 +1,25 @@
 ## Gazebo Sensors 10
 
+### Gazebo Sensors 10.0.1 (2026-01-20)
+
+1. Find jetty packages with explicit version
+    * [Pull request #581](https://github.com/gazebosim/gz-sensors/pull/581)
+
+1. Added invalid point checking to RGBD and Depth Camera plugins to set `is_dense` flag accordingly
+    * [Pull request #575](https://github.com/gazebosim/gz-sensors/pull/575)
+
+1. Bazel updates
+    * [Pull request #562](https://github.com/gazebosim/gz-sensors/pull/562)
+    * [Pull request #567](https://github.com/gazebosim/gz-sensors/pull/567)
+    * [Pull request #568](https://github.com/gazebosim/gz-sensors/pull/568)
+    * [Pull request #583](https://github.com/gazebosim/gz-sensors/pull/583)
+
+1. Fix: updated jacobi as template
+    * [Pull request #560](https://github.com/gazebosim/gz-sensors/pull/560)
+
+1. ADD: Update Air Speed Sensor SDF Element link in Readme
+    * [Pull request #554](https://github.com/gazebosim/gz-sensors/pull/554)
+
 ### Gazebo Sensors 10.0.0 (2025-09-30)
 
 1. **Baseline:** this includes all changes from 9.2.0 and earlier.
