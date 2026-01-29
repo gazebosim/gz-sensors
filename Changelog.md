@@ -1,5 +1,25 @@
 ## Gazebo Sensors 6
 
+### Gazebo Sensors 6.9.0 (2026-01-29)
+
+1. Fortress: disable Ubuntu Focal CI
+    * [Pull request #585](https://github.com/gazebosim/gz-sensors/pull/585)
+
+1. Clarify min and max temperature of thermal camera
+    * [Pull request #523](https://github.com/gazebosim/gz-sensors/pull/523)
+
+1. Disable ign-sensors6's (fortress) failing tests on Windows
+    * [Pull request #527](https://github.com/gazebosim/gz-sensors/pull/527)
+
+1. Set lens intrinsics in Depth and Rgbd camera sensors (backport #390)
+    * [Pull request #486](https://github.com/gazebosim/gz-sensors/pull/486)
+
+1. Added Trigger to Depth camera
+    * [Pull request #484](https://github.com/gazebosim/gz-sensors/pull/484)
+
+1. Check camera sensors have non-zero width or height (backport #480)
+    * [Pull request #481](https://github.com/gazebosim/gz-sensors/pull/481)
+
 ### Gazebo Sensors 6.8.1 (2024-10-04)
 
 1. Fix optical frame id in depth and rgbd camera
