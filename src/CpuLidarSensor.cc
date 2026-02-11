@@ -28,6 +28,9 @@ class gz::sensors::CpuLidarSensorPrivate
 {
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
+
+  /// \brief SDF lidar config
+  public: sdf::Lidar sdfLidar;
 };
 
 //////////////////////////////////////////////////
@@ -53,6 +56,15 @@ bool CpuLidarSensor::Load(const sdf::Sensor &_sdf)
       << "a " << _sdf.TypeStr() << std::endl;
     return false;
   }
+
+  if (_sdf.LidarSensor() == nullptr)
+  {
+    gzerr << "Attempting to load a CpuLidar sensor, but received "
+      << "a null lidar sensor." << std::endl;
+    return false;
+  }
+
+  this->dataPtr->sdfLidar = *_sdf.LidarSensor();
 
   this->dataPtr->initialized = true;
   return true;
@@ -83,4 +95,52 @@ bool CpuLidarSensor::Update(
 bool CpuLidarSensor::HasConnections() const
 {
   return false;
+}
+
+//////////////////////////////////////////////////
+gz::math::Angle CpuLidarSensor::AngleMin() const
+{
+  return this->dataPtr->sdfLidar.HorizontalScanMinAngle();
+}
+
+//////////////////////////////////////////////////
+gz::math::Angle CpuLidarSensor::AngleMax() const
+{
+  return this->dataPtr->sdfLidar.HorizontalScanMaxAngle();
+}
+
+//////////////////////////////////////////////////
+gz::math::Angle CpuLidarSensor::VerticalAngleMin() const
+{
+  return this->dataPtr->sdfLidar.VerticalScanMinAngle();
+}
+
+//////////////////////////////////////////////////
+gz::math::Angle CpuLidarSensor::VerticalAngleMax() const
+{
+  return this->dataPtr->sdfLidar.VerticalScanMaxAngle();
+}
+
+//////////////////////////////////////////////////
+double CpuLidarSensor::RangeMin() const
+{
+  return this->dataPtr->sdfLidar.RangeMin();
+}
+
+//////////////////////////////////////////////////
+double CpuLidarSensor::RangeMax() const
+{
+  return this->dataPtr->sdfLidar.RangeMax();
+}
+
+//////////////////////////////////////////////////
+unsigned int CpuLidarSensor::RayCount() const
+{
+  return this->dataPtr->sdfLidar.HorizontalScanSamples();
+}
+
+//////////////////////////////////////////////////
+unsigned int CpuLidarSensor::VerticalRayCount() const
+{
+  return this->dataPtr->sdfLidar.VerticalScanSamples();
 }

@@ -21,6 +21,7 @@
 
 #include <sdf/sdf.hh>
 
+#include <gz/math/Angle.hh>
 #include <gz/utils/SuppressWarning.hh>
 
 #include <gz/sensors/config.hh>
@@ -70,6 +71,30 @@ namespace gz
       /// \brief Check if there are any subscribers
       /// \return True if there are subscribers, false otherwise
       public: virtual bool HasConnections() const override;
+
+      /// \brief Get the minimum horizontal angle
+      public: gz::math::Angle AngleMin() const;
+
+      /// \brief Get the maximum horizontal angle
+      public: gz::math::Angle AngleMax() const;
+
+      /// \brief Get the minimum vertical angle
+      public: gz::math::Angle VerticalAngleMin() const;
+
+      /// \brief Get the maximum vertical angle
+      public: gz::math::Angle VerticalAngleMax() const;
+
+      /// \brief Get the minimum range
+      public: double RangeMin() const;
+
+      /// \brief Get the maximum range
+      public: double RangeMax() const;
+
+      /// \brief Get the horizontal ray count
+      public: unsigned int RayCount() const;
+
+      /// \brief Get the vertical ray count
+      public: unsigned int VerticalRayCount() const;
 
       GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

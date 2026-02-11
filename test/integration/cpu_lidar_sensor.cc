@@ -113,3 +113,29 @@ TEST_F(CpuLidarSensorTest, CreateSensor)
   EXPECT_EQ(topic, sensor->Topic());
   EXPECT_DOUBLE_EQ(updateRate, sensor->UpdateRate());
 }
+
+/////////////////////////////////////////////////
+TEST_F(CpuLidarSensorTest, LidarConfig)
+{
+  gz::math::Pose3d sensorPose(gz::math::Vector3d::Zero,
+      gz::math::Quaterniond::Identity);
+  auto sdf = CpuLidarToSdf("test_config", sensorPose, 10,
+      "/test/config",
+      640, -1.396, 1.396,
+      16, -0.26, 0.26,
+      0.08, 10.0, true, false);
+  ASSERT_NE(nullptr, sdf);
+
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::CpuLidarSensor>(sdf);
+  ASSERT_NE(nullptr, sensor);
+
+  EXPECT_EQ(640u, sensor->RayCount());
+  EXPECT_EQ(16u, sensor->VerticalRayCount());
+  EXPECT_NEAR(-1.396, sensor->AngleMin().Radian(), 1e-6);
+  EXPECT_NEAR(1.396, sensor->AngleMax().Radian(), 1e-6);
+  EXPECT_NEAR(-0.26, sensor->VerticalAngleMin().Radian(), 1e-6);
+  EXPECT_NEAR(0.26, sensor->VerticalAngleMax().Radian(), 1e-6);
+  EXPECT_DOUBLE_EQ(0.08, sensor->RangeMin());
+  EXPECT_DOUBLE_EQ(10.0, sensor->RangeMax());
+}
