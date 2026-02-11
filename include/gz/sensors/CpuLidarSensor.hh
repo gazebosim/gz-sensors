@@ -47,6 +47,18 @@ namespace gz
     /// depending on gz-rendering.
     class GZ_SENSORS_CPU_LIDAR_VISIBLE CpuLidarSensor : public Sensor
     {
+      /// \brief Result of a single ray cast
+      public: struct RayResult
+      {
+        /// \brief Hit point in entity frame
+        gz::math::Vector3d point;
+
+        /// \brief Fraction along the ray [0, 1]. NaN if no hit.
+        double fraction;
+
+        /// \brief Normal at hit point in entity frame
+        gz::math::Vector3d normal;
+      };
       /// \brief constructor
       public: CpuLidarSensor();
 
@@ -104,6 +116,15 @@ namespace gz
       /// \return Vector of (start, end) pairs
       public: std::vector<std::pair<gz::math::Vector3d, gz::math::Vector3d>>
         GenerateRays() const;
+
+      /// \brief Set the raycast results from the physics engine.
+      /// \param[in] _results Vector of results, one per ray.
+      public: void SetRaycastResults(
+        const std::vector<RayResult> &_results);
+
+      /// \brief Get all range values.
+      /// \param[out] _ranges Vector to fill with range data.
+      public: void Ranges(std::vector<double> &_ranges) const;
 
       GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

@@ -16,6 +16,7 @@
 */
 
 #include <cmath>
+#include <limits>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -213,4 +214,57 @@ TEST_F(CpuLidarSensorTest, GenerateRaysMultiLayer)
     EXPECT_NEAR(0.5, ray.first.Length(), 1e-6);
     EXPECT_NEAR(10.0, ray.second.Length(), 1e-6);
   }
+}
+
+/////////////////////////////////////////////////
+TEST_F(CpuLidarSensorTest, SetRaycastResults)
+{
+  // 3 horizontal rays, range [0.1, 5.0]
+  gz::math::Pose3d sensorPose(gz::math::Vector3d::Zero,
+      gz::math::Quaterniond::Identity);
+  auto sdf = CpuLidarToSdf("test_results", sensorPose, 10,
+      "/test/results",
+      3, -M_PI / 4, M_PI / 4,
+      1, 0, 0,
+      0.1, 5.0, true, false);
+  ASSERT_NE(nullptr, sdf);
+
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::CpuLidarSensor>(sdf);
+  ASSERT_NE(nullptr, sensor);
+
+  auto rays = sensor->GenerateRays();
+  ASSERT_EQ(3u, rays.size());
+
+  // Build results: hit at fraction 0.5, no hit, hit at fraction 0.02
+  std::vector<gz::sensors::CpuLidarSensor::RayResult> results(3);
+
+  // Ray 0: hit at fraction 0.5 → distance along ray = 0.5 * (5.0 - 0.1) + 0.1
+  // Actually fraction is along the full ray from start to end:
+  // range = range_min + fraction * (range_max - range_min)
+  results[0].fraction = 0.5;
+  results[0].point = rays[0].first + 0.5 * (rays[0].second - rays[0].first);
+
+  // Ray 1: no hit
+  results[1].fraction = std::numeric_limits<double>::quiet_NaN();
+  results[1].point = {std::numeric_limits<double>::quiet_NaN(),
+                      std::numeric_limits<double>::quiet_NaN(),
+                      std::numeric_limits<double>::quiet_NaN()};
+
+  // Ray 2: hit very close → fraction 0.0 (at start = range_min)
+  results[2].fraction = 0.0;
+  results[2].point = rays[2].first;
+
+  sensor->SetRaycastResults(results);
+
+  std::vector<double> ranges;
+  sensor->Ranges(ranges);
+
+  ASSERT_EQ(3u, ranges.size());
+  // Ray 0: hit at midpoint between range_min and range_max
+  EXPECT_NEAR(2.55, ranges[0], 1e-4);
+  // Ray 1: no hit → +inf (REP-117)
+  EXPECT_TRUE(std::isinf(ranges[1]));
+  // Ray 2: hit at range_min
+  EXPECT_NEAR(0.1, ranges[2], 1e-4);
 }

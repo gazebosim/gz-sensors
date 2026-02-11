@@ -16,6 +16,7 @@
 */
 
 #include <cmath>
+#include <limits>
 
 #include <gz/common/Console.hh>
 
@@ -33,6 +34,9 @@ class gz::sensors::CpuLidarSensorPrivate
 
   /// \brief SDF lidar config
   public: sdf::Lidar sdfLidar;
+
+  /// \brief Computed range values from the latest raycast results
+  public: std::vector<double> ranges;
 };
 
 //////////////////////////////////////////////////
@@ -182,4 +186,39 @@ CpuLidarSensor::GenerateRays() const
   }
 
   return rays;
+}
+
+//////////////////////////////////////////////////
+void CpuLidarSensor::SetRaycastResults(
+    const std::vector<RayResult> &_results)
+{
+  const double rMin = this->RangeMin();
+  const double rMax = this->RangeMax();
+  const double rayLength = rMax - rMin;
+
+  this->dataPtr->ranges.resize(_results.size());
+
+  for (size_t i = 0; i < _results.size(); ++i)
+  {
+    if (std::isnan(_results[i].fraction))
+    {
+      this->dataPtr->ranges[i] =
+        std::numeric_limits<double>::infinity();
+    }
+    else
+    {
+      double range = rMin + _results[i].fraction * rayLength;
+      if (range < rMin)
+        range = -std::numeric_limits<double>::infinity();
+      else if (range > rMax)
+        range = std::numeric_limits<double>::infinity();
+      this->dataPtr->ranges[i] = range;
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+void CpuLidarSensor::Ranges(std::vector<double> &_ranges) const
+{
+  _ranges = this->dataPtr->ranges;
 }
