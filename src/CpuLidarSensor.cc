@@ -19,6 +19,10 @@
 #include <limits>
 
 #include <gz/common/Console.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/msgs/laserscan.pb.h>
+#include <gz/msgs/Utility.hh>
+#include <gz/transport/Node.hh>
 
 #include "gz/sensors/CpuLidarSensor.hh"
 #include "gz/sensors/SensorFactory.hh"
@@ -37,6 +41,15 @@ class gz::sensors::CpuLidarSensorPrivate
 
   /// \brief Computed range values from the latest raycast results
   public: std::vector<double> ranges;
+
+  /// \brief Transport node
+  public: transport::Node node;
+
+  /// \brief LaserScan publisher
+  public: transport::Node::Publisher scanPub;
+
+  /// \brief LaserScan message (reused)
+  public: msgs::LaserScan laserMsg;
 };
 
 //////////////////////////////////////////////////
@@ -72,6 +85,38 @@ bool CpuLidarSensor::Load(const sdf::Sensor &_sdf)
 
   this->dataPtr->sdfLidar = *_sdf.LidarSensor();
 
+  if (this->Topic().empty())
+    this->SetTopic("/cpu_lidar");
+
+  this->dataPtr->scanPub =
+      this->dataPtr->node.Advertise<gz::msgs::LaserScan>(this->Topic());
+  if (!this->dataPtr->scanPub)
+  {
+    gzerr << "Unable to create publisher on topic["
+      << this->Topic() << "].\n";
+    return false;
+  }
+
+  auto &msg = this->dataPtr->laserMsg;
+  msg.set_count(this->RayCount() * this->VerticalRayCount());
+  msg.set_range_min(this->RangeMin());
+  msg.set_range_max(this->RangeMax());
+  msg.set_angle_min(this->AngleMin().Radian());
+  msg.set_angle_max(this->AngleMax().Radian());
+  msg.set_angle_step(
+    this->RayCount() > 1
+      ? (this->AngleMax().Radian() - this->AngleMin().Radian())
+        / (this->RayCount() - 1)
+      : 0.0);
+  msg.set_vertical_angle_min(this->VerticalAngleMin().Radian());
+  msg.set_vertical_angle_max(this->VerticalAngleMax().Radian());
+  msg.set_vertical_angle_step(
+    this->VerticalRayCount() > 1
+      ? (this->VerticalAngleMax().Radian() - this->VerticalAngleMin().Radian())
+        / (this->VerticalRayCount() - 1)
+      : 0.0);
+  msg.set_vertical_count(this->VerticalRayCount());
+
   this->dataPtr->initialized = true;
   return true;
 }
@@ -86,21 +131,58 @@ bool CpuLidarSensor::Load(sdf::ElementPtr _sdf)
 
 //////////////////////////////////////////////////
 bool CpuLidarSensor::Update(
-    const std::chrono::steady_clock::duration &/*_now*/)
+    const std::chrono::steady_clock::duration &_now)
 {
+  GZ_PROFILE("CpuLidarSensor::Update");
   if (!this->dataPtr->initialized)
   {
     gzerr << "Not initialized, update ignored.\n";
     return false;
   }
 
-  return false;
+  if (!this->dataPtr->scanPub.HasConnections())
+    return false;
+
+  auto &msg = this->dataPtr->laserMsg;
+
+  *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+  msg.mutable_header()->clear_data();
+  auto frame = msg.mutable_header()->add_data();
+  frame->set_key("frame_id");
+  frame->add_value(this->FrameId());
+  msg.set_frame(this->FrameId());
+
+  msgs::Set(msg.mutable_world_pose(), this->Pose());
+
+  const int numRays = static_cast<int>(this->dataPtr->ranges.size());
+  if (msg.ranges_size() != numRays)
+  {
+    msg.clear_ranges();
+    msg.clear_intensities();
+    for (int i = 0; i < numRays; ++i)
+    {
+      msg.add_ranges(gz::math::NAN_F);
+      msg.add_intensities(0.0);
+    }
+  }
+
+  for (int i = 0; i < numRays; ++i)
+  {
+    msg.set_ranges(i, this->dataPtr->ranges[i]);
+    msg.set_intensities(i, 0.0);
+  }
+
+  this->AddSequence(msg.mutable_header());
+  this->dataPtr->scanPub.Publish(msg);
+
+  return true;
 }
 
 //////////////////////////////////////////////////
 bool CpuLidarSensor::HasConnections() const
 {
-  return false;
+  return this->dataPtr->scanPub &&
+         this->dataPtr->scanPub.HasConnections();
 }
 
 //////////////////////////////////////////////////

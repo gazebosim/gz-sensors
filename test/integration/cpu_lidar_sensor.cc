@@ -23,13 +23,18 @@
 
 #include <sdf/sdf.hh>
 
+#include <gz/msgs/laserscan.pb.h>
+#include <gz/msgs/pointcloud_packed.pb.h>
+
 #include <gz/common/Console.hh>
 #include <gz/math/Pose3.hh>
 #include <gz/math/Vector3.hh>
 #include <gz/sensors/CpuLidarSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
+#include <gz/transport/Node.hh>
 
 #include "test_config.hh"  // NOLINT(build/include)
+#include "TransportTestTools.hh"
 
 /// \brief Helper function to create a cpu lidar sdf element
 sdf::ElementPtr CpuLidarToSdf(const std::string &_name,
@@ -267,4 +272,66 @@ TEST_F(CpuLidarSensorTest, SetRaycastResults)
   EXPECT_TRUE(std::isinf(ranges[1]));
   // Ray 2: hit at range_min
   EXPECT_NEAR(0.1, ranges[2], 1e-4);
+}
+
+/////////////////////////////////////////////////
+TEST_F(CpuLidarSensorTest, PublishLaserScan)
+{
+  const std::string topic = "/test/cpu_lidar/scan";
+  gz::math::Pose3d sensorPose(gz::math::Vector3d::Zero,
+      gz::math::Quaterniond::Identity);
+  auto sdf = CpuLidarToSdf("test_pub", sensorPose, 30, topic,
+      5, -0.5, 0.5,
+      1, 0, 0,
+      0.1, 10.0, true, false);
+  ASSERT_NE(nullptr, sdf);
+
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::CpuLidarSensor>(sdf);
+  ASSERT_NE(nullptr, sensor);
+
+  // Subscribe to LaserScan
+  gz::transport::Node node;
+  std::vector<gz::msgs::LaserScan> received;
+  std::mutex mtx;
+  node.Subscribe(topic,
+    std::function<void(const gz::msgs::LaserScan &)>(
+      [&](const gz::msgs::LaserScan &_msg) {
+        std::lock_guard<std::mutex> lock(mtx);
+        received.push_back(_msg);
+      }));
+
+  EXPECT_TRUE(sensor->HasConnections());
+
+  // Build results: all hit at fraction 0.5
+  std::vector<gz::sensors::CpuLidarSensor::RayResult> results(5);
+  auto rays = sensor->GenerateRays();
+  for (size_t i = 0; i < 5; ++i)
+  {
+    results[i].fraction = 0.5;
+    results[i].point = rays[i].first +
+      0.5 * (rays[i].second - rays[i].first);
+  }
+  sensor->SetRaycastResults(results);
+
+  auto now = std::chrono::steady_clock::duration(std::chrono::milliseconds(100));
+  EXPECT_TRUE(sensor->Update(now));
+
+  // Wait for message
+  for (int i = 0; i < 100 && received.empty(); ++i)
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+  std::lock_guard<std::mutex> lock(mtx);
+  ASSERT_GE(received.size(), 1u);
+  auto &msg = received.back();
+  EXPECT_EQ(5, msg.count());
+  EXPECT_NEAR(-0.5, msg.angle_min(), 1e-4);
+  EXPECT_NEAR(0.5, msg.angle_max(), 1e-4);
+  EXPECT_DOUBLE_EQ(0.1, msg.range_min());
+  EXPECT_DOUBLE_EQ(10.0, msg.range_max());
+  EXPECT_EQ(5, msg.ranges_size());
+  for (int i = 0; i < msg.ranges_size(); ++i)
+  {
+    EXPECT_NEAR(5.05, msg.ranges(i), 1e-2);
+  }
 }
