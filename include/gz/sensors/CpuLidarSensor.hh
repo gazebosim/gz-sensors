@@ -18,10 +18,13 @@
 #define GZ_SENSORS_CPULIDARSENSOR_HH_
 
 #include <memory>
+#include <utility>
+#include <vector>
 
 #include <sdf/sdf.hh>
 
 #include <gz/math/Angle.hh>
+#include <gz/math/Vector3.hh>
 #include <gz/utils/SuppressWarning.hh>
 
 #include <gz/sensors/config.hh>
@@ -95,6 +98,12 @@ namespace gz
 
       /// \brief Get the vertical ray count
       public: unsigned int VerticalRayCount() const;
+
+      /// \brief Generate rays from the lidar configuration.
+      /// Each ray is a pair of (start, end) points in entity frame.
+      /// \return Vector of (start, end) pairs
+      public: std::vector<std::pair<gz::math::Vector3d, gz::math::Vector3d>>
+        GenerateRays() const;
 
       GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
       /// \brief Data pointer for private data

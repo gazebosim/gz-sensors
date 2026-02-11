@@ -15,12 +15,16 @@
  *
 */
 
+#include <cmath>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include <sdf/sdf.hh>
 
 #include <gz/common/Console.hh>
 #include <gz/math/Pose3.hh>
+#include <gz/math/Vector3.hh>
 #include <gz/sensors/CpuLidarSensor.hh>
 #include <gz/sensors/SensorFactory.hh>
 
@@ -138,4 +142,75 @@ TEST_F(CpuLidarSensorTest, LidarConfig)
   EXPECT_NEAR(0.26, sensor->VerticalAngleMax().Radian(), 1e-6);
   EXPECT_DOUBLE_EQ(0.08, sensor->RangeMin());
   EXPECT_DOUBLE_EQ(10.0, sensor->RangeMax());
+}
+
+/////////////////////////////////////////////////
+TEST_F(CpuLidarSensorTest, GenerateRays)
+{
+  // 3 horizontal rays over 180° FOV, 1 vertical layer, range [0.1, 5.0]
+  gz::math::Pose3d sensorPose(gz::math::Vector3d::Zero,
+      gz::math::Quaterniond::Identity);
+  auto sdf = CpuLidarToSdf("test_rays", sensorPose, 10,
+      "/test/rays",
+      3, -M_PI / 2, M_PI / 2,
+      1, 0, 0,
+      0.1, 5.0, true, false);
+  ASSERT_NE(nullptr, sdf);
+
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::CpuLidarSensor>(sdf);
+  ASSERT_NE(nullptr, sensor);
+
+  auto rays = sensor->GenerateRays();
+  ASSERT_EQ(3u, rays.size());
+
+  // Each ray should start at range_min and end at range_max distance
+  for (const auto &ray : rays) {
+    EXPECT_NEAR(0.1, ray.first.Length(), 1e-6);
+    EXPECT_NEAR(5.0, ray.second.Length(), 1e-6);
+  }
+
+  // Ray 0: azimuth = -π/2 → direction (0, -1, 0)
+  EXPECT_NEAR(0.0, rays[0].first.X(), 1e-4);
+  EXPECT_NEAR(-0.1, rays[0].first.Y(), 1e-4);
+  EXPECT_NEAR(0.0, rays[0].second.X(), 1e-4);
+  EXPECT_NEAR(-5.0, rays[0].second.Y(), 1e-4);
+
+  // Ray 1: azimuth = 0 → direction (1, 0, 0)
+  EXPECT_NEAR(0.1, rays[1].first.X(), 1e-6);
+  EXPECT_NEAR(0.0, rays[1].first.Y(), 1e-6);
+  EXPECT_NEAR(5.0, rays[1].second.X(), 1e-6);
+  EXPECT_NEAR(0.0, rays[1].second.Y(), 1e-6);
+
+  // Ray 2: azimuth = π/2 → direction (0, 1, 0)
+  EXPECT_NEAR(0.0, rays[2].first.X(), 1e-4);
+  EXPECT_NEAR(0.1, rays[2].first.Y(), 1e-4);
+  EXPECT_NEAR(0.0, rays[2].second.X(), 1e-4);
+  EXPECT_NEAR(5.0, rays[2].second.Y(), 1e-4);
+}
+
+/////////////////////////////////////////////////
+TEST_F(CpuLidarSensorTest, GenerateRaysMultiLayer)
+{
+  gz::math::Pose3d sensorPose(gz::math::Vector3d::Zero,
+      gz::math::Quaterniond::Identity);
+  auto sdf = CpuLidarToSdf("test_multi", sensorPose, 10,
+      "/test/multi",
+      4, -M_PI / 4, M_PI / 4,
+      3, -0.2, 0.2,
+      0.5, 10.0, true, false);
+  ASSERT_NE(nullptr, sdf);
+
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::CpuLidarSensor>(sdf);
+  ASSERT_NE(nullptr, sensor);
+
+  auto rays = sensor->GenerateRays();
+  // 4 horizontal × 3 vertical = 12 rays
+  ASSERT_EQ(12u, rays.size());
+
+  for (const auto &ray : rays) {
+    EXPECT_NEAR(0.5, ray.first.Length(), 1e-6);
+    EXPECT_NEAR(10.0, ray.second.Length(), 1e-6);
+  }
 }

@@ -15,6 +15,8 @@
  *
 */
 
+#include <cmath>
+
 #include <gz/common/Console.hh>
 
 #include "gz/sensors/CpuLidarSensor.hh"
@@ -143,4 +145,41 @@ unsigned int CpuLidarSensor::RayCount() const
 unsigned int CpuLidarSensor::VerticalRayCount() const
 {
   return this->dataPtr->sdfLidar.VerticalScanSamples();
+}
+
+//////////////////////////////////////////////////
+std::vector<std::pair<gz::math::Vector3d, gz::math::Vector3d>>
+CpuLidarSensor::GenerateRays() const
+{
+  const unsigned int hSamples = this->RayCount();
+  const unsigned int vSamples = this->VerticalRayCount();
+  const double hMin = this->AngleMin().Radian();
+  const double hMax = this->AngleMax().Radian();
+  const double vMin = this->VerticalAngleMin().Radian();
+  const double vMax = this->VerticalAngleMax().Radian();
+  const double rMin = this->RangeMin();
+  const double rMax = this->RangeMax();
+
+  const double hStep = hSamples > 1 ? (hMax - hMin) / (hSamples - 1) : 0.0;
+  const double vStep = vSamples > 1 ? (vMax - vMin) / (vSamples - 1) : 0.0;
+
+  std::vector<std::pair<gz::math::Vector3d, gz::math::Vector3d>> rays;
+  rays.reserve(hSamples * vSamples);
+
+  for (unsigned int v = 0; v < vSamples; ++v)
+  {
+    const double inclination = vMin + v * vStep;
+    for (unsigned int h = 0; h < hSamples; ++h)
+    {
+      const double azimuth = hMin + h * hStep;
+      const gz::math::Vector3d dir(
+        std::cos(inclination) * std::cos(azimuth),
+        std::cos(inclination) * std::sin(azimuth),
+        std::sin(inclination));
+
+      rays.emplace_back(dir * rMin, dir * rMax);
+    }
+  }
+
+  return rays;
 }
