@@ -149,6 +149,9 @@ gz_add_component(magnetometer SOURCES ${magnetometer_sources} GET_TARGET_NAME ma
 set(imu_sources ImuSensor.cc)
 gz_add_component(imu SOURCES ${imu_sources} GET_TARGET_NAME imu_target)
 
+set(cpu_lidar_sources CpuLidarSensor.cc)
+gz_add_component(cpu_lidar SOURCES ${cpu_lidar_sources} GET_TARGET_NAME cpu_lidar_target)
+
 set(altimeter_sources AltimeterSensor.cc)
 gz_add_component(altimeter SOURCES ${altimeter_sources} GET_TARGET_NAME altimeter_target)
 
