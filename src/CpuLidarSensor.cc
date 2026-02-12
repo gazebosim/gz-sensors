@@ -24,6 +24,8 @@
 #include <gz/common/Profiler.hh>
 #include <gz/math/Helpers.hh>
 #include <gz/msgs/laserscan.pb.h>
+#include <gz/msgs/pointcloud_packed.pb.h>
+#include <gz/msgs/PointCloudPackedUtils.hh>
 #include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 
@@ -60,6 +62,12 @@ class gz::sensors::CpuLidarSensorPrivate
   /// \brief Noise model for lidar data
   public: std::unordered_map<gz::sensors::SensorNoiseType,
       gz::sensors::NoisePtr> noises;
+
+  /// \brief PointCloud publisher
+  public: transport::Node::Publisher pointPub;
+
+  /// \brief PointCloud message (reused)
+  public: msgs::PointCloudPacked pointMsg;
 };
 
 //////////////////////////////////////////////////
@@ -153,6 +161,27 @@ bool CpuLidarSensor::Load(const sdf::Sensor &_sdf)
       : 0.0);
   msg.set_vertical_count(this->VerticalRayCount());
 
+  msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->FrameId(), false,
+      {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
+      {"intensity", msgs::PointCloudPacked::Field::FLOAT32},
+      {"ring", msgs::PointCloudPacked::Field::UINT16}});
+
+  this->dataPtr->pointMsg.set_width(this->RayCount());
+  this->dataPtr->pointMsg.set_height(this->VerticalRayCount());
+  this->dataPtr->pointMsg.set_row_step(
+      this->dataPtr->pointMsg.point_step() *
+      this->dataPtr->pointMsg.width());
+
+  this->dataPtr->pointPub =
+      this->dataPtr->node.Advertise<gz::msgs::PointCloudPacked>(
+          this->Topic() + "/points");
+  if (!this->dataPtr->pointPub)
+  {
+    gzerr << "Unable to create publisher on topic["
+      << this->Topic() << "/points].\n";
+    return false;
+  }
+
   this->dataPtr->initialized = true;
   return true;
 }
@@ -176,40 +205,110 @@ bool CpuLidarSensor::Update(
     return false;
   }
 
-  if (!this->dataPtr->scanPub.HasConnections())
+  if (!this->HasConnections())
     return false;
 
-  auto &msg = this->dataPtr->laserMsg;
-
-  *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
-  msg.mutable_header()->clear_data();
-  auto frame = msg.mutable_header()->add_data();
-  frame->set_key("frame_id");
-  frame->add_value(this->FrameId());
-  msg.set_frame(this->FrameId());
-
-  msgs::Set(msg.mutable_world_pose(), this->Pose());
-
-  const int numRays = static_cast<int>(this->dataPtr->ranges.size());
-  if (msg.ranges_size() != numRays)
+  if (this->dataPtr->scanPub.HasConnections())
   {
-    msg.clear_ranges();
-    msg.clear_intensities();
+    auto &msg = this->dataPtr->laserMsg;
+
+    *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+    msg.mutable_header()->clear_data();
+    auto frame = msg.mutable_header()->add_data();
+    frame->set_key("frame_id");
+    frame->add_value(this->FrameId());
+    msg.set_frame(this->FrameId());
+
+    msgs::Set(msg.mutable_world_pose(), this->Pose());
+
+    const int numRays = static_cast<int>(this->dataPtr->ranges.size());
+    if (msg.ranges_size() != numRays)
+    {
+      msg.clear_ranges();
+      msg.clear_intensities();
+      for (int i = 0; i < numRays; ++i)
+      {
+        msg.add_ranges(gz::math::NAN_F);
+        msg.add_intensities(0.0);
+      }
+    }
+
     for (int i = 0; i < numRays; ++i)
     {
-      msg.add_ranges(gz::math::NAN_F);
-      msg.add_intensities(0.0);
+      msg.set_ranges(i, this->dataPtr->ranges[i]);
+      msg.set_intensities(i, 0.0);
     }
+
+    this->AddSequence(msg.mutable_header());
+    this->dataPtr->scanPub.Publish(msg);
   }
 
-  for (int i = 0; i < numRays; ++i)
+  if (this->dataPtr->pointPub.HasConnections())
   {
-    msg.set_ranges(i, this->dataPtr->ranges[i]);
-    msg.set_intensities(i, 0.0);
-  }
+    *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
+      msgs::Convert(_now);
+    this->dataPtr->pointMsg.mutable_header()->clear_data();
+    auto pcFrame = this->dataPtr->pointMsg.mutable_header()->add_data();
+    pcFrame->set_key("frame_id");
+    pcFrame->add_value(this->FrameId());
 
-  this->AddSequence(msg.mutable_header());
-  this->dataPtr->scanPub.Publish(msg);
+    const unsigned int hSamples = this->RayCount();
+    const unsigned int vSamples = this->VerticalRayCount();
+    const double hMin = this->AngleMin().Radian();
+    const double hMax = this->AngleMax().Radian();
+    const double vMin = this->VerticalAngleMin().Radian();
+    const double vMax = this->VerticalAngleMax().Radian();
+    const double hStep = hSamples > 1 ? (hMax - hMin) / (hSamples - 1) : 0.0;
+    const double vStep = vSamples > 1 ? (vMax - vMin) / (vSamples - 1) : 0.0;
+
+    std::string *msgBuffer = this->dataPtr->pointMsg.mutable_data();
+    msgBuffer->resize(this->dataPtr->pointMsg.row_step() *
+        this->dataPtr->pointMsg.height());
+    char *msgBufferIndex = msgBuffer->data();
+    bool isDense = true;
+
+    for (unsigned int j = 0; j < vSamples; ++j)
+    {
+      const double inclination = vMin + j * vStep;
+      for (unsigned int i = 0; i < hSamples; ++i)
+      {
+        const double azimuth = hMin + i * hStep;
+        const int index = j * hSamples + i;
+        const double range = this->dataPtr->ranges[index];
+
+        if (isDense)
+          isDense = !(std::isnan(range) || std::isinf(range));
+
+        float depth = static_cast<float>(range);
+        int fieldIndex = 0;
+
+        *reinterpret_cast<float *>(msgBufferIndex +
+            this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
+          depth * static_cast<float>(std::cos(inclination) * std::cos(azimuth));
+
+        *reinterpret_cast<float *>(msgBufferIndex +
+            this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
+          depth * static_cast<float>(std::cos(inclination) * std::sin(azimuth));
+
+        *reinterpret_cast<float *>(msgBufferIndex +
+            this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
+          depth * static_cast<float>(std::sin(inclination));
+
+        *reinterpret_cast<float *>(msgBufferIndex +
+            this->dataPtr->pointMsg.field(fieldIndex++).offset()) = 0.0f;
+
+        *reinterpret_cast<uint16_t *>(msgBufferIndex +
+            this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
+          static_cast<uint16_t>(j);
+
+        msgBufferIndex += this->dataPtr->pointMsg.point_step();
+      }
+    }
+    this->dataPtr->pointMsg.set_is_dense(isDense);
+
+    this->AddSequence(this->dataPtr->pointMsg.mutable_header());
+    this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
+  }
 
   return true;
 }
@@ -217,8 +316,10 @@ bool CpuLidarSensor::Update(
 //////////////////////////////////////////////////
 bool CpuLidarSensor::HasConnections() const
 {
-  return this->dataPtr->scanPub &&
-         this->dataPtr->scanPub.HasConnections();
+  return (this->dataPtr->scanPub &&
+         this->dataPtr->scanPub.HasConnections()) ||
+         (this->dataPtr->pointPub &&
+         this->dataPtr->pointPub.HasConnections());
 }
 
 //////////////////////////////////////////////////

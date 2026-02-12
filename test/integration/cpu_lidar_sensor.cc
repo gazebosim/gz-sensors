@@ -416,3 +416,54 @@ TEST_F(CpuLidarSensorTest, NoiseApplied)
   }
   EXPECT_GT(diffCount, 0) << "Noise should perturb at least some ranges";
 }
+
+/////////////////////////////////////////////////
+TEST_F(CpuLidarSensorTest, PublishPointCloud)
+{
+  const std::string topic = "/test/cpu_lidar/pc";
+  gz::math::Pose3d sensorPose(gz::math::Vector3d::Zero,
+      gz::math::Quaterniond::Identity);
+  auto sdf = CpuLidarToSdf("test_pc", sensorPose, 30, topic,
+      5, -0.5, 0.5,
+      1, 0, 0,
+      0.1, 10.0, true, false);
+  ASSERT_NE(nullptr, sdf);
+
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::CpuLidarSensor>(sdf);
+  ASSERT_NE(nullptr, sensor);
+
+  gz::transport::Node node;
+  std::vector<gz::msgs::PointCloudPacked> received;
+  std::mutex mtx;
+  node.Subscribe(topic + "/points",
+    std::function<void(const gz::msgs::PointCloudPacked &)>(
+      [&](const gz::msgs::PointCloudPacked &_msg) {
+        std::lock_guard<std::mutex> lock(mtx);
+        received.push_back(_msg);
+      }));
+
+  auto rays = sensor->GenerateRays();
+  std::vector<gz::sensors::CpuLidarSensor::RayResult> results(5);
+  for (size_t i = 0; i < 5; ++i)
+  {
+    results[i].fraction = 0.5;
+    results[i].point = rays[i].first +
+      0.5 * (rays[i].second - rays[i].first);
+  }
+  sensor->SetRaycastResults(results);
+
+  auto now = std::chrono::steady_clock::duration(std::chrono::milliseconds(100));
+  EXPECT_TRUE(sensor->Update(now));
+
+  for (int i = 0; i < 100 && received.empty(); ++i)
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+  std::lock_guard<std::mutex> lock(mtx);
+  ASSERT_GE(received.size(), 1u);
+  auto &msg = received.back();
+  EXPECT_EQ(5u, msg.width());
+  EXPECT_EQ(1u, msg.height());
+  EXPECT_TRUE(msg.is_dense());
+  EXPECT_GT(msg.data().size(), 0u);
+}
