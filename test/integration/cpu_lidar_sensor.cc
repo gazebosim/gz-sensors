@@ -335,3 +335,84 @@ TEST_F(CpuLidarSensorTest, PublishLaserScan)
     EXPECT_NEAR(5.05, msg.ranges(i), 1e-2);
   }
 }
+
+/////////////////////////////////////////////////
+TEST_F(CpuLidarSensorTest, NoiseApplied)
+{
+  std::ostringstream stream;
+  stream
+    << "<?xml version='1.0'?>"
+    << "<sdf version='1.6'>"
+    << " <model name='m1'>"
+    << "  <link name='link1'>"
+    << "    <sensor name='noisy_lidar' type='lidar'>"
+    << "      <topic>/test/cpu_lidar/noise</topic>"
+    << "      <update_rate>30</update_rate>"
+    << "      <ray>"
+    << "        <scan>"
+    << "          <horizontal>"
+    << "            <samples>10</samples>"
+    << "            <resolution>1</resolution>"
+    << "            <min_angle>-0.5</min_angle>"
+    << "            <max_angle>0.5</max_angle>"
+    << "          </horizontal>"
+    << "          <vertical>"
+    << "            <samples>1</samples>"
+    << "            <resolution>1</resolution>"
+    << "            <min_angle>0</min_angle>"
+    << "            <max_angle>0</max_angle>"
+    << "          </vertical>"
+    << "        </scan>"
+    << "        <range>"
+    << "          <min>0.1</min>"
+    << "          <max>10.0</max>"
+    << "          <resolution>0.01</resolution>"
+    << "        </range>"
+    << "        <noise>"
+    << "          <type>gaussian</type>"
+    << "          <mean>0.0</mean>"
+    << "          <stddev>0.5</stddev>"
+    << "        </noise>"
+    << "      </ray>"
+    << "      <always_on>1</always_on>"
+    << "      <visualize>false</visualize>"
+    << "    </sensor>"
+    << "  </link>"
+    << " </model>"
+    << "</sdf>";
+
+  sdf::SDFPtr sdfParsed(new sdf::SDF());
+  sdf::init(sdfParsed);
+  ASSERT_TRUE(sdf::readString(stream.str(), sdfParsed));
+
+  auto sdfElem = sdfParsed->Root()->GetElement("model")->GetElement("link")
+    ->GetElement("sensor");
+
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::CpuLidarSensor>(sdfElem);
+  ASSERT_NE(nullptr, sensor);
+
+  auto rays = sensor->GenerateRays();
+  std::vector<gz::sensors::CpuLidarSensor::RayResult> results(10);
+  for (size_t i = 0; i < 10; ++i)
+  {
+    results[i].fraction = 0.5;
+    results[i].point = rays[i].first +
+      0.5 * (rays[i].second - rays[i].first);
+  }
+  sensor->SetRaycastResults(results);
+
+  std::vector<double> ranges;
+  sensor->Ranges(ranges);
+  ASSERT_EQ(10u, ranges.size());
+
+  int diffCount = 0;
+  for (size_t i = 0; i < ranges.size(); ++i)
+  {
+    if (std::abs(ranges[i] - 5.05) > 1e-6)
+      ++diffCount;
+    EXPECT_GT(ranges[i], 0.0);
+    EXPECT_LT(ranges[i], 15.0);
+  }
+  EXPECT_GT(diffCount, 0) << "Noise should perturb at least some ranges";
+}

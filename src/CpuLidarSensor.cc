@@ -17,15 +17,21 @@
 
 #include <cmath>
 #include <limits>
+#include <map>
+#include <unordered_map>
 
 #include <gz/common/Console.hh>
 #include <gz/common/Profiler.hh>
+#include <gz/math/Helpers.hh>
 #include <gz/msgs/laserscan.pb.h>
 #include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
 
 #include "gz/sensors/CpuLidarSensor.hh"
+#include "gz/sensors/GaussianNoiseModel.hh"
+#include "gz/sensors/Noise.hh"
 #include "gz/sensors/SensorFactory.hh"
+#include "gz/sensors/SensorTypes.hh"
 
 using namespace gz;
 using namespace sensors;
@@ -50,6 +56,10 @@ class gz::sensors::CpuLidarSensorPrivate
 
   /// \brief LaserScan message (reused)
   public: msgs::LaserScan laserMsg;
+
+  /// \brief Noise model for lidar data
+  public: std::unordered_map<gz::sensors::SensorNoiseType,
+      gz::sensors::NoisePtr> noises;
 };
 
 //////////////////////////////////////////////////
@@ -84,6 +94,32 @@ bool CpuLidarSensor::Load(const sdf::Sensor &_sdf)
   }
 
   this->dataPtr->sdfLidar = *_sdf.LidarSensor();
+
+  const std::map<SensorNoiseType, sdf::Noise> noises = {
+    {LIDAR_NOISE, this->dataPtr->sdfLidar.LidarNoise()},
+  };
+
+  for (const auto & [noiseType, noiseSdf] : noises)
+  {
+    if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
+    {
+      if (!math::equal(noiseSdf.Mean(), 0.0) ||
+          !math::equal(noiseSdf.StdDev(), 0.0) ||
+          !math::equal(noiseSdf.BiasMean(), 0.0) ||
+          !math::equal(noiseSdf.DynamicBiasStdDev(), 0.0) ||
+          !math::equal(noiseSdf.DynamicBiasCorrelationTime(), 0.0))
+      {
+        this->dataPtr->noises[noiseType] =
+          NoiseFactory::NewNoiseModel(noiseSdf);
+      }
+    }
+    else if (noiseSdf.Type() != sdf::NoiseType::NONE)
+    {
+      gzwarn << "The cpu lidar sensor only supports Gaussian noise. "
+       << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
+       << "] is not supported." << std::endl;
+    }
+  }
 
   if (this->Topic().empty())
     this->SetTopic("/cpu_lidar");
@@ -295,6 +331,18 @@ void CpuLidarSensor::SetRaycastResults(
       else if (range > rMax)
         range = std::numeric_limits<double>::infinity();
       this->dataPtr->ranges[i] = range;
+    }
+  }
+
+  if (this->dataPtr->noises.find(LIDAR_NOISE) != this->dataPtr->noises.end())
+  {
+    for (size_t i = 0; i < this->dataPtr->ranges.size(); ++i)
+    {
+      if (!std::isinf(this->dataPtr->ranges[i]))
+      {
+        this->dataPtr->ranges[i] =
+          this->dataPtr->noises[LIDAR_NOISE]->Apply(this->dataPtr->ranges[i]);
+      }
     }
   }
 }
