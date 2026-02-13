@@ -221,22 +221,50 @@ bool CpuLidarSensor::Update(
 
     msgs::Set(msg.mutable_world_pose(), this->Pose());
 
+    const unsigned int hCount = this->RayCount();
+    const unsigned int vCount = this->VerticalRayCount();
+
+    // Determine the number of samples to publish in the LaserScan message.
+    // For multi-ring lidars (vertical ray count > 1), we extract only the
+    // middle ring to provide a 2D slice for ROS compatibility. ROS laser_scan
+    // messages expect a single horizontal scan line. The middle ring is chosen
+    // as it represents the horizontal plane of the sensor. The PointCloudPacked
+    // message still contains all ranges (all rings) for full 3D data.
+    const bool isMultiRing = (vCount > 1);
+    const unsigned int publishCount = isMultiRing ? hCount : (hCount * vCount);
+    const unsigned int midRingIndex = vCount / 2;
+
     const int numRays = static_cast<int>(this->dataPtr->ranges.size());
-    if (msg.ranges_size() != numRays)
+    if (msg.ranges_size() != static_cast<int>(publishCount))
     {
       msg.clear_ranges();
       msg.clear_intensities();
-      for (int i = 0; i < numRays; ++i)
+      msg.set_count(publishCount);
+      for (unsigned int i = 0; i < publishCount; ++i)
       {
         msg.add_ranges(gz::math::NAN_F);
         msg.add_intensities(0.0);
       }
     }
 
-    for (int i = 0; i < numRays; ++i)
+    if (isMultiRing)
     {
-      msg.set_ranges(i, this->dataPtr->ranges[i]);
-      msg.set_intensities(i, 0.0);
+      // Extract only the middle ring for 2D laser scan compatibility
+      const unsigned int ringStart = midRingIndex * hCount;
+      for (unsigned int i = 0; i < hCount; ++i)
+      {
+        msg.set_ranges(i, this->dataPtr->ranges[ringStart + i]);
+        msg.set_intensities(i, 0.0);
+      }
+    }
+    else
+    {
+      // Single ring: use all ranges (existing behavior)
+      for (int i = 0; i < numRays; ++i)
+      {
+        msg.set_ranges(i, this->dataPtr->ranges[i]);
+        msg.set_intensities(i, 0.0);
+      }
     }
 
     this->AddSequence(msg.mutable_header());
