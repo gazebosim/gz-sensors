@@ -496,6 +496,9 @@ void CpuLidarSensor::SetRaycastResults(
       {
         this->dataPtr->ranges[i] =
           this->dataPtr->noises[LIDAR_NOISE]->Apply(this->dataPtr->ranges[i]);
+
+        this->dataPtr->ranges[i] = gz::math::clamp(this->dataPtr->ranges[i],
+            this->RangeMin(), this->RangeMax());
       }
     }
   }

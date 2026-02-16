@@ -17,6 +17,7 @@
 
 #include <cmath>
 #include <limits>
+#include <sstream>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -466,4 +467,85 @@ TEST_F(CpuLidarSensorTest, PublishPointCloud)
   EXPECT_EQ(1u, msg.height());
   EXPECT_TRUE(msg.is_dense());
   EXPECT_GT(msg.data().size(), 0u);
+}
+
+/////////////////////////////////////////////////
+TEST_F(CpuLidarSensorTest, NoiseClamping)
+{
+  std::ostringstream stream;
+  stream
+    << "<?xml version='1.0'?>"
+    << "<sdf version='1.6'>"
+    << " <model name='m1'>"
+    << "  <link name='link1'>"
+    << "    <sensor name='clamped_lidar' type='lidar'>"
+    << "      <topic>/test/cpu_lidar/clamping</topic>"
+    << "      <update_rate>10</update_rate>"
+    << "      <ray>"
+    << "        <scan>"
+    << "          <horizontal>"
+    << "            <samples>1</samples>"
+    << "            <resolution>1</resolution>"
+    << "            <min_angle>0</min_angle>"
+    << "            <max_angle>0</max_angle>"
+    << "          </horizontal>"
+    << "          <vertical>"
+    << "            <samples>1</samples>"
+    << "            <resolution>1</resolution>"
+    << "            <min_angle>0</min_angle>"
+    << "            <max_angle>0</max_angle>"
+    << "          </vertical>"
+    << "        </scan>"
+    << "        <range>"
+    << "          <min>0.1</min>"
+    << "          <max>10.0</max>"
+    << "          <resolution>0.01</resolution>"
+    << "        </range>"
+    << "        <noise>"
+    << "          <type>gaussian</type>"
+    << "          <mean>5.0</mean>"
+    << "          <stddev>0.0</stddev>"
+    << "        </noise>"
+    << "      </ray>"
+    << "      <always_on>1</always_on>"
+    << "    </sensor>"
+    << "  </link>"
+    << " </model>"
+    << "</sdf>";
+
+  sdf::SDFPtr sdfParsed(new sdf::SDF());
+  sdf::init(sdfParsed);
+  ASSERT_TRUE(sdf::readString(stream.str(), sdfParsed));
+
+  auto sdfElem = sdfParsed->Root()->GetElement("model")->GetElement("link")
+    ->GetElement("sensor");
+
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::CpuLidarSensor>(sdfElem);
+  ASSERT_NE(nullptr, sensor);
+
+  auto rays = sensor->GenerateRays();
+  ASSERT_EQ(1u, rays.size());
+
+  // Supply a raycast result of 8.0.
+  // range = range_min + fraction * (range_max - range_min)
+  // 8.0 = 0.1 + fraction * (10.0 - 0.1)
+  // 7.9 = fraction * 9.9
+  // fraction = 7.9 / 9.9
+  double rangeMin = 0.1;
+  double rangeMax = 10.0;
+  double targetRange = 8.0;
+  double fraction = (targetRange - rangeMin) / (rangeMax - rangeMin);
+
+  std::vector<gz::sensors::CpuLidarSensor::RayResult> results(1);
+  results[0].fraction = fraction;
+  results[0].point = rays[0].first + fraction * (rays[0].second - rays[0].first);
+  sensor->SetRaycastResults(results);
+
+  std::vector<double> ranges;
+  sensor->Ranges(ranges);
+  ASSERT_EQ(1u, ranges.size());
+
+  // With mean 5.0, raw range 8.0 would become 13.0, but should be clamped to max_range (10.0).
+  EXPECT_NEAR(10.0, ranges[0], 1e-6);
 }
