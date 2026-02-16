@@ -301,8 +301,12 @@ bool CpuLidarSensor::Update(
       const unsigned int ringStart = midRingIndex * hCount;
       for (unsigned int i = 0; i < hCount; ++i)
       {
+        const unsigned int index = ringStart + i;
+        const double intensity =
+          index < this->dataPtr->intensities.size() ?
+          this->dataPtr->intensities[index] : 0.0;
         msg.set_ranges(i, this->dataPtr->ranges[ringStart + i]);
-        msg.set_intensities(i, 0.0);
+        msg.set_intensities(i, intensity);
       }
     }
     else
@@ -310,8 +314,11 @@ bool CpuLidarSensor::Update(
       // Single ring: use all ranges (existing behavior)
       for (int i = 0; i < numRays; ++i)
       {
+        const double intensity =
+          static_cast<size_t>(i) < this->dataPtr->intensities.size() ?
+          this->dataPtr->intensities[i] : 0.0;
         msg.set_ranges(i, this->dataPtr->ranges[i]);
-        msg.set_intensities(i, 0.0);
+        msg.set_intensities(i, intensity);
       }
     }
 
@@ -367,7 +374,9 @@ bool CpuLidarSensor::Update(
           static_cast<float>(p.Z());
 
         *reinterpret_cast<float *>(msgBufferIndex +
-            this->dataPtr->pointMsg.field(fieldIndex++).offset()) = 0.0f;
+            this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
+          static_cast<float>(index < static_cast<int>(this->dataPtr->intensities.size()) ?
+          this->dataPtr->intensities[index] : 0.0);
 
         *reinterpret_cast<uint16_t *>(msgBufferIndex +
             this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
