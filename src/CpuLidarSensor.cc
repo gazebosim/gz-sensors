@@ -68,6 +68,9 @@ class gz::sensors::CpuLidarSensorPrivate
 
   /// \brief PointCloud message (reused)
   public: msgs::PointCloudPacked pointMsg;
+
+  /// \brief Pre-computed unit vectors for each ray.
+  public: std::vector<gz::math::Vector3d> unitVectors;
 };
 
 //////////////////////////////////////////////////
@@ -180,6 +183,35 @@ bool CpuLidarSensor::Load(const sdf::Sensor &_sdf)
     gzerr << "Unable to create publisher on topic["
       << this->Topic() << "/points].\n";
     return false;
+  }
+
+  // Pre-compute unit vectors for all rays to optimize Update() and
+  // GenerateRays() performance. This avoids redundant sin/cos calculations
+  // during every sensor update.
+  const unsigned int hSamples = this->RayCount();
+  const unsigned int vSamples = this->VerticalRayCount();
+  const double hMin = this->AngleMin().Radian();
+  const double hMax = this->AngleMax().Radian();
+  const double vMin = this->VerticalAngleMin().Radian();
+  const double vMax = this->VerticalAngleMax().Radian();
+  const double hStep = hSamples > 1 ? (hMax - hMin) / (hSamples - 1) : 0.0;
+  const double vStep = vSamples > 1 ? (vMax - vMin) / (vSamples - 1) : 0.0;
+
+  this->dataPtr->unitVectors.clear();
+  this->dataPtr->unitVectors.reserve(hSamples * vSamples);
+  for (unsigned int v = 0; v < vSamples; ++v)
+  {
+    const double inclination = vMin + v * vStep;
+    for (unsigned int h = 0; h < hSamples; ++h)
+    {
+      const double azimuth = hMin + h * hStep;
+      // Pre-compute the unit vector for this ray. gz::math::Vector3d
+      // provides a convenient way to store and multiply these vectors.
+      this->dataPtr->unitVectors.emplace_back(
+        std::cos(inclination) * std::cos(azimuth),
+        std::cos(inclination) * std::sin(azimuth),
+        std::sin(inclination));
+    }
   }
 
   this->dataPtr->initialized = true;
@@ -295,12 +327,6 @@ bool CpuLidarSensor::Update(
 
     const unsigned int hSamples = this->RayCount();
     const unsigned int vSamples = this->VerticalRayCount();
-    const double hMin = this->AngleMin().Radian();
-    const double hMax = this->AngleMax().Radian();
-    const double vMin = this->VerticalAngleMin().Radian();
-    const double vMax = this->VerticalAngleMax().Radian();
-    const double hStep = hSamples > 1 ? (hMax - hMin) / (hSamples - 1) : 0.0;
-    const double vStep = vSamples > 1 ? (vMax - vMin) / (vSamples - 1) : 0.0;
 
     std::string *msgBuffer = this->dataPtr->pointMsg.mutable_data();
     msgBuffer->resize(this->dataPtr->pointMsg.row_step() *
@@ -310,30 +336,32 @@ bool CpuLidarSensor::Update(
 
     for (unsigned int j = 0; j < vSamples; ++j)
     {
-      const double inclination = vMin + j * vStep;
       for (unsigned int i = 0; i < hSamples; ++i)
       {
-        const double azimuth = hMin + i * hStep;
         const int index = j * hSamples + i;
         const double range = this->dataPtr->ranges[index];
 
         if (isDense)
           isDense = !(std::isnan(range) || std::isinf(range));
 
-        float depth = static_cast<float>(range);
+        // Use pre-computed unit vectors to avoid redundant trig calculations.
+        // gz::math::Vector3d multiplication is optimized for performance and
+        // potentially SIMD-friendly.
+        gz::math::Vector3d p = this->dataPtr->unitVectors[index] * range;
+
         int fieldIndex = 0;
 
         *reinterpret_cast<float *>(msgBufferIndex +
             this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
-          depth * static_cast<float>(std::cos(inclination) * std::cos(azimuth));
+          static_cast<float>(p.X());
 
         *reinterpret_cast<float *>(msgBufferIndex +
             this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
-          depth * static_cast<float>(std::cos(inclination) * std::sin(azimuth));
+          static_cast<float>(p.Y());
 
         *reinterpret_cast<float *>(msgBufferIndex +
             this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
-          depth * static_cast<float>(std::sin(inclination));
+          static_cast<float>(p.Z());
 
         *reinterpret_cast<float *>(msgBufferIndex +
             this->dataPtr->pointMsg.field(fieldIndex++).offset()) = 0.0f;
@@ -417,32 +445,16 @@ CpuLidarSensor::GenerateRays() const
 {
   const unsigned int hSamples = this->RayCount();
   const unsigned int vSamples = this->VerticalRayCount();
-  const double hMin = this->AngleMin().Radian();
-  const double hMax = this->AngleMax().Radian();
-  const double vMin = this->VerticalAngleMin().Radian();
-  const double vMax = this->VerticalAngleMax().Radian();
   const double rMin = this->RangeMin();
   const double rMax = this->RangeMax();
-
-  const double hStep = hSamples > 1 ? (hMax - hMin) / (hSamples - 1) : 0.0;
-  const double vStep = vSamples > 1 ? (vMax - vMin) / (vSamples - 1) : 0.0;
 
   std::vector<std::pair<gz::math::Vector3d, gz::math::Vector3d>> rays;
   rays.reserve(hSamples * vSamples);
 
-  for (unsigned int v = 0; v < vSamples; ++v)
+  for (const auto &unitVec : this->dataPtr->unitVectors)
   {
-    const double inclination = vMin + v * vStep;
-    for (unsigned int h = 0; h < hSamples; ++h)
-    {
-      const double azimuth = hMin + h * hStep;
-      const gz::math::Vector3d dir(
-        std::cos(inclination) * std::cos(azimuth),
-        std::cos(inclination) * std::sin(azimuth),
-        std::sin(inclination));
-
-      rays.emplace_back(dir * rMin, dir * rMax);
-    }
+    // Simplified ray generation using pre-computed unit vectors.
+    rays.emplace_back(unitVec * rMin, unitVec * rMax);
   }
 
   return rays;

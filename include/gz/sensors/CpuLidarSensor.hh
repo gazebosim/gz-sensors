@@ -127,6 +127,9 @@ namespace gz
       public: void Ranges(std::vector<double> &_ranges) const;
 
       GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
+      /// \brief Pre-computed unit vectors for each ray.
+      private: std::vector<gz::math::Vector3d> unitVectors;
+
       /// \brief Data pointer for private data
       /// \internal
       private: std::unique_ptr<CpuLidarSensorPrivate> dataPtr;
