@@ -470,6 +470,135 @@ TEST_F(CpuLidarSensorTest, PublishPointCloud)
 }
 
 /////////////////////////////////////////////////
+TEST_F(CpuLidarSensorTest, PublishLaserScanIntensity)
+{
+  const std::string topic = "/test/cpu_lidar/scan_intensity";
+  gz::math::Pose3d sensorPose(gz::math::Vector3d::Zero,
+      gz::math::Quaterniond::Identity);
+  auto sdf = CpuLidarToSdf("test_scan_intensity", sensorPose, 30, topic,
+      3, -0.2, 0.2,
+      1, 0, 0,
+      0.1, 10.0, true, false);
+  ASSERT_NE(nullptr, sdf);
+
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::CpuLidarSensor>(sdf);
+  ASSERT_NE(nullptr, sensor);
+
+  gz::transport::Node node;
+  std::vector<gz::msgs::LaserScan> received;
+  std::mutex mtx;
+  node.Subscribe(topic,
+    std::function<void(const gz::msgs::LaserScan &)>(
+      [&](const gz::msgs::LaserScan &_msg) {
+        std::lock_guard<std::mutex> lock(mtx);
+        received.push_back(_msg);
+      }));
+
+  auto rays = sensor->GenerateRays();
+  std::vector<gz::sensors::CpuLidarSensor::RayResult> results(3);
+  for (size_t i = 0; i < 3; ++i)
+  {
+    results[i].fraction = 0.5;
+    results[i].point = rays[i].first +
+      0.5 * (rays[i].second - rays[i].first);
+  }
+  results[0].intensity = 0.1;
+  results[1].intensity = 0.6;
+  results[2].intensity = 1.0;
+  sensor->SetRaycastResults(results);
+
+  auto now = std::chrono::steady_clock::duration(std::chrono::milliseconds(100));
+  EXPECT_TRUE(sensor->Update(now));
+
+  for (int i = 0; i < 100 && received.empty(); ++i)
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+  std::lock_guard<std::mutex> lock(mtx);
+  ASSERT_GE(received.size(), 1u);
+  auto &msg = received.back();
+  ASSERT_EQ(3, msg.intensities_size());
+  EXPECT_NEAR(0.1, msg.intensities(0), 1e-6);
+  EXPECT_NEAR(0.6, msg.intensities(1), 1e-6);
+  EXPECT_NEAR(1.0, msg.intensities(2), 1e-6);
+}
+
+/////////////////////////////////////////////////
+TEST_F(CpuLidarSensorTest, PublishPointCloudIntensity)
+{
+  const std::string topic = "/test/cpu_lidar/pc_intensity";
+  gz::math::Pose3d sensorPose(gz::math::Vector3d::Zero,
+      gz::math::Quaterniond::Identity);
+  auto sdf = CpuLidarToSdf("test_pc_intensity", sensorPose, 30, topic,
+      3, -0.2, 0.2,
+      1, 0, 0,
+      0.1, 10.0, true, false);
+  ASSERT_NE(nullptr, sdf);
+
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::CpuLidarSensor>(sdf);
+  ASSERT_NE(nullptr, sensor);
+
+  gz::transport::Node node;
+  std::vector<gz::msgs::PointCloudPacked> received;
+  std::mutex mtx;
+  node.Subscribe(topic + "/points",
+    std::function<void(const gz::msgs::PointCloudPacked &)>(
+      [&](const gz::msgs::PointCloudPacked &_msg) {
+        std::lock_guard<std::mutex> lock(mtx);
+        received.push_back(_msg);
+      }));
+
+  auto rays = sensor->GenerateRays();
+  std::vector<gz::sensors::CpuLidarSensor::RayResult> results(3);
+  for (size_t i = 0; i < 3; ++i)
+  {
+    results[i].fraction = 0.5;
+    results[i].point = rays[i].first +
+      0.5 * (rays[i].second - rays[i].first);
+  }
+  results[0].intensity = 0.2;
+  results[1].intensity = 0.7;
+  results[2].intensity = 1.2;
+  sensor->SetRaycastResults(results);
+
+  auto now = std::chrono::steady_clock::duration(std::chrono::milliseconds(100));
+  EXPECT_TRUE(sensor->Update(now));
+
+  for (int i = 0; i < 100 && received.empty(); ++i)
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+  std::lock_guard<std::mutex> lock(mtx);
+  ASSERT_GE(received.size(), 1u);
+  auto &msg = received.back();
+
+  int intensityOffset = -1;
+  for (int i = 0; i < msg.field_size(); ++i)
+  {
+    if (msg.field(i).name() == "intensity")
+    {
+      intensityOffset = static_cast<int>(msg.field(i).offset());
+      break;
+    }
+  }
+  ASSERT_GE(intensityOffset, 0);
+  ASSERT_EQ(3u, msg.width());
+
+  std::vector<float> publishedIntensities;
+  publishedIntensities.reserve(msg.width());
+  for (uint32_t i = 0; i < msg.width(); ++i)
+  {
+    const char *base = msg.data().data() + i * msg.point_step();
+    float intensity = *reinterpret_cast<const float *>(base + intensityOffset);
+    publishedIntensities.push_back(intensity);
+  }
+
+  EXPECT_NEAR(0.2f, publishedIntensities[0], 1e-6);
+  EXPECT_NEAR(0.7f, publishedIntensities[1], 1e-6);
+  EXPECT_NEAR(1.2f, publishedIntensities[2], 1e-6);
+}
+
+/////////////////////////////////////////////////
 TEST_F(CpuLidarSensorTest, NoiseClamping)
 {
   std::ostringstream stream;

@@ -50,6 +50,9 @@ class gz::sensors::CpuLidarSensorPrivate
   /// \brief Computed range values from the latest raycast results
   public: std::vector<double> ranges;
 
+  /// \brief Computed intensity values from the latest raycast results
+  public: std::vector<double> intensities;
+
   /// \brief Transport node
   public: transport::Node node;
 
@@ -469,9 +472,11 @@ void CpuLidarSensor::SetRaycastResults(
   const double rayLength = rMax - rMin;
 
   this->dataPtr->ranges.resize(_results.size());
+  this->dataPtr->intensities.resize(_results.size());
 
   for (size_t i = 0; i < _results.size(); ++i)
   {
+    this->dataPtr->intensities[i] = _results[i].intensity;
     if (std::isnan(_results[i].fraction))
     {
       this->dataPtr->ranges[i] =

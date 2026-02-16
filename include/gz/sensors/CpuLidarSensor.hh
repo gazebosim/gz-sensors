@@ -58,6 +58,9 @@ namespace gz
 
         /// \brief Normal at hit point in entity frame
         gz::math::Vector3d normal;
+
+        /// \brief Intensity value
+        double intensity = 0.0;
       };
       /// \brief constructor
       public: CpuLidarSensor();
