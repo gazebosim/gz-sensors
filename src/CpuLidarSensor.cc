@@ -240,6 +240,19 @@ bool CpuLidarSensor::Update(
       msg.clear_ranges();
       msg.clear_intensities();
       msg.set_count(publishCount);
+      msg.set_vertical_count(isMultiRing ? 1 : vCount);
+
+      if (isMultiRing)
+      {
+        const double vMin = this->VerticalAngleMin().Radian();
+        const double vMax = this->VerticalAngleMax().Radian();
+        const double vStep = vCount > 1 ? (vMax - vMin) / (vCount - 1) : 0.0;
+        const double midAngle = vMin + midRingIndex * vStep;
+        msg.set_vertical_angle_min(midAngle);
+        msg.set_vertical_angle_max(midAngle);
+        msg.set_vertical_angle_step(0.0);
+      }
+
       for (unsigned int i = 0; i < publishCount; ++i)
       {
         msg.add_ranges(gz::math::NAN_F);
