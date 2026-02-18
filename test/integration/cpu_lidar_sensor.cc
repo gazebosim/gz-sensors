@@ -678,3 +678,62 @@ TEST_F(CpuLidarSensorTest, NoiseClamping)
   // With mean 5.0, raw range 8.0 would become 13.0, but should be clamped to max_range (10.0).
   EXPECT_NEAR(10.0, ranges[0], 1e-6);
 }
+
+/////////////////////////////////////////////////
+TEST_F(CpuLidarSensorTest, DefaultTopic)
+{
+  gz::math::Pose3d sensorPose(gz::math::Vector3d::Zero,
+      gz::math::Quaterniond::Identity);
+
+  // Empty topic → falls back to /cpu_lidar
+  auto sdf = CpuLidarToSdf("test_default_topic", sensorPose, 10,
+      "", 3, -0.5, 0.5, 1, 0, 0, 0.08, 10.0, true, false);
+  ASSERT_NE(nullptr, sdf);
+
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::CpuLidarSensor>(sdf);
+  ASSERT_NE(nullptr, sensor);
+  EXPECT_EQ("/cpu_lidar", sensor->Topic());
+
+  // Custom topic is used as-is
+  auto sdf2 = CpuLidarToSdf("test_custom_topic", sensorPose, 10,
+      "/my/custom/topic", 3, -0.5, 0.5, 1, 0, 0, 0.08, 10.0, true, false);
+  ASSERT_NE(nullptr, sdf2);
+
+  auto sensor2 = sf.CreateSensor<gz::sensors::CpuLidarSensor>(sdf2);
+  ASSERT_NE(nullptr, sensor2);
+  EXPECT_EQ("/my/custom/topic", sensor2->Topic());
+}
+
+/////////////////////////////////////////////////
+TEST_F(CpuLidarSensorTest, HasConnectionsFalse)
+{
+  gz::math::Pose3d sensorPose(gz::math::Vector3d::Zero,
+      gz::math::Quaterniond::Identity);
+  auto sdf = CpuLidarToSdf("test_no_conn", sensorPose, 30,
+      "/test/cpu_lidar/no_conn",
+      3, -0.5, 0.5, 1, 0, 0, 0.1, 10.0, true, false);
+  ASSERT_NE(nullptr, sdf);
+
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::CpuLidarSensor>(sdf);
+  ASSERT_NE(nullptr, sensor);
+
+  // No subscribers → HasConnections is false
+  EXPECT_FALSE(sensor->HasConnections());
+
+  // Feed some results and try to update
+  auto rays = sensor->GenerateRays();
+  std::vector<gz::sensors::CpuLidarSensor::RayResult> results(3);
+  for (size_t i = 0; i < 3; ++i)
+  {
+    results[i].fraction = 0.5;
+    results[i].point = rays[i].first +
+      0.5 * (rays[i].second - rays[i].first);
+  }
+  sensor->SetRaycastResults(results);
+
+  // Update should return false when no connections
+  auto now = std::chrono::steady_clock::duration(std::chrono::milliseconds(100));
+  EXPECT_FALSE(sensor->Update(now));
+}
