@@ -59,7 +59,9 @@ namespace gz
         /// \brief Normal at hit point in entity frame
         gz::math::Vector3d normal;
 
-        /// \brief Intensity value
+        /// \brief Intensity value. Always 0.0 when populated by the default
+        /// physics raycasting pipeline, since collision engines do not
+        /// provide material reflectivity data.
         double intensity = 0.0;
       };
       /// \brief constructor
