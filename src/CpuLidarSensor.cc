@@ -243,6 +243,10 @@ bool CpuLidarSensor::Update(
   if (!this->HasConnections())
     return false;
 
+  const unsigned int totalRays = this->RayCount() * this->VerticalRayCount();
+  if (this->dataPtr->ranges.size() != totalRays)
+    return false;
+
   if (this->dataPtr->scanPub.HasConnections())
   {
     auto &msg = this->dataPtr->laserMsg;
