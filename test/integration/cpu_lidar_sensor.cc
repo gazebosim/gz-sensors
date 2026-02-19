@@ -315,7 +315,8 @@ TEST_F(CpuLidarSensorTest, PublishLaserScan)
   }
   sensor->SetRaycastResults(results);
 
-  auto now = std::chrono::steady_clock::duration(std::chrono::milliseconds(100));
+  auto now = std::chrono::steady_clock::duration(
+    std::chrono::milliseconds(100));
   EXPECT_TRUE(sensor->Update(now));
 
   // Wait for message
@@ -454,7 +455,8 @@ TEST_F(CpuLidarSensorTest, PublishPointCloud)
   }
   sensor->SetRaycastResults(results);
 
-  auto now = std::chrono::steady_clock::duration(std::chrono::milliseconds(100));
+  auto now = std::chrono::steady_clock::duration(
+    std::chrono::milliseconds(100));
   EXPECT_TRUE(sensor->Update(now));
 
   for (int i = 0; i < 100 && received.empty(); ++i)
@@ -508,7 +510,8 @@ TEST_F(CpuLidarSensorTest, PublishLaserScanIntensity)
   results[2].intensity = 1.0;
   sensor->SetRaycastResults(results);
 
-  auto now = std::chrono::steady_clock::duration(std::chrono::milliseconds(100));
+  auto now = std::chrono::steady_clock::duration(
+    std::chrono::milliseconds(100));
   EXPECT_TRUE(sensor->Update(now));
 
   for (int i = 0; i < 100 && received.empty(); ++i)
@@ -562,7 +565,8 @@ TEST_F(CpuLidarSensorTest, PublishPointCloudIntensity)
   results[2].intensity = 1.2;
   sensor->SetRaycastResults(results);
 
-  auto now = std::chrono::steady_clock::duration(std::chrono::milliseconds(100));
+  auto now = std::chrono::steady_clock::duration(
+    std::chrono::milliseconds(100));
   EXPECT_TRUE(sensor->Update(now));
 
   for (int i = 0; i < 100 && received.empty(); ++i)
@@ -668,14 +672,16 @@ TEST_F(CpuLidarSensorTest, NoiseClamping)
 
   std::vector<gz::sensors::CpuLidarSensor::RayResult> results(1);
   results[0].fraction = fraction;
-  results[0].point = rays[0].first + fraction * (rays[0].second - rays[0].first);
+  results[0].point = rays[0].first +
+    fraction * (rays[0].second - rays[0].first);
   sensor->SetRaycastResults(results);
 
   std::vector<double> ranges;
   sensor->Ranges(ranges);
   ASSERT_EQ(1u, ranges.size());
 
-  // With mean 5.0, raw range 8.0 would become 13.0, but should be clamped to max_range (10.0).
+  // With mean 5.0, raw range 8.0 would become 13.0, but should be clamped
+  // to max_range (10.0).
   EXPECT_NEAR(10.0, ranges[0], 1e-6);
 }
 
@@ -734,6 +740,7 @@ TEST_F(CpuLidarSensorTest, HasConnectionsFalse)
   sensor->SetRaycastResults(results);
 
   // Update should return false when no connections
-  auto now = std::chrono::steady_clock::duration(std::chrono::milliseconds(100));
+  auto now = std::chrono::steady_clock::duration(
+    std::chrono::milliseconds(100));
   EXPECT_FALSE(sensor->Update(now));
 }

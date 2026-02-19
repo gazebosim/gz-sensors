@@ -365,8 +365,9 @@ bool CpuLidarSensor::Update(
 
         *reinterpret_cast<float *>(msgBufferIndex +
             this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
-          static_cast<float>(index < static_cast<int>(this->dataPtr->intensities.size()) ?
-          this->dataPtr->intensities[index] : 0.0);
+          static_cast<float>(
+            index < static_cast<int>(this->dataPtr->intensities.size()) ?
+            this->dataPtr->intensities[index] : 0.0);
 
         *reinterpret_cast<uint16_t *>(msgBufferIndex +
             this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
