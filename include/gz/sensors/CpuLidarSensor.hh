@@ -38,12 +38,9 @@ namespace gz
   {
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
 
-    /// \brief forward declarations
     class CpuLidarSensorPrivate;
 
-    /// \brief CPU-based lidar sensor class
-    ///
-    /// A lidar sensor that performs ray casting on the CPU without
+    /// \brief CPU-based lidar sensor that performs ray casting without
     /// depending on gz-rendering.
     class GZ_SENSORS_CPU_LIDAR_VISIBLE CpuLidarSensor : public Sensor
     {
@@ -59,9 +56,7 @@ namespace gz
         /// \brief Normal at hit point in entity frame
         gz::math::Vector3d normal;
 
-        /// \brief Intensity value. Always 0.0 when populated by the default
-        /// physics raycasting pipeline, since collision engines do not
-        /// provide material reflectivity data.
+        /// \brief Intensity value
         double intensity = 0.0;
       };
       /// \brief constructor
@@ -117,8 +112,7 @@ namespace gz
       public: unsigned int VerticalRayCount() const;
 
       /// \brief Generate rays from the lidar configuration.
-      /// Each ray is a pair of (start, end) points in entity frame.
-      /// \return Vector of (start, end) pairs
+      /// \return Vector of (start, end) pairs in entity frame
       public: std::vector<std::pair<gz::math::Vector3d, gz::math::Vector3d>>
         GenerateRays() const;
 

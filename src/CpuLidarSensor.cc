@@ -188,9 +188,7 @@ bool CpuLidarSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
-  // Pre-compute unit vectors for all rays to optimize Update() and
-  // GenerateRays() performance. This avoids redundant sin/cos calculations
-  // during every sensor update.
+  // Pre-compute unit vectors for each ray
   const unsigned int hSamples = this->RayCount();
   const unsigned int vSamples = this->VerticalRayCount();
   const double hMin = this->AngleMin().Radian();
@@ -208,8 +206,6 @@ bool CpuLidarSensor::Load(const sdf::Sensor &_sdf)
     for (unsigned int h = 0; h < hSamples; ++h)
     {
       const double azimuth = hMin + h * hStep;
-      // Pre-compute the unit vector for this ray. gz::math::Vector3d
-      // provides a convenient way to store and multiply these vectors.
       this->dataPtr->unitVectors.emplace_back(
         std::cos(inclination) * std::cos(azimuth),
         std::cos(inclination) * std::sin(azimuth),
@@ -263,12 +259,7 @@ bool CpuLidarSensor::Update(
     const unsigned int hCount = this->RayCount();
     const unsigned int vCount = this->VerticalRayCount();
 
-    // Determine the number of samples to publish in the LaserScan message.
-    // For multi-ring lidars (vertical ray count > 1), we extract only the
-    // middle ring to provide a 2D slice for ROS compatibility. ROS laser_scan
-    // messages expect a single horizontal scan line. The middle ring is chosen
-    // as it represents the horizontal plane of the sensor. The PointCloudPacked
-    // message still contains all ranges (all rings) for full 3D data.
+    // Extract the middle ring as a 2D slice for LaserScan
     const bool isMultiRing = (vCount > 1);
     const unsigned int publishCount = isMultiRing ? hCount : (hCount * vCount);
     const unsigned int midRingIndex = vCount / 2;
@@ -301,7 +292,6 @@ bool CpuLidarSensor::Update(
 
     if (isMultiRing)
     {
-      // Extract only the middle ring for 2D laser scan compatibility
       const unsigned int ringStart = midRingIndex * hCount;
       for (unsigned int i = 0; i < hCount; ++i)
       {
@@ -315,7 +305,6 @@ bool CpuLidarSensor::Update(
     }
     else
     {
-      // Single ring: use all ranges (existing behavior)
       for (int i = 0; i < numRays; ++i)
       {
         const double intensity =
@@ -358,9 +347,6 @@ bool CpuLidarSensor::Update(
         if (isDense)
           isDense = !(std::isnan(range) || std::isinf(range));
 
-        // Use pre-computed unit vectors to avoid redundant trig calculations.
-        // gz::math::Vector3d multiplication is optimized for performance and
-        // potentially SIMD-friendly.
         gz::math::Vector3d p = this->dataPtr->unitVectors[index] * range;
 
         int fieldIndex = 0;
@@ -469,7 +455,6 @@ CpuLidarSensor::GenerateRays() const
 
   for (const auto &unitVec : this->dataPtr->unitVectors)
   {
-    // Simplified ray generation using pre-computed unit vectors.
     rays.emplace_back(unitVec * rMin, unitVec * rMax);
   }
 
