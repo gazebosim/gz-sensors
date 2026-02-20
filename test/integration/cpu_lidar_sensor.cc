@@ -16,8 +16,10 @@
 */
 
 #include <cmath>
+#include <cstddef>
 #include <limits>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include <gtest/gtest.h>

@@ -19,15 +19,19 @@
 #include <limits>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 #include <gz/common/Console.hh>
 #include <gz/common/Profiler.hh>
 #include <gz/math/Helpers.hh>
 #include <gz/msgs/laserscan.pb.h>
+#include <gz/math/Vector3.hh>
 #include <gz/msgs/pointcloud_packed.pb.h>
 #include <gz/msgs/PointCloudPackedUtils.hh>
 #include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
+
+#include <sdf/Lidar.hh>
 
 #include "gz/sensors/CpuLidarSensor.hh"
 #include "gz/sensors/GaussianNoiseModel.hh"
