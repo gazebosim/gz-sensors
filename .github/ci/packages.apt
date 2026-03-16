@@ -1,9 +1,9 @@
-libgz-cmake5-dev
-libgz-common7-dev
-libgz-math9-dev
-libgz-msgs12-dev
-libgz-rendering10-dev
-libgz-tools2-dev
-libgz-transport15-dev
-libsdformat16-dev
+libgz-cmake-dev
+libgz-common-dev
+libgz-math-dev
+libgz-msgs-dev
+libgz-rendering-dev
+libgz-tools-dev
+libgz-transport-dev
+libsdformat-dev
 xvfb
