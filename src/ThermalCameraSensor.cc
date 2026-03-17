@@ -33,6 +33,7 @@
 
 #include "gz/sensors/ThermalCameraSensor.hh"
 #include "gz/sensors/ImageGaussianNoiseModel.hh"
+#include "gz/sensors/ImageNoise.hh"
 #include "gz/sensors/RenderingEvents.hh"
 #include "gz/sensors/SensorFactory.hh"
 
@@ -331,7 +332,7 @@ bool ThermalCameraSensor::CreateCamera()
 
         std::dynamic_pointer_cast<ImageGaussianNoiseModel>(
              this->dataPtr->noises[noiseType])->SetCamera(
-               this->dataPtr->camera);
+               this->dataPtr->thermalCamera);
       }
     }
     else if (noiseSdf.Type() != sdf::NoiseType::NONE)
