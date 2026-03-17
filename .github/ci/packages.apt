@@ -1,9 +1,9 @@
-libgz-cmake-dev
-libgz-common-dev
-libgz-math-dev
-libgz-msgs-dev
-libgz-rendering-dev
-libgz-tools-dev
-libgz-transport-dev
-libsdformat-dev
+libgz-rotary-cmake-dev
+libgz-rotary-common-dev
+libgz-rotary-math-dev
+libgz-rotary-msgs-dev
+libgz-rotary-rendering-dev
+libgz-rotary-tools-dev
+libgz-rotary-transport-dev
+gz-rotary-sdformat-dev
 xvfb
