@@ -126,6 +126,12 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   auto imagePtr = cameraPtr->GetElement("image");
   ASSERT_TRUE(cameraPtr->HasElement("clip"));
   auto clipPtr = cameraPtr->GetElement("clip");
+  ASSERT_TRUE(cameraPtr->HasElement("noise"));
+  auto noisePtr = cameraPtr->GetElement("noise");
+
+  EXPECT_EQ("gaussian", noisePtr->Get<std::string>("type"));
+  EXPECT_FLOAT_EQ(0.0, noisePtr->Get<double>("mean"));
+  EXPECT_DOUBLE_EQ(0.007, noisePtr->Get<double>("stddev"));
 
   int imgWidth = imagePtr->Get<int>("width");
   int imgHeight = imagePtr->Get<int>("height");
@@ -386,6 +392,12 @@ void ThermalCameraSensorTest::Images8BitWithBuiltinSDF(
   auto cameraPtr = sensorPtr->GetElement("camera");
   ASSERT_TRUE(cameraPtr->HasElement("image"));
   auto imagePtr = cameraPtr->GetElement("image");
+  ASSERT_TRUE(cameraPtr->HasElement("noise"));
+  auto noisePtr = cameraPtr->GetElement("noise");
+
+  EXPECT_EQ("gaussian", noisePtr->Get<std::string>("type"));
+  EXPECT_FLOAT_EQ(0.0, noisePtr->Get<double>("mean"));
+  EXPECT_DOUBLE_EQ(0.007, noisePtr->Get<double>("stddev"));
 
   std::string format = imagePtr->Get<std::string>("format");
   EXPECT_EQ("L8", format);

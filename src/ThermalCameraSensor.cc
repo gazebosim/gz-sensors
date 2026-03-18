@@ -40,6 +40,7 @@
 
 #include "gz/sensors/ThermalCameraSensor.hh"
 #include "gz/sensors/ImageGaussianNoiseModel.hh"
+#include "gz/sensors/ImageNoise.hh"
 #include "gz/sensors/RenderingEvents.hh"
 #include "gz/sensors/SensorFactory.hh"
 
@@ -317,12 +318,20 @@ bool ThermalCameraSensor::CreateCamera()
     // Add gaussian noise to camera sensor
     if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
     {
-      this->dataPtr->noises[noiseType] =
-        NoiseFactory::NewNoiseModel(noiseSdf, "camera");
+      // Skip applying noise if mean and stddev are 0 - this avoids
+      // doing an extra render pass in gz-rendering
+      // Note ImageGaussianNoiseModel only uses mean and stddev and does not
+      // use bias parameters.
+      if (!math::equal(noiseSdf.Mean(), 0.0) ||
+          !math::equal(noiseSdf.StdDev(), 0.0))
+      {
+        this->dataPtr->noises[noiseType] =
+          ImageNoiseFactory::NewNoiseModel(noiseSdf, "thermal_camera");
 
-      std::dynamic_pointer_cast<ImageGaussianNoiseModel>(
-           this->dataPtr->noises[noiseType])->SetCamera(
-             this->dataPtr->thermalCamera);
+        std::dynamic_pointer_cast<ImageGaussianNoiseModel>(
+             this->dataPtr->noises[noiseType])->SetCamera(
+               this->dataPtr->thermalCamera);
+      }
     }
     else if (noiseSdf.Type() != sdf::NoiseType::NONE)
     {
