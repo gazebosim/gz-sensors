@@ -19,6 +19,7 @@ set(tests
   air_pressure.cc
   air_speed.cc
   altimeter.cc
+  cpu_lidar_sensor.cc
   force_torque.cc
   imu.cc
   logical_camera.cc
@@ -63,6 +64,7 @@ gz_build_tests(TYPE INTEGRATION
     ${PROJECT_LIBRARY_TARGET_NAME}-air_pressure
     ${PROJECT_LIBRARY_TARGET_NAME}-air_speed
     ${PROJECT_LIBRARY_TARGET_NAME}-altimeter
+    ${PROJECT_LIBRARY_TARGET_NAME}-cpu_lidar
     ${PROJECT_LIBRARY_TARGET_NAME}-force_torque
     ${PROJECT_LIBRARY_TARGET_NAME}-imu
     ${PROJECT_LIBRARY_TARGET_NAME}-logical_camera
