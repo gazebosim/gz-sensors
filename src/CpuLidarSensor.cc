@@ -87,9 +87,7 @@ CpuLidarSensor::CpuLidarSensor()
 }
 
 //////////////////////////////////////////////////
-CpuLidarSensor::~CpuLidarSensor()
-{
-}
+CpuLidarSensor::~CpuLidarSensor() = default;
 
 //////////////////////////////////////////////////
 bool CpuLidarSensor::Load(const sdf::Sensor &_sdf)
@@ -151,33 +149,35 @@ bool CpuLidarSensor::Load(const sdf::Sensor &_sdf)
     return false;
   }
 
+  const unsigned int hSamples = this->RayCount();
+  const unsigned int vSamples = this->VerticalRayCount();
+  const double hMin = this->AngleMin().Radian();
+  const double hMax = this->AngleMax().Radian();
+  const double vMin = this->VerticalAngleMin().Radian();
+  const double vMax = this->VerticalAngleMax().Radian();
+  const double hStep = hSamples > 1 ? (hMax - hMin) / (hSamples - 1) : 0.0;
+  const double vStep = vSamples > 1 ? (vMax - vMin) / (vSamples - 1) : 0.0;
+
   auto &msg = this->dataPtr->laserMsg;
-  msg.set_count(this->RayCount() * this->VerticalRayCount());
+  msg.set_count(hSamples);
   msg.set_range_min(this->RangeMin());
   msg.set_range_max(this->RangeMax());
-  msg.set_angle_min(this->AngleMin().Radian());
-  msg.set_angle_max(this->AngleMax().Radian());
-  msg.set_angle_step(
-    this->RayCount() > 1
-      ? (this->AngleMax().Radian() - this->AngleMin().Radian())
-        / (this->RayCount() - 1)
-      : 0.0);
-  msg.set_vertical_angle_min(this->VerticalAngleMin().Radian());
-  msg.set_vertical_angle_max(this->VerticalAngleMax().Radian());
-  msg.set_vertical_angle_step(
-    this->VerticalRayCount() > 1
-      ? (this->VerticalAngleMax().Radian() - this->VerticalAngleMin().Radian())
-        / (this->VerticalRayCount() - 1)
-      : 0.0);
-  msg.set_vertical_count(this->VerticalRayCount());
+  msg.set_angle_min(hMin);
+  msg.set_angle_max(hMax);
+  msg.set_angle_step(hStep);
+  msg.set_vertical_angle_min(vMin);
+  msg.set_vertical_angle_max(vMax);
+  msg.set_vertical_angle_step(vStep);
+  msg.set_vertical_count(vSamples);
 
+  // InitPointCloudPacked sets point_step to the sum of all field sizes.
   msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->FrameId(), false,
       {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
       {"intensity", msgs::PointCloudPacked::Field::FLOAT32},
       {"ring", msgs::PointCloudPacked::Field::UINT16}});
 
-  this->dataPtr->pointMsg.set_width(this->RayCount());
-  this->dataPtr->pointMsg.set_height(this->VerticalRayCount());
+  this->dataPtr->pointMsg.set_width(hSamples);
+  this->dataPtr->pointMsg.set_height(vSamples);
   this->dataPtr->pointMsg.set_row_step(
       this->dataPtr->pointMsg.point_step() *
       this->dataPtr->pointMsg.width());
@@ -193,14 +193,6 @@ bool CpuLidarSensor::Load(const sdf::Sensor &_sdf)
   }
 
   // Pre-compute unit vectors for each ray
-  const unsigned int hSamples = this->RayCount();
-  const unsigned int vSamples = this->VerticalRayCount();
-  const double hMin = this->AngleMin().Radian();
-  const double hMax = this->AngleMax().Radian();
-  const double vMin = this->VerticalAngleMin().Radian();
-  const double vMax = this->VerticalAngleMax().Radian();
-  const double hStep = hSamples > 1 ? (hMax - hMin) / (hSamples - 1) : 0.0;
-  const double vStep = vSamples > 1 ? (vMax - vMin) / (vSamples - 1) : 0.0;
 
   this->dataPtr->unitVectors.clear();
   this->dataPtr->unitVectors.reserve(hSamples * vSamples);

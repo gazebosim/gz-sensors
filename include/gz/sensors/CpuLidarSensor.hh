@@ -21,7 +21,8 @@
 #include <utility>
 #include <vector>
 
-#include <sdf/sdf.hh>
+#include <sdf/Element.hh>
+#include <sdf/Sensor.hh>
 
 #include <gz/math/Angle.hh>
 #include <gz/math/Vector3.hh>
@@ -75,6 +76,8 @@ namespace gz
       /// \return true if loading was successful
       public: virtual bool Load(sdf::ElementPtr _sdf) override;
 
+      /// \brief Bring base-class Update overloads into scope so they are not
+      /// hidden by the override below.
       using Sensor::Update;
 
       /// \brief Update the sensor and generate data

@@ -47,7 +47,9 @@ sdf::ElementPtr CpuLidarToSdf(const std::string &_name,
     const double _vertSamples, const double _vertMinAngle,
     const double _vertMaxAngle, const double _rangeMin,
     const double _rangeMax, const bool _alwaysOn,
-    const bool _visualize)
+    const bool _visualize,
+    const double _horzResolution = 1.0,
+    const double _vertResolution = 1.0)
 {
   std::ostringstream stream;
   stream
@@ -63,13 +65,13 @@ sdf::ElementPtr CpuLidarToSdf(const std::string &_name,
     << "        <scan>"
     << "          <horizontal>"
     << "            <samples>" << _horzSamples << "</samples>"
-    << "            <resolution>1</resolution>"
+    << "            <resolution>" << _horzResolution << "</resolution>"
     << "            <min_angle>" << _horzMinAngle << "</min_angle>"
     << "            <max_angle>" << _horzMaxAngle << "</max_angle>"
     << "          </horizontal>"
     << "          <vertical>"
     << "            <samples>" << _vertSamples << "</samples>"
-    << "            <resolution>1</resolution>"
+    << "            <resolution>" << _vertResolution << "</resolution>"
     << "            <min_angle>" << _vertMinAngle << "</min_angle>"
     << "            <max_angle>" << _vertMaxAngle << "</max_angle>"
     << "          </vertical>"
@@ -745,4 +747,38 @@ TEST_F(CpuLidarSensorTest, HasConnectionsFalse)
   auto now = std::chrono::steady_clock::duration(
     std::chrono::milliseconds(100));
   EXPECT_FALSE(sensor->Update(now));
+}
+
+/////////////////////////////////////////////////
+TEST_F(CpuLidarSensorTest, NonUnitResolution)
+{
+  // Verify that the sensor loads and generates the correct number of rays
+  // when horizontal/vertical resolution is not 1. Resolution is a render
+  // oversampling hint; the published ray count is always equal to <samples>.
+  gz::math::Pose3d sensorPose(gz::math::Vector3d::Zero,
+      gz::math::Quaterniond::Identity);
+  auto sdf = CpuLidarToSdf("test_resolution", sensorPose, 10,
+      "/test/resolution",
+      8, -M_PI / 4, M_PI / 4,
+      4, -0.1, 0.1,
+      0.1, 10.0, true, false,
+      /*_horzResolution=*/2.0, /*_vertResolution=*/0.5);
+  ASSERT_NE(nullptr, sdf);
+
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::CpuLidarSensor>(sdf);
+  ASSERT_NE(nullptr, sensor);
+
+  // RayCount / VerticalRayCount reflect <samples>, not <samples> * <resolution>
+  EXPECT_EQ(8u, sensor->RayCount());
+  EXPECT_EQ(4u, sensor->VerticalRayCount());
+
+  auto rays = sensor->GenerateRays();
+  ASSERT_EQ(32u, rays.size());  // 8 horizontal × 4 vertical
+
+  for (const auto &ray : rays)
+  {
+    EXPECT_NEAR(0.1, ray.first.Length(), 1e-6);
+    EXPECT_NEAR(10.0, ray.second.Length(), 1e-6);
+  }
 }
