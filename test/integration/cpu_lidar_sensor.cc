@@ -255,8 +255,8 @@ TEST_F(CpuLidarSensorTest, SetRaycastResults)
   results[0].fraction = 0.5;
   results[0].point = rays[0].first + 0.5 * (rays[0].second - rays[0].first);
 
-  // Ray 1: no hit
-  results[1].fraction = std::numeric_limits<double>::quiet_NaN();
+  // Ray 1: no hit — +INF fraction per REP-117 (no object in range)
+  results[1].fraction = std::numeric_limits<double>::infinity();
   results[1].point = {std::numeric_limits<double>::quiet_NaN(),
                       std::numeric_limits<double>::quiet_NaN(),
                       std::numeric_limits<double>::quiet_NaN()};

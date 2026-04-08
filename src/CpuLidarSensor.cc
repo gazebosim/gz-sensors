@@ -472,7 +472,7 @@ void CpuLidarSensor::SetRaycastResults(
   for (size_t i = 0; i < _results.size(); ++i)
   {
     this->dataPtr->intensities[i] = _results[i].intensity;
-    if (std::isnan(_results[i].fraction))
+    if (std::isinf(_results[i].fraction))
     {
       this->dataPtr->ranges[i] =
         std::numeric_limits<double>::infinity();

@@ -51,7 +51,8 @@ namespace gz
         /// \brief Hit point in entity frame
         gz::math::Vector3d point;
 
-        /// \brief Fraction along the ray [0, 1]. NaN if no hit.
+        /// \brief Fraction along the ray [0, 1]. +INF if no hit (no object
+        /// in range, per REP-117). NaN indicates an erroneous measurement.
         double fraction;
 
         /// \brief Normal at hit point in entity frame
