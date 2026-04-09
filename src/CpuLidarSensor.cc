@@ -170,7 +170,6 @@ bool CpuLidarSensor::Load(const sdf::Sensor &_sdf)
   msg.set_vertical_angle_step(vStep);
   msg.set_vertical_count(vSamples);
 
-  // InitPointCloudPacked sets point_step to the sum of all field sizes.
   msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->FrameId(), false,
       {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
       {"intensity", msgs::PointCloudPacked::Field::FLOAT32},

@@ -51,8 +51,7 @@ namespace gz
         /// \brief Hit point in entity frame
         gz::math::Vector3d point;
 
-        /// \brief Fraction along the ray [0, 1]. +INF if no hit (no object
-        /// in range, per REP-117). NaN indicates an erroneous measurement.
+        /// \brief Fraction along the ray [0,1]; +INF if no object in range; NaN on error.
         double fraction;
 
         /// \brief Normal at hit point in entity frame
@@ -77,8 +76,6 @@ namespace gz
       /// \return true if loading was successful
       public: virtual bool Load(sdf::ElementPtr _sdf) override;
 
-      /// \brief Bring base-class Update overloads into scope so they are not
-      /// hidden by the override below.
       using Sensor::Update;
 
       /// \brief Update the sensor and generate data

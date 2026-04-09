@@ -255,7 +255,7 @@ TEST_F(CpuLidarSensorTest, SetRaycastResults)
   results[0].fraction = 0.5;
   results[0].point = rays[0].first + 0.5 * (rays[0].second - rays[0].first);
 
-  // Ray 1: no hit — +INF fraction per REP-117 (no object in range)
+  // Ray 1: no hit — +INF fraction
   results[1].fraction = std::numeric_limits<double>::infinity();
   results[1].point = {std::numeric_limits<double>::quiet_NaN(),
                       std::numeric_limits<double>::quiet_NaN(),
@@ -752,9 +752,6 @@ TEST_F(CpuLidarSensorTest, HasConnectionsFalse)
 /////////////////////////////////////////////////
 TEST_F(CpuLidarSensorTest, NonUnitResolution)
 {
-  // Verify that the sensor loads and generates the correct number of rays
-  // when horizontal/vertical resolution is not 1. Resolution is a render
-  // oversampling hint; the published ray count is always equal to <samples>.
   gz::math::Pose3d sensorPose(gz::math::Vector3d::Zero,
       gz::math::Quaterniond::Identity);
   auto sdf = CpuLidarToSdf("test_resolution", sensorPose, 10,
@@ -769,12 +766,11 @@ TEST_F(CpuLidarSensorTest, NonUnitResolution)
   auto sensor = sf.CreateSensor<gz::sensors::CpuLidarSensor>(sdf);
   ASSERT_NE(nullptr, sensor);
 
-  // RayCount / VerticalRayCount reflect <samples>, not <samples> * <resolution>
   EXPECT_EQ(8u, sensor->RayCount());
   EXPECT_EQ(4u, sensor->VerticalRayCount());
 
   auto rays = sensor->GenerateRays();
-  ASSERT_EQ(32u, rays.size());  // 8 horizontal × 4 vertical
+  ASSERT_EQ(32u, rays.size());
 
   for (const auto &ray : rays)
   {
