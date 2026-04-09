@@ -1,0 +1,510 @@
+/*
+ * Copyright (C) 2026 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+*/
+
+#include <cmath>
+#include <limits>
+#include <map>
+#include <unordered_map>
+#include <vector>
+
+#include <gz/common/Console.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/math/Helpers.hh>
+#include <gz/msgs/laserscan.pb.h>
+#include <gz/math/Vector3.hh>
+#include <gz/msgs/pointcloud_packed.pb.h>
+#include <gz/msgs/PointCloudPackedUtils.hh>
+#include <gz/msgs/Utility.hh>
+#include <gz/transport/Node.hh>
+
+#include <sdf/Lidar.hh>
+
+#include "gz/sensors/CpuLidarSensor.hh"
+#include "gz/sensors/GaussianNoiseModel.hh"
+#include "gz/sensors/Noise.hh"
+#include "gz/sensors/SensorFactory.hh"
+#include "gz/sensors/SensorTypes.hh"
+
+using namespace gz;
+using namespace sensors;
+
+/// \brief Private data for CpuLidarSensor
+class gz::sensors::CpuLidarSensorPrivate
+{
+  /// \brief true if Load() has been called and was successful
+  public: bool initialized = false;
+
+  /// \brief SDF lidar config
+  public: sdf::Lidar sdfLidar;
+
+  /// \brief Computed range values from the latest raycast results
+  public: std::vector<double> ranges;
+
+  /// \brief Computed intensity values from the latest raycast results
+  public: std::vector<double> intensities;
+
+  /// \brief Transport node
+  public: transport::Node node;
+
+  /// \brief LaserScan publisher
+  public: transport::Node::Publisher scanPub;
+
+  /// \brief LaserScan message (reused)
+  public: msgs::LaserScan laserMsg;
+
+  /// \brief Noise model for lidar data
+  public: std::unordered_map<gz::sensors::SensorNoiseType,
+      gz::sensors::NoisePtr> noises;
+
+  /// \brief PointCloud publisher
+  public: transport::Node::Publisher pointPub;
+
+  /// \brief PointCloud message (reused)
+  public: msgs::PointCloudPacked pointMsg;
+
+  /// \brief Pre-computed unit vectors for each ray.
+  public: std::vector<gz::math::Vector3d> unitVectors;
+};
+
+//////////////////////////////////////////////////
+CpuLidarSensor::CpuLidarSensor()
+  : dataPtr(new CpuLidarSensorPrivate())
+{
+}
+
+//////////////////////////////////////////////////
+CpuLidarSensor::~CpuLidarSensor() = default;
+
+//////////////////////////////////////////////////
+bool CpuLidarSensor::Load(const sdf::Sensor &_sdf)
+{
+  if (!Sensor::Load(_sdf))
+    return false;
+
+  if (_sdf.Type() != sdf::SensorType::LIDAR)
+  {
+    gzerr << "Attempting to load a CpuLidar sensor, but received "
+      << "a " << _sdf.TypeStr() << std::endl;
+    return false;
+  }
+
+  if (_sdf.LidarSensor() == nullptr)
+  {
+    gzerr << "Attempting to load a CpuLidar sensor, but received "
+      << "a null lidar sensor." << std::endl;
+    return false;
+  }
+
+  this->dataPtr->sdfLidar = *_sdf.LidarSensor();
+
+  const std::map<SensorNoiseType, sdf::Noise> noises = {
+    {LIDAR_NOISE, this->dataPtr->sdfLidar.LidarNoise()},
+  };
+
+  for (const auto & [noiseType, noiseSdf] : noises)
+  {
+    if (noiseSdf.Type() == sdf::NoiseType::GAUSSIAN)
+    {
+      if (!math::equal(noiseSdf.Mean(), 0.0) ||
+          !math::equal(noiseSdf.StdDev(), 0.0) ||
+          !math::equal(noiseSdf.BiasMean(), 0.0) ||
+          !math::equal(noiseSdf.DynamicBiasStdDev(), 0.0) ||
+          !math::equal(noiseSdf.DynamicBiasCorrelationTime(), 0.0))
+      {
+        this->dataPtr->noises[noiseType] =
+          NoiseFactory::NewNoiseModel(noiseSdf);
+      }
+    }
+    else if (noiseSdf.Type() != sdf::NoiseType::NONE)
+    {
+      gzwarn << "The cpu lidar sensor only supports Gaussian noise. "
+       << "The supplied noise type[" << static_cast<int>(noiseSdf.Type())
+       << "] is not supported." << std::endl;
+    }
+  }
+
+  if (this->Topic().empty())
+    this->SetTopic("/cpu_lidar");
+
+  this->dataPtr->scanPub =
+      this->dataPtr->node.Advertise<gz::msgs::LaserScan>(this->Topic());
+  if (!this->dataPtr->scanPub)
+  {
+    gzerr << "Unable to create publisher on topic["
+      << this->Topic() << "].\n";
+    return false;
+  }
+
+  const unsigned int hSamples = this->RayCount();
+  const unsigned int vSamples = this->VerticalRayCount();
+  const double hMin = this->AngleMin().Radian();
+  const double hMax = this->AngleMax().Radian();
+  const double vMin = this->VerticalAngleMin().Radian();
+  const double vMax = this->VerticalAngleMax().Radian();
+  const double hStep = hSamples > 1 ? (hMax - hMin) / (hSamples - 1) : 0.0;
+  const double vStep = vSamples > 1 ? (vMax - vMin) / (vSamples - 1) : 0.0;
+
+  auto &msg = this->dataPtr->laserMsg;
+  msg.set_count(hSamples);
+  msg.set_range_min(this->RangeMin());
+  msg.set_range_max(this->RangeMax());
+  msg.set_angle_min(hMin);
+  msg.set_angle_max(hMax);
+  msg.set_angle_step(hStep);
+  msg.set_vertical_angle_min(vMin);
+  msg.set_vertical_angle_max(vMax);
+  msg.set_vertical_angle_step(vStep);
+  msg.set_vertical_count(vSamples);
+
+  msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->FrameId(), false,
+      {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
+      {"intensity", msgs::PointCloudPacked::Field::FLOAT32},
+      {"ring", msgs::PointCloudPacked::Field::UINT16}});
+
+  this->dataPtr->pointMsg.set_width(hSamples);
+  this->dataPtr->pointMsg.set_height(vSamples);
+  this->dataPtr->pointMsg.set_row_step(
+      this->dataPtr->pointMsg.point_step() *
+      this->dataPtr->pointMsg.width());
+
+  this->dataPtr->pointPub =
+      this->dataPtr->node.Advertise<gz::msgs::PointCloudPacked>(
+          this->Topic() + "/points");
+  if (!this->dataPtr->pointPub)
+  {
+    gzerr << "Unable to create publisher on topic["
+      << this->Topic() << "/points].\n";
+    return false;
+  }
+
+  // Pre-compute unit vectors for each ray
+
+  this->dataPtr->unitVectors.clear();
+  this->dataPtr->unitVectors.reserve(hSamples * vSamples);
+  for (unsigned int v = 0; v < vSamples; ++v)
+  {
+    const double inclination = vMin + v * vStep;
+    for (unsigned int h = 0; h < hSamples; ++h)
+    {
+      const double azimuth = hMin + h * hStep;
+      this->dataPtr->unitVectors.emplace_back(
+        std::cos(inclination) * std::cos(azimuth),
+        std::cos(inclination) * std::sin(azimuth),
+        std::sin(inclination));
+    }
+  }
+
+  this->dataPtr->initialized = true;
+  return true;
+}
+
+//////////////////////////////////////////////////
+bool CpuLidarSensor::Load(sdf::ElementPtr _sdf)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.Load(_sdf);
+  return this->Load(sdfSensor);
+}
+
+//////////////////////////////////////////////////
+bool CpuLidarSensor::Update(
+    const std::chrono::steady_clock::duration &_now)
+{
+  GZ_PROFILE("CpuLidarSensor::Update");
+  if (!this->dataPtr->initialized)
+  {
+    gzerr << "Not initialized, update ignored.\n";
+    return false;
+  }
+
+  if (!this->HasConnections())
+    return false;
+
+  const unsigned int totalRays = this->RayCount() * this->VerticalRayCount();
+  if (this->dataPtr->ranges.size() != totalRays)
+    return false;
+
+  if (this->dataPtr->scanPub.HasConnections())
+  {
+    auto &msg = this->dataPtr->laserMsg;
+
+    *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+    msg.mutable_header()->clear_data();
+    auto frame = msg.mutable_header()->add_data();
+    frame->set_key("frame_id");
+    frame->add_value(this->FrameId());
+    msg.set_frame(this->FrameId());
+
+    msgs::Set(msg.mutable_world_pose(), this->Pose());
+
+    const unsigned int hCount = this->RayCount();
+    const unsigned int vCount = this->VerticalRayCount();
+
+    // Extract the middle ring as a 2D slice for LaserScan
+    const bool isMultiRing = (vCount > 1);
+    const unsigned int publishCount = isMultiRing ? hCount : (hCount * vCount);
+    const unsigned int midRingIndex = vCount / 2;
+
+    const int numRays = static_cast<int>(this->dataPtr->ranges.size());
+    if (msg.ranges_size() != static_cast<int>(publishCount))
+    {
+      msg.clear_ranges();
+      msg.clear_intensities();
+      msg.set_count(publishCount);
+      msg.set_vertical_count(isMultiRing ? 1 : vCount);
+
+      if (isMultiRing)
+      {
+        const double vMin = this->VerticalAngleMin().Radian();
+        const double vMax = this->VerticalAngleMax().Radian();
+        const double vStep = vCount > 1 ? (vMax - vMin) / (vCount - 1) : 0.0;
+        const double midAngle = vMin + midRingIndex * vStep;
+        msg.set_vertical_angle_min(midAngle);
+        msg.set_vertical_angle_max(midAngle);
+        msg.set_vertical_angle_step(0.0);
+      }
+
+      for (unsigned int i = 0; i < publishCount; ++i)
+      {
+        msg.add_ranges(gz::math::NAN_F);
+        msg.add_intensities(0.0);
+      }
+    }
+
+    if (isMultiRing)
+    {
+      const unsigned int ringStart = midRingIndex * hCount;
+      for (unsigned int i = 0; i < hCount; ++i)
+      {
+        const unsigned int index = ringStart + i;
+        const double intensity =
+          index < this->dataPtr->intensities.size() ?
+          this->dataPtr->intensities[index] : 0.0;
+        msg.set_ranges(i, this->dataPtr->ranges[ringStart + i]);
+        msg.set_intensities(i, intensity);
+      }
+    }
+    else
+    {
+      for (int i = 0; i < numRays; ++i)
+      {
+        const double intensity =
+          static_cast<size_t>(i) < this->dataPtr->intensities.size() ?
+          this->dataPtr->intensities[i] : 0.0;
+        msg.set_ranges(i, this->dataPtr->ranges[i]);
+        msg.set_intensities(i, intensity);
+      }
+    }
+
+    this->AddSequence(msg.mutable_header());
+    this->dataPtr->scanPub.Publish(msg);
+  }
+
+  if (this->dataPtr->pointPub.HasConnections())
+  {
+    *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
+      msgs::Convert(_now);
+    this->dataPtr->pointMsg.mutable_header()->clear_data();
+    auto pcFrame = this->dataPtr->pointMsg.mutable_header()->add_data();
+    pcFrame->set_key("frame_id");
+    pcFrame->add_value(this->FrameId());
+
+    const unsigned int hSamples = this->RayCount();
+    const unsigned int vSamples = this->VerticalRayCount();
+
+    std::string *msgBuffer = this->dataPtr->pointMsg.mutable_data();
+    msgBuffer->resize(this->dataPtr->pointMsg.row_step() *
+        this->dataPtr->pointMsg.height());
+    char *msgBufferIndex = msgBuffer->data();
+    bool isDense = true;
+
+    for (unsigned int j = 0; j < vSamples; ++j)
+    {
+      for (unsigned int i = 0; i < hSamples; ++i)
+      {
+        const int index = j * hSamples + i;
+        const double range = this->dataPtr->ranges[index];
+
+        if (isDense)
+          isDense = !(std::isnan(range) || std::isinf(range));
+
+        gz::math::Vector3d p = this->dataPtr->unitVectors[index] * range;
+
+        int fieldIndex = 0;
+
+        *reinterpret_cast<float *>(msgBufferIndex +
+            this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
+          static_cast<float>(p.X());
+
+        *reinterpret_cast<float *>(msgBufferIndex +
+            this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
+          static_cast<float>(p.Y());
+
+        *reinterpret_cast<float *>(msgBufferIndex +
+            this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
+          static_cast<float>(p.Z());
+
+        *reinterpret_cast<float *>(msgBufferIndex +
+            this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
+          static_cast<float>(
+            index < static_cast<int>(this->dataPtr->intensities.size()) ?
+            this->dataPtr->intensities[index] : 0.0);
+
+        *reinterpret_cast<uint16_t *>(msgBufferIndex +
+            this->dataPtr->pointMsg.field(fieldIndex++).offset()) =
+          static_cast<uint16_t>(j);
+
+        msgBufferIndex += this->dataPtr->pointMsg.point_step();
+      }
+    }
+    this->dataPtr->pointMsg.set_is_dense(isDense);
+
+    this->AddSequence(this->dataPtr->pointMsg.mutable_header());
+    this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
+  }
+
+  return true;
+}
+
+//////////////////////////////////////////////////
+bool CpuLidarSensor::HasConnections() const
+{
+  return (this->dataPtr->scanPub &&
+         this->dataPtr->scanPub.HasConnections()) ||
+         (this->dataPtr->pointPub &&
+         this->dataPtr->pointPub.HasConnections());
+}
+
+//////////////////////////////////////////////////
+gz::math::Angle CpuLidarSensor::AngleMin() const
+{
+  return this->dataPtr->sdfLidar.HorizontalScanMinAngle();
+}
+
+//////////////////////////////////////////////////
+gz::math::Angle CpuLidarSensor::AngleMax() const
+{
+  return this->dataPtr->sdfLidar.HorizontalScanMaxAngle();
+}
+
+//////////////////////////////////////////////////
+gz::math::Angle CpuLidarSensor::VerticalAngleMin() const
+{
+  return this->dataPtr->sdfLidar.VerticalScanMinAngle();
+}
+
+//////////////////////////////////////////////////
+gz::math::Angle CpuLidarSensor::VerticalAngleMax() const
+{
+  return this->dataPtr->sdfLidar.VerticalScanMaxAngle();
+}
+
+//////////////////////////////////////////////////
+double CpuLidarSensor::RangeMin() const
+{
+  return this->dataPtr->sdfLidar.RangeMin();
+}
+
+//////////////////////////////////////////////////
+double CpuLidarSensor::RangeMax() const
+{
+  return this->dataPtr->sdfLidar.RangeMax();
+}
+
+//////////////////////////////////////////////////
+unsigned int CpuLidarSensor::RayCount() const
+{
+  return this->dataPtr->sdfLidar.HorizontalScanSamples();
+}
+
+//////////////////////////////////////////////////
+unsigned int CpuLidarSensor::VerticalRayCount() const
+{
+  return this->dataPtr->sdfLidar.VerticalScanSamples();
+}
+
+//////////////////////////////////////////////////
+std::vector<std::pair<gz::math::Vector3d, gz::math::Vector3d>>
+CpuLidarSensor::GenerateRays() const
+{
+  const unsigned int hSamples = this->RayCount();
+  const unsigned int vSamples = this->VerticalRayCount();
+  const double rMin = this->RangeMin();
+  const double rMax = this->RangeMax();
+
+  std::vector<std::pair<gz::math::Vector3d, gz::math::Vector3d>> rays;
+  rays.reserve(hSamples * vSamples);
+
+  for (const auto &unitVec : this->dataPtr->unitVectors)
+  {
+    rays.emplace_back(unitVec * rMin, unitVec * rMax);
+  }
+
+  return rays;
+}
+
+//////////////////////////////////////////////////
+void CpuLidarSensor::SetRaycastResults(
+    const std::vector<RayResult> &_results)
+{
+  const double rMin = this->RangeMin();
+  const double rMax = this->RangeMax();
+  const double rayLength = rMax - rMin;
+
+  this->dataPtr->ranges.resize(_results.size());
+  this->dataPtr->intensities.resize(_results.size());
+
+  for (size_t i = 0; i < _results.size(); ++i)
+  {
+    this->dataPtr->intensities[i] = _results[i].intensity;
+    if (std::isinf(_results[i].fraction))
+    {
+      this->dataPtr->ranges[i] =
+        std::numeric_limits<double>::infinity();
+    }
+    else
+    {
+      double range = rMin + _results[i].fraction * rayLength;
+      if (range < rMin)
+        range = -std::numeric_limits<double>::infinity();
+      else if (range > rMax)
+        range = std::numeric_limits<double>::infinity();
+      this->dataPtr->ranges[i] = range;
+    }
+  }
+
+  if (this->dataPtr->noises.find(LIDAR_NOISE) != this->dataPtr->noises.end())
+  {
+    for (size_t i = 0; i < this->dataPtr->ranges.size(); ++i)
+    {
+      if (!std::isinf(this->dataPtr->ranges[i]))
+      {
+        this->dataPtr->ranges[i] =
+          this->dataPtr->noises[LIDAR_NOISE]->Apply(this->dataPtr->ranges[i]);
+
+        this->dataPtr->ranges[i] = gz::math::clamp(this->dataPtr->ranges[i],
+            this->RangeMin(), this->RangeMax());
+      }
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+void CpuLidarSensor::Ranges(std::vector<double> &_ranges) const
+{
+  _ranges = this->dataPtr->ranges;
+}
