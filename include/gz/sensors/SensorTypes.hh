@@ -209,6 +209,18 @@ namespace gz
       /// \sa AirSpeedSensor
       AIR_SPEED_NOISE_PASCALS = 25,
 
+      /// \brief Orientation body-frame X axis (Roll) noise in rad
+      /// \sa ImuSensor
+      ORIENTATION_X_NOISE_RAD = 26,
+
+      /// \brief Orientation body-frame Y axis (Pitch) noise in rad
+      /// \sa ImuSensor
+      ORIENTATION_Y_NOISE_RAD = 27,
+
+      /// \brief Orientation body-frame Z axis (Yaw) noise in rad
+      /// \sa ImuSensor
+      ORIENTATION_Z_NOISE_RAD = 28,
+
       /// \internal
       /// \brief Indicator used to create an iterator over the enum. Do not
       /// use this.
