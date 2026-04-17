@@ -191,17 +191,15 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   // If ogre2 is not the engine, don't run the test
   if (_renderEngine.compare("ogre2") != 0)
   {
-    gzdbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
       << "' doesn't support segmentation cameras" << std::endl;
-    return;
   }
   // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    gzdbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
-    return;
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
