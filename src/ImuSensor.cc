@@ -157,6 +157,9 @@ bool ImuSensor::Load(const sdf::Sensor &_sdf)
     {GYROSCOPE_X_NOISE_RAD_S, _sdf.ImuSensor()->AngularVelocityXNoise()},
     {GYROSCOPE_Y_NOISE_RAD_S, _sdf.ImuSensor()->AngularVelocityYNoise()},
     {GYROSCOPE_Z_NOISE_RAD_S, _sdf.ImuSensor()->AngularVelocityZNoise()},
+    {ORIENTATION_X_NOISE_RAD, _sdf.ImuSensor()->OrientationXNoise()},
+    {ORIENTATION_Y_NOISE_RAD, _sdf.ImuSensor()->OrientationYNoise()},
+    {ORIENTATION_Z_NOISE_RAD, _sdf.ImuSensor()->OrientationZNoise()},
   };
 
   for (const auto & [noiseType, noiseSdf] : noises)
@@ -288,9 +291,12 @@ bool ImuSensor::Update(const std::chrono::steady_clock::duration &_now)
         4, getCov(GYROSCOPE_Y_NOISE_RAD_S));
     msg.mutable_angular_velocity_covariance()->set_data(
         8, getCov(GYROSCOPE_Z_NOISE_RAD_S));
-    msg.mutable_orientation_covariance()->set_data(0, 0.0);
-    msg.mutable_orientation_covariance()->set_data(4, 0.0);
-    msg.mutable_orientation_covariance()->set_data(8, 0.0);
+    msg.mutable_orientation_covariance()->set_data(
+      0, getCov(ORIENTATION_X_NOISE_RAD));
+    msg.mutable_orientation_covariance()->set_data(
+      4, getCov(ORIENTATION_Y_NOISE_RAD));
+    msg.mutable_orientation_covariance()->set_data(
+      8, getCov(ORIENTATION_Z_NOISE_RAD));
   }
 
   if (this->dataPtr->orientationEnabled)
@@ -301,7 +307,15 @@ bool ImuSensor::Update(const std::chrono::steady_clock::duration &_now)
         this->dataPtr->orientationReference.Inverse() *
         this->dataPtr->worldPose.Rot();
 
+    // Adding noise to orientation
+    math::Vector3d euler = this->dataPtr->orientation.Euler();
+    applyNoise(ORIENTATION_X_NOISE_RAD, euler.X());
+    applyNoise(ORIENTATION_Y_NOISE_RAD, euler.Y());
+    applyNoise(ORIENTATION_Z_NOISE_RAD, euler.Z());
+    this->dataPtr->orientation.SetFromEuler(euler);
+
     msgs::Set(msg.mutable_orientation(), this->dataPtr->orientation);
+
   }
   msgs::Set(msg.mutable_angular_velocity(), this->dataPtr->angularVel);
   msgs::Set(msg.mutable_linear_acceleration(), this->dataPtr->linearAcc);
