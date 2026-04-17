@@ -203,9 +203,8 @@ void GpuLidarSensorTest::CreateGpuLidar(const std::string &_renderEngine)
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
-    return;
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
@@ -324,9 +323,8 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
     gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
-    return;
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
@@ -496,9 +494,8 @@ void GpuLidarSensorTest::TestThreeBoxes(const std::string &_renderEngine)
     gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
-    return;
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
@@ -645,9 +642,8 @@ void GpuLidarSensorTest::VerticalLidar(const std::string &_renderEngine)
     gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
-    return;
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
@@ -781,9 +777,8 @@ void GpuLidarSensorTest::ManualUpdate(const std::string &_renderEngine)
     gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
-    return;
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
@@ -891,9 +886,8 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
   auto engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
-    return;
   }
   auto scene = engine->CreateScene("scene");
   EXPECT_NE(nullptr, scene);

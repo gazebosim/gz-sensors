@@ -188,9 +188,8 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   if ((_renderEngine.compare("ogre") != 0) &&
       (_renderEngine.compare("ogre2") != 0))
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' doesn't support depth cameras" << std::endl;
-    return;
   }
 
   // Setup ign-rendering with an empty scene

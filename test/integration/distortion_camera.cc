@@ -80,18 +80,18 @@ void DistortionCameraSensorTest::ImagesWithBuiltinSDF(
 
   if (_renderEngine == "ogre2")
   {
-    igndbg << "Distortion camera not supported yet in rendering engine: "
-            << _renderEngine << std::endl;
-    return;
+    GTEST_SKIP() << "Distortion camera not supported yet in rendering engine: "
+                 << _renderEngine
+                 << ", see https://github.com/gazebosim/gz-rendering/issues/697"
+                 << std::endl;
   }
 
   // Setup ign-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
-    return;
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");

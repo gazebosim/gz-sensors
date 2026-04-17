@@ -84,9 +84,8 @@ void TriggeredCameraTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   auto *engine = ignition::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
            << "' is not supported" << std::endl;
-    return;
   }
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");

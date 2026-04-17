@@ -118,9 +118,8 @@ void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
   auto *engine = ignition::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
-    return;
   }
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");
@@ -221,9 +220,8 @@ void CameraSensorTest::CameraIntrinsics(const std::string &_renderEngine)
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
           << "' is not supported" << std::endl;
-    return;
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
@@ -519,9 +517,8 @@ void CameraSensorTest::CameraProjection(const std::string &_renderEngine)
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
           << "' is not supported" << std::endl;
-    return;
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
@@ -810,9 +807,8 @@ void CameraSensorTest::ImageFormatLInt8(const std::string &_renderEngine)
   auto *engine = ignition::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
-    return;
   }
 
   ignition::rendering::ScenePtr scene = engine->CreateScene("scene");

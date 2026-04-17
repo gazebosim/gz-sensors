@@ -145,18 +145,16 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
   if ((_renderEngine.compare("ogre") != 0) &&
       (_renderEngine.compare("ogre2") != 0))
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' doesn't support thermal cameras" << std::endl;
-    return;
   }
 
   // Setup ign-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
-    return;
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
@@ -415,18 +413,16 @@ void ThermalCameraSensorTest::Images8BitWithBuiltinSDF(
   // If ogre2 is not the engine, don't run the test
   if ((_renderEngine.compare("ogre2") != 0))
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' doesn't support 8 bit thermal cameras" << std::endl;
-    return;
   }
 
   // Setup ign-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    igndbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' is not supported" << std::endl;
-    return;
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
