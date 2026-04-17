@@ -135,18 +135,16 @@ void TriggeredBoundingBoxCameraTest::BoxesWithBuiltinSDF(
     // Skip unsupported engines
   if (_renderEngine != "ogre2")
   {
-    gzdbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
            << "' doesn't support bounding box cameras" << std::endl;
-    return;
   }
 
   // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    gzdbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
            << "' is not supported" << std::endl;
-    return;
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
@@ -238,18 +236,16 @@ void TriggeredBoundingBoxCameraTest::EmptyTriggerTopic(
     // Skip unsupported engines
   if (_renderEngine != "ogre2")
   {
-    gzdbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
            << "' doesn't support bounding box cameras" << std::endl;
-    return;
   }
 
   // Setup gz-rendering with an empty scene
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
   {
-    gzdbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
            << "' is not supported" << std::endl;
-    return;
   }
 
   gz::rendering::ScenePtr scene = engine->CreateScene("scene");
