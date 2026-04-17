@@ -240,8 +240,11 @@ class DopplerVelocityLogTest : public testing::Test,
   // Documentation inherited
   protected: void TearDown() override
   {
-    engine->DestroyScene(scene);
-    rendering::unloadEngine(engine->Name());
+    if (engine)
+    {
+      engine->DestroyScene(scene);
+      rendering::unloadEngine(engine->Name());
+    }
   }
 
   rendering::RenderEngine *engine{nullptr};
