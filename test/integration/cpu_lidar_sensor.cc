@@ -163,7 +163,7 @@ TEST_F(CpuLidarSensorTest, GenerateRays)
       gz::math::Quaterniond::Identity);
   auto sdf = CpuLidarToSdf("test_rays", sensorPose, 10,
       "/test/rays",
-      3, -M_PI / 2, M_PI / 2,
+      3, -GZ_PI / 2, GZ_PI / 2,
       1, 0, 0,
       0.1, 5.0, true, false);
   ASSERT_NE(nullptr, sdf);
@@ -207,7 +207,7 @@ TEST_F(CpuLidarSensorTest, GenerateRaysMultiLayer)
       gz::math::Quaterniond::Identity);
   auto sdf = CpuLidarToSdf("test_multi", sensorPose, 10,
       "/test/multi",
-      4, -M_PI / 4, M_PI / 4,
+      4, -GZ_PI / 4, GZ_PI / 4,
       3, -0.2, 0.2,
       0.5, 10.0, true, false);
   ASSERT_NE(nullptr, sdf);
@@ -234,7 +234,7 @@ TEST_F(CpuLidarSensorTest, SetRaycastResults)
       gz::math::Quaterniond::Identity);
   auto sdf = CpuLidarToSdf("test_results", sensorPose, 10,
       "/test/results",
-      3, -M_PI / 4, M_PI / 4,
+      3, -GZ_PI / 4, GZ_PI / 4,
       1, 0, 0,
       0.1, 5.0, true, false);
   ASSERT_NE(nullptr, sdf);
@@ -756,7 +756,7 @@ TEST_F(CpuLidarSensorTest, NonUnitResolution)
       gz::math::Quaterniond::Identity);
   auto sdf = CpuLidarToSdf("test_resolution", sensorPose, 10,
       "/test/resolution",
-      8, -M_PI / 4, M_PI / 4,
+      8, -GZ_PI / 4, GZ_PI / 4,
       4, -0.1, 0.1,
       0.1, 10.0, true, false,
       /*_horzResolution=*/2.0, /*_vertResolution=*/0.5);

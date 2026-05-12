@@ -17,7 +17,6 @@
 #ifndef GZ_SENSORS_CPULIDARSENSOR_HH_
 #define GZ_SENSORS_CPULIDARSENSOR_HH_
 
-#include <memory>
 #include <utility>
 #include <vector>
 
@@ -26,7 +25,7 @@
 
 #include <gz/math/Angle.hh>
 #include <gz/math/Vector3.hh>
-#include <gz/utils/SuppressWarning.hh>
+#include <gz/utils/ImplPtr.hh>
 
 #include <gz/sensors/config.hh>
 #include <gz/sensors/cpu_lidar/Export.hh>
@@ -51,7 +50,8 @@ namespace gz
         /// \brief Hit point in entity frame
         gz::math::Vector3d point;
 
-        /// \brief Fraction along the ray [0,1]; +INF if no object in range; NaN on error.
+        /// \brief Fraction along the ray [0,1]; +INF if no object in range;
+        /// NaN on error.
         double fraction;
 
         /// \brief Normal at hit point in entity frame
@@ -126,11 +126,7 @@ namespace gz
       /// \param[out] _ranges Vector to fill with range data.
       public: void Ranges(std::vector<double> &_ranges) const;
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \brief Data pointer for private data
-      /// \internal
-      private: std::unique_ptr<CpuLidarSensorPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR_FWD(CpuLidarSensorPrivate, dataPtr)
     };
     }
   }

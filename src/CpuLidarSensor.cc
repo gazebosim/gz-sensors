@@ -151,6 +151,11 @@ bool CpuLidarSensor::Load(const sdf::Sensor &_sdf)
 
   const unsigned int hSamples = this->RayCount();
   const unsigned int vSamples = this->VerticalRayCount();
+  if (hSamples == 0 || vSamples == 0)
+  {
+    gzerr << "CpuLidarSensor: ray count is 0, cannot configure sensor.\n";
+    return false;
+  }
   const double hMin = this->AngleMin().Radian();
   const double hMax = this->AngleMax().Radian();
   const double vMin = this->VerticalAngleMin().Radian();
@@ -491,7 +496,7 @@ void CpuLidarSensor::SetRaycastResults(
   {
     for (size_t i = 0; i < this->dataPtr->ranges.size(); ++i)
     {
-      if (!std::isinf(this->dataPtr->ranges[i]))
+      if (std::isfinite(this->dataPtr->ranges[i]))
       {
         this->dataPtr->ranges[i] =
           this->dataPtr->noises[LIDAR_NOISE]->Apply(this->dataPtr->ranges[i]);
