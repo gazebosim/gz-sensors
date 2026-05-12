@@ -25,11 +25,9 @@
 #include <gz/sensors/Export.hh>
 
 /// \file
-/// \ingroup gz_sensors
 /// \brief Forward declarations and typedefs for sensors
 namespace gz
 {
-  /// \ingroup gz_sensors
   /// \brief Sensors namespace
   namespace sensors
   {

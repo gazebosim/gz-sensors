@@ -198,9 +198,8 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   if ((_renderEngine.compare("ogre") != 0) &&
       (_renderEngine.compare("ogre2") != 0))
   {
-    gzdbg << "Engine '" << _renderEngine
+    GTEST_SKIP() << "Engine '" << _renderEngine
               << "' doesn't support depth cameras" << std::endl;
-    return;
   }
 
   // Setup gz-rendering with an empty scene
