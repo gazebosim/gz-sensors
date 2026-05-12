@@ -44,8 +44,7 @@
 using namespace gz;
 using namespace sensors;
 
-/// \brief Private data for CpuLidarSensor
-class gz::sensors::CpuLidarSensorPrivate
+class gz::sensors::CpuLidarSensor::Implementation
 {
   /// \brief true if Load() has been called and was successful
   public: bool initialized = false;
@@ -84,7 +83,7 @@ class gz::sensors::CpuLidarSensorPrivate
 
 //////////////////////////////////////////////////
 CpuLidarSensor::CpuLidarSensor()
-  : dataPtr(gz::utils::MakeUniqueImpl<CpuLidarSensorPrivate>())
+  : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
@@ -140,7 +139,7 @@ bool CpuLidarSensor::Load(const sdf::Sensor &_sdf)
   }
 
   if (this->Topic().empty())
-    this->SetTopic("/cpu_lidar");
+    this->SetTopic("/lidar");
 
   this->dataPtr->scanPub =
       this->dataPtr->node.Advertise<gz::msgs::LaserScan>(this->Topic());
@@ -260,61 +259,28 @@ bool CpuLidarSensor::Update(
 
     const unsigned int hCount = this->RayCount();
     const unsigned int vCount = this->VerticalRayCount();
+    const unsigned int totalCount = hCount * vCount;
 
-    // Extract the middle ring as a 2D slice for LaserScan
-    const bool isMultiRing = (vCount > 1);
-    const unsigned int publishCount = isMultiRing ? hCount : (hCount * vCount);
-    const unsigned int midRingIndex = vCount / 2;
-
-    const int numRays = static_cast<int>(this->dataPtr->ranges.size());
-    if (msg.ranges_size() != static_cast<int>(publishCount))
+    if (msg.ranges_size() != static_cast<int>(totalCount))
     {
       msg.clear_ranges();
       msg.clear_intensities();
-      msg.set_count(publishCount);
-      msg.set_vertical_count(isMultiRing ? 1 : vCount);
-
-      if (isMultiRing)
-      {
-        const double vMin = this->VerticalAngleMin().Radian();
-        const double vMax = this->VerticalAngleMax().Radian();
-        const double vStep = vCount > 1 ? (vMax - vMin) / (vCount - 1) : 0.0;
-        const double midAngle = vMin + midRingIndex * vStep;
-        msg.set_vertical_angle_min(midAngle);
-        msg.set_vertical_angle_max(midAngle);
-        msg.set_vertical_angle_step(0.0);
-      }
-
-      for (unsigned int i = 0; i < publishCount; ++i)
+      msg.set_count(hCount);
+      msg.set_vertical_count(vCount);
+      for (unsigned int i = 0; i < totalCount; ++i)
       {
         msg.add_ranges(gz::math::NAN_F);
         msg.add_intensities(0.0);
       }
     }
 
-    if (isMultiRing)
+    for (unsigned int i = 0; i < totalCount; ++i)
     {
-      const unsigned int ringStart = midRingIndex * hCount;
-      for (unsigned int i = 0; i < hCount; ++i)
-      {
-        const unsigned int index = ringStart + i;
-        const double intensity =
-          index < this->dataPtr->intensities.size() ?
-          this->dataPtr->intensities[index] : 0.0;
-        msg.set_ranges(i, this->dataPtr->ranges[ringStart + i]);
-        msg.set_intensities(i, intensity);
-      }
-    }
-    else
-    {
-      for (int i = 0; i < numRays; ++i)
-      {
-        const double intensity =
-          static_cast<size_t>(i) < this->dataPtr->intensities.size() ?
-          this->dataPtr->intensities[i] : 0.0;
-        msg.set_ranges(i, this->dataPtr->ranges[i]);
-        msg.set_intensities(i, intensity);
-      }
+      const double intensity =
+        i < this->dataPtr->intensities.size() ?
+        this->dataPtr->intensities[i] : 0.0;
+      msg.set_ranges(static_cast<int>(i), this->dataPtr->ranges[i]);
+      msg.set_intensities(static_cast<int>(i), intensity);
     }
 
     this->AddSequence(msg.mutable_header());

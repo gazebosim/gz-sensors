@@ -38,8 +38,6 @@ namespace gz
   {
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
 
-    class CpuLidarSensorPrivate;
-
     /// \brief CPU-based lidar sensor that performs ray casting without
     /// depending on gz-rendering.
     class GZ_SENSORS_CPU_LIDAR_VISIBLE CpuLidarSensor : public Sensor
@@ -126,7 +124,7 @@ namespace gz
       /// \param[out] _ranges Vector to fill with range data.
       public: void Ranges(std::vector<double> &_ranges) const;
 
-      GZ_UTILS_UNIQUE_IMPL_PTR_FWD(CpuLidarSensorPrivate, dataPtr)
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }
