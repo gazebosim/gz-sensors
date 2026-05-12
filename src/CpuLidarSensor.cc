@@ -33,6 +33,8 @@
 
 #include <sdf/Lidar.hh>
 
+#include <gz/utils/ImplPtr.hh>
+
 #include "gz/sensors/CpuLidarSensor.hh"
 #include "gz/sensors/GaussianNoiseModel.hh"
 #include "gz/sensors/Noise.hh"
@@ -82,7 +84,7 @@ class gz::sensors::CpuLidarSensorPrivate
 
 //////////////////////////////////////////////////
 CpuLidarSensor::CpuLidarSensor()
-  : dataPtr(new CpuLidarSensorPrivate())
+  : dataPtr(gz::utils::MakeUniqueImpl<CpuLidarSensorPrivate>())
 {
 }
 
