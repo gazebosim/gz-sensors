@@ -1555,7 +1555,11 @@ namespace gz
               bottomModeNoiseVariance *
               beamBasisElement * beamBasisElement.transpose();
 
+#if GOOGLE_PROTOBUF_VERSION >= 7035000
+          beamVelocityMessage->mutable_covariance()->resize(9, 0.);
+#else
           beamVelocityMessage->mutable_covariance()->Resize(9, 0.);
+#endif
           std::copy(beamVelocityCovarianceInReferenceFrame.data(),
                     beamVelocityCovarianceInReferenceFrame.data() + 9,
                     beamVelocityMessage->mutable_covariance()->begin());
@@ -1596,7 +1600,11 @@ namespace gz
         velocityMessage->mutable_mean()->set_z(
             velocityMeanInReferenceFrame.z());
 
+#if GOOGLE_PROTOBUF_VERSION >= 7035000
+        velocityMessage->mutable_covariance()->resize(9, 0.);
+#else
         velocityMessage->mutable_covariance()->Resize(9, 0.);
+#endif
         std::copy(velocityCovarianceInReferenceFrame.data(),
                   velocityCovarianceInReferenceFrame.data() + 9,
                   velocityMessage->mutable_covariance()->begin());
@@ -1806,7 +1814,11 @@ namespace gz
             gz::msgs::Convert(beamAxisInReferenceFrame * averageBeamSpeed);
 
         // Use row-major 1D layout for covariance
+#if GOOGLE_PROTOBUF_VERSION >= 7035000
+        beamVelocityMessage->mutable_covariance()->resize(9, 0.);
+#else
         beamVelocityMessage->mutable_covariance()->Resize(9, 0.);
+#endif
         std::copy(beamVelocityCovarianceInReferenceFrame.data(),
                   beamVelocityCovarianceInReferenceFrame.data() + 9,
                   beamVelocityMessage->mutable_covariance()->begin());
@@ -1849,7 +1861,11 @@ namespace gz
         velocityMessage->mutable_mean()->set_z(
             velocityMeanInReferenceFrame.z());
 
+#if GOOGLE_PROTOBUF_VERSION >= 7035000
+        velocityMessage->mutable_covariance()->resize(9, 0.);
+#else
         velocityMessage->mutable_covariance()->Resize(9, 0.);
+#endif
         std::copy(velocityCovarianceInReferenceFrame.data(),
                   velocityCovarianceInReferenceFrame.data() + 9,
                   velocityMessage->mutable_covariance()->begin());
