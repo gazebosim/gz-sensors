@@ -16,7 +16,7 @@
   <depend>gz-math</depend>
   <depend>gz-msgs</depend>
   <depend>gz-rendering</depend>
-  <depend>gz-tools2</depend>
+  <depend>gz-tools</depend>
   <depend>gz-transport</depend>
   <depend>sdformat</depend>
 
