@@ -161,6 +161,9 @@ class DepthCameraSensorTest: public testing::Test,
 
   // Create depth camera sensors and verify camera projection
   public: void DepthCameraProjection(const std::string &_renderEngine);
+
+  // Verify point cloud coordinates when use_ros_convention is enabled
+  public: void PointCloudRosConvention(const std::string &_renderEngine);
 };
 
 void DepthCameraSensorTest::ImagesWithBuiltinSDF(
@@ -900,6 +903,165 @@ TEST_P(DepthCameraSensorTest, CameraProjection)
 {
   gz::common::Console::SetVerbosity(2);
   DepthCameraProjection(GetParam());
+}
+
+//////////////////////////////////////////////////
+void DepthCameraSensorTest::PointCloudRosConvention(
+    const std::string &_renderEngine)
+{
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+      "sdf", "depth_camera_sensor_ros_convention.sdf");
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  ASSERT_NE(nullptr, doc->Root());
+  ASSERT_TRUE(doc->Root()->HasElement("model"));
+  auto modelPtr = doc->Root()->GetElement("model");
+  ASSERT_TRUE(modelPtr->HasElement("link"));
+  auto linkPtr = modelPtr->GetElement("link");
+  ASSERT_TRUE(linkPtr->HasElement("sensor"));
+  auto sensorPtr = linkPtr->GetElement("sensor");
+
+  if ((_renderEngine.compare("ogre") != 0) &&
+      (_renderEngine.compare("ogre2") != 0))
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+              << "' doesn't support depth cameras" << std::endl;
+  }
+
+  auto *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+              << "' is not supported" << std::endl;
+  }
+
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene_ros_depth");
+  scene->SetAmbientLight(0.3, 0.3, 0.3);
+
+  gz::rendering::MaterialPtr blue = scene->CreateMaterial();
+  blue->SetAmbient(0.0, 0.0, 0.3);
+  blue->SetDiffuse(0.0, 0.0, 0.8);
+  blue->SetSpecular(0.5, 0.5, 0.5);
+  blue->SetShininess(50);
+  blue->SetReflectivity(0);
+
+  double unitBoxSize = 1.0;
+  gz::math::Vector3d boxPosition(3.0, 0.0, 0.0);
+  double expectedDepth = boxPosition.X() - unitBoxSize * 0.5;
+
+  gz::rendering::VisualPtr box = scene->CreateVisual();
+  box->AddGeometry(scene->CreateBox());
+  box->SetOrigin(0.0, 0.0, 0.0);
+  box->SetLocalPosition(boxPosition);
+  box->SetLocalRotation(0, 0, 0);
+  box->SetLocalScale(unitBoxSize, unitBoxSize, unitBoxSize);
+  box->SetMaterial(blue);
+  scene->DestroyMaterial(blue);
+  scene->RootVisual()->AddChild(box);
+
+  gz::sensors::Manager mgr;
+  gz::sensors::DepthCameraSensor *depthSensor =
+      mgr.CreateSensor<gz::sensors::DepthCameraSensor>(sensorPtr);
+  ASSERT_NE(depthSensor, nullptr);
+  depthSensor->SetScene(scene);
+
+  std::string imageTopic =
+      "/test/integration/DepthCameraPlugin_rosConvention/image";
+  std::string pointsTopic =
+      "/test/integration/DepthCameraPlugin_rosConvention/image/points";
+
+  WaitForMessageTestHelper<gz::msgs::Image> imageHelper(imageTopic);
+  WaitForMessageTestHelper<gz::msgs::PointCloudPacked>
+      pointsHelper(pointsTopic);
+  EXPECT_TRUE(depthSensor->HasConnections());
+
+  // Warmup render
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
+  EXPECT_TRUE(imageHelper.WaitForMessage()) << imageHelper;
+  EXPECT_TRUE(pointsHelper.WaitForMessage()) << pointsHelper;
+
+  // Point cloud header must carry the frame_id set in the SDF
+  {
+    const auto &pcMsg = pointsHelper.Message();
+    ASSERT_GT(pcMsg.header().data_size(), 0);
+    EXPECT_EQ("frame_id", pcMsg.header().data(0).key());
+    ASSERT_GT(pcMsg.header().data(0).value_size(), 0);
+    EXPECT_EQ(depthSensor->OpticalFrameId(),
+              pcMsg.header().data(0).value(0));
+  }
+
+  // Reset globals and subscribe for the measurement render
+  g_pcMutex.lock();
+  g_pcCounter = 0;
+  delete[] g_pointsXYZBuffer; g_pointsXYZBuffer = nullptr;
+  delete[] g_pointsRGBBuffer; g_pointsRGBBuffer = nullptr;
+  g_pcMutex.unlock();
+
+  gz::transport::Node node;
+  node.Subscribe(pointsTopic, &OnPointCloud);
+
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+
+  auto waitTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::duration<double>(0.001));
+  int pcCounter = 0;
+  for (int sleep = 0; sleep < 300 && pcCounter == 0; ++sleep)
+  {
+    g_pcMutex.lock();
+    pcCounter = g_pcCounter;
+    g_pcMutex.unlock();
+    std::this_thread::sleep_for(waitTime);
+  }
+  EXPECT_GT(pcCounter, 0);
+
+  g_pcMutex.lock();
+
+  int imgWidth = static_cast<int>(depthSensor->ImageWidth());
+  int imgChannelCount = 3;
+  int midWidth = imgWidth / 2;
+  int midHeight = static_cast<int>(depthSensor->ImageHeight()) / 2;
+  int imgMid = midHeight * imgWidth * imgChannelCount
+      + midWidth * imgChannelCount;
+
+  // In ROS optical frame: X=right, Y=down, Z=forward(depth)
+  float mx = g_pointsXYZBuffer[imgMid];
+  float my = g_pointsXYZBuffer[imgMid + 1];
+  float mz = g_pointsXYZBuffer[imgMid + 2];
+
+  // Center pixel: Z equals depth; X and Y are near zero (on-axis ray)
+  EXPECT_NEAR(static_cast<double>(mz), expectedDepth, DEPTH_TOL);
+  EXPECT_NEAR(static_cast<double>(mx), 0.0, DEPTH_TOL);
+  EXPECT_NEAR(static_cast<double>(my), 0.0, DEPTH_TOL);
+
+  // Left of center -> negative X; right of center -> positive X
+  float midLeftX  = g_pointsXYZBuffer[imgMid - imgChannelCount];
+  float midRightX = g_pointsXYZBuffer[imgMid + imgChannelCount];
+  EXPECT_LT(midLeftX,  0.0f);
+  EXPECT_GT(midRightX, 0.0f);
+
+  // Z (depth) stays constant across the same row on the flat box face
+  float midLeftZ  = g_pointsXYZBuffer[imgMid - imgChannelCount + 2];
+  float midRightZ = g_pointsXYZBuffer[imgMid + imgChannelCount + 2];
+  EXPECT_NEAR(static_cast<double>(mz), static_cast<double>(midLeftZ),
+      DEPTH_TOL);
+  EXPECT_NEAR(static_cast<double>(mz), static_cast<double>(midRightZ),
+      DEPTH_TOL);
+
+  g_pcMutex.unlock();
+
+  blue.reset();
+  box.reset();
+  mgr.Remove(depthSensor->Id());
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+TEST_P(DepthCameraSensorTest, PointCloudRosConvention)
+{
+  gz::common::Console::SetVerbosity(4);
+  PointCloudRosConvention(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(DepthCameraSensor, DepthCameraSensorTest,

@@ -175,6 +175,9 @@ class RgbdCameraSensorTest: public testing::Test,
 
   // Create a Camera sensor from a SDF and gets a image message
   public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
+
+  // Verify point cloud uses ROS optical frame convention when opted in
+  public: void PointCloudRosConvention(const std::string &_renderEngine);
 };
 
 void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
@@ -757,6 +760,168 @@ TEST_P(RgbdCameraSensorTest, ImagesWithBuiltinSDF)
 {
   common::Console::SetVerbosity(4);
   ImagesWithBuiltinSDF(GetParam());
+}
+
+//////////////////////////////////////////////////
+void RgbdCameraSensorTest::PointCloudRosConvention(
+    const std::string &_renderEngine)
+{
+  std::string path = common::joinPaths(PROJECT_SOURCE_PATH, "test",
+      "sdf", "rgbd_camera_sensor_ros_convention.sdf");
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  ASSERT_NE(nullptr, doc->Root());
+  ASSERT_TRUE(doc->Root()->HasElement("model"));
+  auto modelPtr = doc->Root()->GetElement("model");
+  ASSERT_TRUE(modelPtr->HasElement("link"));
+  auto linkPtr = modelPtr->GetElement("link");
+  ASSERT_TRUE(linkPtr->HasElement("sensor"));
+  auto sensorPtr = linkPtr->GetElement("sensor");
+
+  if ((_renderEngine.compare("ogre") != 0) &&
+      (_renderEngine.compare("ogre2") != 0))
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+              << "' doesn't support rgbd cameras" << std::endl;
+  }
+
+  auto *engine = rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+              << "' is not supported" << std::endl;
+  }
+
+  rendering::ScenePtr scene = engine->CreateScene("scene_ros");
+  scene->SetAmbientLight(0.0, 0.0, 1.0);
+  scene->SetBackgroundColor(1.0, 0.0, 0.0);
+
+  rendering::MaterialPtr blue = scene->CreateMaterial();
+  blue->SetAmbient(0.0, 0.0, 1.0);
+  blue->SetDiffuse(0.0, 0.0, 1.0);
+  blue->SetSpecular(0.0, 0.0, 1.0);
+
+  double unitBoxSize = 1.0;
+  math::Vector3d boxPosition(3.0, 0.0, 0.0);
+  double expectedDepth = boxPosition.X() - unitBoxSize * 0.5;
+
+  rendering::VisualPtr box = scene->CreateVisual();
+  box->AddGeometry(scene->CreateBox());
+  box->SetOrigin(0.0, 0.0, 0.0);
+  box->SetLocalPosition(boxPosition);
+  box->SetLocalRotation(0, 0, 0);
+  box->SetLocalScale(unitBoxSize, unitBoxSize, unitBoxSize);
+  box->SetMaterial(blue);
+  scene->DestroyMaterial(blue);
+  scene->RootVisual()->AddChild(box);
+
+  sensors::Manager mgr;
+  sensors::RgbdCameraSensor *rgbdSensor =
+      mgr.CreateSensor<sensors::RgbdCameraSensor>(sensorPtr);
+  ASSERT_NE(rgbdSensor, nullptr);
+  rgbdSensor->SetScene(scene);
+
+  std::string pointsTopic =
+    "/test/integration/RgbdCameraPlugin_rosConvention/points";
+  WaitForMessageTestHelper<msgs::PointCloudPacked>
+      pointsHelper(pointsTopic);
+
+  // Wait for the transport layer to propagate the subscription so the sensor
+  // detects HasPointConnections() and doesn't skip rendering.
+  {
+    auto waitTime = std::chrono::milliseconds(1);
+    for (int sleep = 0; sleep < 300 && !rgbdSensor->HasPointConnections();
+        ++sleep)
+      std::this_thread::sleep_for(waitTime);
+  }
+  EXPECT_TRUE(rgbdSensor->HasPointConnections());
+
+  // First render to warm up the sensor
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
+  EXPECT_TRUE(pointsHelper.WaitForMessage()) << pointsHelper;
+
+  // Point cloud header must carry the frame_id set in the SDF
+  {
+    const auto &pcMsg = pointsHelper.Message();
+    ASSERT_GT(pcMsg.header().data_size(), 0);
+    EXPECT_EQ("frame_id", pcMsg.header().data(0).key());
+    ASSERT_GT(pcMsg.header().data(0).value_size(), 0);
+    EXPECT_EQ(rgbdSensor->OpticalFrameId(), pcMsg.header().data(0).value(0));
+  }
+
+  // Reset global point cloud buffers so we get a fresh capture
+  g_pcMutex.lock();
+  g_pcCounter = 0;
+  delete[] g_pointsXYZBuffer; g_pointsXYZBuffer = nullptr;
+  delete[] g_pointsRGBBuffer; g_pointsRGBBuffer = nullptr;
+  g_pcMutex.unlock();
+
+  transport::Node node;
+  node.Subscribe(pointsTopic, &OnPointCloud);
+
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+
+  auto waitTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::duration<double>(0.001));
+  int pcCounter = 0;
+  for (int sleep = 0; sleep < 300 && pcCounter == 0; ++sleep)
+  {
+    g_pcMutex.lock();
+    pcCounter = g_pcCounter;
+    g_pcMutex.unlock();
+    std::this_thread::sleep_for(waitTime);
+  }
+  EXPECT_GT(pcCounter, 0);
+
+  g_pcMutex.lock();
+
+  int imgWidth = static_cast<int>(rgbdSensor->ImageWidth());
+  int imgChannelCount = 3;
+  int midWidth = imgWidth / 2;
+  int midHeight = static_cast<int>(rgbdSensor->ImageHeight()) / 2;
+  int imgMid = midHeight * imgWidth * imgChannelCount
+      + midWidth * imgChannelCount;
+
+  // In ROS optical frame: X=right, Y=down, Z=forward(depth)
+  float mx = g_pointsXYZBuffer[imgMid];
+  float my = g_pointsXYZBuffer[imgMid + 1];
+  float mz = g_pointsXYZBuffer[imgMid + 2];
+
+  // Center pixel: Z equals depth; X and Y are near zero (on-axis ray)
+  EXPECT_NEAR(static_cast<double>(mz), expectedDepth, DEPTH_TOL);
+  EXPECT_NEAR(static_cast<double>(mx), 0.0, DEPTH_TOL);
+  EXPECT_NEAR(static_cast<double>(my), 0.0, DEPTH_TOL);
+
+  // Left of center -> negative X; right of center -> positive X
+  float midLeftX  = g_pointsXYZBuffer[imgMid - imgChannelCount];
+  float midRightX = g_pointsXYZBuffer[imgMid + imgChannelCount];
+  EXPECT_LT(midLeftX,  0.0f);
+  EXPECT_GT(midRightX, 0.0f);
+
+  // Z (depth) stays constant across the same row on the flat box face
+  float midLeftZ  = g_pointsXYZBuffer[imgMid - imgChannelCount + 2];
+  float midRightZ = g_pointsXYZBuffer[imgMid + imgChannelCount + 2];
+  EXPECT_NEAR(static_cast<double>(mz), static_cast<double>(midLeftZ),
+      DEPTH_TOL);
+  EXPECT_NEAR(static_cast<double>(mz), static_cast<double>(midRightZ),
+      DEPTH_TOL);
+
+  g_pcMutex.unlock();
+
+  box.reset();
+  mgr.Remove(rgbdSensor->Id());
+  engine->DestroyScene(scene);
+  scene.reset();
+  blue.reset();
+  rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+TEST_P(RgbdCameraSensorTest, PointCloudRosConvention)
+{
+  common::Console::SetVerbosity(4);
+  PointCloudRosConvention(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(RgbdCameraSensor, RgbdCameraSensorTest,
