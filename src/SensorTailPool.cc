@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2026 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+*/
 #include "SensorTailPool.hh"
 
 #include <cstdlib>
@@ -23,8 +39,16 @@ unsigned int ReadWorkerCount()
 //////////////////////////////////////////////////
 SensorTailPool &SensorTailPool::Instance()
 {
-  static SensorTailPool pool;
-  return pool;
+  // Deliberately heap-allocated and never deleted. This pool is process-wide
+  // and must outlive every sensor that can submit to it. A function-local
+  // static *object* would be destroyed at static-destruction time; a sensor
+  // kept alive until then (e.g. in an embedder's global) would then call
+  // Submit()/DrainSensor() on a destroyed pool. Leaking removes that ordering
+  // hazard entirely. The OS reclaims the memory and the idle worker threads at
+  // process exit; every well-behaved sensor drains its own in-flight jobs in
+  // its destructor before then, so no worker ever touches a dead sensor.
+  static SensorTailPool *const instance = new SensorTailPool();
+  return *instance;
 }
 
 //////////////////////////////////////////////////
@@ -38,6 +62,8 @@ SensorTailPool::SensorTailPool()
 //////////////////////////////////////////////////
 SensorTailPool::~SensorTailPool()
 {
+  // Not reached for the process-wide Instance() (intentionally leaked); retained
+  // for completeness and any future explicitly-owned pool.
   {
     std::lock_guard<std::mutex> lock(this->mutex);
     this->stop = true;
