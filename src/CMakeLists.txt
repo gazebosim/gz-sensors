@@ -8,6 +8,7 @@ set (sources
   PointCloudUtil.cc
   Sensor.cc
   SensorFactory.cc
+  SensorTailPool.cc
   SensorTypes.cc
   Util.cc
 )
@@ -226,3 +227,4 @@ gz_build_tests(TYPE UNIT SOURCES ${gtest_sources} LIB_DEPS ${rendering_target})
 gz_build_tests(TYPE UNIT SOURCES Lidar_TEST.cc LIB_DEPS ${lidar_target})
 gz_build_tests(TYPE UNIT SOURCES Camera_TEST.cc LIB_DEPS ${camera_target})
 gz_build_tests(TYPE UNIT SOURCES ImuSensor_TEST.cc LIB_DEPS ${imu_target})
+gz_build_tests(TYPE UNIT SOURCES SensorTailPool_TEST.cc)
