@@ -219,7 +219,7 @@ void RgbdCameraSensor::Implementation::PublishTail(FrameSlot &_s)
   const unsigned int depthSamples = width * height;
 
   // create and publish the depth message
-  if (_s.hasDepth)
+  if (_s.hasDepth && _s.depthBuffer)
   {
     msgs::Image msg;
     msg.set_width(width);
@@ -232,7 +232,10 @@ void RgbdCameraSensor::Implementation::PublishTail(FrameSlot &_s)
     frame->set_key("frame_id");
     frame->add_value(_s.frameId);
 
-    // depth clipping work-around (see original comment).
+    // The following code is a work around since gz-rendering's depth camera
+    // does not support 2 different clipping distances. An assumption is made
+    // that the depth clipping distances are within bounds of the rgb clipping
+    // distances, if not, the rgb clipping values will take priority.
     if (this->hasDepthNearClip || this->hasDepthFarClip)
     {
       for (unsigned int i = 0; i < depthSamples; i++)
