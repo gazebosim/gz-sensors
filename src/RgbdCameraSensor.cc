@@ -31,9 +31,14 @@
 
 #include <sdf/Sensor.hh>
 
+#include <condition_variable>
 #include <cstddef>
+#include <cstdlib>
 #include <cstring>
+#include <deque>
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "gz/sensors/ImageGaussianNoiseModel.hh"
 #include "gz/sensors/ImageNoise.hh"
@@ -149,6 +154,43 @@ class gz::sensors::RgbdCameraSensorPrivate
   /// \brief Render-thread-only slot used when offload is disabled.
   public: FrameSlot inlineSlot;
 
+  /// \brief Off-thread tail enabled (GZ_SENSORS_RGBD_OFFTHREAD).
+  public: bool offthread = false;
+  /// \brief Per-sensor offload slot count (GZ_SENSORS_OFFTHREAD_QUEUE).
+  public: unsigned int queueDepth = 2u;
+  /// \brief Owned offload slots.
+  public: std::vector<std::unique_ptr<FrameSlot>> offloadSlots;
+  /// \brief Available offload slots (raw ptrs into offloadSlots).
+  public: std::deque<FrameSlot *> freeSlots;
+  /// \brief Guards freeSlots.
+  public: std::mutex slotMutex;
+  /// \brief Signals a slot was returned.
+  public: std::condition_variable slotCv;
+  /// \brief Frames that had to wait for a free slot (back-pressure metric).
+  public: std::uint64_t tailBlockCount = 0;
+
+  /// \brief Block until an offload slot is free, then take it.
+  public: FrameSlot *AcquireOffloadSlot()
+  {
+    std::unique_lock<std::mutex> lock(this->slotMutex);
+    if (this->freeSlots.empty())
+      ++this->tailBlockCount;
+    this->slotCv.wait(lock, [this]() { return !this->freeSlots.empty(); });
+    FrameSlot *s = this->freeSlots.front();
+    this->freeSlots.pop_front();
+    return s;
+  }
+
+  /// \brief Return an offload slot to the free-list (called by a worker).
+  public: void ReturnOffloadSlot(FrameSlot *_s)
+  {
+    {
+      std::lock_guard<std::mutex> lock(this->slotMutex);
+      this->freeSlots.push_back(_s);
+    }
+    this->slotCv.notify_one();
+  }
+
   /// \brief (Re)allocate a slot's depth buffer to hold >= _samples floats.
   public: void EnsureDepthCapacity(FrameSlot &_s, std::size_t _samples)
   {
@@ -187,15 +229,50 @@ RgbdCameraSensor::RgbdCameraSensor()
   : dataPtr(new RgbdCameraSensorPrivate())
 {
   this->dataPtr->self = this;
+
+  const char *en = std::getenv("GZ_SENSORS_RGBD_OFFTHREAD");
+  this->dataPtr->offthread = (en && en[0] != '\0' && std::string(en) != "0");
+
+  const char *q = std::getenv("GZ_SENSORS_OFFTHREAD_QUEUE");
+  if (q && q[0] != '\0')
+  {
+    const int v = std::atoi(q);
+    if (v >= 1)
+      this->dataPtr->queueDepth = static_cast<unsigned int>(v);
+  }
+
+  if (this->dataPtr->offthread)
+  {
+    for (unsigned int i = 0; i < this->dataPtr->queueDepth; ++i)
+    {
+      this->dataPtr->offloadSlots.push_back(
+          std::make_unique<Implementation::FrameSlot>());
+      this->dataPtr->freeSlots.push_back(
+          this->dataPtr->offloadSlots.back().get());
+    }
+    gzmsg << "RgbdCameraSensor off-thread tail enabled: "
+          << this->dataPtr->queueDepth << " slots, "
+          << SensorTailPool::Instance().WorkerCount() << " workers\n";
+  }
 }
 
 //////////////////////////////////////////////////
 RgbdCameraSensor::~RgbdCameraSensor()
 {
+  if (this->dataPtr->offthread)
+    SensorTailPool::Instance().DrainSensor(
+        static_cast<std::uint64_t>(this->Id()));
+
   this->dataPtr->depthConnection.reset();
   this->dataPtr->pointCloudConnection.reset();
+
   delete [] this->dataPtr->inlineSlot.depthBuffer;
   delete [] this->dataPtr->inlineSlot.pointCloudBuffer;
+  for (auto &s : this->dataPtr->offloadSlots)
+  {
+    delete [] s->depthBuffer;
+    delete [] s->pointCloudBuffer;
+  }
 }
 
 //////////////////////////////////////////////////
@@ -665,9 +742,12 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
 
-  // Choose this frame's slot. (Offload dispatch is added in Task 4; for now,
-  // always use the render-thread-only inline slot.)
-  RgbdCameraSensor::Implementation::FrameSlot *slot = &this->dataPtr->inlineSlot;
+  // Choose this frame's slot.
+  RgbdCameraSensor::Implementation::FrameSlot *slot;
+  if (this->dataPtr->offthread)
+    slot = this->dataPtr->AcquireOffloadSlot();   // blocks if all are busy
+  else
+    slot = &this->dataPtr->inlineSlot;
 
   // Capture per-frame context on the render thread.
   slot->width = width;
@@ -683,7 +763,22 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   this->Render();
   this->dataPtr->writeSlot = nullptr;
 
-  this->dataPtr->PublishTail(*slot);
+  if (this->dataPtr->offthread)
+  {
+    RgbdCameraSensor *self = this;
+    auto *s = slot;
+    SensorTailPool::Instance().Submit(static_cast<std::uint64_t>(this->Id()),
+        [self, s]()
+        {
+          self->dataPtr->PublishTail(*s);
+          self->dataPtr->ReturnOffloadSlot(s);
+        });
+  }
+  else
+  {
+    this->dataPtr->PublishTail(*slot);
+  }
+
   return true;
 }
 
