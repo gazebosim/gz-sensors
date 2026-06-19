@@ -259,8 +259,12 @@ RgbdCameraSensor::RgbdCameraSensor()
 RgbdCameraSensor::~RgbdCameraSensor()
 {
   if (this->dataPtr->offthread)
+  {
     SensorTailPool::Instance().DrainSensor(
         static_cast<std::uint64_t>(this->Id()));
+    gzdbg << "RgbdCameraSensor off-thread tail: " << this->dataPtr->tailBlockCount
+          << " frame(s) blocked waiting for a slot\n";
+  }
 
   this->dataPtr->depthConnection.reset();
   this->dataPtr->pointCloudConnection.reset();
@@ -755,7 +759,19 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     SensorTailPool::Instance().Submit(static_cast<std::uint64_t>(this->Id()),
         [self, s]()
         {
-          self->dataPtr->PublishTail(*s);
+          // Always return the slot, even if PublishTail throws. SensorTailPool
+          // catches and logs job exceptions; without returning the slot here a
+          // throw (e.g. bad_alloc) would leak it and, once the free-list drains,
+          // block the render thread's AcquireOffloadSlot forever.
+          try
+          {
+            self->dataPtr->PublishTail(*s);
+          }
+          catch (...)
+          {
+            self->dataPtr->ReturnOffloadSlot(s);
+            throw;
+          }
           self->dataPtr->ReturnOffloadSlot(s);
         });
   }
