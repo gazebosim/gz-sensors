@@ -246,7 +246,7 @@ RgbdCameraSensor::RgbdCameraSensor()
     for (unsigned int i = 0; i < this->dataPtr->queueDepth; ++i)
     {
       this->dataPtr->offloadSlots.push_back(
-          std::make_unique<Implementation::FrameSlot>());
+          std::make_unique<RgbdCameraSensorPrivate::FrameSlot>());
       this->dataPtr->freeSlots.push_back(
           this->dataPtr->offloadSlots.back().get());
     }
@@ -280,9 +280,13 @@ RgbdCameraSensor::~RgbdCameraSensor()
 }
 
 //////////////////////////////////////////////////
-void RgbdCameraSensor::Implementation::InitSlotPointMsg(FrameSlot &_s)
+void RgbdCameraSensorPrivate::InitSlotPointMsg(FrameSlot &_s)
 {
-  msgs::InitPointCloudPacked(_s.pointMsg, _s.opticalFrameId, false,
+  // \todo(anyone) The true value in the following function call forces
+  // the xyz and rgb fields to be aligned to memory boundaries. This is need
+  // by ROS1: https://github.com/ros/common_msgs/pull/77. Ideally, memory
+  // alignment should be configured.
+  msgs::InitPointCloudPacked(_s.pointMsg, _s.opticalFrameId, true,
       {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
        {"rgb", msgs::PointCloudPacked::Field::FLOAT32}});
   _s.pointMsg.set_width(_s.width);
@@ -294,7 +298,7 @@ void RgbdCameraSensor::Implementation::InitSlotPointMsg(FrameSlot &_s)
 }
 
 //////////////////////////////////////////////////
-void RgbdCameraSensor::Implementation::PublishTail(FrameSlot &_s)
+void RgbdCameraSensorPrivate::PublishTail(FrameSlot &_s)
 {
   const unsigned int width = _s.width;
   const unsigned int height = _s.height;
@@ -312,7 +316,7 @@ void RgbdCameraSensor::Implementation::PublishTail(FrameSlot &_s)
     *msg.mutable_header()->mutable_stamp() = msgs::Convert(_s.now);
     auto frame = msg.mutable_header()->add_data();
     frame->set_key("frame_id");
-    frame->add_value(_s.frameId);
+    frame->add_value(_s.opticalFrameId);
 
     // The following code is a work around since gz-rendering's depth camera
     // does not support 2 different clipping distances. An assumption is made
@@ -401,7 +405,7 @@ void RgbdCameraSensor::Implementation::PublishTail(FrameSlot &_s)
       *msg.mutable_header()->mutable_stamp() = msgs::Convert(_s.now);
       auto frame = msg.mutable_header()->add_data();
       frame->set_key("frame_id");
-      frame->add_value(_s.frameId);
+      frame->add_value(_s.opticalFrameId);
       msg.set_data(data, rendering::PixelUtil::MemorySize(rendering::PF_R8G8B8,
         width, height));
 
@@ -747,7 +751,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
 
   // Choose this frame's slot.
-  RgbdCameraSensor::Implementation::FrameSlot *slot;
+  RgbdCameraSensorPrivate::FrameSlot *slot;
   if (this->dataPtr->offthread)
     slot = this->dataPtr->AcquireOffloadSlot();   // blocks if all are busy
   else
