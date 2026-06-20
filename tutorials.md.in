@@ -12,6 +12,7 @@ Gazebo @GZ_DESIGNATION_CAP@ library and how to use the library effectively.
 4. \subpage thermalcameraigngazebo "Thermal Camera in Gazebo": Using a thermal camera in Gazebo to detect objects of specific temperatures in camera images.
 5. \subpage segmentationcamera_igngazebo "Segmentation Camera in Gazebo"
 6. \subpage boundingbox_camera "Bounding Box Camera in Gazebo"
+7. \subpage rgbdoffthread "Off-thread RGBD publish": Tuning the worker pool for many RGBD cameras
 
 ## License
 
