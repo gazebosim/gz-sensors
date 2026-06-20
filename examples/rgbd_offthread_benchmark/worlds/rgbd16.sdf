@@ -1,0 +1,346 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="rgbd16">
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size><real_time_factor>1.0</real_time_factor>
+    </physics>
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows><pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse><specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+    <model name="ground_plane"><static>true</static><link name="link">
+      <visual name="visual"><geometry><plane><normal>0 0 1</normal><size>40 40</size></plane></geometry>
+        <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.5 0.5 0.5 1</diffuse></material></visual>
+    </link></model>
+
+    <model name="obj_0">
+      <static>true</static>
+      <pose>0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="v">
+          <geometry><box><size>0.50 0.50 1.00</size></box></geometry>
+          <material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse>
+            <specular>0.3 0.3 0.3 1</specular></material>
+        </visual>
+      </link>
+    </model>
+    <model name="obj_1">
+      <static>true</static>
+      <pose>1.2 0.4 0.7 0 0 0</pose>
+      <link name="link">
+        <visual name="v">
+          <geometry><sphere><radius>0.70</radius></sphere></geometry>
+          <material><ambient>0.2 0.7 0.3 1</ambient><diffuse>0.2 0.7 0.3 1</diffuse>
+            <specular>0.3 0.3 0.3 1</specular></material>
+        </visual>
+      </link>
+    </model>
+    <model name="obj_2">
+      <static>true</static>
+      <pose>-1.0 0.8 0.4 0 0 0</pose>
+      <link name="link">
+        <visual name="v">
+          <geometry><box><size>1.10 0.50 0.80</size></box></geometry>
+          <material><ambient>0.2 0.4 0.85 1</ambient><diffuse>0.2 0.4 0.85 1</diffuse>
+            <specular>0.3 0.3 0.3 1</specular></material>
+        </visual>
+      </link>
+    </model>
+    <model name="obj_3">
+      <static>true</static>
+      <pose>0.5 -1.2 0.6 0 0 0</pose>
+      <link name="link">
+        <visual name="v">
+          <geometry><sphere><radius>0.60</radius></sphere></geometry>
+          <material><ambient>0.85 0.75 0.2 1</ambient><diffuse>0.85 0.75 0.2 1</diffuse>
+            <specular>0.3 0.3 0.3 1</specular></material>
+        </visual>
+      </link>
+    </model>
+    <model name="obj_4">
+      <static>true</static>
+      <pose>-1.1 -0.9 0.9 0 0 0</pose>
+      <link name="link">
+        <visual name="v">
+          <geometry><box><size>0.80 0.50 1.80</size></box></geometry>
+          <material><ambient>0.7 0.3 0.75 1</ambient><diffuse>0.7 0.3 0.75 1</diffuse>
+            <specular>0.3 0.3 0.3 1</specular></material>
+        </visual>
+      </link>
+    </model>
+    <model name="obj_5">
+      <static>true</static>
+      <pose>1.3 -0.6 0.3 0 0 0</pose>
+      <link name="link">
+        <visual name="v">
+          <geometry><sphere><radius>0.30</radius></sphere></geometry>
+          <material><ambient>0.3 0.75 0.8 1</ambient><diffuse>0.3 0.75 0.8 1</diffuse>
+            <specular>0.3 0.3 0.3 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="rgbd_0">
+      <static>true</static>
+      <pose>6.000 0.000 1.200 0 0.15 -3.1416</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_0</topic>
+        </sensor>
+      </link>
+    </model>
+    <model name="rgbd_1">
+      <static>true</static>
+      <pose>5.543 2.296 1.200 0 0.15 -2.7489</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_1</topic>
+        </sensor>
+      </link>
+    </model>
+    <model name="rgbd_2">
+      <static>true</static>
+      <pose>4.243 4.243 1.200 0 0.15 -2.3562</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_2</topic>
+        </sensor>
+      </link>
+    </model>
+    <model name="rgbd_3">
+      <static>true</static>
+      <pose>2.296 5.543 1.200 0 0.15 -1.9635</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_3</topic>
+        </sensor>
+      </link>
+    </model>
+    <model name="rgbd_4">
+      <static>true</static>
+      <pose>0.000 6.000 1.200 0 0.15 -1.5708</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_4</topic>
+        </sensor>
+      </link>
+    </model>
+    <model name="rgbd_5">
+      <static>true</static>
+      <pose>-2.296 5.543 1.200 0 0.15 -1.1781</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_5</topic>
+        </sensor>
+      </link>
+    </model>
+    <model name="rgbd_6">
+      <static>true</static>
+      <pose>-4.243 4.243 1.200 0 0.15 -0.7854</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_6</topic>
+        </sensor>
+      </link>
+    </model>
+    <model name="rgbd_7">
+      <static>true</static>
+      <pose>-5.543 2.296 1.200 0 0.15 -0.3927</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_7</topic>
+        </sensor>
+      </link>
+    </model>
+    <model name="rgbd_8">
+      <static>true</static>
+      <pose>-6.000 0.000 1.200 0 0.15 -0.0000</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_8</topic>
+        </sensor>
+      </link>
+    </model>
+    <model name="rgbd_9">
+      <static>true</static>
+      <pose>-5.543 -2.296 1.200 0 0.15 0.3927</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_9</topic>
+        </sensor>
+      </link>
+    </model>
+    <model name="rgbd_10">
+      <static>true</static>
+      <pose>-4.243 -4.243 1.200 0 0.15 0.7854</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_10</topic>
+        </sensor>
+      </link>
+    </model>
+    <model name="rgbd_11">
+      <static>true</static>
+      <pose>-2.296 -5.543 1.200 0 0.15 1.1781</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_11</topic>
+        </sensor>
+      </link>
+    </model>
+    <model name="rgbd_12">
+      <static>true</static>
+      <pose>-0.000 -6.000 1.200 0 0.15 1.5708</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_12</topic>
+        </sensor>
+      </link>
+    </model>
+    <model name="rgbd_13">
+      <static>true</static>
+      <pose>2.296 -5.543 1.200 0 0.15 1.9635</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_13</topic>
+        </sensor>
+      </link>
+    </model>
+    <model name="rgbd_14">
+      <static>true</static>
+      <pose>4.243 -4.243 1.200 0 0.15 2.3562</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_14</topic>
+        </sensor>
+      </link>
+    </model>
+    <model name="rgbd_15">
+      <static>true</static>
+      <pose>5.543 -2.296 1.200 0 0.15 2.7489</pose>
+      <link name="link">
+        <sensor name="rgbd" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <topic>rgbd_15</topic>
+        </sensor>
+      </link>
+    </model>
+  </world>
+</sdf>

@@ -181,8 +181,9 @@ The data confirms the model and sharpens it:
 **Verified optimum: 2–3 workers, queue depth 2** — the shipped defaults. The safe
 minimum is 1 worker; the practical ceiling before regression is ~4.
 
-Reproduce with `stage1_offthread/sweep_workers.sh` (drives
-`stage1_offthread/perf8.sh` across the matrix).
+Reproduce with the harness in `examples/rgbd_offthread_benchmark/`:
+`sweep_workers.sh` drives `perf8.sh` across the matrix on a bundled 16-camera
+world (see that directory's `README.md` for prerequisites and options).
 
 ## Recommended defaults
 
