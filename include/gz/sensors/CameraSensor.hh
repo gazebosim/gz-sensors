@@ -118,6 +118,11 @@ namespace gz
       /// \return Camera in Gazebo Rendering.
       public: virtual rendering::CameraPtr RenderingCamera() const;
 
+      /// \brief Set the camera info topic.
+      /// \param[in] _topic Topic sensor publishes camera info data to.
+      /// \return True if a valid topic was set.
+      public: bool SetInfoTopic(const std::string &_topic);
+
       /// \brief Topic where camera info is published.
       /// \return Camera info topic.
       public: const std::string& InfoTopic() const;
