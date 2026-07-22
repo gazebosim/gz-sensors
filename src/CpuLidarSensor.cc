@@ -444,7 +444,9 @@ void CpuLidarSensor::SetRaycastResults(
   for (size_t i = 0; i < _results.size(); ++i)
   {
     this->dataPtr->intensities[i] = _results[i].intensity;
-    if (std::isinf(_results[i].fraction))
+    // A miss is NaN on gz-physics9 and +INF on gz-physics10; !isfinite covers
+    // both. (Mirrors RayIntersectionT::IsHit().)
+    if (!std::isfinite(_results[i].fraction))
     {
       this->dataPtr->ranges[i] =
         std::numeric_limits<double>::infinity();

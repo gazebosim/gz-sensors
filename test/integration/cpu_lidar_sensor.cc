@@ -246,12 +246,12 @@ TEST_F(CpuLidarSensorTest, GenerateRaysMultiLayer)
 /////////////////////////////////////////////////
 TEST_F(CpuLidarSensorTest, SetRaycastResults)
 {
-  // 3 horizontal rays, range [0.1, 5.0]
+  // 4 horizontal rays, range [0.1, 5.0]
   gz::math::Pose3d sensorPose(gz::math::Vector3d::Zero,
       gz::math::Quaterniond::Identity);
   auto sdf = CpuLidarToSdf("test_results", sensorPose, 10,
       "/test/results",
-      3, -GZ_PI / 4, GZ_PI / 4,
+      4, -GZ_PI / 4, GZ_PI / 4,
       1, 0, 0,
       0.1, 5.0, true, false);
   ASSERT_NE(nullptr, sdf);
@@ -261,15 +261,16 @@ TEST_F(CpuLidarSensorTest, SetRaycastResults)
   ASSERT_NE(nullptr, sensor);
 
   auto rays = sensor->GenerateRays();
-  ASSERT_EQ(3u, rays.size());
+  ASSERT_EQ(4u, rays.size());
 
-  // Build results: hit at fraction 0.5, no hit, hit at fraction 0.0
-  std::vector<gz::sensors::CpuLidarSensor::RayResult> results(3);
+  // Build results: hit at fraction 0.5, no hit (+INF), hit at fraction 0.0,
+  // no hit (NaN)
+  std::vector<gz::sensors::CpuLidarSensor::RayResult> results(4);
 
   results[0].fraction = 0.5;
   results[0].point = rays[0].first + 0.5 * (rays[0].second - rays[0].first);
 
-  // Ray 1: no hit — +INF fraction
+  // Ray 1: no hit — +INF fraction (gz-physics10 miss convention)
   results[1].fraction = std::numeric_limits<double>::infinity();
   results[1].point = {std::numeric_limits<double>::quiet_NaN(),
                       std::numeric_limits<double>::quiet_NaN(),
@@ -279,18 +280,29 @@ TEST_F(CpuLidarSensorTest, SetRaycastResults)
   results[2].fraction = 0.0;
   results[2].point = rays[2].first;
 
+  // Ray 3: no hit — NaN fraction (gz-physics9 miss convention). The sensor
+  // must still publish +inf per REP-117, not a NaN range.
+  results[3].fraction = std::numeric_limits<double>::quiet_NaN();
+  results[3].point = {std::numeric_limits<double>::quiet_NaN(),
+                      std::numeric_limits<double>::quiet_NaN(),
+                      std::numeric_limits<double>::quiet_NaN()};
+
   sensor->SetRaycastResults(results);
 
   std::vector<double> ranges;
   sensor->Ranges(ranges);
 
-  ASSERT_EQ(3u, ranges.size());
+  ASSERT_EQ(4u, ranges.size());
   // Ray 0: hit at midpoint between range_min and range_max
   EXPECT_NEAR(2.55, ranges[0], 1e-4);
-  // Ray 1: no hit → +inf (REP-117)
+  // Ray 1: no hit (+INF fraction) → +inf (REP-117)
   EXPECT_TRUE(std::isinf(ranges[1]));
+  EXPECT_GT(ranges[1], 0.0);
   // Ray 2: hit at range_min
   EXPECT_NEAR(0.1, ranges[2], 1e-4);
+  // Ray 3: no hit (NaN fraction) → +inf (REP-117), not NaN
+  EXPECT_TRUE(std::isinf(ranges[3]));
+  EXPECT_GT(ranges[3], 0.0);
 }
 
 /////////////////////////////////////////////////
