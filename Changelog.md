@@ -1,5 +1,23 @@
 ## Gazebo Sensors 10
 
+### Gazebo Sensors 10.0.2 (2026-07-23)
+
+1. Bazel updates
+    * [Pull request #634](https://github.com/gazebosim/gz-sensors/pull/634)
+    * [Pull request #631](https://github.com/gazebosim/gz-sensors/pull/631)
+
+1. Fix memory leak in BoundingBoxCameraSensor
+    * [Pull request #625](https://github.com/gazebosim/gz-sensors/pull/625)
+
+1. Fix compiler warnings with protobuf 35.0
+    * [Pull request #618](https://github.com/gazebosim/gz-sensors/pull/618)
+
+1. Use GTEST_SKIP in unsupported tests
+    * [Pull request #604](https://github.com/gazebosim/gz-sensors/pull/604)
+
+1. fix(thermal_camera): Fixed Gaussian noise for thermal camera.
+    * [Pull request #597](https://github.com/gazebosim/gz-sensors/pull/597)
+
 ### Gazebo Sensors 10.0.1 (2026-01-20)
 
 1. Find jetty packages with explicit version
