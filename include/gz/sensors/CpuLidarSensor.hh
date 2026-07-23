@@ -48,8 +48,9 @@ namespace gz
         /// \brief Hit point in entity frame
         gz::math::Vector3d point;
 
-        /// \brief Fraction along the ray [0,1]; +INF if no object in range;
-        /// NaN on error.
+        /// \brief Fraction along the ray [0,1]; non-finite if no object in
+        /// range: NaN on gz-physics9, +INF on gz-physics10 (REP-117). Misses
+        /// are detected with !std::isfinite, which covers both.
         double fraction;
 
         /// \brief Normal at hit point in entity frame
