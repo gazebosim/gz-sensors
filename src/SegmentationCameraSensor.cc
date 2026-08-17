@@ -512,6 +512,7 @@ bool SegmentationCameraSensor::Update(
   // time stamp
   auto stamp = this->dataPtr->coloredMapMsg.mutable_header()->mutable_stamp();
   *stamp = msgs::Convert(_now);
+  this->dataPtr->coloredMapMsg.mutable_header()->clear_data();
   auto frame = this->dataPtr->coloredMapMsg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->FrameId());
