@@ -149,6 +149,36 @@ TEST(Sensor_TEST, Topic)
   EXPECT_FALSE(sensor.SetTopic(""));
 }
 
+//////////////////////////////////////////////////
+TEST(Sensor_TEST, CameraClipPlanes)
+{
+  sdf::Camera camera;
+  camera.SetNearClip(0.1);
+  camera.SetFarClip(10.0);
+
+  sdf::Sensor sdfSensor;
+  sdfSensor.SetName("valid_camera");
+  sdfSensor.SetType(sdf::SensorType::DEPTH_CAMERA);
+  sdfSensor.SetCameraSensor(camera);
+
+  TestSensor validSensor;
+  EXPECT_TRUE(validSensor.Load(sdfSensor));
+
+  camera.SetNearClip(1e308);
+  sdfSensor.SetName("invalid_camera");
+  sdfSensor.SetCameraSensor(camera);
+
+  TestSensor invalidSensor;
+  EXPECT_FALSE(invalidSensor.Load(sdfSensor));
+
+  camera.SetNearClip(10.0);
+  sdfSensor.SetName("equal_camera");
+  sdfSensor.SetCameraSensor(camera);
+
+  TestSensor equalSensor;
+  EXPECT_FALSE(equalSensor.Load(sdfSensor));
+}
+
 class SensorUpdate : public ::testing::Test
 {
   // Documentation inherited

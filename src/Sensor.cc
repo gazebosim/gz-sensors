@@ -231,6 +231,15 @@ Sensor::~Sensor() = default;
 //////////////////////////////////////////////////
 bool Sensor::Load(const sdf::Sensor &_sdf)
 {
+  const auto camera = _sdf.CameraSensor();
+  if (camera && !(camera->NearClip() < camera->FarClip()))
+  {
+    gzerr << "Invalid camera clip planes for sensor [" << _sdf.Name()
+           << "]: near [" << camera->NearClip() << "] must be less than far ["
+           << camera->FarClip() << "]." << std::endl;
+    return false;
+  }
+
   const bool success = this->dataPtr->PopulateFromSDF(_sdf);
   if (!success)
     return false;
