@@ -248,7 +248,15 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
     this->SetTriggered(true, triggerTopic);
   }
 
-  if (!this->AdvertiseInfo(this->Topic() + "/camera_info"))
+  if (!_sdf.CameraSensor()->CameraInfoTopic().empty())
+  {
+    this->SetInfoTopic(_sdf.CameraSensor()->CameraInfoTopic());
+  }
+  else
+  {
+    this->SetInfoTopic(this->Topic() + "/camera_info");
+  }
+  if (!this->AdvertiseInfo())
     return false;
 
   if (this->Scene())

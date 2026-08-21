@@ -153,7 +153,7 @@ class DepthCameraSensorTest: public testing::Test,
     }
 #endif
   }
-  // Create a Camera sensor from a SDF and gets a image message
+  // Create a depth amera sensor from a SDF and gets a image message
   public: void ImagesWithBuiltinSDF(const std::string &_renderEngine);
 
   // Create depth camera sensors and verify camera intrinsics
@@ -161,6 +161,9 @@ class DepthCameraSensorTest: public testing::Test,
 
   // Create depth camera sensors and verify camera projection
   public: void DepthCameraProjection(const std::string &_renderEngine);
+
+  // Create a depth camera sensor and verify a custom camera info topic
+  public: void CustomCameraInfoTopic(const std::string &_renderEngine);
 };
 
 void DepthCameraSensorTest::ImagesWithBuiltinSDF(
@@ -900,6 +903,74 @@ TEST_P(DepthCameraSensorTest, CameraProjection)
 {
   gz::common::Console::SetVerbosity(2);
   DepthCameraProjection(GetParam());
+}
+
+//////////////////////////////////////////////////
+void DepthCameraSensorTest::CustomCameraInfoTopic(
+    const std::string &_renderEngine)
+{
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+      "sdf", "custom_camera_info_topic.sdf");
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  ASSERT_NE(nullptr, doc->Root());
+  ASSERT_TRUE(doc->Root()->HasElement("model"));
+  auto modelPtr = doc->Root()->GetElement("model");
+  ASSERT_TRUE(modelPtr->HasElement("link"));
+  auto linkPtr = modelPtr->GetElement("link");
+  while (linkPtr)
+  {
+    if(linkPtr->Get<std::string>("name") == "depth_camera_link")
+    {
+      break;
+    }
+    linkPtr = linkPtr->GetNextElement("link");
+  }
+  ASSERT_NE(nullptr, linkPtr);
+  ASSERT_TRUE(linkPtr->HasElement("sensor"));
+  auto sensorPtr = linkPtr->GetElement("sensor");
+  ASSERT_NE(nullptr, sensorPtr);
+
+  // Setup gz-rendering with an empty scene.
+  auto *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+                 << "' is not supported" << std::endl;
+  }
+
+  auto scene = engine->CreateScene("scene");
+
+  gz::sensors::Manager mgr;
+  auto *sensor =
+      mgr.CreateSensor<gz::sensors::DepthCameraSensor>(sensorPtr);
+
+  ASSERT_NE(nullptr, sensor);
+  sensor->SetScene(scene);
+
+  const std::string customInfoTopic = "/test_depth_camera_info";
+  WaitForMessageTestHelper<gz::msgs::CameraInfo> infoHelper(
+      customInfoTopic);
+
+  EXPECT_TRUE(sensor->HasConnections());
+
+  // Update once to create image
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+
+  EXPECT_TRUE(infoHelper.WaitForMessage()) << infoHelper;
+
+  // Clean up
+  mgr.Remove(sensor->Id());
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+TEST_P(DepthCameraSensorTest, CustomCameraInfoTopic)
+{
+  gz::common::Console::SetVerbosity(4);
+  CustomCameraInfoTopic(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(DepthCameraSensor, DepthCameraSensorTest,
