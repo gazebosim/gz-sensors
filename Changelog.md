@@ -2,6 +2,9 @@
 
 ### Gazebo Sensors 10.0.2 (2026-07-23)
 
+1. Backport CpuLidarSensor (#593) to gz-sensors10
+    * [Pull request #593](https://github.com/gazebosim/gz-sensors/pull/593) to gz-sensors10 (#637)
+
 1. Bazel updates
     * [Pull request #634](https://github.com/gazebosim/gz-sensors/pull/634)
     * [Pull request #631](https://github.com/gazebosim/gz-sensors/pull/631)
