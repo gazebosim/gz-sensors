@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<sdf version="1.6" xmlns:gz="http://gazebosim.org/schema">
+  <model name="m1">
+    <link name="link1">
+      <sensor name="camera1" type="rgbd_camera">
+        <update_rate>10</update_rate>
+        <topic>/test/integration/RgbdCameraPlugin_rosConvention</topic>
+        <frame_id>camera1_optical_link</frame_id>
+        <camera>
+          <horizontal_fov>1.05</horizontal_fov>
+          <image>
+            <width>257</width>
+            <height>257</height>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>10.0</far>
+          </clip>
+          <gz:use_ros_convention>true</gz:use_ros_convention>
+        </camera>
+      </sensor>
+    </link>
+  </model>
+</sdf>

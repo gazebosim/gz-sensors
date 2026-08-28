@@ -127,6 +127,10 @@ class gz::sensors::RgbdCameraSensor::Implementation
   /// \brief SDF Sensor DOM object.
   public: sdf::Sensor sdfSensor;
 
+  /// \brief If true, publish point cloud coordinates in the ROS optical frame
+  /// convention (X right, Y down, Z forward/depth).
+  public: bool useRosConvention = false;
+
   /// \brief The point cloud message.
   public: msgs::PointCloudPacked pointMsg;
 
@@ -194,6 +198,8 @@ bool RgbdCameraSensor::Load(const sdf::Sensor &_sdf)
   }
 
   this->dataPtr->sdfSensor = _sdf;
+
+  this->dataPtr->useRosConvention = useRosConvention(_sdf);
 
   // Create the 2d image publisher
   this->dataPtr->imagePub =
@@ -582,7 +588,8 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
         // fill point cloud msg and image data
         this->dataPtr->pointsUtil.FillMsg(this->dataPtr->pointMsg,
             this->dataPtr->pointCloudBuffer, true,
-            this->dataPtr->image.Data<unsigned char>());
+            this->dataPtr->image.Data<unsigned char>(), nullptr,
+            this->dataPtr->useRosConvention);
         filledImgData = true;
       }
 

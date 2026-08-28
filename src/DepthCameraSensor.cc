@@ -134,6 +134,10 @@ class gz::sensors::DepthCameraSensor::Implementation
   /// \brief SDF Sensor DOM object.
   public: sdf::Sensor sdfSensor;
 
+  /// \brief If true, publish point cloud coordinates in the ROS optical frame
+  /// convention (X right, Y down, Z forward/depth).
+  public: bool useRosConvention = false;
+
   /// \brief The point cloud message.
   public: msgs::PointCloudPacked pointMsg;
 
@@ -268,6 +272,8 @@ bool DepthCameraSensor::Load(const sdf::Sensor &_sdf)
   }
 
   this->dataPtr->sdfSensor = _sdf;
+
+  this->dataPtr->useRosConvention = useRosConvention(_sdf);
 
   if (this->Topic().empty())
     this->SetTopic("/camera/depth");
@@ -648,7 +654,8 @@ bool DepthCameraSensor::Update(
     // fill the point cloud msg with data from xyz and rgb buffer
     this->dataPtr->pointsUtil.FillMsg(this->dataPtr->pointMsg,
         this->dataPtr->xyzBuffer,
-        this->dataPtr->image.Data<unsigned char>());
+        this->dataPtr->image.Data<unsigned char>(),
+        this->dataPtr->useRosConvention);
 
     this->AddSequence(this->dataPtr->pointMsg.mutable_header(), "pointMsg");
     this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
