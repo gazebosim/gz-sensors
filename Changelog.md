@@ -1,5 +1,10 @@
 ## Gazebo Sensors 10
 
+### Gazebo Sensors 10.1.1 (2026-09-01)
+
+1. [bazel] Fix build on macos
+    * [Pull request #622](https://github.com/gazebosim/gz-sensors/pull/622)
+
 ### Gazebo Sensors 10.1.0 (2026-08-26)
 
 1. Backport CpuLidarSensor (#593) to gz-sensors10
