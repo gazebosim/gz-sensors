@@ -17,11 +17,9 @@
 #ifndef GZ_SENSORS_RGBDCAMERASENSOR_HH_
 #define GZ_SENSORS_RGBDCAMERASENSOR_HH_
 
-#include <memory>
-
 #include <sdf/sdf.hh>
 
-#include <gz/utils/SuppressWarning.hh>
+#include <gz/utils/ImplPtr.hh>
 
 #include "gz/sensors/CameraSensor.hh"
 #include "gz/sensors/config.hh"
@@ -34,8 +32,6 @@ namespace gz
   {
     // Inline bracket to help doxygen filtering.
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
-    // forward declarations
-    class RgbdCameraSensorPrivate;
 
     /// \brief RGBD camera sensor class.
     ///
@@ -109,11 +105,7 @@ namespace gz
       /// \return True on success.
       private: bool CreateCameras();
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \brief Data pointer for private data
-      /// \internal
-      private: std::unique_ptr<RgbdCameraSensorPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

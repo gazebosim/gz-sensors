@@ -37,8 +37,7 @@
 using namespace gz;
 using namespace sensors;
 
-/// \brief Private data for ImuSensor
-class gz::sensors::ImuSensorPrivate
+class gz::sensors::ImuSensor::Implementation
 {
   /// \brief node to create publisher
   public: transport::Node node;
@@ -100,14 +99,12 @@ class gz::sensors::ImuSensorPrivate
 
 //////////////////////////////////////////////////
 ImuSensor::ImuSensor()
-  : dataPtr(new ImuSensorPrivate())
+  : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
-ImuSensor::~ImuSensor()
-{
-}
+ImuSensor::~ImuSensor() = default;
 
 //////////////////////////////////////////////////
 bool ImuSensor::Init()

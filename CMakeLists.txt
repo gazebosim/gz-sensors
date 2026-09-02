@@ -53,6 +53,10 @@ gz_find_package(gz-common
                  REQUIRED)
 
 #--------------------------------------
+# Find gz-utils
+gz_find_package(gz-utils REQUIRED) 
+
+#--------------------------------------
 # Find gz-transport
 gz_find_package(gz-transport REQUIRED)
 

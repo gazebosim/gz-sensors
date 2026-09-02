@@ -41,7 +41,7 @@
 using namespace gz;
 using namespace sensors;
 
-class gz::sensors::ImageBrownDistortionModelPrivate
+class gz::sensors::ImageBrownDistortionModel::Implementation
 {
   /// \brief The radial distortion coefficient k1.
   public: double k1 = 0.0;
@@ -67,16 +67,12 @@ class gz::sensors::ImageBrownDistortionModelPrivate
 
 //////////////////////////////////////////////////
 ImageBrownDistortionModel::ImageBrownDistortionModel()
-  : BrownDistortionModel(), dataPtr(new ImageBrownDistortionModelPrivate())
+  : BrownDistortionModel(), dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
-ImageBrownDistortionModel::~ImageBrownDistortionModel()
-{
-  delete this->dataPtr;
-  this->dataPtr = nullptr;
-}
+ImageBrownDistortionModel::~ImageBrownDistortionModel() = default;
 
 //////////////////////////////////////////////////
 void ImageBrownDistortionModel::Load(const sdf::Camera &_sdf)

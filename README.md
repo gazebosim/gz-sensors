@@ -10,9 +10,10 @@
 Build | Status
 -- | --
 Test coverage | [![codecov](https://codecov.io/gh/gazebosim/gz-sensors/tree/main/graph/badge.svg)](https://codecov.io/gh/gazebosim/gz-sensors/tree/main)
-Ubuntu Noble | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=gz_sensors-ci-main-noble-amd64)](https://build.osrfoundation.org/job/gz_sensors-ci-main-noble-amd64)
-Homebrew      | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=gz_sensors-ci-main-homebrew-amd64)](https://build.osrfoundation.org/job/gz_sensors-ci-main-homebrew-amd64)
-Windows       | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=gz_sensors-main-clowin)](https://build.osrfoundation.org/job/gz_sensors-main-clowin/)
+GitHub: Ubuntu Noble  | [![Ubuntu CI](https://github.com/gazebosim/gz-sensors/actions/workflows/ci.yml/badge.svg)](https://github.com/gazebosim/gz-sensors/actions/workflows/ci.yml?query=branch%3Amain)
+Jenkins: Ubuntu Noble | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=gz_sensors-ci-main-noble-amd64)](https://build.osrfoundation.org/job/gz_sensors-ci-main-noble-amd64)
+Jenkins: Homebrew     | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=gz_sensors-ci-main-homebrew-amd64)](https://build.osrfoundation.org/job/gz_sensors-ci-main-homebrew-amd64)
+Jenkins: Windows      | [![Build Status](https://build.osrfoundation.org/buildStatus/icon?job=gz_sensors-main-cnlwin)](https://build.osrfoundation.org/job/gz_sensors-main-cnlwin/)
 
 Gazebo Sensors, a component of [Gazebo](https://gazebosim.org),
 provides numerous sensor models

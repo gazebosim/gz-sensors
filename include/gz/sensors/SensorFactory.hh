@@ -23,7 +23,7 @@
 #include <sdf/sdf.hh>
 
 #include <gz/common/Console.hh>
-#include <gz/utils/SuppressWarning.hh>
+#include <gz/utils/ImplPtr.hh>
 
 #include <gz/sensors/config.hh>
 #include <gz/sensors/Export.hh>
@@ -36,9 +36,6 @@ namespace gz
   {
     // Inline bracket to help doxygen filtering.
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
-    // forward declaration
-    class SensorFactoryPrivate;
-
     /// \brief A factory class for creating sensors
     /// This class instantiates sensor objects based on the sensor type and
     /// makes sure they're initialized correctly.
@@ -138,10 +135,7 @@ namespace gz
                 return sensor;
               }
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \brief private data pointer
-      private: std::unique_ptr<SensorFactoryPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

@@ -41,7 +41,7 @@ using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for WideAngleCameraSensor
-class gz::sensors::WideAngleCameraSensorPrivate
+class gz::sensors::WideAngleCameraSensor::Implementation
 {
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
@@ -114,7 +114,7 @@ class gz::sensors::WideAngleCameraSensorPrivate
 
 //////////////////////////////////////////////////
 WideAngleCameraSensor::WideAngleCameraSensor()
-  : dataPtr(new WideAngleCameraSensorPrivate())
+  : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
@@ -541,7 +541,8 @@ bool WideAngleCameraSensor::Update(
 }
 
 //////////////////////////////////////////////////
-bool WideAngleCameraSensorPrivate::SaveImage(const unsigned char *_data,
+bool WideAngleCameraSensor::Implementation::SaveImage(
+    const unsigned char *_data,
     unsigned int _width, unsigned int _height,
     gz::common::Image::PixelFormatType _format)
 {

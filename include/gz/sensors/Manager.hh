@@ -22,7 +22,7 @@
 #include <utility>
 #include <type_traits>
 #include <sdf/sdf.hh>
-#include <gz/utils/SuppressWarning.hh>
+#include <gz/utils/ImplPtr.hh>
 #include <gz/common/Console.hh>
 #include <gz/sensors/config.hh>
 #include <gz/sensors/Export.hh>
@@ -35,9 +35,6 @@ namespace gz
   {
     // Inline bracket to help doxygen filtering.
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
-    // Forward declarations
-    class ManagerPrivate;
-
     /// \brief Loads and runs sensors
     ///
     ///   This class is responsible for loading and running sensors, and
@@ -114,10 +111,7 @@ namespace gz
       public: void RunOnce(const std::chrono::steady_clock::duration &_time,
                   bool _force = false);
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \brief private data pointer
-      private: std::unique_ptr<ManagerPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

@@ -28,10 +28,9 @@
 #endif
 
 #include <chrono>
-#include <memory>
 #include <string>
 
-#include <gz/utils/SuppressWarning.hh>
+#include <gz/utils/ImplPtr.hh>
 #include <gz/math/Pose3.hh>
 #include <gz/sensors/config.hh>
 #include <gz/sensors/Export.hh>
@@ -47,9 +46,6 @@ namespace gz
     /// \brief A string used to identify a sensor
     using SensorId = std::size_t;
     const SensorId NO_SENSOR = 0;
-
-    /// \brief forward declarations
-    class SensorPrivate;
 
     /// \brief a base sensor class
     ///
@@ -257,11 +253,7 @@ namespace gz
       /// \return True if the sensor is in trigger mode, false otherwise
       public: bool IsTriggered() const;
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \internal
-      /// \brief Data pointer for private data
-      private: std::unique_ptr<SensorPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

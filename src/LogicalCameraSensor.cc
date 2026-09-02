@@ -30,8 +30,7 @@
 using namespace gz;
 using namespace sensors;
 
-/// \brief Private data for LogicalCameraSensor
-class gz::sensors::LogicalCameraSensorPrivate
+class gz::sensors::LogicalCameraSensor::Implementation
 {
   /// \brief node to create publisher
   public: transport::Node node;
@@ -69,14 +68,12 @@ class gz::sensors::LogicalCameraSensorPrivate
 
 //////////////////////////////////////////////////
 LogicalCameraSensor::LogicalCameraSensor()
-  : dataPtr(new LogicalCameraSensorPrivate())
+  : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
-LogicalCameraSensor::~LogicalCameraSensor()
-{
-}
+LogicalCameraSensor::~LogicalCameraSensor() = default;
 
 //////////////////////////////////////////////////
 bool LogicalCameraSensor::Init()

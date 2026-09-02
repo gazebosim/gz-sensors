@@ -42,7 +42,7 @@
 #include "PointCloudUtil.hh"
 
 /// \brief Private data for RgbdCameraSensor
-class gz::sensors::RgbdCameraSensorPrivate
+class gz::sensors::RgbdCameraSensor::Implementation
 {
   /// \brief Depth data callback used to get the data from the sensor
   /// \param[in] _scan pointer to the data from the sensor
@@ -140,7 +140,7 @@ using namespace sensors;
 
 //////////////////////////////////////////////////
 RgbdCameraSensor::RgbdCameraSensor()
-  : dataPtr(new RgbdCameraSensorPrivate())
+  : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
@@ -369,7 +369,7 @@ bool RgbdCameraSensor::CreateCameras()
 
   this->dataPtr->depthConnection =
       this->dataPtr->depthCamera->ConnectNewDepthFrame(
-        std::bind(&RgbdCameraSensorPrivate::OnNewDepthFrame,
+        std::bind(&RgbdCameraSensor::Implementation::OnNewDepthFrame,
         this->dataPtr.get(),
         std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
         std::placeholders::_4, std::placeholders::_5));
@@ -406,7 +406,7 @@ void RgbdCameraSensor::SetScene(rendering::ScenePtr _scene)
 }
 
 /////////////////////////////////////////////////
-void RgbdCameraSensorPrivate::OnNewDepthFrame(const float *_scan,
+void RgbdCameraSensor::Implementation::OnNewDepthFrame(const float *_scan,
                     unsigned int _width, unsigned int _height,
                     unsigned int /*_channels*/,
                     const std::string &/*_format*/)
@@ -424,7 +424,7 @@ void RgbdCameraSensorPrivate::OnNewDepthFrame(const float *_scan,
 }
 
 /////////////////////////////////////////////////
-void RgbdCameraSensorPrivate::OnNewRgbPointCloud(const float *_scan,
+void RgbdCameraSensor::Implementation::OnNewRgbPointCloud(const float *_scan,
                     unsigned int _width, unsigned int _height,
                     unsigned int _channels,
                     const std::string &/*_format*/)
@@ -477,7 +477,7 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     this->dataPtr->pointCloudConnection =
         this->dataPtr->depthCamera->ConnectNewRgbPointCloud(
-        std::bind(&RgbdCameraSensorPrivate::OnNewRgbPointCloud,
+        std::bind(&RgbdCameraSensor::Implementation::OnNewRgbPointCloud,
         this->dataPtr.get(),
         std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
         std::placeholders::_4, std::placeholders::_5));

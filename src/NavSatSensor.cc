@@ -41,8 +41,7 @@
 using namespace gz;
 using namespace sensors;
 
-/// \brief Private data for NavSat
-class gz::sensors::NavSatPrivate
+class gz::sensors::NavSatSensor::Implementation
 {
   /// \brief Node to create publisher
   public: transport::Node node;
@@ -71,7 +70,7 @@ class gz::sensors::NavSatPrivate
 
 //////////////////////////////////////////////////
 NavSatSensor::NavSatSensor()
-  : dataPtr(std::make_unique<NavSatPrivate>())
+  : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 

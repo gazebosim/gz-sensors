@@ -17,14 +17,13 @@
 #ifndef GZ_SENSORS_WIDEANGLECAMERASENSOR_HH_
 #define GZ_SENSORS_WIDEANGLECAMERASENSOR_HH_
 
-#include <memory>
 #include <cstdint>
 #include <string>
 
 #include <sdf/sdf.hh>
 
 #include <gz/common/Event.hh>
-#include <gz/utils/SuppressWarning.hh>
+#include <gz/utils/ImplPtr.hh>
 
 #include <gz/msgs/image.pb.h>
 
@@ -50,8 +49,6 @@ namespace gz
   {
     // Inline bracket to help doxygen filtering.
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
-    // forward declarations
-    class WideAngleCameraSensorPrivate;
 
     /// \brief Wide Angle camera sensor class.
     ///
@@ -138,11 +135,7 @@ namespace gz
       /// \return True on success.
       private: bool CreateCamera();
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \brief Data pointer for private data
-      /// \internal
-      private: std::unique_ptr<WideAngleCameraSensorPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

@@ -37,8 +37,7 @@
 using namespace gz;
 using namespace sensors;
 
-/// \brief Private data for MagnetometerSensor
-class gz::sensors::MagnetometerSensorPrivate
+class gz::sensors::MagnetometerSensor::Implementation
 {
   /// \brief node to create publisher
   public: transport::Node node;
@@ -66,14 +65,12 @@ class gz::sensors::MagnetometerSensorPrivate
 
 //////////////////////////////////////////////////
 MagnetometerSensor::MagnetometerSensor()
-  : dataPtr(new MagnetometerSensorPrivate())
+  : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
-MagnetometerSensor::~MagnetometerSensor()
-{
-}
+MagnetometerSensor::~MagnetometerSensor() = default;
 
 //////////////////////////////////////////////////
 bool MagnetometerSensor::Init()

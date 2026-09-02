@@ -17,9 +17,7 @@
 #ifndef GZ_SENSORS_RENDERINGSENSOR_HH_
 #define GZ_SENSORS_RENDERINGSENSOR_HH_
 
-#include <memory>
-
-#include <gz/utils/SuppressWarning.hh>
+#include <gz/utils/ImplPtr.hh>
 
 // TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
@@ -42,9 +40,6 @@ namespace gz
     // Inline bracket to help doxygen filtering.
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
-    /// \brief forward declarations
-    class RenderingSensorPrivate;
-
     /// \brief a rendering sensor class
     ///
     ///   This class is a base for all rendering sensor classes. It provides
@@ -86,11 +81,7 @@ namespace gz
       /// \param[in] _sensor Sensor to add.
       protected: void AddSensor(rendering::SensorPtr _sensor);
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \internal
-      /// \brief Data pointer for private data
-      private: std::unique_ptr<RenderingSensorPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

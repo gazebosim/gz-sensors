@@ -17,9 +17,7 @@
 #ifndef GZ_SENSORS_NAVSAT_HH_
 #define GZ_SENSORS_NAVSAT_HH_
 
-#include <memory>
-
-#include <gz/utils/SuppressWarning.hh>
+#include <gz/utils/ImplPtr.hh>
 #include <sdf/Sensor.hh>
 
 #include "gz/sensors/config.hh"
@@ -35,8 +33,6 @@ namespace gz
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief forward declarations
-    class NavSatPrivate;
-
     /// \brief NavSat Sensor Class
     ///
     /// A sensor that reports position and velocity readings over
@@ -119,11 +115,7 @@ namespace gz
       public: void SetPosition(const math::Angle &_latitude,
           const math::Angle &_longitude, double _altitude = 0.0);
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \brief Data pointer for private data
-      /// \internal
-      private: std::unique_ptr<NavSatPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

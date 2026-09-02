@@ -36,7 +36,7 @@
 using namespace gz::sensors;
 
 /// \brief Private data for the GpuLidar class
-class gz::sensors::GpuLidarSensorPrivate
+class gz::sensors::GpuLidarSensor::Implementation
 {
   /// \brief Fill the point cloud packed message
   /// \param[in] _laserBuffer Lidar data buffer.
@@ -75,7 +75,7 @@ class gz::sensors::GpuLidarSensorPrivate
 
 //////////////////////////////////////////////////
 GpuLidarSensor::GpuLidarSensor()
-  : dataPtr(new GpuLidarSensorPrivate())
+  : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
@@ -349,7 +349,8 @@ bool GpuLidarSensor::HasConnections() const
 }
 
 //////////////////////////////////////////////////
-void GpuLidarSensorPrivate::FillPointCloudMsg(const float *_laserBuffer)
+void GpuLidarSensor::Implementation::FillPointCloudMsg(
+    const float *_laserBuffer)
 {
   GZ_PROFILE("GpuLidarSensorPrivate::FillPointCloudMsg");
   uint32_t width = this->pointMsg.width();

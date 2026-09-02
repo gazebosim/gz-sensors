@@ -18,12 +18,11 @@
 #define GZ_SENSORS_LOGICALCAMERASENSOR_HH_
 
 #include <map>
-#include <memory>
 #include <string>
 
 #include <sdf/sdf.hh>
 
-#include <gz/utils/SuppressWarning.hh>
+#include <gz/utils/ImplPtr.hh>
 
 #include <gz/math/Angle.hh>
 
@@ -41,9 +40,6 @@ namespace gz
     // Inline bracket to help doxygen filtering.
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
-    /// \brief forward declarations
-    class LogicalCameraSensorPrivate;
-
     /// \brief Logical Camera Sensor Class
     ///
     /// A logical camera reports locations of objects. This camera finds models
@@ -117,11 +113,7 @@ namespace gz
       /// \return List of detected models.
       public: msgs::LogicalCameraImage Image() const;
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \brief Data pointer for private data
-      /// \internal
-      private: std::unique_ptr<LogicalCameraSensorPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

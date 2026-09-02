@@ -17,11 +17,9 @@
 #ifndef GZ_SENSORS_IMUSENSOR_HH_
 #define GZ_SENSORS_IMUSENSOR_HH_
 
-#include <memory>
-
 #include <sdf/sdf.hh>
 
-#include <gz/utils/SuppressWarning.hh>
+#include <gz/utils/ImplPtr.hh>
 #include <gz/math/Pose3.hh>
 
 #include <gz/sensors/config.hh>
@@ -58,8 +56,6 @@ namespace gz
 
     ///
     /// \brief forward declarations
-    class ImuSensorPrivate;
-
     /// \brief Imu Sensor Class
     ///
     /// An imu sensor that reports linear acceleration, angular velocity, and
@@ -170,11 +166,7 @@ namespace gz
       /// \return True if there are subscribers, false otherwise
       public: virtual bool HasConnections() const override;
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \brief Data pointer for private data
-      /// \internal
-      private: std::unique_ptr<ImuSensorPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

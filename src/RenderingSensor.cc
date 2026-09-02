@@ -21,8 +21,7 @@
 
 #include "gz/sensors/RenderingSensor.hh"
 
-/// \brief Private data class for RenderingSensor
-class gz::sensors::RenderingSensorPrivate
+class gz::sensors::RenderingSensor::Implementation
 {
   /// \brief Pointer to the scene
   public: gz::rendering::ScenePtr scene;
@@ -40,7 +39,7 @@ using namespace sensors;
 
 //////////////////////////////////////////////////
 RenderingSensor::RenderingSensor() :
-  dataPtr(new RenderingSensorPrivate)
+  dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 

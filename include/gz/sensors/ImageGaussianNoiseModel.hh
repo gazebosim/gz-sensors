@@ -18,6 +18,7 @@
 #ifndef GZ_SENSORS_IMAGEGAUSSIANNOISEMODEL_HH_
 #define GZ_SENSORS_IMAGEGAUSSIANNOISEMODEL_HH_
 
+#include <gz/utils/ImplPtr.hh>
 #include <sdf/sdf.hh>
 
 // TODO(louise) Remove these pragmas once gz-rendering is disabling the
@@ -41,8 +42,6 @@ namespace gz
   {
     // Inline bracket to help doxygen filtering.
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
-    // Forward declarations
-    class ImageGaussianNoiseModelPrivate;
 
     /** \class ImageGaussianNoiseModel GaussianNoiseModel.hh \
     gz/sensors/GaussianNoiseModel.hh
@@ -66,8 +65,7 @@ namespace gz
       /// Documentation inherited
       public: virtual void Print(std::ostream &_out) const override;
 
-      /// \brief Private data pointer.
-      private: ImageGaussianNoiseModelPrivate *dataPtr = nullptr;
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
   }
   }

@@ -50,7 +50,7 @@
 #endif
 
 /// \brief Private data for DepthCameraSensor
-class gz::sensors::DepthCameraSensorPrivate
+class gz::sensors::DepthCameraSensor::Implementation
 {
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
@@ -149,7 +149,7 @@ using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////
-bool DepthCameraSensorPrivate::ConvertDepthToImage(
+bool DepthCameraSensor::Implementation::ConvertDepthToImage(
     const float *_data,
     unsigned char *_imageBuffer,
     unsigned int _width, unsigned int _height)
@@ -174,7 +174,7 @@ bool DepthCameraSensorPrivate::ConvertDepthToImage(
 }
 
 //////////////////////////////////////////////////
-bool DepthCameraSensorPrivate::SaveImage(const float *_data,
+bool DepthCameraSensor::Implementation::SaveImage(const float *_data,
     unsigned int _width, unsigned int _height,
     common::Image::PixelFormatType /*_format*/)
 {
@@ -212,7 +212,7 @@ bool DepthCameraSensorPrivate::SaveImage(const float *_data,
 
 //////////////////////////////////////////////////
 DepthCameraSensor::DepthCameraSensor()
-  : CameraSensor(), dataPtr(new DepthCameraSensorPrivate())
+  : CameraSensor(), dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 

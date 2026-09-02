@@ -31,7 +31,7 @@
 using namespace gz;
 using namespace sensors;
 
-class gz::sensors::NoisePrivate
+class gz::sensors::Noise::Implementation
 {
   /// \brief Which type of noise we're applying
   public: NoiseType type = NoiseType::NONE;
@@ -104,17 +104,13 @@ NoisePtr NoiseFactory::NewNoiseModel(sdf::ElementPtr _sdf,
 
 //////////////////////////////////////////////////
 Noise::Noise(NoiseType _type)
-  : dataPtr(new NoisePrivate())
+  : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
   this->dataPtr->type = _type;
 }
 
 //////////////////////////////////////////////////
-Noise::~Noise()
-{
-  delete this->dataPtr;
-  this->dataPtr = nullptr;
-}
+Noise::~Noise() = default;
 
 //////////////////////////////////////////////////
 void Noise::Load(const sdf::Noise &_sdf)

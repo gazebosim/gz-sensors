@@ -43,8 +43,13 @@
 using namespace gz;
 using namespace sensors;
 
-class gz::sensors::BoundingBoxCameraSensorPrivate
+class gz::sensors::BoundingBoxCameraSensor::Implementation
 {
+  public:  ~Implementation()
+  {
+    delete [] this->saveImageBuffer;
+  }
+
   /// \brief Save an image of rgb camera
   public: void SaveImage();
 
@@ -113,14 +118,12 @@ class gz::sensors::BoundingBoxCameraSensorPrivate
 
 //////////////////////////////////////////////////
 BoundingBoxCameraSensor::BoundingBoxCameraSensor()
-  : CameraSensor(), dataPtr(std::make_unique<BoundingBoxCameraSensorPrivate>())
+  : CameraSensor(), dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
 /////////////////////////////////////////////////
-BoundingBoxCameraSensor::~BoundingBoxCameraSensor()
-{
-}
+BoundingBoxCameraSensor::~BoundingBoxCameraSensor() = default;
 
 /////////////////////////////////////////////////
 bool BoundingBoxCameraSensor::Init()
@@ -575,7 +578,7 @@ unsigned int BoundingBoxCameraSensor::ImageWidth() const
 }
 
 //////////////////////////////////////////////////
-void BoundingBoxCameraSensorPrivate::SaveImage()
+void BoundingBoxCameraSensor::Implementation::SaveImage()
 {
   // Attempt to create the save directory if it doesn't exist
   if (!common::isDirectory(this->savePath))
@@ -620,7 +623,7 @@ void BoundingBoxCameraSensorPrivate::SaveImage()
 }
 
 //////////////////////////////////////////////////
-void BoundingBoxCameraSensorPrivate::SaveBoxes()
+void BoundingBoxCameraSensor::Implementation::SaveBoxes()
 {
   // Attempt to create the save directory if it doesn't exist
   if (!common::isDirectory(this->savePath))

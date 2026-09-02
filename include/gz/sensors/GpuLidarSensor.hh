@@ -17,12 +17,11 @@
 #ifndef GZ_SENSORS_GPULIDARSENSOR_HH_
 #define GZ_SENSORS_GPULIDARSENSOR_HH_
 
-#include <memory>
 #include <string>
 
 #include <sdf/sdf.hh>
 
-#include <gz/utils/SuppressWarning.hh>
+#include <gz/utils/ImplPtr.hh>
 
 // TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
@@ -45,9 +44,6 @@ namespace gz
   {
     // Inline bracket to help doxygen filtering.
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
-    //
-    /// \brief forward declarations
-    class GpuLidarSensorPrivate;
 
     /// \brief GpuLidar Sensor Class
     ///
@@ -138,11 +134,7 @@ namespace gz
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &_format);
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \brief Data pointer for private data
-      /// \internal
-      private: std::unique_ptr<GpuLidarSensorPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

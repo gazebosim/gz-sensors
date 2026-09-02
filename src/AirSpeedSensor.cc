@@ -50,8 +50,7 @@ static constexpr auto kLapseRate = 0.0065f;
 // air density at MSL [kg/m^3]
 static constexpr auto kAirDensityMsl = 1.225f;
 
-/// \brief Private data for AirSpeedSensor
-class gz::sensors::AirSpeedSensorPrivate
+class gz::sensors::AirSpeedSensor::Implementation
 {
   /// \brief node to create publisher
   public: transport::Node node;
@@ -77,14 +76,12 @@ class gz::sensors::AirSpeedSensorPrivate
 
 //////////////////////////////////////////////////
 AirSpeedSensor::AirSpeedSensor()
-  : dataPtr(new AirSpeedSensorPrivate())
+  : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
-AirSpeedSensor::~AirSpeedSensor()
-{
-}
+AirSpeedSensor::~AirSpeedSensor() = default;
 
 //////////////////////////////////////////////////
 bool AirSpeedSensor::Init()

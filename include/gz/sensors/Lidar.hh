@@ -17,7 +17,7 @@
 #ifndef GZ_SENSORS_LIDAR_HH_
 #define GZ_SENSORS_LIDAR_HH_
 
-#include <memory>
+#include <gz/utils/ImplPtr.hh>
 #include <string>
 #include <vector>
 
@@ -34,8 +34,6 @@ namespace gz
     // Inline bracket to help doxygen filtering.
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
-    /// \brief forward declarations
-    class LidarPrivate;
 
     /// \brief Lidar Sensor Class
     ///
@@ -274,11 +272,7 @@ namespace gz
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &/*_format*/)> _subscriber);
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \brief Data pointer for private data
-      /// \internal
-      private: std::unique_ptr<LidarPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

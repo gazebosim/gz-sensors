@@ -139,7 +139,7 @@ gz_sensor_library(
         "@gz-msgs",
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-transport",
-        "@gz-utils//:SuppressWarning",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -156,7 +156,7 @@ gz_sensor_library(
         "@gz-msgs",
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-transport",
-        "@gz-utils//:SuppressWarning",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -173,7 +173,7 @@ gz_sensor_library(
         "@gz-msgs",
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-transport",
-        "@gz-utils//:SuppressWarning",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -195,6 +195,7 @@ gz_sensor_library(
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-rendering",
         "@gz-transport",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -221,7 +222,7 @@ gz_sensor_library(
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-rendering",
         "@gz-transport",
-        "@gz-utils//:SuppressWarning",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -235,6 +236,25 @@ cc_test(
         "@googletest//:gtest",
         "@googletest//:gtest_main",
         "@gz-common",
+        "@sdformat",
+    ],
+)
+
+gz_sensor_library(
+    name = "cpu_lidar",
+    srcs = ["src/CpuLidarSensor.cc"],
+    hdrs = ["include/gz/sensors/CpuLidarSensor.hh"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":gz-sensors",
+        "@gz-common",
+        "@gz-common//profiler",
+        "@gz-math",
+        "@gz-msgs",
+        "@gz-msgs//:gzmsgs_cc_proto",
+        "@gz-transport",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -261,7 +281,7 @@ gz_sensor_library(
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-rendering",
         "@gz-transport",
-        "@gz-utils//:SuppressWarning",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -284,6 +304,7 @@ gz_sensor_library(
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-rendering",
         "@gz-transport",
+        "@gz-utils//:ImplPtr",
     ],
 )
 
@@ -300,7 +321,7 @@ gz_sensor_library(
         "@gz-msgs",
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-transport",
-        "@gz-utils//:SuppressWarning",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -321,7 +342,7 @@ gz_sensor_library(
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-rendering",
         "@gz-transport",
-        "@gz-utils//:SuppressWarning",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -339,7 +360,7 @@ gz_sensor_library(
         "@gz-msgs",
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-transport",
-        "@gz-utils//:SuppressWarning",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -373,6 +394,7 @@ gz_sensor_library(
         "@gz-msgs",
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-transport",
+        "@gz-utils//:ImplPtr",
         "@gz-utils//:SuppressWarning",
         "@sdformat",
     ],
@@ -405,7 +427,7 @@ gz_sensor_library(
         "@gz-msgs",
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-transport",
-        "@gz-utils//:SuppressWarning",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -423,7 +445,7 @@ gz_sensor_library(
         "@gz-msgs",
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-transport",
-        "@gz-utils//:SuppressWarning",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -441,7 +463,7 @@ gz_sensor_library(
         "@gz-msgs",
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-transport",
-        "@gz-utils//:SuppressWarning",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -472,6 +494,7 @@ gz_sensor_library(
         "@gz-common//events",
         "@gz-common//profiler",
         "@gz-rendering",
+        "@gz-utils//:ImplPtr",
         "@gz-utils//:SuppressWarning",
         "@sdformat",
     ],
@@ -500,7 +523,7 @@ gz_sensor_library(
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-rendering",
         "@gz-transport",
-        "@gz-utils//:SuppressWarning",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -523,7 +546,7 @@ gz_sensor_library(
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-rendering",
         "@gz-transport",
-        "@gz-utils//:SuppressWarning",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -547,7 +570,7 @@ gz_sensor_library(
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-rendering",
         "@gz-transport",
-        "@gz-utils//:SuppressWarning",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -571,7 +594,7 @@ gz_sensor_library(
         "@gz-msgs//:gzmsgs_cc_proto",
         "@gz-rendering",
         "@gz-transport",
-        "@gz-utils//:SuppressWarning",
+        "@gz-utils//:ImplPtr",
         "@sdformat",
     ],
 )
@@ -595,6 +618,7 @@ cc_library(
         ":altimeter",
         ":boundingbox_camera",
         ":camera",
+        ":cpu_lidar",
         ":depth_camera",
         ":dvl",
         ":force_torque",

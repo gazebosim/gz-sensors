@@ -87,6 +87,16 @@ void OnImage8Bit(const gz::msgs::Image &_msg)
   g_mutex.unlock();
 }
 
+void ExpectSingleFrameId(const gz::msgs::Image &_msg,
+    const std::string &_expectedFrameId)
+{
+  ASSERT_TRUE(_msg.has_header());
+  ASSERT_EQ(1, _msg.header().data_size());
+  EXPECT_EQ("frame_id", _msg.header().data(0).key());
+  ASSERT_EQ(1, _msg.header().data(0).value_size());
+  EXPECT_EQ(_expectedFrameId, _msg.header().data(0).value(0));
+}
+
 class ThermalCameraSensorTest: public testing::Test,
   public testing::WithParamInterface<const char *>
 {
@@ -215,6 +225,17 @@ void ThermalCameraSensorTest::ImagesWithBuiltinSDF(
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
   EXPECT_TRUE(infoHelper.WaitForMessage()) << infoHelper;
+
+  const std::string originalFrameId = thermalSensor->FrameId();
+  for (int frame = 0; frame < 3; ++frame)
+  {
+    const std::string frameId = "thermal_frame_" + std::to_string(frame);
+    thermalSensor->SetFrameId(frameId);
+    mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+    ASSERT_TRUE(helper.WaitForMessage()) << helper;
+    ExpectSingleFrameId(helper.Message(), frameId);
+  }
+  thermalSensor->SetFrameId(originalFrameId);
 
   // subscribe to the thermal camera topic
   gz::transport::Node node;

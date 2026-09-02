@@ -38,7 +38,7 @@
 #include "gz/sensors/SensorFactory.hh"
 
 /// \brief Private data for ThermalCameraSensor
-class gz::sensors::ThermalCameraSensorPrivate
+class gz::sensors::ThermalCameraSensor::Implementation
 {
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
@@ -144,7 +144,7 @@ using namespace sensors;
 
 //////////////////////////////////////////////////
 ThermalCameraSensor::ThermalCameraSensor()
-  : CameraSensor(), dataPtr(new ThermalCameraSensorPrivate())
+  : CameraSensor(), dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
@@ -486,6 +486,7 @@ bool ThermalCameraSensor::Update(
   this->dataPtr->thermalMsg.set_pixel_format_type(msgsFormat);
   auto stamp = this->dataPtr->thermalMsg.mutable_header()->mutable_stamp();
   *stamp = msgs::Convert(_now);
+  this->dataPtr->thermalMsg.mutable_header()->clear_data();
   auto frame = this->dataPtr->thermalMsg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->FrameId());
@@ -609,7 +610,7 @@ void ThermalCameraSensor::SetLinearResolution(float _resolution)
 }
 
 //////////////////////////////////////////////////
-bool ThermalCameraSensorPrivate::ConvertTemperatureToImage(
+bool ThermalCameraSensor::Implementation::ConvertTemperatureToImage(
     const uint16_t *_data,
     unsigned char *_imageBuffer,
     unsigned int _width, unsigned int _height)
@@ -642,7 +643,7 @@ bool ThermalCameraSensorPrivate::ConvertTemperatureToImage(
 }
 
 //////////////////////////////////////////////////
-bool ThermalCameraSensorPrivate::SaveImage(const uint16_t *_data,
+bool ThermalCameraSensor::Implementation::SaveImage(const uint16_t *_data,
     unsigned int _width, unsigned int _height,
     common::Image::PixelFormatType /*_format*/)
 {

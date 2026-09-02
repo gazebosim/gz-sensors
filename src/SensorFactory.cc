@@ -19,8 +19,7 @@
 
 #include "gz/sensors/SensorFactory.hh"
 
-/// \brief Private data class for SensorFactory
-class gz::sensors::SensorFactoryPrivate
+class gz::sensors::SensorFactory::Implementation
 {
 };
 
@@ -28,11 +27,10 @@ using namespace gz;
 using namespace sensors;
 
 //////////////////////////////////////////////////
-SensorFactory::SensorFactory() : dataPtr(new SensorFactoryPrivate)
+SensorFactory::SensorFactory()
+    : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
-SensorFactory::~SensorFactory()
-{
-}
+SensorFactory::~SensorFactory() = default;

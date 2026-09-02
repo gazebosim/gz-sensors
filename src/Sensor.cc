@@ -42,7 +42,7 @@
 
 using namespace gz::sensors;
 
-class gz::sensors::SensorPrivate
+class gz::sensors::Sensor::Implementation
 {
   /// \brief Populates fields from a <sensor> DOM
   public: bool PopulateFromSDF(const sdf::Sensor &_sdf);
@@ -154,10 +154,10 @@ class gz::sensors::SensorPrivate
   public: std::mutex triggerMutex;
 };
 
-SensorId SensorPrivate::idCounter = 0;
+SensorId Sensor::Implementation::idCounter = 0;
 
 //////////////////////////////////////////////////
-bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
+bool Sensor::Implementation::PopulateFromSDF(const sdf::Sensor &_sdf)
 {
   this->sdfSensor = _sdf;
 
@@ -213,7 +213,7 @@ bool SensorPrivate::PopulateFromSDF(const sdf::Sensor &_sdf)
 
 //////////////////////////////////////////////////
 Sensor::Sensor() :
-  dataPtr(new SensorPrivate)
+  dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
   this->dataPtr->id = (++this->dataPtr->idCounter);
 }
@@ -226,9 +226,7 @@ bool Sensor::Init()
 }
 
 //////////////////////////////////////////////////
-Sensor::~Sensor()
-{
-}
+Sensor::~Sensor() = default;
 
 //////////////////////////////////////////////////
 bool Sensor::Load(const sdf::Sensor &_sdf)
@@ -244,7 +242,7 @@ bool Sensor::Load(const sdf::Sensor &_sdf)
   const auto rateTopic = sensorTopic + "/set_rate";
 
   if (!this->dataPtr->node.Advertise(rateTopic,
-    &SensorPrivate::SetRate, this->dataPtr.get()))
+    &Sensor::Implementation::SetRate, this->dataPtr.get()))
   {
     gzerr << "Unable to create service server on topic["
            << rateTopic << "].\n";
@@ -312,7 +310,7 @@ bool Sensor::SetTopic(const std::string &_topic)
 }
 
 //////////////////////////////////////////////////
-bool SensorPrivate::SetTopic(const std::string &_topic)
+bool Sensor::Implementation::SetTopic(const std::string &_topic)
 {
   auto validTopic = transport::TopicUtils::AsValidTopic(_topic);
   if (validTopic.empty())
@@ -345,7 +343,8 @@ void Sensor::PublishMetrics(const std::chrono::duration<double> &_now)
 }
 
 //////////////////////////////////////////////////
-void SensorPrivate::PublishMetrics(const std::chrono::duration<double> &_now)
+void Sensor::Implementation::PublishMetrics(
+    const std::chrono::duration<double> &_now)
 {
   if (!this->performanceSensorMetricsPub)
   {
@@ -399,7 +398,7 @@ void SensorPrivate::PublishMetrics(const std::chrono::duration<double> &_now)
 }
 
 //////////////////////////////////////////////////
-void SensorPrivate::SetRate(const gz::msgs::Double &_rate)
+void Sensor::Implementation::SetRate(const gz::msgs::Double &_rate)
 {
   auto rate = _rate.data();
   if (rate < 0.0)
@@ -610,14 +609,14 @@ bool Sensor::SetTriggered(bool _triggered, const std::string &_triggerTopic) {
 }
 
 //////////////////////////////////////////////////
-bool SensorPrivate::SetTriggerTopic(const std::string &_topic) {
+bool Sensor::Implementation::SetTriggerTopic(const std::string &_topic) {
   if (_topic.empty())
   {
     gzwarn << "Trigger topic is empty for sensor [" << this->name << "]"
            << std::endl;
     return false;
   }
-  if (!this->node.Subscribe(_topic, &SensorPrivate::OnTrigger, this))
+  if (!this->node.Subscribe(_topic, &Sensor::Implementation::OnTrigger, this))
   {
     gzwarn << "Failed to subscribe to trigger topic [" << _topic
            << "] for sensor [" << this->name << "]" << std::endl;
@@ -631,18 +630,18 @@ bool SensorPrivate::SetTriggerTopic(const std::string &_topic) {
 }
 
 //////////////////////////////////////////////////
-bool SensorPrivate::IsTriggered() const {
+bool Sensor::Implementation::IsTriggered() const {
   return !this->triggerTopic.empty();
 }
 
 //////////////////////////////////////////////////
-void SensorPrivate::OnTrigger(const gz::msgs::Boolean &/*_msg*/) {
+void Sensor::Implementation::OnTrigger(const gz::msgs::Boolean &/*_msg*/) {
   std::lock_guard<std::mutex> lock(this->triggerMutex);
   this->pendingTrigger = true;
 }
 
 //////////////////////////////////////////////////
-void SensorPrivate::DisableTriggered() {
+void Sensor::Implementation::DisableTriggered() {
   gzmsg << "Disabled triggered mode for sensor [" << this->name
         << "]. Sensor will update at " << this->updateRate << "Hz."
         << std::endl;

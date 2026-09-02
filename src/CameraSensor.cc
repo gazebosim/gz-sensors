@@ -50,7 +50,7 @@ using namespace gz;
 using namespace sensors;
 
 /// \brief Private data for CameraSensor
-class gz::sensors::CameraSensorPrivate
+class gz::sensors::CameraSensor::Implementation
 {
   /// \brief Save an image
   /// \param[in] _data the image data to be saved
@@ -273,7 +273,7 @@ bool CameraSensor::CreateCamera()
 
 //////////////////////////////////////////////////
 CameraSensor::CameraSensor()
-  : dataPtr(new CameraSensorPrivate())
+  : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
@@ -542,7 +542,7 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 }
 
 //////////////////////////////////////////////////
-bool CameraSensorPrivate::SaveImage(const unsigned char *_data,
+bool CameraSensor::Implementation::SaveImage(const unsigned char *_data,
     unsigned int _width, unsigned int _height,
     gz::common::Image::PixelFormatType _format)
 {

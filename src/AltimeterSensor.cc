@@ -37,8 +37,7 @@
 using namespace gz;
 using namespace sensors;
 
-/// \brief Private data for AltimeterSensor
-class gz::sensors::AltimeterSensorPrivate
+class gz::sensors::AltimeterSensor::Implementation
 {
   /// \brief node to create publisher
   public: transport::Node node;
@@ -64,14 +63,12 @@ class gz::sensors::AltimeterSensorPrivate
 
 //////////////////////////////////////////////////
 AltimeterSensor::AltimeterSensor()
-  : dataPtr(new AltimeterSensorPrivate())
+  : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
-AltimeterSensor::~AltimeterSensor()
-{
-}
+AltimeterSensor::~AltimeterSensor() = default;
 
 //////////////////////////////////////////////////
 bool AltimeterSensor::Init()

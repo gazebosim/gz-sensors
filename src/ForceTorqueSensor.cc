@@ -37,8 +37,7 @@
 using namespace gz;
 using namespace sensors;
 
-/// \brief Private data for ForceTorqueSensor
-class gz::sensors::ForceTorqueSensorPrivate
+class gz::sensors::ForceTorqueSensor::Implementation
 {
   /// \brief node to create publisher
   public: transport::Node node;
@@ -93,7 +92,7 @@ class gz::sensors::ForceTorqueSensorPrivate
 
 //////////////////////////////////////////////////
 ForceTorqueSensor::ForceTorqueSensor()
-  : dataPtr(std::make_unique<ForceTorqueSensorPrivate>())
+  : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
   // measuredWrench is reused, so allocate the first header data-value pair
   auto frame = this->dataPtr->measuredWrench.mutable_header()->add_data();

@@ -26,6 +26,7 @@
 #include <gz/sensors/SensorTypes.hh>
 #include <gz/sensors/Export.hh>
 
+#include <gz/utils/ImplPtr.hh>
 #include <sdf/sdf.hh>
 
 namespace gz
@@ -34,8 +35,6 @@ namespace gz
   {
     // Inline bracket to help doxygen filtering.
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
-    // Forward declarations
-    class NoisePrivate;
 
     /// \class NoiseFactory Noise.hh gz/sensors/Noise.hh
     /// \brief Use this noise manager for creating and loading noise models.
@@ -116,8 +115,7 @@ namespace gz
       /// \param[in] _out Output stream
       public: virtual void Print(std::ostream &_out) const;
 
-      /// \brief Private data pointer
-      private: NoisePrivate *dataPtr = nullptr;
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

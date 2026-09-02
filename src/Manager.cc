@@ -27,15 +27,15 @@
 
 using namespace gz::sensors;
 
-class gz::sensors::ManagerPrivate
+class gz::sensors::Manager::Implementation
 {
   /// \brief Loaded sensors.
-  public: std::map<SensorId, std::unique_ptr<Sensor>> sensors;
+  public: std::map<SensorId, std::unique_ptr<gz::sensors::Sensor>> sensors;
 };
 
 //////////////////////////////////////////////////
 Manager::Manager() :
-  dataPtr(new ManagerPrivate)
+  dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 

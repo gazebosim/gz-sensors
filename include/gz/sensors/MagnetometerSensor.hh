@@ -17,11 +17,9 @@
 #ifndef GZ_SENSORS_MAGNETOMETERSENSOR_HH_
 #define GZ_SENSORS_MAGNETOMETERSENSOR_HH_
 
-#include <memory>
-
 #include <sdf/sdf.hh>
 
-#include <gz/utils/SuppressWarning.hh>
+#include <gz/utils/ImplPtr.hh>
 #include <gz/math/Pose3.hh>
 
 #include <gz/sensors/config.hh>
@@ -37,8 +35,6 @@ namespace gz
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief forward declarations
-    class MagnetometerSensorPrivate;
-
     /// \brief Magnetometer Sensor Class
     ///
     /// A magnetometer reports the magnetic field vector
@@ -97,11 +93,7 @@ namespace gz
       /// \return True if there are subscribers, false otherwise
       public: virtual bool HasConnections() const override;
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \brief Data pointer for private data
-      /// \internal
-      private: std::unique_ptr<MagnetometerSensorPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

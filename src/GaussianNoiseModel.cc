@@ -29,7 +29,7 @@
 using namespace gz;
 using namespace sensors;
 
-class gz::sensors::GaussianNoiseModelPrivate
+class gz::sensors::GaussianNoiseModel::Implementation
 {
   /// \brief If type starts with GAUSSIAN, the mean of the distribution
   /// from which we sample when adding noise.
@@ -60,16 +60,13 @@ class gz::sensors::GaussianNoiseModelPrivate
 
 //////////////////////////////////////////////////
 GaussianNoiseModel::GaussianNoiseModel()
-  : Noise(NoiseType::GAUSSIAN), dataPtr(new GaussianNoiseModelPrivate())
+  : Noise(NoiseType::GAUSSIAN),
+    dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
-GaussianNoiseModel::~GaussianNoiseModel()
-{
-  delete this->dataPtr;
-  this->dataPtr = nullptr;
-}
+GaussianNoiseModel::~GaussianNoiseModel() = default;
 
 //////////////////////////////////////////////////
 void GaussianNoiseModel::Load(const sdf::Noise &_sdf)

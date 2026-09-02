@@ -18,7 +18,6 @@
 #define GZ_SENSORS_CAMERASENSOR_HH_
 
 #include <cstdint>
-#include <memory>
 #include <string>
 
 #include <gz/msgs/boolean.pb.h>
@@ -26,7 +25,7 @@
 
 #include <sdf/sdf.hh>
 
-#include <gz/utils/SuppressWarning.hh>
+#include <gz/utils/ImplPtr.hh>
 
 // TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
@@ -51,8 +50,7 @@ namespace gz
     // Inline bracket to help doxygen filtering.
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
-    /// \brief forward declarations
-    class CameraSensorPrivate;
+
 
     /// \brief Camera Sensor Class
     ///
@@ -189,11 +187,7 @@ namespace gz
       /// \param[in] _scene Pointer to the new scene.
       private: void OnSceneChange(gz::rendering::ScenePtr /*_scene*/);
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \brief Data pointer for private data
-      /// \internal
-      private: std::unique_ptr<CameraSensorPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

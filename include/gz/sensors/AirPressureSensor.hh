@@ -17,11 +17,9 @@
 #ifndef GZ_SENSORS_AIRPRESSURESENSOR_HH_
 #define GZ_SENSORS_AIRPRESSURESENSOR_HH_
 
-#include <memory>
-
 #include <sdf/sdf.hh>
 
-#include <gz/utils/SuppressWarning.hh>
+#include <gz/utils/ImplPtr.hh>
 
 #include <gz/sensors/config.hh>
 #include <gz/sensors/air_pressure/Export.hh>
@@ -36,8 +34,6 @@ namespace gz
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief forward declarations
-    class AirPressureSensorPrivate;
-
     /// \brief AirPressure Sensor Class
     ///
     /// A sensor that reports air pressure readings.
@@ -84,11 +80,7 @@ namespace gz
       /// \return True if there are subscribers, false otherwise
       public: virtual bool HasConnections() const override;
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \brief Data pointer for private data
-      /// \internal
-      private: std::unique_ptr<AirPressureSensorPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

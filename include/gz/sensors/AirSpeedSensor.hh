@@ -17,11 +17,9 @@
 #ifndef GZ_SENSORS_AIRSPEEDSENSOR_HH_
 #define GZ_SENSORS_AIRSPEEDSENSOR_HH_
 
-#include <memory>
-
 #include <sdf/sdf.hh>
 
-#include <gz/utils/SuppressWarning.hh>
+#include <gz/utils/ImplPtr.hh>
 
 #include <gz/sensors/config.hh>
 #include <gz/sensors/air_speed/Export.hh>
@@ -36,8 +34,6 @@ namespace gz
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
     //
     /// \brief forward declarations
-    class AirSpeedSensorPrivate;
-
     /// \brief AirSpeed Sensor Class
     ///
     /// A sensor that reports air speed through differential pressure readings.
@@ -86,11 +82,7 @@ namespace gz
       /// \return True if there are subscribers, false otherwise
       public: virtual bool HasConnections() const override;
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \brief Data pointer for private data
-      /// \internal
-      private: std::unique_ptr<AirSpeedSensorPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }

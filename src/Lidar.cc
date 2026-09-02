@@ -43,7 +43,7 @@
 using namespace gz::sensors;
 
 /// \brief Private data for Lidar class
-class gz::sensors::LidarPrivate
+class gz::sensors::Lidar::Implementation
 {
   /// \brief node to create publisher
   public: transport::Node node;
@@ -66,7 +66,7 @@ class gz::sensors::LidarPrivate
 
 //////////////////////////////////////////////////
 Lidar::Lidar()
-  : dataPtr(new LidarPrivate())
+  : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 

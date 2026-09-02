@@ -18,6 +18,7 @@
 #ifndef GZ_SENSORS_GAUSSIANNOISEMODEL_HH_
 #define GZ_SENSORS_GAUSSIANNOISEMODEL_HH_
 
+#include <gz/utils/ImplPtr.hh>
 #include <sdf/sdf.hh>
 
 #include "gz/sensors/config.hh"
@@ -30,9 +31,6 @@ namespace gz
   {
     // Inline bracket to help doxygen filtering.
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
-    //
-    // Forward declarations
-    class GaussianNoiseModelPrivate;
 
     /** \class GaussianNoiseModel GaussianNoiseModel.hh \
     gz/sensors/GaussianNoiseModel.hh
@@ -67,8 +65,7 @@ namespace gz
       /// Documentation inherited
       public: virtual void Print(std::ostream &_out) const override;
 
-      /// \brief Private data pointer.
-      private: GaussianNoiseModelPrivate *dataPtr = nullptr;
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
   }
   }

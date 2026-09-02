@@ -51,8 +51,7 @@ static constexpr double kAirConstantDimensionless = kGravityMagnitude *
     kMeanMolecularAirWeightKgPerKmol /
         (kGasConstantNmPerKmolKelvin * -kTempLapseKelvinPerMeter);
 
-/// \brief Private data for AirPressureSensor
-class gz::sensors::AirPressureSensorPrivate
+class gz::sensors::AirPressureSensor::Implementation
 {
   /// \brief node to create publisher
   public: transport::Node node;
@@ -75,14 +74,12 @@ class gz::sensors::AirPressureSensorPrivate
 
 //////////////////////////////////////////////////
 AirPressureSensor::AirPressureSensor()
-  : dataPtr(new AirPressureSensorPrivate())
+  : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
-AirPressureSensor::~AirPressureSensor()
-{
-}
+AirPressureSensor::~AirPressureSensor() = default;
 
 //////////////////////////////////////////////////
 bool AirPressureSensor::Init()

@@ -18,8 +18,9 @@
 #ifndef GZ_SENSORS_BOUNDINGBOXCAMERASENSOR_HH_
 #define GZ_SENSORS_BOUNDINGBOXCAMERASENSOR_HH_
 
-#include <memory>
 #include <vector>
+
+#include <gz/utils/ImplPtr.hh>
 
 #include <gz/rendering/BoundingBoxCamera.hh>
 #include <sdf/Sensor.hh>
@@ -33,9 +34,6 @@ namespace gz
   {
     // Inline bracket to help doxygen filtering.
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
-    // forward declarations
-    class BoundingBoxCameraSensorPrivate;
-
     /// \brief BoundingBox camera sensor class.
     ///
     /// This class creates a BoundingBox image from an gz rendering scene.
@@ -103,11 +101,7 @@ namespace gz
       /// \return True on success.
       private: bool CreateCamera();
 
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      /// \brief Data pointer for private data
-      /// \internal
-      private: std::unique_ptr<BoundingBoxCameraSensorPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+      GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
   }
