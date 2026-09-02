@@ -130,8 +130,8 @@ namespace gz
     /// - `<tracking><bottom_mode>` configures the bottom tracking mode.
     /// - `<tracking><bottom_mode><when>` enables (or disables) the bottom
     /// tracking mode. Supported values are 'never', to disable it completely
-    /// (as if no <bottom_mode> configuration had been specified), 'always' to
-    /// enable it at all times, and 'best' to track at all times but only
+    /// (as if no `<bottom_mode>` configuration had been specified), 'always'
+    /// to enable it at all times, and 'best' to track at all times but only
     /// publish estimates when it performs best among all configured modes.
     /// Defaults to 'always' if left unspecified.
     /// - `<tracking><bottom_mode><noise>` sets the noise model for velocity
@@ -145,7 +145,7 @@ namespace gz
     /// mode.
     /// - `<tracking><water_mass_mode><when>` enables (or disables) the
     /// water-mass tracking mode. Supported values are 'never', to disable it
-    /// completely (as if no <water_mass_mode> configuration had been
+    /// completely (as if no `<water_mass_mode>` configuration had been
     /// specified), 'always' to enable it at all times, and 'best' to track at
     /// all times but only publish estimates when it performs best among all
     /// configured modes. Defaults to 'always' if left unspecified.
