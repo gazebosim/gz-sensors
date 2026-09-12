@@ -72,6 +72,16 @@ void OnNewSegmentationFrame(const msgs::Image &_msg)
   g_mutex.unlock();
 }
 
+void ExpectSingleFrameId(const msgs::Image &_msg,
+    const std::string &_expectedFrameId)
+{
+  ASSERT_TRUE(_msg.has_header());
+  ASSERT_EQ(1, _msg.header().data_size());
+  EXPECT_EQ("frame_id", _msg.header().data(0).key());
+  ASSERT_EQ(1, _msg.header().data(0).value_size());
+  EXPECT_EQ(_expectedFrameId, _msg.header().data(0).value(0));
+}
+
 /// \brief wait till you read the published frame
 void WaitForNewFrame(gz::sensors::Manager &_mgr)
 {
@@ -240,18 +250,34 @@ void SegmentationCameraSensorTest::ImagesWithBuiltinSDF(
   std::string topic =
     "/test/integration/SegmentationCameraPlugin_imagesWithBuiltinSDF";
   std::string infoTopic = topic + "/camera_info";
+  std::string coloredMapTopic = topic + "/colored_map";
   // Get the topic of the labels map
-  // TODO(anyone) add test coverage for the colored map topic and its data
+  // TODO(anyone) add test coverage for the colored map image data
   topic += "/labels_map";
 
   WaitForMessageTestHelper<gz::msgs::Image> helper(topic);
   EXPECT_TRUE(sensor->HasConnections());
+  WaitForMessageTestHelper<gz::msgs::Image> coloredMapHelper(coloredMapTopic);
   WaitForMessageTestHelper<gz::msgs::CameraInfo> infoHelper(infoTopic);
 
   // Update once to create image
   mgr.RunOnce(std::chrono::steady_clock::duration::zero());
 
   EXPECT_TRUE(helper.WaitForMessage()) << helper;
+  EXPECT_TRUE(coloredMapHelper.WaitForMessage()) << coloredMapHelper;
+
+  const std::string originalFrameId = sensor->FrameId();
+  for (int frame = 0; frame < 3; ++frame)
+  {
+    const std::string frameId = "segmentation_frame_" + std::to_string(frame);
+    sensor->SetFrameId(frameId);
+    mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+    ASSERT_TRUE(coloredMapHelper.WaitForMessage()) << coloredMapHelper;
+    ASSERT_TRUE(helper.WaitForMessage()) << helper;
+    ExpectSingleFrameId(coloredMapHelper.Message(), frameId);
+    ExpectSingleFrameId(helper.Message(), frameId);
+  }
+  sensor->SetFrameId(originalFrameId);
 
   // subscribe to the segmentation camera topic
   gz::transport::Node node;
