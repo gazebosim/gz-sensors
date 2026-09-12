@@ -486,6 +486,7 @@ bool ThermalCameraSensor::Update(
   this->dataPtr->thermalMsg.set_pixel_format_type(msgsFormat);
   auto stamp = this->dataPtr->thermalMsg.mutable_header()->mutable_stamp();
   *stamp = msgs::Convert(_now);
+  this->dataPtr->thermalMsg.mutable_header()->clear_data();
   auto frame = this->dataPtr->thermalMsg.mutable_header()->add_data();
   frame->set_key("frame_id");
   frame->add_value(this->FrameId());
