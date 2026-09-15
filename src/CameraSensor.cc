@@ -79,8 +79,23 @@ class gz::sensors::CameraSensor::Implementation
   /// \brief Rendering camera
   public: gz::rendering::CameraPtr camera;
 
-  /// \brief Pointer to an image to be published
+  /// \brief Image whose pixels live in imageMsg's payload, so the camera
+  /// copies its frame straight into the message that is published.
   public: gz::rendering::Image image;
+
+  /// \brief Reused image message. Its data field is sized once for the
+  /// camera resolution and written in place by the render target copy.
+  public: msgs::Image imageMsg;
+
+  /// \brief Size the message payload for the camera and wrap it in image.
+  public: void PrepareImageBuffer()
+  {
+    const unsigned int size = this->camera->ImageMemorySize();
+    this->imageMsg.mutable_data()->resize(size);
+    this->image = gz::rendering::Image(this->camera->ImageWidth(),
+        this->camera->ImageHeight(), this->camera->ImageFormat(),
+        this->imageMsg.mutable_data()->data());
+  }
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -253,7 +268,7 @@ bool CameraSensor::CreateCamera()
   this->UpdateLensIntrinsicsAndProjection(this->dataPtr->camera,
       *cameraSdf);
 
-  this->dataPtr->image = this->dataPtr->camera->CreateImage();
+  this->dataPtr->PrepareImageBuffer();
 
   this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);
 
@@ -447,6 +462,17 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     this->Render();
     {
       GZ_PROFILE("CameraSensor::Update Copy image");
+      // The image wraps the message payload; keep them in sync if the
+      // camera resolution or format changed since the buffer was sized.
+      if (this->dataPtr->imageMsg.data().size() !=
+          this->dataPtr->camera->ImageMemorySize() ||
+          this->dataPtr->image.Width() !=
+          this->dataPtr->camera->ImageWidth() ||
+          this->dataPtr->image.Height() !=
+          this->dataPtr->camera->ImageHeight())
+      {
+        this->dataPtr->PrepareImageBuffer();
+      }
       this->dataPtr->camera->Copy(this->dataPtr->image);
     }
 
@@ -495,8 +521,8 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
         break;
     }
 
-    // create message
-    msgs::Image msg;
+    // fill in the message; its payload already holds the frame
+    msgs::Image &msg = this->dataPtr->imageMsg;
     {
       GZ_PROFILE("CameraSensor::Update Message");
       msg.set_width(width);
@@ -504,11 +530,11 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
                    this->dataPtr->camera->ImageFormat()));
       msg.set_pixel_format_type(msgsPixelFormat);
+      msg.clear_header();
       *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
       auto frame = msg.mutable_header()->add_data();
       frame->set_key("frame_id");
       frame->add_value(this->FrameId());
-      msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
     }
 
     // publish the image message
