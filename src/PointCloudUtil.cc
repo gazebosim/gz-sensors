@@ -25,7 +25,7 @@ using namespace sensors;
 //////////////////////////////////////////////////
 void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
     const math::Angle &_hfov, const unsigned char *_imageData,
-    const float *_depthData) const
+    const float *_depthData, bool _useRosConvention) const
 {
   // Fill message. Logic borrowed from
   // https://github.com/ros-simulation/gazebo_ros_pkgs/blob/kinetic-devel/gazebo_plugins/src/gazebo_ros_depth_camera.cpp
@@ -65,14 +65,30 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
       if (fl > 0 && width > 1)
         yAngle = std::atan2(0.5 * (width - 1) - i, fl);
 
-      *reinterpret_cast<float*>(msgBufferIndex +
-          _msg.field(fieldIndex++).offset()) = depth;
-      *reinterpret_cast<float*>(msgBufferIndex +
-          _msg.field(fieldIndex++).offset()) =
-        depth * std::tan(yAngle);
-      *reinterpret_cast<float*>(msgBufferIndex +
-          _msg.field(fieldIndex++).offset()) =
-        depth * std::tan(pAngle);
+      // Gazebo body frame: X=forward(depth), Y=left, Z=up
+      // ROS optical frame: X=right, Y=down, Z=forward(depth)
+      if (_useRosConvention)
+      {
+        *reinterpret_cast<float*>(msgBufferIndex +
+            _msg.field(fieldIndex++).offset()) =
+          -depth * std::tan(yAngle);
+        *reinterpret_cast<float*>(msgBufferIndex +
+            _msg.field(fieldIndex++).offset()) =
+          -depth * std::tan(pAngle);
+        *reinterpret_cast<float*>(msgBufferIndex +
+            _msg.field(fieldIndex++).offset()) = depth;
+      }
+      else
+      {
+        *reinterpret_cast<float*>(msgBufferIndex +
+            _msg.field(fieldIndex++).offset()) = depth;
+        *reinterpret_cast<float*>(msgBufferIndex +
+            _msg.field(fieldIndex++).offset()) =
+          depth * std::tan(yAngle);
+        *reinterpret_cast<float*>(msgBufferIndex +
+            _msg.field(fieldIndex++).offset()) =
+          depth * std::tan(pAngle);
+      }
 
       int imgIndex = i * 3 + j * width * 3;
       int fieldOffset = _msg.field(fieldIndex).offset();
@@ -99,7 +115,8 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
 
 //////////////////////////////////////////////////
 void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
-    const float *_xyzData, const unsigned char *_imageData) const
+    const float *_xyzData, const unsigned char *_imageData,
+    bool _useRosConvention) const
 {
   uint32_t width = _msg.width();
   uint32_t height = _msg.height();
@@ -131,12 +148,15 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
       }
 
       int fieldIndex = 0;
+      float outX = _useRosConvention ? -y : x;
+      float outY = _useRosConvention ? -z : y;
+      float outZ = _useRosConvention ?  x : z;
       *reinterpret_cast<float*>(msgBufferIndex +
-          _msg.field(fieldIndex++).offset()) = x;
+          _msg.field(fieldIndex++).offset()) = outX;
       *reinterpret_cast<float*>(msgBufferIndex +
-          _msg.field(fieldIndex++).offset()) = y;
+          _msg.field(fieldIndex++).offset()) = outY;
       *reinterpret_cast<float*>(msgBufferIndex +
-          _msg.field(fieldIndex++).offset()) = z;
+          _msg.field(fieldIndex++).offset()) = outZ;
 
       uint8_t r = static_cast<uint8_t>(_imageData[index]);
       uint8_t g = static_cast<uint8_t>(_imageData[index + 1]);
@@ -168,7 +188,7 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
 void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
     const float *_pointCloudData, bool _writeToBuffers,
     unsigned char *_imageData,
-    float *_xyzData) const
+    float *_xyzData, bool _useRosConvention) const
 {
   uint32_t width = _msg.width();
   uint32_t height = _msg.height();
@@ -202,12 +222,15 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
       float rgba = _pointCloudData[pcIndex + 3];
 
       int fieldIndex = 0;
+      float outX = _useRosConvention ? -y : x;
+      float outY = _useRosConvention ? -z : y;
+      float outZ = _useRosConvention ?  x : z;
       *reinterpret_cast<float*>(msgBufferIndex +
-          _msg.field(fieldIndex++).offset()) = x;
+          _msg.field(fieldIndex++).offset()) = outX;
       *reinterpret_cast<float*>(msgBufferIndex +
-          _msg.field(fieldIndex++).offset()) = y;
+          _msg.field(fieldIndex++).offset()) = outY;
       *reinterpret_cast<float*>(msgBufferIndex +
-          _msg.field(fieldIndex++).offset()) = z;
+          _msg.field(fieldIndex++).offset()) = outZ;
 
       uint8_t r = 0u;
       uint8_t g = 0u;
@@ -237,6 +260,8 @@ void PointCloudUtil::FillMsg(msgs::PointCloudPacked &_msg,
       int imgIndex = imgStep + i * 3;
       if (_writeToBuffers && _xyzData)
       {
+        // Always write raw Gazebo-frame coordinates regardless of
+        // _useRosConvention; the buffer holds sensor-frame data.
         _xyzData[imgIndex + 0] = x;
         _xyzData[imgIndex + 1] = y;
         _xyzData[imgIndex + 2] = z;

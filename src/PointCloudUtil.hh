@@ -52,9 +52,13 @@ namespace gz
       /// generated the image and depth data.
       /// \param[in] _imageData RGB Image data.
       /// \param[in] _depthData Depth image data.
+      /// \param[in] _useRosConvention If true, output coordinates in the ROS
+      /// optical frame (X right, Y down, Z forward/depth). Default false uses
+      /// the Gazebo camera body frame (X forward/depth, Y left, Z up).
       public: void FillMsg(msgs::PointCloudPacked &_msg,
           const math::Angle &_hfov, const unsigned char *_imageData,
-          const float *_depthData) const;
+          const float *_depthData,
+          bool _useRosConvention = false) const;
 
       /// \brief Fill a msgs::PointCloudPacked.
       /// \param[in,out] _msg Point cloud message to fill. This message
@@ -62,8 +66,12 @@ namespace gz
       /// RgbdCameraSensor and DepthCameraSensor.
       /// \param[in] _xyzData XYZ data.
       /// \param[in] _imageData RGB data.
+      /// \param[in] _useRosConvention If true, output coordinates in the ROS
+      /// optical frame (X right, Y down, Z forward/depth). Default false uses
+      /// the Gazebo camera body frame (X forward/depth, Y left, Z up).
       public: void FillMsg(msgs::PointCloudPacked &_msg,
-          const float *_xyzData, const unsigned char *_imageData) const;
+          const float *_xyzData, const unsigned char *_imageData,
+          bool _useRosConvention = false) const;
 
       /// \brief Fill a msgs::PointCloudPacked.
       /// \param[in,out] _msg Point cloud message to fill. This message
@@ -74,11 +82,17 @@ namespace gz
       /// RGB (_imageData) and XYZ (_xyzData) buffers.
       /// \param[out] _imageData Fill _imageData wth RGB data extracted
       /// from _pointCloudData.
-      /// \param[out] _xyzData Fill _xyzData wth XYZ data extracted
-      /// from _pointCloudData.
+      /// \param[out] _xyzData Fill _xyzData with XYZ data extracted
+      /// from _pointCloudData. Always written in the Gazebo camera body frame
+      /// (X forward/depth, Y left, Z up) regardless of _useRosConvention.
+      /// \param[in] _useRosConvention If true, output coordinates in the ROS
+      /// optical frame (X right, Y down, Z forward/depth) in the message.
+      /// Default false uses the Gazebo camera body frame. Does not affect
+      /// the _xyzData write-back buffer.
       public: void FillMsg(msgs::PointCloudPacked &_msg,
           const float *_pointCloudData, bool _writeToBuffers = false,
-          unsigned char *_imageData = 0, float *_xyzData = 0) const;
+          unsigned char *_imageData = 0, float *_xyzData = 0,
+          bool _useRosConvention = false) const;
 
       /// \brief Extract RGB data from point cloud data
       /// \param[out] _imageData RGB Image buffer to be filled.

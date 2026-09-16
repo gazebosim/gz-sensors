@@ -18,6 +18,9 @@
 #ifndef GZ_SENSORS_CAMERASENSORUTIL_HH_
 #define GZ_SENSORS_CAMERASENSORUTIL_HH_
 
+#include <sdf/Camera.hh>
+#include <sdf/Sensor.hh>
+
 #include <gz/math/Matrix4.hh>
 
 #include "gz/sensors/config.hh"
@@ -87,6 +90,17 @@ math::Matrix4d buildProjectionMatrix(double _imageWidth, double _imageHeight,
                                      double _intrinsicsCx, double _intrinsicsCy,
                                      double _intrinsicsS, double _clipNear,
                                      double _clipFar);
+
+/// \brief Read the <gz:use_ros_convention> element from a camera sensor SDF.
+/// \param[in] _sdf Sensor SDF to inspect.
+/// \return True if the element is present and set to true, false otherwise.
+inline bool useRosConvention(const sdf::Sensor &_sdf)
+{
+  const sdf::Camera *cam = _sdf.CameraSensor();
+  return cam && cam->Element() &&
+         cam->Element()->HasElement("gz:use_ros_convention") &&
+         cam->Element()->Get<bool>("gz:use_ros_convention");
+}
 }
 }
 }
