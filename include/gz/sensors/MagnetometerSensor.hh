@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2019 Open Source Robotics Foundation
+ * Copyright (C) 2026 Rudis Laboratories
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,6 +93,14 @@ namespace gz
       /// \brief Get the magnetic field vector in body frame
       /// \return Magnetic field vector in body frame
       public: math::Vector3d MagneticField() const;
+
+      /// \brief Set the magnetic field unit for published messages.
+      /// \param[in] _unit Unit enum value from msgs::Magnetometer.
+      public: void SetFieldUnit(int _unit);
+
+      /// \brief Set the coordinate frame for published messages.
+      /// \param[in] _frame Frame enum value from msgs::Magnetometer.
+      public: void SetCoordinateFrame(int _frame);
 
       /// \brief Check if there are any subscribers
       /// \return True if there are subscribers, false otherwise
