@@ -12,8 +12,8 @@ on:
   # Automated trigger on git tag push
   push:
     tags:
-      # Glob pattern: branch_semver-postfix
-      - 'gz-sensors[1-9]?[0-9]_[0-9]+.[0-9]+.[0-9]+*'
+      # Glob pattern: branch_semver
+      - 'gz-sensors[1-9]?[0-9]_[0-9]+.[0-9]+.[0-9]+'
 jobs:
   # The publish-to-bcr reusable workflow expects the version name to be in
   # semver-(optional build metadata postfix) format, but the repo tags are in
