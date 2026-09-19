@@ -16,7 +16,7 @@
 // Configure tests based on installed render engines
 // ogre 1.x and ogre 2.x tests can not be run at the same time
 // so use only ogre2 by default.
-#if WITH_OGRE2 && !defined(__APPLE__)
+#if WITH_OGRE2
 static const std::vector<const char *> kRenderEngineTestValues{"ogre2"};
 #elif WITH_OGRE
 static const std::vector<const char *> kRenderEngineTestValues{"ogre"};
