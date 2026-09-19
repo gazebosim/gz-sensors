@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="m1">
+    <link name="camera_link">
+      <sensor name="camera" type="camera">
+        <update_rate>10</update_rate>
+        <topic>/camera/image</topic>
+        <camera>
+          <camera_info_topic>/test_camera_info</camera_info_topic>
+          <image>
+            <width>256</width>
+            <height>257</height>
+          </image>
+        </camera>
+      </sensor>
+    </link>
+
+    <link name="depth_camera_link">
+      <sensor name="depth_camera" type="depth">
+        <update_rate>10</update_rate>
+        <topic>/depth_camera/image</topic>
+        <camera>
+          <camera_info_topic>/test_depth_camera_info</camera_info_topic>
+          <image>
+            <width>1000</width>
+            <height>1000</height>
+          </image>
+        </camera>
+      </sensor>
+    </link>
+
+    <link name="rgbd_camera_link">
+      <sensor name="rgbd_camera" type="rgbd_camera">
+        <update_rate>10</update_rate>
+        <topic>/rgbd_camera/image</topic>
+        <camera>
+          <camera_info_topic>/test_rgbd_camera_info</camera_info_topic>
+          <image>
+            <width>256</width>
+            <height>256</height>
+          </image>
+        </camera>
+      </sensor>
+    </link>
+
+    <link name="segmentation_camera_link">
+      <sensor name="segmentation_camera" type="segmentation">
+        <update_rate>10</update_rate>
+        <topic>/segmentation_camera</topic>
+        <camera>
+          <camera_info_topic>/test_segmentation_camera_info</camera_info_topic>
+          <image>
+              <width>320</width>
+              <height>240</height>
+          </image>
+        </camera>
+      </sensor>
+    </link>
+
+    <link name="thermal_camera_link">
+      <sensor name="thermal_camera" type="thermal_camera">
+        <update_rate>10</update_rate>
+        <topic>/thermal_camera/image</topic>
+        <camera>
+          <camera_info_topic>/test_thermal_camera_info</camera_info_topic>
+          <image>
+            <width>10</width>
+            <height>10</height>
+            <format>L8</format>
+          </image>
+        </camera>
+      </sensor>
+    </link>
+
+    <link name="wide_angle_camera_link">
+      <sensor name="wide_angle_camera" type="wideanglecamera">
+        <update_rate>10</update_rate>
+        <topic>/wide_angle_camera/image</topic>
+        <camera>
+          <camera_info_topic>/test_wide_angle_camera_info</camera_info_topic>
+          <image>
+            <width>320</width>
+            <height>240</height>
+          </image>
+        </camera>
+      </sensor>
+    </link>
+
+    <link name="boundingbox_camera_link">
+      <sensor name="boundingbox_camera" type="boundingbox_camera">
+        <update_rate>10</update_rate>
+        <topic>/boundingbox_camera</topic>
+        <camera>
+          <camera_info_topic>/test_boundingbox_camera_info</camera_info_topic>
+          <image>
+              <width>320</width>
+              <height>240</height>
+          </image>
+        </camera>
+      </sensor>
+    </link>
+
+  </model>
+</sdf>
