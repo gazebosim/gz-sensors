@@ -388,7 +388,7 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
 
   if (!_sdf.CameraSensor()->CameraInfoTopic().empty())
   {
-    this->dataPtr->infoTopic = _sdf.CameraSensor()->CameraInfoTopic();
+    this->SetInfoTopic(_sdf.CameraSensor()->CameraInfoTopic());
   }
 
   this->dataPtr->pub =
@@ -653,7 +653,25 @@ rendering::CameraPtr CameraSensor::RenderingCamera() const
 }
 
 //////////////////////////////////////////////////
+<<<<<<< HEAD
 std::string CameraSensor::InfoTopic() const
+=======
+bool CameraSensor::SetInfoTopic(const std::string &_topic)
+{
+  auto validTopic = transport::TopicUtils::AsValidTopic(_topic);
+  if (validTopic.empty())
+  {
+    gzerr << "Failed to set camera info topic [" << _topic << "]" << std::endl;
+    return false;
+  }
+
+  this->dataPtr->infoTopic = validTopic;
+  return true;
+}
+
+//////////////////////////////////////////////////
+const std::string& CameraSensor::InfoTopic() const
+>>>>>>> 1449e3e (Fix custom camera_info_topic handling for camera sensors (#630))
 {
   return this->dataPtr->infoTopic;
 }
