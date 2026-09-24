@@ -237,6 +237,10 @@ bool BoundingBoxCameraSensor::Load(const sdf::Sensor &_sdf)
     this->SetTriggered(true, triggerTopic);
   }
 
+  if (!_sdf.CameraSensor()->CameraInfoTopic().empty())
+  {
+    this->SetInfoTopic(_sdf.CameraSensor()->CameraInfoTopic());
+  }
   if (!this->AdvertiseInfo())
     return false;
 

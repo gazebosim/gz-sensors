@@ -228,7 +228,15 @@ bool SegmentationCameraSensor::Load(const sdf::Sensor &_sdf)
   }
 
   // TODO(anyone) Access the info topic from the parent class
-  if (!this->AdvertiseInfo(this->Topic() + "/camera_info"))
+  if (!_sdf.CameraSensor()->CameraInfoTopic().empty())
+  {
+    this->SetInfoTopic(_sdf.CameraSensor()->CameraInfoTopic());
+  }
+  else
+  {
+    this->SetInfoTopic(this->Topic() + "/camera_info");
+  }
+  if (!this->AdvertiseInfo())
     return false;
 
   if (this->Scene())
