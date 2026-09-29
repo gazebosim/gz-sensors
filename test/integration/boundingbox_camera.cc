@@ -21,6 +21,7 @@
 #include <gz/msgs/annotated_axis_aligned_2d_box_v.pb.h>
 #include <gz/msgs/annotated_oriented_3d_box.pb.h>
 #include <gz/msgs/annotated_oriented_3d_box_v.pb.h>
+#include <gz/msgs/camera_info.pb.h>
 
 #include <gz/common/Filesystem.hh>
 #include <gz/sensors/Manager.hh>
@@ -44,6 +45,9 @@ class BoundingBoxCameraSensorTest: public testing::Test,
 
   // Create a BoundingBox Camera 3D sensor from a SDF and gets a boxes message
   public: void Boxes3DWithBuiltinSDF(const std::string &_renderEngine);
+
+  // Create a BoundingBox Camera sensor and verify a custom camera info topic
+  public: void CustomCameraInfoTopic(const std::string &_renderEngine);
 };
 
 /// \brief mutex for thread safety
@@ -477,6 +481,67 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
 }
 
 //////////////////////////////////////////////////
+void BoundingBoxCameraSensorTest::CustomCameraInfoTopic(
+    const std::string &_renderEngine)
+{
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+      "sdf", "custom_camera_info_topic.sdf");
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  ASSERT_NE(nullptr, doc->Root());
+  ASSERT_TRUE(doc->Root()->HasElement("model"));
+  auto modelPtr = doc->Root()->GetElement("model");
+  ASSERT_TRUE(modelPtr->HasElement("link"));
+  auto linkPtr = modelPtr->GetElement("link");
+  while (linkPtr)
+  {
+    if(linkPtr->Get<std::string>("name") == "boundingbox_camera_link")
+    {
+      break;
+    }
+    linkPtr = linkPtr->GetNextElement("link");
+  }
+  ASSERT_NE(nullptr, linkPtr);
+  ASSERT_TRUE(linkPtr->HasElement("sensor"));
+  auto sensorPtr = linkPtr->GetElement("sensor");
+  ASSERT_NE(nullptr, sensorPtr);
+
+  // Setup gz-rendering with an empty scene.
+  auto *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+                 << "' is not supported" << std::endl;
+  }
+
+  auto scene = engine->CreateScene("scene");
+
+  gz::sensors::Manager mgr;
+  auto *sensor =
+      mgr.CreateSensor<gz::sensors::BoundingBoxCameraSensor>(sensorPtr);
+
+  ASSERT_NE(nullptr, sensor);
+  sensor->SetScene(scene);
+
+  const std::string customInfoTopic = "/test_boundingbox_camera_info";
+  WaitForMessageTestHelper<gz::msgs::CameraInfo> infoHelper(
+      customInfoTopic);
+
+  EXPECT_TRUE(sensor->HasConnections());
+
+  // Update once to create image
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+
+  EXPECT_TRUE(infoHelper.WaitForMessage()) << infoHelper;
+
+  // Clean up
+  mgr.Remove(sensor->Id());
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
 TEST_P(BoundingBoxCameraSensorTest, BoxesWithBuiltinSDF)
 {
   BoxesWithBuiltinSDF(GetParam());
@@ -486,6 +551,12 @@ TEST_P(BoundingBoxCameraSensorTest, BoxesWithBuiltinSDF)
 TEST_P(BoundingBoxCameraSensorTest, Boxes3DWithBuiltinSDF)
 {
   Boxes3DWithBuiltinSDF(GetParam());
+}
+
+//////////////////////////////////////////////////
+TEST_P(BoundingBoxCameraSensorTest, CustomCameraInfoTopic)
+{
+  CustomCameraInfoTopic(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(BoundingBoxCameraSensor, BoundingBoxCameraSensorTest,
