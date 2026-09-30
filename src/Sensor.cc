@@ -529,8 +529,9 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
   {
     // Advance by one sensor period. Keep the period in the clock's native
     // duration so sub-millisecond update rates don't truncate to zero.
-    auto delta = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
-      std::chrono::duration<double>(1.0 / this->dataPtr->updateRate));
+    auto delta =
+      std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+        std::chrono::duration<double>(1.0 / this->dataPtr->updateRate));
 
     // Rates finer than the clock resolution cannot be represented. Clamp to
     // one clock tick so scheduling always makes forward progress.
