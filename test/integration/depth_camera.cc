@@ -15,8 +15,13 @@
  *
 */
 
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
 #include <cstring>
 #include <string>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include <gz/msgs/camera_info.pb.h>
@@ -602,12 +607,18 @@ void DepthCameraSensorTest::DepthCameraIntrinsics(
   std::string imgTopic1 = "/camera1/image";
   std::string imgTopic2 = "/camera2/image";
   std::string imgTopic3 = "/camera3/image";
+  std::string pointsTopic1 = imgTopic1 + "/points";
+  std::string pointsTopic2 = imgTopic2 + "/points";
   WaitForMessageTestHelper<gz::msgs::Image> helper1(imgTopic1);
   WaitForMessageTestHelper<gz::msgs::CameraInfo> helper2(infoTopic1);
   WaitForMessageTestHelper<gz::msgs::Image> helper3(imgTopic2);
   WaitForMessageTestHelper<gz::msgs::CameraInfo> helper4(infoTopic2);
   WaitForMessageTestHelper<gz::msgs::Image> helper5(imgTopic3);
   WaitForMessageTestHelper<gz::msgs::CameraInfo> helper6(infoTopic3);
+  WaitForMessageTestHelper<gz::msgs::PointCloudPacked> pointsHelper1(
+      pointsTopic1);
+  WaitForMessageTestHelper<gz::msgs::PointCloudPacked> pointsHelper2(
+      pointsTopic2);
 
   EXPECT_TRUE(sensor1->HasConnections());
   EXPECT_TRUE(sensor2->HasConnections());
@@ -622,6 +633,92 @@ void DepthCameraSensorTest::DepthCameraIntrinsics(
   EXPECT_TRUE(helper4.WaitForMessage()) << helper4;
   EXPECT_TRUE(helper5.WaitForMessage()) << helper5;
   EXPECT_TRUE(helper6.WaitForMessage()) << helper6;
+  EXPECT_TRUE(pointsHelper1.WaitForMessage()) << pointsHelper1;
+  EXPECT_TRUE(pointsHelper2.WaitForMessage()) << pointsHelper2;
+
+  // Explicit intrinsics equivalent to the default camera model must not alter
+  // the projection, depth image, or reconstructed XYZ point cloud.
+  const auto projection1 = sensor1->DepthCamera()->ProjectionMatrix();
+  const auto projection2 = sensor2->DepthCamera()->ProjectionMatrix();
+  for (std::size_t row = 0; row < 4; ++row)
+  {
+    for (std::size_t col = 0; col < 4; ++col)
+    {
+      EXPECT_NEAR(projection1(row, col), projection2(row, col), 1e-6)
+          << "projection mismatch at (" << row << ", " << col << ")";
+    }
+  }
+
+  const auto depthMsg1 = helper1.Message();
+  const auto depthMsg2 = helper3.Message();
+  ASSERT_EQ(depthMsg1.width(), depthMsg2.width());
+  ASSERT_EQ(depthMsg1.height(), depthMsg2.height());
+  ASSERT_EQ(depthMsg1.data().size(), depthMsg2.data().size());
+  ASSERT_EQ(0u, depthMsg1.data().size() % sizeof(float));
+
+  std::vector<float> depth1(depthMsg1.data().size() / sizeof(float));
+  std::vector<float> depth2(depthMsg2.data().size() / sizeof(float));
+  memcpy(depth1.data(), depthMsg1.data().data(), depthMsg1.data().size());
+  memcpy(depth2.data(), depthMsg2.data().data(), depthMsg2.data().size());
+
+  double maxDepthError = 0.0;
+  std::size_t depthNonFiniteMismatches = 0u;
+  for (std::size_t i = 0; i < depth1.size(); ++i)
+  {
+    if (std::isfinite(depth1[i]) && std::isfinite(depth2[i]))
+    {
+      maxDepthError = std::max(
+          maxDepthError,
+          std::abs(static_cast<double>(depth1[i]) - depth2[i]));
+    }
+    else if (std::isnan(depth1[i]) != std::isnan(depth2[i]) ||
+             std::isinf(depth1[i]) != std::isinf(depth2[i]) ||
+             (std::isinf(depth1[i]) &&
+              std::signbit(depth1[i]) != std::signbit(depth2[i])))
+    {
+      ++depthNonFiniteMismatches;
+    }
+  }
+  EXPECT_EQ(0u, depthNonFiniteMismatches);
+  EXPECT_LE(maxDepthError, DEPTH_TOL);
+
+  const auto points1 = pointsHelper1.Message();
+  const auto points2 = pointsHelper2.Message();
+  ASSERT_EQ(points1.width(), points2.width());
+  ASSERT_EQ(points1.height(), points2.height());
+
+  const std::size_t pointValueCount =
+      static_cast<std::size_t>(points1.width()) * points1.height() * 3;
+  std::vector<float> xyz1(pointValueCount);
+  std::vector<float> xyz2(pointValueCount);
+  std::vector<unsigned char> rgb1(pointValueCount);
+  std::vector<unsigned char> rgb2(pointValueCount);
+  UnpackPointCloudMsg(points1, xyz1.data(), rgb1.data());
+  UnpackPointCloudMsg(points2, xyz2.data(), rgb2.data());
+
+  std::size_t finitePointValues = 0u;
+  std::size_t pointNonFiniteMismatches = 0u;
+  double maxPointError = 0.0;
+  for (std::size_t i = 0; i < pointValueCount; ++i)
+  {
+    if (std::isfinite(xyz1[i]) && std::isfinite(xyz2[i]))
+    {
+      ++finitePointValues;
+      maxPointError = std::max(
+          maxPointError,
+          std::abs(static_cast<double>(xyz1[i]) - xyz2[i]));
+    }
+    else if (std::isnan(xyz1[i]) != std::isnan(xyz2[i]) ||
+             std::isinf(xyz1[i]) != std::isinf(xyz2[i]) ||
+             (std::isinf(xyz1[i]) &&
+              std::signbit(xyz1[i]) != std::signbit(xyz2[i])))
+    {
+      ++pointNonFiniteMismatches;
+    }
+  }
+  EXPECT_GT(finitePointValues, 0u);
+  EXPECT_EQ(0u, pointNonFiniteMismatches);
+  EXPECT_LE(maxPointError, DEPTH_TOL);
 
   // Subscribe to the camera info topic
   gz::msgs::CameraInfo camera1Info, camera2Info, camera3Info;
@@ -682,8 +779,8 @@ void DepthCameraSensorTest::DepthCameraIntrinsics(
   // Camera sensor with intrinsics tag
   EXPECT_EQ(camera2Info.width(), width);
   EXPECT_EQ(camera2Info.height(), height);
-  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(0), 866.23);
-  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(4), 866.23);
+  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(0), 866.0229549862297);
+  EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(4), 866.0229549862297);
   EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(2), 500);
   EXPECT_DOUBLE_EQ(camera2Info.intrinsics().k(5), 500);
 

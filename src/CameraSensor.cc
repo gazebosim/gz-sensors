@@ -18,6 +18,7 @@
 #include <gz/msgs/camera_info.pb.h>
 #include <gz/msgs/image.pb.h>
 
+#include <cstddef>
 #include <mutex>
 #include <ostream>
 #include <string>
@@ -801,6 +802,30 @@ const std::string& CameraSensor::OpticalFrameId() const
 void CameraSensor::UpdateLensIntrinsicsAndProjection(
   rendering::CameraPtr _camera, sdf::Camera &_cameraSdf)
 {
+  // Lens intrinsics / projection describe the image-plane calibration. Keep
+  // the renderer's existing depth mapping intact: some camera backends adjust
+  // their internal near / far projection terms for depth rendering.
+  auto setImagePlaneProjection =
+      [&_camera](double _fx, double _fy, double _cx, double _cy, double _s)
+  {
+    const auto requestedProjection = buildProjectionMatrix(
+        _camera->ImageWidth(),
+        _camera->ImageHeight(),
+        _fx, _fy, _cx, _cy, _s,
+        _camera->NearClipPlane(),
+        _camera->FarClipPlane());
+
+    auto projectionMatrix = _camera->ProjectionMatrix();
+    for (std::size_t row = 0; row < 2; ++row)
+    {
+      for (std::size_t col = 0; col < 4; ++col)
+      {
+        projectionMatrix(row, col) = requestedProjection(row, col);
+      }
+    }
+    _camera->SetProjectionMatrix(projectionMatrix);
+  };
+
   // Update the DOM object intrinsics to have consistent
   // intrinsics between ogre camera and camera_info msg
   if(!_cameraSdf.HasLensIntrinsics())
@@ -825,13 +850,7 @@ void CameraSensor::UpdateLensIntrinsicsAndProjection(
     double cx = _cameraSdf.LensIntrinsicsCx();
     double cy = _cameraSdf.LensIntrinsicsCy();
     double s = _cameraSdf.LensIntrinsicsSkew();
-    auto projectionMatrix = buildProjectionMatrix(
-        _camera->ImageWidth(),
-        _camera->ImageHeight(),
-        fx, fy, cx, cy, s,
-        _camera->NearClipPlane(),
-        _camera->FarClipPlane());
-    _camera->SetProjectionMatrix(projectionMatrix);
+    setImagePlaneProjection(fx, fy, cx, cy, s);
   }
 
   // Update the DOM object intrinsics to have consistent
@@ -867,12 +886,6 @@ void CameraSensor::UpdateLensIntrinsicsAndProjection(
     double cy = _cameraSdf.LensProjectionCy();
     double s = 0;
 
-    auto projectionMatrix = buildProjectionMatrix(
-        _camera->ImageWidth(),
-        _camera->ImageHeight(),
-        fx, fy, cx, cy, s,
-        _camera->NearClipPlane(),
-        _camera->FarClipPlane());
-    _camera->SetProjectionMatrix(projectionMatrix);
+    setImagePlaneProjection(fx, fy, cx, cy, s);
   }
 }
