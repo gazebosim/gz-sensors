@@ -496,6 +496,37 @@ TEST_F(SensorUpdate, NextDataUpdateTime)
     std::chrono::steady_clock::duration newNext = std::chrono::seconds(6);
     EXPECT_EQ(newNext.count(), sensor->NextDataUpdateTime().count());
   }
+
+  {
+    // Catching up from a large absolute simulation time should preserve the
+    // schedule phase without iterating once per missed sensor period.
+    sensor->SetUpdateRate(100.0);
+    sensor->SetNextDataUpdateTime(std::chrono::steady_clock::duration::zero());
+    const auto now = std::chrono::seconds(1700000000);
+    EXPECT_TRUE(sensor->Update(now, false));
+
+    const auto period =
+      std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+        std::chrono::duration<double>(1.0 / sensor->UpdateRate()));
+    const auto next = sensor->NextDataUpdateTime();
+    EXPECT_GT(next, now);
+    EXPECT_LE(next, now + period);
+  }
+
+  {
+    // Sub-millisecond sensor periods must not truncate to zero. Before the
+    // fix, a rate above 1000 Hz could enter a non-advancing catch-up loop.
+    sensor->SetUpdateRate(2000.0);
+    sensor->SetNextDataUpdateTime(std::chrono::steady_clock::duration::zero());
+    const auto now = std::chrono::steady_clock::duration::zero();
+    EXPECT_TRUE(sensor->Update(now, false));
+
+    const auto period =
+      std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+        std::chrono::duration<double>(1.0 / sensor->UpdateRate()));
+    ASSERT_GT(period, std::chrono::steady_clock::duration::zero());
+    EXPECT_EQ(period.count(), sensor->NextDataUpdateTime().count());
+  }
 }
 
 //////////////////////////////////////////////////
