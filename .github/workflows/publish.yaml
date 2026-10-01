@@ -39,6 +39,8 @@ jobs:
           echo "prefix=$prefix" >> "$GITHUB_OUTPUT"
 
   publish:
+    # don't publish Rotary tags on main branch to BCR
+    if: github.event.base_ref != 'refs/heads/main'
     needs: extract_tag_prefix
     uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.0.0
     with:
