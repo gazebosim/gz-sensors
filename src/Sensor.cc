@@ -527,16 +527,29 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
 
   if (!force && this->dataPtr->updateRate > 0.0)
   {
-    // Update the time the plugin should be loaded
-    auto delta = std::chrono::duration_cast< std::chrono::milliseconds>
-      (std::chrono::duration< double >(1.0 / this->dataPtr->updateRate));
+    // Advance by one sensor period. Keep the period in the clock's native
+    // duration so sub-millisecond update rates don't truncate to zero.
+    auto delta = std::chrono::duration_cast<
+      std::chrono::steady_clock::duration>(
+        std::chrono::duration<double>(1.0 / this->dataPtr->updateRate));
+
+    // Rates finer than the clock resolution cannot be represented. Clamp to
+    // one clock tick so scheduling always makes forward progress.
+    if (delta <= std::chrono::steady_clock::duration::zero())
+    {
+      delta = std::chrono::steady_clock::duration{1};
+    }
 
     this->dataPtr->nextUpdateTime += delta;
 
-    // Catch up to "now", if necessary.
-    while (this->dataPtr->nextUpdateTime <= _now)
+    // Catch up to "now" in O(1), preserving the phase of the existing
+    // schedule. This is important when simulation time starts at a large
+    // absolute value (for example a UNIX timestamp).
+    if (this->dataPtr->nextUpdateTime <= _now)
     {
-      this->dataPtr->nextUpdateTime += delta;
+      const auto missed =
+        (_now - this->dataPtr->nextUpdateTime) / delta + 1;
+      this->dataPtr->nextUpdateTime += delta * missed;
     }
   }
 
