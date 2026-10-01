@@ -15,6 +15,7 @@
  *
 */
 
+#include <cmath>
 #include <cstring>
 #include <gtest/gtest.h>
 
@@ -171,6 +172,9 @@ class GpuLidarSensorTest: public testing::Test,
 
   // Test topics
   public: void Topic(const std::string &_renderEngine);
+
+  // Test point-cloud conformance on a plane at cubemap endpoints
+  public: void PointCloudPlane(const std::string &_renderEngine);
 };
 
 /////////////////////////////////////////////////
@@ -444,6 +448,137 @@ void GpuLidarSensorTest::DetectBox(const std::string &_renderEngine)
   visualBox1.reset();
 
   // Clean up
+  mgr.Remove(sensor->Id());
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+/////////////////////////////////////////////////
+/// \brief Test point-cloud conformance on a plane at cubemap endpoints
+void GpuLidarSensorTest::PointCloudPlane(const std::string &_renderEngine)
+{
+  if (_renderEngine != "ogre2")
+  {
+    GTEST_SKIP() << "Cubemap endpoint regression is specific to Ogre2.";
+  }
+
+  laserMsgs.clear();
+  pointMsgs.clear();
+
+  const std::string name = "PlaneGpuLidar";
+  const std::string parent = "parent_link";
+  const std::string topic = "/gz/sensors/test/plane_lidar";
+  const double updateRate = 30;
+  const unsigned int horzSamples = 900u;
+  const double horzResolution = 1;
+  const double horzMinAngle = -GZ_PI / 4.0;
+  const double horzMaxAngle = GZ_PI / 4.0;
+  const unsigned int vertSamples = 300u;
+  const double vertResolution = 1;
+  const double vertMinAngle = -GZ_PI / 6.0;
+  const double vertMaxAngle = 0;
+  const double rangeResolution = 0.01;
+  const double rangeMin = 0.01;
+  const double rangeMax = 30.0;
+  const bool alwaysOn = true;
+  const bool visualize = false;
+  const std::string frameId = "PlaneGpuLidar_frame";
+
+  const gz::math::Pose3d sensorPose = gz::math::Pose3d::Zero;
+  sdf::ElementPtr lidarSdf = GpuLidarToSdf(name, sensorPose, updateRate,
+      topic, horzSamples, horzResolution, horzMinAngle, horzMaxAngle,
+      vertSamples, vertResolution, vertMinAngle, vertMaxAngle,
+      rangeResolution, rangeMin, rangeMax, alwaysOn, visualize, frameId);
+
+  gz::rendering::RenderEngine *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+                 << "' is not supported" << std::endl;
+  }
+
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
+  gz::rendering::VisualPtr root = scene->RootVisual();
+  scene->SetAmbientLight(0.3, 0.3, 0.3);
+
+  // A small roll makes the intersection range depend on horizontal angle,
+  // so wrapping either cubemap endpoint cannot remain hidden by symmetry.
+  const gz::math::Pose3d planePose(
+      gz::math::Vector3d(0, 0, -1),
+      gz::math::Quaterniond(0.1, 0, 0));
+  gz::rendering::VisualPtr plane = scene->CreateVisual("GroundPlane");
+  plane->AddGeometry(scene->CreatePlane());
+  plane->SetLocalPose(planePose);
+  plane->SetLocalScale(gz::math::Vector3d(1e3, 1e3, 0));
+  root->AddChild(plane);
+
+  gz::sensors::Manager mgr;
+  gz::sensors::GpuLidarSensor *sensor =
+      mgr.CreateSensor<gz::sensors::GpuLidarSensor>(lidarSdf);
+  ASSERT_NE(nullptr, sensor);
+  sensor->SetParent(parent);
+  sensor->SetScene(scene);
+
+  gz::transport::Node node;
+  node.Subscribe(topic, &::laserCb);
+  node.Subscribe(topic + "/points", &::pointCb);
+
+  WaitForMessageTestHelper<gz::msgs::LaserScan> helper(topic);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+  EXPECT_TRUE(helper.WaitForMessage()) << helper;
+
+  auto waitTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::duration<double>(0.01));
+  int waitCount = 0;
+  while (pointMsgs.empty() && waitCount < 300)
+  {
+    std::this_thread::sleep_for(waitTime);
+    ++waitCount;
+  }
+  ASSERT_LT(waitCount, 300);
+  ASSERT_FALSE(pointMsgs.empty());
+
+  const auto &msg = pointMsgs.back();
+  ASSERT_EQ(horzSamples, msg.width());
+  ASSERT_EQ(vertSamples, msg.height());
+  ASSERT_GE(msg.field_size(), 3);
+  ASSERT_EQ("x", msg.field(0).name());
+  ASSERT_EQ("y", msg.field(1).name());
+  ASSERT_EQ("z", msg.field(2).name());
+
+  const gz::math::Vector3d planeNormal =
+      planePose.Rot() * gz::math::Vector3d::UnitZ;
+  const unsigned int rows[] = {0u, 149u, 200u};
+  const unsigned int columns[] = {0u, horzSamples / 2u, horzSamples - 1u};
+  const double planeTolerance = 1e-2;
+
+  for (const unsigned int row : rows)
+  {
+    for (const unsigned int column : columns)
+    {
+      const size_t pointIndex = row * msg.width() + column;
+      const char *base =
+          msg.data().data() + pointIndex * msg.point_step();
+      float x;
+      float y;
+      float z;
+      std::memcpy(&x, base + msg.field(0).offset(), sizeof(float));
+      std::memcpy(&y, base + msg.field(1).offset(), sizeof(float));
+      std::memcpy(&z, base + msg.field(2).offset(), sizeof(float));
+
+      ASSERT_TRUE(std::isfinite(x));
+      ASSERT_TRUE(std::isfinite(y));
+      ASSERT_TRUE(std::isfinite(z));
+
+      const gz::math::Vector3d point(x, y, z);
+      const double residual =
+          std::abs(planeNormal.Dot(point - planePose.Pos()));
+      EXPECT_NEAR(0.0, residual, planeTolerance)
+          << "row " << row << ", column " << column;
+    }
+  }
+
+  plane.reset();
   mgr.Remove(sensor->Id());
   engine->DestroyScene(scene);
   gz::rendering::unloadEngine(engine->Name());
@@ -961,6 +1096,16 @@ TEST_P(GpuLidarSensorTest, DetectBox)
 #endif
 {
   DetectBox(GetParam());
+}
+
+/////////////////////////////////////////////////
+#ifdef __APPLE__
+TEST_P(GpuLidarSensorTest, DISABLED_PointCloudPlane)
+#else
+TEST_P(GpuLidarSensorTest, PointCloudPlane)
+#endif
+{
+  PointCloudPlane(GetParam());
 }
 
 /////////////////////////////////////////////////
