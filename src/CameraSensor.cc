@@ -591,9 +591,6 @@ rendering::CameraPtr CameraSensor::RenderingCamera() const
 }
 
 //////////////////////////////////////////////////
-<<<<<<< HEAD
-std::string CameraSensor::InfoTopic() const
-=======
 bool CameraSensor::SetInfoTopic(const std::string &_topic)
 {
   auto validTopic = transport::TopicUtils::AsValidTopic(_topic);
@@ -608,8 +605,7 @@ bool CameraSensor::SetInfoTopic(const std::string &_topic)
 }
 
 //////////////////////////////////////////////////
-const std::string& CameraSensor::InfoTopic() const
->>>>>>> 1449e3e (Fix custom camera_info_topic handling for camera sensors (#630))
+std::string CameraSensor::InfoTopic() const
 {
   return this->dataPtr->infoTopic;
 }
