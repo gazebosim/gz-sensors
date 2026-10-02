@@ -44,6 +44,7 @@
 #include "gz/sensors/SensorFactory.hh"
 #include "gz/sensors/SensorTypes.hh"
 
+#include <gz/rendering/PixelBuffer.hh>
 #include <gz/rendering/Utils.hh>
 
 using namespace gz;
@@ -79,23 +80,8 @@ class gz::sensors::CameraSensor::Implementation
   /// \brief Rendering camera
   public: gz::rendering::CameraPtr camera;
 
-  /// \brief Image whose pixels live in imageMsg's payload, so the camera
-  /// copies its frame straight into the message that is published.
-  public: gz::rendering::Image image;
-
-  /// \brief Reused image message. Its data field is sized once for the
-  /// camera resolution and written in place by the render target copy.
+  /// \brief Reused image message whose data field receives camera frames.
   public: msgs::Image imageMsg;
-
-  /// \brief Size the message payload for the camera and wrap it in image.
-  public: void PrepareImageBuffer()
-  {
-    const unsigned int size = this->camera->ImageMemorySize();
-    this->imageMsg.mutable_data()->resize(size);
-    this->image = gz::rendering::Image(this->camera->ImageWidth(),
-        this->camera->ImageHeight(), this->camera->ImageFormat(),
-        this->imageMsg.mutable_data()->data());
-  }
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -267,8 +253,6 @@ bool CameraSensor::CreateCamera()
 
   this->UpdateLensIntrinsicsAndProjection(this->dataPtr->camera,
       *cameraSdf);
-
-  this->dataPtr->PrepareImageBuffer();
 
   this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);
 
@@ -460,25 +444,28 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     // generate sensor data
     this->Render();
+    unsigned char *data = nullptr;
     {
       GZ_PROFILE("CameraSensor::Update Copy image");
-      // The image wraps the message payload; keep them in sync if the
-      // camera resolution or format changed since the buffer was sized.
-      if (this->dataPtr->imageMsg.data().size() !=
-          this->dataPtr->camera->ImageMemorySize() ||
-          this->dataPtr->image.Width() !=
-          this->dataPtr->camera->ImageWidth() ||
-          this->dataPtr->image.Height() !=
-          this->dataPtr->camera->ImageHeight())
+      auto *payload = this->dataPtr->imageMsg.mutable_data();
+      if (payload->size() != this->dataPtr->camera->ImageMemorySize())
       {
-        this->dataPtr->PrepareImageBuffer();
+        payload->resize(this->dataPtr->camera->ImageMemorySize());
       }
-      this->dataPtr->camera->Copy(this->dataPtr->image);
+
+      rendering::PixelBuffer buffer(
+          this->dataPtr->camera->ImageWidth(),
+          this->dataPtr->camera->ImageHeight(),
+          this->dataPtr->camera->ImageFormat(),
+          payload->data(), payload->size());
+      if (!this->dataPtr->camera->CopyTo(buffer))
+        return false;
+
+      data = buffer.Data();
     }
 
     unsigned int width = this->dataPtr->camera->ImageWidth();
     unsigned int height = this->dataPtr->camera->ImageHeight();
-    unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
     gz::common::Image::PixelFormatType
         format{common::Image::UNKNOWN_PIXEL_FORMAT};
