@@ -46,6 +46,7 @@
 #include "gz/sensors/SensorFactory.hh"
 #include "gz/sensors/SensorTypes.hh"
 
+#include <gz/rendering/PixelBuffer.hh>
 #include <gz/rendering/Utils.hh>
 
 using namespace gz;
@@ -85,8 +86,13 @@ class gz::sensors::CameraSensorPrivate
   /// \brief Rendering camera
   public: rendering::CameraPtr camera;
 
+<<<<<<< HEAD
   /// \brief Pointer to an image to be published
   public: rendering::Image image;
+=======
+  /// \brief Reused image message whose data field receives camera frames.
+  public: msgs::Image imageMsg;
+>>>>>>> de66143 (Adapt to the PixelBuffer API (#674))
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -248,6 +254,7 @@ bool CameraSensor::CreateCamera()
         this->dataPtr->camera->ImageHeight()
       );
 
+<<<<<<< HEAD
     cameraSdf->SetLensIntrinsicsFx(intrinsicMatrix(0, 0));
     cameraSdf->SetLensIntrinsicsFy(intrinsicMatrix(1, 1));
     cameraSdf->SetLensIntrinsicsCx(intrinsicMatrix(0, 2));
@@ -272,6 +279,8 @@ bool CameraSensor::CreateCamera()
 
   this->dataPtr->image = this->dataPtr->camera->CreateImage();
 
+=======
+>>>>>>> de66143 (Adapt to the PixelBuffer API (#674))
   this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);
 
   // Create the directory to store frames
@@ -525,14 +534,33 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     // generate sensor data
     this->Render();
+    unsigned char *data = nullptr;
     {
+<<<<<<< HEAD
       IGN_PROFILE("CameraSensor::Update Copy image");
       this->dataPtr->camera->Copy(this->dataPtr->image);
+=======
+      GZ_PROFILE("CameraSensor::Update Copy image");
+      auto *payload = this->dataPtr->imageMsg.mutable_data();
+      if (payload->size() != this->dataPtr->camera->ImageMemorySize())
+      {
+        payload->resize(this->dataPtr->camera->ImageMemorySize());
+      }
+
+      rendering::PixelBuffer buffer(
+          this->dataPtr->camera->ImageWidth(),
+          this->dataPtr->camera->ImageHeight(),
+          this->dataPtr->camera->ImageFormat(),
+          payload->data(), payload->size());
+      if (!this->dataPtr->camera->CopyTo(buffer))
+        return false;
+
+      data = buffer.Data();
+>>>>>>> de66143 (Adapt to the PixelBuffer API (#674))
     }
 
     unsigned int width = this->dataPtr->camera->ImageWidth();
     unsigned int height = this->dataPtr->camera->ImageHeight();
-    unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
     common::Image::PixelFormatType
         format{common::Image::UNKNOWN_PIXEL_FORMAT};
