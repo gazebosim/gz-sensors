@@ -67,7 +67,7 @@ if ((NOT ${CMAKE_VERSION} VERSION_LESS 3.11) AND (NOT OpenGL_GL_PREFERENCE))
   set(OpenGL_GL_PREFERENCE "GLVND")
 endif()
 
-gz_find_package(gz-rendering8 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
+gz_find_package(gz-rendering8 REQUIRED VERSION 8.3 OPTIONAL_COMPONENTS ogre ogre2)
 set(GZ_RENDERING_VER ${gz-rendering8_VERSION_MAJOR})
 
 if (TARGET gz-rendering${GZ_RENDERING_VER}::ogre)
