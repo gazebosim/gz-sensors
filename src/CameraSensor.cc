@@ -44,6 +44,7 @@
 #include "gz/sensors/SensorFactory.hh"
 #include "gz/sensors/SensorTypes.hh"
 
+#include <gz/rendering/PixelBuffer.hh>
 #include <gz/rendering/Utils.hh>
 
 using namespace gz;
@@ -79,8 +80,8 @@ class gz::sensors::CameraSensorPrivate
   /// \brief Rendering camera
   public: gz::rendering::CameraPtr camera;
 
-  /// \brief Pointer to an image to be published
-  public: gz::rendering::Image image;
+  /// \brief Reused image message whose data field receives camera frames.
+  public: msgs::Image imageMsg;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -255,8 +256,6 @@ bool CameraSensor::CreateCamera()
 
   this->UpdateLensIntrinsicsAndProjection(this->dataPtr->camera,
       *cameraSdf);
-
-  this->dataPtr->image = this->dataPtr->camera->CreateImage();
 
   this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);
 
@@ -448,14 +447,28 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     // generate sensor data
     this->Render();
+    unsigned char *data = nullptr;
     {
       GZ_PROFILE("CameraSensor::Update Copy image");
-      this->dataPtr->camera->Copy(this->dataPtr->image);
+      auto *payload = this->dataPtr->imageMsg.mutable_data();
+      if (payload->size() != this->dataPtr->camera->ImageMemorySize())
+      {
+        payload->resize(this->dataPtr->camera->ImageMemorySize());
+      }
+
+      rendering::PixelBuffer buffer(
+          this->dataPtr->camera->ImageWidth(),
+          this->dataPtr->camera->ImageHeight(),
+          this->dataPtr->camera->ImageFormat(),
+          payload->data(), payload->size());
+      if (!this->dataPtr->camera->CopyTo(buffer))
+        return false;
+
+      data = buffer.Data();
     }
 
     unsigned int width = this->dataPtr->camera->ImageWidth();
     unsigned int height = this->dataPtr->camera->ImageHeight();
-    unsigned char *data = this->dataPtr->image.Data<unsigned char>();
 
     gz::common::Image::PixelFormatType
         format{common::Image::UNKNOWN_PIXEL_FORMAT};
@@ -498,8 +511,8 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
         break;
     }
 
-    // create message
-    msgs::Image msg;
+    // fill in the message; its payload already holds the frame
+    msgs::Image &msg = this->dataPtr->imageMsg;
     {
       GZ_PROFILE("CameraSensor::Update Message");
       msg.set_width(width);
@@ -507,11 +520,11 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
                    this->dataPtr->camera->ImageFormat()));
       msg.set_pixel_format_type(msgsPixelFormat);
+      msg.clear_header();
       *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
       auto frame = msg.mutable_header()->add_data();
       frame->set_key("frame_id");
       frame->add_value(this->dataPtr->opticalFrameId);
-      msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
     }
 
     // publish the image message
