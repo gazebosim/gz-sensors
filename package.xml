@@ -15,7 +15,7 @@
   <depend>gz-common</depend>
   <depend>gz-math</depend>
   <depend>gz-msgs</depend>
-  <depend>gz-rendering</depend>
+  <depend version_gte="10.1.0">gz-rendering</depend>
   <depend>gz-tools2</depend>
   <depend>gz-transport</depend>
   <depend>sdformat</depend>

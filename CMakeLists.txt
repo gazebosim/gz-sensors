@@ -58,7 +58,7 @@ gz_find_package(gz-transport VERSION 15 REQUIRED)
 
 #--------------------------------------
 # Find gz-rendering
-gz_find_package(gz-rendering VERSION 10 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
+gz_find_package(gz-rendering VERSION 10.1 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
 
 if (TARGET gz-rendering::ogre)
   set(HAVE_OGRE TRUE)
