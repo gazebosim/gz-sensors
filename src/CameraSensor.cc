@@ -80,13 +80,8 @@ class gz::sensors::CameraSensorPrivate
   /// \brief Rendering camera
   public: gz::rendering::CameraPtr camera;
 
-<<<<<<< HEAD
-  /// \brief Pointer to an image to be published
-  public: gz::rendering::Image image;
-=======
   /// \brief Reused image message whose data field receives camera frames.
   public: msgs::Image imageMsg;
->>>>>>> de66143 (Adapt to the PixelBuffer API (#674))
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -259,11 +254,6 @@ bool CameraSensor::CreateCamera()
   this->UpdateLensIntrinsicsAndProjection(this->dataPtr->camera,
       *cameraSdf);
 
-<<<<<<< HEAD
-  this->dataPtr->image = this->dataPtr->camera->CreateImage();
-
-=======
->>>>>>> de66143 (Adapt to the PixelBuffer API (#674))
   this->Scene()->RootVisual()->AddChild(this->dataPtr->camera);
 
   // Create the directory to store frames
@@ -457,9 +447,6 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     unsigned char *data = nullptr;
     {
       GZ_PROFILE("CameraSensor::Update Copy image");
-<<<<<<< HEAD
-      this->dataPtr->camera->Copy(this->dataPtr->image);
-=======
       auto *payload = this->dataPtr->imageMsg.mutable_data();
       if (payload->size() != this->dataPtr->camera->ImageMemorySize())
       {
@@ -475,7 +462,6 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
         return false;
 
       data = buffer.Data();
->>>>>>> de66143 (Adapt to the PixelBuffer API (#674))
     }
 
     unsigned int width = this->dataPtr->camera->ImageWidth();
@@ -522,8 +508,8 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
         break;
     }
 
-    // create message
-    msgs::Image msg;
+    // fill in the message; its payload already holds the frame
+    msgs::Image &msg = this->dataPtr->imageMsg;
     {
       GZ_PROFILE("CameraSensor::Update Message");
       msg.set_width(width);
@@ -531,11 +517,11 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
                    this->dataPtr->camera->ImageFormat()));
       msg.set_pixel_format_type(msgsPixelFormat);
+      msg.clear_header();
       *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
       auto frame = msg.mutable_header()->add_data();
       frame->set_key("frame_id");
       frame->add_value(this->FrameId());
-      msg.set_data(data, this->dataPtr->camera->ImageMemorySize());
     }
 
     // publish the image message
