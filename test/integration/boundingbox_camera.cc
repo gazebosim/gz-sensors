@@ -484,6 +484,13 @@ void BoundingBoxCameraSensorTest::Boxes3DWithBuiltinSDF(
 void BoundingBoxCameraSensorTest::CustomCameraInfoTopic(
     const std::string &_renderEngine)
 {
+  // Skip unsupported engines
+  if (_renderEngine != "ogre2")
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+              << "' doesn't support bounding box cameras" << std::endl;
+  }
+
   std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "custom_camera_info_topic.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
