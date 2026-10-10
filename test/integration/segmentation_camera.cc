@@ -392,6 +392,13 @@ TEST_P(SegmentationCameraSensorTest, ImagesWithBuiltinSDF)
 void SegmentationCameraSensorTest::CustomCameraInfoTopic(
     const std::string &_renderEngine)
 {
+  // If ogre2 is not the engine, don't run the test
+  if (_renderEngine.compare("ogre2") != 0)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+      << "' doesn't support segmentation cameras" << std::endl;
+  }
+
   std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "custom_camera_info_topic.sdf");
   sdf::SDFPtr doc(new sdf::SDF());
