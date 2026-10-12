@@ -61,7 +61,7 @@ set(GZ_TRANSPORT_VER ${gz-transport14_VERSION_MAJOR})
 
 #--------------------------------------
 # Find gz-rendering
-gz_find_package(gz-rendering9 REQUIRED OPTIONAL_COMPONENTS ogre ogre2)
+gz_find_package(gz-rendering9 REQUIRED VERSION 9.6 OPTIONAL_COMPONENTS ogre ogre2)
 set(GZ_RENDERING_VER ${gz-rendering9_VERSION_MAJOR})
 
 if (TARGET gz-rendering${GZ_RENDERING_VER}::ogre)
