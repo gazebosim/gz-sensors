@@ -16,9 +16,11 @@
 */
 
 #include <gz/msgs/camera_info.pb.h>
+#include <gz/msgs/double.pb.h>
 #include <gz/msgs/image.pb.h>
 
 #include <mutex>
+#include <optional>
 #include <ostream>
 #include <string>
 
@@ -126,6 +128,20 @@ class gz::sensors::CameraSensor::Implementation
 
   /// \brief Flag to indicate if sensor is generating data
   public: bool generatingData = false;
+
+  /// \brief Callback of the set_hfov topic: keeps the horizontal field of
+  /// view for the next update, which changes the rendering camera.
+  /// \param[in] _msg Horizontal field of view in radians.
+  public: void OnSetHfov(const msgs::Double &_msg);
+
+  /// \brief Camera SDF as loaded, before the lens intrinsics and projection
+  /// are derived from the field of view. Base of a field of view set at
+  /// runtime.
+  public: sdf::Camera loadedCameraSdf;
+
+  /// \brief Horizontal field of view received on the set_hfov topic and not
+  /// applied yet.
+  public: std::optional<math::Angle> pendingHfov;
 };
 
 //////////////////////////////////////////////////
@@ -271,6 +287,13 @@ bool CameraSensor::CreateCamera()
 }
 
 //////////////////////////////////////////////////
+void CameraSensor::Implementation::OnSetHfov(const msgs::Double &_msg)
+{
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->pendingHfov = math::Angle(_msg.data());
+}
+
+//////////////////////////////////////////////////
 CameraSensor::CameraSensor()
   : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
@@ -349,6 +372,21 @@ bool CameraSensor::Load(const sdf::Sensor &_sdf)
     this->SetTriggered(true, triggerTopic);
   }
 
+  // The horizontal field of view can be changed at runtime (zoom)
+  this->dataPtr->loadedCameraSdf = *_sdf.CameraSensor();
+  const std::string hfovTopic =
+      transport::TopicUtils::AsValidTopic(this->Topic() + "/set_hfov");
+  if (this->dataPtr->node.Subscribe(hfovTopic,
+      &CameraSensor::Implementation::OnSetHfov, this->dataPtr.get()))
+  {
+    gzdbg << "Horizontal field of view of [" << this->Name()
+          << "] set on [" << hfovTopic << "]" << std::endl;
+  }
+  else
+  {
+    gzerr << "Unable to subscribe to topic [" << hfovTopic << "]\n";
+  }
+
   if (!this->AdvertiseInfo())
     return false;
 
@@ -410,6 +448,38 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   }
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+
+  if (this->dataPtr->pendingHfov)
+  {
+    const math::Angle angle = *this->dataPtr->pendingHfov;
+    this->dataPtr->pendingHfov.reset();
+
+    // Same derivation of the lens intrinsics and projection as at creation
+    sdf::Camera cameraSdf = this->dataPtr->loadedCameraSdf;
+    if (cameraSdf.HasLensIntrinsics() || cameraSdf.HasLensProjection())
+    {
+      gzwarn << "Horizontal field of view of [" << this->Name()
+             << "] not changed: its lens intrinsics or projection are set."
+             << std::endl;
+    }
+    else if (angle < 0.001 || angle > GZ_PI*2)
+    {
+      gzerr << "Invalid horizontal field of view [" << angle << "]\n";
+    }
+    else
+    {
+      cameraSdf.SetHorizontalFov(angle);
+      this->dataPtr->camera->SetHFOV(angle);
+      this->UpdateLensIntrinsicsAndProjection(this->dataPtr->camera,
+          cameraSdf);
+      this->dataPtr->sdfSensor.SetCameraSensor(cameraSdf);
+
+      // Camera info follows the new field of view
+      this->dataPtr->infoMsg.Clear();
+      this->PopulateInfo(&cameraSdf);
+      this->SetBaseline(this->dataPtr->baseline);
+    }
+  }
 
   if (this->HasInfoConnections())
   {

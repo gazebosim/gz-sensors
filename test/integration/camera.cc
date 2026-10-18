@@ -15,10 +15,14 @@
  *
 */
 
+#include <cmath>
 #include <cstring>
+#include <mutex>
+#include <thread>
 #include <gtest/gtest.h>
 
 #include <gz/msgs/camera_info.pb.h>
+#include <gz/msgs/double.pb.h>
 #include <gz/msgs/image.pb.h>
 #include <gz/common/Image.hh>
 
@@ -97,6 +101,9 @@ class CameraSensorTest: public testing::Test,
 
   // Create a camera sensor and verify a custom camera info topic
   public: void CustomCameraInfoTopic(const std::string &_renderEngine);
+
+  // Change the horizontal field of view of camera sensors at runtime
+  public: void SetHfov(const std::string &_renderEngine);
 };
 
 void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
@@ -965,6 +972,117 @@ TEST_P(CameraSensorTest, CustomCameraInfoTopic)
 {
   gz::common::Console::SetVerbosity(4);
   CustomCameraInfoTopic(GetParam());
+}
+
+/////////////////////////////////////////////////
+void CameraSensorTest::SetHfov(const std::string &_renderEngine)
+{
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+                                           "sdf", "camera_intrinsics.sdf");
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  ASSERT_NE(nullptr, doc->Root());
+  auto linkPtr = doc->Root()->GetElement("model")->GetElement("link");
+  ASSERT_NE(nullptr, linkPtr);
+
+  // Camera sensor without intrinsics tag, and one with intrinsics tag
+  auto cameraWithoutIntrinsicsTag = linkPtr->GetElement("sensor");
+  auto cameraWithIntrinsicsTag = cameraWithoutIntrinsicsTag->GetNextElement();
+
+  auto *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+                 << "' is not supported" << std::endl;
+  }
+  auto scene = engine->CreateScene("scene");
+
+  gz::sensors::Manager mgr;
+  auto *sensor1 =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(cameraWithoutIntrinsicsTag);
+  auto *sensor2 =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(cameraWithIntrinsicsTag);
+  ASSERT_NE(nullptr, sensor1);
+  ASSERT_NE(nullptr, sensor2);
+  sensor1->SetScene(scene);
+  sensor2->SetScene(scene);
+
+  std::mutex mutex;
+  gz::msgs::CameraInfo info1, info2;
+  std::function<void(const gz::msgs::CameraInfo &)> info1Callback =
+      [&](const gz::msgs::CameraInfo &_msg)
+  {
+    std::lock_guard<std::mutex> lock(mutex);
+    info1 = _msg;
+  };
+  std::function<void(const gz::msgs::CameraInfo &)> info2Callback =
+      [&](const gz::msgs::CameraInfo &_msg)
+  {
+    std::lock_guard<std::mutex> lock(mutex);
+    info2 = _msg;
+  };
+  gz::transport::Node node;
+  node.Subscribe("/camera1/camera_info", info1Callback);
+  node.Subscribe("/camera2/camera_info", info2Callback);
+
+  // Update until both camera infos arrive
+  auto fx = [&](const gz::msgs::CameraInfo &_info)
+  {
+    std::lock_guard<std::mutex> lock(mutex);
+    return _info.intrinsics().k_size() == 9 ? _info.intrinsics().k(0) : 0.0;
+  };
+  for (int i = 0; i < 50 && (fx(info1) == 0.0 || fx(info2) == 0.0); ++i)
+  {
+    mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+  ASSERT_GT(fx(info1), 0.0);
+  ASSERT_GT(fx(info2), 0.0);
+  const double fx2 = fx(info2);
+
+  // Zoom both cameras in to half their field of view
+  const double hfov = sensor1->RenderingCamera()->HFOV().Radian() / 2;
+  auto pub1 = node.Advertise<gz::msgs::Double>(
+      sensor1->Topic() + "/set_hfov");
+  auto pub2 = node.Advertise<gz::msgs::Double>(
+      sensor2->Topic() + "/set_hfov");
+  for (int i = 0; i < 50 && !(pub1.HasConnections() && pub2.HasConnections());
+       ++i)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+  ASSERT_TRUE(pub1.HasConnections());
+  ASSERT_TRUE(pub2.HasConnections());
+  gz::msgs::Double msg;
+  msg.set_data(hfov);
+  pub1.Publish(msg);
+  pub2.Publish(msg);
+
+  // Pinhole camera: fx = width / (2 tan(hfov / 2))
+  const double expectedFx = sensor1->ImageWidth() / (2 * std::tan(hfov / 2));
+  for (int i = 0; i < 50 && std::abs(fx(info1) - expectedFx) > 1e-3; ++i)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+  }
+  EXPECT_NEAR(hfov, sensor1->RenderingCamera()->HFOV().Radian(), 1e-6);
+  EXPECT_NEAR(expectedFx, fx(info1), 1e-3);
+
+  // The lens intrinsics set in SDF keep the field of view of camera2
+  EXPECT_DOUBLE_EQ(fx2, fx(info2));
+
+  // Clean up
+  mgr.Remove(sensor1->Id());
+  mgr.Remove(sensor2->Id());
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+TEST_P(CameraSensorTest, SetHfov)
+{
+  SetHfov(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(CameraSensor, CameraSensorTest,
