@@ -59,6 +59,10 @@ namespace gz
     ///   It offers both a gz-transport interface and a direct C++ API
     ///   to access the image data. The API works by setting a callback to be
     ///   called with image data.
+    ///   The horizontal field of view can be changed while the sensor runs
+    ///   (zoom) by publishing a gz::msgs::Double in radians on
+    ///   <topic>/set_hfov, unless the lens intrinsics or projection are set
+    ///   in SDF. The camera info follows the new field of view.
     class GZ_SENSORS_CAMERA_VISIBLE CameraSensor : public RenderingSensor
     {
       /// \brief constructor
