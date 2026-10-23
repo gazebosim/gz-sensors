@@ -17,7 +17,7 @@
 1. Fix custom camera_info_topic handling for camera sensors
     * [Pull request #630](https://github.com/gazebosim/gz-sensors/pull/630)
 
-1. Update BCR maintainers
+1. Bazel updates
     * [Pull request #651](https://github.com/gazebosim/gz-sensors/pull/651)
 
 1. Reject invalid camera clip plane ordering
