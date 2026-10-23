@@ -17,17 +17,20 @@
 1. Use the SPDX identifier Apache-2.0 in the license declaration
     * [Pull request #666](https://github.com/gazebosim/gz-sensors/pull/666)
 
-1. Update BCR maintainers
+1. Bazel updates
     * [Pull request #651](https://github.com/gazebosim/gz-sensors/pull/651)
+    * [Pull request #633](https://github.com/gazebosim/gz-sensors/pull/633)
+    * [Pull request #568](https://github.com/gazebosim/gz-sensors/pull/568)
+    * [Pull request #567](https://github.com/gazebosim/gz-sensors/pull/567)
+    * [Pull request #566](https://github.com/gazebosim/gz-sensors/pull/566)
+    * [Pull request #537](https://github.com/gazebosim/gz-sensors/pull/537)
+    * [Pull request #535](https://github.com/gazebosim/gz-sensors/pull/535)
 
 1. Reject invalid camera clip plane ordering
     * [Pull request #641](https://github.com/gazebosim/gz-sensors/pull/641)
 
 1. Fix doxygen complaints (partial backport of #615)
     * [Pull request #647](https://github.com/gazebosim/gz-sensors/pull/647)
-
-1. [bazel/infra] Automate publish to BCR workflow
-    * [Pull request #633](https://github.com/gazebosim/gz-sensors/pull/633)
 
 1. Fix memory leak in BoundingBoxCameraSensor
     * [Pull request #624](https://github.com/gazebosim/gz-sensors/pull/624)
@@ -44,29 +47,14 @@
 1. Added invalid point checking to RGBD and Depth Camera plugins to set `is_dense` flag accordingly
     * [Pull request #575](https://github.com/gazebosim/gz-sensors/pull/575)
 
-1. [bazel/infra] Disable windows CI
-    * [Pull request #568](https://github.com/gazebosim/gz-sensors/pull/568)
-
-1. [bazel/infra] Add manual BCR release workflow
-    * [Pull request #567](https://github.com/gazebosim/gz-sensors/pull/567)
-
-1. Bazel updates: prep for BCR release automation
-    * [Pull request #566](https://github.com/gazebosim/gz-sensors/pull/566)
-
 1. Fix: updated jacobi as template
     * [Pull request #560](https://github.com/gazebosim/gz-sensors/pull/560)
 
 1. Update Air Speed Sensor SDF Element link in Readme
     * [Pull request #554](https://github.com/gazebosim/gz-sensors/pull/554)
 
-1. [Bazel] Fix downstream build errors with -Werror
-    * [Pull request #537](https://github.com/gazebosim/gz-sensors/pull/537)
-
 1. Fix flaky test in DepthCameraSensorTest::ImagesWithBuiltinSDF
     * [Pull request #536](https://github.com/gazebosim/gz-sensors/pull/536)
-
-1. [Bazel] Remove rendering from core and force-torque targets
-    * [Pull request #535](https://github.com/gazebosim/gz-sensors/pull/535)
 
 1. Better GZ_PROFILE instrumentation for rendering sensors
     * [Pull request #532](https://github.com/gazebosim/gz-sensors/pull/532)
