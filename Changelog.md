@@ -1,5 +1,67 @@
 ## Gazebo Sensors 9
 
+### Gazebo Sensors 9.3.0 (2026-10-23)
+
+1. Adapt to the PixelBuffer API
+    * [Pull request #678](https://github.com/gazebosim/gz-sensors/pull/678)
+
+1. Skip CustomCameraInfoTopic tests on engines other than ogre2
+    * [Pull request #681](https://github.com/gazebosim/gz-sensors/pull/681)
+
+1. Fix custom camera_info_topic handling for camera sensors
+    * [Pull request #660](https://github.com/gazebosim/gz-sensors/pull/660)
+
+1. Sensor: catch up update schedule in O(1)
+    * [Pull request #663](https://github.com/gazebosim/gz-sensors/pull/663)
+
+1. Use the SPDX identifier Apache-2.0 in the license declaration
+    * [Pull request #666](https://github.com/gazebosim/gz-sensors/pull/666)
+
+1. Bazel updates
+    * [Pull request #651](https://github.com/gazebosim/gz-sensors/pull/651)
+    * [Pull request #633](https://github.com/gazebosim/gz-sensors/pull/633)
+    * [Pull request #568](https://github.com/gazebosim/gz-sensors/pull/568)
+    * [Pull request #567](https://github.com/gazebosim/gz-sensors/pull/567)
+    * [Pull request #566](https://github.com/gazebosim/gz-sensors/pull/566)
+    * [Pull request #537](https://github.com/gazebosim/gz-sensors/pull/537)
+    * [Pull request #535](https://github.com/gazebosim/gz-sensors/pull/535)
+
+1. Reject invalid camera clip plane ordering
+    * [Pull request #641](https://github.com/gazebosim/gz-sensors/pull/641)
+
+1. Fix doxygen complaints (partial backport of #615)
+    * [Pull request #647](https://github.com/gazebosim/gz-sensors/pull/647)
+
+1. Fix memory leak in BoundingBoxCameraSensor
+    * [Pull request #624](https://github.com/gazebosim/gz-sensors/pull/624)
+
+1. Fix compiler warnings with protobuf 35.0
+    * [Pull request #618](https://github.com/gazebosim/gz-sensors/pull/618)
+
+1. Use GTEST_SKIP in unsupported tests
+    * [Pull request #604](https://github.com/gazebosim/gz-sensors/pull/604)
+
+1. fix(thermal_camera): Fixed Gaussian noise for thermal camera.
+    * [Pull request #597](https://github.com/gazebosim/gz-sensors/pull/597)
+
+1. Added invalid point checking to RGBD and Depth Camera plugins to set `is_dense` flag accordingly
+    * [Pull request #575](https://github.com/gazebosim/gz-sensors/pull/575)
+
+1. Fix: updated jacobi as template
+    * [Pull request #560](https://github.com/gazebosim/gz-sensors/pull/560)
+
+1. Update Air Speed Sensor SDF Element link in Readme
+    * [Pull request #554](https://github.com/gazebosim/gz-sensors/pull/554)
+
+1. Fix flaky test in DepthCameraSensorTest::ImagesWithBuiltinSDF
+    * [Pull request #536](https://github.com/gazebosim/gz-sensors/pull/536)
+
+1. Better GZ_PROFILE instrumentation for rendering sensors
+    * [Pull request #532](https://github.com/gazebosim/gz-sensors/pull/532)
+
+1. Clarify min and max temperature of thermal camera
+    * [Pull request #523](https://github.com/gazebosim/gz-sensors/pull/523)
+
 ### Gazebo Sensors 9.2.0 (2026-06-26)
 
 1. **Baseline:** this includes all changes from 9.1.0 and earlier.
