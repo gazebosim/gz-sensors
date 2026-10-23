@@ -1,5 +1,34 @@
 ## Gazebo Sensors 10
 
+### Gazebo Sensors 10.2.0 (2026-10-23)
+
+1. Adapt to the PixelBuffer API
+    * [Pull request #677](https://github.com/gazebosim/gz-sensors/pull/677)
+
+1. Skip CustomCameraInfoTopic tests on engines other than ogre2
+    * [Pull request #681](https://github.com/gazebosim/gz-sensors/pull/681)
+
+1. Sensor: catch up update schedule in O(1)
+    * [Pull request #663](https://github.com/gazebosim/gz-sensors/pull/663)
+
+1. Use the SPDX identifier Apache-2.0 in the license declaration
+    * [Pull request #666](https://github.com/gazebosim/gz-sensors/pull/666)
+
+1. Fix custom camera_info_topic handling for camera sensors
+    * [Pull request #630](https://github.com/gazebosim/gz-sensors/pull/630)
+
+1. Bazel updates
+    * [Pull request #651](https://github.com/gazebosim/gz-sensors/pull/651)
+
+1. Reject invalid camera clip plane ordering
+    * [Pull request #641](https://github.com/gazebosim/gz-sensors/pull/641)
+
+1. ci: test on Ubuntu Resolute (26.04)
+    * [Pull request #646](https://github.com/gazebosim/gz-sensors/pull/646)
+
+1. Fix doxygen complaints (partial backport of #615)
+    * [Pull request #647](https://github.com/gazebosim/gz-sensors/pull/647)
+
 ### Gazebo Sensors 10.1.1 (2026-09-01)
 
 1. [bazel] Fix build on macos
