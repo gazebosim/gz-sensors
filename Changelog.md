@@ -1,5 +1,13 @@
 ## Gazebo Sensors 6
 
+### Gazebo Sensors 6.10.0 (2026-10-23)
+
+1. Adapt to the PixelBuffer API
+    * [Pull request #680](https://github.com/gazebosim/gz-sensors/pull/680)
+
+1. fix(thermal_camera): Fixed Gaussian noise for thermal camera.
+    * [Pull request #597](https://github.com/gazebosim/gz-sensors/pull/597)
+
 ### Gazebo Sensors 6.9.0 (2026-01-29)
 
 1. Fortress: disable Ubuntu Focal CI
