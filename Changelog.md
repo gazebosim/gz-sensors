@@ -1,5 +1,55 @@
 ## Gazebo Sensors 8
 
+### Gazebo Sensors 8.3.0 (2026-10-23)
+
+1. Fix custom camera_info_topic handling for camera sensors
+    * [Pull request #661](https://github.com/gazebosim/gz-sensors/pull/661)
+
+1. Adapt to the PixelBuffer API
+    * [Pull request #679](https://github.com/gazebosim/gz-sensors/pull/679)
+
+1. Sensor: catch up update schedule in O(1)
+    * [Pull request #663](https://github.com/gazebosim/gz-sensors/pull/663)
+
+1. Use the SPDX identifier Apache-2.0 in the license declaration
+    * [Pull request #666](https://github.com/gazebosim/gz-sensors/pull/666)
+
+1. Reject invalid camera clip plane ordering
+    * [Pull request #641](https://github.com/gazebosim/gz-sensors/pull/641)
+
+1. Fix doxygen complaints (partial backport of #615)
+    * [Pull request #647](https://github.com/gazebosim/gz-sensors/pull/647)
+
+1. Fix memory leak in BoundingBoxCameraSensor
+    * [Pull request #624](https://github.com/gazebosim/gz-sensors/pull/624)
+
+1. Fix compiler warnings with protobuf 35.0
+    * [Pull request #618](https://github.com/gazebosim/gz-sensors/pull/618)
+
+1. Use GTEST_SKIP in unsupported tests
+    * [Pull request #604](https://github.com/gazebosim/gz-sensors/pull/604)
+
+1. fix(thermal_camera): Fixed Gaussian noise for thermal camera.
+    * [Pull request #597](https://github.com/gazebosim/gz-sensors/pull/597)
+
+1. Added invalid point checking to RGBD and Depth Camera plugins to set `is_dense` flag accordingly
+    * [Pull request #575](https://github.com/gazebosim/gz-sensors/pull/575)
+
+1. Fix: updated jacobi as template
+    * [Pull request #560](https://github.com/gazebosim/gz-sensors/pull/560)
+
+1. Fix flaky test in DepthCameraSensorTest::ImagesWithBuiltinSDF
+    * [Pull request #536](https://github.com/gazebosim/gz-sensors/pull/536)
+
+1. Better GZ_PROFILE instrumentation for rendering sensors
+    * [Pull request #532](https://github.com/gazebosim/gz-sensors/pull/532)
+
+1. Clarify min and max temperature of thermal camera
+    * [Pull request #523](https://github.com/gazebosim/gz-sensors/pull/523)
+
+1. Update CameraSensor.cc - Allow min HFOV of 0.001 rad
+    * [Pull request #520](https://github.com/gazebosim/gz-sensors/pull/520)
+
 ### Gazebo Sensors 8.2.2 (2025-01-30)
 
 1. Check camera resolution (#480)
