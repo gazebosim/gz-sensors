@@ -18,12 +18,15 @@ jobs:
   # The publish-to-bcr reusable workflow expects the version name to be in
   # semver-(optional build metadata postfix) format, but the repo tags are in
   # branch_semver-postfix format. This job extracts the branch name as a prefix
-  # to pass to publish-to-bcr.
+  # to pass to publish-to-bcr. It also checks whether the release branch exists
+  # so that tags pushed to main (before a release branch is created) are not
+  # published to BCR.
   extract_tag_prefix:
     runs-on: ubuntu-latest
     outputs:
       prefix: ${{ steps.extract.outputs.prefix }}
       tag_name: ${{ steps.extract.outputs.tag_name }}
+      publish: ${{ steps.extract.outputs.publish }}
     steps:
       - name: Determine tag name and prefix
         id: extract
@@ -35,12 +38,17 @@ jobs:
           branch=$(echo "$TAG_NAME" | cut -d'_' -f1)
           prefix="${branch}_"
 
+          # Only publish if the release branch matching the tag prefix exists
+          repo_url="${{ github.server_url }}/${{ github.repository }}"
+          publish=$(git ls-remote --exit-code "$repo_url" "refs/heads/$branch" > /dev/null && echo true || echo false)
+
           echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
           echo "prefix=$prefix" >> "$GITHUB_OUTPUT"
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
 
   publish:
-    # don't publish Rotary tags on main branch to BCR
-    if: github.event.base_ref != 'refs/heads/main'
+    # don't publish tags to BCR unless the release branch exists
+    if: needs.extract_tag_prefix.outputs.publish == 'true'
     needs: extract_tag_prefix
     uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.0.0
     with:
