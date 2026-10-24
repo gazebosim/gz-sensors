@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2019 Open Source Robotics Foundation
+ * Copyright (C) 2026 Rudis Laboratories
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +63,14 @@ class gz::sensors::MagnetometerSensorPrivate
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
+
+  /// \brief Magnetic field unit for published messages.
+  public: msgs::Magnetometer::MagneticFieldUnit fieldUnit =
+      msgs::Magnetometer::GAUSS;
+
+  /// \brief Coordinate frame for published messages.
+  public: msgs::Magnetometer::CoordinateFrame coordinateFrame =
+      msgs::Magnetometer::ENU;
 };
 
 //////////////////////////////////////////////////
@@ -197,6 +206,10 @@ bool MagnetometerSensor::Update(
 
   msgs::Set(msg.mutable_field_tesla(), this->dataPtr->localField);
 
+  // Set unit and frame metadata
+  msg.set_unit(this->dataPtr->fieldUnit);
+  msg.set_frame(this->dataPtr->coordinateFrame);
+
   // publish
   this->AddSequence(msg.mutable_header());
   this->dataPtr->pub.Publish(msg);
@@ -232,6 +245,20 @@ math::Vector3d MagnetometerSensor::WorldMagneticField() const
 math::Vector3d MagnetometerSensor::MagneticField() const
 {
   return this->dataPtr->localField;
+}
+
+//////////////////////////////////////////////////
+void MagnetometerSensor::SetFieldUnit(int _unit)
+{
+  this->dataPtr->fieldUnit =
+      static_cast<msgs::Magnetometer::MagneticFieldUnit>(_unit);
+}
+
+//////////////////////////////////////////////////
+void MagnetometerSensor::SetCoordinateFrame(int _frame)
+{
+  this->dataPtr->coordinateFrame =
+      static_cast<msgs::Magnetometer::CoordinateFrame>(_frame);
 }
 
 //////////////////////////////////////////////////
