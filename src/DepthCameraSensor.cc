@@ -18,6 +18,7 @@
 #include <gz/msgs/image.pb.h>
 #include <gz/msgs/pointcloud_packed.pb.h>
 
+#include <cstdint>
 #include <mutex>
 #include <typeinfo>
 
@@ -42,7 +43,6 @@
 #include "gz/sensors/RenderingEvents.hh"
 
 #include "CameraSensorUtil.hh"
-#include "PointCloudUtil.hh"
 
 // undefine near and far macros from windows.h
 #ifdef _WIN32
@@ -73,6 +73,18 @@ class gz::sensors::DepthCameraSensor::Implementation
   public: bool ConvertDepthToImage(const float *_data,
     unsigned char *_imageBuffer, unsigned int _width, unsigned int _height);
 
+  /// \brief Write the data of pointMsg from the camera's point cloud in a
+  /// single pass: xyz from the first three channels and a grayscale colour
+  /// from the depth (channel 0), the same bytes as XYZFromPointCloud +
+  /// ConvertDepthToImage + PointCloudUtil::FillMsg without their buffers.
+  /// \param[in] _pointCloud Float point cloud, pointMsg size
+  /// \param[in] _channels Floats per point of _pointCloud, at least 3
+  /// \param[in] _maxDepth Largest finite depth of the frame
+  /// \param[out] _out pointMsg's data, row_step * height bytes
+  /// \return True if every x, y and z is finite (the message's is_dense)
+  public: bool FillPointData(const float *_pointCloud, unsigned int _channels,
+      float _maxDepth, char *_out) const;
+
   /// \brief node to create publisher
   public: transport::Node node;
 
@@ -85,20 +97,23 @@ class gz::sensors::DepthCameraSensor::Implementation
     /// \brief Rendering camera
   public: gz::rendering::DepthCameraPtr depthCamera;
 
-  /// \brief Depth data buffer.
-  public: float *depthBuffer = nullptr;
+  /// \brief The depth image message. OnNewDepthFrame copies the frame
+  /// straight into its data, which is reused frame to frame.
+  public: msgs::Image depthMsg;
 
-  /// \brief point cloud data buffer.
-  public: float *pointCloudBuffer = nullptr;
+  /// \brief Largest finite depth of the last depth frame, the colour scale
+  /// of its point cloud.
+  public: float cloudMaxDepth = 0;
 
-  /// \brief xyz data buffer.
-  public: float *xyzBuffer = nullptr;
+  /// \brief True if the last Render() delivered a depth frame.
+  public: bool newFrame = false;
+
+  /// \brief True if the last Render() delivered a point cloud, which
+  /// OnNewRgbPointCloud wrote into pointMsg.
+  public: bool newPoints = false;
 
   /// \brief Near clip distance.
   public: float near = 0.0;
-
-  /// \brief Pointer to an image to be published
-  public: gz::rendering::Image image;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -138,10 +153,6 @@ class gz::sensors::DepthCameraSensor::Implementation
   /// \brief The point cloud message.
   public: msgs::PointCloudPacked pointMsg;
 
-  /// \brief Helper class that can fill a msgs::PointCloudPacked
-  /// image and depth data.
-  public: PointCloudUtil pointsUtil;
-
   /// \brief publisher to publish point cloud
   public: transport::Node::Publisher pointPub;
 };
@@ -149,21 +160,32 @@ class gz::sensors::DepthCameraSensor::Implementation
 using namespace gz;
 using namespace sensors;
 
-//////////////////////////////////////////////////
-bool DepthCameraSensor::Implementation::ConvertDepthToImage(
-    const float *_data,
-    unsigned char *_imageBuffer,
-    unsigned int _width, unsigned int _height)
+namespace
+{
+/// \brief Largest finite depth of a depth frame, 0 if it has none.
+/// \param[in] _data Depth frame
+/// \param[in] _count Number of depths
+float MaxFiniteDepth(const float *_data, unsigned int _count)
 {
   float maxDepth = 0;
-  for (unsigned int i = 0; i < _height * _width; ++i)
+  for (unsigned int i = 0; i < _count; ++i)
   {
     if (_data[i] > maxDepth && !std::isinf(_data[i]))
     {
       maxDepth = _data[i];
     }
   }
-  double factor = 255 / maxDepth;
+  return maxDepth;
+}
+}  // namespace
+
+//////////////////////////////////////////////////
+bool DepthCameraSensor::Implementation::ConvertDepthToImage(
+    const float *_data,
+    unsigned char *_imageBuffer,
+    unsigned int _width, unsigned int _height)
+{
+  double factor = 255 / MaxFiniteDepth(_data, _height * _width);
   for (unsigned int j = 0; j < _height * _width; ++j)
   {
     unsigned char d = static_cast<unsigned char>(255 - (_data[j] * factor));
@@ -172,6 +194,47 @@ bool DepthCameraSensor::Implementation::ConvertDepthToImage(
     _imageBuffer[j * 3 + 2] = d;
   }
   return true;
+}
+
+//////////////////////////////////////////////////
+bool DepthCameraSensor::Implementation::FillPointData(
+    const float *_pointCloud, unsigned int _channels, float _maxDepth,
+    char *_out) const
+{
+  const uint32_t step = this->pointMsg.point_step();
+  const uint32_t n = this->pointMsg.width() * this->pointMsg.height();
+  const uint32_t ox = this->pointMsg.field(0).offset();
+  const uint32_t oy = this->pointMsg.field(1).offset();
+  const uint32_t oz = this->pointMsg.field(2).offset();
+  const uint32_t oc = this->pointMsg.field(3).offset();
+
+  // A float is finite unless all its exponent bits are set.
+  constexpr uint32_t kExponent = 0x7f800000u;
+  uint32_t nonFinite = 0u;
+
+  // Same expression as ConvertDepthToImage, so the bytes match.
+  double factor = 255 / _maxDepth;
+  for (uint32_t i = 0; i < n; ++i, _out += step)
+  {
+    const float *p = _pointCloud + i * _channels;
+    uint32_t x, y, z;
+    memcpy(&x, p, sizeof(x));
+    memcpy(&y, p + 1, sizeof(y));
+    memcpy(&z, p + 2, sizeof(z));
+    nonFinite |= ((x & kExponent) == kExponent) |
+        ((y & kExponent) == kExponent) | ((z & kExponent) == kExponent);
+    memcpy(_out + ox, &x, sizeof(x));
+    memcpy(_out + oy, &y, sizeof(y));
+    memcpy(_out + oz, &z, sizeof(z));
+    // Grayscale: equal r, g and b, so byte order does not matter. The depth
+    // frame is channel 0 of the point cloud. The fourth byte of the rgb
+    // float is 0, as in a message buffer resized from empty.
+    const char d = static_cast<char>(
+        static_cast<unsigned char>(255 - (p[0] * factor)));
+    const char rgb[4] = {d, d, d, 0};
+    memcpy(_out + oc, rgb, sizeof(rgb));
+  }
+  return nonFinite == 0u;
 }
 
 //////////////////////////////////////////////////
@@ -222,12 +285,6 @@ DepthCameraSensor::~DepthCameraSensor()
 {
   this->dataPtr->depthConnection.reset();
   this->dataPtr->pointCloudConnection.reset();
-  if (this->dataPtr->depthBuffer)
-    delete [] this->dataPtr->depthBuffer;
-  if (this->dataPtr->pointCloudBuffer)
-    delete [] this->dataPtr->pointCloudBuffer;
-  if (this->dataPtr->xyzBuffer)
-    delete [] this->dataPtr->xyzBuffer;
 }
 
 //////////////////////////////////////////////////
@@ -476,10 +533,16 @@ void DepthCameraSensor::OnNewDepthFrame(const float *_scan,
   common::Image::PixelFormatType format =
     common::Image::ConvertPixelFormat(_format);
 
-  if (!this->dataPtr->depthBuffer)
-    this->dataPtr->depthBuffer = new float[depthSamples];
+  // Resizing to the same size is a no-op after the first frame.
+  std::string *data = this->dataPtr->depthMsg.mutable_data();
+  data->resize(depthBufferSize);
+  memcpy(data->data(), _scan, depthBufferSize);
+  this->dataPtr->newFrame = true;
 
-  memcpy(this->dataPtr->depthBuffer, _scan, depthBufferSize);
+  // Point cloud colour scale (see ConvertDepthToImage), found here while the
+  // depth frame is hot in cache.
+  if (this->dataPtr->pointCloudConnection)
+    this->dataPtr->cloudMaxDepth = MaxFiniteDepth(_scan, depthSamples);
 
   // Save image
   if (this->dataPtr->saveImage)
@@ -497,15 +560,17 @@ void DepthCameraSensor::OnNewRgbPointCloud(const float *_scan,
 {
   GZ_PROFILE("DepthCameraSensor::OnNewRgbPointCloud");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  msgs::PointCloudPacked &msg = this->dataPtr->pointMsg;
+  if (_channels < 3u || _width * _height != msg.width() * msg.height())
+    return;
 
-  unsigned int pointCloudSamples = _width * _height;
-  unsigned int pointCloudBufferSize = pointCloudSamples * _channels *
-      sizeof(float);
-
-  if (!this->dataPtr->pointCloudBuffer)
-    this->dataPtr->pointCloudBuffer = new float[pointCloudSamples * _channels];
-
-  memcpy(this->dataPtr->pointCloudBuffer, _scan, pointCloudBufferSize);
+  // Filled here, while the camera's buffer is valid: the render engine may
+  // hand out memory that is valid only during the callback.
+  std::string *data = msg.mutable_data();
+  data->resize(static_cast<std::size_t>(msg.row_step()) * msg.height());
+  msg.set_is_dense(this->dataPtr->FillPointData(_scan, _channels,
+      this->dataPtr->cloudMaxDepth, data->data()));
+  this->dataPtr->newPoints = true;
 }
 
 /////////////////////////////////////////////////
@@ -566,6 +631,9 @@ bool DepthCameraSensor::Update(
   // after this update.
   const bool renderedAhead = this->RenderedAhead();
   this->DropRenderedAhead();
+  // OnNewDepthFrame and OnNewRgbPointCloud fill the messages
+  this->dataPtr->newFrame = false;
+  this->dataPtr->newPoints = false;
   if (renderedAhead)
   {
     this->dataPtr->depthCamera->PostRender();
@@ -581,14 +649,18 @@ bool DepthCameraSensor::Update(
     // generate sensor data
     this->Render();
   }
+  if (!this->dataPtr->newFrame)
+    return false;
 
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
 
   auto msgsFormat = msgs::PixelFormatType::R_FLOAT32;
 
-  // create message
-  msgs::Image msg;
+  // create message; OnNewDepthFrame filled its data
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  msgs::Image &msg = this->dataPtr->depthMsg;
+  msg.clear_header();
   msg.set_width(width);
   msg.set_height(height);
   msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
@@ -600,10 +672,6 @@ bool DepthCameraSensor::Update(
   frame->set_key("frame_id");
   frame->add_value(this->OpticalFrameId());
 
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  msg.set_data(this->dataPtr->depthBuffer,
-      rendering::PixelUtil::MemorySize(rendering::PF_FLOAT32_R,
-      width, height));
   this->AddSequence(msg.mutable_header(), "default");
 
   {
@@ -625,37 +693,11 @@ bool DepthCameraSensor::Update(
   }
 
   // Only a frame rendered with the point cloud connected has a cloud.
-  if (this->HasPointConnections() && this->dataPtr->pointCloudConnection &&
-      this->dataPtr->pointCloudBuffer)
+  if (this->HasPointConnections() && this->dataPtr->newPoints)
   {
     // Set the time stamp
     *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
       msgs::Convert(_now);
-
-    if (!this->dataPtr->xyzBuffer)
-      this->dataPtr->xyzBuffer = new float[width*height*3];
-
-    if (this->dataPtr->image.Width() != width
-        || this->dataPtr->image.Height() != height)
-    {
-      this->dataPtr->image =
-          rendering::Image(width, height, rendering::PF_R8G8B8);
-    }
-
-    // extract image data from point cloud data
-    this->dataPtr->pointsUtil.XYZFromPointCloud(
-        this->dataPtr->xyzBuffer,
-        this->dataPtr->pointCloudBuffer,
-        width, height);
-
-    // convert depth to grayscale rgb image
-    this->dataPtr->ConvertDepthToImage(this->dataPtr->depthBuffer,
-        this->dataPtr->image.Data<unsigned char>(), width, height);
-
-    // fill the point cloud msg with data from xyz and rgb buffer
-    this->dataPtr->pointsUtil.FillMsg(this->dataPtr->pointMsg,
-        this->dataPtr->xyzBuffer,
-        this->dataPtr->image.Data<unsigned char>());
 
     this->AddSequence(this->dataPtr->pointMsg.mutable_header(), "pointMsg");
     this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
