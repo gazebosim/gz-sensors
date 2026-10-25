@@ -18,9 +18,12 @@
 #include <sdf/sdf.hh>
 
 #include <chrono>
+#include <cstring>
 #include <functional>
+#include <limits>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -308,6 +311,119 @@ TEST(Lidar_TEST, PublishMoreRangesThanRays)
   {
     EXPECT_DOUBLE_EQ(1.0 + i, scans[0].ranges(i));
     EXPECT_DOUBLE_EQ(101.0 + i, scans[0].intensities(i));
+  }
+}
+
+namespace
+{
+/// \brief Scans received, owned with the subscriber callbacks, which may
+/// still run after a failed assertion has left the test.
+struct ReceivedScans
+{
+  std::mutex mutex;
+  std::vector<gz::msgs::LaserScan> scans;
+
+  /// \brief Wait up to 2 s for more than _count scans.
+  /// \return The number of scans received.
+  std::size_t WaitForMoreThan(std::size_t _count)
+  {
+    for (int i = 0; i < 200; ++i)
+    {
+      {
+        std::lock_guard<std::mutex> lock(this->mutex);
+        if (this->scans.size() > _count)
+          break;
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    std::lock_guard<std::mutex> lock(this->mutex);
+    return this->scans.size();
+  }
+};
+}  // namespace
+
+/////////////////////////////////////////////////
+/// \brief With fewer ranges than rays (resolution < 1), the rays past the
+/// range count keep the values of earlier scans, also across a reload with
+/// a different resolution, as in gz-sensors 10: here 4 rays, 3 ranges, then
+/// 2 ranges, then all 4.
+TEST(Lidar_TEST, PublishedTailKeepsEarlierScans)
+{
+  const double rangeMin = 0.5;
+  const double rangeMax = 10.0;
+  const float nan = std::numeric_limits<float>::quiet_NaN();
+  const double n = nan;
+  struct Scan
+  {
+    std::string topic;
+    double resolution;
+    std::vector<float> buffer;
+    std::vector<double> ranges;
+    std::vector<double> intensities;
+  };
+  const std::vector<Scan> table = {
+    // 3 ranges of 4 rays (one clamped), the 4th ray NaN.
+    {"/lidar_tail_a", 0.75, {1, 2, 30, 4},
+        {1, 2, rangeMax, n}, {101, 102, 130, n}},
+    // 2 ranges: rays 3 and 4 keep the previous scan's values.
+    {"/lidar_tail_b", 0.5, {5, 6, 7, 8},
+        {5, 6, rangeMax, n}, {105, 106, 130, n}},
+    // Resolution 1: every ray written.
+    {"/lidar_tail_c", 1.0, {nan, 0.1f, 3, 9},
+        {rangeMax, rangeMin, 3, 9}, {n, 100.1f, 103, 109}},
+  };
+
+  gz::sensors::Lidar sensor;
+  sensor.laserBuffer = new float[4 * 3];
+  auto received = std::make_shared<ReceivedScans>();
+  std::function<void(const gz::msgs::LaserScan &)> cb =
+      [received](const gz::msgs::LaserScan &_msg)
+      {
+        std::lock_guard<std::mutex> lock(received->mutex);
+        received->scans.push_back(_msg);
+      };
+  gz::transport::Node node;
+  for (std::size_t k = 0; k < table.size(); ++k)
+  {
+    const Scan &expected = table[k];
+    SCOPED_TRACE(expected.topic);
+    sdf::Sensor sdfSensor;
+    sdfSensor.SetName("tail");
+    sdfSensor.SetType(sdf::SensorType::LIDAR);
+    sdfSensor.SetTopic(expected.topic);
+    sdf::Lidar sdfLidar;
+    sdfLidar.SetHorizontalScanSamples(4);
+    sdfLidar.SetHorizontalScanResolution(expected.resolution);
+    sdfLidar.SetVerticalScanSamples(1);
+    sdfLidar.SetRangeMin(rangeMin);
+    sdfLidar.SetRangeMax(rangeMax);
+    sdfSensor.SetLidarSensor(sdfLidar);
+    // A reload: Load() again, on a new topic (the old one stays advertised).
+    ASSERT_TRUE(sensor.Load(sdfSensor));
+    ASSERT_TRUE(node.Subscribe(expected.topic, cb));
+    for (int i = 0; i < 4; ++i)
+    {
+      sensor.laserBuffer[i * 3] = expected.buffer[i];
+      sensor.laserBuffer[i * 3 + 1] = 100.0f + expected.buffer[i];
+    }
+    for (int i = 0; i < 200 && !sensor.HasConnections(); ++i)
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    EXPECT_TRUE(sensor.PublishLidarScan(std::chrono::seconds(1)));
+    ASSERT_EQ(k + 1, received->WaitForMoreThan(k));
+
+    std::lock_guard<std::mutex> lock(received->mutex);
+    const gz::msgs::LaserScan &scan = received->scans[k];
+    ASSERT_EQ(4, scan.ranges_size());
+    ASSERT_EQ(4, scan.intensities_size());
+    for (int i = 0; i < 4; ++i)
+    {
+      const double range = scan.ranges(i);
+      const double intensity = scan.intensities(i);
+      EXPECT_EQ(0, memcmp(&expected.ranges[i], &range, sizeof(double)))
+          << "range " << i << ": " << range;
+      EXPECT_EQ(0, memcmp(&expected.intensities[i], &intensity,
+          sizeof(double))) << "intensity " << i << ": " << intensity;
+    }
   }
 }
 

@@ -16,12 +16,16 @@
 */
 
 #include <algorithm>
+#include <cstdint>
+#include <cstring>
+#include <string>
 
 #if defined(_MSC_VER)
   #pragma warning(push)
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
+#include <google/protobuf/io/coded_stream.h>
 #include <gz/msgs/laserscan.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
@@ -66,6 +70,8 @@ class gz::sensors::Lidar::Implementation
 
 namespace
 {
+using google::protobuf::io::CodedOutputStream;
+
 /// \brief Lidar::Clamp with the range limits given.
 /// \return _rangeMax for NaN, a finite _range clamped to the limits, +-inf
 /// unchanged.
@@ -286,19 +292,6 @@ bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
   msgs::Set(this->dataPtr->laserMsg.mutable_world_pose(),
       this->Pose());
 
-  const int numRays = this->RayCount() * this->VerticalRayCount();
-  if (this->dataPtr->laserMsg.ranges_size() != numRays)
-  {
-    // gzdbg << "Size mismatch; allocating memory\n";
-    this->dataPtr->laserMsg.clear_ranges();
-    this->dataPtr->laserMsg.clear_intensities();
-    for (int i = 0; i < numRays; ++i)
-    {
-      this->dataPtr->laserMsg.add_ranges(gz::math::NAN_F);
-      this->dataPtr->laserMsg.add_intensities(gz::math::NAN_F);
-    }
-  }
-
   // \todo(iche033) interpolate if ray count != range count, i.e. resolution > 1
   // Rows of RangeCount() ranges, VerticalRangeCount() rows, as many as the
   // message holds. The sensor's parameters are read once, not per range:
@@ -308,24 +301,87 @@ bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
   // one value per ray: with resolution > 1 that is the first rows of the
   // buffer, whole, and the last rows are missing, as with Ranges(). Sizing
   // the message for every range would change what is published.
+  const int numRays = this->RayCount() * this->VerticalRayCount();
   const int count = std::min(numRays, static_cast<int>(
       this->RangeCount() * this->VerticalRangeCount()));
   const double rangeMin = this->RangeMin();
   const double rangeMax = this->RangeMax();
   const unsigned int channels = this->dataPtr->kChannelCount;
   const float *buffer = this->laserBuffer;
-  double *ranges = this->dataPtr->laserMsg.mutable_ranges()->mutable_data();
-  double *intensities =
-      this->dataPtr->laserMsg.mutable_intensities()->mutable_data();
-  for (int index = 0; index < count; ++index)
+  const auto rangeAt = [&](int _index)
   {
-    ranges[index] = ClampRange(buffer[index * channels], rangeMin, rangeMax);
-    intensities[index] = buffer[index * channels + 1];
+    return ClampRange(buffer[_index * channels], rangeMin, rangeMax);
+  };
+  const auto intensityAt = [&](int _index)
+  {
+    return static_cast<double>(buffer[_index * channels + 1]);
+  };
+  auto &msg = this->dataPtr->laserMsg;
+
+  if (count < numRays)
+  {
+    // Fewer ranges than rays (resolution < 1): the message keeps the rays
+    // past `count` from earlier scans, so it is updated and published as a
+    // whole. Never past its end, though.
+    if (msg.ranges_size() != numRays)
+    {
+      msg.clear_ranges();
+      msg.clear_intensities();
+      for (int i = 0; i < numRays; ++i)
+      {
+        msg.add_ranges(gz::math::NAN_F);
+        msg.add_intensities(gz::math::NAN_F);
+      }
+    }
+    for (int index = 0; index < count; ++index)
+    {
+      msg.set_ranges(index, rangeAt(index));
+      msg.set_intensities(index, intensityAt(index));
+    }
+    this->AddSequence(msg.mutable_header());
+    this->dataPtr->pub.Publish(msg);
+    return true;
   }
 
-  // publish
-  this->AddSequence(this->dataPtr->laserMsg.mutable_header());
-  this->dataPtr->pub.Publish(this->dataPtr->laserMsg);
+  // publish: every range is written, so laserMsg holds everything but the
+  // ranges and intensities (fields 14 and 15, the last two), which are
+  // written once, straight into the transport's buffer as packed doubles
+  // after the rest of the message. laserMsg has no unknown fields (it is
+  // never parsed into), which SerializeAsString would put last.
+  msg.clear_ranges();
+  msg.clear_intensities();
+  this->AddSequence(msg.mutable_header());
+  const std::string front = msg.SerializeAsString();
+  const std::size_t arrayBytes =
+      static_cast<std::size_t>(std::max(numRays, 0)) * sizeof(double);
+  static_assert(msgs::LaserScan::kIntensitiesFieldNumber < 16,
+      "one-byte tags");
+  const std::size_t fieldBytes = arrayBytes == 0 ? 0 :
+      1 + CodedOutputStream::VarintSize64(arrayBytes) + arrayBytes;
+  this->dataPtr->pub.PublishInPlace(front.size() + 2 * fieldBytes,
+      [&](char *_buffer)
+      {
+        memcpy(_buffer, front.data(), front.size());
+        if (arrayBytes == 0)
+          return true;
+        auto *out = reinterpret_cast<uint8_t *>(_buffer + front.size());
+        const auto writeField = [&](int _field, auto _value)
+        {
+          out = CodedOutputStream::WriteTagToArray(
+              (static_cast<uint32_t>(_field) << 3) | 2, out);
+          out = CodedOutputStream::WriteVarint64ToArray(arrayBytes, out);
+          for (int index = 0; index < numRays; ++index)
+          {
+            const double v = _value(index);
+            uint64_t bits;
+            memcpy(&bits, &v, sizeof(bits));
+            out = CodedOutputStream::WriteLittleEndian64ToArray(bits, out);
+          }
+        };
+        writeField(msgs::LaserScan::kRangesFieldNumber, rangeAt);
+        writeField(msgs::LaserScan::kIntensitiesFieldNumber, intensityAt);
+        return true;
+      });
 
   return true;
 }

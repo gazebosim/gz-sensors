@@ -19,13 +19,16 @@
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
+#include <google/protobuf/io/coded_stream.h>
 #include <gz/msgs/pointcloud_packed.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
 
 #include <cmath>
+#include <cstdint>
 #include <cstring>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -40,12 +43,53 @@
 
 using namespace gz::sensors;
 
+namespace
+{
+using google::protobuf::io::CodedOutputStream;
+
+/// \brief Publish a message in place: _front and _back are its serialized
+/// fields before and after the bytes field number _field, whose _size bytes
+/// _fill writes straight into the transport's buffer (false cancels the
+/// message). Protobuf serializes fields in field number order and omits an
+/// empty bytes field, so the bytes are those Publish() sends for the whole
+/// message.
+/// \return The result of PublishInPlace
+bool PublishWithData(gz::transport::Node::Publisher &_pub,
+    const std::string &_front, int _field, std::size_t _size,
+    const std::string &_back, const std::function<bool(char *)> &_fill)
+{
+  // tag (length-delimited) and varint length: at most 5 + 10 bytes
+  uint8_t key[15];
+  uint8_t *keyEnd = key;
+  if (_size > 0)
+  {
+    keyEnd = CodedOutputStream::WriteTagToArray(
+        (static_cast<uint32_t>(_field) << 3) | 2, keyEnd);
+    keyEnd = CodedOutputStream::WriteVarint64ToArray(_size, keyEnd);
+  }
+  const std::size_t keySize = keyEnd - key;
+  return _pub.PublishInPlace(
+      _front.size() + keySize + _size + _back.size(), [&](char *_buffer)
+      {
+        memcpy(_buffer, _front.data(), _front.size());
+        _buffer += _front.size();
+        memcpy(_buffer, key, keySize);
+        _buffer += keySize;
+        if (!_fill(_buffer))
+          return false;
+        memcpy(_buffer + _size, _back.data(), _back.size());
+        return true;
+      });
+}
+}  // namespace
+
 /// \brief Private data for the GpuLidar class
 class gz::sensors::GpuLidarSensor::Implementation
 {
-  /// \brief Fill the point cloud packed message
+  /// \brief Write the data of the point cloud packed message
   /// \param[in] _laserBuffer Lidar data buffer.
-  public: void FillPointCloudMsg(const float *_laserBuffer);
+  /// \param[out] _out The message's data, row_step * height bytes.
+  public: void FillPointCloudData(const float *_laserBuffer, char *_out);
 
   /// \brief Rendering camera
   public: gz::rendering::GpuRaysPtr gpuRays;
@@ -77,7 +121,7 @@ class gz::sensors::GpuLidarSensor::Implementation
   /// \brief Publisher for the publish point cloud message.
   public: transport::Node::Publisher pointPub;
 
-  /// \brief Cosine and sine of each column's azimuth, FillPointCloudMsg's
+  /// \brief Cosine and sine of each column's azimuth, FillPointCloudData's
   /// tables.
   public: std::vector<float> azimuthCos;
 
@@ -291,6 +335,9 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
 
   if (this->dataPtr->pointPub.HasConnections())
   {
+    // is_dense and the points must come from the same frame.
+    std::lock_guard<std::mutex> lock(this->lidarMutex);
+
     // Set the time stamp
     *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
       msgs::Convert(_now);
@@ -308,13 +355,36 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
       }
     }
 
-    this->dataPtr->FillPointCloudMsg(this->laserBuffer);
-
+    // is_dense follows the data in the message, but the message size
+    // depends on it, so find it first: a point is invalid if its depth is
+    // NaN or +-inf. Most scans stop at their first ray into the sky.
+    msgs::PointCloudPacked &msg = this->dataPtr->pointMsg;
+    const uint64_t numPoints = static_cast<uint64_t>(msg.width()) *
+        msg.height();
+    bool isDense = true;
+    for (uint64_t i = 0; i < numPoints && isDense; ++i)
     {
-      this->AddSequence(this->dataPtr->pointMsg.mutable_header());
-      GZ_PROFILE("GpuLidarSensor::Update Publish point cloud");
-      this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
+      const float depth = this->laserBuffer[i * 3];
+      isDense = std::isfinite(depth);
     }
+
+    // The message serialized around the data, which is written once,
+    // straight into the transport's buffer. pointMsg itself keeps empty data
+    // and is_dense false, and has no unknown fields (it is never parsed
+    // into), which SerializeAsString would put last.
+    this->AddSequence(msg.mutable_header());
+    msgs::PointCloudPacked tail;
+    tail.set_is_dense(isDense);
+
+    GZ_PROFILE("GpuLidarSensor::Update Publish point cloud");
+    PublishWithData(this->dataPtr->pointPub, msg.SerializeAsString(),
+        msgs::PointCloudPacked::kDataFieldNumber,
+        static_cast<std::size_t>(msg.row_step()) * msg.height(),
+        tail.SerializeAsString(), [&](char *_out)
+        {
+          this->dataPtr->FillPointCloudData(this->laserBuffer, _out);
+          return true;
+        });
   }
   return true;
 }
@@ -361,10 +431,10 @@ bool GpuLidarSensor::HasConnections() const
 }
 
 //////////////////////////////////////////////////
-void GpuLidarSensor::Implementation::FillPointCloudMsg(
-    const float *_laserBuffer)
+void GpuLidarSensor::Implementation::FillPointCloudData(
+    const float *_laserBuffer, char *_out)
 {
-  GZ_PROFILE("GpuLidarSensorPrivate::FillPointCloudMsg");
+  GZ_PROFILE("GpuLidarSensorPrivate::FillPointCloudData");
   uint32_t width = this->pointMsg.width();
   uint32_t height = this->pointMsg.height();
   unsigned int channels = 3;
@@ -400,12 +470,7 @@ void GpuLidarSensor::Implementation::FillPointCloudMsg(
   const uint32_t offsetIntensity = this->pointMsg.field(3).offset();
   const uint32_t offsetRing = this->pointMsg.field(4).offset();
 
-  std::string *msgBuffer = this->pointMsg.mutable_data();
-  msgBuffer->resize(this->pointMsg.row_step() *
-      this->pointMsg.height());
-  char *msgBufferIndex = msgBuffer->data();
-  // Set Pointcloud as dense. Change if invalid points are found.
-  bool isDense { true };
+  char *msgBufferIndex = _out;
   // Iterate over scan and populate point cloud
   for (uint32_t j = 0; j < height; ++j)
   {
@@ -417,9 +482,6 @@ void GpuLidarSensor::Implementation::FillPointCloudMsg(
     for (uint32_t i = 0; i < width; ++i)
     {
       float depth = point[0];
-      // Validate Depth/Radius and update pointcloud density flag
-      if (isDense)
-        isDense = !(gz::math::isnan(depth) || std::isinf(depth));
 
       // Convert spherical coordinates to Cartesian for pointcloud
       // See https://en.wikipedia.org/wiki/Spherical_coordinate_system
@@ -440,5 +502,4 @@ void GpuLidarSensor::Implementation::FillPointCloudMsg(
     }
     inclination += verticleAngleStep;
   }
-  this->pointMsg.set_is_dense(isDense);
 }
