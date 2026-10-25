@@ -15,11 +15,16 @@
  *
 */
 
+#include <google/protobuf/io/coded_stream.h>
 #include <gz/msgs/image.pb.h>
 #include <gz/msgs/pointcloud_packed.pb.h>
 
+#include <chrono>
 #include <cstdint>
+#include <cstring>
+#include <functional>
 #include <mutex>
+#include <string>
 #include <typeinfo>
 
 #include <gz/common/Console.hh>
@@ -108,9 +113,26 @@ class gz::sensors::DepthCameraSensor::Implementation
   /// \brief True if the last Render() delivered a depth frame.
   public: bool newFrame = false;
 
-  /// \brief True if the last Render() delivered a point cloud, which
-  /// OnNewRgbPointCloud wrote into pointMsg.
+  /// \brief is_dense of the last point cloud, which the next one is
+  /// serialized with first (see OnNewRgbPointCloud).
+  public: bool pointsDense = false;
+
+  /// \brief True if OnNewRgbPointCloud filled pointMsg for Update() to
+  /// publish (image callbacks: the cloud follows the image and its
+  /// callbacks, as without in-place publishing).
   public: bool newPoints = false;
+
+  /// \brief True while Update() renders a frame that OnNewDepthFrame
+  /// publishes itself, serialized straight into the transport's buffer
+  /// (no image callbacks need the message).
+  public: bool publishInPlace = false;
+
+  /// \brief True if OnNewDepthFrame published the frame of the last
+  /// Render().
+  public: bool publishedInPlace = false;
+
+  /// \brief Stamp of the frame the current Render() delivers.
+  public: std::chrono::steady_clock::duration frameStamp{0};
 
   /// \brief Near clip distance.
   public: float near = 0.0;
@@ -162,6 +184,43 @@ using namespace sensors;
 
 namespace
 {
+using google::protobuf::io::CodedOutputStream;
+
+/// \brief Publish a message in place: _front and _back are its serialized
+/// fields before and after the bytes field number _field, whose _size bytes
+/// _fill writes straight into the transport's buffer (false cancels the
+/// message). Protobuf serializes fields in field number order and omits an
+/// empty bytes field, so the bytes are those Publish() sends for the whole
+/// message.
+/// \return The result of PublishInPlace
+bool PublishWithData(gz::transport::Node::Publisher &_pub,
+    const std::string &_front, int _field, std::size_t _size,
+    const std::string &_back, const std::function<bool(char *)> &_fill)
+{
+  // tag (length-delimited) and varint length: at most 5 + 10 bytes
+  uint8_t key[15];
+  uint8_t *keyEnd = key;
+  if (_size > 0)
+  {
+    keyEnd = CodedOutputStream::WriteTagToArray(
+        (static_cast<uint32_t>(_field) << 3) | 2, keyEnd);
+    keyEnd = CodedOutputStream::WriteVarint64ToArray(_size, keyEnd);
+  }
+  const std::size_t keySize = keyEnd - key;
+  return _pub.PublishInPlace(
+      _front.size() + keySize + _size + _back.size(), [&](char *_buffer)
+      {
+        memcpy(_buffer, _front.data(), _front.size());
+        _buffer += _front.size();
+        memcpy(_buffer, key, keySize);
+        _buffer += keySize;
+        if (!_fill(_buffer))
+          return false;
+        memcpy(_buffer + _size, _back.data(), _back.size());
+        return true;
+      });
+}
+
 /// \brief Largest finite depth of a depth frame, 0 if it has none.
 /// \param[in] _data Depth frame
 /// \param[in] _count Number of depths
@@ -176,6 +235,29 @@ float MaxFiniteDepth(const float *_data, unsigned int _count)
     }
   }
   return maxDepth;
+}
+
+/// \brief Fill a depth image message as Update() builds it, all but its
+/// data and pixel format type (the fields serialized after the data).
+/// \param[in] _sensor The sensor, for the frame id and the sequence
+/// \param[out] _msg The message
+/// \param[in] _width Image width
+/// \param[in] _height Image height
+/// \param[in] _stamp Frame stamp
+void FillDepthMsg(DepthCameraSensor &_sensor, msgs::Image &_msg,
+    unsigned int _width, unsigned int _height,
+    const std::chrono::steady_clock::duration &_stamp)
+{
+  _msg.clear_header();
+  _msg.set_width(_width);
+  _msg.set_height(_height);
+  _msg.set_step(_width * rendering::PixelUtil::BytesPerPixel(
+      rendering::PF_FLOAT32_R));
+  *_msg.mutable_header()->mutable_stamp() = msgs::Convert(_stamp);
+  auto *frame = _msg.mutable_header()->add_data();
+  frame->set_key("frame_id");
+  frame->add_value(_sensor.OpticalFrameId());
+  _sensor.AddSequence(_msg.mutable_header(), "default");
 }
 }  // namespace
 
@@ -533,10 +615,32 @@ void DepthCameraSensor::OnNewDepthFrame(const float *_scan,
   common::Image::PixelFormatType format =
     common::Image::ConvertPixelFormat(_format);
 
-  // Resizing to the same size is a no-op after the first frame.
-  std::string *data = this->dataPtr->depthMsg.mutable_data();
-  data->resize(depthBufferSize);
-  memcpy(data->data(), _scan, depthBufferSize);
+  if (this->dataPtr->publishInPlace)
+  {
+    // The message as Update() would build it, serialized around the data,
+    // which is written once, from the frame straight into the transport's
+    // buffer.
+    msgs::Image head;
+    FillDepthMsg(*this, head, _width, _height, this->dataPtr->frameStamp);
+    msgs::Image tail;
+    tail.set_pixel_format_type(msgs::PixelFormatType::R_FLOAT32);
+
+    GZ_PROFILE("DepthCameraSensor::OnNewDepthFrame Publish");
+    this->dataPtr->publishedInPlace = PublishWithData(this->dataPtr->pub,
+        head.SerializeAsString(), msgs::Image::kDataFieldNumber,
+        depthBufferSize, tail.SerializeAsString(), [&](char *_out)
+        {
+          memcpy(_out, _scan, depthBufferSize);
+          return true;
+        });
+  }
+  if (!this->dataPtr->publishedInPlace)
+  {
+    // Resizing to the same size is a no-op after the first frame.
+    std::string *data = this->dataPtr->depthMsg.mutable_data();
+    data->resize(depthBufferSize);
+    memcpy(data->data(), _scan, depthBufferSize);
+  }
   this->dataPtr->newFrame = true;
 
   // Point cloud colour scale (see ConvertDepthToImage), found here while the
@@ -561,16 +665,62 @@ void DepthCameraSensor::OnNewRgbPointCloud(const float *_scan,
   GZ_PROFILE("DepthCameraSensor::OnNewRgbPointCloud");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   msgs::PointCloudPacked &msg = this->dataPtr->pointMsg;
-  if (_channels < 3u || _width * _height != msg.width() * msg.height())
+  // Only for point cloud subscribers (as Update() published it), and only
+  // a cloud of the message's size.
+  if (!this->HasPointConnections() || _channels < 3u ||
+      _width * _height != msg.width() * msg.height())
+  {
     return;
+  }
 
-  // Filled here, while the camera's buffer is valid: the render engine may
-  // hand out memory that is valid only during the callback.
-  std::string *data = msg.mutable_data();
-  data->resize(static_cast<std::size_t>(msg.row_step()) * msg.height());
-  msg.set_is_dense(this->dataPtr->FillPointData(_scan, _channels,
-      this->dataPtr->cloudMaxDepth, data->data()));
-  this->dataPtr->newPoints = true;
+  if (!this->dataPtr->publishInPlace)
+  {
+    // Image callbacks, or a render outside Update(): Update() publishes the
+    // cloud after the image. Filled here, while the camera's buffer is
+    // valid.
+    std::string *data = msg.mutable_data();
+    data->resize(static_cast<std::size_t>(msg.row_step()) * msg.height());
+    msg.set_is_dense(this->dataPtr->FillPointData(_scan, _channels,
+        this->dataPtr->cloudMaxDepth, data->data()));
+    this->dataPtr->newPoints = true;
+    return;
+  }
+
+  // The message as Update() built it, serialized around the data, which is
+  // written once, from the frame straight into the transport's buffer.
+  // pointMsg itself keeps empty data here.
+  *msg.mutable_header()->mutable_stamp() =
+      msgs::Convert(this->dataPtr->frameStamp);
+  this->AddSequence(msg.mutable_header(), "pointMsg");
+  const std::string front = msg.SerializeAsString();
+  const std::size_t dataSize =
+      static_cast<std::size_t>(msg.row_step()) * msg.height();
+
+  GZ_PROFILE("DepthCameraSensor::OnNewRgbPointCloud Publish");
+  // is_dense follows the data in the message, but the message size depends
+  // on it: serialize with the last point cloud's, find this one's while
+  // filling the data, and only when it changed fill again.
+  bool dense = this->dataPtr->pointsDense;
+  for (int attempt = 0; attempt < 2; ++attempt)
+  {
+    msgs::PointCloudPacked tail;
+    tail.set_is_dense(dense);
+    bool filled = false;
+    bool isDense = dense;
+    PublishWithData(this->dataPtr->pointPub, front,
+        msgs::PointCloudPacked::kDataFieldNumber, dataSize,
+        tail.SerializeAsString(), [&](char *_out)
+        {
+          isDense = this->dataPtr->FillPointData(_scan, _channels,
+              this->dataPtr->cloudMaxDepth, _out);
+          filled = true;
+          return isDense == dense;
+        });
+    if (!filled || isDense == dense)
+      break;
+    dense = isDense;
+  }
+  this->dataPtr->pointsDense = dense;
 }
 
 /////////////////////////////////////////////////
@@ -631,48 +781,48 @@ bool DepthCameraSensor::Update(
   // after this update.
   const bool renderedAhead = this->RenderedAhead();
   this->DropRenderedAhead();
-  // OnNewDepthFrame and OnNewRgbPointCloud fill the messages
+  if (!renderedAhead && !this->HasDepthConnections() &&
+      !this->HasPointConnections())
+  {
+    return false;
+  }
+
+  // Without image callbacks OnNewDepthFrame publishes the depth image
+  // itself; OnNewRgbPointCloud publishes the point cloud.
   this->dataPtr->newFrame = false;
+  this->dataPtr->frameStamp = _now;
+  this->dataPtr->publishInPlace =
+      this->dataPtr->imageEvent.ConnectionCount() == 0u;
+  this->dataPtr->publishedInPlace = false;
   this->dataPtr->newPoints = false;
+  // (the in-place path serializes pointMsg without data and is_dense, see
+  // OnNewRgbPointCloud)
+  this->dataPtr->pointMsg.clear_data();
+  this->dataPtr->pointMsg.clear_is_dense();
   if (renderedAhead)
   {
     this->dataPtr->depthCamera->PostRender();
   }
   else
   {
-    if (!this->HasDepthConnections() && !this->HasPointConnections())
-    {
-      return false;
-    }
     this->UpdatePointCloudConnection();
 
     // generate sensor data
     this->Render();
   }
+  this->dataPtr->publishInPlace = false;
   if (!this->dataPtr->newFrame)
     return false;
 
-  unsigned int width = this->dataPtr->depthCamera->ImageWidth();
-  unsigned int height = this->dataPtr->depthCamera->ImageHeight();
-
-  auto msgsFormat = msgs::PixelFormatType::R_FLOAT32;
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  if (this->dataPtr->publishedInPlace)
+    return true;
 
   // create message; OnNewDepthFrame filled its data
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   msgs::Image &msg = this->dataPtr->depthMsg;
-  msg.clear_header();
-  msg.set_width(width);
-  msg.set_height(height);
-  msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
-               rendering::PF_FLOAT32_R));
-  msg.set_pixel_format_type(msgsFormat);
-  *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
-
-  auto* frame = msg.mutable_header()->add_data();
-  frame->set_key("frame_id");
-  frame->add_value(this->OpticalFrameId());
-
-  this->AddSequence(msg.mutable_header(), "default");
+  FillDepthMsg(*this, msg, this->dataPtr->depthCamera->ImageWidth(),
+      this->dataPtr->depthCamera->ImageHeight(), _now);
+  msg.set_pixel_format_type(msgs::PixelFormatType::R_FLOAT32);
 
   {
     GZ_PROFILE("DepthCameraSensor::Update Publish");
@@ -692,15 +842,15 @@ bool DepthCameraSensor::Update(
     }
   }
 
-  // Only a frame rendered with the point cloud connected has a cloud.
+  // Only a frame rendered with the point cloud connected has a cloud;
+  // OnNewRgbPointCloud published it in place unless there are image
+  // callbacks.
   if (this->HasPointConnections() && this->dataPtr->newPoints)
   {
-    // Set the time stamp
-    *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
-      msgs::Convert(_now);
-
-    this->AddSequence(this->dataPtr->pointMsg.mutable_header(), "pointMsg");
-    this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
+    msgs::PointCloudPacked &pointMsg = this->dataPtr->pointMsg;
+    *pointMsg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
+    this->AddSequence(pointMsg.mutable_header(), "pointMsg");
+    this->dataPtr->pointPub.Publish(pointMsg);
   }
   return true;
 }
