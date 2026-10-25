@@ -16,6 +16,7 @@
 */
 
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 #include <functional>
@@ -27,6 +28,7 @@
 
 #include <gz/common/Image.hh>
 #include <gz/common/Profiler.hh>
+#include <gz/common/Util.hh>
 #include <gz/math/Helpers.hh>
 
 #include <gz/rendering/Camera.hh>
@@ -46,7 +48,6 @@
 #include "gz/sensors/SensorFactory.hh"
 
 #include "CameraSensorUtil.hh"
-#include "PointCloudUtil.hh"
 #include "PublishInPlace.hh"
 
 /// \brief Private data for RgbdCameraSensor
@@ -110,9 +111,6 @@ class gz::sensors::RgbdCameraSensor::Implementation
   /// cloud reads too. Only with a depth clip.
   public: float *depthBuffer = nullptr;
 
-  /// \brief Point cloud data buffer.
-  public: float *pointCloudBuffer = nullptr;
-
   /// \brief True if a depth far clipping value has been set.
   public: bool hasDepthFarClip = false;
 
@@ -124,13 +122,6 @@ class gz::sensors::RgbdCameraSensor::Implementation
 
   /// \brief Depth camera near clipping distance in meters.
   public: double depthNearClip = 0.1;
-
-  /// \brief The number of channels (x, y, z, rgba, ...) in the
-  /// point cloud.
-  public: unsigned int channels = 4;
-
-  /// \brief Pointer to an image to be published
-  public: gz::rendering::Image image;
 
   /// \brief Noise added to sensor data
   public: std::map<SensorNoiseType, NoisePtr> noises;
@@ -150,12 +141,12 @@ class gz::sensors::RgbdCameraSensor::Implementation
   /// \brief SDF Sensor DOM object.
   public: sdf::Sensor sdfSensor;
 
-  /// \brief The point cloud message.
+  /// \brief The point cloud message: header and layout, the data is
+  /// written in place (OnNewRgbPointCloud)
   public: msgs::PointCloudPacked pointMsg;
 
-  /// \brief Helper class that can fill a msgs::PointCloudPacked
-  /// image and depth data.
-  public: PointCloudUtil pointsUtil;
+  /// \brief is_dense of the last point cloud published
+  public: bool pointsDense = false;
 
   /// \brief The sensor, for the frame callbacks, which publish
   public: RgbdCameraSensor *sensor = nullptr;
@@ -182,8 +173,6 @@ RgbdCameraSensor::~RgbdCameraSensor()
   this->dataPtr->pointCloudConnection.reset();
   if (this->dataPtr->depthBuffer)
     delete [] this->dataPtr->depthBuffer;
-  if (this->dataPtr->pointCloudBuffer)
-    delete [] this->dataPtr->pointCloudBuffer;
 }
 
 //////////////////////////////////////////////////
@@ -537,15 +526,114 @@ void RgbdCameraSensor::Implementation::OnNewRgbPointCloud(const float *_scan,
   GZ_PROFILE("RgbdCameraSensorPrivate::OnNewRgbPointCloud");
   std::lock_guard<std::mutex> lock(this->mutex);
 
-  unsigned int pointCloudSamples = _width * _height;
-  unsigned int pointCloudBufferSize = pointCloudSamples * _channels *
-      sizeof(float);
-  this->channels = _channels;
+  if (!this->frameStamp)
+    return;
+  const bool points = this->sensor->HasPointConnections();
+  const bool color = this->sensor->HasColorConnections();
+  const uint32_t n = _width * _height;
+  msgs::PointCloudPacked &msg = this->pointMsg;
+  if (!points && !color)
+    return;
+  if (_channels != 4u)
+  {
+    gzerr << "RgbdCameraSensor: unexpected point cloud frame ("
+          << _channels << " channels)" << std::endl;
+    return;
+  }
 
-  if (!this->pointCloudBuffer)
-    this->pointCloudBuffer = new float[pointCloudSamples * _channels];
+  // The point cloud and the image are published from the frame, each
+  // written once, straight into the transport's buffer: the bytes are
+  // those of the messages Update built (PointCloudUtil::FillMsg,
+  // RGBFromPointCloud). With a depth clip, points whose depth is +-inf take
+  // it as x, y and z.
+  // (the depth camera delivers the depth frame first: OnNewDepthFrame
+  // clipped this frame's depth into depthBuffer)
+  const float *depth = (this->hasDepthNearClip || this->hasDepthFarClip) ?
+      this->depthBuffer : nullptr;
+  // PointCloudUtil::DecodeRGBAFromFloat, inline: one colour byte of point _i
+  auto rgb = [_scan](uint32_t _i, int _shift)
+  {
+    uint32_t bits;
+    memcpy(&bits, &_scan[_i * 4 + 3], sizeof(bits));
+    return static_cast<char>(bits >> _shift & 0xFF);
+  };
 
-  memcpy(this->pointCloudBuffer, _scan, pointCloudBufferSize);
+  if (points && n != msg.width() * msg.height())
+  {
+    gzerr << "RgbdCameraSensor: point cloud frame of " << _width << "x"
+          << _height << " for a " << msg.width() << "x" << msg.height()
+          << " message" << std::endl;
+  }
+  else if (points)
+  {
+    // The layout InitPointCloudPacked gives (see CreateCameras): x, y, z,
+    // then rgb as b, g, r and a zero byte (little endian)
+    GZ_ASSERT(msg.point_step() == 16u && msg.field_size() == 4 &&
+        msg.field(3).offset() == 12u && !msg.is_bigendian() &&
+        msg.data().empty() && !msg.is_dense(),
+        "RgbdCameraSensor: unexpected point cloud layout");
+    *msg.mutable_header()->mutable_stamp() = msgs::Convert(*this->frameStamp);
+    this->sensor->AddSequence(msg.mutable_header(), "pointMsg");
+    // the fields before the data
+    const std::string front = msg.SerializeAsString();
+
+    GZ_PROFILE("RgbdCameraSensor::Update Publish point cloud");
+    // is_dense follows the data, but the message size depends on it:
+    // serialize with the last cloud's, find this one's while writing the
+    // data, and only when it changed write again.
+    bool dense = this->pointsDense;
+    for (int attempt = 0; attempt < 2; ++attempt)
+    {
+      msgs::PointCloudPacked tail;
+      tail.set_is_dense(dense);
+      bool isDense = true;
+      bool filled = false;
+      PublishWithData(this->pointPub, front,
+          msgs::PointCloudPacked::kDataFieldNumber,
+          static_cast<std::size_t>(msg.row_step()) * msg.height(),
+          tail.SerializeAsString(), [&](char *_out)
+          {
+            for (uint32_t i = 0; i < n; ++i, _out += 16)
+            {
+              float xyz[3] = {_scan[i * 4], _scan[i * 4 + 1], _scan[i * 4 + 2]};
+              if (depth && std::isinf(depth[i]))
+                xyz[0] = xyz[1] = xyz[2] = depth[i];
+              if (isDense)
+              {
+                isDense = std::isfinite(xyz[0]) && std::isfinite(xyz[1]) &&
+                    std::isfinite(xyz[2]);
+              }
+              memcpy(_out, xyz, sizeof(xyz));
+              _out[12] = rgb(i, 8);
+              _out[13] = rgb(i, 16);
+              _out[14] = rgb(i, 24);
+              _out[15] = 0;
+            }
+            filled = true;
+            return isDense == dense;
+          });
+      if (!filled || isDense == dense)
+        break;
+      dense = isDense;
+    }
+    this->pointsDense = dense;
+  }
+
+  if (color)
+  {
+    GZ_PROFILE("RgbdCameraSensor::Update Publish RGB image");
+    this->PublishImage(this->imagePub, "rgbdImage", rendering::PF_R8G8B8,
+        msgs::PixelFormatType::RGB_INT8, _width, _height, [&](char *_out)
+        {
+          for (uint32_t i = 0; i < n; ++i, _out += 3)
+          {
+            _out[0] = rgb(i, 24);
+            _out[1] = rgb(i, 16);
+            _out[2] = rgb(i, 8);
+          }
+          return true;
+        });
+  }
 }
 
 //////////////////////////////////////////////////
@@ -593,102 +681,11 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     this->dataPtr->pointCloudConnection.reset();
   }
 
-  unsigned int width = this->dataPtr->depthCamera->ImageWidth();
-  unsigned int height = this->dataPtr->depthCamera->ImageHeight();
-  unsigned int depthSamples = height * width;
-
-  // generate sensor data; OnNewDepthFrame publishes the depth image
+  // generate sensor data; OnNewDepthFrame publishes the depth image,
+  // OnNewRgbPointCloud the point cloud and the image
   this->dataPtr->frameStamp = _now;
   this->Render();
   this->dataPtr->frameStamp.reset();
-
-  if (this->dataPtr->pointCloudBuffer)
-  {
-    bool filledImgData = false;
-    if (this->dataPtr->image.Width() != width
-        || this->dataPtr->image.Height() != height)
-    {
-      this->dataPtr->image =
-          rendering::Image(width, height, rendering::PF_R8G8B8);
-    }
-
-    // publish point cloud msg
-    if (this->HasPointConnections())
-    {
-      // Set the time stamp
-      *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
-        msgs::Convert(_now);
-
-      if ((this->dataPtr->hasDepthNearClip || this->dataPtr->hasDepthFarClip)
-          && this->dataPtr->depthBuffer)
-      {
-        for (unsigned int i = 0; i < depthSamples; i++)
-        {
-          float depthValue = this->dataPtr->depthBuffer[i];
-          if (std::isinf(depthValue))
-          {
-            unsigned int index = i * this->dataPtr->channels;
-
-            this->dataPtr->pointCloudBuffer[index] = depthValue;
-            this->dataPtr->pointCloudBuffer[index + 1] = depthValue;
-            this->dataPtr->pointCloudBuffer[index + 2] = depthValue;
-          }
-        }
-      }
-
-      {
-        GZ_PROFILE("RgbdCameraSensor::Update Fill Point Cloud");
-        // fill point cloud msg and image data
-        this->dataPtr->pointsUtil.FillMsg(this->dataPtr->pointMsg,
-            this->dataPtr->pointCloudBuffer, true,
-            this->dataPtr->image.Data<unsigned char>());
-        filledImgData = true;
-      }
-
-      // publish
-      {
-        this->AddSequence(this->dataPtr->pointMsg.mutable_header(), "pointMsg");
-        GZ_PROFILE("RgbdCameraSensor::Update Publish point cloud");
-        this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
-      }
-    }
-
-    // publish the 2d image message
-    if (this->HasColorConnections())
-    {
-      if (!filledImgData)
-      {
-        GZ_PROFILE("RgbdCameraSensor::Update Fill RGB Image");
-        // extract image data from point cloud data
-        this->dataPtr->pointsUtil.RGBFromPointCloud(
-            this->dataPtr->image.Data<unsigned char>(),
-            this->dataPtr->pointCloudBuffer,
-            width, height);
-      }
-
-      unsigned char *data = this->dataPtr->image.Data<unsigned char>();
-
-      msgs::Image msg;
-      msg.set_width(width);
-      msg.set_height(height);
-      msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
-          rendering::PF_R8G8B8));
-      msg.set_pixel_format_type(msgs::PixelFormatType::RGB_INT8);
-      *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
-      auto frame = msg.mutable_header()->add_data();
-      frame->set_key("frame_id");
-      frame->add_value(this->FrameId());
-      msg.set_data(data, rendering::PixelUtil::MemorySize(rendering::PF_R8G8B8,
-        width, height));
-
-      // publish the image message
-      {
-        this->AddSequence(msg.mutable_header(), "rgbdImage");
-        GZ_PROFILE("RgbdCameraSensor::Update Publish RGB image");
-        this->dataPtr->imagePub.Publish(msg);
-      }
-    }
-  }
 
   return true;
 }
