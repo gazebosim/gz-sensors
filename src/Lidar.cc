@@ -247,6 +247,8 @@ void Lidar::ApplyNoise()
 {
   if (this->dataPtr->noises.find(LIDAR_NOISE) != this->dataPtr->noises.end())
   {
+    // Range() and Ranges() read the buffer under the same lock.
+    std::lock_guard<std::mutex> lock(this->lidarMutex);
     for (unsigned int j = 0; j < this->VerticalRayCount(); ++j)
     {
       for (unsigned int i = 0; i < this->RayCount(); ++i)
