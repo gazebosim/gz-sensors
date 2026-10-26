@@ -18,6 +18,16 @@
 #include <cstring>
 #include <gtest/gtest.h>
 
+#include <chrono>
+#include <functional>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <sstream>
+#include <string>
+#include <thread>
+#include <vector>
+
 #include <gz/msgs/camera_info.pb.h>
 #include <gz/msgs/image.pb.h>
 
@@ -33,6 +43,7 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
+#include <gz/rendering/Light.hh>
 #include <gz/rendering/Material.hh>
 #include <gz/rendering/RenderEngine.hh>
 #include <gz/rendering/RenderingIface.hh>
@@ -828,6 +839,190 @@ TEST_P(RgbdCameraSensorTest, CustomCameraInfoTopic)
 {
   gz::common::Console::SetVerbosity(4);
   CustomCameraInfoTopic(GetParam());
+}
+
+//////////////////////////////////////////////////
+/// \brief Two RGBD sensors render ahead (as Manager::RunOnce does) and
+/// publish the same depth images, images and point clouds as serial
+/// updates; a point cloud subscriber that connects between the two passes
+/// gets no cloud from a frame rendered without one.
+void RenderAheadMatchesSerial(const std::string &_renderEngine)
+{
+  if (_renderEngine != "ogre2")
+  {
+    GTEST_SKIP() << "Render ahead is tested on ogre2 only";
+  }
+  auto *engine = rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine << "' is not supported";
+  }
+  rendering::ScenePtr scene = engine->CreateScene("scene");
+  scene->SetAmbientLight(0.3, 0.3, 0.3);
+  rendering::VisualPtr root = scene->RootVisual();
+  rendering::DirectionalLightPtr light = scene->CreateDirectionalLight();
+  light->SetDirection(0.5, 0.5, -1);
+  root->AddChild(light);
+  rendering::VisualPtr box = scene->CreateVisual();
+  box->AddGeometry(scene->CreateBox());
+  root->AddChild(box);
+
+  // No noise: each scene PreRender() draws new noise offsets
+  auto sensorSdf = [](const std::string &_name, double _yaw)
+  {
+    std::ostringstream str;
+    str << "<sdf version='1.6'><model name='m'><link name='l'>"
+        << "<sensor name='" << _name << "' type='rgbd_camera'>"
+        << "<pose>0 0 0 0 0 " << _yaw << "</pose>"
+        << "<update_rate>10</update_rate>"
+        << "<topic>/test/render_ahead/" << _name << "</topic>"
+        << "<camera><horizontal_fov>1.05</horizontal_fov>"
+        << "<image><width>160</width><height>120</height></image>"
+        << "<clip><near>0.1</near><far>10</far></clip></camera>"
+        << "</sensor></link></model></sdf>";
+    sdf::SDFPtr doc(new sdf::SDF());
+    sdf::init(doc);
+    EXPECT_TRUE(sdf::readString(str.str(), doc));
+    return doc->Root()->GetElement("model")->GetElement("link")->
+        GetElement("sensor");
+  };
+
+  sensors::Manager mgr;
+  std::vector<sensors::Sensor *> cams;
+  for (unsigned int i = 0; i < 2; ++i)
+  {
+    auto *sensor = mgr.CreateSensor<sensors::RgbdCameraSensor>(
+        sensorSdf("rgbd" + std::to_string(i), i == 0 ? -0.2 : 0.2));
+    ASSERT_NE(nullptr, sensor);
+    sensor->SetScene(scene);
+    sensor->SetManualSceneUpdate(true);
+    cams.push_back(sensor);
+  }
+
+  // The data published on each topic; shared with the subscriber
+  // callbacks, which may run after an early return.
+  struct Received
+  {
+    std::mutex mutex;
+    std::map<std::string, std::vector<std::string>> data;
+  };
+  auto received = std::make_shared<Received>();
+  transport::Node node;
+  auto subscribe = [&](const std::string &_topic)
+  {
+    auto record = [received, _topic](const auto &_msg)
+    {
+      std::lock_guard<std::mutex> lock(received->mutex);
+      received->data[_topic].push_back(_msg.data());
+    };
+    if (_topic.size() > 7 && _topic.substr(_topic.size() - 7) == "/points")
+    {
+      return node.Subscribe(_topic,
+          std::function<void(const msgs::PointCloudPacked &)>(record));
+    }
+    return node.Subscribe(_topic,
+        std::function<void(const msgs::Image &)>(record));
+  };
+  std::vector<std::string> topics;
+  for (auto *sensor : cams)
+  {
+    for (const char *suffix : {"/depth_image", "/image", "/points"})
+    {
+      topics.push_back(sensor->Topic() + suffix);
+      ASSERT_TRUE(subscribe(topics.back()));
+    }
+  }
+  auto count = [&](const std::string &_topic)
+  {
+    std::lock_guard<std::mutex> lock(received->mutex);
+    return received->data[_topic].size();
+  };
+  auto waitFor = [&](size_t _count)
+  {
+    for (int sleep = 0; sleep < 300; ++sleep)
+    {
+      bool all = true;
+      for (const auto &topic : topics)
+        all = all && count(topic) >= _count;
+      if (all)
+        return true;
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    return false;
+  };
+
+  // One frame of both sensors as gz-sim runs it, rendered ahead or serial;
+  // _between (if set) runs between the two passes
+  auto frame = [&](bool _ahead, int _sec,
+      const std::function<void()> &_between)
+  {
+    const std::chrono::steady_clock::duration now =
+        std::chrono::seconds(_sec);
+    scene->PreRender();
+    if (_ahead)
+    {
+      for (auto *sensor : cams)
+        EXPECT_TRUE(sensor->RenderAheadIfDue(now, false));
+    }
+    if (_between)
+      _between();
+    for (auto *sensor : cams)
+      EXPECT_TRUE(sensor->Update(now, false));
+    scene->PostRender();
+  };
+
+  // The depth camera renders colour only if the point cloud callback was
+  // connected at the scene's PreRender(), so the first frame, which connects
+  // it, has none (ahead or serial): skip it.
+  frame(false, 0, nullptr);
+  ASSERT_TRUE(waitFor(1u));
+  for (int i = 0; i < 4; ++i)
+  {
+    box->SetLocalPosition(2.0 + 0.3 * i, -0.4 + 0.25 * i, 0.1 * i);
+    frame(true, 2 * i + 1, nullptr);
+    frame(false, 2 * i + 2, nullptr);
+    ASSERT_TRUE(waitFor(2u * i + 3u));
+    std::lock_guard<std::mutex> lock(received->mutex);
+    for (const auto &topic : topics)
+    {
+      const auto &data = received->data[topic];
+      EXPECT_EQ(data[2 * i + 1], data[2 * i + 2])
+          << topic << ", frame " << i;
+      // The box moved: a stale frame would not match the new one.
+      EXPECT_NE(data[2 * i], data[2 * i + 2]) << topic << ", frame " << i;
+    }
+  }
+
+  // Only the depth image is subscribed when the first camera renders ahead,
+  // then a point cloud subscriber connects: the frame has no cloud, so none
+  // is published (not the previous frame's).
+  const std::string depthTopic = cams[0]->Topic() + "/depth_image";
+  const std::string pointsTopic = cams[0]->Topic() + "/points";
+  ASSERT_TRUE(node.Unsubscribe(cams[0]->Topic() + "/image"));
+  ASSERT_TRUE(node.Unsubscribe(pointsTopic));
+  const size_t depthCount = count(depthTopic);
+  const size_t pointsCount = count(pointsTopic);
+  frame(true, 9, [&]() { EXPECT_TRUE(subscribe(pointsTopic)); });
+  for (int sleep = 0; sleep < 300 && count(depthTopic) == depthCount; ++sleep)
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  EXPECT_EQ(depthCount + 1, count(depthTopic));
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  EXPECT_EQ(pointsCount, count(pointsTopic));
+
+  // Clean up
+  for (const auto &topic : topics)
+    node.Unsubscribe(topic);
+  for (auto *sensor : cams)
+    mgr.Remove(sensor->Id());
+  engine->DestroyScene(scene);
+  rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+TEST_P(RgbdCameraSensorTest, RenderAheadMatchesSerial)
+{
+  common::Console::SetVerbosity(4);
+  RenderAheadMatchesSerial(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(RgbdCameraSensor, RgbdCameraSensorTest,

@@ -101,6 +101,15 @@ namespace gz
       /// \return True if there are subscribers, false otherwise
       public: virtual bool HasPointConnections() const;
 
+      // Documentation inherited.
+      protected: bool RenderAhead(
+                     const std::chrono::steady_clock::duration &_now)
+                     override;
+
+      /// \brief Connect or disconnect the point cloud callback to match
+      /// the point cloud and image subscribers.
+      private: void UpdatePointCloudConnection();
+
       /// \brief Create an RGB camera and a depth camera.
       /// \return True on success.
       private: bool CreateCameras();
