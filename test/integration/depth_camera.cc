@@ -164,6 +164,9 @@ class DepthCameraSensorTest: public testing::Test,
 
   // Create a depth camera sensor and verify a custom camera info topic
   public: void CustomCameraInfoTopic(const std::string &_renderEngine);
+
+  // Create a depth camera sensor with separate depth_camera clip planes
+  public: void DepthCameraClip(const std::string &_renderEngine);
 };
 
 void DepthCameraSensorTest::ImagesWithBuiltinSDF(
@@ -350,9 +353,10 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_EQ(12, infoMsg.projection().p().size());
   EXPECT_EQ(9, infoMsg.rectification_matrix().size());
 
-  // Check that for a box really close it returns -inf
+  // Check that for a box really close (within [0.9 * near_, near_))
+  // it returns -inf
   gz::math::Vector3d boxPositionNear(
-      unitBoxSize * 0.5 + near_ * 0.5, 0.0, 0.0);
+      unitBoxSize * 0.5 + near_ * 0.95, 0.0, 0.0);
   box->SetLocalPosition(boxPositionNear);
 
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
@@ -971,6 +975,192 @@ TEST_P(DepthCameraSensorTest, CustomCameraInfoTopic)
 {
   gz::common::Console::SetVerbosity(4);
   CustomCameraInfoTopic(GetParam());
+}
+
+//////////////////////////////////////////////////
+void DepthCameraSensorTest::DepthCameraClip(
+    const std::string &_renderEngine)
+{
+  if ((_renderEngine.compare("ogre") != 0) &&
+      (_renderEngine.compare("ogre2") != 0))
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+                 << "' doesn't support depth cameras" << std::endl;
+  }
+
+  auto *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+                 << "' is not supported" << std::endl;
+  }
+
+  const std::string sdfStr = R"(<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="m1">
+    <link name="link1">
+      <sensor name="camera_clip" type="depth_camera">
+        <update_rate>10</update_rate>
+        <topic>/test/integration/DepthCameraClip/image</topic>
+        <camera>
+          <horizontal_fov>1.05</horizontal_fov>
+          <image>
+            <width>64</width>
+            <height>64</height>
+            <format>R_FLOAT32</format>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>10.0</far>
+          </clip>
+          <depth_camera>
+            <clip>
+              <near>0.5</near>
+              <far>5.0</far>
+            </clip>
+          </depth_camera>
+        </camera>
+      </sensor>
+    </link>
+  </model>
+</sdf>)";
+
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readString(sdfStr, doc));
+  auto sensorPtr =
+      doc->Root()->GetElement("model")->GetElement("link")->GetElement(
+          "sensor");
+  ASSERT_NE(nullptr, sensorPtr);
+
+  auto scene = engine->CreateScene("scene");
+  auto root = scene->RootVisual();
+
+  // Place a small sensor housing box around the camera origin (within
+  // clip.near = 0.1 m) to verify near clipping lets the depth camera see
+  // through its own housing while depth_camera.clip.near (0.5 m) enforces
+  // the depth deadzone.
+  gz::rendering::VisualPtr housing = scene->CreateVisual("housing");
+  housing->AddGeometry(scene->CreateBox());
+  housing->SetLocalPosition(0.0, 0.0, 0.0);
+  housing->SetLocalScale(0.05, 0.05, 0.05);
+  root->AddChild(housing);
+
+  double unitBoxSize = 1.0;
+  gz::rendering::VisualPtr box = scene->CreateVisual("target_box");
+  box->AddGeometry(scene->CreateBox());
+  box->SetLocalPosition(2.5, 0.0, 0.0);
+  box->SetLocalScale(unitBoxSize, unitBoxSize, unitBoxSize);
+  root->AddChild(box);
+
+  gz::sensors::Manager mgr;
+  auto *depthSensor =
+      mgr.CreateSensor<gz::sensors::DepthCameraSensor>(sensorPtr);
+  ASSERT_NE(nullptr, depthSensor);
+  depthSensor->SetScene(scene);
+
+  EXPECT_NEAR(depthSensor->NearClip(), 0.5, DOUBLE_TOL);
+  EXPECT_NEAR(depthSensor->FarClip(), 5.0, DOUBLE_TOL);
+
+  std::string topic = "/test/integration/DepthCameraClip/image";
+  std::string pointsTopic = "/test/integration/DepthCameraClip/image/points";
+
+  std::mutex mutex;
+  std::vector<float> depthVec;
+  std::vector<float> xyzVec;
+  unsigned int depthCount = 0;
+  unsigned int pcCount = 0;
+
+  std::function<void(const gz::msgs::Image &)> depthCb =
+      [&](const gz::msgs::Image &_msg)
+  {
+    std::lock_guard<std::mutex> lock(mutex);
+    unsigned int samples = _msg.width() * _msg.height();
+    depthVec.resize(samples);
+    memcpy(depthVec.data(), _msg.data().c_str(), samples * sizeof(float));
+    depthCount++;
+  };
+
+  std::function<void(const gz::msgs::PointCloudPacked &)> pcCb =
+      [&](const gz::msgs::PointCloudPacked &_msg)
+  {
+    std::lock_guard<std::mutex> lock(mutex);
+    unsigned int samples = _msg.width() * _msg.height() * 3;
+    xyzVec.resize(samples);
+    std::vector<unsigned char> rgbTmp(samples);
+    UnpackPointCloudMsg(_msg, xyzVec.data(), rgbTmp.data());
+    pcCount++;
+  };
+
+  gz::transport::Node node;
+  node.Subscribe(topic, depthCb);
+  node.Subscribe(pointsTopic, pcCb);
+
+  auto waitForFrame = [&]()
+  {
+    {
+      std::lock_guard<std::mutex> lock(mutex);
+      depthCount = 0;
+      pcCount = 0;
+    }
+    mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+    for (int sleep = 0; sleep < 300; ++sleep)
+    {
+      {
+        std::lock_guard<std::mutex> lock(mutex);
+        if (depthCount > 0 && pcCount > 0)
+          break;
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    std::lock_guard<std::mutex> lock(mutex);
+    EXPECT_GT(depthCount, 0u);
+    EXPECT_GT(pcCount, 0u);
+  };
+
+  int midWidth = static_cast<int>(depthSensor->ImageWidth() * 0.5);
+  int midHeight = static_cast<int>(depthSensor->ImageHeight() * 0.5);
+  int mid = midHeight * depthSensor->ImageWidth() + midWidth - 1;
+
+  // 1. Box at 2.5 (front face at 2.0, inside [0.5, 5.0]) -> valid depth 2.0
+  waitForFrame();
+  {
+    std::lock_guard<std::mutex> lock(mutex);
+    EXPECT_NEAR(depthVec[mid], 2.0, DEPTH_TOL);
+    EXPECT_NEAR(xyzVec[mid * 3], 2.0, DEPTH_TOL);
+  }
+
+  // 2. Box with front face at 0.3 (inside deadzone [0.1, 0.5)) -> -inf
+  box->SetLocalPosition(unitBoxSize * 0.5 + 0.3, 0.0, 0.0);
+  waitForFrame();
+  {
+    std::lock_guard<std::mutex> lock(mutex);
+    EXPECT_DOUBLE_EQ(depthVec[mid], -gz::math::INF_D);
+    EXPECT_DOUBLE_EQ(xyzVec[mid * 3], -gz::math::INF_D);
+  }
+
+  // 3. Box with front face at 7.0 (between depth far 5.0 and camera far 10.0)
+  // -> +inf
+  box->SetLocalPosition(unitBoxSize * 0.5 + 7.0, 0.0, 0.0);
+  waitForFrame();
+  {
+    std::lock_guard<std::mutex> lock(mutex);
+    EXPECT_DOUBLE_EQ(depthVec[mid], gz::math::INF_D);
+    EXPECT_DOUBLE_EQ(xyzVec[mid * 3], gz::math::INF_D);
+  }
+
+  housing.reset();
+  box.reset();
+  mgr.Remove(depthSensor->Id());
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+TEST_P(DepthCameraSensorTest, DepthCameraClip)
+{
+  gz::common::Console::SetVerbosity(4);
+  DepthCameraClip(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(DepthCameraSensor, DepthCameraSensorTest,
