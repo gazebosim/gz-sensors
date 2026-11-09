@@ -581,6 +581,9 @@ void RgbdCameraSensor::Implementation::OnNewRgbPointCloud(const float *_scan,
     // is_dense follows the data, but the message size depends on it:
     // serialize with the last cloud's, find this one's while writing the
     // data, and only when it changed write again.
+    // (This assumes an unthrottled publisher, as pointPub is:
+    // PublishInPlace takes the throttling slot before it calls the fill, so
+    // with MsgsPerSec the second attempt would be dropped.)
     bool dense = this->pointsDense;
     for (int attempt = 0; attempt < 2; ++attempt)
     {

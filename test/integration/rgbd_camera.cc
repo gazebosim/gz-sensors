@@ -18,6 +18,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstring>
+#include <functional>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -1065,6 +1066,107 @@ TEST_P(RgbdCameraSensorTest, PublishedBytesMatchCopy)
   }
   box.reset();
   red.reset();
+  engine->DestroyScene(scene);
+  rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+/// \brief A point cloud frame whose size is not the message's: the point
+/// cloud is not published and an error is logged; the image, sized from the
+/// frame, still is.
+TEST_P(RgbdCameraSensorTest, PointCloudFrameSizeMismatch)
+{
+  const std::string engineName = GetParam();
+  if (engineName != "ogre2")
+    GTEST_SKIP() << "ogre2 only";
+  auto *engine = rendering::engine(engineName);
+  if (!engine)
+    GTEST_SKIP() << "Engine '" << engineName << "' is not supported";
+
+  rendering::ScenePtr scene = engine->CreateScene("scene");
+  const std::string topic = "/test/rgbd_size_mismatch";
+  const std::string sdfString =
+      "<?xml version='1.0'?><sdf version='1.6'><model name='m'>"
+      "<link name='l'><sensor name='rgbd_m' type='rgbd_camera'>"
+      "<update_rate>10</update_rate><topic>" + topic + "</topic>"
+      "<camera><horizontal_fov>1.05</horizontal_fov>"
+      "<image><width>61</width><height>47</height></image>"
+      "<clip><near>0.1</near><far>10.0</far></clip>"
+      "</camera></sensor></link></model></sdf>";
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readString(sdfString, doc));
+  auto sensorPtr = doc->Root()->GetElement("model")->GetElement("link")
+      ->GetElement("sensor");
+
+  sensors::Manager mgr;
+  auto *sensor = mgr.CreateSensor<sensors::RgbdCameraSensor>(sensorPtr);
+  ASSERT_NE(nullptr, sensor);
+  sensor->SetScene(scene);
+  auto camera = std::dynamic_pointer_cast<rendering::DepthCamera>(
+      scene->SensorByName(sensor->Name()));
+  ASSERT_NE(nullptr, camera);
+
+  struct Received
+  {
+    std::mutex mutex;
+    std::vector<unsigned int> imageHeights;
+    int points = 0;
+  };
+  auto received = std::make_shared<Received>();
+  transport::Node node;
+  ASSERT_TRUE(node.Subscribe(topic + "/image",
+      std::function<void(const msgs::Image &)>(
+      [received](const msgs::Image &_msg)
+      {
+        std::lock_guard<std::mutex> lock(received->mutex);
+        received->imageHeights.push_back(_msg.height());
+      })));
+  ASSERT_TRUE(node.Subscribe(topic + "/points",
+      std::function<void(const msgs::PointCloudPacked &)>(
+      [received](const msgs::PointCloudPacked &)
+      {
+        std::lock_guard<std::mutex> lock(received->mutex);
+        ++received->points;
+      })));
+  auto waitForImages = [&](std::size_t _n)
+  {
+    for (int i = 0; i < 300; ++i)
+    {
+      {
+        std::lock_guard<std::mutex> lock(received->mutex);
+        if (received->imageHeights.size() >= _n)
+          return true;
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    return false;
+  };
+
+  // A frame of the message's size: both are published
+  EXPECT_TRUE(sensor->Update(std::chrono::seconds(1)));
+  ASSERT_TRUE(waitForImages(1u));
+
+  // The camera now delivers frames one row shorter than the message
+  camera->SetImageHeight(46);
+  testing::internal::CaptureStderr();
+  EXPECT_TRUE(sensor->Update(std::chrono::seconds(2)));
+  const std::string log = testing::internal::GetCapturedStderr();
+  EXPECT_NE(std::string::npos,
+      log.find("point cloud frame of 61x46 for a 61x47 message")) << log;
+  ASSERT_TRUE(waitForImages(2u));
+  // (no point cloud follows)
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  {
+    std::lock_guard<std::mutex> lock(received->mutex);
+    EXPECT_EQ((std::vector<unsigned int>{47u, 46u}),
+        received->imageHeights);
+    EXPECT_EQ(1, received->points);
+  }
+
+  // (no mgr.Remove(): removing an RGBD sensor while its scene lives trips
+  // an Ogre HlmsDatablock assertion, gz-sensors#548)
+  camera.reset();
   engine->DestroyScene(scene);
   rendering::unloadEngine(engine->Name());
 }
