@@ -120,10 +120,6 @@ class gz::sensors::RgbdCameraSensor::Implementation
   /// \brief Connection from depth camera with new point cloud data
   public: gz::common::ConnectionPtr pointCloudConnection;
 
-  /// \brief True if RenderAhead() rendered the current camera's frame for
-  /// the next Update(); SetScene() drops it.
-  public: bool renderedAhead = false;
-
   /// \brief Connection to the Manager's scene change event.
   public: gz::common::ConnectionPtr sceneChangeConnection;
 
@@ -412,7 +408,7 @@ void RgbdCameraSensor::SetScene(rendering::ScenePtr _scene)
   {
     // TODO(anyone) Remove cameras from current scene
     this->dataPtr->depthCamera = nullptr;
-    this->dataPtr->renderedAhead = false;
+    this->DropRenderedAhead();
     RenderingSensor::SetScene(_scene);
 
     if (this->dataPtr->initialized)
@@ -487,9 +483,8 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   // A frame rendered ahead is completed whatever the subscribers are now:
   // the subscribers seen by RenderAhead() decide, as if they had changed
   // after this update.
-  const bool renderedAhead = this->dataPtr->renderedAhead &&
-      this->RenderedAhead();
-  this->dataPtr->renderedAhead = false;
+  const bool renderedAhead = this->RenderedAhead();
+  this->DropRenderedAhead();
   if (renderedAhead)
   {
     this->dataPtr->depthCamera->PostRender();
@@ -689,7 +684,6 @@ bool RgbdCameraSensor::RenderAhead(
   this->UpdatePointCloudConnection();
   this->dataPtr->depthCamera->Render();
   this->dataPtr->depthCamera->IssueReadback();
-  this->dataPtr->renderedAhead = true;
   return true;
 }
 
