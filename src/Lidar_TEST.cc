@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <sdf/sdf.hh>
 
+#include <atomic>
 #include <chrono>
 #include <cstring>
 #include <functional>
@@ -507,4 +508,48 @@ TEST(Lidar_TEST, PublishMoreRangesThanRaysVertical)
     EXPECT_DOUBLE_EQ(col + 1.0, scan.ranges(col));
     EXPECT_DOUBLE_EQ(col + 101.0, scan.intensities(col));
   }
+}
+
+/////////////////////////////////////////////////
+/// \brief ApplyNoise does not take lidarMutex: a caller may hold it, as
+/// GpuLidarSensor::Update does, to keep Range() and Ranges() from reading
+/// the buffer while it is written.
+TEST(Lidar_TEST, ApplyNoiseUnderLidarMutex)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.SetName("noise_lock");
+  sdfSensor.SetType(sdf::SensorType::LIDAR);
+  sdfSensor.SetTopic("/lidar_noise_lock");
+  sdf::Lidar sdfLidar;
+  sdfLidar.SetHorizontalScanSamples(4);
+  sdfLidar.SetVerticalScanSamples(1);
+  sdfLidar.SetRangeMin(0.5);
+  sdfLidar.SetRangeMax(10.0);
+  sdf::Noise noise;
+  noise.SetType(sdf::NoiseType::GAUSSIAN);
+  noise.SetStdDev(0.1);
+  sdfLidar.SetLidarNoise(noise);
+  sdfSensor.SetLidarSensor(sdfLidar);
+
+  // Shared with the thread, which stays blocked if ApplyNoise deadlocks.
+  auto sensor = std::make_shared<gz::sensors::Lidar>();
+  ASSERT_TRUE(sensor->Load(sdfSensor));
+  sensor->laserBuffer = new float[4 * 3]();
+  auto done = std::make_shared<std::atomic<bool>>(false);
+  std::thread thread([sensor, done]
+  {
+    std::lock_guard<std::mutex> lock(sensor->lidarMutex);
+    sensor->ApplyNoise();
+    *done = true;
+  });
+  for (int i = 0; i < 500 && !*done; ++i)
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  if (!*done)
+  {
+    thread.detach();
+    FAIL() << "ApplyNoise blocked on lidarMutex held by its caller";
+  }
+  thread.join();
+  // The noise was applied: the ranges were 0, clamped to at least 0.5.
+  EXPECT_LE(0.5f, sensor->laserBuffer[0]);
 }

@@ -60,7 +60,9 @@ namespace gz
 
       /// \brief Apply noise to the laser buffer, if noise has been
       /// configured. This should be called before PublishLidarScan if you
-      /// want the scan data to contain noise.
+      /// want the scan data to contain noise. It writes laserBuffer without
+      /// taking lidarMutex: hold that lock while calling it if another
+      /// thread may read the buffer (Range(), Ranges()).
       public: void ApplyNoise();
 
       /// \brief Publish LaserScan message

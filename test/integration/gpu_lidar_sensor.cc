@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <memory>
@@ -1143,6 +1144,10 @@ void GpuLidarSensorTest::BitExactOutput(const std::string &_renderEngine)
       std::mutex mutex;
       std::vector<std::string> scans;
       std::vector<std::string> clouds;
+      // Typed subscribers, which get the messages parsed from the bytes,
+      // serialized again.
+      std::vector<std::string> typedScans;
+      std::vector<std::string> typedClouds;
     };
     auto received = std::make_shared<Received>();
     std::mutex &mutex = received->mutex;
@@ -1163,6 +1168,20 @@ void GpuLidarSensorTest::BitExactOutput(const std::string &_renderEngine)
           std::lock_guard<std::mutex> lock(received->mutex);
           received->clouds.emplace_back(_data, _size);
         }, "gz.msgs.PointCloudPacked"));
+    std::function<void(const gz::msgs::LaserScan &)> scanCb =
+        [received](const gz::msgs::LaserScan &_msg)
+        {
+          std::lock_guard<std::mutex> lock(received->mutex);
+          received->typedScans.push_back(_msg.SerializeAsString());
+        };
+    std::function<void(const gz::msgs::PointCloudPacked &)> cloudCb =
+        [received](const gz::msgs::PointCloudPacked &_msg)
+        {
+          std::lock_guard<std::mutex> lock(received->mutex);
+          received->typedClouds.push_back(_msg.SerializeAsString());
+        };
+    ASSERT_TRUE(node.Subscribe(topic, scanCb));
+    ASSERT_TRUE(node.Subscribe(topic + "/points", cloudCb));
 
     const int numRays = cfg.horz * cfg.vert;
     for (frame = 0; frame < 2; ++frame)
@@ -1175,7 +1194,9 @@ void GpuLidarSensorTest::BitExactOutput(const std::string &_renderEngine)
         {
           std::lock_guard<std::mutex> lock(mutex);
           if (static_cast<int>(scans.size()) > frame &&
-              static_cast<int>(clouds.size()) > frame)
+              static_cast<int>(clouds.size()) > frame &&
+              static_cast<int>(received->typedScans.size()) > frame &&
+              static_cast<int>(received->typedClouds.size()) > frame)
             break;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -1183,6 +1204,8 @@ void GpuLidarSensorTest::BitExactOutput(const std::string &_renderEngine)
       std::lock_guard<std::mutex> lock(mutex);
       ASSERT_EQ(frame + 1, static_cast<int>(scans.size()));
       ASSERT_EQ(frame + 1, static_cast<int>(clouds.size()));
+      ASSERT_EQ(frame + 1, static_cast<int>(received->typedScans.size()));
+      ASSERT_EQ(frame + 1, static_cast<int>(received->typedClouds.size()));
       const float *buf = sensor->laserBuffer;
       // Scan and cloud share the sensor's sequence: scan first.
       const std::string scanSeq = std::to_string(2 * frame);
@@ -1223,6 +1246,7 @@ void GpuLidarSensorTest::BitExactOutput(const std::string &_renderEngine)
       meta.clear_intensities();
       EXPECT_EQ(meta.DebugString(), got.DebugString());
       EXPECT_TRUE(scan.SerializeAsString() == scans.back());
+      EXPECT_TRUE(scan.SerializeAsString() == received->typedScans.back());
 
       // PointCloudPacked, as gz-sensors 10 fills it.
       gz::msgs::PointCloudPacked cloud;
@@ -1282,6 +1306,7 @@ void GpuLidarSensorTest::BitExactOutput(const std::string &_renderEngine)
       cloudMeta.clear_data();
       EXPECT_EQ(cloudMeta.DebugString(), gotCloud.DebugString());
       EXPECT_TRUE(cloud.SerializeAsString() == clouds.back());
+      EXPECT_TRUE(cloud.SerializeAsString() == received->typedClouds.back());
     }
 
     conn.reset();

@@ -328,8 +328,12 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
 
   this->Render();
 
-  // Apply noise before publishing the data.
-  this->ApplyNoise();
+  // Apply noise before publishing the data. Range() and Ranges() read the
+  // buffer under the same lock.
+  {
+    std::lock_guard<std::mutex> lock(this->lidarMutex);
+    this->ApplyNoise();
+  }
 
   this->PublishLidarScan(_now);
 
@@ -469,6 +473,17 @@ void GpuLidarSensor::Implementation::FillPointCloudData(
   const uint32_t offsetZ = this->pointMsg.field(2).offset();
   const uint32_t offsetIntensity = this->pointMsg.field(3).offset();
   const uint32_t offsetRing = this->pointMsg.field(4).offset();
+  // The fields cover every byte of a point (pointMsg is not memory
+  // aligned), so the buffer is written whole. With padding between them,
+  // zero it first, as the message's data used to be.
+  if (offsetX != 0 || offsetY != offsetX + sizeof(float) ||
+      offsetZ != offsetY + sizeof(float) ||
+      offsetIntensity != offsetZ + sizeof(float) ||
+      offsetRing != offsetIntensity + sizeof(float) ||
+      pointStep != offsetRing + sizeof(uint16_t))
+  {
+    memset(_out, 0, static_cast<std::size_t>(pointStep) * width * height);
+  }
 
   char *msgBufferIndex = _out;
   // Iterate over scan and populate point cloud
