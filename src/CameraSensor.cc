@@ -18,6 +18,9 @@
 #include <gz/msgs/camera_info.pb.h>
 #include <gz/msgs/image.pb.h>
 
+#include <cstdint>
+#include <cstring>
+#include <functional>
 #include <mutex>
 #include <ostream>
 #include <string>
@@ -34,6 +37,7 @@
 #include <gz/transport/TopicUtils.hh>
 
 #include "CameraSensorUtil.hh"
+#include "PublishInPlace.hh"
 #include "gz/sensors/CameraSensor.hh"
 #include "gz/sensors/ImageBrownDistortionModel.hh"
 #include "gz/sensors/ImageDistortion.hh"
@@ -64,6 +68,16 @@ class gz::sensors::CameraSensor::Implementation
   /// \sa ImageSaver
   public: bool SaveImage(const unsigned char *_data, unsigned int _width,
     unsigned int _height, gz::common::Image::PixelFormatType _format);
+
+  /// \brief Publish imageMsg, whose data field is not filled, with the
+  /// camera's current frame as its data: the bytes of Publish(imageMsg)
+  /// after a copy of the frame into its data. The message's other fields are
+  /// serialized around the frame, which the camera copies once, straight
+  /// into the transport's buffer.
+  /// \param[in] _width Image width
+  /// \param[in] _height Image height
+  /// \return False if the camera could not copy the frame
+  public: bool PublishInPlace(unsigned int _width, unsigned int _height);
 
   /// \brief node to create publisher
   public: transport::Node node;
@@ -444,7 +458,16 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   {
     // generate sensor data
     this->Render();
+
+    // Nobody in this process takes the message (image callbacks) and no
+    // image is saved: the frame is copied once, from the render engine
+    // straight into the transport's buffer (PublishInPlace below).
+    const bool inPlace = this->dataPtr->pub.HasConnections() &&
+        this->dataPtr->imageEvent.ConnectionCount() <= 0 &&
+        !this->dataPtr->saveImage;
+
     unsigned char *data = nullptr;
+    if (!inPlace)
     {
       GZ_PROFILE("CameraSensor::Update Copy image");
       auto *payload = this->dataPtr->imageMsg.mutable_data();
@@ -525,8 +548,13 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     }
 
     // publish the image message
+    this->AddSequence(msg.mutable_header());
+    if (inPlace)
     {
-      this->AddSequence(msg.mutable_header());
+      GZ_PROFILE("CameraSensor::Update Publish in place");
+      return this->dataPtr->PublishInPlace(width, height);
+    }
+    {
       GZ_PROFILE("CameraSensor::Update Publish");
       this->dataPtr->pub.Publish(msg);
     }
@@ -552,6 +580,37 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   }
 
   return true;
+}
+
+//////////////////////////////////////////////////
+bool CameraSensor::Implementation::PublishInPlace(unsigned int _width,
+    unsigned int _height)
+{
+  // Fields 1-4 (header, width, height, step) before the data (field 5),
+  // pixel_format_type (field 6) after it: protobuf serializes in field
+  // order.
+  const msgs::Image &msg = this->imageMsg;
+  msgs::Image head;
+  *head.mutable_header() = msg.header();
+  head.set_width(msg.width());
+  head.set_height(msg.height());
+  head.set_step(msg.step());
+  const std::string front = head.SerializeAsString();
+  msgs::Image tail;
+  tail.set_pixel_format_type(msg.pixel_format_type());
+  const std::string back = tail.SerializeAsString();
+
+  const std::size_t dataSize = this->camera->ImageMemorySize();
+  bool copyFailed = false;
+  PublishWithData(this->pub, front, msgs::Image::kDataFieldNumber, dataSize,
+      back, [&](char *_buffer)
+      {
+        rendering::PixelBuffer frame(_width, _height,
+            this->camera->ImageFormat(), _buffer, dataSize);
+        copyFailed = !this->camera->CopyTo(frame);
+        return !copyFailed;
+      });
+  return !copyFailed;
 }
 
 //////////////////////////////////////////////////
