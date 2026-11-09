@@ -34,6 +34,7 @@
 #include <gz/sensors/CameraSensor.hh>
 #include <gz/transport/Node.hh>
 #include <gz/rendering/PixelBuffer.hh>
+#include <gz/rendering/PixelFormat.hh>
 #include <gz/rendering/Utils.hh>
 
 // TODO(louise) Remove these pragmas once gz-rendering is disabling the
@@ -106,8 +107,10 @@ class CameraSensorTest: public testing::Test,
   // Create a camera sensor and verify a custom camera info topic
   public: void CustomCameraInfoTopic(const std::string &_renderEngine);
 
-  // Compare the image bytes published in place with those of Publish()
-  public: void PublishedBytesMatchCopy(const std::string &_renderEngine);
+  // Compare the image bytes published in place with those of Publish(),
+  // for an image of the SDF format _format (empty: the SDF's)
+  public: void PublishedBytesMatchCopy(const std::string &_renderEngine,
+      const std::string &_format);
 };
 
 void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
@@ -980,7 +983,7 @@ TEST_P(CameraSensorTest, CustomCameraInfoTopic)
 
 //////////////////////////////////////////////////
 void CameraSensorTest::PublishedBytesMatchCopy(
-    const std::string &_renderEngine)
+    const std::string &_renderEngine, const std::string &_format)
 {
   std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
       "sdf", "camera_sensor_builtin.sdf");
@@ -990,6 +993,11 @@ void CameraSensorTest::PublishedBytesMatchCopy(
   auto sensorPtr = doc->Root()->GetElement("model")->GetElement("link")
       ->GetElement("sensor");
   ASSERT_NE(nullptr, sensorPtr);
+  if (!_format.empty())
+  {
+    sensorPtr->GetElement("camera")->GetElement("image")
+        ->GetElement("format")->Set<std::string>(_format);
+  }
 
   auto *engine = gz::rendering::engine(_renderEngine);
   if (!engine)
@@ -1066,19 +1074,26 @@ void CameraSensorTest::PublishedBytesMatchCopy(
   EXPECT_TRUE(sensor->Update(stamp));
   ASSERT_TRUE(waitFor(3u));
   // frame 2, read again from the render target
+  const gz::rendering::PixelFormat format =
+      sensor->RenderingCamera()->ImageFormat();
   std::string frame(sensor->RenderingCamera()->ImageMemorySize(), '\0');
   ASSERT_TRUE(sensor->RenderingCamera()->CopyTo(gz::rendering::PixelBuffer(
-      256u, 257u, gz::rendering::PF_R8G8B8, frame.data(), frame.size())));
+      256u, 257u, format, frame.data(), frame.size())));
 
   std::lock_guard<std::mutex> lock(received->mutex);
   const std::vector<std::string> &raw = received->raw;
   ASSERT_EQ(3u, raw.size());
   EXPECT_EQ(copied.SerializeAsString(), raw[0]);
+  if (_format == "L8")
+  {
+    EXPECT_EQ(gz::msgs::PixelFormatType::L_INT8, copied.pixel_format_type());
+  }
   // a frame with an image, not a uniform one
-  ASSERT_EQ(256u * 257u * 3u, frame.size());
+  const unsigned int bpp = gz::rendering::PixelUtil::BytesPerPixel(format);
+  ASSERT_EQ(256u * 257u * bpp, frame.size());
   bool uniform = true;
-  for (std::size_t i = 3; uniform && i < frame.size(); i += 3)
-    uniform = frame.compare(i, 3, frame, 0, 3) == 0;
+  for (std::size_t i = bpp; uniform && i < frame.size(); i += bpp)
+    uniform = frame.compare(i, bpp, frame, 0, bpp) == 0;
   EXPECT_FALSE(uniform);
 
   // Frame 2 is Publish() of frame 0's message with sequence number 2 and
@@ -1114,7 +1129,15 @@ void CameraSensorTest::PublishedBytesMatchCopy(
 //////////////////////////////////////////////////
 TEST_P(CameraSensorTest, PublishedBytesMatchCopy)
 {
-  PublishedBytesMatchCopy(GetParam());
+  PublishedBytesMatchCopy(GetParam(), "");
+}
+
+//////////////////////////////////////////////////
+// L8: one byte per pixel, and a pixel_format_type other than RGB_INT8 after
+// the data
+TEST_P(CameraSensorTest, PublishedBytesMatchCopyL8)
+{
+  PublishedBytesMatchCopy(GetParam(), "L8");
 }
 
 INSTANTIATE_TEST_SUITE_P(CameraSensor, CameraSensorTest,
