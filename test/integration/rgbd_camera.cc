@@ -36,6 +36,7 @@
 #include <gz/common/Event.hh>
 #include <gz/sensors/Manager.hh>
 #include <gz/sensors/RgbdCameraSensor.hh>
+#include <gz/math/Rand.hh>
 
 // TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
@@ -845,8 +846,13 @@ TEST_P(RgbdCameraSensorTest, CustomCameraInfoTopic)
 /// \brief Two RGBD sensors render ahead (as Manager::RunOnce does) and
 /// publish the same depth images, images and point clouds as serial
 /// updates; a point cloud subscriber that connects between the two passes
-/// gets no cloud from a frame rendered without one.
-void RenderAheadMatchesSerial(const std::string &_renderEngine)
+/// gets no cloud from a frame rendered without one. (SetScene() between the
+/// passes is tested with the GPU lidar: the two same-name depth cameras it
+/// leaves trip known Ogre teardown errors, see gz-sensors#548.)
+/// \param[in] _cameraExtra SDF added to the sensors' <camera>
+/// \param[in] _noise True if _cameraExtra adds noise
+void RenderAheadMatchesSerial(const std::string &_renderEngine,
+    const std::string &_cameraExtra, bool _noise)
 {
   if (_renderEngine != "ogre2")
   {
@@ -867,8 +873,9 @@ void RenderAheadMatchesSerial(const std::string &_renderEngine)
   box->AddGeometry(scene->CreateBox());
   root->AddChild(box);
 
-  // No noise: each scene PreRender() draws new noise offsets
-  auto sensorSdf = [](const std::string &_name, double _yaw)
+  // (noise draws its offsets in each scene PreRender(): the random
+  // generator is seeded the same before the two frames of a pair)
+  auto sensorSdf = [&_cameraExtra](const std::string &_name, double _yaw)
   {
     std::ostringstream str;
     str << "<sdf version='1.6'><model name='m'><link name='l'>"
@@ -878,7 +885,8 @@ void RenderAheadMatchesSerial(const std::string &_renderEngine)
         << "<topic>/test/render_ahead/" << _name << "</topic>"
         << "<camera><horizontal_fov>1.05</horizontal_fov>"
         << "<image><width>160</width><height>120</height></image>"
-        << "<clip><near>0.1</near><far>10</far></clip></camera>"
+        << "<clip><near>0.1</near><far>10</far></clip>" << _cameraExtra
+        << "</camera>"
         << "</sensor></link></model></sdf>";
     sdf::SDFPtr doc(new sdf::SDF());
     sdf::init(doc);
@@ -979,7 +987,9 @@ void RenderAheadMatchesSerial(const std::string &_renderEngine)
   for (int i = 0; i < 4; ++i)
   {
     box->SetLocalPosition(2.0 + 0.3 * i, -0.4 + 0.25 * i, 0.1 * i);
+    math::Rand::Seed(7 + i);
     frame(true, 2 * i + 1, nullptr);
+    math::Rand::Seed(7 + i);
     frame(false, 2 * i + 2, nullptr);
     ASSERT_TRUE(waitFor(2u * i + 3u));
     std::lock_guard<std::mutex> lock(received->mutex);
@@ -993,6 +1003,19 @@ void RenderAheadMatchesSerial(const std::string &_renderEngine)
     }
   }
 
+  if (_noise)
+  {
+    // The noise is applied: the same scene, seeded differently, differs
+    math::Rand::Seed(1);
+    frame(false, 20, nullptr);
+    math::Rand::Seed(2);
+    frame(false, 21, nullptr);
+    ASSERT_TRUE(waitFor(11u));
+    std::lock_guard<std::mutex> lock(received->mutex);
+    const auto &data = received->data[cams[0]->Topic() + "/image"];
+    EXPECT_NE(data[9], data[10]);
+  }
+
   // Only the depth image is subscribed when the first camera renders ahead,
   // then a point cloud subscriber connects: the frame has no cloud, so none
   // is published (not the previous frame's).
@@ -1002,7 +1025,7 @@ void RenderAheadMatchesSerial(const std::string &_renderEngine)
   ASSERT_TRUE(node.Unsubscribe(pointsTopic));
   const size_t depthCount = count(depthTopic);
   const size_t pointsCount = count(pointsTopic);
-  frame(true, 9, [&]() { EXPECT_TRUE(subscribe(pointsTopic)); });
+  frame(true, 22, [&]() { EXPECT_TRUE(subscribe(pointsTopic)); });
   for (int sleep = 0; sleep < 300 && count(depthTopic) == depthCount; ++sleep)
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   EXPECT_EQ(depthCount + 1, count(depthTopic));
@@ -1022,7 +1045,24 @@ void RenderAheadMatchesSerial(const std::string &_renderEngine)
 TEST_P(RgbdCameraSensorTest, RenderAheadMatchesSerial)
 {
   common::Console::SetVerbosity(4);
-  RenderAheadMatchesSerial(GetParam());
+  RenderAheadMatchesSerial(GetParam(), "", false);
+}
+
+//////////////////////////////////////////////////
+TEST_P(RgbdCameraSensorTest, RenderAheadMatchesSerialNoise)
+{
+  RenderAheadMatchesSerial(GetParam(),
+      "<noise><type>gaussian</type><mean>0</mean><stddev>0.05</stddev>"
+      "</noise>", true);
+}
+
+//////////////////////////////////////////////////
+TEST_P(RgbdCameraSensorTest, RenderAheadMatchesSerialDepthClip)
+{
+  // (the box's front face is at 1.5 to 2.4 m)
+  RenderAheadMatchesSerial(GetParam(),
+      "<depth_camera><clip><near>1.8</near><far>9</far></clip>"
+      "</depth_camera>", false);
 }
 
 INSTANTIATE_TEST_SUITE_P(RgbdCameraSensor, RgbdCameraSensorTest,
