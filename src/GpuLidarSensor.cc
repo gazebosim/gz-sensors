@@ -25,7 +25,6 @@
 #endif
 
 #include <typeinfo>
-#include <utility>
 
 #include <gz/common/Console.hh>
 #include <gz/common/Profiler.hh>
@@ -77,10 +76,6 @@ class gz::sensors::GpuLidarSensor::Implementation
 
   /// \brief True if the SDF has lidar noise, which Update() draws.
   public: bool noise = false;
-
-  /// \brief True if RenderAhead() rendered the current camera's frame for
-  /// the next Update(); SetScene() drops it.
-  public: bool renderedAhead = false;
 };
 
 //////////////////////////////////////////////////
@@ -111,7 +106,7 @@ void GpuLidarSensor::SetScene(gz::rendering::ScenePtr _scene)
   if (this->Scene() != _scene)
   {
     this->RemoveGpuRays(this->Scene());
-    this->dataPtr->renderedAhead = false;
+    this->DropRenderedAhead();
     RenderingSensor::SetScene(_scene);
 
     if (this->initialized)
@@ -285,9 +280,8 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
   }
 
   // A frame rendered ahead is completed here.
-  const bool renderedAhead =
-      std::exchange(this->dataPtr->renderedAhead, false) &&
-      this->RenderedAhead();
+  const bool renderedAhead = this->RenderedAhead();
+  this->DropRenderedAhead();
   if (renderedAhead)
     this->dataPtr->gpuRays->PostRender();
   else
@@ -347,7 +341,6 @@ bool GpuLidarSensor::RenderAhead(
   GZ_PROFILE("GpuLidarSensor::RenderAhead");
   this->dataPtr->gpuRays->Render();
   this->dataPtr->gpuRays->IssueReadback();
-  this->dataPtr->renderedAhead = true;
   return true;
 }
 

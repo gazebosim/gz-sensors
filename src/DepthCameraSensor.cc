@@ -20,7 +20,6 @@
 
 #include <mutex>
 #include <typeinfo>
-#include <utility>
 
 #include <gz/common/Console.hh>
 #include <gz/common/Image.hh>
@@ -91,10 +90,6 @@ class gz::sensors::DepthCameraSensor::Implementation
 
   /// \brief point cloud data buffer.
   public: float *pointCloudBuffer = nullptr;
-
-  /// \brief True if RenderAhead() rendered the current camera's frame for
-  /// the next Update(); SetScene() drops it.
-  public: bool renderedAhead = false;
 
   /// \brief xyz data buffer.
   public: float *xyzBuffer = nullptr;
@@ -535,7 +530,7 @@ void DepthCameraSensor::SetScene(rendering::ScenePtr _scene)
   {
     // TODO(anyone) Remove camera from scene
     this->dataPtr->depthCamera = nullptr;
-    this->dataPtr->renderedAhead = false;
+    this->DropRenderedAhead();
     RenderingSensor::SetScene(_scene);
 
     if (this->dataPtr->initialized)
@@ -569,9 +564,8 @@ bool DepthCameraSensor::Update(
   // A frame rendered ahead is completed whatever the subscribers are now:
   // the subscribers seen by RenderAhead() decide, as if they had changed
   // after this update.
-  const bool renderedAhead =
-      std::exchange(this->dataPtr->renderedAhead, false) &&
-      this->RenderedAhead();
+  const bool renderedAhead = this->RenderedAhead();
+  this->DropRenderedAhead();
   if (renderedAhead)
   {
     this->dataPtr->depthCamera->PostRender();
@@ -732,7 +726,6 @@ bool DepthCameraSensor::RenderAhead(
   this->UpdatePointCloudConnection();
   this->dataPtr->depthCamera->Render();
   this->dataPtr->depthCamera->IssueReadback();
-  this->dataPtr->renderedAhead = true;
   return true;
 }
 

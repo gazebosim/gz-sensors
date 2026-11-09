@@ -595,6 +595,12 @@ bool Sensor::RenderedAhead() const
 }
 
 //////////////////////////////////////////////////
+void Sensor::DropRenderedAhead()
+{
+  this->dataPtr->renderedAhead = false;
+}
+
+//////////////////////////////////////////////////
 std::chrono::steady_clock::duration Sensor::NextDataUpdateTime() const
 {
   return this->dataPtr->nextUpdateTime;
