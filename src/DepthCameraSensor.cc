@@ -667,9 +667,19 @@ void DepthCameraSensor::OnNewRgbPointCloud(const float *_scan,
   msgs::PointCloudPacked &msg = this->dataPtr->pointMsg;
   // Only for point cloud subscribers (as Update() published it), and only
   // a cloud of the message's size.
-  if (!this->HasPointConnections() || _channels < 3u ||
-      _width * _height != msg.width() * msg.height())
+  if (!this->HasPointConnections())
+    return;
+  if (_channels < 3u)
   {
+    gzerr << "DepthCameraSensor: unexpected point cloud frame ("
+          << _channels << " channels)" << std::endl;
+    return;
+  }
+  if (_width * _height != msg.width() * msg.height())
+  {
+    gzerr << "DepthCameraSensor: point cloud frame of " << _width << "x"
+          << _height << " for a " << msg.width() << "x" << msg.height()
+          << " message" << std::endl;
     return;
   }
 
@@ -700,6 +710,9 @@ void DepthCameraSensor::OnNewRgbPointCloud(const float *_scan,
   // is_dense follows the data in the message, but the message size depends
   // on it: serialize with the last point cloud's, find this one's while
   // filling the data, and only when it changed fill again.
+  // (This assumes an unthrottled publisher, as pointPub is: PublishInPlace
+  // takes the throttling slot before it calls the fill, so with MsgsPerSec
+  // the second attempt would be dropped.)
   bool dense = this->dataPtr->pointsDense;
   for (int attempt = 0; attempt < 2; ++attempt)
   {
