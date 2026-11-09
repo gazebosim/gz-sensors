@@ -578,48 +578,29 @@ void RgbdCameraSensor::Implementation::OnNewRgbPointCloud(const float *_scan,
     const std::string front = msg.SerializeAsString();
 
     GZ_PROFILE("RgbdCameraSensor::Update Publish point cloud");
-    // is_dense follows the data, but the message size depends on it:
-    // serialize with the last cloud's, find this one's while writing the
-    // data, and only when it changed write again.
-    // (This assumes an unthrottled publisher, as pointPub is:
-    // PublishInPlace takes the throttling slot before it calls the fill, so
-    // with MsgsPerSec the second attempt would be dropped.)
-    bool dense = this->pointsDense;
-    for (int attempt = 0; attempt < 2; ++attempt)
-    {
-      msgs::PointCloudPacked tail;
-      tail.set_is_dense(dense);
-      bool isDense = true;
-      bool filled = false;
-      PublishWithData(this->pointPub, front,
-          msgs::PointCloudPacked::kDataFieldNumber,
-          static_cast<std::size_t>(msg.row_step()) * msg.height(),
-          tail.SerializeAsString(), [&](char *_out)
+    PublishPointCloudWithData(this->pointPub, front,
+        static_cast<std::size_t>(msg.row_step()) * msg.height(),
+        [&](char *_out)
+        {
+          bool isDense = true;
+          for (uint32_t i = 0; i < n; ++i, _out += 16)
           {
-            for (uint32_t i = 0; i < n; ++i, _out += 16)
+            float xyz[3] = {_scan[i * 4], _scan[i * 4 + 1], _scan[i * 4 + 2]};
+            if (depth && std::isinf(depth[i]))
+              xyz[0] = xyz[1] = xyz[2] = depth[i];
+            if (isDense)
             {
-              float xyz[3] = {_scan[i * 4], _scan[i * 4 + 1], _scan[i * 4 + 2]};
-              if (depth && std::isinf(depth[i]))
-                xyz[0] = xyz[1] = xyz[2] = depth[i];
-              if (isDense)
-              {
-                isDense = std::isfinite(xyz[0]) && std::isfinite(xyz[1]) &&
-                    std::isfinite(xyz[2]);
-              }
-              memcpy(_out, xyz, sizeof(xyz));
-              _out[12] = rgb(i, 8);
-              _out[13] = rgb(i, 16);
-              _out[14] = rgb(i, 24);
-              _out[15] = 0;
+              isDense = std::isfinite(xyz[0]) && std::isfinite(xyz[1]) &&
+                  std::isfinite(xyz[2]);
             }
-            filled = true;
-            return isDense == dense;
-          });
-      if (!filled || isDense == dense)
-        break;
-      dense = isDense;
-    }
-    this->pointsDense = dense;
+            memcpy(_out, xyz, sizeof(xyz));
+            _out[12] = rgb(i, 8);
+            _out[13] = rgb(i, 16);
+            _out[14] = rgb(i, 24);
+            _out[15] = 0;
+          }
+          return isDense;
+        }, this->pointsDense);
   }
 
   if (color)
