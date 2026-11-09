@@ -303,6 +303,11 @@ bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
   // Rows of RangeCount() ranges, VerticalRangeCount() rows, as many as the
   // message holds. The sensor's parameters are read once, not per range:
   // each accessor goes through sdf::Lidar.
+  // The message declares that layout (count RangeCount(), vertical_count
+  // VerticalRangeCount()), and its rows are the buffer's rows, but it holds
+  // one value per ray: with resolution > 1 that is the first rows of the
+  // buffer, whole, and the last rows are missing, as with Ranges(). Sizing
+  // the message for every range would change what is published.
   const int count = std::min(numRays, static_cast<int>(
       this->RangeCount() * this->VerticalRangeCount()));
   const double rangeMin = this->RangeMin();
