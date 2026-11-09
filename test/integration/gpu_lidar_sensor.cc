@@ -15,7 +15,13 @@
  *
 */
 
+#include <chrono>
 #include <cstring>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <thread>
 #include <vector>
 #include <gtest/gtest.h>
 
@@ -1058,6 +1064,243 @@ TEST_P(GpuLidarSensorTest, RenderAheadOnlyExactType)
   mgr.Remove(base->Id());
   mgr.Remove(derived->Id());
   engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+/////////////////////////////////////////////////
+/// \brief _raw parsed as a T whose header stamp must be _sec seconds,
+/// serialized again without its stamp and sequence number.
+template <typename T>
+std::string WithoutStampAndSeq(const std::string &_raw, int _sec)
+{
+  T msg;
+  EXPECT_TRUE(msg.ParseFromString(_raw));
+  EXPECT_EQ(_sec, msg.header().stamp().sec());
+  EXPECT_EQ(0, msg.header().stamp().nsec());
+  msg.mutable_header()->clear_stamp();
+  for (auto &data : *msg.mutable_header()->mutable_data())
+  {
+    if (data.key() == "seq")
+      data.clear_value();
+  }
+  return msg.SerializeAsString();
+}
+
+/////////////////////////////////////////////////
+/// \brief A frame rendered ahead publishes the same scan and point cloud
+/// bytes, with the same stamp, as a serial frame. SetScene() between the
+/// two passes drops the frame rendered ahead (and destroys its camera):
+/// Update() renders in the new scene. Lidar frame callbacks and noise keep
+/// the sensor serial. A callback between the two passes removes a sensor
+/// whose frame is pending.
+TEST_P(GpuLidarSensorTest, RenderAheadMatchesSerial)
+{
+  const std::string renderEngine = GetParam();
+  if (renderEngine != "ogre2")
+  {
+    GTEST_SKIP() << "Engine '" << renderEngine << "' is not tested here";
+  }
+  auto *engine = gz::rendering::engine(renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << renderEngine << "' is not supported";
+  }
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene_ahead_serial");
+  ASSERT_NE(nullptr, scene);
+  gz::rendering::VisualPtr box = scene->CreateVisual();
+  box->AddGeometry(scene->CreateBox());
+  box->SetLocalPosition(3.0, 0.0, 0.0);
+  scene->RootVisual()->AddChild(box);
+
+  // (a camera name is unique in the scene)
+  auto lidarSdf = [](const std::string &_name)
+  {
+    return GpuLidarToSdf(_name, gz::math::Pose3d::Zero, 30,
+        "/gz/sensors/test/" + _name, 64, 1, -0.5, 0.5, 1, 1, 0, 0, 0.01,
+        0.08, 10.0, true, false, _name + "_frame");
+  };
+  // The serialized messages, as they leave the publishers; shared with the
+  // callbacks, which may run after an early return
+  struct Received
+  {
+    std::mutex mutex;
+    std::map<std::string, std::vector<std::string>> raw;
+  };
+  auto received = std::make_shared<Received>();
+  gz::transport::Node node;
+  auto subscribe = [&](const std::string &_topic, const std::string &_type)
+  {
+    return node.SubscribeRaw(_topic,
+        [received, _topic](const char *_data, std::size_t _size,
+            const gz::transport::MessageInfo &)
+        {
+          std::lock_guard<std::mutex> lock(received->mutex);
+          received->raw[_topic].emplace_back(_data, _size);
+        }, _type);
+  };
+  auto count = [&](const std::string &_topic)
+  {
+    std::lock_guard<std::mutex> lock(received->mutex);
+    return received->raw[_topic].size();
+  };
+  auto waitFor = [&](const std::string &_topic, std::size_t _n)
+  {
+    for (int i = 0; i < 300 && count(_topic) < _n; ++i)
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    return count(_topic) >= _n;
+  };
+  auto waitForConnections = [](gz::sensors::GpuLidarSensor *_lidar)
+  {
+    for (int i = 0; i < 500 && !_lidar->HasConnections(); ++i)
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    return _lidar->HasConnections();
+  };
+
+  gz::sensors::Manager mgr;
+  auto *lidar = mgr.CreateSensor<gz::sensors::GpuLidarSensor>(
+      lidarSdf("render_ahead_serial"));
+  ASSERT_NE(nullptr, lidar);
+  // (Sensor::Update(_now, _force) is hidden in the sensor types)
+  gz::sensors::RenderingSensor *sensor = lidar;
+  sensor->SetScene(scene);
+  sensor->SetManualSceneUpdate(true);
+  const std::string scanTopic = "/gz/sensors/test/render_ahead_serial";
+  const std::string pointsTopic = scanTopic + "/points";
+  ASSERT_TRUE(subscribe(scanTopic, "gz.msgs.LaserScan"));
+  ASSERT_TRUE(subscribe(pointsTopic, "gz.msgs.PointCloudPacked"));
+  ASSERT_TRUE(waitForConnections(lidar));
+
+  // One frame at _sec seconds, rendered ahead or serial (the scene update
+  // is manual, as in gz-sim)
+  auto frame = [&](const gz::rendering::ScenePtr &_scene, bool _ahead,
+      int _sec)
+  {
+    const std::chrono::steady_clock::duration now =
+        std::chrono::seconds(_sec);
+    _scene->PreRender();
+    if (_ahead)
+    {
+      EXPECT_TRUE(sensor->RenderAheadIfDue(now, true));
+    }
+    EXPECT_TRUE(sensor->Update(now, true));
+  };
+  // Frames _a and _b of both topics are the same, but for stamp and seq
+  auto expectSame = [&](bool _same, int _a, int _b)
+  {
+    std::lock_guard<std::mutex> lock(received->mutex);
+    const auto &scans = received->raw[scanTopic];
+    const auto &points = received->raw[pointsTopic];
+    EXPECT_EQ(_same, WithoutStampAndSeq<gz::msgs::LaserScan>(scans[_a], _a)
+        == WithoutStampAndSeq<gz::msgs::LaserScan>(scans[_b], _b));
+    EXPECT_EQ(_same,
+        WithoutStampAndSeq<gz::msgs::PointCloudPacked>(points[_a], _a) ==
+        WithoutStampAndSeq<gz::msgs::PointCloudPacked>(points[_b], _b));
+  };
+
+  frame(scene, false, 0);
+  for (int i = 0; i < 2; ++i)
+  {
+    SCOPED_TRACE("frame pair " + std::to_string(i));
+    box->SetLocalPosition(2.0 + 0.5 * i, -0.3 + 0.6 * i, 0.0);
+    frame(scene, true, 2 * i + 1);
+    frame(scene, false, 2 * i + 2);
+    ASSERT_TRUE(waitFor(scanTopic, 2u * i + 3u));
+    ASSERT_TRUE(waitFor(pointsTopic, 2u * i + 3u));
+    expectSame(true, 2 * i + 1, 2 * i + 2);
+    // The box moved: a stale frame would not match the new one
+    expectSame(false, 2 * i, 2 * i + 2);
+  }
+
+  // SetScene() between the two passes: the frame rendered ahead in the
+  // scene with the box is dropped, Update() renders the empty scene
+  gz::rendering::ScenePtr scene2 =
+      engine->CreateScene("scene_ahead_serial_2");
+  ASSERT_NE(nullptr, scene2);
+  scene->PreRender();
+  EXPECT_TRUE(sensor->RenderAheadIfDue(std::chrono::seconds(5), true));
+  sensor->SetScene(scene2);
+  frame(scene2, false, 5);
+  frame(scene2, false, 6);
+  ASSERT_TRUE(waitFor(scanTopic, 7u));
+  ASSERT_TRUE(waitFor(pointsTopic, 7u));
+  expectSame(true, 5, 6);
+  expectSame(false, 4, 6);
+
+  // A lidar frame callback runs user code between the serial renders:
+  // serial
+  auto connection = lidar->ConnectNewLidarFrame(
+      [](const float *, unsigned int, unsigned int, unsigned int,
+         const std::string &) {});
+  scene2->PreRender();
+  EXPECT_FALSE(sensor->RenderAheadIfDue(std::chrono::seconds(7), true));
+  EXPECT_TRUE(sensor->Update(std::chrono::seconds(7), true));
+  connection.reset();
+
+  // Noise draws random numbers in Update(): serial
+  auto noisySdf = lidarSdf("render_ahead_noisy");
+  auto noise = noisySdf->GetElement("ray")->GetElement("noise");
+  noise->GetElement("type")->Set<std::string>("gaussian");
+  noise->GetElement("stddev")->Set<double>(0.01);
+  auto *noisy = mgr.CreateSensor<gz::sensors::GpuLidarSensor>(noisySdf);
+  ASSERT_NE(nullptr, noisy);
+  gz::sensors::RenderingSensor *noisySensor = noisy;
+  noisySensor->SetScene(scene2);
+  noisySensor->SetManualSceneUpdate(true);
+  scene2->PreRender();
+  EXPECT_FALSE(noisySensor->RenderAheadIfDue(std::chrono::seconds(8), true));
+  EXPECT_TRUE(noisySensor->Update(std::chrono::seconds(8), true));
+  mgr.Remove(noisy->Id());
+  mgr.Remove(lidar->Id());
+
+  // A callback between the two passes (a listener of a's camera, which
+  // fires in a's Update()) removes b, whose frame is pending: RunOnce
+  // skips it, and its camera is destroyed with its readback issued
+  {
+    gz::sensors::Manager mgr2;
+    auto *a = mgr2.CreateSensor<gz::sensors::GpuLidarSensor>(
+        lidarSdf("render_ahead_a"));
+    auto *b = mgr2.CreateSensor<gz::sensors::GpuLidarSensor>(
+        lidarSdf("render_ahead_b"));
+    ASSERT_NE(nullptr, a);
+    ASSERT_NE(nullptr, b);
+    for (gz::sensors::RenderingSensor *s :
+         std::vector<gz::sensors::RenderingSensor *>{a, b})
+    {
+      s->SetScene(scene);
+      s->SetManualSceneUpdate(true);
+    }
+    const std::string aTopic = "/gz/sensors/test/render_ahead_a";
+    const std::string bTopic = "/gz/sensors/test/render_ahead_b";
+    ASSERT_TRUE(subscribe(aTopic, "gz.msgs.LaserScan"));
+    ASSERT_TRUE(subscribe(bTopic, "gz.msgs.LaserScan"));
+    ASSERT_TRUE(waitForConnections(a));
+    ASSERT_TRUE(waitForConnections(b));
+    const gz::sensors::SensorId bId = b->Id();
+    bool removed = false;
+    auto removeB = a->GpuRays()->ConnectNewGpuRaysFrame(
+        [&](const float *, unsigned int, unsigned int, unsigned int,
+            const std::string &)
+        {
+          if (!removed)
+            removed = mgr2.Remove(bId);
+        });
+    for (int sec = 10; sec < 12; ++sec)
+    {
+      scene->PreRender();
+      mgr2.RunOnce(std::chrono::seconds(sec), true);
+    }
+    EXPECT_TRUE(removed);
+    EXPECT_EQ(nullptr, mgr2.Sensor(bId));
+    EXPECT_TRUE(waitFor(aTopic, 2u));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    EXPECT_EQ(2u, count(aTopic));
+    EXPECT_EQ(0u, count(bTopic));
+    removeB.reset();
+  }
+
+  box.reset();
+  engine->DestroyScene(scene);
+  engine->DestroyScene(scene2);
   gz::rendering::unloadEngine(engine->Name());
 }
 
