@@ -328,7 +328,10 @@ gz_sensor_library(
 
 gz_sensor_library(
     name = "gpu_lidar",
-    srcs = ["src/GpuLidarSensor.cc"],
+    srcs = [
+        "src/GpuLidarSensor.cc",
+        "src/PublishInPlace.hh",
+    ],
     hdrs = ["include/gz/sensors/GpuLidarSensor.hh"],
     includes = ["include"],
     visibility = ["//visibility:public"],
@@ -381,7 +384,10 @@ cc_test(
 
 gz_sensor_library(
     name = "lidar",
-    srcs = ["src/Lidar.cc"],
+    srcs = [
+        "src/Lidar.cc",
+        "src/PublishInPlace.hh",
+    ],
     hdrs = ["include/gz/sensors/Lidar.hh"],
     includes = ["include"],
     visibility = ["//visibility:public"],
