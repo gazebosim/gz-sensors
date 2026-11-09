@@ -19,7 +19,6 @@
   #pragma warning(disable: 4005)
   #pragma warning(disable: 4251)
 #endif
-#include <google/protobuf/io/coded_stream.h>
 #include <gz/msgs/pointcloud_packed.pb.h>
 #if defined(_MSC_VER)
   #pragma warning(pop)
@@ -41,47 +40,9 @@
 #include "gz/sensors/GpuLidarSensor.hh"
 #include "gz/sensors/SensorFactory.hh"
 
+#include "PublishInPlace.hh"
+
 using namespace gz::sensors;
-
-namespace
-{
-using google::protobuf::io::CodedOutputStream;
-
-/// \brief Publish a message in place: _front and _back are its serialized
-/// fields before and after the bytes field number _field, whose _size bytes
-/// _fill writes straight into the transport's buffer (false cancels the
-/// message). Protobuf serializes fields in field number order and omits an
-/// empty bytes field, so the bytes are those Publish() sends for the whole
-/// message.
-/// \return The result of PublishInPlace
-bool PublishWithData(gz::transport::Node::Publisher &_pub,
-    const std::string &_front, int _field, std::size_t _size,
-    const std::string &_back, const std::function<bool(char *)> &_fill)
-{
-  // tag (length-delimited) and varint length: at most 5 + 10 bytes
-  uint8_t key[15];
-  uint8_t *keyEnd = key;
-  if (_size > 0)
-  {
-    keyEnd = CodedOutputStream::WriteTagToArray(
-        (static_cast<uint32_t>(_field) << 3) | 2, keyEnd);
-    keyEnd = CodedOutputStream::WriteVarint64ToArray(_size, keyEnd);
-  }
-  const std::size_t keySize = keyEnd - key;
-  return _pub.PublishInPlace(
-      _front.size() + keySize + _size + _back.size(), [&](char *_buffer)
-      {
-        memcpy(_buffer, _front.data(), _front.size());
-        _buffer += _front.size();
-        memcpy(_buffer, key, keySize);
-        _buffer += keySize;
-        if (!_fill(_buffer))
-          return false;
-        memcpy(_buffer + _size, _back.data(), _back.size());
-        return true;
-      });
-}
-}  // namespace
 
 /// \brief Private data for the GpuLidar class
 class gz::sensors::GpuLidarSensor::Implementation

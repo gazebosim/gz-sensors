@@ -44,6 +44,8 @@
 #include "gz/sensors/SensorFactory.hh"
 #include "gz/sensors/SensorTypes.hh"
 
+#include "PublishInPlace.hh"
+
 using namespace gz::sensors;
 
 /// \brief Private data for Lidar class
@@ -367,9 +369,7 @@ bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
         auto *out = reinterpret_cast<uint8_t *>(_buffer + front.size());
         const auto writeField = [&](int _field, auto _value)
         {
-          out = CodedOutputStream::WriteTagToArray(
-              (static_cast<uint32_t>(_field) << 3) | 2, out);
-          out = CodedOutputStream::WriteVarint64ToArray(arrayBytes, out);
+          out = WriteLengthDelimitedKey(_field, arrayBytes, out);
           for (int index = 0; index < numRays; ++index)
           {
             const double v = _value(index);
