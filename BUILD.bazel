@@ -261,7 +261,10 @@ gz_sensor_library(
 
 gz_sensor_library(
     name = "depth_camera",
-    srcs = ["src/DepthCameraSensor.cc"],
+    srcs = [
+        "src/DepthCameraSensor.cc",
+        "src/PublishInPlace.hh",
+    ],
     hdrs = ["include/gz/sensors/DepthCameraSensor.hh"],
     features = [
         "-layering_check",  # Needs private headers from :gz-sensors and :camera

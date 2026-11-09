@@ -15,12 +15,24 @@
  *
 */
 
+#include <chrono>
+#include <cmath>
+#include <condition_variable>
 #include <cstring>
+#include <functional>
+#include <map>
+#include <memory>
+#include <mutex>
 #include <string>
+#include <thread>
+#include <vector>
 #include <gtest/gtest.h>
 
 #include <gz/msgs/camera_info.pb.h>
 #include <gz/msgs/image.pb.h>
+#include <gz/msgs/pointcloud_packed.pb.h>
+#include <gz/msgs/PointCloudPackedUtils.hh>
+#include <gz/msgs/Utility.hh>
 
 #include <gz/common/Filesystem.hh>
 #include <gz/common/Event.hh>
@@ -164,6 +176,9 @@ class DepthCameraSensorTest: public testing::Test,
 
   // Create a depth camera sensor and verify a custom camera info topic
   public: void CustomCameraInfoTopic(const std::string &_renderEngine);
+
+  // Compare the published bytes with the messages built the original way
+  public: void PublishedBytesMatchReference(const std::string &_renderEngine);
 };
 
 void DepthCameraSensorTest::ImagesWithBuiltinSDF(
@@ -971,6 +986,483 @@ TEST_P(DepthCameraSensorTest, CustomCameraInfoTopic)
 {
   gz::common::Console::SetVerbosity(4);
   CustomCameraInfoTopic(GetParam());
+}
+
+/////////////////////////////////////////////////
+/// \brief The published depth images and point clouds are, byte for byte,
+/// Publish() of the messages built the original way from the frame the
+/// render engine delivered: a fresh msgs::Image with the depth frame as
+/// data, and a point cloud filled by PointCloudUtil::FillMsg from the xyz
+/// of the camera's point cloud and a grayscale of the depth. Checked with
+/// and without an image callback (the sensor renders ahead or serially),
+/// with is_dense going true, false, true, and for the frame in which the
+/// point cloud subscriber reconnects (a fresh cloud, not a stale one).
+void DepthCameraSensorTest::PublishedBytesMatchReference(
+    const std::string &_renderEngine)
+{
+  if (_renderEngine != "ogre2")
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+              << "' is not tested here" << std::endl;
+  }
+  auto *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+              << "' is not supported" << std::endl;
+  }
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene_bytes");
+  ASSERT_NE(nullptr, scene);
+  gz::rendering::VisualPtr root = scene->RootVisual();
+  gz::rendering::VisualPtr box = scene->CreateVisual();
+  box->AddGeometry(scene->CreateBox());
+  box->SetLocalPosition(3.0, 0.0, 0.0);
+  root->AddChild(box);
+  // A wall that fills the view: every point finite (a dense cloud). Moved
+  // beyond the far clip plane, the background is +inf (not dense).
+  gz::rendering::VisualPtr wall = scene->CreateVisual();
+  wall->AddGeometry(scene->CreateBox());
+  wall->SetLocalScale(0.2, 40.0, 40.0);
+  root->AddChild(wall);
+  auto wallInView = [&wall](bool _inView)
+  {
+    wall->SetLocalPosition(_inView ? 5.0 : 50.0, 0.0, 0.0);
+  };
+
+  const std::string topic = "/test/integration/DepthCameraBytes/image";
+  const std::string pointsTopic = topic + "/points";
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+      "sdf", "depth_camera_sensor_builtin.sdf");
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  auto sensorPtr = doc->Root()->GetElement("model")->GetElement("link")
+      ->GetElement("sensor");
+  sensorPtr->GetElement("topic")->Set<std::string>(topic);
+
+  gz::sensors::Manager mgr;
+  auto *sensor = mgr.CreateSensor<gz::sensors::DepthCameraSensor>(sensorPtr);
+  ASSERT_NE(nullptr, sensor);
+  sensor->SetScene(scene);
+  // gz-sim's mode: the scene is updated once for all sensors, which then
+  // render ahead
+  sensor->SetManualSceneUpdate(true);
+  const unsigned int width = sensor->ImageWidth();
+  const unsigned int height = sensor->ImageHeight();
+
+  // The frames the render engine delivers to the sensor.
+  std::vector<float> depth;
+  std::vector<float> cloud;
+  auto depthConn = sensor->DepthCamera()->ConnectNewDepthFrame(
+      [&depth](const float *_data, unsigned int _w, unsigned int _h,
+          unsigned int, const std::string &)
+      {
+        depth.assign(_data, _data + _w * _h);
+      });
+  auto onCloud = [&cloud](const float *_data, unsigned int _w,
+      unsigned int _h, unsigned int _c, const std::string &)
+  {
+    cloud.assign(_data, _data + _w * _h * _c);
+  };
+  auto cloudConn = sensor->DepthCamera()->ConnectNewRgbPointCloud(onCloud);
+
+  // The published bytes.
+  struct Raw
+  {
+    std::mutex mutex;
+    std::condition_variable received;
+    std::string bytes;
+    int count = 0;
+  };
+  // (shared with the transport's callbacks, which may outlive the test)
+  auto image = std::make_shared<Raw>();
+  auto points = std::make_shared<Raw>();
+  auto onRaw = [](std::shared_ptr<Raw> _raw)
+  {
+    return [_raw](const char *_data, const size_t _size,
+        const gz::transport::MessageInfo &)
+    {
+      {
+        std::lock_guard<std::mutex> lock(_raw->mutex);
+        _raw->bytes.assign(_data, _size);
+        ++_raw->count;
+      }
+      _raw->received.notify_all();
+    };
+  };
+  // The bytes of the _count-th message, empty if it doesn't arrive.
+  auto waitFor = [](const std::shared_ptr<Raw> &_raw, int _count)
+  {
+    std::unique_lock<std::mutex> lock(_raw->mutex);
+    if (!_raw->received.wait_for(lock, std::chrono::seconds(3),
+        [&]() { return _raw->count >= _count; }))
+    {
+      return std::string();
+    }
+    return _raw->bytes;
+  };
+  gz::transport::Node node;
+  ASSERT_TRUE(node.SubscribeRaw(topic, onRaw(image)));
+  ASSERT_TRUE(node.SubscribeRaw(pointsTopic, onRaw(points)));
+
+  int images = 0;
+  int clouds = 0;
+  // One frame at _sec seconds; checks the published depth image, and the
+  // point cloud if _points; returns the cloud's is_dense.
+  auto frame = [&](int _sec, bool _points)
+  {
+    SCOPED_TRACE("frame at " + std::to_string(_sec) + " s");
+    const std::chrono::steady_clock::duration now = std::chrono::seconds(_sec);
+    depth.clear();
+    cloud.clear();
+    scene->PreRender();
+    mgr.RunOnce(now, true);
+    EXPECT_EQ(width * height, depth.size());
+
+    const std::string imageBytes = waitFor(image, ++images);
+    gz::msgs::Image expImage;
+    *expImage.mutable_header()->mutable_stamp() = gz::msgs::Convert(now);
+    auto *frameId = expImage.mutable_header()->add_data();
+    frameId->set_key("frame_id");
+    frameId->add_value(sensor->OpticalFrameId());
+    auto *seq = expImage.mutable_header()->add_data();
+    seq->set_key("seq");
+    seq->add_value(std::to_string(images - 1));
+    expImage.set_width(width);
+    expImage.set_height(height);
+    expImage.set_step(width * sizeof(float));
+    expImage.set_pixel_format_type(gz::msgs::PixelFormatType::R_FLOAT32);
+    expImage.set_data(depth.data(), depth.size() * sizeof(float));
+    EXPECT_TRUE(expImage.SerializeAsString() == imageBytes)
+        << "depth image: " << imageBytes.size() << " bytes, expected "
+        << expImage.ByteSizeLong();
+
+    if (!_points)
+      return false;
+    const std::string cloudBytes = waitFor(points, ++clouds);
+    if (cloud.size() != width * height * 4)
+    {
+      ADD_FAILURE() << "point cloud frame of " << cloud.size() << " floats";
+      return false;
+    }
+    gz::msgs::PointCloudPacked expCloud;
+    gz::msgs::InitPointCloudPacked(expCloud, sensor->OpticalFrameId(), false,
+        {{"xyz", gz::msgs::PointCloudPacked::Field::FLOAT32},
+         {"rgb", gz::msgs::PointCloudPacked::Field::FLOAT32}});
+    expCloud.set_width(width);
+    expCloud.set_height(height);
+    expCloud.set_row_step(expCloud.point_step() * width);
+    *expCloud.mutable_header()->mutable_stamp() = gz::msgs::Convert(now);
+    auto *cloudSeqData = expCloud.mutable_header()->add_data();
+    cloudSeqData->set_key("seq");
+    cloudSeqData->add_value(std::to_string(clouds - 1));
+    // xyz of the camera's point cloud, and the grayscale image of the
+    // depth that DepthCameraSensor's ConvertDepthToImage makes
+    std::vector<float> xyz(width * height * 3);
+    gz::sensors::PointCloudUtil().XYZFromPointCloud(xyz.data(), cloud.data(),
+        width, height);
+    std::vector<unsigned char> gray(width * height * 3);
+    float maxDepth = 0;
+    for (float d : depth)
+    {
+      if (d > maxDepth && !std::isinf(d))
+        maxDepth = d;
+    }
+    double factor = 255 / maxDepth;
+    for (unsigned int i = 0; i < depth.size(); ++i)
+    {
+      unsigned char d = static_cast<unsigned char>(255 - (depth[i] * factor));
+      gray[i * 3] = d;
+      gray[i * 3 + 1] = d;
+      gray[i * 3 + 2] = d;
+    }
+    gz::sensors::PointCloudUtil().FillMsg(expCloud, xyz.data(), gray.data());
+    EXPECT_TRUE(expCloud.SerializeAsString() == cloudBytes)
+        << "point cloud: " << cloudBytes.size() << " bytes, expected "
+        << expCloud.ByteSizeLong() << ", is_dense " << expCloud.is_dense();
+    return expCloud.is_dense();
+  };
+
+  // is_dense true, false, true; the sensor renders ahead (Manager).
+  wallInView(true);
+  EXPECT_TRUE(frame(1, true));
+  wallInView(false);
+  EXPECT_FALSE(frame(2, true));
+  wallInView(true);
+  EXPECT_TRUE(frame(3, true));
+
+  // With an image callback (the sensor renders serially, and the callback
+  // gets the published message).
+  int callbacks = 0;
+  auto imageConn = sensor->ConnectImageCallback(
+      [&callbacks](const gz::msgs::Image &) { ++callbacks; });
+  wallInView(false);
+  EXPECT_FALSE(frame(4, true));
+  EXPECT_EQ(1, callbacks);
+  imageConn.reset();
+
+  // The point cloud subscriber leaves (a depth-only frame: nothing else
+  // listens to the camera's point cloud) and comes back: the frame it comes
+  // back in has its own cloud.
+  ASSERT_TRUE(node.Unsubscribe(pointsTopic));
+  cloudConn.reset();
+  box->SetLocalPosition(2.5, 0.5, 0.0);
+  frame(5, false);
+  cloudConn = sensor->DepthCamera()->ConnectNewRgbPointCloud(onCloud);
+  ASSERT_TRUE(node.SubscribeRaw(pointsTopic, onRaw(points)));
+  box->SetLocalPosition(2.0, -0.5, 0.0);
+  EXPECT_FALSE(frame(6, true));
+  {
+    std::lock_guard<std::mutex> lock(points->mutex);
+    EXPECT_EQ(clouds, points->count);
+  }
+
+  depthConn.reset();
+  cloudConn.reset();
+  mgr.Remove(sensor->Id());
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+TEST_P(DepthCameraSensorTest, PublishedBytesMatchReference)
+{
+  PublishedBytesMatchReference(GetParam());
+}
+
+//////////////////////////////////////////////////
+/// \brief A sensor type derived from DepthCameraSensor: its Update() may run
+/// code before it renders, so it does not render ahead.
+class DerivedDepthCameraSensor : public gz::sensors::DepthCameraSensor
+{
+};
+
+//////////////////////////////////////////////////
+TEST_P(DepthCameraSensorTest, RenderAheadOnlyExactType)
+{
+  const std::string renderEngine = GetParam();
+  if (renderEngine != "ogre2")
+  {
+    GTEST_SKIP() << "Engine '" << renderEngine << "' is not tested here";
+  }
+  auto *engine = gz::rendering::engine(renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << renderEngine << "' is not supported";
+  }
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene_render_ahead");
+  ASSERT_NE(nullptr, scene);
+
+  const std::string topic = "/test/integration/DepthCameraRenderAhead/image";
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+      "sdf", "depth_camera_sensor_builtin.sdf");
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  auto sensorPtr = doc->Root()->GetElement("model")->GetElement("link")
+      ->GetElement("sensor");
+  sensorPtr->GetElement("topic")->Set<std::string>(topic);
+
+  gz::sensors::Manager mgr;
+  auto *base = mgr.CreateSensor<gz::sensors::DepthCameraSensor>(sensorPtr);
+  // (a camera name is unique in the scene)
+  sensorPtr->GetAttribute("name")->Set<std::string>("derived_depth_camera");
+  auto *derived = mgr.CreateSensor<DerivedDepthCameraSensor>(sensorPtr);
+  ASSERT_NE(nullptr, base);
+  ASSERT_NE(nullptr, derived);
+  // (Sensor::Update(_now, _force) is hidden in the sensor types)
+  const std::vector<gz::sensors::RenderingSensor *> sensors{base, derived};
+  for (gz::sensors::RenderingSensor *sensor : sensors)
+  {
+    sensor->SetScene(scene);
+    sensor->SetManualSceneUpdate(true);
+  }
+
+  // A subscriber: the depth camera renders ahead only for one.
+  gz::transport::Node node;
+  ASSERT_TRUE(node.Subscribe(topic,
+      std::function<void(const gz::msgs::Image &)>(
+          [](const gz::msgs::Image &) {})));
+  for (int i = 0; i < 500 && !(base->HasConnections() &&
+       derived->HasConnections()); ++i)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+  ASSERT_TRUE(base->HasConnections());
+  ASSERT_TRUE(derived->HasConnections());
+
+  // (the scene update is manual, as in gz-sim)
+  scene->PreRender();
+  const auto now = std::chrono::steady_clock::duration::zero();
+  EXPECT_TRUE(sensors[0]->RenderAheadIfDue(now, true));
+  EXPECT_FALSE(sensors[1]->RenderAheadIfDue(now, true));
+  EXPECT_TRUE(sensors[0]->Update(now, true));
+  EXPECT_TRUE(sensors[1]->Update(now, true));
+
+  mgr.Remove(base->Id());
+  mgr.Remove(derived->Id());
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+/// \brief _raw parsed as a T whose header stamp must be _sec seconds,
+/// serialized again without its stamp and sequence number.
+template <typename T>
+std::string WithoutStampAndSeq(const std::string &_raw, int _sec)
+{
+  T msg;
+  EXPECT_TRUE(msg.ParseFromString(_raw));
+  EXPECT_EQ(_sec, msg.header().stamp().sec());
+  EXPECT_EQ(0, msg.header().stamp().nsec());
+  msg.mutable_header()->clear_stamp();
+  for (auto &data : *msg.mutable_header()->mutable_data())
+  {
+    if (data.key() == "seq")
+      data.clear_value();
+  }
+  return msg.SerializeAsString();
+}
+
+//////////////////////////////////////////////////
+/// \brief A frame rendered ahead publishes the same depth image and point
+/// cloud bytes, with the same stamp, as a serial frame. An image callback
+/// keeps the sensor serial. (SetScene() between the passes is tested with
+/// the GPU lidar: here the two same-name depth cameras it leaves trip known
+/// Ogre teardown errors, see gz-sensors#548.)
+TEST_P(DepthCameraSensorTest, RenderAheadMatchesSerial)
+{
+  const std::string renderEngine = GetParam();
+  if (renderEngine != "ogre2")
+  {
+    GTEST_SKIP() << "Engine '" << renderEngine << "' is not tested here";
+  }
+  auto *engine = gz::rendering::engine(renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << renderEngine << "' is not supported";
+  }
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene_ahead_serial");
+  ASSERT_NE(nullptr, scene);
+  scene->SetAmbientLight(0.3, 0.3, 0.3);
+  gz::rendering::VisualPtr box = scene->CreateVisual();
+  box->AddGeometry(scene->CreateBox());
+  box->SetLocalPosition(3.0, 0.0, 0.0);
+  scene->RootVisual()->AddChild(box);
+
+  const std::string topic =
+      "/test/integration/DepthCameraRenderAheadSerial/image";
+  const std::string pointsTopic = topic + "/points";
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+      "sdf", "depth_camera_sensor_builtin.sdf");
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  auto sensorPtr = doc->Root()->GetElement("model")->GetElement("link")
+      ->GetElement("sensor");
+  sensorPtr->GetElement("topic")->Set<std::string>(topic);
+
+  gz::sensors::Manager mgr;
+  auto *depth = mgr.CreateSensor<gz::sensors::DepthCameraSensor>(sensorPtr);
+  ASSERT_NE(nullptr, depth);
+  // (Sensor::Update(_now, _force) is hidden in the sensor types)
+  gz::sensors::RenderingSensor *sensor = depth;
+  sensor->SetScene(scene);
+  sensor->SetManualSceneUpdate(true);
+
+  // The serialized messages, as they leave the publishers; shared with the
+  // callbacks, which may run after an early return
+  struct Received
+  {
+    std::mutex mutex;
+    std::map<std::string, std::vector<std::string>> raw;
+  };
+  auto received = std::make_shared<Received>();
+  gz::transport::Node node;
+  for (const auto &[t, type] : std::map<std::string, std::string>{
+      {topic, "gz.msgs.Image"}, {pointsTopic, "gz.msgs.PointCloudPacked"}})
+  {
+    ASSERT_TRUE(node.SubscribeRaw(t,
+        [received, t = t](const char *_data, std::size_t _size,
+            const gz::transport::MessageInfo &)
+        {
+          std::lock_guard<std::mutex> lock(received->mutex);
+          received->raw[t].emplace_back(_data, _size);
+        }, type));
+  }
+  for (int i = 0; i < 500 && !(depth->HasDepthConnections() &&
+       depth->HasPointConnections()); ++i)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+  ASSERT_TRUE(depth->HasDepthConnections());
+  ASSERT_TRUE(depth->HasPointConnections());
+  auto waitFor = [&](const std::string &_topic, std::size_t _n)
+  {
+    for (int i = 0; i < 300; ++i)
+    {
+      {
+        std::lock_guard<std::mutex> lock(received->mutex);
+        if (received->raw[_topic].size() >= _n)
+          return true;
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    return false;
+  };
+  // One frame at _sec seconds, rendered ahead or serial (the scene update
+  // is manual, as in gz-sim)
+  auto frame = [&](bool _ahead, int _sec)
+  {
+    const std::chrono::steady_clock::duration now = std::chrono::seconds(_sec);
+    scene->PreRender();
+    if (_ahead)
+    {
+      EXPECT_TRUE(sensor->RenderAheadIfDue(now, true));
+    }
+    EXPECT_TRUE(sensor->Update(now, true));
+  };
+
+  // The first frame connects the point cloud callback
+  frame(false, 0);
+  for (int i = 0; i < 2; ++i)
+  {
+    SCOPED_TRACE("frame pair " + std::to_string(i));
+    box->SetLocalPosition(2.0 + 0.5 * i, -0.3 + 0.6 * i, 0.0);
+    frame(true, 2 * i + 1);
+    frame(false, 2 * i + 2);
+    ASSERT_TRUE(waitFor(topic, 2u * i + 3u));
+    ASSERT_TRUE(waitFor(pointsTopic, 2u * i + 3u));
+    std::lock_guard<std::mutex> lock(received->mutex);
+    const auto &images = received->raw[topic];
+    const auto &points = received->raw[pointsTopic];
+    EXPECT_EQ(WithoutStampAndSeq<gz::msgs::Image>(images[2 * i + 1], 2 * i + 1),
+        WithoutStampAndSeq<gz::msgs::Image>(images[2 * i + 2], 2 * i + 2));
+    EXPECT_EQ(WithoutStampAndSeq<gz::msgs::PointCloudPacked>(
+        points[2 * i + 1], 2 * i + 1),
+        WithoutStampAndSeq<gz::msgs::PointCloudPacked>(
+        points[2 * i + 2], 2 * i + 2));
+    // The box moved: a stale frame would not match the new one
+    EXPECT_NE(WithoutStampAndSeq<gz::msgs::Image>(images[2 * i], 2 * i),
+        WithoutStampAndSeq<gz::msgs::Image>(images[2 * i + 2], 2 * i + 2));
+    EXPECT_NE(WithoutStampAndSeq<gz::msgs::PointCloudPacked>(
+        points[2 * i], 2 * i),
+        WithoutStampAndSeq<gz::msgs::PointCloudPacked>(
+        points[2 * i + 2], 2 * i + 2));
+  }
+
+  // An image callback runs user code between the serial renders: serial
+  auto connection = depth->ConnectImageCallback(
+      [](const gz::msgs::Image &) {});
+  scene->PreRender();
+  EXPECT_FALSE(sensor->RenderAheadIfDue(std::chrono::seconds(5), true));
+  EXPECT_TRUE(sensor->Update(std::chrono::seconds(5), true));
+  connection.reset();
+
+  mgr.Remove(depth->Id());
+  box.reset();
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
 }
 
 INSTANTIATE_TEST_SUITE_P(DepthCameraSensor, DepthCameraSensorTest,

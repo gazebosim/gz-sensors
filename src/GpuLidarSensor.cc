@@ -24,6 +24,8 @@
   #pragma warning(pop)
 #endif
 
+#include <typeinfo>
+
 #include <gz/common/Console.hh>
 #include <gz/common/Profiler.hh>
 #include <gz/msgs/PointCloudPackedUtils.hh>
@@ -71,6 +73,9 @@ class gz::sensors::GpuLidarSensor::Implementation
 
   /// \brief Publisher for the publish point cloud message.
   public: transport::Node::Publisher pointPub;
+
+  /// \brief True if the SDF has lidar noise, which Update() draws.
+  public: bool noise = false;
 };
 
 //////////////////////////////////////////////////
@@ -101,6 +106,7 @@ void GpuLidarSensor::SetScene(gz::rendering::ScenePtr _scene)
   if (this->Scene() != _scene)
   {
     this->RemoveGpuRays(this->Scene());
+    this->DropRenderedAhead();
     RenderingSensor::SetScene(_scene);
 
     if (this->initialized)
@@ -128,6 +134,9 @@ bool GpuLidarSensor::Load(const sdf::Sensor &_sdf)
   {
     return false;
   }
+
+  this->dataPtr->noise = _sdf.LidarSensor() &&
+      _sdf.LidarSensor()->LidarNoise().Type() != sdf::NoiseType::NONE;
 
   // Initialize the point message.
   msgs::InitPointCloudPacked(this->dataPtr->pointMsg, this->FrameId(), false,
@@ -270,7 +279,13 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
     return false;
   }
 
-  this->Render();
+  // A frame rendered ahead is completed here.
+  const bool renderedAhead = this->RenderedAhead();
+  this->DropRenderedAhead();
+  if (renderedAhead)
+    this->dataPtr->gpuRays->PostRender();
+  else
+    this->Render();
 
   // Apply noise before publishing the data.
   this->ApplyNoise();
@@ -304,6 +319,28 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
       this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
     }
   }
+  return true;
+}
+
+//////////////////////////////////////////////////
+bool GpuLidarSensor::RenderAhead(
+    const std::chrono::steady_clock::duration &/*_now*/)
+{
+  // Only a GpuLidarSensor: a derived sensor's Update() may run code before
+  // it renders. Through RenderingSensor::Render(), Update() renders only the
+  // lidar when the scene update is manual. Frame callbacks run user code, and
+  // noise draws random numbers, between the serial renders: these may change
+  // the scene or draw what the next sensor's render draws, so serial then.
+  if (typeid(*this) != typeid(GpuLidarSensor) ||
+      !this->initialized || !this->dataPtr->gpuRays ||
+      !this->ManualSceneUpdate() || this->dataPtr->noise ||
+      this->dataPtr->lidarEvent.ConnectionCount() > 0u)
+  {
+    return false;
+  }
+  GZ_PROFILE("GpuLidarSensor::RenderAhead");
+  this->dataPtr->gpuRays->Render();
+  this->dataPtr->gpuRays->IssueReadback();
   return true;
 }
 
