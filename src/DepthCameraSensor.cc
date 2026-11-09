@@ -15,7 +15,6 @@
  *
 */
 
-#include <google/protobuf/io/coded_stream.h>
 #include <gz/msgs/image.pb.h>
 #include <gz/msgs/pointcloud_packed.pb.h>
 
@@ -48,6 +47,7 @@
 #include "gz/sensors/RenderingEvents.hh"
 
 #include "CameraSensorUtil.hh"
+#include "PublishInPlace.hh"
 
 // undefine near and far macros from windows.h
 #ifdef _WIN32
@@ -184,42 +184,6 @@ using namespace sensors;
 
 namespace
 {
-using google::protobuf::io::CodedOutputStream;
-
-/// \brief Publish a message in place: _front and _back are its serialized
-/// fields before and after the bytes field number _field, whose _size bytes
-/// _fill writes straight into the transport's buffer (false cancels the
-/// message). Protobuf serializes fields in field number order and omits an
-/// empty bytes field, so the bytes are those Publish() sends for the whole
-/// message.
-/// \return The result of PublishInPlace
-bool PublishWithData(gz::transport::Node::Publisher &_pub,
-    const std::string &_front, int _field, std::size_t _size,
-    const std::string &_back, const std::function<bool(char *)> &_fill)
-{
-  // tag (length-delimited) and varint length: at most 5 + 10 bytes
-  uint8_t key[15];
-  uint8_t *keyEnd = key;
-  if (_size > 0)
-  {
-    keyEnd = CodedOutputStream::WriteTagToArray(
-        (static_cast<uint32_t>(_field) << 3) | 2, keyEnd);
-    keyEnd = CodedOutputStream::WriteVarint64ToArray(_size, keyEnd);
-  }
-  const std::size_t keySize = keyEnd - key;
-  return _pub.PublishInPlace(
-      _front.size() + keySize + _size + _back.size(), [&](char *_buffer)
-      {
-        memcpy(_buffer, _front.data(), _front.size());
-        _buffer += _front.size();
-        memcpy(_buffer, key, keySize);
-        _buffer += keySize;
-        if (!_fill(_buffer))
-          return false;
-        memcpy(_buffer + _size, _back.data(), _back.size());
-        return true;
-      });
-}
 
 /// \brief Largest finite depth of a depth frame, 0 if it has none.
 /// \param[in] _data Depth frame
@@ -707,33 +671,12 @@ void DepthCameraSensor::OnNewRgbPointCloud(const float *_scan,
       static_cast<std::size_t>(msg.row_step()) * msg.height();
 
   GZ_PROFILE("DepthCameraSensor::OnNewRgbPointCloud Publish");
-  // is_dense follows the data in the message, but the message size depends
-  // on it: serialize with the last point cloud's, find this one's while
-  // filling the data, and only when it changed fill again.
-  // (This assumes an unthrottled publisher, as pointPub is: PublishInPlace
-  // takes the throttling slot before it calls the fill, so with MsgsPerSec
-  // the second attempt would be dropped.)
-  bool dense = this->dataPtr->pointsDense;
-  for (int attempt = 0; attempt < 2; ++attempt)
-  {
-    msgs::PointCloudPacked tail;
-    tail.set_is_dense(dense);
-    bool filled = false;
-    bool isDense = dense;
-    PublishWithData(this->dataPtr->pointPub, front,
-        msgs::PointCloudPacked::kDataFieldNumber, dataSize,
-        tail.SerializeAsString(), [&](char *_out)
-        {
-          isDense = this->dataPtr->FillPointData(_scan, _channels,
-              this->dataPtr->cloudMaxDepth, _out);
-          filled = true;
-          return isDense == dense;
-        });
-    if (!filled || isDense == dense)
-      break;
-    dense = isDense;
-  }
-  this->dataPtr->pointsDense = dense;
+  PublishPointCloudWithData(this->dataPtr->pointPub, front, dataSize,
+      [&](char *_out)
+      {
+        return this->dataPtr->FillPointData(_scan, _channels,
+            this->dataPtr->cloudMaxDepth, _out);
+      }, this->dataPtr->pointsDense);
 }
 
 /////////////////////////////////////////////////
