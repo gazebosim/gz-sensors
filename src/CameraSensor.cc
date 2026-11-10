@@ -740,6 +740,18 @@ void CameraSensor::PopulateInfo(const sdf::Camera *_cameraSdf)
 }
 
 //////////////////////////////////////////////////
+void CameraSensor::SetInfoDistortion(
+    msgs::CameraInfo::Distortion::DistortionModelType _model,
+    const std::vector<double> &_k)
+{
+  auto *distortion = this->dataPtr->infoMsg.mutable_distortion();
+  distortion->set_model(_model);
+  distortion->clear_k();
+  for (double k : _k)
+    distortion->add_k(k);
+}
+
+//////////////////////////////////////////////////
 void CameraSensor::SetBaseline(double _baseline)
 {
   this->dataPtr->baseline = _baseline;
