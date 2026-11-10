@@ -17,6 +17,8 @@
 #ifndef GZ_SENSORS_RENDERINGSENSOR_HH_
 #define GZ_SENSORS_RENDERINGSENSOR_HH_
 
+#include <chrono>
+
 #include <gz/utils/ImplPtr.hh>
 
 // TODO(louise) Remove these pragmas once gz-rendering is disabling the
@@ -49,6 +51,9 @@ namespace gz
     {
       /// \brief constructor
       protected: RenderingSensor();
+
+      // Documentation inherited
+      protected: std::chrono::nanoseconds ThreadGpuWaitTime() const override;
 
       /// \brief destructor
       public: virtual ~RenderingSensor();

@@ -57,6 +57,12 @@ namespace gz
       /// \brief constructor
       protected: Sensor();
 
+      /// \brief Get the time the calling thread has spent blocked on the GPU
+      /// so far. Used to split the time of an update, sensors that render
+      /// override it.
+      /// \return Accumulated wait time of the calling thread
+      protected: virtual std::chrono::nanoseconds ThreadGpuWaitTime() const;
+
       /// \brief destructor
       public: virtual ~Sensor();
 

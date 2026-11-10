@@ -18,6 +18,7 @@
 #include <gz/common/Profiler.hh>
 
 #include <gz/rendering/Camera.hh>
+#include <gz/rendering/GpuWaitTime.hh>
 
 #include "gz/sensors/RenderingSensor.hh"
 
@@ -36,6 +37,12 @@ class gz::sensors::RenderingSensor::Implementation
 
 using namespace gz;
 using namespace sensors;
+
+//////////////////////////////////////////////////
+std::chrono::nanoseconds RenderingSensor::ThreadGpuWaitTime() const
+{
+  return rendering::ThreadGpuWaitTime();
+}
 
 //////////////////////////////////////////////////
 RenderingSensor::RenderingSensor() :

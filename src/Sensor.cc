@@ -38,6 +38,8 @@
 #include <gz/common/Console.hh>
 #include <gz/common/Profiler.hh>
 #include <gz/transport/Node.hh>
+
+#include "SensorTimingPrivate.hh"
 #include <gz/transport/TopicUtils.hh>
 
 using namespace gz::sensors;
@@ -486,6 +488,12 @@ void Sensor::SetUpdateRate(const double _hz)
 }
 
 //////////////////////////////////////////////////
+std::chrono::nanoseconds Sensor::ThreadGpuWaitTime() const
+{
+  return std::chrono::nanoseconds::zero();
+}
+
+//////////////////////////////////////////////////
 bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
                   const bool _force)
 {
@@ -516,7 +524,20 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
     return result;
 
   // Make the update happen
-  result = this->Update(_now);
+  if (SensorTimingEnabled())
+  {
+    const auto gpuWaitStart = this->ThreadGpuWaitTime();
+    const auto start = std::chrono::steady_clock::now();
+    result = this->Update(_now);
+    const auto total = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::steady_clock::now() - start);
+    RecordSensorTiming(*this, total,
+        this->ThreadGpuWaitTime() - gpuWaitStart);
+  }
+  else
+  {
+    result = this->Update(_now);
+  }
 
   // Publish metrics
   if (this->EnableMetrics())
