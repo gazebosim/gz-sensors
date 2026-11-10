@@ -19,8 +19,10 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include <gz/msgs/boolean.pb.h>
+#include <gz/msgs/camera_info.pb.h>
 #include <gz/msgs/image.pb.h>
 
 #include <sdf/sdf.hh>
@@ -177,6 +179,14 @@ namespace gz
       /// \param[in] _cameraSdf Pointer to SDF object containing camera
       /// information.
       protected: void PopulateInfo(const sdf::Camera *_cameraSdf);
+
+      /// \brief Set the distortion model and coefficients of the camera info
+      /// message. Call after PopulateInfo().
+      /// \param[in] _model Distortion model.
+      /// \param[in] _k Distortion coefficients, see msgs::CameraInfo.
+      protected: void SetInfoDistortion(
+          msgs::CameraInfo::Distortion::DistortionModelType _model,
+          const std::vector<double> &_k);
 
       /// \brief Publish camera info message.
       /// \param[in] _now The current time
