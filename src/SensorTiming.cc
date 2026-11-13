@@ -20,6 +20,7 @@
 #include <atomic>
 #include <mutex>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 #include <gz/utils/NeverDestroyed.hh>
@@ -47,7 +48,14 @@ struct TimingStore
   /// is read.
   std::unordered_map<const gz::sensors::Sensor *,
     gz::sensors::SensorTiming> timings;
+
+  /// \brief Rendering sensors that exist. Unlike the timings, it is kept
+  /// from one interval to the next.
+  std::unordered_set<const gz::sensors::Sensor *> renderingSensors;
 };
+
+/// \brief Renders of rendering sensors done by each thread
+thread_local uint64_t threadRenders{0};
 
 /// \brief Get the singleton storage. It is never destroyed because sensors
 /// can still be updated while the process is shutting down.
@@ -56,6 +64,25 @@ TimingStore &timingStore()
 {
   static gz::utils::NeverDestroyed<TimingStore> store;
   return store.Access();
+}
+
+/// \brief Get the timing of a sensor in the current interval, which starts
+/// when the sensor is first seen in the interval. The store must be locked.
+/// \param[in] _store The storage
+/// \param[in] _sensor The sensor, which must exist
+/// \return Its timing
+gz::sensors::SensorTiming &sensorTiming(TimingStore &_store,
+    const gz::sensors::Sensor &_sensor)
+{
+  auto [it, inserted] = _store.timings.try_emplace(&_sensor);
+  if (inserted)
+  {
+    it->second.name = _sensor.Name();
+    it->second.parent = _sensor.Parent();
+    it->second.topic = _sensor.Topic();
+    it->second.rendering = _store.renderingSensors.count(&_sensor) > 0u;
+  }
+  return it->second;
 }
 }
 
@@ -114,21 +141,60 @@ std::chrono::nanoseconds ThreadGpuWaitTime()
 }
 
 //////////////////////////////////////////////////
+bool SensorHasConnections(const Sensor &_sensor)
+{
+  const bool connected = _sensor.HasConnections();
+  if (SensorTimingEnabled())
+  {
+    auto &store = timingStore();
+    std::lock_guard<std::mutex> lock(store.mutex);
+    sensorTiming(store, _sensor).subscribers =
+        connected ? SensorSubscribers::SOME : SensorSubscribers::NONE;
+  }
+  return connected;
+}
+
+//////////////////////////////////////////////////
 void RecordSensorTiming(const Sensor &_sensor,
-    std::chrono::nanoseconds _total, std::chrono::nanoseconds _gpuWait)
+    std::chrono::nanoseconds _total, std::chrono::nanoseconds _gpuWait,
+    bool _rendered)
 {
   auto &store = timingStore();
   std::lock_guard<std::mutex> lock(store.mutex);
-  auto &timing = store.timings[&_sensor];
-  if (timing.updates == 0u)
-  {
-    timing.name = _sensor.Name();
-    timing.parent = _sensor.Parent();
-    timing.topic = _sensor.Topic();
-  }
+  auto &timing = sensorTiming(store, _sensor);
   ++timing.updates;
   timing.total += _total;
   timing.gpuWait += _gpuWait;
+  if (_rendered)
+    ++timing.renders;
+}
+
+//////////////////////////////////////////////////
+uint64_t ThreadRenderCount()
+{
+  return threadRenders;
+}
+
+//////////////////////////////////////////////////
+void CountThreadRender()
+{
+  ++threadRenders;
+}
+
+//////////////////////////////////////////////////
+void AddRenderingSensor(const Sensor &_sensor)
+{
+  auto &store = timingStore();
+  std::lock_guard<std::mutex> lock(store.mutex);
+  store.renderingSensors.insert(&_sensor);
+}
+
+//////////////////////////////////////////////////
+void RemoveRenderingSensor(const Sensor &_sensor)
+{
+  auto &store = timingStore();
+  std::lock_guard<std::mutex> lock(store.mutex);
+  store.renderingSensors.erase(&_sensor);
 }
 
 }

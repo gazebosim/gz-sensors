@@ -299,6 +299,87 @@ TEST(Sensor_TEST, UpdateTimingGpuWait)
 }
 
 //////////////////////////////////////////////////
+/// \brief A sensor whose subscribers the test decides
+class SubscribedSensor : public TestSensor
+{
+  // Documentation inherited
+  public: bool HasConnections() const override
+  {
+    return this->connected;
+  }
+
+  /// \brief What HasConnections returns
+  public: bool connected{false};
+};
+
+//////////////////////////////////////////////////
+TEST(Sensor_TEST, SubscriberChecksAreRecorded)
+{
+  sensors::SetSensorTimingEnabled(false);
+
+  SubscribedSensor sensor;
+  sdf::Sensor sdfSensor;
+  sdfSensor.SetName("checked_sensor");
+  sdfSensor.SetTopic("/checked_sensor");
+  EXPECT_TRUE(sensor.Load(sdfSensor));
+
+  // It answers like HasConnections, and records nothing while disabled.
+  EXPECT_FALSE(sensors::SensorHasConnections(sensor));
+  sensor.connected = true;
+  EXPECT_TRUE(sensors::SensorHasConnections(sensor));
+  EXPECT_TRUE(sensors::TakeSensorTimings().empty());
+
+  // A sensor without subscribers is reported although it was not updated.
+  sensors::SetSensorTimingEnabled(true);
+  sensor.connected = false;
+  EXPECT_FALSE(sensors::SensorHasConnections(sensor));
+  auto timings = sensors::TakeSensorTimings();
+  ASSERT_EQ(1u, timings.size());
+  EXPECT_EQ("checked_sensor", timings[0].name);
+  EXPECT_EQ("/checked_sensor", timings[0].topic);
+  EXPECT_EQ(0u, timings[0].updates);
+  EXPECT_EQ(sensors::SensorSubscribers::NONE, timings[0].subscribers);
+
+  // The last check of the interval is the one reported.
+  EXPECT_FALSE(sensors::SensorHasConnections(sensor));
+  sensor.connected = true;
+  EXPECT_TRUE(sensors::SensorHasConnections(sensor));
+  EXPECT_TRUE(sensor.Update(std::chrono::seconds(1), false));
+  timings = sensors::TakeSensorTimings();
+  ASSERT_EQ(1u, timings.size());
+  EXPECT_EQ(1u, timings[0].updates);
+  EXPECT_EQ(sensors::SensorSubscribers::SOME, timings[0].subscribers);
+
+  // Updates alone don't tell if there are subscribers.
+  EXPECT_TRUE(sensor.Update(std::chrono::seconds(2), false));
+  timings = sensors::TakeSensorTimings();
+  ASSERT_EQ(1u, timings.size());
+  EXPECT_EQ(sensors::SensorSubscribers::UNKNOWN, timings[0].subscribers);
+
+  sensors::SetSensorTimingEnabled(false);
+}
+
+//////////////////////////////////////////////////
+TEST(Sensor_TEST, SensorsThatDoNotRenderAreNotRenderingSensors)
+{
+  sensors::SetSensorTimingEnabled(true);
+  sensors::TakeSensorTimings();
+
+  TestSensor sensor;
+  sdf::Sensor sdfSensor;
+  sdfSensor.SetName("cpu_sensor");
+  EXPECT_TRUE(sensor.Load(sdfSensor));
+  EXPECT_TRUE(sensor.Update(std::chrono::seconds(1), false));
+
+  auto timings = sensors::TakeSensorTimings();
+  ASSERT_EQ(1u, timings.size());
+  EXPECT_FALSE(timings[0].rendering);
+  EXPECT_EQ(0u, timings[0].renders);
+
+  sensors::SetSensorTimingEnabled(false);
+}
+
+//////////////////////////////////////////////////
 TEST(Sensor_TEST, SetRateService)
 {
   std::ostringstream stream;

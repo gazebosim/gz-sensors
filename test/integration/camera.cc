@@ -26,6 +26,7 @@
 #include <gz/common/Filesystem.hh>
 #include <gz/sensors/Manager.hh>
 #include <gz/sensors/CameraSensor.hh>
+#include <gz/sensors/SensorTiming.hh>
 #include <gz/rendering/Utils.hh>
 
 // TODO(louise) Remove these pragmas once gz-rendering is disabling the
@@ -94,6 +95,10 @@ class CameraSensorTest: public testing::Test,
 
   // Create camera sensors and verify camera projection
   public: void CameraProjection(const std::string &_renderEngine);
+
+  // Create a camera sensor and verify that its timing tells if it rendered
+  public: void TimingTellsIfTheImageWasRendered(
+      const std::string &_renderEngine);
 };
 
 void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
@@ -898,6 +903,77 @@ TEST_P(CameraSensorTest, LInt8LInt16ImagesWithBuiltinSDF)
 {
   gz::common::Console::SetVerbosity(4);
   ImageFormatLInt8LInt16(GetParam());
+}
+
+//////////////////////////////////////////////////
+void CameraSensorTest::TimingTellsIfTheImageWasRendered(
+    const std::string &_renderEngine)
+{
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+      "sdf", "camera_sensor_builtin.sdf");
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  auto sensorPtr = doc->Root()->GetElement("model")->GetElement("link")
+      ->GetElement("sensor");
+
+  auto *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+              << "' is not supported" << std::endl;
+  }
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
+
+  gz::sensors::Manager mgr;
+  auto *sensor = mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtr);
+  ASSERT_NE(nullptr, sensor);
+  sensor->SetScene(scene);
+
+  gz::sensors::SetSensorTimingEnabled(true);
+  gz::sensors::TakeSensorTimings();
+
+  const auto timingOfCamera = [&]()
+  {
+    for (const auto &timing : gz::sensors::TakeSensorTimings())
+    {
+      if (timing.name == sensor->Name())
+        return timing;
+    }
+    return gz::sensors::SensorTiming();
+  };
+
+  // Subscribed only to the camera info, it updates without rendering.
+  WaitForMessageTestHelper<gz::msgs::CameraInfo> infoHelper(
+      sensor->InfoTopic());
+  EXPECT_TRUE(sensor->HasConnections());
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
+  EXPECT_TRUE(infoHelper.WaitForMessage()) << infoHelper;
+  auto timing = timingOfCamera();
+  EXPECT_EQ(1u, timing.updates);
+  EXPECT_TRUE(timing.rendering);
+  EXPECT_EQ(0u, timing.renders);
+
+  // Subscribed to the image, it renders.
+  WaitForMessageTestHelper<gz::msgs::Image> imageHelper(
+      "/test/integration/CameraPlugin_imagesWithBuiltinSDF");
+  mgr.RunOnce(std::chrono::seconds(1));
+  EXPECT_TRUE(imageHelper.WaitForMessage()) << imageHelper;
+  timing = timingOfCamera();
+  EXPECT_EQ(1u, timing.updates);
+  EXPECT_TRUE(timing.rendering);
+  EXPECT_EQ(1u, timing.renders);
+
+  gz::sensors::SetSensorTimingEnabled(false);
+  mgr.Remove(sensor->Id());
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+TEST_P(CameraSensorTest, TimingTellsIfTheImageWasRendered)
+{
+  TimingTellsIfTheImageWasRendered(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(CameraSensor, CameraSensorTest,
