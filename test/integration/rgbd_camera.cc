@@ -537,9 +537,10 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   g_pcMutex.unlock();
   g_imgMutex.unlock();
 
-  // Check that for a box really close it returns -inf
+  // Check that for a box really close (within [0.9 * near_, near_))
+  // it returns -inf
   math::Vector3d boxPositionNear(
-      unitBoxSize * 0.5 + near_ * 0.5, 0.0, 0.0);
+      unitBoxSize * 0.5 + near_ * 0.95, 0.0, 0.0);
   box->SetLocalPosition(boxPositionNear);
 
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);

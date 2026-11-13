@@ -90,18 +90,6 @@ class gz::sensors::RgbdCameraSensor::Implementation
   /// \brief Point cloud data buffer.
   public: float *pointCloudBuffer = nullptr;
 
-  /// \brief True if a depth far clipping value has been set.
-  public: bool hasDepthFarClip = false;
-
-  /// \brief True if a depth near clipping value has been set.
-  public: bool hasDepthNearClip = false;
-
-  /// \brief Depth camera far clipping distance in meters.
-  public: double depthFarClip = 10.0;
-
-  /// \brief Depth camera near clipping distance in meters.
-  public: double depthNearClip = 0.1;
-
   /// \brief The number of channels (x, y, z, rgba, ...) in the
   /// point cloud.
   public: unsigned int channels = 4;
@@ -307,13 +295,13 @@ bool RgbdCameraSensor::CreateCameras()
   {
     if (cameraSdf->HasDepthFarClip())
     {
-      this->dataPtr->hasDepthFarClip = true;
-      this->dataPtr->depthFarClip = cameraSdf->DepthFarClip();
+      this->dataPtr->depthCamera->SetDepthFarClipPlane(
+          cameraSdf->DepthFarClip());
     }
     if (cameraSdf->HasDepthNearClip())
     {
-      this->dataPtr->hasDepthNearClip = true;
-      this->dataPtr->depthNearClip = cameraSdf->DepthNearClip();
+      this->dataPtr->depthCamera->SetDepthNearClipPlane(
+          cameraSdf->DepthNearClip());
     }
   }
 
@@ -498,7 +486,6 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
 
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
-  unsigned int depthSamples = height * width;
 
   // generate sensor data
   this->Render();
@@ -518,27 +505,6 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     frame->add_value(this->FrameId());
 
     std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-
-    // The following code is a work around since gz-rendering's depth camera
-    // does not support 2 different clipping distances. An assumption is made
-    // that the depth clipping distances are within bounds of the rgb clipping
-    // distances, if not, the rgb clipping values will take priority.
-    if (this->dataPtr->hasDepthNearClip || this->dataPtr->hasDepthFarClip)
-    {
-      for (unsigned int i = 0; i < depthSamples; i++)
-      {
-        if (this->dataPtr->hasDepthFarClip &&
-            (this->dataPtr->depthBuffer[i] > this->dataPtr->depthFarClip))
-        {
-          this->dataPtr->depthBuffer[i] = math::INF_D;
-        }
-        if (this->dataPtr->hasDepthNearClip &&
-            (this->dataPtr->depthBuffer[i] < this->dataPtr->depthNearClip))
-        {
-          this->dataPtr->depthBuffer[i] = -math::INF_D;
-        }
-      }
-    }
     msg.set_data(this->dataPtr->depthBuffer,
         rendering::PixelUtil::MemorySize(rendering::PF_FLOAT32_R,
         width, height));
@@ -567,23 +533,6 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       // Set the time stamp
       *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
         msgs::Convert(_now);
-
-      if ((this->dataPtr->hasDepthNearClip || this->dataPtr->hasDepthFarClip)
-          && this->dataPtr->depthBuffer)
-      {
-        for (unsigned int i = 0; i < depthSamples; i++)
-        {
-          float depthValue = this->dataPtr->depthBuffer[i];
-          if (std::isinf(depthValue))
-          {
-            unsigned int index = i * this->dataPtr->channels;
-
-            this->dataPtr->pointCloudBuffer[index] = depthValue;
-            this->dataPtr->pointCloudBuffer[index + 1] = depthValue;
-            this->dataPtr->pointCloudBuffer[index + 2] = depthValue;
-          }
-        }
-      }
 
       {
         GZ_PROFILE("RgbdCameraSensor::Update Fill Point Cloud");
