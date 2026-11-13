@@ -1,0 +1,136 @@
+/*
+ * Copyright (C) 2026 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include "SensorTimingPrivate.hh"
+
+#include <atomic>
+#include <mutex>
+#include <unordered_map>
+#include <utility>
+
+#include <gz/utils/NeverDestroyed.hh>
+
+#include "gz/sensors/Sensor.hh"
+
+namespace
+{
+/// \brief Whether sensor updates are being timed.
+std::atomic<bool> timingEnabled{false};
+
+/// \brief Reads the GPU wait time of the calling thread, null when no
+/// rendering library is loaded.
+std::atomic<gz::sensors::ThreadGpuWaitTimeFunction> gpuWaitTimeFunction{
+  nullptr};
+
+/// \brief Timing of the current interval.
+struct TimingStore
+{
+  /// \brief Protects timings. Sensors are updated from several threads.
+  std::mutex mutex;
+
+  /// \brief Timing of each sensor. Sensors are only used as a key here, they
+  /// are never dereferenced because they may be gone by the time the interval
+  /// is read.
+  std::unordered_map<const gz::sensors::Sensor *,
+    gz::sensors::SensorTiming> timings;
+};
+
+/// \brief Get the singleton storage. It is never destroyed because sensors
+/// can still be updated while the process is shutting down.
+/// \return The storage
+TimingStore &timingStore()
+{
+  static gz::utils::NeverDestroyed<TimingStore> store;
+  return store.Access();
+}
+}
+
+namespace gz
+{
+namespace sensors
+{
+inline namespace GZ_SENSORS_VERSION_NAMESPACE {
+
+//////////////////////////////////////////////////
+void SetSensorTimingEnabled(bool _enabled)
+{
+  timingEnabled.store(_enabled, std::memory_order_relaxed);
+  if (!_enabled)
+  {
+    TakeSensorTimings();
+  }
+}
+
+//////////////////////////////////////////////////
+bool SensorTimingEnabled()
+{
+  return timingEnabled.load(std::memory_order_relaxed);
+}
+
+//////////////////////////////////////////////////
+std::vector<SensorTiming> TakeSensorTimings()
+{
+  std::unordered_map<const Sensor *, SensorTiming> taken;
+  {
+    auto &store = timingStore();
+    std::lock_guard<std::mutex> lock(store.mutex);
+    taken.swap(store.timings);
+  }
+
+  std::vector<SensorTiming> result;
+  result.reserve(taken.size());
+  for (auto &[sensor, timing] : taken)
+  {
+    result.push_back(std::move(timing));
+  }
+  return result;
+}
+
+//////////////////////////////////////////////////
+void SetThreadGpuWaitTimeFunction(ThreadGpuWaitTimeFunction _function)
+{
+  gpuWaitTimeFunction.store(_function, std::memory_order_release);
+}
+
+//////////////////////////////////////////////////
+std::chrono::nanoseconds ThreadGpuWaitTime()
+{
+  const auto function = gpuWaitTimeFunction.load(std::memory_order_acquire);
+  return function ? function() : std::chrono::nanoseconds::zero();
+}
+
+//////////////////////////////////////////////////
+void RecordSensorTiming(const Sensor &_sensor,
+    std::chrono::nanoseconds _total, std::chrono::nanoseconds _gpuWait)
+{
+  auto &store = timingStore();
+  std::lock_guard<std::mutex> lock(store.mutex);
+  auto &timing = store.timings[&_sensor];
+  if (timing.updates == 0u)
+  {
+    timing.name = _sensor.Name();
+    timing.parent = _sensor.Parent();
+    timing.topic = _sensor.Topic();
+  }
+  ++timing.updates;
+  timing.total += _total;
+  timing.gpuWait += _gpuWait;
+}
+
+}
+}
+}

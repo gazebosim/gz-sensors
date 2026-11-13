@@ -35,13 +35,18 @@
 #include <gz/common/Console.hh>
 #include <gz/sensors/Export.hh>
 #include <gz/sensors/Sensor.hh>
+#include <gz/sensors/SensorTiming.hh>
 #include <gz/transport/Node.hh>
+
+#include "SensorTimingPrivate.hh"
 
 using namespace gz;
 using namespace sensors;
 
 class TestSensor : public Sensor
 {
+  public: using Sensor::Update;
+
   public: bool Update(const std::chrono::steady_clock::duration &) override
   {
     updateCount++;
@@ -217,6 +222,80 @@ TEST_F(SensorUpdate, Update)
 
   auto testSensor = dynamic_cast<TestSensor*>(sensor.get());
   EXPECT_EQ(testSensor->updateCount, performanceMetricsMsgsCount);
+}
+
+//////////////////////////////////////////////////
+TEST(Sensor_TEST, UpdateTiming)
+{
+  sensors::SetSensorTimingEnabled(false);
+  EXPECT_FALSE(sensors::SensorTimingEnabled());
+
+  TestSensor sensor;
+  sdf::Sensor sdfSensor;
+  sdfSensor.SetName("timed_sensor");
+  sdfSensor.SetTopic("/timed_sensor");
+  EXPECT_TRUE(sensor.Load(sdfSensor));
+  sensor.SetParent("model::link");
+
+  // Nothing is collected while disabled.
+  EXPECT_TRUE(sensor.Update(std::chrono::seconds(1), false));
+  EXPECT_TRUE(sensors::TakeSensorTimings().empty());
+
+  sensors::SetSensorTimingEnabled(true);
+  EXPECT_TRUE(sensors::SensorTimingEnabled());
+  EXPECT_TRUE(sensor.Update(std::chrono::seconds(2), false));
+  EXPECT_TRUE(sensor.Update(std::chrono::seconds(3), false));
+
+  auto timings = sensors::TakeSensorTimings();
+  ASSERT_EQ(1u, timings.size());
+  EXPECT_EQ("timed_sensor", timings[0].name);
+  EXPECT_EQ("model::link", timings[0].parent);
+  EXPECT_EQ("/timed_sensor", timings[0].topic);
+  EXPECT_EQ(2u, timings[0].updates);
+  EXPECT_GT(timings[0].total.count(), 0);
+  EXPECT_EQ(0, timings[0].gpuWait.count());
+
+  // The interval restarts when it is taken.
+  EXPECT_TRUE(sensors::TakeSensorTimings().empty());
+
+  sensors::SetSensorTimingEnabled(false);
+}
+
+//////////////////////////////////////////////////
+/// \brief Fake GPU wait counter that advances 5 ms on each read.
+std::chrono::nanoseconds FakeThreadGpuWaitTime()
+{
+  static std::chrono::nanoseconds counter{0};
+  counter += std::chrono::milliseconds(5);
+  return counter;
+}
+
+//////////////////////////////////////////////////
+TEST(Sensor_TEST, UpdateTimingGpuWait)
+{
+  TestSensor sensor;
+  sdf::Sensor sdfSensor;
+  sdfSensor.SetName("gpu_sensor");
+  sdfSensor.SetTopic("/gpu_sensor");
+  EXPECT_TRUE(sensor.Load(sdfSensor));
+
+  sensors::SetSensorTimingEnabled(true);
+  sensors::SetThreadGpuWaitTimeFunction(&FakeThreadGpuWaitTime);
+  EXPECT_TRUE(sensor.Update(std::chrono::seconds(1), false));
+
+  // The counter is read before and after the update.
+  auto timings = sensors::TakeSensorTimings();
+  ASSERT_EQ(1u, timings.size());
+  EXPECT_EQ(std::chrono::milliseconds(5), timings[0].gpuWait);
+
+  // Without a function the wait is zero.
+  sensors::SetThreadGpuWaitTimeFunction(nullptr);
+  EXPECT_TRUE(sensor.Update(std::chrono::seconds(2), false));
+  timings = sensors::TakeSensorTimings();
+  ASSERT_EQ(1u, timings.size());
+  EXPECT_EQ(0, timings[0].gpuWait.count());
+
+  sensors::SetSensorTimingEnabled(false);
 }
 
 //////////////////////////////////////////////////

@@ -18,8 +18,11 @@
 #include <gz/common/Profiler.hh>
 
 #include <gz/rendering/Camera.hh>
+#include <gz/rendering/GpuWaitTime.hh>
 
 #include "gz/sensors/RenderingSensor.hh"
+
+#include "SensorTimingPrivate.hh"
 
 /// \brief Private data class for RenderingSensor
 class gz::sensors::RenderingSensorPrivate
@@ -37,6 +40,27 @@ class gz::sensors::RenderingSensorPrivate
 
 using namespace gz;
 using namespace sensors;
+
+namespace
+{
+/// \brief Lets sensor timing split the update time of rendering sensors into
+/// GPU wait and the rest, for as long as this library is loaded.
+struct GpuWaitTimeHook
+{
+  GpuWaitTimeHook()
+  {
+    SetThreadGpuWaitTimeFunction(&rendering::ThreadGpuWaitTime);
+  }
+
+  ~GpuWaitTimeHook()
+  {
+    SetThreadGpuWaitTimeFunction(nullptr);
+  }
+};
+
+/// \brief Installed when the library is loaded.
+const GpuWaitTimeHook gpuWaitTimeHook;
+}
 
 //////////////////////////////////////////////////
 RenderingSensor::RenderingSensor() :

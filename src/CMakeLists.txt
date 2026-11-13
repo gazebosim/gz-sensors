@@ -8,6 +8,7 @@ set (sources
   PointCloudUtil.cc
   Sensor.cc
   SensorFactory.cc
+  SensorTiming.cc
   SensorTypes.cc
   Util.cc
 )
