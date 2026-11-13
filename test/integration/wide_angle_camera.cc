@@ -15,7 +15,9 @@
  *
 */
 
+#include <cmath>
 #include <cstring>
+#include <sstream>
 #include <gtest/gtest.h>
 
 #include <gz/msgs/camera_info.pb.h>
@@ -316,6 +318,111 @@ TEST_P(WideAngleCameraSensorTest, CustomCameraInfoTopic)
 {
   gz::common::Console::SetVerbosity(4);
   CustomCameraInfoTopic(GetParam());
+}
+
+//////////////////////////////////////////////////
+// Load a wide angle camera with the given lens type and return the first
+// camera_info message it publishes.
+gz::msgs::CameraInfo CameraInfoForLens(const std::string &_renderEngine,
+    const std::string &_lensType, double _hfov)
+{
+  const std::string topic = "/test/wide_angle_camera_info/" + _lensType;
+  std::ostringstream stream;
+  stream
+    << "<?xml version=\"1.0\"?>"
+    << "<sdf version=\"1.6\">"
+    << " <model name=\"m1\">"
+    << "  <link name=\"link1\">"
+    << "   <sensor name=\"camera_" << _lensType
+    << "\" type=\"wideanglecamera\">"
+    << "    <topic>" << topic << "/image</topic>"
+    << "    <camera>"
+    << "     <camera_info_topic>" << topic << "</camera_info_topic>"
+    << "     <horizontal_fov>" << _hfov << "</horizontal_fov>"
+    << "     <image><width>400</width><height>300</height></image>"
+    << "     <lens><type>" << _lensType << "</type></lens>"
+    << "    </camera>"
+    << "   </sensor>"
+    << "  </link>"
+    << " </model>"
+    << "</sdf>";
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  EXPECT_TRUE(sdf::readString(stream.str(), doc));
+  auto sensorPtr = doc->Root()->GetElement("model")->GetElement("link")
+      ->GetElement("sensor");
+
+  auto *engine = gz::rendering::engine(_renderEngine);
+  auto scene = engine->CreateScene("scene");
+
+  gz::sensors::Manager mgr;
+  auto *sensor =
+      mgr.CreateSensor<gz::sensors::WideAngleCameraSensor>(sensorPtr);
+  EXPECT_NE(nullptr, sensor);
+  if (!sensor)
+  {
+    engine->DestroyScene(scene);
+    return {};
+  }
+  sensor->SetScene(scene);
+
+  // The sensor only renders and publishes while its image topic has
+  // subscribers.
+  WaitForMessageTestHelper<gz::msgs::Image> imageHelper(topic + "/image");
+  WaitForMessageTestHelper<gz::msgs::CameraInfo> infoHelper(topic);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+  EXPECT_TRUE(infoHelper.WaitForMessage(std::chrono::seconds(10)))
+      << infoHelper;
+
+  mgr.Remove(sensor->Id());
+  engine->DestroyScene(scene);
+  return infoHelper.Message();
+}
+
+//////////////////////////////////////////////////
+TEST_P(WideAngleCameraSensorTest, CameraInfoMatchesLens)
+{
+  auto *engine = gz::rendering::engine(GetParam());
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine [" << GetParam() << "] is not supported";
+  }
+
+  // Equidistant lens (r = f * theta) scaled so that hfov / 2 maps to the
+  // image edge: f = (width / 2) / (hfov / 2). Image is 400x300.
+  double hfov = 2.2689;
+  auto info = CameraInfoForLens(GetParam(), "equidistant", hfov);
+  EXPECT_EQ(gz::msgs::CameraInfo::Distortion::EQUIDISTANT,
+            info.distortion().model());
+  EXPECT_EQ(4, info.distortion().k_size());
+  for (int i = 0; i < info.distortion().k_size(); ++i)
+    EXPECT_DOUBLE_EQ(0.0, info.distortion().k(i));
+  ASSERT_EQ(9, info.intrinsics().k_size());
+  EXPECT_NEAR(400.0 / hfov, info.intrinsics().k(0), 1e-3);
+  EXPECT_NEAR(200.0, info.intrinsics().k(2), 1e-6);
+  EXPECT_NEAR(400.0 / hfov, info.intrinsics().k(4), 1e-3);
+  EXPECT_NEAR(150.0, info.intrinsics().k(5), 1e-6);
+  ASSERT_EQ(12, info.projection().p_size());
+  EXPECT_NEAR(400.0 / hfov, info.projection().p(0), 1e-3);
+  EXPECT_NEAR(200.0, info.projection().p(2), 1e-6);
+  EXPECT_NEAR(400.0 / hfov, info.projection().p(5), 1e-3);
+  EXPECT_NEAR(150.0, info.projection().p(6), 1e-6);
+
+  // Gnomonic lens (r = f * tan(theta)) is a pinhole camera.
+  hfov = GZ_PI / 2.0;
+  info = CameraInfoForLens(GetParam(), "gnomonical", hfov);
+  EXPECT_EQ(gz::msgs::CameraInfo::Distortion::PLUMB_BOB,
+            info.distortion().model());
+  EXPECT_EQ(5, info.distortion().k_size());
+  for (int i = 0; i < info.distortion().k_size(); ++i)
+    EXPECT_DOUBLE_EQ(0.0, info.distortion().k(i));
+  ASSERT_EQ(9, info.intrinsics().k_size());
+  EXPECT_NEAR(200.0 / std::tan(hfov / 2.0), info.intrinsics().k(0), 1e-3);
+  EXPECT_NEAR(200.0, info.intrinsics().k(2), 1e-6);
+  EXPECT_NEAR(200.0 / std::tan(hfov / 2.0), info.intrinsics().k(4), 1e-3);
+  EXPECT_NEAR(150.0, info.intrinsics().k(5), 1e-6);
+
+  gz::rendering::unloadEngine(engine->Name());
 }
 
 INSTANTIATE_TEST_SUITE_P(WideAngleCameraSensor, WideAngleCameraSensorTest,
