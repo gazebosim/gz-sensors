@@ -4,7 +4,8 @@
   <name>gz-sensors</name>
   <version>11.0.0</version>
   <description>Gazebo Sensors : Sensor models for simulation</description>
-  <maintainer email="ichen@openrobotics.org">Ian Chen</maintainer>
+  <maintainer email="iche@intrinsic.ai">Ian Chen</maintainer>
+  <maintainer email="acordero@honurobotics.com">Alejandro Hernández Cordero</maintainer>
   <license>Apache-2.0</license>
   <url type="website">https://github.com/gazebosim/gz-sensors</url>
 
