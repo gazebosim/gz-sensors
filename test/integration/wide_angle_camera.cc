@@ -93,6 +93,9 @@ class WideAngleCameraSensorTest: public testing::Test,
 
   // Create a wide angle camera sensor and verify a custom camera info topic
   public: void CustomCameraInfoTopic(const std::string &_renderEngine);
+
+  // Create a wide angle camera sensor and verify a custom frame ID
+  public: void CustomFrameId(const std::string &_renderEngine);
 };
 
 void WideAngleCameraSensorTest::ImagesWithBuiltinSDF(
@@ -316,6 +319,78 @@ TEST_P(WideAngleCameraSensorTest, CustomCameraInfoTopic)
 {
   gz::common::Console::SetVerbosity(4);
   CustomCameraInfoTopic(GetParam());
+}
+
+//////////////////////////////////////////////////
+void WideAngleCameraSensorTest::CustomFrameId(
+    const std::string &_renderEngine)
+{
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+      "sdf", "custom_camera_info_topic.sdf");
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  ASSERT_NE(nullptr, doc->Root());
+  ASSERT_TRUE(doc->Root()->HasElement("model"));
+  auto modelPtr = doc->Root()->GetElement("model");
+  ASSERT_TRUE(modelPtr->HasElement("link"));
+  auto linkPtr = modelPtr->GetElement("link");
+  while (linkPtr)
+  {
+    if(linkPtr->Get<std::string>("name") == "wide_angle_camera_link")
+    {
+      break;
+    }
+    linkPtr = linkPtr->GetNextElement("link");
+  }
+  ASSERT_NE(nullptr, linkPtr);
+  ASSERT_TRUE(linkPtr->HasElement("sensor"));
+  auto sensorPtr = linkPtr->GetElement("sensor");
+  ASSERT_NE(nullptr, sensorPtr);
+
+  // Setup gz-rendering with an empty scene.
+  auto *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+                 << "' is not supported" << std::endl;
+  }
+
+  auto scene = engine->CreateScene("scene");
+
+  gz::sensors::Manager mgr;
+  auto *sensor =
+      mgr.CreateSensor<gz::sensors::WideAngleCameraSensor>(sensorPtr);
+
+  ASSERT_NE(nullptr, sensor);
+  sensor->SetScene(scene);
+
+  WaitForMessageTestHelper<gz::msgs::Image> imageHelper(
+      "/wide_angle_camera/image");
+  EXPECT_TRUE(sensor->HasConnections());
+
+  // Update once to create image
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+
+  ASSERT_TRUE(imageHelper.WaitForMessage()) << imageHelper;
+  const auto imageMsg = imageHelper.Message();
+  ASSERT_TRUE(imageMsg.has_header());
+  ASSERT_LT(1, imageMsg.header().data_size());
+  EXPECT_EQ("frame_id", imageMsg.header().data(0).key());
+  ASSERT_EQ(1, imageMsg.header().data(0).value_size());
+  EXPECT_EQ("wide_angle_custom_frame", imageMsg.header().data(0).value(0));
+
+  // Clean up
+  mgr.Remove(sensor->Id());
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+TEST_P(WideAngleCameraSensorTest, CustomFrameId)
+{
+  gz::common::Console::SetVerbosity(4);
+  CustomFrameId(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(WideAngleCameraSensor, WideAngleCameraSensorTest,
