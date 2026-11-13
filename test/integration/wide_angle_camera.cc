@@ -333,7 +333,8 @@ gz::msgs::CameraInfo CameraInfoForLens(const std::string &_renderEngine,
     << "<sdf version=\"1.6\">"
     << " <model name=\"m1\">"
     << "  <link name=\"link1\">"
-    << "   <sensor name=\"camera_" << _lensType << "\" type=\"wideanglecamera\">"
+    << "   <sensor name=\"camera_" << _lensType
+    << "\" type=\"wideanglecamera\">"
     << "    <topic>" << topic << "/image</topic>"
     << "    <camera>"
     << "     <camera_info_topic>" << topic << "</camera_info_topic>"
