@@ -15,6 +15,8 @@
  *
 */
 
+#include <typeinfo>
+
 #include <gz/msgs/image.pb.h>
 #include <gz/msgs/pointcloud_packed.pb.h>
 
@@ -406,6 +408,7 @@ void RgbdCameraSensor::SetScene(rendering::ScenePtr _scene)
   {
     // TODO(anyone) Remove cameras from current scene
     this->dataPtr->depthCamera = nullptr;
+    this->DropRenderedAhead();
     RenderingSensor::SetScene(_scene);
 
     if (this->dataPtr->initialized)
@@ -473,35 +476,32 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     this->PublishInfo(_now);
   }
 
-  // don't render if there are no subscribers
-  if (!this->HasColorConnections() && !this->HasDepthConnections() &&
-    !this->HasPointConnections())
-  {
-    return false;
-  }
-
-  if ((this->HasPointConnections() || HasColorConnections()) &&
-      !this->dataPtr->pointCloudConnection)
-  {
-    this->dataPtr->pointCloudConnection =
-        this->dataPtr->depthCamera->ConnectNewRgbPointCloud(
-        std::bind(&RgbdCameraSensor::Implementation::OnNewRgbPointCloud,
-        this->dataPtr.get(),
-        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-        std::placeholders::_4, std::placeholders::_5));
-  }
-  else if (!this->HasPointConnections() && !this->HasColorConnections() &&
-      this->dataPtr->pointCloudConnection)
-  {
-    this->dataPtr->pointCloudConnection.reset();
-  }
-
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
   unsigned int depthSamples = height * width;
 
-  // generate sensor data
-  this->Render();
+  // A frame rendered ahead is completed whatever the subscribers are now:
+  // the subscribers seen by RenderAhead() decide, as if they had changed
+  // after this update.
+  const bool renderedAhead = this->RenderedAhead();
+  this->DropRenderedAhead();
+  if (renderedAhead)
+  {
+    this->dataPtr->depthCamera->PostRender();
+  }
+  else
+  {
+    // don't render if there are no subscribers
+    if (!this->HasColorConnections() && !this->HasDepthConnections() &&
+      !this->HasPointConnections())
+    {
+      return false;
+    }
+    this->UpdatePointCloudConnection();
+
+    // generate sensor data
+    this->Render();
+  }
 
   // create and publish the depth message
   if (this->HasDepthConnections())
@@ -551,7 +551,8 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     }
   }
 
-  if (this->dataPtr->pointCloudBuffer)
+  // Only a frame rendered with the point cloud connected has a cloud.
+  if (this->dataPtr->pointCloudConnection && this->dataPtr->pointCloudBuffer)
   {
     bool filledImgData = false;
     if (this->dataPtr->image.Width() != width
@@ -639,6 +640,50 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
     }
   }
 
+  return true;
+}
+
+//////////////////////////////////////////////////
+void RgbdCameraSensor::UpdatePointCloudConnection()
+{
+  if ((this->HasPointConnections() || this->HasColorConnections()) &&
+      !this->dataPtr->pointCloudConnection)
+  {
+    this->dataPtr->pointCloudConnection =
+        this->dataPtr->depthCamera->ConnectNewRgbPointCloud(
+        std::bind(&RgbdCameraSensor::Implementation::OnNewRgbPointCloud,
+        this->dataPtr.get(),
+        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5));
+  }
+  else if (!this->HasPointConnections() && !this->HasColorConnections() &&
+      this->dataPtr->pointCloudConnection)
+  {
+    this->dataPtr->pointCloudConnection.reset();
+  }
+}
+
+//////////////////////////////////////////////////
+bool RgbdCameraSensor::RenderAhead(
+    const std::chrono::steady_clock::duration &/*_now*/)
+{
+  // Only an RgbdCameraSensor: a derived sensor's Update() may run code
+  // before it renders. Only when Update(_now) would render, and through
+  // RenderingSensor::Render() only the camera (the scene update is manual).
+  // The RGBD sensor has no image callbacks and draws no random numbers in
+  // Update() (its noise is a render pass).
+  if (typeid(*this) != typeid(RgbdCameraSensor) ||
+      !this->dataPtr->initialized || !this->dataPtr->depthCamera ||
+      !this->ManualSceneUpdate() ||
+      (!this->HasColorConnections() && !this->HasDepthConnections() &&
+       !this->HasPointConnections()))
+  {
+    return false;
+  }
+  GZ_PROFILE("RgbdCameraSensor::RenderAhead");
+  this->UpdatePointCloudConnection();
+  this->dataPtr->depthCamera->Render();
+  this->dataPtr->depthCamera->IssueReadback();
   return true;
 }
 

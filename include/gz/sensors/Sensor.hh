@@ -253,6 +253,42 @@ namespace gz
       /// \return True if the sensor is in trigger mode, false otherwise
       public: bool IsTriggered() const;
 
+      /// \brief First half of a split Update(), used by Manager::RunOnce:
+      /// if Update(_now, _force) would call Update(_now), let the sensor
+      /// render ahead (RenderAhead(_now)). The next Update(_now, _force)
+      /// then completes that frame. This lets the manager issue the GPU work
+      /// of several sensors before it waits for any of their readbacks.
+      /// Triggered sensors never render ahead.
+      /// \param[in] _now The current time
+      /// \param[in] _force As for Update()
+      /// \return True if the sensor rendered ahead.
+      public: bool RenderAheadIfDue(
+                  const std::chrono::steady_clock::duration &_now,
+                  bool _force);
+
+      /// \brief Render the frame that Update(_now) would publish and issue
+      /// its GPU readback without waiting for it; the next Update(_now)
+      /// waits for the readback and publishes the frame, with the same data
+      /// as Update(_now) alone. Called only when Update(_now) is due.
+      /// \param[in] _now The current time
+      /// \return False, the default, if the sensor did nothing:
+      /// Update(_now) then does all the work.
+      protected: virtual bool RenderAhead(
+                     const std::chrono::steady_clock::duration &_now);
+
+      /// \brief Whether the current Update(_now) completes a frame that
+      /// RenderAhead(_now) rendered for it: true from RenderAheadIfDue()
+      /// rendering ahead to the end of the next Update(_now, _force), which
+      /// drops the frame if it skips Update(_now), or to
+      /// DropRenderedAhead().
+      /// \return True if RenderAhead() rendered this update's frame.
+      protected: bool RenderedAhead() const;
+
+      /// \brief Drop the frame rendered ahead, if any: RenderedAhead() is
+      /// false until RenderAheadIfDue() renders ahead again. For a sensor
+      /// that completed the frame, or whose camera changed (SetScene()).
+      protected: void DropRenderedAhead();
+
       GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
     };
     }
