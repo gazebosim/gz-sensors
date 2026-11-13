@@ -22,6 +22,8 @@
 
 #include "gz/sensors/RenderingSensor.hh"
 
+#include "SensorTimingPrivate.hh"
+
 class gz::sensors::RenderingSensor::Implementation
 {
   /// \brief Pointer to the scene
@@ -48,11 +50,13 @@ std::chrono::nanoseconds RenderingSensor::ThreadGpuWaitTime() const
 RenderingSensor::RenderingSensor() :
   dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
+  AddRenderingSensor(*this);
 }
 
 //////////////////////////////////////////////////
 RenderingSensor::~RenderingSensor()
 {
+  RemoveRenderingSensor(*this);
   if (!this->dataPtr->scene || !this->dataPtr->scene->IsInitialized())
     return;
   for (auto &s : this->dataPtr->sensors)
@@ -98,6 +102,7 @@ bool RenderingSensor::ManualSceneUpdate() const
 void RenderingSensor::Render()
 {
   GZ_PROFILE("RenderingSensor::Render");
+  CountThreadRender();
   // Skip scene update. The user indicated that they will do this manually.
   // Performance is improved when a global scene update occurs only once per
   // frame, which can be acheived using a manual scene update.

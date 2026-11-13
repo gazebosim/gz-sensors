@@ -527,12 +527,14 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
   if (SensorTimingEnabled())
   {
     const auto gpuWaitStart = this->ThreadGpuWaitTime();
+    const auto rendersStart = ThreadRenderCount();
     const auto start = std::chrono::steady_clock::now();
     result = this->Update(_now);
     const auto total = std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::steady_clock::now() - start);
     RecordSensorTiming(*this, total,
-        this->ThreadGpuWaitTime() - gpuWaitStart);
+        this->ThreadGpuWaitTime() - gpuWaitStart,
+        ThreadRenderCount() != rendersStart);
   }
   else
   {
