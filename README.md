@@ -1,6 +1,6 @@
 # Gazebo Sensors : Sensor models for simulation
 
-**Maintainer:** ichen AT openrobotics DOT org
+**Maintainer:** iche AT intrinsic DOT ai
 
 [![GitHub open issues](https://img.shields.io/github/issues-raw/gazebosim/gz-sensors.svg)](https://github.com/gazebosim/gz-sensors/issues)
 [![GitHub open pull requests](https://img.shields.io/github/issues-pr-raw/gazebosim/gz-sensors.svg)](https://github.com/gazebosim/gz-sensors/pulls)
