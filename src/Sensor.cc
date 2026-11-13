@@ -74,6 +74,14 @@ class gz::sensors::Sensor::Implementation
   /// \return True if sensor is triggered by a topic.
   public: bool IsTriggered() const;
 
+  /// \brief Whether Update(_now, _force) calls Update(_now), once a trigger
+  /// is taken into account.
+  /// \param[in] _now The current time
+  /// \param[in] _force As for Update(), or a pending trigger
+  /// \return True if the update is due and the sensor active, or forced.
+  public: bool IsDue(const std::chrono::steady_clock::duration &_now,
+              bool _force) const;
+
   /// \brief Callback for triggered subscription.
   /// \param[in] _msg Boolean message.
   public: void OnTrigger(const gz::msgs::Boolean &_msg);
@@ -142,6 +150,10 @@ class gz::sensors::Sensor::Implementation
 
   /// \brief If sensor is active or not.
   public: bool active = true;
+
+  /// \brief True from RenderAheadIfDue() rendering ahead to the end of the
+  /// next Update(_now, _force).
+  public: bool renderedAhead = false;
 
   /// \brief Topic on which to listen for trigger messages. Empty indicates that
   /// the sensor is not in triggered mode.
@@ -490,6 +502,13 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
                   const bool _force)
 {
   GZ_PROFILE("Sensor::Update");
+  // A frame rendered ahead belongs to this update only, whether or not it
+  // calls Update(_now).
+  struct ClearRenderedAhead
+  {
+    bool &flag;
+    ~ClearRenderedAhead() { this->flag = false; }
+  } clearRenderedAhead{this->dataPtr->renderedAhead};
   bool result = false;
   bool force = _force;
   if (this->dataPtr->IsTriggered())
@@ -504,15 +523,9 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
       return result;
   }
 
-  // Check if it's time to update
-  if (_now < this->dataPtr->nextUpdateTime && !force &&
-      this->dataPtr->updateRate > 0)
-  {
-    return result;
-  }
-
-  // prevent update if not active, unless forced
-  if (!this->dataPtr->active && !force)
+  // Check if it's time to update, and prevent it if not active, unless
+  // forced
+  if (!this->dataPtr->IsDue(_now, force))
     return result;
 
   // Make the update happen
@@ -554,6 +567,37 @@ bool Sensor::Update(const std::chrono::steady_clock::duration &_now,
   }
 
   return result;
+}
+
+//////////////////////////////////////////////////
+bool Sensor::RenderAheadIfDue(const std::chrono::steady_clock::duration &_now,
+    bool _force)
+{
+  this->dataPtr->renderedAhead = false;
+  // The conditions under which Update(_now, _force) calls Update(_now),
+  // without consuming a trigger.
+  if (this->dataPtr->IsTriggered() || !this->dataPtr->IsDue(_now, _force))
+    return false;
+  this->dataPtr->renderedAhead = this->RenderAhead(_now);
+  return this->dataPtr->renderedAhead;
+}
+
+//////////////////////////////////////////////////
+bool Sensor::RenderAhead(const std::chrono::steady_clock::duration &)
+{
+  return false;
+}
+
+//////////////////////////////////////////////////
+bool Sensor::RenderedAhead() const
+{
+  return this->dataPtr->renderedAhead;
+}
+
+//////////////////////////////////////////////////
+void Sensor::DropRenderedAhead()
+{
+  this->dataPtr->renderedAhead = false;
 }
 
 //////////////////////////////////////////////////
@@ -654,6 +698,14 @@ bool Sensor::Implementation::SetTriggerTopic(const std::string &_topic) {
 //////////////////////////////////////////////////
 bool Sensor::Implementation::IsTriggered() const {
   return !this->triggerTopic.empty();
+}
+
+//////////////////////////////////////////////////
+bool Sensor::Implementation::IsDue(
+    const std::chrono::steady_clock::duration &_now, bool _force) const
+{
+  return !(_now < this->nextUpdateTime && !_force && this->updateRate > 0) &&
+      (this->active || _force);
 }
 
 //////////////////////////////////////////////////
