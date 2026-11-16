@@ -15,7 +15,13 @@
  *
 */
 
+#include <chrono>
 #include <cstring>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <vector>
 #include <gtest/gtest.h>
 
 #include <gz/msgs/camera_info.pb.h>
@@ -26,6 +32,9 @@
 #include <gz/common/Filesystem.hh>
 #include <gz/sensors/Manager.hh>
 #include <gz/sensors/CameraSensor.hh>
+#include <gz/transport/Node.hh>
+#include <gz/rendering/PixelBuffer.hh>
+#include <gz/rendering/PixelFormat.hh>
 #include <gz/rendering/Utils.hh>
 
 // TODO(louise) Remove these pragmas once gz-rendering is disabling the
@@ -97,6 +106,11 @@ class CameraSensorTest: public testing::Test,
 
   // Create a camera sensor and verify a custom camera info topic
   public: void CustomCameraInfoTopic(const std::string &_renderEngine);
+
+  // Compare the image bytes published in place with those of Publish(),
+  // for an image of the SDF format _format (empty: the SDF's)
+  public: void PublishedBytesMatchCopy(const std::string &_renderEngine,
+      const std::string &_format);
 };
 
 void CameraSensorTest::ImagesWithBuiltinSDF(const std::string &_renderEngine)
@@ -965,6 +979,165 @@ TEST_P(CameraSensorTest, CustomCameraInfoTopic)
 {
   gz::common::Console::SetVerbosity(4);
   CustomCameraInfoTopic(GetParam());
+}
+
+//////////////////////////////////////////////////
+void CameraSensorTest::PublishedBytesMatchCopy(
+    const std::string &_renderEngine, const std::string &_format)
+{
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+      "sdf", "camera_sensor_builtin.sdf");
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  auto sensorPtr = doc->Root()->GetElement("model")->GetElement("link")
+      ->GetElement("sensor");
+  ASSERT_NE(nullptr, sensorPtr);
+  if (!_format.empty())
+  {
+    sensorPtr->GetElement("camera")->GetElement("image")
+        ->GetElement("format")->Set<std::string>(_format);
+  }
+
+  auto *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+                 << "' is not supported" << std::endl;
+  }
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
+  scene->SetAmbientLight(1, 1, 1);
+  scene->SetBackgroundColor(0.2, 0.3, 0.4);
+  // A red box in front of the camera (at the origin, looking along +X)
+  gz::rendering::VisualPtr box = scene->CreateVisual();
+  box->AddGeometry(scene->CreateBox());
+  box->SetWorldPosition(2.0, 0.3, 0.0);
+  gz::rendering::MaterialPtr red = scene->CreateMaterial();
+  red->SetAmbient(1.0, 0.0, 0.0);
+  red->SetDiffuse(1.0, 0.0, 0.0);
+  box->SetMaterial(red);
+  scene->RootVisual()->AddChild(box);
+
+  gz::sensors::Manager mgr;
+  auto *sensor = mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtr);
+  ASSERT_NE(nullptr, sensor);
+  sensor->SetScene(scene);
+
+  // The serialized messages, as they leave the publisher. Shared with the
+  // callback, which runs on a transport thread and may outlive this scope
+  // if an assertion returns early.
+  struct Received
+  {
+    std::mutex mutex;
+    std::vector<std::string> raw;
+  };
+  auto received = std::make_shared<Received>();
+  gz::transport::Node node;
+  ASSERT_TRUE(node.SubscribeRaw(sensor->Topic(),
+      [received](const char *_data, std::size_t _size,
+          const gz::transport::MessageInfo &)
+      {
+        std::lock_guard<std::mutex> lock(received->mutex);
+        received->raw.emplace_back(_data, _size);
+      }, "gz.msgs.Image"));
+  auto waitFor = [&](std::size_t _n)
+  {
+    for (int i = 0; i < 300; ++i)
+    {
+      {
+        std::lock_guard<std::mutex> lock(received->mutex);
+        if (received->raw.size() >= _n)
+          return true;
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    return false;
+  };
+  ASSERT_TRUE(sensor->HasConnections());
+
+  // Frame 0 takes the copying path: an image callback makes the sensor
+  // fill the message and Publish() it.
+  const auto stamp = std::chrono::seconds(1) + std::chrono::milliseconds(5);
+  gz::msgs::Image copied;
+  auto connection = sensor->ConnectImageCallback(
+      [&copied](const gz::msgs::Image &_msg) { copied = _msg; });
+  EXPECT_TRUE(sensor->Update(stamp));
+  ASSERT_TRUE(waitFor(1u));
+  connection.reset();
+
+  // Frame 1 still takes the copying path: the event drops a disconnected
+  // callback only when it next signals, until then it counts it
+  EXPECT_TRUE(sensor->Update(stamp));
+  ASSERT_TRUE(waitFor(2u));
+
+  // Frame 2: no image callback, so it is published in place
+  EXPECT_TRUE(sensor->Update(stamp));
+  ASSERT_TRUE(waitFor(3u));
+  // frame 2, read again from the render target
+  const gz::rendering::PixelFormat format =
+      sensor->RenderingCamera()->ImageFormat();
+  std::string frame(sensor->RenderingCamera()->ImageMemorySize(), '\0');
+  ASSERT_TRUE(sensor->RenderingCamera()->CopyTo(gz::rendering::PixelBuffer(
+      256u, 257u, format, frame.data(), frame.size())));
+
+  std::lock_guard<std::mutex> lock(received->mutex);
+  const std::vector<std::string> &raw = received->raw;
+  ASSERT_EQ(3u, raw.size());
+  EXPECT_EQ(copied.SerializeAsString(), raw[0]);
+  if (_format == "L8")
+  {
+    EXPECT_EQ(gz::msgs::PixelFormatType::L_INT8, copied.pixel_format_type());
+  }
+  // a frame with an image, not a uniform one
+  const unsigned int bpp = gz::rendering::PixelUtil::BytesPerPixel(format);
+  ASSERT_EQ(256u * 257u * bpp, frame.size());
+  bool uniform = true;
+  for (std::size_t i = bpp; uniform && i < frame.size(); i += bpp)
+    uniform = frame.compare(i, bpp, frame, 0, bpp) == 0;
+  EXPECT_FALSE(uniform);
+
+  // Frame 2 is Publish() of frame 0's message with sequence number 2 and
+  // frame 2's data
+  gz::msgs::Image expected = copied;
+  expected.set_data(frame);
+  bool seqFound = false;
+  for (auto &data : *expected.mutable_header()->mutable_data())
+  {
+    if (data.key() == "seq")
+    {
+      EXPECT_EQ("0", data.value(0));
+      data.set_value(0, "2");
+      seqFound = true;
+    }
+  }
+  EXPECT_TRUE(seqFound);
+  const std::string expectedBytes = expected.SerializeAsString();
+  ASSERT_EQ(expectedBytes.size(), raw[2].size());
+  std::size_t firstDiff = 0;
+  while (firstDiff < raw[2].size() &&
+         raw[2][firstDiff] == expectedBytes[firstDiff])
+  {
+    ++firstDiff;
+  }
+  EXPECT_EQ(raw[2].size(), firstDiff) << "first differing byte";
+
+  mgr.Remove(sensor->Id());
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+TEST_P(CameraSensorTest, PublishedBytesMatchCopy)
+{
+  PublishedBytesMatchCopy(GetParam(), "");
+}
+
+//////////////////////////////////////////////////
+// L8: one byte per pixel, and a pixel_format_type other than RGB_INT8 after
+// the data
+TEST_P(CameraSensorTest, PublishedBytesMatchCopyL8)
+{
+  PublishedBytesMatchCopy(GetParam(), "L8");
 }
 
 INSTANTIATE_TEST_SUITE_P(CameraSensor, CameraSensorTest,
