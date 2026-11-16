@@ -64,6 +64,23 @@ class gz::sensors::Lidar::Implementation
   public: const unsigned int kChannelCount = 3u;
 };
 
+namespace
+{
+/// \brief Lidar::Clamp with the range limits given.
+/// \return _rangeMax for NaN, a finite _range clamped to the limits, +-inf
+/// unchanged.
+inline double ClampRange(double _range, double _rangeMin, double _rangeMax)
+{
+  if (gz::math::isnan(_range))
+    return _rangeMax;
+
+  if (std::isfinite(_range))
+    return std::clamp(_range, _rangeMin, _rangeMax);
+
+  return _range;
+}
+}  // namespace
+
 //////////////////////////////////////////////////
 Lidar::Lidar()
   : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
@@ -283,18 +300,27 @@ bool Lidar::PublishLidarScan(const std::chrono::steady_clock::duration &_now)
   }
 
   // \todo(iche033) interpolate if ray count != range count, i.e. resolution > 1
-  for (unsigned int j = 0; j < this->VerticalRangeCount(); ++j)
+  // Rows of RangeCount() ranges, VerticalRangeCount() rows, as many as the
+  // message holds. The sensor's parameters are read once, not per range:
+  // each accessor goes through sdf::Lidar.
+  // The message declares that layout (count RangeCount(), vertical_count
+  // VerticalRangeCount()), and its rows are the buffer's rows, but it holds
+  // one value per ray: with resolution > 1 that is the first rows of the
+  // buffer, whole, and the last rows are missing, as with Ranges(). Sizing
+  // the message for every range would change what is published.
+  const int count = std::min(numRays, static_cast<int>(
+      this->RangeCount() * this->VerticalRangeCount()));
+  const double rangeMin = this->RangeMin();
+  const double rangeMax = this->RangeMax();
+  const unsigned int channels = this->dataPtr->kChannelCount;
+  const float *buffer = this->laserBuffer;
+  double *ranges = this->dataPtr->laserMsg.mutable_ranges()->mutable_data();
+  double *intensities =
+      this->dataPtr->laserMsg.mutable_intensities()->mutable_data();
+  for (int index = 0; index < count; ++index)
   {
-    for (unsigned int i = 0; i < this->RangeCount(); ++i)
-    {
-      int index = j * this->RangeCount() + i;
-      double range = this->laserBuffer[index * this->dataPtr->kChannelCount];
-
-      range = this->Clamp(range);
-      this->dataPtr->laserMsg.set_ranges(index, range);
-      this->dataPtr->laserMsg.set_intensities(index,
-          this->laserBuffer[index * this->dataPtr->kChannelCount + 1]);
-    }
+    ranges[index] = ClampRange(buffer[index * channels], rangeMin, rangeMax);
+    intensities[index] = buffer[index * channels + 1];
   }
 
   // publish
@@ -516,11 +542,5 @@ bool Lidar::HasConnections() const
 //////////////////////////////////////////////////
 double Lidar::Clamp(double _range) const
 {
-  if (gz::math::isnan(_range))
-    return this->RangeMax();
-
-  if (std::isfinite(_range))
-    return std::clamp(_range, this->RangeMin(), this->RangeMax());
-
-  return _range;
+  return ClampRange(_range, this->RangeMin(), this->RangeMax());
 }
