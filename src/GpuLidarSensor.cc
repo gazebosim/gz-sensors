@@ -24,6 +24,13 @@
   #pragma warning(pop)
 #endif
 
+#include <cmath>
+#include <cstdint>
+#include <cstring>
+#include <functional>
+#include <string>
+#include <vector>
+
 #include <gz/common/Console.hh>
 #include <gz/common/Profiler.hh>
 #include <gz/msgs/PointCloudPackedUtils.hh>
@@ -33,14 +40,17 @@
 #include "gz/sensors/GpuLidarSensor.hh"
 #include "gz/sensors/SensorFactory.hh"
 
+#include "PublishInPlace.hh"
+
 using namespace gz::sensors;
 
 /// \brief Private data for the GpuLidar class
 class gz::sensors::GpuLidarSensor::Implementation
 {
-  /// \brief Fill the point cloud packed message
+  /// \brief Write the data of the point cloud packed message
   /// \param[in] _laserBuffer Lidar data buffer.
-  public: void FillPointCloudMsg(const float *_laserBuffer);
+  /// \param[out] _out The message's data, row_step * height bytes.
+  public: void FillPointCloudData(const float *_laserBuffer, char *_out);
 
   /// \brief Rendering camera
   public: gz::rendering::GpuRaysPtr gpuRays;
@@ -71,6 +81,13 @@ class gz::sensors::GpuLidarSensor::Implementation
 
   /// \brief Publisher for the publish point cloud message.
   public: transport::Node::Publisher pointPub;
+
+  /// \brief Cosine and sine of each column's azimuth, FillPointCloudData's
+  /// tables.
+  public: std::vector<float> azimuthCos;
+
+  /// \brief See azimuthCos.
+  public: std::vector<float> azimuthSin;
 };
 
 //////////////////////////////////////////////////
@@ -272,13 +289,20 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
 
   this->Render();
 
-  // Apply noise before publishing the data.
-  this->ApplyNoise();
+  // Apply noise before publishing the data. Range() and Ranges() read the
+  // buffer under the same lock.
+  {
+    std::lock_guard<std::mutex> lock(this->lidarMutex);
+    this->ApplyNoise();
+  }
 
   this->PublishLidarScan(_now);
 
   if (this->dataPtr->pointPub.HasConnections())
   {
+    // is_dense and the points must come from the same frame.
+    std::lock_guard<std::mutex> lock(this->lidarMutex);
+
     // Set the time stamp
     *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
       msgs::Convert(_now);
@@ -296,13 +320,36 @@ bool GpuLidarSensor::Update(const std::chrono::steady_clock::duration &_now)
       }
     }
 
-    this->dataPtr->FillPointCloudMsg(this->laserBuffer);
-
+    // is_dense follows the data in the message, but the message size
+    // depends on it, so find it first: a point is invalid if its depth is
+    // NaN or +-inf. Most scans stop at their first ray into the sky.
+    msgs::PointCloudPacked &msg = this->dataPtr->pointMsg;
+    const uint64_t numPoints = static_cast<uint64_t>(msg.width()) *
+        msg.height();
+    bool isDense = true;
+    for (uint64_t i = 0; i < numPoints && isDense; ++i)
     {
-      this->AddSequence(this->dataPtr->pointMsg.mutable_header());
-      GZ_PROFILE("GpuLidarSensor::Update Publish point cloud");
-      this->dataPtr->pointPub.Publish(this->dataPtr->pointMsg);
+      const float depth = this->laserBuffer[i * 3];
+      isDense = std::isfinite(depth);
     }
+
+    // The message serialized around the data, which is written once,
+    // straight into the transport's buffer. pointMsg itself keeps empty data
+    // and is_dense false, and has no unknown fields (it is never parsed
+    // into), which SerializeAsString would put last.
+    this->AddSequence(msg.mutable_header());
+    msgs::PointCloudPacked tail;
+    tail.set_is_dense(isDense);
+
+    GZ_PROFILE("GpuLidarSensor::Update Publish point cloud");
+    PublishWithData(this->dataPtr->pointPub, msg.SerializeAsString(),
+        msgs::PointCloudPacked::kDataFieldNumber,
+        static_cast<std::size_t>(msg.row_step()) * msg.height(),
+        tail.SerializeAsString(), [&](char *_out)
+        {
+          this->dataPtr->FillPointCloudData(this->laserBuffer, _out);
+          return true;
+        });
   }
   return true;
 }
@@ -349,10 +396,10 @@ bool GpuLidarSensor::HasConnections() const
 }
 
 //////////////////////////////////////////////////
-void GpuLidarSensor::Implementation::FillPointCloudMsg(
-    const float *_laserBuffer)
+void GpuLidarSensor::Implementation::FillPointCloudData(
+    const float *_laserBuffer, char *_out)
 {
-  GZ_PROFILE("GpuLidarSensorPrivate::FillPointCloudMsg");
+  GZ_PROFILE("GpuLidarSensorPrivate::FillPointCloudData");
   uint32_t width = this->pointMsg.width();
   uint32_t height = this->pointMsg.height();
   unsigned int channels = 3;
@@ -369,59 +416,66 @@ void GpuLidarSensor::Implementation::FillPointCloudMsg(
   // is vertical
   float inclination = this->gpuRays->VerticalAngleMin().Radian();
 
-  std::string *msgBuffer = this->pointMsg.mutable_data();
-  msgBuffer->resize(this->pointMsg.row_step() *
-      this->pointMsg.height());
-  char *msgBufferIndex = msgBuffer->data();
-  // Set Pointcloud as dense. Change if invalid points are found.
-  bool isDense { true };
+  // Every row sweeps the same azimuths, accumulated in float as the rows go:
+  // take their cosine and sine once per scan instead of once per point.
+  this->azimuthCos.resize(width);
+  this->azimuthSin.resize(width);
+  float azimuth = this->gpuRays->AngleMin().Radian();
+  for (uint32_t i = 0; i < width; ++i)
+  {
+    this->azimuthCos[i] = std::cos(azimuth);
+    this->azimuthSin[i] = std::sin(azimuth);
+    azimuth += angleStep;
+  }
+
+  const uint32_t pointStep = this->pointMsg.point_step();
+  const uint32_t offsetX = this->pointMsg.field(0).offset();
+  const uint32_t offsetY = this->pointMsg.field(1).offset();
+  const uint32_t offsetZ = this->pointMsg.field(2).offset();
+  const uint32_t offsetIntensity = this->pointMsg.field(3).offset();
+  const uint32_t offsetRing = this->pointMsg.field(4).offset();
+  // The fields cover every byte of a point (pointMsg is not memory
+  // aligned), so the buffer is written whole. With padding between them,
+  // zero it first, as the message's data used to be.
+  if (offsetX != 0 || offsetY != offsetX + sizeof(float) ||
+      offsetZ != offsetY + sizeof(float) ||
+      offsetIntensity != offsetZ + sizeof(float) ||
+      offsetRing != offsetIntensity + sizeof(float) ||
+      pointStep != offsetRing + sizeof(uint16_t))
+  {
+    memset(_out, 0, static_cast<std::size_t>(pointStep) * width * height);
+  }
+
+  char *msgBufferIndex = _out;
   // Iterate over scan and populate point cloud
   for (uint32_t j = 0; j < height; ++j)
   {
-    float azimuth = this->gpuRays->AngleMin().Radian();
+    const float cosInclination = std::cos(inclination);
+    const float sinInclination = std::sin(inclination);
+    const uint16_t ring = j;
+    const float *point = _laserBuffer + j * width * channels;
 
     for (uint32_t i = 0; i < width; ++i)
     {
-      // Index of current point, and the depth value at that point
-      auto index = j * width * channels + i * channels;
-      float depth = _laserBuffer[index];
-      // Validate Depth/Radius and update pointcloud density flag
-      if (isDense)
-        isDense = !(gz::math::isnan(depth) || std::isinf(depth));
-
-      float intensity = _laserBuffer[index + 1];
-      uint16_t ring = j;
-
-      int fieldIndex = 0;
+      float depth = point[0];
 
       // Convert spherical coordinates to Cartesian for pointcloud
       // See https://en.wikipedia.org/wiki/Spherical_coordinate_system
-      *reinterpret_cast<float *>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) =
-        depth * std::cos(inclination) * std::cos(azimuth);
-
-      *reinterpret_cast<float *>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) =
-        depth * std::cos(inclination) * std::sin(azimuth);
-
-      *reinterpret_cast<float *>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) =
-        depth * std::sin(inclination);
-
-      // Intensity
-      *reinterpret_cast<float *>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) = intensity;
-
-      // Ring
-      *reinterpret_cast<uint16_t *>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) = ring;
+      // Same products, in the same order, as depth * cos(inclination) *
+      // cos(azimuth) per point.
+      const float x = depth * cosInclination * this->azimuthCos[i];
+      const float y = depth * cosInclination * this->azimuthSin[i];
+      const float z = depth * sinInclination;
+      memcpy(msgBufferIndex + offsetX, &x, sizeof(x));
+      memcpy(msgBufferIndex + offsetY, &y, sizeof(y));
+      memcpy(msgBufferIndex + offsetZ, &z, sizeof(z));
+      memcpy(msgBufferIndex + offsetIntensity, point + 1, sizeof(float));
+      memcpy(msgBufferIndex + offsetRing, &ring, sizeof(ring));
 
       // Move the index to the next point.
-      msgBufferIndex += this->pointMsg.point_step();
-
-      azimuth += angleStep;
+      msgBufferIndex += pointStep;
+      point += channels;
     }
     inclination += verticleAngleStep;
   }
-  this->pointMsg.set_is_dense(isDense);
 }
