@@ -76,6 +76,7 @@
       <sensor name="wide_angle_camera" type="wideanglecamera">
         <update_rate>10</update_rate>
         <topic>/wide_angle_camera/image</topic>
+        <gz_frame_id>wide_angle_custom_frame</gz_frame_id>
         <camera>
           <camera_info_topic>/test_wide_angle_camera_info</camera_info_topic>
           <image>
@@ -90,6 +91,7 @@
       <sensor name="boundingbox_camera" type="boundingbox_camera">
         <update_rate>10</update_rate>
         <topic>/boundingbox_camera</topic>
+        <gz_frame_id>boundingbox_custom_frame</gz_frame_id>
         <camera>
           <camera_info_topic>/test_boundingbox_camera_info</camera_info_topic>
           <image>

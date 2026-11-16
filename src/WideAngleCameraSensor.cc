@@ -492,7 +492,7 @@ bool WideAngleCameraSensor::Update(
     *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
     auto frame = msg.mutable_header()->add_data();
     frame->set_key("frame_id");
-    frame->add_value(this->Name());
+    frame->add_value(this->FrameId());
     msg.set_data(this->dataPtr->imageBuffer,
         rendering::PixelUtil::MemorySize(renderingFormat,
         width, height));
