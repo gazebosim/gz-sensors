@@ -128,6 +128,11 @@ namespace gz
                   unsigned int _heighti, unsigned int _channels,
                   const std::string &/*_format*/)> _subscriber) override;
 
+      // Documentation inherited.
+      protected: bool RenderAhead(
+                     const std::chrono::steady_clock::duration &_now)
+                     override;
+
       /// \brief Connect function pointer to internal GpuRays callback
       /// \return gz::common::Connection pointer
       private: void OnNewLidarFrame(const float *_scan, unsigned int _width,
