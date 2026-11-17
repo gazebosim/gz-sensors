@@ -353,10 +353,10 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   EXPECT_EQ(12, infoMsg.projection().p().size());
   EXPECT_EQ(9, infoMsg.rectification_matrix().size());
 
-  // Check that for a box really close (within [0.9 * near_, near_))
-  // it returns -inf
+  // Check that for a box closer than near_ (0.5 * near_) it is clipped by
+  // the camera frustum and returns +inf
   gz::math::Vector3d boxPositionNear(
-      unitBoxSize * 0.5 + near_ * 0.95, 0.0, 0.0);
+      unitBoxSize * 0.5 + near_ * 0.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionNear);
 
   mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
@@ -384,7 +384,7 @@ void DepthCameraSensorTest::ImagesWithBuiltinSDF(
   infoCounter = 0;
   pcCounter = 0;
 
-  EXPECT_DOUBLE_EQ(g_depthBuffer[mid], -gz::math::INF_D);
+  EXPECT_DOUBLE_EQ(g_depthBuffer[mid], gz::math::INF_D);
   g_infoMutex.unlock();
   g_mutex.unlock();
 

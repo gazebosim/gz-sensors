@@ -93,9 +93,6 @@ class gz::sensors::DepthCameraSensor::Implementation
   /// \brief xyz data buffer.
   public: float *xyzBuffer = nullptr;
 
-  /// \brief Near clip distance.
-  public: float near = 0.0;
-
   /// \brief Pointer to an image to be published
   public: gz::rendering::Image image;
 
@@ -414,10 +411,6 @@ bool DepthCameraSensor::CreateCamera()
        << "] is not supported." << std::endl;
     }
   }
-
-  // Near clip plane not set because we need to be able to detect occlusion
-  // from objects before near clip plane
-  this->dataPtr->near = near;
 
   // \todo(nkoeng) these parameters via sdf
   this->dataPtr->depthCamera->SetAntiAliasing(2);
