@@ -134,6 +134,44 @@ target_link_libraries(${gpu_lidar_target}
     ${lidar_target}
 )
 
+# Marine radar.
+#
+# The vendored marine_radar core library (scan generation, echo model,
+# target extraction and PPI rendering) is engine agnostic and is also linked
+# into its unit tests, so it is built once as a static library.
+set(marine_radar_core_sources
+  marine_radar/RadarConfig.cc
+  marine_radar/ScanGeometry.cc
+  marine_radar/EchoModel.cc
+  marine_radar/TargetExtraction.cc
+  marine_radar/PpiRenderer.cc
+  marine_radar/RadarProcessor.cc
+)
+add_library(marine_radar_core STATIC ${marine_radar_core_sources})
+set_target_properties(marine_radar_core PROPERTIES
+  POSITION_INDEPENDENT_CODE ON
+)
+target_include_directories(marine_radar_core
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+)
+
+set(marine_radar_sources MarineRadarSensor.cc marine_radar/RadarGzMessages.cc)
+gz_add_component(marine_radar
+  SOURCES ${marine_radar_sources}
+  DEPENDS_ON_COMPONENTS rendering
+  GET_TARGET_NAME marine_radar_target
+)
+target_compile_definitions(${marine_radar_target} PUBLIC MarineRadarSensor_EXPORTS)
+target_link_libraries(${marine_radar_target}
+  PUBLIC
+    ${rendering_target}
+  PRIVATE
+    marine_radar_core
+    gz-msgs::gz-msgs
+    gz-transport::gz-transport
+)
+
 set(logical_camera_sources LogicalCameraSensor.cc)
 gz_add_component(logical_camera SOURCES ${logical_camera_sources} GET_TARGET_NAME logical_camera_target)
 target_compile_definitions(${logical_camera_target} PUBLIC LogicalCameraSensor_EXPORTS)
@@ -234,3 +272,19 @@ gz_build_tests(TYPE UNIT SOURCES ${gtest_sources} LIB_DEPS ${rendering_target})
 gz_build_tests(TYPE UNIT SOURCES Lidar_TEST.cc LIB_DEPS ${lidar_target})
 gz_build_tests(TYPE UNIT SOURCES Camera_TEST.cc LIB_DEPS ${camera_target})
 gz_build_tests(TYPE UNIT SOURCES ImuSensor_TEST.cc LIB_DEPS ${imu_target})
+gz_build_tests(TYPE UNIT SOURCES MarineRadarSensor_TEST.cc
+  LIB_DEPS ${marine_radar_target} marine_radar_core)
+
+# Build the unit tests of the vendored marine radar core library.
+gz_build_tests(TYPE UNIT
+  SOURCES
+    marine_radar/RadarConfig_TEST.cc
+    marine_radar/ScanGeometry_TEST.cc
+    marine_radar/EchoModel_TEST.cc
+    marine_radar/TargetExtraction_TEST.cc
+    marine_radar/PpiRenderer_TEST.cc
+    marine_radar/RadarProcessor_TEST.cc
+  LIB_DEPS marine_radar_core
+)
+gz_build_tests(TYPE UNIT SOURCES marine_radar/RadarGzMessages_TEST.cc
+  LIB_DEPS marine_radar_core ${marine_radar_target} gz-msgs::gz-msgs)
