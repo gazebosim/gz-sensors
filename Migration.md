@@ -8,6 +8,16 @@ release will remove the deprecated code.
 
 ## Gz Sensors 10.X to 11.X
 
+### Modifications
+
+1. **DepthCameraSensor** and **RgbdCameraSensor** now forward
+   `<camera><depth_camera><clip><near>` and `<far>` to
+   `gz::rendering::DepthCamera::SetDepthNearClipPlane` and
+   `SetDepthFarClipPlane`. `<camera><clip><near>` acts as the camera frustum
+   near clip plane (allowing sensors to see through enclosing housing geometry
+   closer than `clip.near`), while `<camera><depth_camera><clip>` controls the
+   depth measurement range (`-inf` / `+inf`).
+
 
 ## Gazebo Sensors 6.X to 7.X
 

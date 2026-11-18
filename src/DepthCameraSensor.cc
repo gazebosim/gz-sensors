@@ -93,9 +93,6 @@ class gz::sensors::DepthCameraSensor::Implementation
   /// \brief xyz data buffer.
   public: float *xyzBuffer = nullptr;
 
-  /// \brief Near clip distance.
-  public: float near = 0.0;
-
   /// \brief Pointer to an image to be published
   public: gz::rendering::Image image;
 
@@ -361,6 +358,23 @@ bool DepthCameraSensor::CreateCamera()
   this->dataPtr->depthCamera->SetImageHeight(height);
   this->dataPtr->depthCamera->SetNearClipPlane(near);
   this->dataPtr->depthCamera->SetFarClipPlane(far);
+
+  // Depth camera clip params are new and only override the camera clip
+  // params if specified.
+  if (cameraSdf->HasDepthCamera())
+  {
+    if (cameraSdf->HasDepthFarClip())
+    {
+      this->dataPtr->depthCamera->SetDepthFarClipPlane(
+          cameraSdf->DepthFarClip());
+    }
+    if (cameraSdf->HasDepthNearClip())
+    {
+      this->dataPtr->depthCamera->SetDepthNearClipPlane(
+          cameraSdf->DepthNearClip());
+    }
+  }
+
   this->dataPtr->depthCamera->SetVisibilityMask(
       cameraSdf->VisibilityMask());
   this->dataPtr->depthCamera->SetLocalPose(this->Pose());
@@ -397,10 +411,6 @@ bool DepthCameraSensor::CreateCamera()
        << "] is not supported." << std::endl;
     }
   }
-
-  // Near clip plane not set because we need to be able to detect occlusion
-  // from objects before near clip plane
-  this->dataPtr->near = near;
 
   // \todo(nkoeng) these parameters via sdf
   this->dataPtr->depthCamera->SetAntiAliasing(2);
@@ -675,13 +685,13 @@ unsigned int DepthCameraSensor::ImageHeight() const
 //////////////////////////////////////////////////
 double DepthCameraSensor::FarClip() const
 {
-  return this->dataPtr->depthCamera->FarClipPlane();
+  return this->dataPtr->depthCamera->DepthFarClipPlane();
 }
 
 //////////////////////////////////////////////////
 double DepthCameraSensor::NearClip() const
 {
-  return this->dataPtr->near;
+  return this->dataPtr->depthCamera->DepthNearClipPlane();
 }
 
 //////////////////////////////////////////////////

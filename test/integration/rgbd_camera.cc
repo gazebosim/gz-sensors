@@ -537,7 +537,8 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
   g_pcMutex.unlock();
   g_imgMutex.unlock();
 
-  // Check that for a box really close it returns -inf
+  // Check that for a box closer than near_ (0.5 * near_) it is clipped by
+  // the camera frustum and returns +inf
   math::Vector3d boxPositionNear(
       unitBoxSize * 0.5 + near_ * 0.5, 0.0, 0.0);
   box->SetLocalPosition(boxPositionNear);
@@ -588,7 +589,7 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
       for (unsigned int j = 0; j < rgbdSensor->ImageWidth(); ++j)
       {
         unsigned int index = step + j;
-        EXPECT_FLOAT_EQ(-math::INF_D, g_depthBuffer[index]);
+        EXPECT_FLOAT_EQ(math::INF_D, g_depthBuffer[index]);
       }
     }
   }
@@ -622,9 +623,9 @@ void RgbdCameraSensorTest::ImagesWithBuiltinSDF(
         float x = g_pointsXYZBuffer[index];
         float y = g_pointsXYZBuffer[index + 1];
         float z = g_pointsXYZBuffer[index + 2];
-        EXPECT_FLOAT_EQ(-math::INF_D, x);
-        EXPECT_FLOAT_EQ(-math::INF_D, y);
-        EXPECT_FLOAT_EQ(-math::INF_D, z);
+        EXPECT_FLOAT_EQ(math::INF_D, x);
+        EXPECT_FLOAT_EQ(math::INF_D, y);
+        EXPECT_FLOAT_EQ(math::INF_D, z);
 
         unsigned int r = g_pointsRGBBuffer[index];
         unsigned int g = g_pointsRGBBuffer[index + 1];
