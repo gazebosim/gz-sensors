@@ -1,5 +1,6 @@
 module(
     name = "gz-sensors",
+    bazel_compatibility = [">=8.1.0"],
     compatibility_level = 9,
 )
 
@@ -9,6 +10,22 @@ bazel_dep(name = "eigen", version = "3.4.0.bcr.3")
 bazel_dep(name = "googletest", version = "1.17.0.bcr.2")
 bazel_dep(name = "rules_cc", version = "0.2.14")
 bazel_dep(name = "rules_license", version = "1.0.0")
+bazel_dep(name = "rules_rs", version = "0.0.109")
+
+rust_toolchains = use_extension("@rules_rs//rs/toolchains:module_extension.bzl", "toolchains")
+rust_toolchains.toolchain(
+    edition = "2021",
+    version = "1.93.0",
+)
+use_repo(rust_toolchains, "default_rust_toolchains")
+
+rules_rust = use_extension("@rules_rs//rs:rules_rust.bzl", "rules_rust")
+use_repo(rules_rust, "rules_rust")
+
+register_toolchains(
+    "@default_rust_toolchains//...",
+    dev_dependency = True,
+)
 
 # Gazebo Dependencies
 bazel_dep(name = "rules_gazebo", version = "0.0.6")
