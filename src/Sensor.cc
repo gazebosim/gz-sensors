@@ -29,6 +29,8 @@
 
 #include "gz/sensors/Sensor.hh"
 
+#include <sdf/config.hh>
+
 #include <chrono>
 #include <map>
 #include <mutex>
@@ -178,7 +180,13 @@ bool Sensor::Implementation::PopulateFromSDF(const sdf::Sensor &_sdf)
       return false;
   }
 
+#if SDF_MAJOR_VERSION >= 15
   this->frameId = _sdf.FrameId();
+#else
+  // sdf::Sensor::FrameId() was added in sdformat 15. Fall back to the
+  // deprecated gz_frame_id / name lookup below when building against an
+  // older sdformat that doesn't have it yet.
+#endif
   if (this->frameId.empty())
   {
     sdf::ElementPtr element = _sdf.Element();

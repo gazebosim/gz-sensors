@@ -57,6 +57,18 @@ if (DRI_TESTS)
   )
 endif()
 
+if (DRI_TESTS)
+  # The marine radar only needs the rendering scene (via gz::rendering::
+  # RayQuery), so it is built separately from the camera based DRI tests.
+  gz_build_tests(TYPE INTEGRATION
+    SOURCES
+      marine_radar.cc
+    LIB_DEPS
+      ${GZ-TRANSPORT_LIBRARIES}
+      ${PROJECT_LIBRARY_TARGET_NAME}-marine_radar
+  )
+endif()
+
 gz_build_tests(TYPE INTEGRATION
   SOURCES
     ${tests}
