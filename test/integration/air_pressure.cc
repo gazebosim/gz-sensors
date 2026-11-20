@@ -224,6 +224,49 @@ TEST_F(AirPressureSensorTest, SensorReadings)
 }
 
 /////////////////////////////////////////////////
+TEST_F(AirPressureSensorTest, ReferenceAltitudeFromSdf)
+{
+  const std::string topic = "/gz/sensors/test/air_pressure_ref_alt";
+  std::ostringstream stream;
+  stream
+    << "<?xml version='1.0'?>"
+    << "<sdf version='1.6'>"
+    << " <model name='m1'>"
+    << "  <link name='link1'>"
+    << "    <sensor name='TestAirPressure' type='air_pressure'>"
+    << "      <topic>" << topic << "</topic>"
+    << "      <update_rate>30</update_rate>"
+    << "      <air_pressure>"
+    << "        <reference_altitude>500</reference_altitude>"
+    << "      </air_pressure>"
+    << "    </sensor>"
+    << "  </link>"
+    << " </model>"
+    << "</sdf>";
+
+  sdf::SDFPtr sdfParsed(new sdf::SDF());
+  sdf::init(sdfParsed);
+  ASSERT_TRUE(sdf::readString(stream.str(), sdfParsed));
+  sdf::ElementPtr airPressureSdf = sdfParsed->Root()->GetElement("model")
+    ->GetElement("link")->GetElement("sensor");
+
+  gz::sensors::SensorFactory sf;
+  auto sensor = sf.CreateSensor<gz::sensors::AirPressureSensor>(
+      airPressureSdf);
+  ASSERT_NE(nullptr, sensor);
+
+  // The reference altitude set in SDF is used by the sensor
+  EXPECT_DOUBLE_EQ(500.0, sensor->ReferenceAltitude());
+
+  WaitForMessageTestHelper<gz::msgs::FluidPressure> msgHelper(topic);
+  sensor->Update(std::chrono::steady_clock::duration(std::chrono::seconds(1)));
+  EXPECT_TRUE(msgHelper.WaitForMessage()) << msgHelper;
+
+  // Pressure at 500 m, not at sea level (101325 Pa)
+  EXPECT_NEAR(95461.29, msgHelper.Message().pressure(), 0.01);
+}
+
+/////////////////////////////////////////////////
 TEST_F(AirPressureSensorTest, Topic)
 {
   const std::string name = "TestAirPressure";

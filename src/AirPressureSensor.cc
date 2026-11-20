@@ -123,6 +123,8 @@ bool AirPressureSensor::Load(const sdf::Sensor &_sdf)
   gzdbg << "Air pressure for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
+  this->SetReferenceAltitude(_sdf.AirPressureSensor()->ReferenceAltitude());
+
   // Load the noise parameters
   if (_sdf.AirPressureSensor()->PressureNoise().Type() != sdf::NoiseType::NONE)
   {
