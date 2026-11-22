@@ -18,6 +18,7 @@
 #include "gz/sensors/Manager.hh"
 #include <memory>
 #include <unordered_map>
+#include <vector>
 #include <gz/common/Profiler.hh>
 #include <gz/common/SystemPaths.hh>
 #include <gz/common/Console.hh>
@@ -81,8 +82,49 @@ void Manager::RunOnce(
   const std::chrono::steady_clock::duration &_time, bool _force)
 {
   GZ_PROFILE("SensorManager::RunOnce");
-  for (auto &s : this->dataPtr->sensors)
+  auto &sensors = this->dataPtr->sensors;
+
+  // Render ahead: consecutive sensors that can render ahead all render and
+  // issue their GPU readbacks first, then each Update() waits for its own
+  // readback and publishes, so the readbacks' latencies overlap. Any other
+  // sensor runs after the pending run is complete, so GPU commands (and
+  // random draws while rendering) keep the serial order.
+  // Update() may run callbacks that remove sensors, so sensors are looked up
+  // by id again after each call that may run them.
+  std::vector<SensorId> ahead;
+  auto complete = [&]()
   {
-    s.second->Update(_time, _force);
+    for (SensorId id : ahead)
+    {
+      auto it = sensors.find(id);
+      if (it != sensors.end())
+        it->second->Update(_time, _force);
+    }
+    ahead.clear();
+  };
+  SensorId id = 0;
+  for (auto it = sensors.begin();; it = sensors.upper_bound(id))
+  {
+    if (it == sensors.end())
+    {
+      if (ahead.empty())
+        break;
+      // Complete the last run; its callbacks may have added sensors after
+      // it, which the serial loop would visit too.
+      complete();
+      continue;
+    }
+    id = it->first;
+    if (it->second->RenderAheadIfDue(_time, _force))
+    {
+      ahead.push_back(id);
+    }
+    else
+    {
+      complete();
+      it = sensors.find(id);
+      if (it != sensors.end())
+        it->second->Update(_time, _force);
+    }
   }
 }
