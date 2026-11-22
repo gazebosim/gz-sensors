@@ -17,6 +17,20 @@
 #include <gtest/gtest.h>
 #include <sdf/sdf.hh>
 
+#include <atomic>
+#include <chrono>
+#include <cstring>
+#include <functional>
+#include <limits>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <vector>
+
+#include <gz/msgs/laserscan.pb.h>
+#include <gz/transport/Node.hh>
+
 #include <gz/math/Angle.hh>
 #include <gz/math/Helpers.hh>
 
@@ -223,4 +237,319 @@ TEST(Lidar_TEST, CreateLaserFailures)
 
   sensor.Update(std::chrono::steady_clock::duration(
     std::chrono::milliseconds(100)));
+}
+
+/////////////////////////////////////////////////
+/// \brief With more ranges than rays (resolution > 1), the published scan
+/// has one range per ray, the first ones of the buffer. PublishLidarScan
+/// used to write RangeCount() x VerticalRangeCount() entries into a message
+/// sized for the rays, past its end (AddressSanitizer: heap-buffer-overflow).
+TEST(Lidar_TEST, PublishMoreRangesThanRays)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.SetName("more_ranges");
+  sdfSensor.SetType(sdf::SensorType::LIDAR);
+  sdfSensor.SetTopic("/lidar_more_ranges");
+  sdf::Lidar sdfLidar;
+  sdfLidar.SetHorizontalScanSamples(4);
+  sdfLidar.SetHorizontalScanResolution(4);
+  sdfLidar.SetVerticalScanSamples(1);
+  sdfLidar.SetRangeMin(0.5);
+  sdfLidar.SetRangeMax(10.0);
+  sdfSensor.SetLidarSensor(sdfLidar);
+
+  gz::sensors::Lidar sensor;
+  ASSERT_TRUE(sensor.Load(sdfSensor));
+  ASSERT_EQ(4u, sensor.RayCount());
+  ASSERT_EQ(16u, sensor.RangeCount());
+  // A buffer with every range, so that only the message could overflow.
+  sensor.laserBuffer = new float[16 * 3];
+  for (int i = 0; i < 16; ++i)
+  {
+    sensor.laserBuffer[i * 3] = 1.0f + i;
+    sensor.laserBuffer[i * 3 + 1] = 101.0f + i;
+    sensor.laserBuffer[i * 3 + 2] = 0.0f;
+  }
+
+  // Owned with the subscriber callback, which may still run after a failed
+  // assertion has left this scope.
+  struct Received
+  {
+    std::mutex mutex;
+    std::vector<gz::msgs::LaserScan> scans;
+  };
+  auto received = std::make_shared<Received>();
+  std::mutex &mutex = received->mutex;
+  std::vector<gz::msgs::LaserScan> &scans = received->scans;
+  std::function<void(const gz::msgs::LaserScan &)> cb =
+      [received](const gz::msgs::LaserScan &_msg)
+      {
+        std::lock_guard<std::mutex> lock(received->mutex);
+        received->scans.push_back(_msg);
+      };
+  gz::transport::Node node;
+  ASSERT_TRUE(node.Subscribe("/lidar_more_ranges", cb));
+  for (int i = 0; i < 200 && !sensor.HasConnections(); ++i)
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  ASSERT_TRUE(sensor.HasConnections());
+
+  EXPECT_TRUE(sensor.PublishLidarScan(std::chrono::seconds(1)));
+  for (int i = 0; i < 200; ++i)
+  {
+    {
+      std::lock_guard<std::mutex> lock(mutex);
+      if (!scans.empty())
+        break;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+
+  std::lock_guard<std::mutex> lock(mutex);
+  ASSERT_EQ(1u, scans.size());
+  ASSERT_EQ(4, scans[0].ranges_size());
+  ASSERT_EQ(4, scans[0].intensities_size());
+  for (int i = 0; i < 4; ++i)
+  {
+    EXPECT_DOUBLE_EQ(1.0 + i, scans[0].ranges(i));
+    EXPECT_DOUBLE_EQ(101.0 + i, scans[0].intensities(i));
+  }
+}
+
+namespace
+{
+/// \brief Scans received, owned with the subscriber callbacks, which may
+/// still run after a failed assertion has left the test.
+struct ReceivedScans
+{
+  std::mutex mutex;
+  std::vector<gz::msgs::LaserScan> scans;
+
+  /// \brief Wait up to 2 s for more than _count scans.
+  /// \return The number of scans received.
+  std::size_t WaitForMoreThan(std::size_t _count)
+  {
+    for (int i = 0; i < 200; ++i)
+    {
+      {
+        std::lock_guard<std::mutex> lock(this->mutex);
+        if (this->scans.size() > _count)
+          break;
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    std::lock_guard<std::mutex> lock(this->mutex);
+    return this->scans.size();
+  }
+};
+}  // namespace
+
+/////////////////////////////////////////////////
+/// \brief With fewer ranges than rays (resolution < 1), the rays past the
+/// range count keep the values of earlier scans, also across a reload with
+/// a different resolution, as in gz-sensors 10: here 4 rays, 3 ranges, then
+/// 2 ranges, then all 4.
+TEST(Lidar_TEST, PublishedTailKeepsEarlierScans)
+{
+  const double rangeMin = 0.5;
+  const double rangeMax = 10.0;
+  const float nan = std::numeric_limits<float>::quiet_NaN();
+  const double n = nan;
+  struct Scan
+  {
+    std::string topic;
+    double resolution;
+    std::vector<float> buffer;
+    std::vector<double> ranges;
+    std::vector<double> intensities;
+  };
+  const std::vector<Scan> table = {
+    // 3 ranges of 4 rays (one clamped), the 4th ray NaN.
+    {"/lidar_tail_a", 0.75, {1, 2, 30, 4},
+        {1, 2, rangeMax, n}, {101, 102, 130, n}},
+    // 2 ranges: rays 3 and 4 keep the previous scan's values.
+    {"/lidar_tail_b", 0.5, {5, 6, 7, 8},
+        {5, 6, rangeMax, n}, {105, 106, 130, n}},
+    // Resolution 1: every ray written.
+    {"/lidar_tail_c", 1.0, {nan, 0.1f, 3, 9},
+        {rangeMax, rangeMin, 3, 9}, {n, 100.1f, 103, 109}},
+  };
+
+  gz::sensors::Lidar sensor;
+  sensor.laserBuffer = new float[4 * 3];
+  auto received = std::make_shared<ReceivedScans>();
+  std::function<void(const gz::msgs::LaserScan &)> cb =
+      [received](const gz::msgs::LaserScan &_msg)
+      {
+        std::lock_guard<std::mutex> lock(received->mutex);
+        received->scans.push_back(_msg);
+      };
+  gz::transport::Node node;
+  for (std::size_t k = 0; k < table.size(); ++k)
+  {
+    const Scan &expected = table[k];
+    SCOPED_TRACE(expected.topic);
+    sdf::Sensor sdfSensor;
+    sdfSensor.SetName("tail");
+    sdfSensor.SetType(sdf::SensorType::LIDAR);
+    sdfSensor.SetTopic(expected.topic);
+    sdf::Lidar sdfLidar;
+    sdfLidar.SetHorizontalScanSamples(4);
+    sdfLidar.SetHorizontalScanResolution(expected.resolution);
+    sdfLidar.SetVerticalScanSamples(1);
+    sdfLidar.SetRangeMin(rangeMin);
+    sdfLidar.SetRangeMax(rangeMax);
+    sdfSensor.SetLidarSensor(sdfLidar);
+    // A reload: Load() again, on a new topic (the old one stays advertised).
+    ASSERT_TRUE(sensor.Load(sdfSensor));
+    ASSERT_TRUE(node.Subscribe(expected.topic, cb));
+    for (int i = 0; i < 4; ++i)
+    {
+      sensor.laserBuffer[i * 3] = expected.buffer[i];
+      sensor.laserBuffer[i * 3 + 1] = 100.0f + expected.buffer[i];
+    }
+    for (int i = 0; i < 200 && !sensor.HasConnections(); ++i)
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    EXPECT_TRUE(sensor.PublishLidarScan(std::chrono::seconds(1)));
+    ASSERT_EQ(k + 1, received->WaitForMoreThan(k));
+
+    std::lock_guard<std::mutex> lock(received->mutex);
+    const gz::msgs::LaserScan &scan = received->scans[k];
+    ASSERT_EQ(4, scan.ranges_size());
+    ASSERT_EQ(4, scan.intensities_size());
+    for (int i = 0; i < 4; ++i)
+    {
+      const double range = scan.ranges(i);
+      const double intensity = scan.intensities(i);
+      EXPECT_EQ(0, memcmp(&expected.ranges[i], &range, sizeof(double)))
+          << "range " << i << ": " << range;
+      EXPECT_EQ(0, memcmp(&expected.intensities[i], &intensity,
+          sizeof(double))) << "intensity " << i << ": " << intensity;
+    }
+  }
+}
+
+/////////////////////////////////////////////////
+/// \brief With more ranges than rays in both directions, the message rows
+/// are the buffer's rows, RangeCount() wide as the message's count says,
+/// and the message holds the first RayCount() x VerticalRayCount() ranges:
+/// with 4 x 2 rays at horizontal resolution 2, the first buffer row (8
+/// ranges), not 4 ranges of each row.
+TEST(Lidar_TEST, PublishMoreRangesThanRaysVertical)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.SetName("more_ranges_vertical");
+  sdfSensor.SetType(sdf::SensorType::LIDAR);
+  sdfSensor.SetTopic("/lidar_more_ranges_vertical");
+  sdf::Lidar sdfLidar;
+  sdfLidar.SetHorizontalScanSamples(4);
+  sdfLidar.SetHorizontalScanResolution(2);
+  sdfLidar.SetVerticalScanSamples(2);
+  sdfLidar.SetRangeMin(0.5);
+  sdfLidar.SetRangeMax(100.0);
+  sdfSensor.SetLidarSensor(sdfLidar);
+
+  gz::sensors::Lidar sensor;
+  ASSERT_TRUE(sensor.Load(sdfSensor));
+  ASSERT_EQ(8u, sensor.RangeCount());
+  ASSERT_EQ(2u, sensor.VerticalRangeCount());
+  // Range 10 * row + column + 1, intensity 100 more.
+  sensor.laserBuffer = new float[16 * 3];
+  for (int row = 0; row < 2; ++row)
+  {
+    for (int col = 0; col < 8; ++col)
+    {
+      const int i = row * 8 + col;
+      sensor.laserBuffer[i * 3] = 10.0f * row + col + 1.0f;
+      sensor.laserBuffer[i * 3 + 1] = 110.0f * row + col + 101.0f;
+      sensor.laserBuffer[i * 3 + 2] = 0.0f;
+    }
+  }
+
+  // Owned with the subscriber callback, which may still run after a failed
+  // assertion has left this scope.
+  struct Received
+  {
+    std::mutex mutex;
+    std::vector<gz::msgs::LaserScan> scans;
+  };
+  auto received = std::make_shared<Received>();
+  std::function<void(const gz::msgs::LaserScan &)> cb =
+      [received](const gz::msgs::LaserScan &_msg)
+      {
+        std::lock_guard<std::mutex> lock(received->mutex);
+        received->scans.push_back(_msg);
+      };
+  gz::transport::Node node;
+  ASSERT_TRUE(node.Subscribe("/lidar_more_ranges_vertical", cb));
+  for (int i = 0; i < 200 && !sensor.HasConnections(); ++i)
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  ASSERT_TRUE(sensor.HasConnections());
+
+  EXPECT_TRUE(sensor.PublishLidarScan(std::chrono::seconds(1)));
+  for (int i = 0; i < 200; ++i)
+  {
+    {
+      std::lock_guard<std::mutex> lock(received->mutex);
+      if (!received->scans.empty())
+        break;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+
+  std::lock_guard<std::mutex> lock(received->mutex);
+  ASSERT_EQ(1u, received->scans.size());
+  const gz::msgs::LaserScan &scan = received->scans[0];
+  EXPECT_EQ(8u, scan.count());
+  EXPECT_EQ(2u, scan.vertical_count());
+  ASSERT_EQ(8, scan.ranges_size());
+  ASSERT_EQ(8, scan.intensities_size());
+  for (int col = 0; col < 8; ++col)
+  {
+    EXPECT_DOUBLE_EQ(col + 1.0, scan.ranges(col));
+    EXPECT_DOUBLE_EQ(col + 101.0, scan.intensities(col));
+  }
+}
+
+/////////////////////////////////////////////////
+/// \brief ApplyNoise does not take lidarMutex: a caller may hold it, as
+/// GpuLidarSensor::Update does, to keep Range() and Ranges() from reading
+/// the buffer while it is written.
+TEST(Lidar_TEST, ApplyNoiseUnderLidarMutex)
+{
+  sdf::Sensor sdfSensor;
+  sdfSensor.SetName("noise_lock");
+  sdfSensor.SetType(sdf::SensorType::LIDAR);
+  sdfSensor.SetTopic("/lidar_noise_lock");
+  sdf::Lidar sdfLidar;
+  sdfLidar.SetHorizontalScanSamples(4);
+  sdfLidar.SetVerticalScanSamples(1);
+  sdfLidar.SetRangeMin(0.5);
+  sdfLidar.SetRangeMax(10.0);
+  sdf::Noise noise;
+  noise.SetType(sdf::NoiseType::GAUSSIAN);
+  noise.SetStdDev(0.1);
+  sdfLidar.SetLidarNoise(noise);
+  sdfSensor.SetLidarSensor(sdfLidar);
+
+  // Shared with the thread, which stays blocked if ApplyNoise deadlocks.
+  auto sensor = std::make_shared<gz::sensors::Lidar>();
+  ASSERT_TRUE(sensor->Load(sdfSensor));
+  sensor->laserBuffer = new float[4 * 3]();
+  auto done = std::make_shared<std::atomic<bool>>(false);
+  std::thread thread([sensor, done]
+  {
+    std::lock_guard<std::mutex> lock(sensor->lidarMutex);
+    sensor->ApplyNoise();
+    *done = true;
+  });
+  for (int i = 0; i < 500 && !*done; ++i)
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  if (!*done)
+  {
+    thread.detach();
+    FAIL() << "ApplyNoise blocked on lidarMutex held by its caller";
+  }
+  thread.join();
+  // The noise was applied: the ranges were 0, clamped to at least 0.5.
+  EXPECT_LE(0.5f, sensor->laserBuffer[0]);
 }
