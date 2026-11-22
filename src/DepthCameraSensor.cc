@@ -19,6 +19,7 @@
 #include <gz/msgs/pointcloud_packed.pb.h>
 
 #include <mutex>
+#include <typeinfo>
 
 #include <gz/common/Console.hh>
 #include <gz/common/Image.hh>
@@ -529,6 +530,7 @@ void DepthCameraSensor::SetScene(rendering::ScenePtr _scene)
   {
     // TODO(anyone) Remove camera from scene
     this->dataPtr->depthCamera = nullptr;
+    this->DropRenderedAhead();
     RenderingSensor::SetScene(_scene);
 
     if (this->dataPtr->initialized)
@@ -559,26 +561,26 @@ bool DepthCameraSensor::Update(
     this->PublishInfo(_now);
   }
 
-  if (!this->HasDepthConnections() && !this->HasPointConnections())
+  // A frame rendered ahead is completed whatever the subscribers are now:
+  // the subscribers seen by RenderAhead() decide, as if they had changed
+  // after this update.
+  const bool renderedAhead = this->RenderedAhead();
+  this->DropRenderedAhead();
+  if (renderedAhead)
   {
-    return false;
+    this->dataPtr->depthCamera->PostRender();
   }
+  else
+  {
+    if (!this->HasDepthConnections() && !this->HasPointConnections())
+    {
+      return false;
+    }
+    this->UpdatePointCloudConnection();
 
-  if (this->HasPointConnections() && !this->dataPtr->pointCloudConnection)
-  {
-    this->dataPtr->pointCloudConnection =
-        this->dataPtr->depthCamera->ConnectNewRgbPointCloud(
-        std::bind(&DepthCameraSensor::OnNewRgbPointCloud, this,
-          std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-          std::placeholders::_4, std::placeholders::_5));
+    // generate sensor data
+    this->Render();
   }
-  else if (!this->HasPointConnections() && this->dataPtr->pointCloudConnection)
-  {
-    this->dataPtr->pointCloudConnection.reset();
-  }
-
-  // generate sensor data
-  this->Render();
 
   unsigned int width = this->dataPtr->depthCamera->ImageWidth();
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
@@ -622,7 +624,8 @@ bool DepthCameraSensor::Update(
     }
   }
 
-  if (this->HasPointConnections() &&
+  // Only a frame rendered with the point cloud connected has a cloud.
+  if (this->HasPointConnections() && this->dataPtr->pointCloudConnection &&
       this->dataPtr->pointCloudBuffer)
   {
     // Set the time stamp
@@ -682,6 +685,48 @@ double DepthCameraSensor::FarClip() const
 double DepthCameraSensor::NearClip() const
 {
   return this->dataPtr->near;
+}
+
+//////////////////////////////////////////////////
+void DepthCameraSensor::UpdatePointCloudConnection()
+{
+  if (this->HasPointConnections() && !this->dataPtr->pointCloudConnection)
+  {
+    this->dataPtr->pointCloudConnection =
+        this->dataPtr->depthCamera->ConnectNewRgbPointCloud(
+        std::bind(&DepthCameraSensor::OnNewRgbPointCloud, this,
+          std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+          std::placeholders::_4, std::placeholders::_5));
+  }
+  else if (!this->HasPointConnections() && this->dataPtr->pointCloudConnection)
+  {
+    this->dataPtr->pointCloudConnection.reset();
+  }
+}
+
+//////////////////////////////////////////////////
+bool DepthCameraSensor::RenderAhead(
+    const std::chrono::steady_clock::duration &/*_now*/)
+{
+  // Only a DepthCameraSensor: a derived sensor's Update() may run code
+  // before it renders. Only when Update(_now) would render, and through
+  // RenderingSensor::Render() only the camera (the scene update is manual).
+  // Image callbacks run user code between the serial renders, which may
+  // change the scene or draw random numbers that the next sensor's render
+  // draws: serial then.
+  if (typeid(*this) != typeid(DepthCameraSensor) ||
+      !this->dataPtr->initialized || !this->dataPtr->depthCamera ||
+      !this->ManualSceneUpdate() ||
+      this->dataPtr->imageEvent.ConnectionCount() > 0u ||
+      (!this->HasDepthConnections() && !this->HasPointConnections()))
+  {
+    return false;
+  }
+  GZ_PROFILE("DepthCameraSensor::RenderAhead");
+  this->UpdatePointCloudConnection();
+  this->dataPtr->depthCamera->Render();
+  this->dataPtr->depthCamera->IssueReadback();
+  return true;
 }
 
 //////////////////////////////////////////////////
