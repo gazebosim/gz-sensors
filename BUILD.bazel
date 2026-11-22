@@ -503,6 +503,7 @@ gz_sensor_library(
 gz_sensor_library(
     name = "rgbd_camera",
     srcs = [
+        "src/PublishInPlace.hh",
         "src/RgbdCameraSensor.cc",
     ],
     hdrs = ["include/gz/sensors/RgbdCameraSensor.hh"],

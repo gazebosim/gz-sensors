@@ -15,6 +15,13 @@
  *
 */
 
+#include <chrono>
+#include <cstdint>
+#include <cstring>
+#include <functional>
+#include <optional>
+#include <string>
+
 #include <gz/msgs/image.pb.h>
 #include <gz/msgs/pointcloud_packed.pb.h>
 
@@ -40,6 +47,7 @@
 
 #include "CameraSensorUtil.hh"
 #include "PointCloudUtil.hh"
+#include "PublishInPlace.hh"
 
 /// \brief Private data for RgbdCameraSensor
 class gz::sensors::RgbdCameraSensor::Implementation
@@ -66,6 +74,20 @@ class gz::sensors::RgbdCameraSensor::Implementation
                     unsigned int _channels,
                     const std::string &_format);
 
+  /// \brief Publish an image of the frame Update() renders, as Update()
+  /// built it, its data written in place by _fill
+  /// \param[in] _pub Publisher
+  /// \param[in] _seqKey Sequence key (AddSequence)
+  /// \param[in] _format Pixel format of the data
+  /// \param[in] _type Pixel format type of the message
+  /// \param[in] _width Image width
+  /// \param[in] _height Image height
+  /// \param[in] _fill Writes the data, see PublishWithData
+  public: void PublishImage(transport::Node::Publisher &_pub,
+              const std::string &_seqKey, rendering::PixelFormat _format,
+              msgs::PixelFormatType _type, unsigned int _width,
+              unsigned int _height, const std::function<bool(char *)> &_fill);
+
   /// \brief node to create publisher
   public: transport::Node node;
 
@@ -84,7 +106,8 @@ class gz::sensors::RgbdCameraSensor::Implementation
   /// \brief Rendering camera
   public: gz::rendering::DepthCameraPtr depthCamera;
 
-  /// \brief Depth data buffer.
+  /// \brief The depth frame with the depth clip applied, which the point
+  /// cloud reads too. Only with a depth clip.
   public: float *depthBuffer = nullptr;
 
   /// \brief Point cloud data buffer.
@@ -133,6 +156,13 @@ class gz::sensors::RgbdCameraSensor::Implementation
   /// \brief Helper class that can fill a msgs::PointCloudPacked
   /// image and depth data.
   public: PointCloudUtil pointsUtil;
+
+  /// \brief The sensor, for the frame callbacks, which publish
+  public: RgbdCameraSensor *sensor = nullptr;
+
+  /// \brief Stamp of the frame Update() renders, set only while it
+  /// renders, the only time the frame callbacks publish
+  public: std::optional<std::chrono::steady_clock::duration> frameStamp;
 };
 
 using namespace gz;
@@ -142,6 +172,7 @@ using namespace sensors;
 RgbdCameraSensor::RgbdCameraSensor()
   : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
+  this->dataPtr->sensor = this;
 }
 
 //////////////////////////////////////////////////
@@ -425,10 +456,76 @@ void RgbdCameraSensor::Implementation::OnNewDepthFrame(const float *_scan,
   unsigned int depthSamples = _width * _height;
   unsigned int depthBufferSize = depthSamples * sizeof(float);
 
-  if (!this->depthBuffer)
-    this->depthBuffer = new float[depthSamples];
+  // The depth image is published from the frame, written once, straight
+  // into the transport's buffer. Only the depth clip needs a copy, which
+  // the point cloud reads too.
+  const bool clip = this->hasDepthNearClip || this->hasDepthFarClip;
+  const float *depth = _scan;
+  if (clip)
+  {
+    if (!this->depthBuffer)
+      this->depthBuffer = new float[depthSamples];
+    memcpy(this->depthBuffer, _scan, depthBufferSize);
+    depth = this->depthBuffer;
+  }
 
-  memcpy(this->depthBuffer, _scan, depthBufferSize);
+  if (!this->frameStamp || !this->sensor->HasDepthConnections())
+    return;
+
+  // The following code is a work around since gz-rendering's depth camera
+  // does not support 2 different clipping distances. An assumption is made
+  // that the depth clipping distances are within bounds of the rgb clipping
+  // distances, if not, the rgb clipping values will take priority.
+  if (clip)
+  {
+    for (unsigned int i = 0; i < depthSamples; i++)
+    {
+      if (this->hasDepthFarClip &&
+          (this->depthBuffer[i] > this->depthFarClip))
+      {
+        this->depthBuffer[i] = math::INF_D;
+      }
+      if (this->hasDepthNearClip &&
+          (this->depthBuffer[i] < this->depthNearClip))
+      {
+        this->depthBuffer[i] = -math::INF_D;
+      }
+    }
+  }
+
+  GZ_PROFILE("RgbdCameraSensor::Update Publish depth image");
+  this->PublishImage(this->depthPub, "depthImage", rendering::PF_FLOAT32_R,
+      msgs::PixelFormatType::R_FLOAT32, _width, _height, [&](char *_out)
+      {
+        memcpy(_out, depth, depthBufferSize);
+        return true;
+      });
+}
+
+/////////////////////////////////////////////////
+void RgbdCameraSensor::Implementation::PublishImage(
+    transport::Node::Publisher &_pub, const std::string &_seqKey,
+    rendering::PixelFormat _format, msgs::PixelFormatType _type,
+    unsigned int _width, unsigned int _height,
+    const std::function<bool(char *)> &_fill)
+{
+  // The fields before and after the data
+  msgs::Image head;
+  head.set_width(_width);
+  head.set_height(_height);
+  head.set_step(_width * rendering::PixelUtil::BytesPerPixel(_format));
+  *head.mutable_header()->mutable_stamp() = msgs::Convert(*this->frameStamp);
+  auto frame = head.mutable_header()->add_data();
+  frame->set_key("frame_id");
+  frame->add_value(this->sensor->FrameId());
+  this->sensor->AddSequence(head.mutable_header(), _seqKey);
+  msgs::Image tail;
+  tail.set_pixel_format_type(_type);
+
+  PublishWithData(_pub, head.SerializeAsString(),
+      msgs::Image::kDataFieldNumber,
+      rendering::PixelUtil::MemorySize(_format, _width, _height),
+      tail.SerializeAsString(), _fill);
 }
 
 /////////////////////////////////////////////////
@@ -500,56 +597,10 @@ bool RgbdCameraSensor::Update(const std::chrono::steady_clock::duration &_now)
   unsigned int height = this->dataPtr->depthCamera->ImageHeight();
   unsigned int depthSamples = height * width;
 
-  // generate sensor data
+  // generate sensor data; OnNewDepthFrame publishes the depth image
+  this->dataPtr->frameStamp = _now;
   this->Render();
-
-  // create and publish the depth message
-  if (this->HasDepthConnections())
-  {
-    msgs::Image msg;
-    msg.set_width(width);
-    msg.set_height(height);
-    msg.set_step(width * rendering::PixelUtil::BytesPerPixel(
-               rendering::PF_FLOAT32_R));
-    msg.set_pixel_format_type(msgs::PixelFormatType::R_FLOAT32);
-    *msg.mutable_header()->mutable_stamp() = msgs::Convert(_now);
-    auto frame = msg.mutable_header()->add_data();
-    frame->set_key("frame_id");
-    frame->add_value(this->FrameId());
-
-    std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-
-    // The following code is a work around since gz-rendering's depth camera
-    // does not support 2 different clipping distances. An assumption is made
-    // that the depth clipping distances are within bounds of the rgb clipping
-    // distances, if not, the rgb clipping values will take priority.
-    if (this->dataPtr->hasDepthNearClip || this->dataPtr->hasDepthFarClip)
-    {
-      for (unsigned int i = 0; i < depthSamples; i++)
-      {
-        if (this->dataPtr->hasDepthFarClip &&
-            (this->dataPtr->depthBuffer[i] > this->dataPtr->depthFarClip))
-        {
-          this->dataPtr->depthBuffer[i] = math::INF_D;
-        }
-        if (this->dataPtr->hasDepthNearClip &&
-            (this->dataPtr->depthBuffer[i] < this->dataPtr->depthNearClip))
-        {
-          this->dataPtr->depthBuffer[i] = -math::INF_D;
-        }
-      }
-    }
-    msg.set_data(this->dataPtr->depthBuffer,
-        rendering::PixelUtil::MemorySize(rendering::PF_FLOAT32_R,
-        width, height));
-
-    // publish
-    {
-      this->AddSequence(msg.mutable_header(), "depthImage");
-      GZ_PROFILE("RgbdCameraSensor::Update Publish depth image");
-      this->dataPtr->depthPub.Publish(msg);
-    }
-  }
+  this->dataPtr->frameStamp.reset();
 
   if (this->dataPtr->pointCloudBuffer)
   {

@@ -15,17 +15,29 @@
  *
 */
 
+#include <chrono>
+#include <cmath>
 #include <cstring>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <utility>
+#include <vector>
 #include <gtest/gtest.h>
 
 #include <gz/msgs/camera_info.pb.h>
 #include <gz/msgs/image.pb.h>
+#include <gz/msgs/pointcloud_packed.pb.h>
+#include <gz/msgs/PointCloudPackedUtils.hh>
 
 #include <gz/msgs/Utility.hh>
 #include <gz/common/Filesystem.hh>
 #include <gz/common/Event.hh>
 #include <gz/sensors/Manager.hh>
 #include <gz/sensors/RgbdCameraSensor.hh>
+#include <gz/transport/Node.hh>
 
 // TODO(louise) Remove these pragmas once gz-rendering is disabling the
 // warnings
@@ -33,6 +45,7 @@
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #endif
+#include <gz/rendering/DepthCamera.hh>
 #include <gz/rendering/Material.hh>
 #include <gz/rendering/RenderEngine.hh>
 #include <gz/rendering/RenderingIface.hh>
@@ -828,6 +841,232 @@ TEST_P(RgbdCameraSensorTest, CustomCameraInfoTopic)
 {
   gz::common::Console::SetVerbosity(4);
   CustomCameraInfoTopic(GetParam());
+}
+
+//////////////////////////////////////////////////
+/// \brief The bytes of the depth image, point cloud and image are those the
+/// sensor published before it wrote them in place: messages built here as
+/// RgbdCameraSensor::Update built them, from the frames the depth camera
+/// delivered, then serialized. Frames with and without a dense cloud (the
+/// serialized is_dense follows the data), with and without depth clip.
+TEST_P(RgbdCameraSensorTest, PublishedBytesMatchCopy)
+{
+  const std::string engineName = GetParam();
+  if (engineName != "ogre2")
+    GTEST_SKIP() << "ogre2 only";
+  auto *engine = rendering::engine(engineName);
+  if (!engine)
+    GTEST_SKIP() << "Engine '" << engineName << "' is not supported";
+
+  rendering::ScenePtr scene = engine->CreateScene("scene");
+  scene->SetAmbientLight(0.3, 0.3, 0.3);
+  scene->SetBackgroundColor(0.2, 0.3, 0.4);
+  rendering::VisualPtr box = scene->CreateVisual();
+  box->AddGeometry(scene->CreateBox());
+  box->SetLocalPosition(3.0, 0.4, 0.0);
+  rendering::MaterialPtr red = scene->CreateMaterial();
+  red->SetAmbient(1.0, 0.1, 0.0);
+  red->SetDiffuse(1.0, 0.1, 0.0);
+  box->SetMaterial(red);
+  scene->DestroyMaterial(red);
+  scene->RootVisual()->AddChild(box);
+
+  // (one manager: the sensors stay until the end of the test)
+  sensors::Manager mgr;
+  for (const bool clip : {false, true})
+  {
+    SCOPED_TRACE(clip ? "depth clip" : "no depth clip");
+    const std::string topic = std::string("/test/rgbd_bytes_") +
+        (clip ? "clip" : "noclip");
+    // near clip 2.6: the box's front face (2.5 m) becomes -inf in the
+    // depth image and, through it, in the point cloud
+    const std::string sdfString = std::string(
+        "<?xml version='1.0'?><sdf version='1.6'><model name='m'>"
+        "<link name='l'><sensor name='rgbd_") + (clip ? "c" : "n") +
+        "' type='rgbd_camera'><update_rate>10</update_rate><topic>" + topic +
+        "</topic><camera><horizontal_fov>1.05</horizontal_fov>"
+        "<image><width>61</width><height>47</height></image>"
+        "<clip><near>0.1</near><far>10.0</far></clip>" +
+        (clip ? "<depth_camera><clip><near>2.6</near><far>9.0</far></clip>"
+                "</depth_camera>" : "") +
+        "</camera></sensor></link></model></sdf>";
+    sdf::SDFPtr doc(new sdf::SDF());
+    sdf::init(doc);
+    ASSERT_TRUE(sdf::readString(sdfString, doc));
+    auto sensorPtr = doc->Root()->GetElement("model")->GetElement("link")
+        ->GetElement("sensor");
+
+    auto *sensor = mgr.CreateSensor<sensors::RgbdCameraSensor>(sensorPtr);
+    ASSERT_NE(nullptr, sensor);
+    sensor->SetScene(scene);
+    const unsigned int width = sensor->ImageWidth();
+    const unsigned int height = sensor->ImageHeight();
+    const unsigned int n = width * height;
+
+    // The frames, as the camera delivers them to the sensor too
+    auto camera = std::dynamic_pointer_cast<rendering::DepthCamera>(
+        scene->SensorByName(sensor->Name()));
+    ASSERT_NE(nullptr, camera);
+    std::vector<std::vector<float>> depthFrames, cloudFrames;
+    auto depthConn = camera->ConnectNewDepthFrame(
+        [&](const float *_d, unsigned int, unsigned int, unsigned int,
+            const std::string &) { depthFrames.emplace_back(_d, _d + n); });
+    auto cloudConn = camera->ConnectNewRgbPointCloud(
+        [&](const float *_c, unsigned int, unsigned int, unsigned int _ch,
+            const std::string &)
+        {
+          ASSERT_EQ(4u, _ch);
+          cloudFrames.emplace_back(_c, _c + n * 4);
+        });
+
+    // The serialized messages, as they leave the publishers
+    // (shared: a callback still running after a failed assertion keeps it)
+    struct Received
+    {
+      std::mutex mutex;
+      std::map<std::string, std::vector<std::string>> raw;
+    };
+    auto received = std::make_shared<Received>();
+    std::mutex &mutex = received->mutex;
+    auto &raw = received->raw;
+    transport::Node node;
+    const std::vector<std::pair<std::string, std::string>> topics = {
+        {topic + "/depth_image", "gz.msgs.Image"},
+        {topic + "/points", "gz.msgs.PointCloudPacked"},
+        {topic + "/image", "gz.msgs.Image"}};
+    for (const auto &[t, type] : topics)
+    {
+      ASSERT_TRUE(node.SubscribeRaw(t,
+          [received, t = t](const char *_data, std::size_t _size,
+              const transport::MessageInfo &)
+          {
+            std::lock_guard<std::mutex> lock(received->mutex);
+            received->raw[t].emplace_back(_data, _size);
+          }, type));
+    }
+
+    // dense: a wall filling the view; not dense: a box and the sky
+    const std::vector<math::Vector3d> scales = {
+        {1, 1, 1}, {1, 20, 20}, {1, 20, 20}, {1, 1, 1}};
+    const auto stamp0 = std::chrono::seconds(2);
+    for (std::size_t k = 0; k < scales.size(); ++k)
+    {
+      box->SetLocalScale(scales[k]);
+      EXPECT_TRUE(sensor->Update(stamp0 + k * std::chrono::milliseconds(100)));
+    }
+    for (int i = 0; i < 300; ++i)
+    {
+      {
+        std::lock_guard<std::mutex> lock(mutex);
+        bool all = true;
+        for (const auto &tt : topics)
+          all = all && raw[tt.first].size() >= scales.size();
+        if (all)
+          break;
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    // one message per frame and topic, no more
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    {
+      std::lock_guard<std::mutex> lock(mutex);
+      for (const auto &tt : topics)
+        EXPECT_EQ(scales.size(), raw[tt.first].size()) << tt.first;
+    }
+    ASSERT_EQ(scales.size(), depthFrames.size());
+    ASSERT_EQ(scales.size(), cloudFrames.size());
+
+    // The messages RgbdCameraSensor::Update built
+    msgs::PointCloudPacked pointMsg;
+    msgs::InitPointCloudPacked(pointMsg, sensor->OpticalFrameId(), false,
+        {{"xyz", msgs::PointCloudPacked::Field::FLOAT32},
+         {"rgb", msgs::PointCloudPacked::Field::FLOAT32}});
+    pointMsg.set_width(width);
+    pointMsg.set_height(height);
+    pointMsg.set_row_step(pointMsg.point_step() * width);
+    sensors::PointCloudUtil util;
+    int denseFrames = 0;
+    for (std::size_t k = 0; k < scales.size(); ++k)
+    {
+      SCOPED_TRACE("frame " + std::to_string(k));
+      const auto stamp = msgs::Convert(
+          stamp0 + k * std::chrono::milliseconds(100));
+      auto header = [&](msgs::Header *_h, const std::string &_frame)
+      {
+        *_h->mutable_stamp() = stamp;
+        auto *f = _h->add_data();
+        f->set_key("frame_id");
+        f->add_value(_frame);
+        auto *seq = _h->add_data();
+        seq->set_key("seq");
+        seq->add_value(std::to_string(k));
+      };
+      std::vector<float> depth = depthFrames[k];
+      std::vector<float> cloud = cloudFrames[k];
+      if (clip)
+      {
+        for (float &d : depth)
+        {
+          if (d > 9.0)
+            d = math::INF_D;
+          if (d < 2.6)
+            d = -math::INF_D;
+        }
+        for (unsigned int i = 0; i < n; ++i)
+        {
+          if (std::isinf(depth[i]))
+            cloud[i * 4] = cloud[i * 4 + 1] = cloud[i * 4 + 2] = depth[i];
+        }
+      }
+
+      msgs::Image depthMsg;
+      depthMsg.set_width(width);
+      depthMsg.set_height(height);
+      depthMsg.set_step(width * 4);
+      depthMsg.set_pixel_format_type(msgs::PixelFormatType::R_FLOAT32);
+      header(depthMsg.mutable_header(), sensor->FrameId());
+      depthMsg.set_data(depth.data(), n * sizeof(float));
+
+      std::vector<unsigned char> rgb(n * 3);
+      pointMsg.clear_header();
+      header(pointMsg.mutable_header(), sensor->OpticalFrameId());
+      util.FillMsg(pointMsg, cloud.data(), true, rgb.data());
+      denseFrames += pointMsg.is_dense();
+
+      msgs::Image imageMsg;
+      imageMsg.set_width(width);
+      imageMsg.set_height(height);
+      imageMsg.set_step(width * 3);
+      imageMsg.set_pixel_format_type(msgs::PixelFormatType::RGB_INT8);
+      header(imageMsg.mutable_header(), sensor->FrameId());
+      imageMsg.set_data(rgb.data(), rgb.size());
+
+      const std::string expected[] = {depthMsg.SerializeAsString(),
+          pointMsg.SerializeAsString(), imageMsg.SerializeAsString()};
+      for (int t = 0; t < 3; ++t)
+      {
+        std::lock_guard<std::mutex> lock(mutex);
+        const auto &got = raw[topics[t].first];
+        ASSERT_GT(got.size(), k) << topics[t].first;
+        std::size_t diff = 0;
+        while (diff < got[k].size() && diff < expected[t].size() &&
+            got[k][diff] == expected[t][diff])
+          ++diff;
+        EXPECT_TRUE(got[k] == expected[t]) << topics[t].first
+            << ": " << got[k].size() << " bytes, expected "
+            << expected[t].size() << ", first diff at byte " << diff;
+      }
+    }
+    // without the clip, both kinds of frames (with it, the wall is -inf)
+    EXPECT_EQ(clip ? 0 : 2, denseFrames);
+
+    depthConn.reset();
+    cloudConn.reset();
+  }
+  box.reset();
+  red.reset();
+  engine->DestroyScene(scene);
+  rendering::unloadEngine(engine->Name());
 }
 
 INSTANTIATE_TEST_SUITE_P(RgbdCameraSensor, RgbdCameraSensorTest,
