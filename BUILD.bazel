@@ -206,6 +206,7 @@ gz_sensor_library(
         "src/CameraSensor.cc",
         "src/CameraSensorUtil.cc",
         "src/CameraSensorUtil.hh",
+        "src/PublishInPlace.hh",
     ],
     hdrs = ["include/gz/sensors/CameraSensor.hh"],
     includes = ["include"],
