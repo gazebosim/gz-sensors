@@ -24,6 +24,11 @@
   #pragma warning(pop)
 #endif
 
+#include <cmath>
+#include <cstring>
+#include <string>
+#include <vector>
+
 #include <gz/common/Console.hh>
 #include <gz/common/Profiler.hh>
 #include <gz/msgs/PointCloudPackedUtils.hh>
@@ -71,6 +76,13 @@ class gz::sensors::GpuLidarSensor::Implementation
 
   /// \brief Publisher for the publish point cloud message.
   public: transport::Node::Publisher pointPub;
+
+  /// \brief Cosine and sine of each column's azimuth, FillPointCloudMsg's
+  /// tables.
+  public: std::vector<float> azimuthCos;
+
+  /// \brief See azimuthCos.
+  public: std::vector<float> azimuthSin;
 };
 
 //////////////////////////////////////////////////
@@ -369,6 +381,25 @@ void GpuLidarSensor::Implementation::FillPointCloudMsg(
   // is vertical
   float inclination = this->gpuRays->VerticalAngleMin().Radian();
 
+  // Every row sweeps the same azimuths, accumulated in float as the rows go:
+  // take their cosine and sine once per scan instead of once per point.
+  this->azimuthCos.resize(width);
+  this->azimuthSin.resize(width);
+  float azimuth = this->gpuRays->AngleMin().Radian();
+  for (uint32_t i = 0; i < width; ++i)
+  {
+    this->azimuthCos[i] = std::cos(azimuth);
+    this->azimuthSin[i] = std::sin(azimuth);
+    azimuth += angleStep;
+  }
+
+  const uint32_t pointStep = this->pointMsg.point_step();
+  const uint32_t offsetX = this->pointMsg.field(0).offset();
+  const uint32_t offsetY = this->pointMsg.field(1).offset();
+  const uint32_t offsetZ = this->pointMsg.field(2).offset();
+  const uint32_t offsetIntensity = this->pointMsg.field(3).offset();
+  const uint32_t offsetRing = this->pointMsg.field(4).offset();
+
   std::string *msgBuffer = this->pointMsg.mutable_data();
   msgBuffer->resize(this->pointMsg.row_step() *
       this->pointMsg.height());
@@ -378,48 +409,34 @@ void GpuLidarSensor::Implementation::FillPointCloudMsg(
   // Iterate over scan and populate point cloud
   for (uint32_t j = 0; j < height; ++j)
   {
-    float azimuth = this->gpuRays->AngleMin().Radian();
+    const float cosInclination = std::cos(inclination);
+    const float sinInclination = std::sin(inclination);
+    const uint16_t ring = j;
+    const float *point = _laserBuffer + j * width * channels;
 
     for (uint32_t i = 0; i < width; ++i)
     {
-      // Index of current point, and the depth value at that point
-      auto index = j * width * channels + i * channels;
-      float depth = _laserBuffer[index];
+      float depth = point[0];
       // Validate Depth/Radius and update pointcloud density flag
       if (isDense)
         isDense = !(gz::math::isnan(depth) || std::isinf(depth));
 
-      float intensity = _laserBuffer[index + 1];
-      uint16_t ring = j;
-
-      int fieldIndex = 0;
-
       // Convert spherical coordinates to Cartesian for pointcloud
       // See https://en.wikipedia.org/wiki/Spherical_coordinate_system
-      *reinterpret_cast<float *>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) =
-        depth * std::cos(inclination) * std::cos(azimuth);
-
-      *reinterpret_cast<float *>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) =
-        depth * std::cos(inclination) * std::sin(azimuth);
-
-      *reinterpret_cast<float *>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) =
-        depth * std::sin(inclination);
-
-      // Intensity
-      *reinterpret_cast<float *>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) = intensity;
-
-      // Ring
-      *reinterpret_cast<uint16_t *>(msgBufferIndex +
-          this->pointMsg.field(fieldIndex++).offset()) = ring;
+      // Same products, in the same order, as depth * cos(inclination) *
+      // cos(azimuth) per point.
+      const float x = depth * cosInclination * this->azimuthCos[i];
+      const float y = depth * cosInclination * this->azimuthSin[i];
+      const float z = depth * sinInclination;
+      memcpy(msgBufferIndex + offsetX, &x, sizeof(x));
+      memcpy(msgBufferIndex + offsetY, &y, sizeof(y));
+      memcpy(msgBufferIndex + offsetZ, &z, sizeof(z));
+      memcpy(msgBufferIndex + offsetIntensity, point + 1, sizeof(float));
+      memcpy(msgBufferIndex + offsetRing, &ring, sizeof(ring));
 
       // Move the index to the next point.
-      msgBufferIndex += this->pointMsg.point_step();
-
-      azimuth += angleStep;
+      msgBufferIndex += pointStep;
+      point += channels;
     }
     inclination += verticleAngleStep;
   }
