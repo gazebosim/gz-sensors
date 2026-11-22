@@ -15,11 +15,22 @@
  *
 */
 
+#include <algorithm>
+#include <cmath>
 #include <cstring>
+#include <iterator>
+#include <limits>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <vector>
 #include <gtest/gtest.h>
 
 #include <gz/msgs/laserscan.pb.h>
 #include <gz/msgs/pointcloud_packed.pb.h>
+#include <gz/msgs/PointCloudPackedUtils.hh>
+#include <gz/msgs/Utility.hh>
 
 #include <gz/common/Console.hh>
 #include <gz/common/Filesystem.hh>
@@ -29,6 +40,7 @@
 #include <gz/sensors/GpuLidarSensor.hh>
 #include <gz/math/Angle.hh>
 #include <gz/math/Helpers.hh>
+#include <gz/math/Rand.hh>
 #include <gz/transport/Node.hh>
 
 // TODO(louise) Remove these pragmas once gz-rendering is disabling the
@@ -171,6 +183,9 @@ class GpuLidarSensorTest: public testing::Test,
 
   // Test topics
   public: void Topic(const std::string &_renderEngine);
+
+  // Test the published bytes against the original formulas
+  public: void BitExactOutput(const std::string &_renderEngine);
 };
 
 /////////////////////////////////////////////////
@@ -944,6 +959,341 @@ void GpuLidarSensorTest::Topic(const std::string &_renderEngine)
 }
 
 /////////////////////////////////////////////////
+// Reference copies of the original (gz-sensors 11.0.0~pre2) Lidar::Clamp and
+// GpuLidarSensor::FillPointCloudMsg. The published messages must match what
+// these produce bit for bit.
+double RefClamp(double _range, double _rangeMin, double _rangeMax)
+{
+  if (gz::math::isnan(_range))
+    return _rangeMax;
+
+  if (std::isfinite(_range))
+    return std::clamp(_range, _rangeMin, _rangeMax);
+
+  return _range;
+}
+
+/////////////////////////////////////////////////
+void RefFillPointCloudMsg(gz::msgs::PointCloudPacked &_pointMsg,
+    const gz::rendering::GpuRaysPtr &_gpuRays, const float *_laserBuffer)
+{
+  uint32_t width = _pointMsg.width();
+  uint32_t height = _pointMsg.height();
+  unsigned int channels = 3;
+
+  float angleStep =
+    (_gpuRays->AngleMax() - _gpuRays->AngleMin()).Radian() /
+    (_gpuRays->RangeCount()-1);
+
+  float verticleAngleStep = (_gpuRays->VerticalAngleMax() -
+      _gpuRays->VerticalAngleMin()).Radian() /
+    (_gpuRays->VerticalRangeCount()-1);
+
+  float inclination = _gpuRays->VerticalAngleMin().Radian();
+
+  std::string *msgBuffer = _pointMsg.mutable_data();
+  msgBuffer->resize(_pointMsg.row_step() * _pointMsg.height());
+  char *msgBufferIndex = msgBuffer->data();
+  bool isDense { true };
+  for (uint32_t j = 0; j < height; ++j)
+  {
+    float azimuth = _gpuRays->AngleMin().Radian();
+
+    for (uint32_t i = 0; i < width; ++i)
+    {
+      auto index = j * width * channels + i * channels;
+      float depth = _laserBuffer[index];
+      if (isDense)
+        isDense = !(gz::math::isnan(depth) || std::isinf(depth));
+
+      float intensity = _laserBuffer[index + 1];
+      uint16_t ring = j;
+
+      int fieldIndex = 0;
+      const float v[4] = {
+        depth * std::cos(inclination) * std::cos(azimuth),
+        depth * std::cos(inclination) * std::sin(azimuth),
+        depth * std::sin(inclination),
+        intensity};
+      for (float f : v)
+      {
+        memcpy(msgBufferIndex + _pointMsg.field(fieldIndex++).offset(), &f,
+            sizeof(f));
+      }
+      memcpy(msgBufferIndex + _pointMsg.field(fieldIndex++).offset(), &ring,
+          sizeof(ring));
+
+      msgBufferIndex += _pointMsg.point_step();
+
+      azimuth += angleStep;
+    }
+    inclination += verticleAngleStep;
+  }
+  _pointMsg.set_is_dense(isDense);
+}
+
+/////////////////////////////////////////////////
+/// \brief The published LaserScan and PointCloudPacked messages must equal,
+/// byte for byte, messages built independently: the metadata from the
+/// configured sensor and the requested times, the payload with the reference
+/// formulas above from the sensor's laser buffer, including NaN, +-inf and
+/// out of range values. Three sensors: 641 x 13 rays; one vertical ray;
+/// Gaussian noise with a fixed seed.
+void GpuLidarSensorTest::BitExactOutput(const std::string &_renderEngine)
+{
+  gz::rendering::RenderEngine *engine =
+    gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+              << "' is not supported" << std::endl;
+  }
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene_bits");
+  ASSERT_NE(nullptr, scene);
+  gz::rendering::VisualPtr box = scene->CreateVisual("TestBox");
+  box->AddGeometry(scene->CreateBox());
+  box->SetLocalPosition(1, 0, 0.5);
+  scene->RootVisual()->AddChild(box);
+
+  const double rangeMin = 0.3;
+  const double rangeMax = 8.0;
+  const double hMin = -2.6, hMax = 2.9;
+  const std::string frameId = "bits_frame";
+  const gz::math::Pose3d pose(0, 0, 0.1, 0, 0, 0);
+  const float nan = std::numeric_limits<float>::quiet_NaN();
+  const float inf = std::numeric_limits<float>::infinity();
+
+  struct Config
+  {
+    int horz;
+    int vert;
+    double vMin;
+    double vMax;
+    bool noise;
+  };
+  for (const Config &cfg : {Config{641, 13, -0.35, 0.3, false},
+                            Config{257, 1, -0.1, 0.1, false},
+                            Config{301, 7, -0.35, 0.3, true}})
+  {
+    SCOPED_TRACE("rays " + std::to_string(cfg.horz) + " x " +
+        std::to_string(cfg.vert) + (cfg.noise ? ", noise" : ""));
+    const std::string topic = "/gz/sensors/test/lidar_bits_" +
+        std::to_string(cfg.horz) + "_" + std::to_string(cfg.vert);
+    sdf::ElementPtr lidarSdf = GpuLidarToSdf("TestGpuLidarBits", pose, 10,
+        topic, cfg.horz, 1, hMin, hMax, cfg.vert, 1, cfg.vMin, cfg.vMax,
+        0.01, rangeMin, rangeMax, true, false, frameId);
+    ASSERT_NE(nullptr, lidarSdf);
+    if (cfg.noise)
+    {
+      sdf::ElementPtr noise = lidarSdf->GetElement("ray")->GetElement("noise");
+      noise->GetElement("type")->Set<std::string>("gaussian");
+      noise->GetElement("mean")->Set<double>(0.01);
+      noise->GetElement("stddev")->Set<double>(0.2);
+      gz::math::Rand::Seed(7);
+    }
+
+    gz::sensors::Manager mgr;
+    gz::sensors::GpuLidarSensor *sensor =
+        mgr.CreateSensor<gz::sensors::GpuLidarSensor>(lidarSdf);
+    ASSERT_NE(nullptr, sensor);
+    sensor->SetScene(scene);
+
+    // Overwrite the laser buffer the sensor publishes from: frame 0 gets
+    // finite ranges first, then NaN, +-inf, zero, values on and beyond both
+    // clamps and NaN intensities between the rendered ones; frame 1 finite
+    // ranges only (a dense cloud without noise).
+    int frame = 0;
+    std::vector<float> injected;
+    auto conn = sensor->ConnectNewLidarFrame(
+        [&](const float *, unsigned int _w, unsigned int _h, unsigned int _c,
+            const std::string &)
+        {
+          float *buf = sensor->laserBuffer;
+          for (unsigned int k = 0; k < _w * _h; ++k)
+          {
+            float &range = buf[k * _c];
+            float &retro = buf[k * _c + 1];
+            if (frame == 0)
+            {
+              const float special[] = {nan, inf, -inf, 0.0f, -2.5f,
+                  std::nextafter(0.3f, 0.0f), 0.3f, 8.0f,
+                  std::nextafter(8.0f, 9.0f), 1e30f, 1e-30f};
+              // Even rays: the special values, the first invalid one at
+              // ray 16; odd rays finite.
+              range = k % 2 == 0 ?
+                  special[(k / 2 + 3) % std::size(special)] : 1.5f;
+              if (k % 7 == 0)
+                retro = nan;
+            }
+            else
+            {
+              range = 0.35f + 0.0073f * static_cast<float>(
+                  (k * 2654435761u) % 1009u);
+              retro = static_cast<float>(k % 251u) * 0.5f;
+            }
+          }
+          // Before noise: the noise must change most in-range values.
+          injected.assign(buf, buf + _w * _h * _c);
+        });
+
+    // Owned with the subscriber callbacks, which may still run after a
+    // failed assertion has left this scope.
+    struct Received
+    {
+      std::mutex mutex;
+      std::vector<std::string> scans;
+      std::vector<std::string> clouds;
+    };
+    auto received = std::make_shared<Received>();
+    std::mutex &mutex = received->mutex;
+    std::vector<std::string> &scans = received->scans;
+    std::vector<std::string> &clouds = received->clouds;
+    gz::transport::Node node;
+    ASSERT_TRUE(node.SubscribeRaw(topic,
+        [received](const char *_data, const size_t _size,
+            const gz::transport::MessageInfo &)
+        {
+          std::lock_guard<std::mutex> lock(received->mutex);
+          received->scans.emplace_back(_data, _size);
+        }, "gz.msgs.LaserScan"));
+    ASSERT_TRUE(node.SubscribeRaw(topic + "/points",
+        [received](const char *_data, const size_t _size,
+            const gz::transport::MessageInfo &)
+        {
+          std::lock_guard<std::mutex> lock(received->mutex);
+          received->clouds.emplace_back(_data, _size);
+        }, "gz.msgs.PointCloudPacked"));
+
+    const int numRays = cfg.horz * cfg.vert;
+    for (frame = 0; frame < 2; ++frame)
+    {
+      SCOPED_TRACE("frame " + std::to_string(frame));
+      const int64_t sec = frame + 1;
+      mgr.RunOnce(std::chrono::seconds(sec), true);
+      for (int i = 0; i < 300; ++i)
+      {
+        {
+          std::lock_guard<std::mutex> lock(mutex);
+          if (static_cast<int>(scans.size()) > frame &&
+              static_cast<int>(clouds.size()) > frame)
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      }
+      std::lock_guard<std::mutex> lock(mutex);
+      ASSERT_EQ(frame + 1, static_cast<int>(scans.size()));
+      ASSERT_EQ(frame + 1, static_cast<int>(clouds.size()));
+      const float *buf = sensor->laserBuffer;
+      // Scan and cloud share the sensor's sequence: scan first.
+      const std::string scanSeq = std::to_string(2 * frame);
+      const std::string cloudSeq = std::to_string(2 * frame + 1);
+
+      // LaserScan, as gz-sensors 10 fills it.
+      gz::msgs::LaserScan scan;
+      scan.mutable_header()->mutable_stamp()->set_sec(sec);
+      auto *data = scan.mutable_header()->add_data();
+      data->set_key("frame_id");
+      data->add_value(frameId);
+      data = scan.mutable_header()->add_data();
+      data->set_key("seq");
+      data->add_value(scanSeq);
+      scan.set_frame(frameId);
+      gz::msgs::Set(scan.mutable_world_pose(), pose);
+      scan.set_angle_min(hMin);
+      scan.set_angle_max(hMax);
+      scan.set_angle_step((hMax - hMin) / (cfg.horz - 1));
+      scan.set_range_min(rangeMin);
+      scan.set_range_max(rangeMax);
+      scan.set_count(cfg.horz);
+      scan.set_vertical_angle_min(cfg.vMin);
+      scan.set_vertical_angle_max(cfg.vMax);
+      scan.set_vertical_angle_step((cfg.vMax - cfg.vMin) / (cfg.vert - 1));
+      scan.set_vertical_count(cfg.vert);
+      for (int k = 0; k < numRays; ++k)
+      {
+        scan.add_ranges(RefClamp(buf[k * 3], rangeMin, rangeMax));
+        scan.add_intensities(buf[k * 3 + 1]);
+      }
+      gz::msgs::LaserScan got;
+      ASSERT_TRUE(got.ParseFromString(scans.back()));
+      got.clear_ranges();
+      got.clear_intensities();
+      gz::msgs::LaserScan meta = scan;
+      meta.clear_ranges();
+      meta.clear_intensities();
+      EXPECT_EQ(meta.DebugString(), got.DebugString());
+      EXPECT_TRUE(scan.SerializeAsString() == scans.back());
+
+      // PointCloudPacked, as gz-sensors 10 fills it.
+      gz::msgs::PointCloudPacked cloud;
+      gz::msgs::InitPointCloudPacked(cloud, frameId, false,
+          {{"xyz", gz::msgs::PointCloudPacked::Field::FLOAT32},
+          {"intensity", gz::msgs::PointCloudPacked::Field::FLOAT32},
+          {"ring", gz::msgs::PointCloudPacked::Field::UINT16}});
+      cloud.set_width(cfg.horz);
+      cloud.set_height(cfg.vert);
+      cloud.set_row_step(cloud.point_step() * cfg.horz);
+      cloud.mutable_header()->mutable_stamp()->set_sec(sec);
+      data = cloud.mutable_header()->add_data();
+      data->set_key("seq");
+      data->add_value(cloudSeq);
+      RefFillPointCloudMsg(cloud, sensor->GpuRays(), buf);
+      if (!cfg.noise)
+      {
+        EXPECT_EQ(frame == 1, cloud.is_dense());
+        // Ray 1 is finite, ray 16 the first invalid one.
+        if (frame == 0)
+        {
+          EXPECT_TRUE(std::isfinite(buf[1 * 3]));
+          EXPECT_TRUE(std::isnan(buf[16 * 3]));
+        }
+      }
+      else
+      {
+        // The published ranges are the noisy ones.
+        int inRange = 0, changed = 0;
+        for (int k = 0; k < numRays; ++k)
+        {
+          const float before = injected[k * 3];
+          if (before > rangeMin + 1 && before < rangeMax - 1)
+          {
+            ++inRange;
+            const double noisy = scan.ranges(k);
+            const double clean = RefClamp(before, rangeMin, rangeMax);
+            changed += memcmp(&noisy, &clean, sizeof(double)) != 0;
+          }
+        }
+        EXPECT_GT(inRange, numRays / 4);
+        EXPECT_GT(changed, inRange * 9 / 10);
+      }
+
+      gz::msgs::PointCloudPacked gotCloud;
+      ASSERT_TRUE(gotCloud.ParseFromString(clouds.back()));
+      ASSERT_EQ(cloud.data().size(), gotCloud.data().size());
+      int pointDiffs = 0;
+      for (size_t p = 0; p < cloud.data().size(); p += cloud.point_step())
+      {
+        pointDiffs += memcmp(gotCloud.data().data() + p,
+            cloud.data().data() + p, cloud.point_step()) != 0;
+      }
+      EXPECT_EQ(0, pointDiffs);
+      gotCloud.clear_data();
+      gz::msgs::PointCloudPacked cloudMeta = cloud;
+      cloudMeta.clear_data();
+      EXPECT_EQ(cloudMeta.DebugString(), gotCloud.DebugString());
+      EXPECT_TRUE(cloud.SerializeAsString() == clouds.back());
+    }
+
+    conn.reset();
+    mgr.Remove(sensor->Id());
+  }
+
+  box.reset();
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+/////////////////////////////////////////////////
 #ifdef __APPLE__
 TEST_P(GpuLidarSensorTest, DISABLED_CreateGpuLidar)
 #else
@@ -998,6 +1348,16 @@ TEST_P(GpuLidarSensorTest, Topic)
 {
   gz::common::Console::SetVerbosity(4);
   Topic(GetParam());
+}
+
+/////////////////////////////////////////////////
+#ifdef __APPLE__
+TEST_P(GpuLidarSensorTest, DISABLED_BitExactOutput)
+#else
+TEST_P(GpuLidarSensorTest, BitExactOutput)
+#endif
+{
+  BitExactOutput(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(GpuLidarSensor, GpuLidarSensorTest,
