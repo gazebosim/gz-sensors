@@ -17,6 +17,7 @@
 
 #include <gz/msgs/camera_info.pb.h>
 
+#include <cmath>
 #include <mutex>
 
 #include <gz/common/Console.hh>
@@ -227,8 +228,6 @@ bool WideAngleCameraSensor::CreateCamera()
     return false;
   }
 
-  this->PopulateInfo(cameraSdf);
-
   unsigned int width = cameraSdf->ImageWidth();
   unsigned int height = cameraSdf->ImageHeight();
 
@@ -330,6 +329,58 @@ bool WideAngleCameraSensor::CreateCamera()
 
   this->dataPtr->camera->SetAspectRatio(static_cast<double>(width)/height);
   this->dataPtr->camera->SetHFOV(angle);
+
+  // Populate camera info from the lens mapping r = c1 * f * fun(theta / c2 +
+  // c3), where r is in units of half the image width. The focal length is
+  // the slope of r at theta = 0, assuming c3 = 0 (true for all lens types
+  // except custom lenses with an angle offset).
+  double f = lens.F();
+  double r = 1.0;
+  if (lens.ScaleToHFOV() && !math::equal(lens.C2(), 0.0))
+  {
+    r = lens.C1() * lens.ApplyMappingFunction(static_cast<float>(
+        angle.Radian() / 2.0 / lens.C2() + lens.C3()));
+    if (!math::equal(r, 0.0))
+      f = 1.0 / r;
+  }
+  double focal = 0.0;
+  if (!math::equal(lens.C2(), 0.0) && !math::equal(r, 0.0))
+  {
+    focal = width / 2.0 * lens.C1() * f / lens.C2();
+  }
+  else
+  {
+    // A degenerate lens has no slope at the center; report the pinhole
+    // focal length for the horizontal field of view instead.
+    gzwarn << "Wide angle camera lens has c2 = 0 or a zero mapping at the "
+           << "field of view edge; camera_info uses the pinhole focal length."
+           << std::endl;
+    focal = width / 2.0 / std::tan(angle.Radian() / 2.0);
+  }
+  sdf::Camera infoSdf = *cameraSdf;
+  infoSdf.SetLensIntrinsicsFx(focal);
+  infoSdf.SetLensIntrinsicsFy(focal);
+  infoSdf.SetLensIntrinsicsCx(width / 2.0);
+  infoSdf.SetLensIntrinsicsCy(height / 2.0);
+  infoSdf.SetLensProjectionFx(focal);
+  infoSdf.SetLensProjectionFy(focal);
+  infoSdf.SetLensProjectionCx(width / 2.0);
+  infoSdf.SetLensProjectionCy(height / 2.0);
+  this->PopulateInfo(&infoSdf);
+
+  // The wide angle camera does not apply <distortion>. The equidistant and
+  // gnomonical lenses match the equidistant and plumb_bob models with zero
+  // coefficients; other lens types have no exact match.
+  if (lens.Type() == rendering::MFT_EQUIDISTANT)
+  {
+    this->SetInfoDistortion(msgs::CameraInfo::Distortion::EQUIDISTANT,
+        std::vector<double>(4, 0.0));
+  }
+  else
+  {
+    this->SetInfoDistortion(msgs::CameraInfo::Distortion::PLUMB_BOB,
+        std::vector<double>(5, 0.0));
+  }
 
   sdf::PixelFormatType pixelFormat = cameraSdf->PixelFormat();
   switch (pixelFormat)
