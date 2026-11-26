@@ -227,6 +227,9 @@ bool CameraSensor::CreateCamera()
     case sdf::PixelFormatType::RGB_INT8:
       this->dataPtr->camera->SetImageFormat(rendering::PF_R8G8B8);
       break;
+    case sdf::PixelFormatType::BGR_INT8:
+      this->dataPtr->camera->SetImageFormat(rendering::PF_B8G8R8);
+      break;
     case sdf::PixelFormatType::L_INT8:
       this->dataPtr->camera->SetImageFormat(rendering::PF_L8);
       break;
@@ -477,6 +480,10 @@ bool CameraSensor::Update(const std::chrono::steady_clock::duration &_now)
       case rendering::PF_R8G8B8:
         format = common::Image::RGB_INT8;
         msgsPixelFormat = msgs::PixelFormatType::RGB_INT8;
+        break;
+      case rendering::PF_B8G8R8:
+        format = common::Image::BGR_INT8;
+        msgsPixelFormat = msgs::PixelFormatType::BGR_INT8;
         break;
       case rendering::PF_L8:
         format = common::Image::L_INT8;

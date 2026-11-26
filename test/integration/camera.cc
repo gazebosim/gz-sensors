@@ -66,6 +66,16 @@ void OnGrayscaleImageL16(const gz::msgs::Image &_msg)
   g_imgCounter2++;
 }
 
+gz::msgs::Image g_bgrImage;
+unsigned int g_bgrImgCounter = 0;
+
+void OnImageBGR(const gz::msgs::Image &_msg)
+{
+  std::lock_guard<std::mutex> lock(g_mutex);
+  g_bgrImage = _msg;
+  g_bgrImgCounter++;
+}
+
 class CameraSensorTest: public testing::Test,
   public testing::WithParamInterface<const char *>
 {
@@ -88,6 +98,9 @@ class CameraSensorTest: public testing::Test,
 
   // Create 8 bit and 16 bit grayscale camera sensors and verify image format
   public: void ImageFormatLInt8LInt16(const std::string &_renderEngine);
+
+  // Create a camera sensor with B8G8R8 format and verify image format
+  public: void ImageFormatBGR(const std::string &_renderEngine);
 
   // Create camera sensors and verify camera intrinsics
   public: void CameraIntrinsics(const std::string &_renderEngine);
@@ -897,6 +910,102 @@ TEST_P(CameraSensorTest, LInt8LInt16ImagesWithBuiltinSDF)
 {
   gz::common::Console::SetVerbosity(4);
   ImageFormatLInt8LInt16(GetParam());
+}
+
+//////////////////////////////////////////////////
+void CameraSensorTest::ImageFormatBGR(const std::string &_renderEngine)
+{
+  {
+    std::lock_guard<std::mutex> lock(g_mutex);
+    g_bgrImgCounter = 0;
+    g_bgrImage.Clear();
+  }
+
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+      "sdf", "camera_sensor_bgr_builtin.sdf");
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  ASSERT_NE(nullptr, doc->Root());
+  ASSERT_TRUE(doc->Root()->HasElement("model"));
+  auto modelPtr = doc->Root()->GetElement("model");
+  ASSERT_TRUE(modelPtr->HasElement("link"));
+  auto linkPtr = modelPtr->GetElement("link");
+  ASSERT_TRUE(linkPtr->HasElement("sensor"));
+  auto sensorPtr = linkPtr->GetElement("sensor");
+
+  // Setup gz-rendering with an empty scene
+  auto *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+              << "' is not supported" << std::endl;
+  }
+
+  gz::rendering::ScenePtr scene = engine->CreateScene("scene");
+  // Pure red background, so the channel order can be checked
+  scene->SetBackgroundColor(1.0, 0.0, 0.0);
+
+  gz::sensors::Manager mgr;
+  gz::sensors::CameraSensor *sensor =
+      mgr.CreateSensor<gz::sensors::CameraSensor>(sensorPtr);
+  ASSERT_NE(nullptr, sensor);
+  sensor->SetScene(scene);
+
+  ASSERT_NE(nullptr, sensor->RenderingCamera());
+  EXPECT_EQ(gz::rendering::PF_B8G8R8,
+      sensor->RenderingCamera()->ImageFormat());
+
+  std::string topic = "/images_bgr";
+  WaitForMessageTestHelper<gz::msgs::Image> helper(topic);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero());
+  EXPECT_TRUE(helper.WaitForMessage()) << helper;
+
+  gz::transport::Node node;
+  node.Subscribe(topic, &OnImageBGR);
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+
+  bool done = false;
+  int sleep = 0;
+  int maxSleep = 10;
+  while (!done && sleep++ < maxSleep)
+  {
+    {
+      std::lock_guard<std::mutex> lock(g_mutex);
+      done = g_bgrImgCounter > 0;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+  ASSERT_TRUE(done);
+
+  {
+    std::lock_guard<std::mutex> lock(g_mutex);
+    EXPECT_EQ(gz::msgs::PixelFormatType::BGR_INT8,
+        g_bgrImage.pixel_format_type());
+    EXPECT_EQ(64u, g_bgrImage.width());
+    EXPECT_EQ(32u, g_bgrImage.height());
+    EXPECT_EQ(64u * 3u, g_bgrImage.step());
+    ASSERT_EQ(64u * 32u * 3u, g_bgrImage.data().size());
+
+    // Red background: blue comes first and red last in BGR order
+    const auto *data =
+        reinterpret_cast<const unsigned char *>(g_bgrImage.data().data());
+    EXPECT_EQ(0u, data[0]);
+    EXPECT_EQ(0u, data[1]);
+    EXPECT_EQ(255u, data[2]);
+  }
+
+  // Clean up
+  mgr.Remove(sensor->Id());
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+TEST_P(CameraSensorTest, BGRImagesWithBuiltinSDF)
+{
+  gz::common::Console::SetVerbosity(4);
+  ImageFormatBGR(GetParam());
 }
 
 //////////////////////////////////////////////////
