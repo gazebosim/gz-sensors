@@ -18,9 +18,11 @@
 #include <gtest/gtest.h>
 
 #include <array>
+#include <cmath>
 #include <string>
 
 #include <gz/math/Quaternion.hh>
+#include <gz/math/Rand.hh>
 #include <gz/math/Vector3.hh>
 
 #include <gz/msgs/dvl_velocity_tracking.pb.h>
@@ -164,6 +166,7 @@ class DopplerVelocityLogTest : public testing::Test,
 #endif
 
     common::Console::SetVerbosity(4);
+    math::Rand::Seed(42);
     this->engine = rendering::engine(GetParam());
     if (!this->engine)
     {
@@ -327,9 +330,12 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileStatic)
   using DVLKinematicEstimate = msgs::DVLKinematicEstimate;
   constexpr auto velocityReference = DVLKinematicEstimate::DVL_REFERENCE_SHIP;
   EXPECT_EQ(velocityReference, message.velocity().reference());
+  // With 4 beams tilted at 30 deg, the least-squares velocity estimate has
+  // horizontal stddev sqrt(2) * trackingNoise. Use a 6-sigma tolerance.
+  const double velocityTol = 6.0 * std::sqrt(2.0) * config.trackingNoise;
+  const double beamVelocityTol = 6.0 * config.trackingNoise;
   EXPECT_TRUE(math::Vector3d::Zero.Equal(
-    msgs::Convert(message.velocity().mean()),
-    4 * config.trackingNoise));
+    msgs::Convert(message.velocity().mean()), velocityTol));
   EXPECT_EQ(4, message.beams_size());
   for (int i = 0; i < message.beams_size(); ++i)
   {
@@ -346,8 +352,7 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileStatic)
 
     EXPECT_EQ(velocityReference, message.beams(i).velocity().reference());
     EXPECT_TRUE(math::Vector3d::Zero.Equal(
-      msgs::Convert(message.beams(i).velocity().mean()),
-      4 * config.trackingNoise));
+      msgs::Convert(message.beams(i).velocity().mean()), beamVelocityTol));
   }
   EXPECT_EQ(0, message.status());
 
@@ -422,9 +427,12 @@ TEST_P(DopplerVelocityLogTest, WaterMassTrackingWhileStatic)
   constexpr auto velocityReference = DVLKinematicEstimate::DVL_REFERENCE_SHIP;
   EXPECT_EQ(velocityReference, message.velocity().reference());
   const math::Vector3d waterVelocity(1.0, 0.5, 0.0);
+  // With 4 beams tilted at 30 deg, the least-squares velocity estimate has
+  // horizontal stddev sqrt(2) * trackingNoise. Use a 6-sigma tolerance.
+  const double velocityTol = 6.0 * std::sqrt(2.0) * config.trackingNoise;
+  const double beamVelocityTol = 6.0 * config.trackingNoise;
   EXPECT_TRUE((-waterVelocity).Equal(
-    msgs::Convert(message.velocity().mean()),
-    4 * config.trackingNoise));
+    msgs::Convert(message.velocity().mean()), velocityTol));
   EXPECT_EQ(4, message.beams_size());
   for (int i = 0; i < message.beams_size(); ++i)
   {
@@ -443,8 +451,7 @@ TEST_P(DopplerVelocityLogTest, WaterMassTrackingWhileStatic)
 
     const auto beamVelocity = beamAxis * beamAxis.Dot(-waterVelocity);
     EXPECT_TRUE(beamVelocity.Equal(
-      msgs::Convert(message.beams(i).velocity().mean()),
-      4 * config.trackingNoise));
+      msgs::Convert(message.beams(i).velocity().mean()), beamVelocityTol));
     EXPECT_EQ(velocityReference, message.beams(i).velocity().reference());
   }
   EXPECT_EQ(0, message.status());
@@ -519,9 +526,12 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileInMotion)
   using DVLKinematicEstimate = msgs::DVLKinematicEstimate;
   constexpr auto velocityReference = DVLKinematicEstimate::DVL_REFERENCE_SHIP;
   EXPECT_EQ(velocityReference, message.velocity().reference());
+  // With 4 beams tilted at 30 deg, the least-squares velocity estimate has
+  // horizontal stddev sqrt(2) * trackingNoise. Use a 6-sigma tolerance.
+  const double velocityTol = 6.0 * std::sqrt(2.0) * config.trackingNoise;
+  const double beamVelocityTol = 6.0 * config.trackingNoise;
   EXPECT_TRUE(math::Vector3d::UnitX.Equal(
-    msgs::Convert(message.velocity().mean()),
-    4 * config.trackingNoise));
+    msgs::Convert(message.velocity().mean()), velocityTol));
   EXPECT_EQ(4, message.beams_size());
   for (int i = 0; i < message.beams_size(); ++i)
   {
@@ -533,8 +543,7 @@ TEST_P(DopplerVelocityLogTest, BottomTrackingWhileInMotion)
     const auto beamVelocity =
       beamAxis * beamAxis.Dot(deviceState.linearVelocity);
     EXPECT_TRUE(beamVelocity.Equal(
-      msgs::Convert(message.beams(i).velocity().mean()),
-      4 * config.trackingNoise));
+      msgs::Convert(message.beams(i).velocity().mean()), beamVelocityTol));
     EXPECT_EQ(velocityReference, message.beams(i).velocity().reference());
   }
   EXPECT_EQ(0, message.status());
