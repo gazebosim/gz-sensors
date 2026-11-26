@@ -48,6 +48,10 @@ class BoundingBoxCameraSensorTest: public testing::Test,
 
   // Create a BoundingBox Camera sensor and verify a custom camera info topic
   public: void CustomCameraInfoTopic(const std::string &_renderEngine);
+
+  // Create a BoundingBox Camera sensor and verify a custom frame ID
+  public: void CustomFrameId(const std::string &_renderEngine);
+
 };
 
 /// \brief mutex for thread safety
@@ -564,6 +568,82 @@ TEST_P(BoundingBoxCameraSensorTest, Boxes3DWithBuiltinSDF)
 TEST_P(BoundingBoxCameraSensorTest, CustomCameraInfoTopic)
 {
   CustomCameraInfoTopic(GetParam());
+}
+
+//////////////////////////////////////////////////
+void BoundingBoxCameraSensorTest::CustomFrameId(
+    const std::string &_renderEngine)
+{
+  if (_renderEngine != "ogre2")
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+                 << "' doesn't support bounding box cameras" << std::endl;
+  }
+
+  std::string path = gz::common::joinPaths(PROJECT_SOURCE_PATH, "test",
+      "sdf", "custom_camera_info_topic.sdf");
+  sdf::SDFPtr doc(new sdf::SDF());
+  sdf::init(doc);
+  ASSERT_TRUE(sdf::readFile(path, doc));
+  ASSERT_NE(nullptr, doc->Root());
+  ASSERT_TRUE(doc->Root()->HasElement("model"));
+  auto modelPtr = doc->Root()->GetElement("model");
+  ASSERT_TRUE(modelPtr->HasElement("link"));
+  auto linkPtr = modelPtr->GetElement("link");
+  while (linkPtr)
+  {
+    if(linkPtr->Get<std::string>("name") == "boundingbox_camera_link")
+    {
+      break;
+    }
+    linkPtr = linkPtr->GetNextElement("link");
+  }
+  ASSERT_NE(nullptr, linkPtr);
+  ASSERT_TRUE(linkPtr->HasElement("sensor"));
+  auto sensorPtr = linkPtr->GetElement("sensor");
+  ASSERT_NE(nullptr, sensorPtr);
+
+  // Setup gz-rendering with an empty scene.
+  auto *engine = gz::rendering::engine(_renderEngine);
+  if (!engine)
+  {
+    GTEST_SKIP() << "Engine '" << _renderEngine
+                 << "' is not supported" << std::endl;
+  }
+  auto scene = engine->CreateScene("scene");
+
+  gz::sensors::Manager mgr;
+  auto *sensor =
+      mgr.CreateSensor<gz::sensors::BoundingBoxCameraSensor>(sensorPtr);
+
+  ASSERT_NE(nullptr, sensor);
+  sensor->SetScene(scene);
+
+  WaitForMessageTestHelper<gz::msgs::AnnotatedAxisAligned2DBox_V> boxHelper(
+      "/boundingbox_camera");
+  EXPECT_TRUE(sensor->HasConnections());
+
+  // Update once to create image
+  mgr.RunOnce(std::chrono::steady_clock::duration::zero(), true);
+
+  ASSERT_TRUE(boxHelper.WaitForMessage()) << boxHelper;
+  const auto boxMsg = boxHelper.Message();
+  ASSERT_TRUE(boxMsg.has_header());
+  ASSERT_LT(1, boxMsg.header().data_size());
+  EXPECT_EQ("frame_id", boxMsg.header().data(0).key());
+  ASSERT_EQ(1, boxMsg.header().data(0).value_size());
+  EXPECT_EQ("boundingbox_custom_frame", boxMsg.header().data(0).value(0));
+
+  // Clean up
+  mgr.Remove(sensor->Id());
+  engine->DestroyScene(scene);
+  gz::rendering::unloadEngine(engine->Name());
+}
+
+//////////////////////////////////////////////////
+TEST_P(BoundingBoxCameraSensorTest, CustomFrameId)
+{
+  CustomFrameId(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(BoundingBoxCameraSensor, BoundingBoxCameraSensorTest,

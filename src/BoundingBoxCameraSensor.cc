@@ -541,7 +541,7 @@ bool BoundingBoxCameraSensor::Update(
     *stampBoxes = msgs::Convert(_now);
     auto frameBoxes = boxes2DMsg.mutable_header()->add_data();
     frameBoxes->set_key("frame_id");
-    frameBoxes->add_value(this->Name());
+    frameBoxes->add_value(this->FrameId());
   }
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
