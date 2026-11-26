@@ -1,0 +1,37 @@
+<!--
+  Marine radar preset: long range, 1000 m, with realistic imperfections
+  enabled (range/bearing noise, occasional missed echoes, false echoes).
+
+  For ranges beyond a few km increase range_resolution (range cells per spoke
+  are limited to 16384) and expect small objects to fall between rays: the
+  gap between rays is range * 360 / samples (1.5 m at 1000 m with 4096
+  samples). See the "Marine Radar Sensor" section of the gz-sensors README
+  for every parameter.
+-->
+<sensor name="marine_radar" type="custom" gz:type="marine_radar">
+  <always_on>1</always_on>
+  <update_rate>0</update_rate>
+  <topic>/marine_radar</topic>
+  <gz:marine_radar>
+    <range_min>10</range_min>
+    <range_max>1000</range_max>
+    <range_resolution>2</range_resolution>
+    <samples>4096</samples>
+    <rotation_rate_rpm>24</rotation_rate_rpm>
+    <beamwidth_horizontal_deg>1.2</beamwidth_horizontal_deg>
+    <beamwidth_vertical_deg>20</beamwidth_vertical_deg>
+    <slice_heights>0.5 1.5 3 6 12 24</slice_heights>
+    <snr_reference_db>30</snr_reference_db>
+    <reference_range>1000</reference_range>
+    <detection_threshold_db>8</detection_threshold_db>
+    <intensity_noise_stddev_db>2</intensity_noise_stddev_db>
+    <range_noise_stddev>1.0</range_noise_stddev>
+    <bearing_noise_stddev_deg>0.2</bearing_noise_stddev_deg>
+    <echo_detection_probability>0.9</echo_detection_probability>
+    <false_alarm_rate>2</false_alarm_rate>
+    <min_target_cells>2</min_target_cells>
+    <image_size>768</image_size>
+    <image_rate>5</image_rate>
+    <display_mode>north_up</display_mode>
+  </gz:marine_radar>
+</sensor>

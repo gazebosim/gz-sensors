@@ -1,0 +1,26 @@
+<!--
+  Marine radar preset: short range (harbour / docking), 100 m.
+
+  Paste this <sensor> block into a <link> of your model. Fine range cells and
+  a fast antenna give a quick update rate. See the "Marine Radar Sensor"
+  section of the gz-sensors README for every parameter.
+-->
+<sensor name="marine_radar" type="custom" gz:type="marine_radar">
+  <always_on>1</always_on>
+  <update_rate>0</update_rate>
+  <topic>/marine_radar</topic>
+  <gz:marine_radar>
+    <range_min>3</range_min>
+    <range_max>100</range_max>
+    <range_resolution>0.5</range_resolution>
+    <samples>2048</samples>              <!-- 0.176 deg: 0.3 m between rays at 100 m -->
+    <rotation_rate_rpm>48</rotation_rate_rpm>  <!-- 1.25 s scan period -->
+    <beamwidth_horizontal_deg>1.8</beamwidth_horizontal_deg>
+    <slice_heights>0.3 1 2.5 5</slice_heights>
+    <snr_reference_db>-10</snr_reference_db>  <!-- 30 dB at 100 m -->
+    <reference_range>1000</reference_range>
+    <range_noise_stddev>0.1</range_noise_stddev>
+    <image_size>512</image_size>
+    <image_rate>10</image_rate>
+  </gz:marine_radar>
+</sensor>

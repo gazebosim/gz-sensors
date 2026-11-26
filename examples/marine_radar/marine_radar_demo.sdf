@@ -1,0 +1,205 @@
+<?xml version="1.0" ?>
+<!--
+  Marine radar demonstration world.
+
+  A small surface vessel carries the marine radar on a dedicated link 5 m
+  above the waterline, and a few obstacles sit at known ranges and bearings
+  so the PPI image and the extracted targets can be checked by eye.
+
+  The radar samples the *rendering* scene with gz::rendering::RayQuery, so
+  obstacles need <visual> geometry (not <collision>) to be seen, and the
+  world must be run with a rendering-capable sensors system.
+
+  Load with Gazebo Sim plus a System plugin that creates the sensor (see the
+  README in this directory), for example:
+
+    gz sim -v 4 -r examples/marine_radar/marine_radar_demo.sdf
+-->
+<sdf version="1.9">
+  <world name="marine_radar_demo">
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.002</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+    <!-- The System plugin that creates gz::sensors::MarineRadarSensor for
+         every <sensor type="custom" gz:type="marine_radar">. See README.md
+         in this directory for its source. -->
+    <plugin filename="marine_radar_sensor_system"
+            name="marine_radar::MarineRadarSensorSystem">
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 100 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- The sea surface. Visual only: a flat, perfectly reflecting sea is
+         invisible to a real radar at these grazing angles, and the radar's
+         sea_level_filter drops anything below sea level anyway. -->
+    <model name="sea_surface">
+      <static>true</static>
+      <link name="surface">
+        <visual name="surface">
+          <geometry><plane><normal>0 0 1</normal><size>4000 4000</size></plane></geometry>
+          <material>
+            <ambient>0.0 0.05 0.1 1</ambient>
+            <diffuse>0.0 0.1 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Own ship, with the radar. -->
+    <model name="radar_usv">
+      <pose>0 0 0 0 0 0</pose>
+      <static>true</static>
+
+      <link name="base_link">
+        <visual name="hull">
+          <pose>0 0 0.3 0 0 0</pose>
+          <geometry><box><size>8 3 1.2</size></box></geometry>
+          <material>
+            <ambient>0.85 0.85 0.85 1</ambient>
+            <diffuse>0.95 0.95 0.95 1</diffuse>
+          </material>
+        </visual>
+        <visual name="cabin">
+          <pose>-0.5 0 1.7 0 0 0</pose>
+          <geometry><box><size>3 2.4 1.6</size></box></geometry>
+          <material>
+            <ambient>0.2 0.25 0.35 1</ambient>
+            <diffuse>0.25 0.3 0.45 1</diffuse>
+          </material>
+        </visual>
+      </link>
+
+      <!-- The antenna. It carries no visual of its own, so the radar's own
+           rays cannot hit it. -->
+      <link name="radar_link">
+        <pose>0 0 5 0 0 0</pose>
+
+        <sensor name="marine_radar" type="custom" gz:type="marine_radar">
+          <always_on>1</always_on>
+          <!-- 0 means "update every simulation step". The antenna schedule
+               lives inside the sensor, so this only has to be fast enough to
+               keep up with the spoke rate. -->
+          <update_rate>0</update_rate>
+          <topic>/marine_radar</topic>
+          <frame_id>radar_link</frame_id>
+
+          <gz:marine_radar>
+            <!-- Range -->
+            <range_min>10</range_min>
+            <range_max>1000</range_max>
+            <range_resolution>2</range_resolution>
+
+            <!-- Antenna scan -->
+            <horizontal_fov_deg>360</horizontal_fov_deg>
+            <angular_resolution_deg>0.087890625</angular_resolution_deg>
+            <rotation_rate_rpm>24</rotation_rate_rpm>
+
+            <!-- Beam -->
+            <beamwidth_horizontal_deg>1.2</beamwidth_horizontal_deg>
+            <beamwidth_vertical_deg>20</beamwidth_vertical_deg>
+            <slice_heights>0.5 1.5 3 6 12 24</slice_heights>
+
+            <!-- Echo / detection model -->
+            <snr_reference_db>30</snr_reference_db>
+            <reference_range>1000</reference_range>
+            <detection_threshold_db>8</detection_threshold_db>
+
+            <!-- Noise, written as standard SDFormat noise elements. Only
+                 'gaussian' is supported; <stddev> is in metres for the
+                 range, degrees for the bearing and dB for the intensity. -->
+            <range_noise>
+              <noise type="gaussian">
+                <stddev>0.5</stddev>
+              </noise>
+            </range_noise>
+            <bearing_noise>
+              <noise type="gaussian">
+                <stddev>0.1</stddev>
+              </noise>
+            </bearing_noise>
+            <intensity_noise>
+              <noise type="gaussian">
+                <stddev>1.5</stddev>
+              </noise>
+            </intensity_noise>
+
+            <!-- PPI display -->
+            <image_size>512</image_size>
+            <image_rate>5</image_rate>
+            <range_rings>4</range_rings>
+            <display_mode>head_up</display_mode>
+
+            <!-- Outputs -->
+            <publish_image>true</publish_image>
+            <publish_returns>true</publish_returns>
+
+            <!-- Surface normals, and therefore the incidence angle of each
+                 echo, are recovered with two extra probe rays per hit
+                 because the render engine's ray query does not report
+                 normals. Set to 'none' to assume normal incidence and save
+                 two thirds of the rays. -->
+            <normal_estimation>probe</normal_estimation>
+            <normal_probe_angle_deg>0.05</normal_probe_angle_deg>
+          </gz:marine_radar>
+        </sensor>
+      </link>
+    </model>
+
+    <!-- Obstacles at known ranges and bearings from the antenna. -->
+    <model name="cargo_vessel">
+      <static>true</static>
+      <pose>300 0 0 0 0 0</pose>
+      <link name="hull">
+        <visual name="hull">
+          <pose>0 0 4 0 0 0</pose>
+          <geometry><box><size>120 20 8</size></box></geometry>
+          <material><diffuse>0.6 0.6 0.6 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="channel_buoy_port">
+      <static>true</static>
+      <pose>0 150 0 0 0 0</pose>
+      <link name="buoy">
+        <visual name="buoy">
+          <pose>0 0 1.5 0 0 0</pose>
+          <geometry><cylinder><radius>0.8</radius><length>3</length></cylinder></geometry>
+          <material><diffuse>0.8 0.1 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="demo_island">
+      <static>true</static>
+      <pose>-600 400 0 0 0 0</pose>
+      <link name="island">
+        <visual name="island">
+          <pose>0 0 15 0 0 0</pose>
+          <geometry><box><size>250 180 30</size></box></geometry>
+          <material><diffuse>0.35 0.3 0.25 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

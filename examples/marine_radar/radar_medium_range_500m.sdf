@@ -1,0 +1,24 @@
+<!--
+  Marine radar preset: medium range (coastal navigation, collision
+  avoidance), 500 m.
+
+  Paste this <sensor> block into a <link> of your model. See the "Marine
+  Radar Sensor" section of the gz-sensors README for every parameter.
+-->
+<sensor name="marine_radar" type="custom" gz:type="marine_radar">
+  <always_on>1</always_on>
+  <update_rate>0</update_rate>
+  <topic>/marine_radar</topic>
+  <gz:marine_radar>
+    <range_min>10</range_min>
+    <range_max>500</range_max>
+    <range_resolution>1.5</range_resolution>
+    <horizontal_fov_deg>360</horizontal_fov_deg>
+    <samples>4096</samples>
+    <rotation_rate_rpm>24</rotation_rate_rpm>
+    <range_noise_stddev>0.5</range_noise_stddev>
+    <bearing_noise_stddev_deg>0.1</bearing_noise_stddev_deg>
+    <image_size>512</image_size>
+    <image_rate>5</image_rate>
+  </gz:marine_radar>
+</sensor>
